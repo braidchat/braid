@@ -21,13 +21,9 @@
 
 (defmulti dispatch! (fn [event data] event))
 
-(defmethod dispatch! :new-thread-message [_ data]
-  (transact! [:messages] #(conj % {:content data
-                                   :thread-id (guid)})))
-
-(defmethod dispatch! :reply-thread-message [_ data]
+(defmethod dispatch! :new-message [_ data]
   (transact! [:messages] #(conj % {:content (data :content)
-                                   :thread-id (data :thread-id)})))
+                                   :thread-id (or (data :thread-id) (guid))})))
 
 (defn message-view [message owner]
   (reify
@@ -45,8 +41,8 @@
         (dom/textarea #js {:placeholder "Reply..."
                            :onKeyDown (fn [e]
                                         (when (and (= 13 e.keyCode) (= e.shiftKey false))
-                                          (dispatch! :reply-thread-message {:thread-id (thread :id)
-                                                                            :content (.. e -target -value)} )
+                                          (dispatch! :new-message {:thread-id (thread :id)
+                                                                   :content (.. e -target -value)})
                                           (.preventDefault e)
                                           (aset (.. e -target) "value" "")))})))))
 (defn thread-view [thread owner]
@@ -67,7 +63,7 @@
           (dom/textarea #js {:placeholder "Start a new conversation..."
                            :onKeyDown (fn [e]
                                         (when (and (= 13 e.keyCode) (= e.shiftKey false))
-                                          (dispatch! :new-thread-message (.. e -target -value))
+                                          (dispatch! :new-message {:content (.. e -target -value)})
                                           (.preventDefault e)
                                           (aset (.. e -target) "value" "")))}))))))
 
