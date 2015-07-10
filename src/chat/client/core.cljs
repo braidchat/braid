@@ -77,8 +77,8 @@
                                              :messages ms})))]
         (dom/div nil
           (apply dom/div nil
-            (om/build-all thread-view threads))
-          (om/build new-thread-view {}))))))
+            (concat (om/build-all thread-view threads)
+                    [(om/build new-thread-view {})])))))))
 
 
 (defn init []
