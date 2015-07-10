@@ -17,10 +17,11 @@
   (reset! app-state
           {:session {:user-id 1}
            :users {1 {:id 1
-                      :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-08/4801271456_41230ac0b881cdf85c28_72.jpg" }
+                      :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-08/4801271456_41230ac0b881cdf85c28_72.jpg"
+                      :hidden-thread-ids []}
                    2 {:id 2
-                      :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-09/4805955000_07dc272f0a7f9de7719e_192.jpg"}}
-           :threads {123 {:id 123}}
+                      :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-09/4805955000_07dc272f0a7f9de7719e_192.jpg"
+                      :hidden-thread-ids []}}
            :messages {99 {:id 99 :content "Hello?" :thread-id 123 :user-id 1 :created-at (js/Date. 1)}
                       98 {:id 98 :content "Hi!" :thread-id 123 :user-id 2 :created-at (js/Date. 2)}
                       97 {:id 97 :content "Oh, great, someone else is here." :thread-id 123 :user-id 1 :created-at (js/Date. 3)}
@@ -36,8 +37,8 @@
                                          :user-id (get-in @app-state [:session :user-id])
                                          :created-at (js/Date.)}))))
 
-(defmethod dispatch! :close-thread [_ data]
-  (transact! [:threads (data :thread-id)] #(assoc % :closed true)))
+(defmethod dispatch! :hide-thread [_ data]
+  (transact! [:users (get-in @app-state [:session :user-id]) :hidden-thread-ids] #(conj % (data :thread-id))))
 
 (defn message-view [message owner]
   (reify
@@ -67,7 +68,7 @@
       (dom/div #js {:className "thread"}
         (dom/div #js {:className "close"
                       :onClick (fn [_]
-                                 (dispatch! :close-thread {:thread-id (thread :id)}))} "×")
+                                 (dispatch! :hide-thread {:thread-id (thread :id)}))} "×")
         (apply dom/div #js {:className "messages"}
           (om/build-all message-view (thread :messages)))
         (om/build new-message-view {:thread-id (thread :id) :placeholder "Reply..."})))))
@@ -83,16 +84,15 @@
   (reify
     om/IRender
     (render [_]
-      (let [threads (->> (data :messages)
+      (let [remove-keys (fn [ks coll]
+                          (apply dissoc coll ks))
+            threads (->> (data :messages)
                          vals
                          (sort-by :created-at)
                          (group-by :thread-id)
-                         (map (fn [[id ms]] [id {:id id
-                                                 :messages ms}]))
-                         (into {})
-                         (merge-with merge (data :threads))
-                         vals
-                         (remove (comp true? :closed)))]
+                         (remove-keys (get-in data [:users (get-in data [:session :user-id]) :hidden-thread-ids]))
+                         (map (fn [[id ms]] {:id id
+                                             :messages ms})))]
         (dom/div nil
           (apply dom/div nil
             (concat (om/build-all thread-view threads)
