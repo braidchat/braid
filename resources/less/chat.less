@@ -15,19 +15,22 @@ body {
   display: inline-block;
   vertical-align: top;
 
-  .content {
-    white-space: pre;
-  }
+  .message {
 
-  &.new {
-    textarea {
-      width: 100%;
-      border: none;
-      resize: none;
-      &:focus {
-        outline: none;
+    .content {
+      white-space: pre;
+    }
+
+    &.new {
+      textarea {
+        width: 100%;
+        border: none;
+        resize: none;
+        &:focus {
+          outline: none;
+        }
+
       }
-
     }
   }
 }
