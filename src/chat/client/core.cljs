@@ -20,6 +20,7 @@
                       :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-08/4801271456_41230ac0b881cdf85c28_72.jpg" }
                    2 {:id 2
                       :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-09/4805955000_07dc272f0a7f9de7719e_192.jpg"}}
+           :threads {123 {:id 123}}
            :messages {99 {:id 99 :content "Hello?" :thread-id 123 :user-id 1}
                       98 {:id 98 :content "Hi!" :thread-id 123 :user-id 2}
                       97 {:id 97 :content "Oh, great, someone else is here." :thread-id 123 :user-id 1}
@@ -33,6 +34,9 @@
                                          :content (data :content)
                                          :thread-id (or (data :thread-id) (guid))
                                          :user-id (get-in @app-state [:session :user-id])}))))
+
+(defmethod dispatch! :close-thread [_ data]
+  (transact! [:threads (data :thread-id)] #(assoc % :closed true)))
 
 (defn message-view [message owner]
   (reify
@@ -60,6 +64,9 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
+        (dom/div #js {:className "close"
+                      :onClick (fn [_]
+                                 (dispatch! :close-thread {:thread-id (thread :id)}))} "×")
         (apply dom/div #js {:className "messages"}
           (om/build-all message-view (thread :messages)))
         (om/build new-message-view {:thread-id (thread :id) :placeholder "Reply..."})))))
@@ -78,13 +85,16 @@
       (let [threads (->> (data :messages)
                          vals
                          (group-by :thread-id)
-                         (map (fn [[id ms]] {:id id
-                                             :messages ms})))]
+                         (map (fn [[id ms]] [id {:id id
+                                                 :messages ms}]))
+                         (into {})
+                         (merge-with merge (data :threads))
+                         vals
+                         (remove (comp true? :closed)))]
         (dom/div nil
           (apply dom/div nil
             (concat (om/build-all thread-view threads)
                     [(om/build new-thread-view {})])))))))
-
 
 (defn init []
   (om/root app-view app-state
