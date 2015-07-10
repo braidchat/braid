@@ -21,10 +21,10 @@
                    2 {:id 2
                       :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-09/4805955000_07dc272f0a7f9de7719e_192.jpg"}}
            :threads {123 {:id 123}}
-           :messages {99 {:id 99 :content "Hello?" :thread-id 123 :user-id 1}
-                      98 {:id 98 :content "Hi!" :thread-id 123 :user-id 2}
-                      97 {:id 97 :content "Oh, great, someone else is here." :thread-id 123 :user-id 1}
-                      96 {:id 96 :content "Yep" :thread-id 123 :user-id 2}}}))
+           :messages {99 {:id 99 :content "Hello?" :thread-id 123 :user-id 1 :created-at (js/Date. 1)}
+                      98 {:id 98 :content "Hi!" :thread-id 123 :user-id 2 :created-at (js/Date. 2)}
+                      97 {:id 97 :content "Oh, great, someone else is here." :thread-id 123 :user-id 1 :created-at (js/Date. 3)}
+                      96 {:id 96 :content "Yep" :thread-id 123 :user-id 2 :created-at (js/Date. 4)}}}))
 
 (defmulti dispatch! (fn [event data] event))
 
@@ -33,7 +33,8 @@
                             (assoc % id {:id id
                                          :content (data :content)
                                          :thread-id (or (data :thread-id) (guid))
-                                         :user-id (get-in @app-state [:session :user-id])}))))
+                                         :user-id (get-in @app-state [:session :user-id])
+                                         :created-at (js/Date.)}))))
 
 (defmethod dispatch! :close-thread [_ data]
   (transact! [:threads (data :thread-id)] #(assoc % :closed true)))
@@ -84,6 +85,7 @@
     (render [_]
       (let [threads (->> (data :messages)
                          vals
+                         (sort-by :created-at)
                          (group-by :thread-id)
                          (map (fn [[id ms]] [id {:id id
                                                  :messages ms}]))
