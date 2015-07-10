@@ -8,7 +8,7 @@
 (def app-state (atom {:messages []}))
 
 (defn guid []
-  (rand 100000))
+  (rand-int 100000))
 
 (defn transact! [ks f]
   (swap! app-state update-in ks f))
