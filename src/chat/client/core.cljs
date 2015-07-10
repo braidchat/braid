@@ -20,17 +20,19 @@
                       :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-08/4801271456_41230ac0b881cdf85c28_72.jpg" }
                    2 {:id 2
                       :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-09/4805955000_07dc272f0a7f9de7719e_192.jpg"}}
-           :messages [{:content "Hello?" :thread-id 123 :user-id 1}
-                      {:content "Hi!" :thread-id 123 :user-id 2}
-                      {:content "Oh, great, someone else is here." :thread-id 123 :user-id 1}
-                      {:content "Yep" :thread-id 123 :user-id 2}]}))
+           :messages {99 {:id 99 :content "Hello?" :thread-id 123 :user-id 1}
+                      98 {:id 98 :content "Hi!" :thread-id 123 :user-id 2}
+                      97 {:id 97 :content "Oh, great, someone else is here." :thread-id 123 :user-id 1}
+                      96 {:id 96 :content "Yep" :thread-id 123 :user-id 2}}}))
 
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
-  (transact! [:messages] #(conj % {:content (data :content)
-                                   :thread-id (or (data :thread-id) (guid))
-                                   :user-id (get-in @app-state [:session :user-id])})))
+  (transact! [:messages] #(let [id (guid)]
+                            (assoc % id {:id id
+                                         :content (data :content)
+                                         :thread-id (or (data :thread-id) (guid))
+                                         :user-id (get-in @app-state [:session :user-id])}))))
 
 (defn message-view [message owner]
   (reify
@@ -74,6 +76,7 @@
     om/IRender
     (render [_]
       (let [threads (->> (data :messages)
+                         vals
                          (group-by :thread-id)
                          (map (fn [[id ms]] {:id id
                                              :messages ms})))]
