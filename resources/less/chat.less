@@ -1,3 +1,33 @@
 body {
-  background: #ccc;
+  background: #eee;
+  margin: 0;
+  padding: 0;
+  font-family: Tahoma;
+  font-size: 12px;
+}
+
+.message {
+  background: white;
+  margin: 1em;
+  box-shadow: 0 1px 2px 0 #ccc;
+  width: 15em;
+  padding: 1em;
+  display: inline-block;
+  vertical-align: top;
+
+  .content {
+    white-space: pre;
+  }
+
+  &.new {
+    textarea {
+      width: 100%;
+      border: none;
+      resize: none;
+      &:focus {
+        outline: none;
+      }
+
+    }
+  }
 }
