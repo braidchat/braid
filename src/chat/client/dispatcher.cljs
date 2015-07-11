@@ -8,12 +8,15 @@
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
-  (store/transact! [:messages] #(let [id (guid)]
-                            (assoc % id {:id id
-                                         :content (data :content)
-                                         :thread-id (or (data :thread-id) (guid))
-                                         :user-id (get-in @store/app-state [:session :user-id])
-                                         :created-at (js/Date.)}))))
+  (let [message (let [id (guid)]
+                  {:id id
+                   :content (data :content)
+                   :thread-id (or (data :thread-id) (guid))
+                   :user-id (get-in @store/app-state [:session :user-id])
+                   :created-at (js/Date.)})]
+
+    (store/transact! [:messages] #(assoc % (message :id) message))
+    (sync/chsk-send! [:chat/new-message message])))
 
 (defmethod dispatch! :hide-thread [_ data]
   (store/transact! [:users (get-in @store/app-state [:session :user-id]) :hidden-thread-ids] #(conj % (data :thread-id))))
