@@ -16,6 +16,8 @@
   (def chsk-send! send-fn)
   (def chsk-state state))
 
+(defmulti event-handler (fn [[id _]] id))
+
 (defmulti event-msg-handler :id)
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
@@ -33,8 +35,9 @@
     (debugf "Channel socket state change: %s" ?data)))
 
 (defmethod event-msg-handler :chsk/recv
-  [{:as ev-msg :keys [?data]}]
-  (debugf "Push event from server: %s" ?data))
+  [{:as ev-msg :keys [event ?data]}]
+  (debugf "Push event from server: %s" ?data)
+  (event-handler ?data))
 
 (defmethod event-msg-handler :chsk/handshake
   [{:as ev-msg :keys [?data]}]

@@ -4,3 +4,6 @@
 
 (defn transact! [ks f]
   (swap! app-state update-in ks f))
+
+(defn add-message! [message]
+  (transact! [:messages] #(assoc % (message :id) message)))

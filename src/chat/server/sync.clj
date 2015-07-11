@@ -32,6 +32,14 @@
     (when ?reply-fn
       (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
 
+(defmethod event-msg-handler :chat/new-message
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (println "received message")
+  (doseq [uid (->> (:any @connected-uids)
+                   (remove (partial = id)))]
+    (println "sending to" uid)
+    (chsk-send! uid [:chat/new-message ?data])))
+
 (defonce router_ (atom nil))
 
 (defn stop-router! [] (when-let [stop-f @router_] (stop-f)))

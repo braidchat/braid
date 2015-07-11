@@ -9,7 +9,7 @@
   (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
                                       :content (data :content)
                                       :thread-id (data :thread-id)})]
-    (store/transact! [:messages] #(assoc % (message :id) message))
+    (store/add-message! message)
     (sync/chsk-send! [:chat/new-message message])))
 
 (defmethod dispatch! :hide-thread [_ data]
@@ -30,3 +30,7 @@
                       98 {:id 98 :content "Hi!" :thread-id 123 :user-id 2 :created-at (js/Date. 2)}
                       97 {:id 97 :content "Oh, great, someone else is here." :thread-id 123 :user-id 1 :created-at (js/Date. 3)}
                       96 {:id 96 :content "Yep" :thread-id 123 :user-id 2 :created-at (js/Date. 4)}}}))
+
+(defmethod sync/event-handler :chat/new-message
+  [[_ data]]
+  (store/add-message! data))
