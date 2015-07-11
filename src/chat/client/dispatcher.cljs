@@ -5,13 +5,10 @@
 (defn guid []
   (rand-int 100000))
 
-(defn transact! [ks f]
-  (swap! store/app-state update-in ks f))
-
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
-  (transact! [:messages] #(let [id (guid)]
+  (store/transact! [:messages] #(let [id (guid)]
                             (assoc % id {:id id
                                          :content (data :content)
                                          :thread-id (or (data :thread-id) (guid))
@@ -19,7 +16,7 @@
                                          :created-at (js/Date.)}))))
 
 (defmethod dispatch! :hide-thread [_ data]
-  (transact! [:users (get-in @store/app-state [:session :user-id]) :hidden-thread-ids] #(conj % (data :thread-id))))
+  (store/transact! [:users (get-in @store/app-state [:session :user-id]) :hidden-thread-ids] #(conj % (data :thread-id))))
 
 
 (defmethod dispatch! :seed [_ _]
