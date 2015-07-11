@@ -18,15 +18,6 @@
   (GET  "/chsk" req (ring-ajax-get-or-ws-handshake req))
   (POST "/chsk" req (ring-ajax-post                req)))
 
-(defn start-broadcaster! []
-  (go-loop [i 0]
-    (<! (async/timeout 10000))
-    (println (format "Broadcasting server->user: %s" @connected-uids))
-    (doseq [uid (:any @connected-uids)]
-      (chsk-send! uid
-                  [:some/broadcast {:i i}]))
-    (recur (inc i))))
-
 (defmulti event-msg-handler :id)
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
