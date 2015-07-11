@@ -10,7 +10,10 @@
                                      [http-kit "2.1.18"]
                                      [fogus/ring-edn "0.3.0"]
                                      [compojure "1.3.4"]
-                                     [environ "1.0.0"]]}
+                                     [environ "1.0.0"]
+                                     [com.taoensso/sente "1.5.0"]
+                                     [com.taoensso/timbre "4.0.2"]
+                                     [org.clojure/core.async "0.1.346.0-17112a-alpha"]]}
              :client {:plugins [[lein-cljsbuild "1.0.6"]
                                 [jamesnvc/lein-lesscss "1.4.0"]]
                       :dependencies [[org.clojure/clojure "1.7.0-RC2"]
@@ -18,7 +21,10 @@
                                      [org.omcljs/om "0.8.8"]
                                      [org.clojars.leanpixel/cljs-utils "0.2.0"]
                                      [prismatic/schema "0.4.3"]
-                                     [secretary "1.2.3"]]
+                                     [secretary "1.2.3"]
+                                     [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                                     [com.taoensso/sente "1.5.0"]
+                                     [com.lucasbradstreet/cljs-uuid-utils "1.0.1"]]
                       :lesscss-paths ["resources/less"]
                       :lesscss-output-path "resources/public/css/out"
                       :cljsbuild {:builds
