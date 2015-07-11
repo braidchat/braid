@@ -1,7 +1,9 @@
 (ns chat.client.core
   (:require [om.core :as om]
             [om.dom :as dom]
-            [cljs-utils.core :refer [edn-xhr]]))
+            [cljs-utils.core :refer [edn-xhr]]
+            [chat.client.sync :as sync]))
+
 
 (enable-console-print!)
 
@@ -94,6 +96,8 @@
                          (map (fn [[id ms]] {:id id
                                              :messages ms})))]
         (dom/div nil
+          (dom/div #js {:onClick (fn [_]
+                                   (sync/test-send!))} "test send")
           (apply dom/div nil
             (concat (om/build-all thread-view threads)
                     [(om/build new-thread-view {})])))))))
@@ -101,4 +105,5 @@
 (defn init []
   (om/root app-view app-state
            {:target (. js/document (getElementById "app"))})
-  (seed!))
+  (seed!)
+  (sync/start-router!))

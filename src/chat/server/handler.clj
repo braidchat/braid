@@ -1,19 +1,16 @@
 (ns chat.server.handler
   (:require [org.httpkit.server :refer [run-server]]
             [compojure.route :refer [resources]]
-            [ring.middleware.edn :refer [wrap-edn-params]]
             [compojure.handler :refer [api]]
-            [compojure.core :refer [GET routes defroutes context]]))
+            [compojure.core :refer [GET routes defroutes context]]
+            [chat.server.sync :refer [sync-routes]]))
 
-(defroutes api-routes
-  (context "/" []
-    (GET "/" []
-      (-> "chat.html"
-          (clojure.java.io/resource)
-          (clojure.java.io/file)
-          (slurp))))
-  (context "/api" []
-    (GET "/" [])))
+(defroutes site-routes
+  (GET "/" []
+    (-> "chat.html"
+        (clojure.java.io/resource)
+        (clojure.java.io/file)
+        (slurp))))
 
 (defroutes resource-routes
   (resources "/"))
@@ -21,9 +18,9 @@
 (def app
   (-> (routes
         resource-routes
-        api-routes)
-      api
-      wrap-edn-params))
+        site-routes
+        sync-routes)
+      api))
 
 (defonce server (atom nil))
 
