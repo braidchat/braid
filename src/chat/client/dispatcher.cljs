@@ -1,20 +1,14 @@
 (ns chat.client.dispatcher
   (:require [chat.client.store :as store]
-            [chat.client.sync :as sync]))
-
-(defn guid []
-  (rand-int 100000))
+            [chat.client.sync :as sync]
+            [chat.client.schema :as schema]))
 
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
-  (let [message (let [id (guid)]
-                  {:id id
-                   :content (data :content)
-                   :thread-id (or (data :thread-id) (guid))
-                   :user-id (get-in @store/app-state [:session :user-id])
-                   :created-at (js/Date.)})]
-
+  (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
+                                      :content (data :content)
+                                      :thread-id (data :thread-id)})]
     (store/transact! [:messages] #(assoc % (message :id) message))
     (sync/chsk-send! [:chat/new-message message])))
 

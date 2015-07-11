@@ -23,7 +23,8 @@
                                      [prismatic/schema "0.4.3"]
                                      [secretary "1.2.3"]
                                      [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                                     [com.taoensso/sente "1.5.0"]]
+                                     [com.taoensso/sente "1.5.0"]
+                                     [com.lucasbradstreet/cljs-uuid-utils "1.0.1"]]
                       :lesscss-paths ["resources/less"]
                       :lesscss-output-path "resources/public/css/out"
                       :cljsbuild {:builds
