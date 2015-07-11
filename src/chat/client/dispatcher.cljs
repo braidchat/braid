@@ -32,6 +32,3 @@
                       98 {:id 98 :content "Hi!" :thread-id 123 :user-id 2 :created-at (js/Date. 2)}
                       97 {:id 97 :content "Oh, great, someone else is here." :thread-id 123 :user-id 1 :created-at (js/Date. 3)}
                       96 {:id 96 :content "Yep" :thread-id 123 :user-id 2 :created-at (js/Date. 4)}}}))
-
-(defmethod dispatch! :test-send [_ _]
- (sync/test-send!))

@@ -59,8 +59,6 @@
                          (map (fn [[id ms]] {:id id
                                              :messages ms})))]
         (dom/div nil
-          (dom/div #js {:onClick (fn [_]
-                                   (dispatch! :test-send nil))} "test send")
           (apply dom/div nil
             (concat (om/build-all thread-view threads)
                     [(om/build new-thread-view {})])))))))

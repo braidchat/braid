@@ -16,10 +16,6 @@
   (def chsk-send! send-fn)
   (def chsk-state state))
 
-(defn test-send! []
-  (println "test-send!")
-  (chsk-send! [:test/echo "foobar"]))
-
 (defmulti event-msg-handler :id)
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
