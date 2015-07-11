@@ -19,6 +19,7 @@
     (sync/chsk-send! [:chat/new-message message])))
 
 (defmethod dispatch! :hide-thread [_ data]
+  (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/transact! [:users (get-in @store/app-state [:session :user-id]) :hidden-thread-ids] #(conj % (data :thread-id))))
 
 
