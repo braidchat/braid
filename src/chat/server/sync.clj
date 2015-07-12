@@ -3,11 +3,13 @@
             [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)]
             [compojure.core :refer [GET POST routes defroutes context]]
             [taoensso.timbre :as timbre :refer [debugf]]
-            [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]))
+            [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
+            [chat.server.db :as db]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
-      (sente/make-channel-socket! sente-web-server-adapter {})]
+      (sente/make-channel-socket! sente-web-server-adapter {:user-id-fn (fn [ob]
+                                                                          (get-in ob [:session :user-id]))})]
   (def ring-ajax-post                ajax-post-fn)
   (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
   (def ch-chsk                       ch-recv)
@@ -34,11 +36,15 @@
 
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (println "received message")
   (doseq [uid (->> (:any @connected-uids)
                    (remove (partial = id)))]
-    (println "sending to" uid)
     (chsk-send! uid [:chat/new-message ?data])))
+
+(defmethod event-msg-handler :session/start
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (chsk-send! [:session/init-data {:users (db/all-users)
+                                      :messages (db/all-messages)}])))
 
 (defonce router_ (atom nil))
 

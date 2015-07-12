@@ -6,7 +6,7 @@ body {
   font-size: 12px;
 }
 
-.thread {
+.floating-box() {
   background: white;
   margin: 1em;
   box-shadow: 0 1px 2px 0 #ccc;
@@ -16,6 +16,15 @@ body {
   vertical-align: top;
 
   position: relative;
+}
+
+.tiny-avatar() {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.thread {
+  .floating-box;
 
   .close {
     position: absolute;
@@ -30,8 +39,7 @@ body {
     margin: 0 0 1em;
 
     .avatar {
-      width: 1.2em;
-      height: 1.2em;
+      .tiny-avatar();
       display: inline-block;
       position: absolute;
      }
@@ -55,5 +63,28 @@ body {
 
       }
     }
+  }
+}
+
+.login {
+  .floating-box;
+  input {
+    width: 100%;
+    margin: 0 0 1em;
+    padding: 0.25em;
+    box-sizing: border-box;
+  }
+}
+
+.user-meta {
+  position: absolute;
+  top: 0;
+  right: 0;
+  .avatar {
+    .tiny-avatar();
+    display: inline-block;
+  }
+  .logout {
+    display: inline-block;
   }
 }

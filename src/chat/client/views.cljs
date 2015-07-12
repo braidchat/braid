@@ -31,7 +31,7 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
-        (dom/div #js {:className "close"
+        #_(dom/div #js {:className "close"
                       :onClick (fn [_]
                                  (dispatch! :hide-thread {:thread-id (thread :id)}))} "×")
         (apply dom/div #js {:className "messages"}
@@ -45,7 +45,8 @@
       (dom/div #js {:className "thread"}
         (om/build new-message-view {:placeholder "Start a new conversation..."})))))
 
-(defn app-view [data owner]
+
+(defn chat-view [data owner]
   (reify
     om/IRender
     (render [_]
@@ -55,10 +56,49 @@
                          vals
                          (sort-by :created-at)
                          (group-by :thread-id)
-                         (remove-keys (get-in data [:users (get-in data [:session :user-id]) :hidden-thread-ids]))
                          (map (fn [[id ms]] {:id id
                                              :messages ms})))]
         (dom/div nil
+          (dom/div #js {:className "user-meta"}
+            (dom/img #js {:className "avatar"
+                          :src (let [user-id (get-in @store/app-state [:session :user-id])]
+                                 (get-in @store/app-state [:users user-id :icon]))})
+            (dom/div #js {:className "logout"
+                          :onClick (fn [_] (dispatch! :logout nil))} "×"))
           (apply dom/div nil
             (concat (om/build-all thread-view threads)
                     [(om/build new-thread-view {})])))))))
+
+(defn login-view [data owner]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:email ""
+       :password ""})
+    om/IRenderState
+    (render-state [_ state]
+      (dom/div #js {:className "login"}
+        (dom/input
+          #js {:placeholder "Email"
+               :type "text"
+               :value (state :email)
+               :onChange (fn [e] (om/set-state! owner :email (.. e -target -value)))})
+        (dom/input
+          #js {:placeholder "Password"
+               :type "password"
+               :value (state :password)
+               :onChange (fn [e] (om/set-state! owner :password (.. e -target -value)))})
+        (dom/button
+          #js {:onClick (fn [e]
+                          (dispatch! :auth {:email (state :email)
+                                            :password (state :password)}))}
+          "Let's do this!")))))
+
+(defn app-view [data owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div nil
+        (if (data :session)
+          (om/build chat-view data)
+          (om/build login-view data))))))
