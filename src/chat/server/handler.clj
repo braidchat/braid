@@ -19,12 +19,9 @@
         (clojure.java.io/file)
         (slurp)))
   (POST "/auth" req
-    ; attempt to auth with session or email + password
-    (if-let [user-id (or (get-in req [:session :user-id])
-                         (let [{:keys [email password]} (req :params)]
-                           (db/authenticate email password)))]
-      (merge (edn-response {:user-id user-id})
-             {:session (assoc (req :session) :user-id user-id)})
+    (if-let [user-id (let [{:keys [email password]} (req :params)]
+                       (db/authenticate email password))]
+      {:status 200 :session (assoc (req :session) :user-id user-id)}
       {:status 401}))
   (POST "/logout" req
     {:status 200 :session nil}))

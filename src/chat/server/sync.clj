@@ -43,8 +43,9 @@
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (chsk-send! [:session/init-data {:users (db/all-users)
-                                      :messages (db/all-messages)}])))
+    (chsk-send! user-id [:session/init-data {:user-id user-id
+                                             :users (db/all-users)
+                                             :messages (db/all-messages)}])))
 
 (defonce router_ (atom nil))
 

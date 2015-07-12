@@ -17,10 +17,6 @@
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/transact! [:users (get-in @store/app-state [:session :user-id]) :hidden-thread-ids] #(conj % (data :thread-id))))
 
-(defn start-session! [user-id]
-  (store/set-session! {:user-id user-id})
-  (sync/chsk-send! [:session/start nil]))
-
 (defmethod dispatch! :auth [_ data]
   (edn-xhr {:url "/auth"
             :method :post
@@ -30,11 +26,8 @@
             :on-error (fn [e]
                         ; TODO
                         )
-            :on-complete (let [cred-auth? (data :email)]
-                           (fn [data]
-                             (if cred-auth?
-                               (sync/reconnect!)
-                               (start-session! (data :user-id)))))}))
+            :on-complete (fn [data]
+                           (sync/reconnect!))}))
 
 (defmethod dispatch! :logout [_ _]
   (edn-xhr {:url "/logout"
@@ -51,9 +44,10 @@
 
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
+  (store/set-session! {:user-id (data :user-id)})
   (store/add-users! (data :users))
   (store/add-messages! (data :messages)))
 
 (defmethod sync/event-handler :socket/connected
   [[_ _]]
-  (dispatch! :auth {}))
+  (sync/chsk-send! [:session/start nil]))
