@@ -12,5 +12,4 @@
 (defn init []
   (om/root views/app-view store/app-state
            {:target (. js/document (getElementById "app"))})
-  (dispatcher/dispatch! :seed nil)
   (sync/start-router!))

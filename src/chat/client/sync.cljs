@@ -30,9 +30,10 @@
 
 (defmethod event-msg-handler :chsk/state
   [{:as ev-msg :keys [?data]}]
-  (if (= ?data {:first-open? true})
+  (if (?data :first-open?)
     (debugf "Channel socket successfully established!")
-    (debugf "Channel socket state change: %s" ?data)))
+    (debugf "Channel socket state change: %s" ?data))
+  (event-handler [:socket/connected ?data]))
 
 (defmethod event-msg-handler :chsk/recv
   [{:as ev-msg :keys [event ?data]}]
@@ -50,4 +51,7 @@
 
 (defn start-router! []
   (stop-router!)
-  (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler)))
+  (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler*)))
+
+(defn reconnect! []
+  (sente/chsk-reconnect! chsk))

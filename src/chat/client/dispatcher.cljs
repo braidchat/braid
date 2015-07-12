@@ -1,7 +1,8 @@
 (ns chat.client.dispatcher
   (:require [chat.client.store :as store]
             [chat.client.sync :as sync]
-            [chat.client.schema :as schema]))
+            [chat.client.schema :as schema]
+            [cljs-utils.core :refer [edn-xhr]]))
 
 (defmulti dispatch! (fn [event data] event))
 
@@ -16,21 +17,43 @@
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/transact! [:users (get-in @store/app-state [:session :user-id]) :hidden-thread-ids] #(conj % (data :thread-id))))
 
+(defn start-session! [user-id]
+  (store/set-session! {:user-id user-id})
+  (sync/chsk-send! [:session/start nil]))
 
-(defmethod dispatch! :seed [_ _]
-  (reset! store/app-state
-          {:session {:user-id 1}
-           :users {1 {:id 1
-                      :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-08/4801271456_41230ac0b881cdf85c28_72.jpg"
-                      :hidden-thread-ids []}
-                   2 {:id 2
-                      :icon "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-09/4805955000_07dc272f0a7f9de7719e_192.jpg"
-                      :hidden-thread-ids []}}
-           :messages {99 {:id 99 :content "Hello?" :thread-id 123 :user-id 1 :created-at (js/Date. 1)}
-                      98 {:id 98 :content "Hi!" :thread-id 123 :user-id 2 :created-at (js/Date. 2)}
-                      97 {:id 97 :content "Oh, great, someone else is here." :thread-id 123 :user-id 1 :created-at (js/Date. 3)}
-                      96 {:id 96 :content "Yep" :thread-id 123 :user-id 2 :created-at (js/Date. 4)}}}))
+(defmethod dispatch! :auth [_ data]
+  (edn-xhr {:url "/auth"
+            :method :post
+            :data {:email (data :email)
+                   :password (data :password)
+                   :csrf-token (:csrf-token @sync/chsk-state)}
+            :on-error (fn [e]
+                        ; TODO
+                        )
+            :on-complete (let [cred-auth? (data :email)]
+                           (fn [data]
+                             (if cred-auth?
+                               (sync/reconnect!)
+                               (start-session! (data :user-id)))))}))
+
+(defmethod dispatch! :logout [_ _]
+  (edn-xhr {:url "/logout"
+            :method :post
+            :data {:csrf-token (:csrf-token @sync/chsk-state)}
+            :on-complete (fn [data]
+                           (store/clear-session!))}))
+
+; Websocket Events
 
 (defmethod sync/event-handler :chat/new-message
   [[_ data]]
   (store/add-message! data))
+
+(defmethod sync/event-handler :session/init-data
+  [[_ data]]
+  (store/add-users! (data :users))
+  (store/add-messages! (data :messages)))
+
+(defmethod sync/event-handler :socket/connected
+  [[_ _]]
+  (dispatch! :auth {}))

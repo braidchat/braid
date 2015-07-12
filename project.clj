@@ -8,6 +8,7 @@
   :profiles {:server {:dependencies [[org.clojure/clojure "1.7.0-RC2"]
                                      [javax.servlet/servlet-api "2.5"]
                                      [http-kit "2.1.18"]
+                                     [ring/ring-defaults "0.1.5"]
                                      [fogus/ring-edn "0.3.0"]
                                      [compojure "1.3.4"]
                                      [environ "1.0.0"]

@@ -2,25 +2,47 @@
   (:require [org.httpkit.server :refer [run-server]]
             [compojure.route :refer [resources]]
             [compojure.handler :refer [api]]
-            [compojure.core :refer [GET routes defroutes context]]
-            [chat.server.sync :refer [sync-routes]]))
+            [compojure.core :refer [GET POST routes defroutes context]]
+            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [ring.middleware.edn :refer [wrap-edn-params]]
+            [chat.server.sync :refer [sync-routes]]
+            [chat.server.db :as db]))
+
+(defn edn-response [clj-body]
+  {:headers {"Content-Type" "application/edn; charset=utf-8" }
+   :body (pr-str clj-body)})
 
 (defroutes site-routes
   (GET "/" []
     (-> "chat.html"
         (clojure.java.io/resource)
         (clojure.java.io/file)
-        (slurp))))
+        (slurp)))
+  (POST "/auth" req
+    ; attempt to auth with session or email + password
+    (if-let [user-id (or (get-in req [:session :user-id])
+                         (let [{:keys [email password]} (req :params)]
+                           (db/authenticate email password)))]
+      (merge (edn-response {:user-id user-id})
+             {:session (assoc (req :session) :user-id user-id)})
+      {:status 401}))
+  (POST "/logout" req
+    {:status 200 :session nil}))
 
 (defroutes resource-routes
   (resources "/"))
 
 (def app
-  (-> (routes
+  (->
+    (wrap-defaults
+      (routes
         resource-routes
         site-routes
         sync-routes)
-      api))
+      (-> site-defaults ; TODO: switch to secure-site-defaults when in using https in prod
+          (assoc-in [:security :anti-forgery]
+            {:read-token (fn [req] (-> req :params :csrf-token))})))
+      wrap-edn-params))
 
 (defonce server (atom nil))
 
