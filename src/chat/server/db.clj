@@ -132,7 +132,10 @@
                   :message/user [:user/id (attrs :user-id)]
                   :message/thread (:db/id thread-data)
                   :message/created-at (attrs :created-at)}
-        {:keys [db-after tempids]} @(d/transact *conn* [thread-data msg-data])]
+        subscribe-data {:db/id [:user/id (attrs :user-id)]
+                        :user/open-thread (thread-data :db/id)
+                        :user/subscribed-thread (thread-data :db/id)}
+        {:keys [db-after tempids]} @(d/transact *conn* [thread-data msg-data subscribe-data])]
     (->> (d/resolve-tempid db-after tempids (msg-data :db/id))
          (d/pull db-after '[:message/id
                             :message/content
@@ -183,3 +186,21 @@
               :where [?e :message/id]]
             (d/db *conn*))
        (map (comp db->message first))))
+
+(defn get-open-threads-for-user [user-id]
+  (first (d/q '[:find ?thread-id
+         :where
+         [?e :user/id ?user-id]
+         [?e :user/open-thread ?thread]
+         [?thread :thread/id ?thread-id]]
+       (d/db *conn*)
+       user-id)))
+
+(defn get-subscribed-threads-for-user [user-id]
+  (first (d/q '[:find ?thread-id
+         :where
+         [?e :user/id ?user-id]
+         [?e :user/subscribed-thread ?thread]
+         [?thread :thread/id ?thread-id]]
+       (d/db *conn*)
+       user-id)))

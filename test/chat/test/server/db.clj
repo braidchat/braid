@@ -61,7 +61,11 @@
                           :content "Hello?"}
             message (db/create-message! message-data)]
         (testing "returns message"
-          (is (= message-data message)))))
+          (is (= message-data message)))
+        (testing "user has thread open"
+          (is (contains? (set (db/get-open-threads-for-user (user-1 :id))) thread-id)))
+        (testing "user has thread subscribed"
+          (is (contains? (set (db/get-subscribed-threads-for-user (user-1 :id))) thread-id)))))
 
     (testing "create-message w/ existing thread-id"
       (let [message-2-data {:id (db/uuid)
@@ -70,8 +74,12 @@
                             :created-at (java.util.Date.)
                             :content "Goodbye."}
             message-2 (db/create-message! message-2-data)]
-        (testing "create returns message"
-          (is (= message-2-data message-2))))) ))
+        (testing "returns message"
+          (is (= message-2-data message-2)))
+        (testing "user has thread open"
+          (is (contains? (set (db/get-open-threads-for-user (user-1 :id))) thread-id)))
+        (testing "user has thread subscribed"
+          (is (contains? (set (db/get-subscribed-threads-for-user (user-1 :id))) thread-id)))))))
 
 
 (deftest fetch-messages
