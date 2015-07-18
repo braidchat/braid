@@ -14,7 +14,9 @@
                                      [environ "1.0.0"]
                                      [com.taoensso/sente "1.5.0"]
                                      [com.taoensso/timbre "4.0.2"]
-                                     [org.clojure/core.async "0.1.346.0-17112a-alpha"]]}
+                                     [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                                     [com.datomic/datomic-pro "0.9.5201"]
+                                     [crypto-password "0.1.3"]]}
              :client {:plugins [[lein-cljsbuild "1.0.6"]
                                 [jamesnvc/lein-lesscss "1.4.0"]]
                       :dependencies [[org.clojure/clojure "1.7.0-RC2"]
@@ -47,4 +49,5 @@
              :dev-common {:repl-options {:init-ns chat.server.handler}}
              :dev-overrides {}
              :dev [:common :dev-common :dev-overrides]
+             :test [:common :dev-common :dev-overrides]
              })
