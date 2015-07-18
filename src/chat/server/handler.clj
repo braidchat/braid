@@ -20,7 +20,7 @@
         (slurp)))
   (POST "/auth" req
     (if-let [user-id (let [{:keys [email password]} (req :params)]
-                       (db/authenticate-user email password))]
+                       (db/with-conn (db/authenticate-user email password)))]
       {:status 200 :session (assoc (req :session) :user-id user-id)}
       {:status 401}))
   (POST "/logout" req
