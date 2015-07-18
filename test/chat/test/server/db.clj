@@ -102,3 +102,17 @@
         messages (db/fetch-messages)]
     (testing "create returns message"
       (is (= (set messages) #{message-1 message-2})))))
+
+(deftest user-hide-thread
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        message-1 (db/create-message! {:id (db/uuid)
+                                       :user-id (user-1 :id)
+                                       :thread-id (db/uuid)
+                                       :created-at (java.util.Date.)
+                                       :content "Hello?"})]
+    (testing "user can hide thread"
+      (db/user-hide-thread! (user-1 :id) (message-1 :thread-id))
+      (is (not (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-1 :thread-id)))))))

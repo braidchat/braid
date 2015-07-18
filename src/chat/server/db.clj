@@ -204,3 +204,8 @@
          [?thread :thread/id ?thread-id]]
        (d/db *conn*)
        user-id)))
+
+(defn user-hide-thread! [user-id thread-id]
+  (d/transact
+    *conn*
+    [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
