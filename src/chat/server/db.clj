@@ -83,22 +83,30 @@
        :db.install/_attribute :db.part/db}
 
       ; thread
-
+      {:db/ident :thread/id
+       :db/valueType :db.type/uuid
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
 
       ]))
 
+
+(defn uuid []
+  (d/squuid))
 
 (defn- db->user [e]
   {:id (:user/id e)
    :email (:user/email e)
    :avatar (:user/avatar e)})
 
-(defn- db->message [resp]
-  {:id (resp :message/id)
-   :content (resp :message/content)
-   :user-id (resp :message/user-id)
-   :thread-id (resp :message/thread-id)
-   :created-at (resp :message/created-at)})
+(defn- db->message [e]
+  {:id (:message/id e)
+   :content (:message/content e)
+   :user-id (:user/id (:message/user e))
+   :thread-id (:thread/id (:message/thread e))
+   :created-at (:message/created-at e)})
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -116,21 +124,32 @@
          (d/entity db-after))))
 
 (defn- create-reply-message! [attrs]
-  (create-entity! {:message/id (attrs :id)
-                   :message/content (attrs :content)
-                   :message/user [:user/id (attrs :user-id)]
-                   :message/thread [:thread/id (attrs :thread-id)]
-                   :message/created-at (attrs :created-at)}))
+  (-> {:message/id (attrs :id)
+       :message/content (attrs :content)
+       :message/user [:user/id (attrs :user-id)]
+       :message/thread [:thread/id (attrs :thread-id)]
+       :message/created-at (attrs :created-at)}
+      create-entity!
+      db->message))
 
 (defn- create-first-message! [attrs]
-  (create-entity! {:message/id (attrs :id)
-                   :message/content (attrs :content)
-                   :message/user [:user/id (attrs :user-id)]
-                   :message/thread (d/tempid :entities)
-                   :message/created-at (attrs :created-at)}))
+  (let [thread-data {:db/id (d/tempid :entities)
+                     :thread/id (uuid)}
+        msg-data {:db/id (d/tempid :entities)
+                  :message/id (attrs :id)
+                  :message/content (attrs :content)
+                  :message/user [:user/id (attrs :user-id)]
+                  :message/thread (:db/id thread-data)
+                  :message/created-at (attrs :created-at)}
+        {:keys [db-after tempids]} @(d/transact *conn* [thread-data msg-data])]
+    (->> (d/resolve-tempid db-after tempids (msg-data :db/id))
+         (d/pull db-after '[:message/id
+                            :message/content
+                            {:message/user [:user/id]}
+                            {:message/thread [:thread/id]}
+                            :message/created-at])
+         db->message)))
 
-(defn uuid []
-  (d/squuid))
 
 (defn create-message! [attrs]
   (if (attrs :thread-id)
@@ -163,10 +182,19 @@
            user-id))))
 
 (defn fetch-users []
-  (->> (d/q '[:find (pull ?e [:user/id :user/email :user/avatar])
+  (->> (d/q '[:find (pull ?e [:user/id
+                              :user/email
+                              :user/avatar])
               :where [?e :user/id]]
             (d/db *conn*))
        (map (comp db->user first))))
 
 (defn fetch-messages []
-  )
+  (->> (d/q '[:find (pull ?e [:message/id
+                              :message/content
+                              :message/created-at
+                              {:message/user [:user/id]}
+                              {:message/thread [:thread/id]}])
+              :where [?e :message/id]]
+            (d/db *conn*))
+       (map (comp db->message first))))
