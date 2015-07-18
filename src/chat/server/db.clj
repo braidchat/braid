@@ -123,18 +123,9 @@
     (->> (d/resolve-tempid db-after tempids new-id)
          (d/entity db-after))))
 
-(defn- create-reply-message! [attrs]
-  (-> {:message/id (attrs :id)
-       :message/content (attrs :content)
-       :message/user [:user/id (attrs :user-id)]
-       :message/thread [:thread/id (attrs :thread-id)]
-       :message/created-at (attrs :created-at)}
-      create-entity!
-      db->message))
-
-(defn- create-first-message! [attrs]
+(defn create-message! [attrs]
   (let [thread-data {:db/id (d/tempid :entities)
-                     :thread/id (uuid)}
+                     :thread/id (attrs :thread-id)}
         msg-data {:db/id (d/tempid :entities)
                   :message/id (attrs :id)
                   :message/content (attrs :content)
@@ -149,12 +140,6 @@
                             {:message/thread [:thread/id]}
                             :message/created-at])
          db->message)))
-
-
-(defn create-message! [attrs]
-  (if (attrs :thread-id)
-    (create-reply-message! attrs)
-    (create-first-message! attrs)))
 
 (defn create-user!
   "creates a user, returns id"

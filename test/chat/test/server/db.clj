@@ -46,41 +46,33 @@
     (testing "returns nil when email+password wrong"
       (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
 
-(deftest create-message
-  (testing "create-message w/o thread-id"
-    (let [user-1 (db/create-user! {:id (db/uuid)
-                                   :email "foo@bar.com"
-                                   :password "foobar"
-                                   :avatar "http://www.foobar.com/1.jpg"})
-          message-data {:id (db/uuid)
-                        :user-id (user-1 :id)
-                        :created-at (java.util.Date.)
-                        :content "Hello?"}
-          message (db/create-message! message-data)]
-      (testing "create returns message"
-        (is (= message-data (dissoc message :thread-id))))
-      (testing "message contains a thread-id"
-        (is (not (nil? (message :thread-id))))))))
+(deftest create-message-new
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar "http://www.foobar.com/1.jpg"})
+        thread-id (db/uuid)]
 
-(deftest create-message-reply
-  (testing "create-message w/ thread-id"
-    (let [user-1 (db/create-user! {:id (db/uuid)
-                                   :email "foo@bar.com"
-                                   :password "foobar"
-                                   :avatar "http://www.foobar.com/1.jpg"})
-          message-1-data {:id (db/uuid)
+    (testing "create-message w/ new thread-id"
+      (let [message-data {:id (db/uuid)
                           :user-id (user-1 :id)
+                          :thread-id thread-id
                           :created-at (java.util.Date.)
                           :content "Hello?"}
-          message-1 (db/create-message! message-1-data)
-          message-2-data {:id (db/uuid)
-                          :user-id (user-1 :id)
-                          :thread-id (message-1 :thread-id)
-                          :created-at (java.util.Date.)
-                          :content "Goodbye."}
-          message-2 (db/create-message! message-2-data)]
-      (testing "create returns message"
-        (is (= message-2-data message-2))))))
+            message (db/create-message! message-data)]
+        (testing "returns message"
+          (is (= message-data message)))))
+
+    (testing "create-message w/ existing thread-id"
+      (let [message-2-data {:id (db/uuid)
+                            :user-id (user-1 :id)
+                            :thread-id thread-id
+                            :created-at (java.util.Date.)
+                            :content "Goodbye."}
+            message-2 (db/create-message! message-2-data)]
+        (testing "create returns message"
+          (is (= message-2-data message-2))))) ))
+
 
 (deftest fetch-messages
   (let [user-1 (db/create-user! {:id (db/uuid)
@@ -89,6 +81,7 @@
                                  :avatar "http://www.foobar.com/1.jpg"})
         message-1-data {:id (db/uuid)
                         :user-id (user-1 :id)
+                        :thread-id (db/uuid)
                         :created-at (java.util.Date.)
                         :content "Hello?"}
         message-1 (db/create-message! message-1-data)
