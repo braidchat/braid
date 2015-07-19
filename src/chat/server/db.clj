@@ -188,24 +188,27 @@
        (map (comp db->message first))))
 
 (defn get-open-threads-for-user [user-id]
-  (first (d/q '[:find ?thread-id
-         :where
-         [?e :user/id ?user-id]
-         [?e :user/open-thread ?thread]
-         [?thread :thread/id ?thread-id]]
+  (d/q '[:find [?thread-id ...]
+                :in $ ?user-id
+                :where
+                [?e :user/id ?user-id]
+                [?e :user/open-thread ?thread]
+                [?thread :thread/id ?thread-id]]
        (d/db *conn*)
-       user-id)))
+       user-id))
 
 (defn get-subscribed-threads-for-user [user-id]
-  (first (d/q '[:find ?thread-id
+  (d/q '[:find [?thread-id ...]
+         :in $ ?user-id
          :where
-         [?e :user/id ?user-id]
-         [?e :user/subscribed-thread ?thread]
+         [?user :user/id ?user-id]
+         [?user :user/subscribed-thread ?thread]
          [?thread :thread/id ?thread-id]]
        (d/db *conn*)
-       user-id)))
+       user-id))
 
 (defn user-hide-thread! [user-id thread-id]
   (d/transact
     *conn*
     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
+

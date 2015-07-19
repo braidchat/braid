@@ -31,7 +31,7 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
-        #_(dom/div #js {:className "close"
+        (dom/div #js {:className "close"
                       :onClick (fn [_]
                                  (dispatch! :hide-thread {:thread-id (thread :id)}))} "×")
         (apply dom/div #js {:className "messages"}
@@ -52,12 +52,14 @@
     (render [_]
       (let [remove-keys (fn [ks coll]
                           (apply dissoc coll ks))
+            open-thread-ids (set (data :open-thread-ids))
             threads (->> (data :messages)
                          vals
                          (sort-by :created-at)
                          (group-by :thread-id)
                          (map (fn [[id ms]] {:id id
-                                             :messages ms})))]
+                                             :messages ms}))
+                         (filter (fn [t] (contains? open-thread-ids (t :id)))))]
         (dom/div nil
           (dom/div #js {:className "user-meta"}
             (dom/img #js {:className "avatar"

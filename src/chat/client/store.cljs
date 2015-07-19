@@ -1,7 +1,9 @@
 (ns chat.client.store)
 
 (def app-state (atom {:messages {}
-                      :users {}}))
+                      :users {}
+                      :session nil
+                      :open-thread-ids #{}}))
 
 (defn transact! [ks f]
   (swap! app-state update-in ks f))
@@ -23,3 +25,12 @@
   (transact! [:users] #(merge % (->> users
                                      (reduce (fn [memo u]
                                                (assoc memo (u :id) u)) {})))))
+
+(defn set-open-thread-ids! [thread-ids]
+  (transact! [:open-thread-ids] (constantly (set thread-ids))))
+
+(defn hide-thread! [thread-id]
+  (transact! [:open-thread-ids] #(disj % thread-id)))
+
+(defn show-thread! [thread-id]
+  (transact! [:open-thread-ids] #(conj % thread-id)))
