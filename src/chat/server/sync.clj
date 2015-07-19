@@ -36,9 +36,9 @@
 
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (db/with-conn (db/create-message! ?data))
   (doseq [uid (->> (:any @connected-uids)
                    (remove (partial = id)))]
-    (db/with-conn (db/create-message! ?data))
     (chsk-send! uid [:chat/new-message ?data])))
 
 (defmethod event-msg-handler :chat/hide-thread
