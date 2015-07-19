@@ -13,6 +13,7 @@
 
         msg (db/create-message! {:id (db/uuid)
                                  :user-id (user-1 :id)
+                                 :thread-id (db/uuid)
                                  :created-at (java.util.Date.)
                                  :content "Hello?"})
         _ (db/create-message! {:id (db/uuid)
