@@ -113,6 +113,11 @@
                                        :thread-id (db/uuid)
                                        :created-at (java.util.Date.)
                                        :content "Hello?"})
+        message-1-b (db/create-message! {:id (db/uuid)
+                                         :user-id (user-1 :id)
+                                         :thread-id (db/uuid)
+                                         :created-at (java.util.Date.)
+                                         :content "Hello?"})
         message-2 (db/create-message! {:id (db/uuid)
                                        :user-id (user-1 :id)
                                        :thread-id (db/uuid)
@@ -124,4 +129,7 @@
       (is (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-2 :thread-id))))
     (testing "user can hide thread"
       (db/user-hide-thread! (user-1 :id) (message-1 :thread-id))
-      (is (not (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-1 :thread-id)))))))
+      (is (not (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-1 :thread-id)))))
+    (testing "user can hide thread"
+      (db/user-hide-thread! (user-1 :id) (message-2 :thread-id))
+      (is (not (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-2 :thread-id)))))))
