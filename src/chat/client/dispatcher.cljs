@@ -41,7 +41,8 @@
 
 (defmethod sync/event-handler :chat/new-message
   [[_ data]]
-  (store/add-message! data))
+  (store/add-message! data)
+  (store/show-thread! (data :thread-id)))
 
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
