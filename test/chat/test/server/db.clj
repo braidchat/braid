@@ -100,7 +100,7 @@
                         :content "Hello?"}
         message-2 (db/create-message! message-2-data)
         messages (db/fetch-messages)]
-    (testing "create returns message"
+    (testing "fetch-messages returns all messages"
       (is (= (set messages) #{message-1 message-2})))))
 
 (deftest user-hide-thread
