@@ -269,6 +269,10 @@
   (d/transact *conn* [[:db/add [:user/id user-id]
                        :user/subscribed-tag [:tag/id tag-id]]]))
 
+(defn user-unsubscribe-from-tag! [user-id tag-id]
+  (d/transact *conn* [[:db/retract [:user/id user-id]
+                       :user/subscribed-tag [:tag/id tag-id]]]))
+
 (defn get-user-subscribed-tags [user-id]
   (d/q '[:find [?tag-id ...]
          :in $ ?user-id

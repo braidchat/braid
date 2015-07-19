@@ -18,6 +18,14 @@
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
+(defmethod dispatch! :unsubscribe-from-tag [_ tag-id]
+  (sync/chsk-send! [:user/unsubscribe-from-tag tag-id])
+  (store/unsubscribe-from-tag! tag-id))
+
+(defmethod dispatch! :subscribe-to-tag [_ tag-id]
+  (sync/chsk-send! [:user/subscribe-to-tag tag-id])
+  (store/subscribe-to-tag! tag-id))
+
 (defmethod dispatch! :auth [_ data]
   (edn-xhr {:url "/auth"
             :method :post
@@ -50,7 +58,8 @@
   (store/add-users! (data :users))
   (store/add-messages! (data :messages))
   (store/add-tags! (data :tags))
-  (store/set-open-thread-ids! (data :open-thread-ids)))
+  (store/set-user-open-thread-ids! (data :user-open-thread-ids))
+  (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids)))
 
 (defmethod sync/event-handler :socket/connected
   [[_ _]]

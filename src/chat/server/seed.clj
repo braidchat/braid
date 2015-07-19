@@ -21,6 +21,11 @@
           tag-1 (db/create-tag! {:id (db/uuid) :name "penyopal"})
           tag-2 (db/create-tag! {:id (db/uuid) :name "watercooler"})
 
+          _ (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
+          _ (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
+          _ (db/user-subscribe-to-tag! (user-1 :id) (tag-2 :id))
+          _ (db/user-subscribe-to-tag! (user-2 :id) (tag-2 :id))
+
           msg (db/create-message! {:id (db/uuid)
                                    :user-id (user-1 :id)
                                    :thread-id (db/uuid)
@@ -40,4 +45,6 @@
                                  :thread-id (msg :thread-id)
                                  :user-id (user-2 :id)
                                  :created-at (java.util.Date.)
-                                 :content "Yep"})])))
+                                 :content "Yep"})]
+      (println "users" user-1 user-2)
+      (println "tags" tag-2 tag-2))))

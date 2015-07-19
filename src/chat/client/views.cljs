@@ -45,12 +45,26 @@
       (dom/div #js {:className "thread"}
         (om/build new-message-view {:placeholder "Start a new conversation..."})))))
 
+(defn tag-view [tag owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "tag"}
+        (dom/label nil
+          (dom/input #js {:type "checkbox"
+                          :checked (tag :subscribed?)
+                          :onClick (fn [_]
+                                     (if (tag :subscribed?)
+                                       (dispatch! :unsubscribe-from-tag (tag :id))
+                                       (dispatch! :subscribe-to-tag (tag :id))))})
+          (tag :name))))))
+
 (defn tags-view [tags owner]
   (reify
     om/IRender
     (render [_]
       (apply dom/div #js {:className "tags"}
-        (map (fn [tag] (dom/div nil (tag :name))) tags)))))
+        (om/build-all tag-view tags)))))
 
 (defn chat-view [data owner]
   (reify
@@ -65,7 +79,14 @@
                          (group-by :thread-id)
                          (map (fn [[id ms]] {:id id
                                              :messages ms}))
-                         (filter (fn [t] (contains? open-thread-ids (t :id)))))]
+                         (filter (fn [t] (contains? open-thread-ids (t :id)))))
+            tags (->> (data :tags)
+                      vals
+                      (map (fn [tag]
+                             (assoc tag :subscribed?
+                               (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id))))))
+
+            ]
         (dom/div nil
           (dom/div #js {:className "user-meta"}
             (dom/img #js {:className "avatar"
@@ -73,7 +94,7 @@
                                  (get-in @store/app-state [:users user-id :icon]))})
             (dom/div #js {:className "logout"
                           :onClick (fn [_] (dispatch! :logout nil))} "×"))
-          (om/build tags-view (vals (data :tags)))
+          (om/build tags-view tags)
           (apply dom/div nil
             (concat (om/build-all thread-view threads)
                     [(om/build new-thread-view {})])))))))

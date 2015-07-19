@@ -4,6 +4,9 @@
                       :users {}
                       :tags {}
                       :session nil
+                      :user {:open-thread-ids #{}
+                             :subscribed-tag-ids #{}
+                             :user-id nil}
                       :open-thread-ids #{}}))
 
 (defn transact! [ks f]
@@ -32,11 +35,20 @@
                                      (reduce (fn [memo t]
                                                (assoc memo (t :id) t)) {})))))
 
-(defn set-open-thread-ids! [thread-ids]
-  (transact! [:open-thread-ids] (constantly (set thread-ids))))
+(defn set-user-open-thread-ids! [thread-ids]
+  (transact! [:user :open-thread-ids] (constantly (set thread-ids))))
 
 (defn hide-thread! [thread-id]
-  (transact! [:open-thread-ids] #(disj % thread-id)))
+  (transact! [:user :open-thread-ids] #(disj % thread-id)))
 
 (defn show-thread! [thread-id]
-  (transact! [:open-thread-ids] #(conj % thread-id)))
+  (transact! [:user :open-thread-ids] #(conj % thread-id)))
+
+(defn set-user-subscribed-tag-ids! [tag-ids]
+  (transact! [:user :subscribed-tag-ids] (constantly (set tag-ids))))
+
+(defn unsubscribe-from-tag! [tag-id]
+  (transact! [:user :subscribed-tag-ids] #(disj % tag-id)))
+
+(defn subscribe-to-tag! [tag-id]
+  (transact! [:user :subscribed-tag-ids] #(conj % tag-id)))

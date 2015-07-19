@@ -189,20 +189,27 @@
             (is (= (set tags) #{tag-1 tag-2}))))))))
 
 (deftest user-can-subscribe-to-tags
-  (testing "user can subscribe to tags"
-    (let [user (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
-          tag-2 (db/create-tag! {:id (db/uuid) :name "acme2"})]
+  (let [user (db/create-user! {:id (db/uuid)
+                               :email "foo@bar.com"
+                               :password "foobar"
+                               :avatar ""})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2"})]
+    (testing "user can subscribe to tags"
       (testing "user-subscribe-to-tag!"
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
         (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
       (testing "get-user-subscribed-tags"
         (let [tags (db/get-user-subscribed-tags (user :id))]
           (testing "returns subscribed tags"
-            (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))))
+            (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))
+    (testing "user can unsubscribe from tags"
+      (testing "user-unsubscribe-from-tag!"
+        (db/user-unsubscribe-from-tag! (user :id) (tag-1 :id))
+        (db/user-unsubscribe-from-tag! (user :id) (tag-2 :id)))
+      (testing "is unsubscribed"
+        (let [tags (db/get-user-subscribed-tags (user :id))]
+          (is (= (set tags) #{})))))))
 
 (deftest can-add-tags-to-thread
   (testing "can add tags to thread"
