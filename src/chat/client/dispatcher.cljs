@@ -49,6 +49,7 @@
   (store/set-session! {:user-id (data :user-id)})
   (store/add-users! (data :users))
   (store/add-messages! (data :messages))
+  (store/add-tags! (data :tags))
   (store/set-open-thread-ids! (data :open-thread-ids)))
 
 (defmethod sync/event-handler :socket/connected

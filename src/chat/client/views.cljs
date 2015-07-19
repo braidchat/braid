@@ -45,6 +45,12 @@
       (dom/div #js {:className "thread"}
         (om/build new-message-view {:placeholder "Start a new conversation..."})))))
 
+(defn tags-view [tags owner]
+  (reify
+    om/IRender
+    (render [_]
+      (apply dom/div #js {:className "tags"}
+        (map (fn [tag] (dom/div nil (tag :name))) tags)))))
 
 (defn chat-view [data owner]
   (reify
@@ -67,6 +73,7 @@
                                  (get-in @store/app-state [:users user-id :icon]))})
             (dom/div #js {:className "logout"
                           :onClick (fn [_] (dispatch! :logout nil))} "×"))
+          (om/build tags-view (vals (data :tags)))
           (apply dom/div nil
             (concat (om/build-all thread-view threads)
                     [(om/build new-thread-view {})])))))))

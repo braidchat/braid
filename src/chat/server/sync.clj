@@ -50,9 +50,10 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (chsk-send! user-id [:session/init-data (db/with-conn
                                               {:user-id user-id
+                                               :open-thread-ids (db/get-open-threads-for-user user-id)
                                                :users (db/fetch-users)
                                                :messages (db/fetch-messages)
-                                               :open-thread-ids (db/get-open-threads-for-user user-id)})])))
+                                               :tags (db/fetch-tags)})])))
 
 (defonce router_ (atom nil))
 

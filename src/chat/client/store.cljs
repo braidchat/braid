@@ -2,6 +2,7 @@
 
 (def app-state (atom {:messages {}
                       :users {}
+                      :tags {}
                       :session nil
                       :open-thread-ids #{}}))
 
@@ -25,6 +26,11 @@
   (transact! [:users] #(merge % (->> users
                                      (reduce (fn [memo u]
                                                (assoc memo (u :id) u)) {})))))
+
+(defn add-tags! [tags]
+  (transact! [:tags] #(merge % (->> tags
+                                     (reduce (fn [memo t]
+                                               (assoc memo (t :id) t)) {})))))
 
 (defn set-open-thread-ids! [thread-ids]
   (transact! [:open-thread-ids] (constantly (set thread-ids))))
