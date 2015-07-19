@@ -131,25 +131,29 @@
                                 [?thread :thread/id ?thread-id]]
                               (d/db *conn*)
                               (attrs :thread-id))
-        open-transactions (map (fn [user]
-                                 [:db/add user
-                                  :user/open-thread [:thread/id (attrs :thread-id)]])
-                               subscribed-users)
+        ; show thread for all users subscribed to thread
+        add-open-transactions (map (fn [user]
+                                     [:db/add user
+                                      :user/open-thread [:thread/id (attrs :thread-id)]])
+                                   subscribed-users)
+        ; upsert thread
         thread-data {:db/id (d/tempid :entities)
                      :thread/id (attrs :thread-id)}
+        ; upsert message
         msg-data {:db/id (d/tempid :entities)
                   :message/id (attrs :id)
                   :message/content (attrs :content)
                   :message/user [:user/id (attrs :user-id)]
                   :message/thread (:db/id thread-data)
                   :message/created-at (attrs :created-at)}
+        ; user who created message: show thread, subscribe to thread
         subscribe-data {:db/id [:user/id (attrs :user-id)]
                         :user/open-thread (thread-data :db/id)
                         :user/subscribed-thread (thread-data :db/id)}
         {:keys [db-after tempids]} @(d/transact *conn* (concat [thread-data
                                                                 msg-data
                                                                 subscribe-data]
-                                                               open-transactions))]
+                                                               add-open-transactions))]
     (->> (d/resolve-tempid db-after tempids (msg-data :db/id))
          (d/pull db-after '[:message/id
                             :message/content
