@@ -51,6 +51,12 @@
        :db/cardinality :db.cardinality/many
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
+      ; user - tag
+      {:db/ident :user/subscribed-tag
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/many
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
 
       ; message
       {:db/ident :message/id
@@ -87,6 +93,25 @@
        :db/valueType :db.type/uuid
        :db/cardinality :db.cardinality/one
        :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      ; thread - tag
+      {:db/ident :thread/tag
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/many
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+
+      ; tag
+      {:db/ident :tag/id
+       :db/valueType :db.type/uuid
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :tag/name
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/one
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
 
@@ -229,4 +254,42 @@
   (d/transact
     *conn*
     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
+
+(defn- db->tag [e]
+  {:id (:tag/id e)
+   :name (:tag/name e)})
+
+(defn create-tag! [attrs]
+  (-> {:tag/id (attrs :id)
+       :tag/name (attrs :name)}
+    create-entity!
+    db->tag))
+
+(defn user-subscribe-to-tag! [user-id tag-id]
+  (d/transact *conn* [[:db/add [:user/id user-id]
+                       :user/subscribed-tag [:tag/id tag-id]]]))
+
+(defn get-user-subscribed-tags [user-id]
+  (d/q '[:find [?tag-id ...]
+         :in $ ?user-id
+         :where
+         [?user :user/id ?user-id]
+         [?user :user/subscribed-tag ?tag]
+         [?tag :tag/id ?tag-id]]
+       (d/db *conn*)
+       user-id))
+
+(defn thread-add-tag! [thread-id tag-id]
+  (d/transact *conn* [[:db/add [:thread/id thread-id]
+                       :thread/tag [:tag/id tag-id]]]))
+
+(defn get-thread-tags [thread-id]
+  (d/q '[:find [?tag-id ...]
+         :in $ ?thread-id
+         :where
+         [?thread :thread/id ?thread-id]
+         [?thread :thread/tag ?tag]
+         [?tag :tag/id ?tag-id]]
+       (d/db *conn*)
+       thread-id))
 

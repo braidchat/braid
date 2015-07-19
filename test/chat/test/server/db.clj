@@ -169,3 +169,49 @@
                            :created-at (java.util.Date.)
                            :content "Hello?"})
       (is (contains? (set (db/get-open-threads-for-user (user-2 :id))) thread-id)))))
+
+(deftest tags
+  (testing "can create tag"
+    (let [tag-data {:id (db/uuid)
+                    :name "acme"}]
+      (testing "create-tag!"
+        (let [tag (db/create-tag! tag-data)]
+          (testing "returns tag"
+            (is (= tag tag-data)))))))
+
+  (testing "user can subscribe to tags"
+    (let [user (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
+          tag-2 (db/create-tag! {:id (db/uuid) :name "acme2"})]
+      (testing "user-subscribe-to-tag!"
+        (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
+        (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
+      (testing "get-user-subscribed-tags"
+        (let [tags (db/get-user-subscribed-tags (user :id))]
+          (testing "returns subscribed tags"
+            (is (= (set tags) #{(tag-1 :id) (tag-2 :id)})))))))
+
+  (testing "can add tags to thread"
+    (let [user (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+          msg (db/create-message! {:id (db/uuid)
+                                   :user-id (user :id)
+                                   :thread-id (db/uuid)
+                                   :created-at (java.util.Date.)
+                                   :content "Hello?"})
+          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
+          tag-2 (db/create-tag! {:id (db/uuid) :name "acme2"})]
+
+      (testing "thread-add-tag!"
+        (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
+        (db/thread-add-tag! (msg :thread-id) (tag-2 :id)))
+
+      (testing "get-thread-tags"
+        (let [tags (db/get-thread-tags (msg :thread-id))]
+          (testing "returns assigned tags"
+            (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))))
