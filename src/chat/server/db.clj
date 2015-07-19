@@ -148,19 +148,22 @@
     (->> (d/resolve-tempid db-after tempids new-id)
          (d/entity db-after))))
 
+(defn- get-users-subscribed-to-thread [thread-id]
+  (d/q '[:find [?user-id ...]
+         :in $ ?thread-id
+         :where
+         [?user :user/id ?user-id]
+         [?user :user/subscribed-thread ?thread]
+         [?thread :thread/id ?thread-id]]
+       (d/db *conn*)
+       thread-id))
+
 (defn create-message! [attrs]
-  (let [subscribed-users (d/q '[:find [?user ...]
-                                :in $ ?thread-id
-                                :where
-                                [?user :user/subscribed-thread ?thread]
-                                [?thread :thread/id ?thread-id]]
-                              (d/db *conn*)
-                              (attrs :thread-id))
-        ; show thread for all users subscribed to thread
-        add-open-transactions (map (fn [user]
-                                     [:db/add user
+  (let [; show thread for all users subscribed to thread
+        add-open-transactions (map (fn [user-id]
+                                     [:db/add [:user/id user-id]
                                       :user/open-thread [:thread/id (attrs :thread-id)]])
-                                   subscribed-users)
+                                   (get-users-subscribed-to-thread (attrs :thread-id)))
         ; upsert thread
         thread-data {:db/id (d/tempid :entities)
                      :thread/id (attrs :thread-id)}
