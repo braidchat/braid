@@ -177,8 +177,18 @@
       (testing "create-tag!"
         (let [tag (db/create-tag! tag-data)]
           (testing "returns tag"
-            (is (= tag tag-data)))))))
+            (is (= tag tag-data))))))))
 
+(deftest fetch-tags
+  (testing "can fetch tags"
+    (let [tag-1 (db/create-tag! {:id (db/uuid) :name "tag1"})
+          tag-2 (db/create-tag! {:id (db/uuid) :name "tag2"})]
+      (testing "fetch-tags"
+        (let [tags (db/fetch-tags)]
+          (testing "returns tags"
+            (is (= (set tags) #{tag-1 tag-2}))))))))
+
+(deftest user-can-subscribe-to-tags
   (testing "user can subscribe to tags"
     (let [user (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
@@ -192,8 +202,9 @@
       (testing "get-user-subscribed-tags"
         (let [tags (db/get-user-subscribed-tags (user :id))]
           (testing "returns subscribed tags"
-            (is (= (set tags) #{(tag-1 :id) (tag-2 :id)})))))))
+            (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))))
 
+(deftest can-add-tags-to-thread
   (testing "can add tags to thread"
     (let [user (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"

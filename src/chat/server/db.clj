@@ -293,3 +293,9 @@
        (d/db *conn*)
        thread-id))
 
+(defn fetch-tags []
+  (->> (d/q '[:find (pull ?e [:tag/id
+                              :tag/name])
+              :where [?e :tag/id]]
+            (d/db *conn*))
+       (map (comp db->tag first))))
