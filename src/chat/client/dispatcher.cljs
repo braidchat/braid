@@ -11,11 +11,12 @@
                                       :content (data :content)
                                       :thread-id (data :thread-id)})]
     (store/add-message! message)
+    (store/show-thread! (message :thread-id))
     (sync/chsk-send! [:chat/new-message message])))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
-  (store/transact! [:users (get-in @store/app-state [:session :user-id]) :hidden-thread-ids] #(conj % (data :thread-id))))
+  (store/hide-thread! (data :thread-id)))
 
 (defmethod dispatch! :auth [_ data]
   (edn-xhr {:url "/auth"
@@ -46,7 +47,8 @@
   [[_ data]]
   (store/set-session! {:user-id (data :user-id)})
   (store/add-users! (data :users))
-  (store/add-messages! (data :messages)))
+  (store/add-messages! (data :messages))
+  (store/set-open-thread-ids! (data :open-thread-ids)))
 
 (defmethod sync/event-handler :socket/connected
   [[_ _]]

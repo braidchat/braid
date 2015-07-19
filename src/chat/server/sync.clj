@@ -38,14 +38,21 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (doseq [uid (->> (:any @connected-uids)
                    (remove (partial = id)))]
+    (db/with-conn (db/create-message! ?data))
     (chsk-send! uid [:chat/new-message ?data])))
+
+(defmethod event-msg-handler :chat/hide-thread
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (db/with-conn (db/user-hide-thread! (get-in ring-req [:session :user-id]) ?data)))
 
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (chsk-send! user-id [:session/init-data {:user-id user-id
-                                             :users (db/all-users)
-                                             :messages (db/all-messages)}])))
+    (chsk-send! user-id [:session/init-data (db/with-conn
+                                              {:user-id user-id
+                                               :users (db/fetch-users)
+                                               :messages (db/fetch-messages)
+                                               :open-thread-ids (db/get-open-threads-for-user user-id)})])))
 
 (defonce router_ (atom nil))
 
