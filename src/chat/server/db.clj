@@ -124,7 +124,18 @@
          (d/entity db-after))))
 
 (defn create-message! [attrs]
-  (let [thread-data {:db/id (d/tempid :entities)
+  (let [subscribed-users (d/q '[:find [?user ...]
+                                :in $ ?thread-id
+                                :where
+                                [?user :user/subscribed-thread ?thread]
+                                [?thread :thread/id ?thread-id]]
+                              (d/db *conn*)
+                              (attrs :thread-id))
+        open-transactions (map (fn [user]
+                                 [:db/add user
+                                  :user/open-thread [:thread/id (attrs :thread-id)]])
+                               subscribed-users)
+        thread-data {:db/id (d/tempid :entities)
                      :thread/id (attrs :thread-id)}
         msg-data {:db/id (d/tempid :entities)
                   :message/id (attrs :id)
@@ -135,7 +146,10 @@
         subscribe-data {:db/id [:user/id (attrs :user-id)]
                         :user/open-thread (thread-data :db/id)
                         :user/subscribed-thread (thread-data :db/id)}
-        {:keys [db-after tempids]} @(d/transact *conn* [thread-data msg-data subscribe-data])]
+        {:keys [db-after tempids]} @(d/transact *conn* (concat [thread-data
+                                                                msg-data
+                                                                subscribe-data]
+                                                               open-transactions))]
     (->> (d/resolve-tempid db-after tempids (msg-data :db/id))
          (d/pull db-after '[:message/id
                             :message/content

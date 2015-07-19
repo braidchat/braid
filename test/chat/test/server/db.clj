@@ -133,3 +133,39 @@
     (testing "user can hide thread"
       (db/user-hide-thread! (user-1 :id) (message-2 :thread-id))
       (is (not (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-2 :thread-id)))))))
+
+(deftest new-message-opens-for-other-user
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        thread-id (db/uuid)
+        message-1 (db/create-message! {:id (db/uuid)
+                                       :user-id (user-1 :id)
+                                       :thread-id thread-id
+                                       :created-at (java.util.Date.)
+                                       :content "Hello?"})
+        message-2 (db/create-message! {:id (db/uuid)
+                                       :user-id (user-2 :id)
+                                       :thread-id thread-id
+                                       :created-at (java.util.Date.)
+                                       :content "Hello?"})]
+    (testing "both users have open and are subscribed"
+      (is (contains? (set (db/get-open-threads-for-user (user-1 :id))) thread-id))
+      (is (contains? (set (db/get-open-threads-for-user (user-2 :id))) thread-id))
+      (is (contains? (set (db/get-subscribed-threads-for-user (user-1 :id))) thread-id))
+      (is (contains? (set (db/get-subscribed-threads-for-user (user-2 :id))) thread-id)))
+    (testing "user 2 can hide"
+      (db/user-hide-thread! (user-2 :id) thread-id)
+      (is (not (contains? (set (db/get-open-threads-for-user (user-2 :id))) thread-id))))
+    (testing "if new message by other user, user who hid thread has thread opened"
+      (db/create-message! {:id (db/uuid)
+                           :user-id (user-1 :id)
+                           :thread-id thread-id
+                           :created-at (java.util.Date.)
+                           :content "Hello?"})
+      (is (contains? (set (db/get-open-threads-for-user (user-2 :id))) thread-id)))))
