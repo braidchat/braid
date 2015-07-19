@@ -233,3 +233,28 @@
         (let [tags (db/get-thread-tags (msg :thread-id))]
           (testing "returns assigned tags"
             (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))))
+
+(deftest tag-thread-user-subscribe
+  (testing "given a user subscribed to a tag"
+    (let [tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
+          user-1 (db/create-user! {:id (db/uuid)
+                                   :email "foo@bar.com"
+                                   :password "foobar"
+                                   :avatar ""})]
+      (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
+
+      (testing "when a thread is tagged with that tag"
+        (let [user-2 (db/create-user! {:id (db/uuid)
+                                       :email "bar@baz.com"
+                                       :password "foobar"
+                                       :avatar ""})
+              msg (db/create-message! {:id (db/uuid)
+                                       :user-id (user-2 :id)
+                                       :thread-id (db/uuid)
+                                       :created-at (java.util.Date.)
+                                       :content "Hello?"})]
+          (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
+          (testing "then the user is subscribed to that thread"
+            (let [user-threads (db/get-subscribed-threads-for-user (user-1 :id))]
+              (is (contains? (set user-threads) (msg :thread-id))))))))))
+

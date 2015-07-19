@@ -283,9 +283,25 @@
        (d/db *conn*)
        user-id))
 
+(defn- get-users-subscribe-to-tag [tag-id]
+  (d/q '[:find [?user-id ...]
+         :in $ ?tag-id
+         :where
+         [?tag :tag/id ?tag-id]
+         [?user :user/subscribed-tag ?tag]
+         [?user :user/id ?user-id]]
+       (d/db *conn*)
+       tag-id))
+
 (defn thread-add-tag! [thread-id tag-id]
-  (d/transact *conn* [[:db/add [:thread/id thread-id]
-                       :thread/tag [:tag/id tag-id]]]))
+  (let [subscriber-transactions
+        (map (fn [user-id]
+               [:db/add [:user/id user-id]
+                :user/subscribed-thread [:thread/id thread-id]])
+             (get-users-subscribe-to-tag tag-id))]
+    (d/transact *conn* (conj subscriber-transactions
+                             [:db/add [:thread/id thread-id]
+                              :thread/tag [:tag/id tag-id]]))))
 
 (defn get-thread-tags [thread-id]
   (d/q '[:find [?tag-id ...]
