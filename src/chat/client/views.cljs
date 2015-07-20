@@ -64,7 +64,8 @@
         (om/build thread-tags-view thread)
         (apply dom/div #js {:className "messages"}
           (om/build-all message-view (->> (thread :messages)
-                                          (sort-by :created-at))))
+                                          (sort-by :created-at))
+                        {:key :id}))
         (om/build new-message-view {:thread-id (thread :id) :placeholder "Reply..."})))))
 
 (defn new-thread-view [data owner]
@@ -131,7 +132,7 @@
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
-            (concat (om/build-all thread-view threads)
+            (concat (om/build-all thread-view threads {:key :id})
                     [(om/build new-thread-view {})])))))))
 
 (defn login-view [data owner]
