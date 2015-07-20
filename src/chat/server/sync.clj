@@ -60,9 +60,6 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
-    (doseq [uid (->> (:any @connected-uids)
-                     (remove (partial = user-id)))]
-      (chsk-send! uid [:thread/add-tag ?data]))
     (broadcast-thread (?data :thread-id) [user-id])))
 
 (defmethod event-msg-handler :user/subscribe-to-tag

@@ -73,10 +73,6 @@
   [[_ _]]
   (sync/chsk-send! [:session/start nil]))
 
-(defmethod sync/event-handler :thread/add-tag
-  [[_ data]]
-  (store/add-tag-to-thread! (data :tag-id) (data :thread-id)))
-
 (defmethod sync/event-handler :chat/create-tag
   [[_ data]]
   (store/add-tag! data))
