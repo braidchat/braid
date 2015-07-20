@@ -1,9 +1,9 @@
 body {
-  background: #eee;
   margin: 0;
   padding: 0;
   font-family: Tahoma;
   font-size: 12px;
+  background: #eee;
 }
 
 .floating-box() {
@@ -25,6 +25,18 @@ body {
 
 .thread {
   .floating-box;
+
+  .tags {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    .tag {
+      height: 3px;
+      display: inline-block;
+      vertical-align: top;
+    }
+  }
 
   .close {
     position: absolute;
@@ -76,15 +88,63 @@ body {
   }
 }
 
-.user-meta {
-  position: absolute;
+.meta {
+  background: #333;
+  position: fixed;
+  z-index: 100;
+  width: 10em;
+  right: -6em;
   top: 0;
-  right: 0;
+  bottom: 0;
+  transition: right 0.5s ease;
+  padding: 1em;
+  box-sizing: border-box;
+  .extras {
+    display: none;
+  }
+  &:hover {
+    right: 0;
+    .extras {
+      display: block;
+    }
+  }
   .avatar {
-    .tiny-avatar();
+    width: 2em;
+    height: 2em;
     display: inline-block;
   }
-  .logout {
-    display: inline-block;
+  .extras {
+    .tags {
+      margin: 1em 0;
+      .tag {
+        color: #999;
+        margin: 0.25em 0;
+        cursor: pointer;
+        .color-block {
+          width: 1rem;
+          height: 1rem;
+          display: inline-block;
+          border-radius: 2px;
+          color: #333;
+          vertical-align: middle;
+          margin-right: 0.25em;
+          text-align: center;
+        }
+        .name {
+          vertical-align: middle;
+        }
+      }
+    }
+    .logout {
+      margin: 10em 0 0;
+      border-radius: 3px;
+      border: 1px solid #999;
+      color: #999;
+      padding: 0.25em;
+      cursor: pointer;
+    }
   }
+}
+
+.threads {
 }

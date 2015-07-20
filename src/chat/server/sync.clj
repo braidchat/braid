@@ -4,7 +4,8 @@
             [compojure.core :refer [GET POST routes defroutes context]]
             [taoensso.timbre :as timbre :refer [debugf]]
             [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
-            [chat.server.db :as db]))
+            [chat.server.db :as db]
+            [clojure.set :refer [difference intersection]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -34,25 +35,66 @@
     (when ?reply-fn
       (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
 
+(defn broadcast-thread
+  "broadcasts thread to all subscribed users, except those in ids-to-skip"
+  [thread-id ids-to-skip]
+  (let [subscribed-user-ids (db/with-conn
+                              (db/get-users-subscribed-to-thread thread-id))
+        user-ids-to-send-to (-> (difference
+                                  (intersection
+                                    (set subscribed-user-ids)
+                                    (set (:any @connected-uids)))
+                                  (set ids-to-skip)))
+        thread (db/with-conn
+                 (db/get-thread thread-id))]
+    (doseq [uid user-ids-to-send-to]
+      (chsk-send! uid [:chat/thread thread]))))
+
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (db/with-conn (db/create-message! ?data))
-  (doseq [uid (->> (:any @connected-uids)
-                   (remove (partial = id)))]
-    (chsk-send! uid [:chat/new-message ?data])))
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn (db/create-message! ?data))
+    (broadcast-thread (?data :thread-id) [user-id])))
+
+(defmethod event-msg-handler :thread/add-tag
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
+    (broadcast-thread (?data :thread-id) [user-id])))
+
+(defmethod event-msg-handler :user/subscribe-to-tag
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn (db/user-subscribe-to-tag! user-id ?data))))
+
+(defmethod event-msg-handler :user/unsubscribe-from-tag
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn (db/user-unsubscribe-from-tag! user-id ?data))))
 
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (db/with-conn (db/user-hide-thread! (get-in ring-req [:session :user-id]) ?data)))
 
+(defmethod event-msg-handler :chat/create-tag
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (db/with-conn (db/create-tag! {:id (?data :id)
+                                 :name (?data :name)}))
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (doseq [uid (->> (:any @connected-uids)
+                     (remove (partial = user-id)))]
+      (chsk-send! uid [:chat/create-tag ?data]))))
+
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (chsk-send! user-id [:session/init-data (db/with-conn
-                                              {:user-id user-id
-                                               :users (db/fetch-users)
-                                               :messages (db/fetch-messages)
-                                               :open-thread-ids (db/get-open-threads-for-user user-id)})])))
+    (chsk-send! user-id [:session/init-data
+                         (db/with-conn
+                           {:user-id user-id
+                            :user-threads (db/get-open-threads-for-user user-id)
+                            :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
+                            :users (db/fetch-users)
+                            :tags (db/fetch-tags)})])))
 
 (defonce router_ (atom nil))
 

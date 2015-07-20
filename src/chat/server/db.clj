@@ -51,6 +51,12 @@
        :db/cardinality :db.cardinality/many
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
+      ; user - tag
+      {:db/ident :user/subscribed-tag
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/many
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
 
       ; message
       {:db/ident :message/id
@@ -89,6 +95,25 @@
        :db/unique :db.unique/identity
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
+      ; thread - tag
+      {:db/ident :thread/tag
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/many
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+
+      ; tag
+      {:db/ident :tag/id
+       :db/valueType :db.type/uuid
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :tag/name
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
 
       ]))
 
@@ -123,19 +148,22 @@
     (->> (d/resolve-tempid db-after tempids new-id)
          (d/entity db-after))))
 
+(defn get-users-subscribed-to-thread [thread-id]
+  (d/q '[:find [?user-id ...]
+         :in $ ?thread-id
+         :where
+         [?user :user/id ?user-id]
+         [?user :user/subscribed-thread ?thread]
+         [?thread :thread/id ?thread-id]]
+       (d/db *conn*)
+       thread-id))
+
 (defn create-message! [attrs]
-  (let [subscribed-users (d/q '[:find [?user ...]
-                                :in $ ?thread-id
-                                :where
-                                [?user :user/subscribed-thread ?thread]
-                                [?thread :thread/id ?thread-id]]
-                              (d/db *conn*)
-                              (attrs :thread-id))
-        ; show thread for all users subscribed to thread
-        add-open-transactions (map (fn [user]
-                                     [:db/add user
+  (let [; show thread for all users subscribed to thread
+        add-open-transactions (map (fn [user-id]
+                                     [:db/add [:user/id user-id]
                                       :user/open-thread [:thread/id (attrs :thread-id)]])
-                                   subscribed-users)
+                                   (get-users-subscribed-to-thread (attrs :thread-id)))
         ; upsert thread
         thread-data {:db/id (d/tempid :entities)
                      :thread/id (attrs :thread-id)}
@@ -205,7 +233,7 @@
             (d/db *conn*))
        (map (comp db->message first))))
 
-(defn get-open-threads-for-user [user-id]
+(defn get-open-thread-ids-for-user [user-id]
   (d/q '[:find [?thread-id ...]
                 :in $ ?user-id
                 :where
@@ -215,7 +243,51 @@
        (d/db *conn*)
        user-id))
 
-(defn get-subscribed-threads-for-user [user-id]
+(defn- db->thread [thread]
+  {:id (thread :thread/id)
+   :messages (map (fn [msg]
+                    {:id (msg :message/id)
+                     :content (msg :message/content)
+                     :user-id (get-in msg [:message/user :user/id])
+                     :created-at (msg :message/created-at)})
+                  (thread :message/_thread))
+   :tag-ids (map (fn [tag]
+                   (tag :tag/id))
+                 (thread :thread/tag))})
+
+(defn get-open-threads-for-user [user-id]
+  (->> (d/q '[:find (pull ?thread [:thread/id
+                                   {:thread/tag [:tag/id]}
+                                   {:message/_thread [:message/id
+                                                      :message/content
+                                                      {:message/user [:user/id]}
+                                                      :message/created-at]}])
+              :in $ ?user-id
+              :where
+              [?e :user/id ?user-id]
+              [?e :user/open-thread ?thread]]
+            (d/db *conn*)
+            user-id)
+       (map first)
+       (map db->thread)))
+
+(defn get-thread [thread-id]
+  (-> (d/q '[:find (pull ?thread [:thread/id
+                                  {:thread/tag [:tag/id]}
+                                  {:message/_thread [:message/id
+                                                     :message/content
+                                                     {:message/user [:user/id]}
+                                                     :message/created-at]}])
+             :in $ ?thread-id
+             :where
+             [?thread :thread/id ?thread-id]]
+           (d/db *conn*)
+           thread-id)
+      first
+      first
+      db->thread))
+
+(defn get-subscribed-thread-ids-for-user [user-id]
   (d/q '[:find [?thread-id ...]
          :in $ ?user-id
          :where
@@ -230,3 +302,69 @@
     *conn*
     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
+(defn- db->tag [e]
+  {:id (:tag/id e)
+   :name (:tag/name e)})
+
+(defn create-tag! [attrs]
+  (-> {:tag/id (attrs :id)
+       :tag/name (attrs :name)}
+    create-entity!
+    db->tag))
+
+(defn user-subscribe-to-tag! [user-id tag-id]
+  (d/transact *conn* [[:db/add [:user/id user-id]
+                       :user/subscribed-tag [:tag/id tag-id]]]))
+
+(defn user-unsubscribe-from-tag! [user-id tag-id]
+  (d/transact *conn* [[:db/retract [:user/id user-id]
+                       :user/subscribed-tag [:tag/id tag-id]]]))
+
+(defn get-user-subscribed-tag-ids [user-id]
+  (d/q '[:find [?tag-id ...]
+         :in $ ?user-id
+         :where
+         [?user :user/id ?user-id]
+         [?user :user/subscribed-tag ?tag]
+         [?tag :tag/id ?tag-id]]
+       (d/db *conn*)
+       user-id))
+
+(defn- get-users-subscribed-to-tag [tag-id]
+  (d/q '[:find [?user-id ...]
+         :in $ ?tag-id
+         :where
+         [?tag :tag/id ?tag-id]
+         [?user :user/subscribed-tag ?tag]
+         [?user :user/id ?user-id]]
+       (d/db *conn*)
+       tag-id))
+
+(defn thread-add-tag! [thread-id tag-id]
+  (let [subscriber-transactions
+        (mapcat (fn [user-id]
+               [[:db/add [:user/id user-id]
+                  :user/subscribed-thread [:thread/id thread-id]]
+                [:db/add [:user/id user-id]
+                 :user/open-thread [:thread/id thread-id]]])
+             (get-users-subscribed-to-tag tag-id))]
+    (d/transact *conn* (conj subscriber-transactions
+                             [:db/add [:thread/id thread-id]
+                              :thread/tag [:tag/id tag-id]]))))
+
+(defn get-thread-tags [thread-id]
+  (d/q '[:find [?tag-id ...]
+         :in $ ?thread-id
+         :where
+         [?thread :thread/id ?thread-id]
+         [?thread :thread/tag ?tag]
+         [?tag :tag/id ?tag-id]]
+       (d/db *conn*)
+       thread-id))
+
+(defn fetch-tags []
+  (->> (d/q '[:find (pull ?e [:tag/id
+                              :tag/name])
+              :where [?e :tag/id]]
+            (d/db *conn*))
+       (map (comp db->tag first))))
