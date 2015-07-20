@@ -324,9 +324,11 @@
 
 (defn thread-add-tag! [thread-id tag-id]
   (let [subscriber-transactions
-        (map (fn [user-id]
-               [:db/add [:user/id user-id]
-                :user/subscribed-thread [:thread/id thread-id]])
+        (mapcat (fn [user-id]
+               [[:db/add [:user/id user-id]
+                  :user/subscribed-thread [:thread/id thread-id]]
+                [:db/add [:user/id user-id]
+                 :user/open-thread [:thread/id thread-id]]])
              (get-users-subscribed-to-tag tag-id))]
     (d/transact *conn* (conj subscriber-transactions
                              [:db/add [:thread/id thread-id]

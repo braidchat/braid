@@ -256,5 +256,10 @@
           (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
           (testing "then the user is subscribed to that thread"
             (let [user-threads (db/get-subscribed-thread-ids-for-user (user-1 :id))]
+              (is (contains? (set user-threads) (msg :thread-id))))
+            (let [users (db/get-users-subscribed-to-thread (msg :thread-id))]
+              (is (contains? (set users) (user-1 :id)))))
+          (testing "then the user has that thread open"
+            (let [user-threads (db/get-open-thread-ids-for-user (user-1 :id))]
               (is (contains? (set user-threads) (msg :thread-id))))))))))
 
