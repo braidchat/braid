@@ -37,7 +37,7 @@
                        str
                        (.substring 33 36)
                        (js/parseInt 16)
-                       (->> (/ 4096)))]
+                       (/ 4096))]
     (str "hsl(" (* 360 normalized) ",50%,50%)")))
 
 (defn thread-tags-view [thread owner]
