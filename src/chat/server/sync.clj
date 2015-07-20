@@ -42,6 +42,14 @@
                      (remove (partial = user-id)))]
       (chsk-send! uid [:chat/new-message ?data]))))
 
+(defmethod event-msg-handler :thread/add-tag
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
+    (doseq [uid (->> (:any @connected-uids)
+                     (remove (partial = user-id)))]
+      (chsk-send! uid [:thread/add-tag ?data]))))
+
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
@@ -59,13 +67,13 @@
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (chsk-send! user-id [:session/init-data (db/with-conn
-                                              {:user-id user-id
-                                               :user-open-thread-ids (db/get-open-threads-for-user user-id)
-                                               :user-subscribed-tag-ids (db/get-user-subscribed-tags user-id)
-                                               :users (db/fetch-users)
-                                               :messages (db/fetch-messages)
-                                               :tags (db/fetch-tags)})])))
+    (chsk-send! user-id [:session/init-data
+                         (db/with-conn
+                           {:user-id user-id
+                            :user-threads (db/get-open-threads-for-user user-id)
+                            :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
+                            :users (db/fetch-users)
+                            :tags (db/fetch-tags)})])))
 
 (defonce router_ (atom nil))
 

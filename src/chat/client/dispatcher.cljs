@@ -11,7 +11,6 @@
                                       :content (data :content)
                                       :thread-id (data :thread-id)})]
     (store/add-message! message)
-    (store/show-thread! (message :thread-id))
     (sync/chsk-send! [:chat/new-message message])))
 
 (defmethod dispatch! :hide-thread [_ data]
@@ -25,6 +24,12 @@
 (defmethod dispatch! :subscribe-to-tag [_ tag-id]
   (sync/chsk-send! [:user/subscribe-to-tag tag-id])
   (store/subscribe-to-tag! tag-id))
+
+(defmethod dispatch! :tag-thread [_ attr]
+  (when-let [tag-id (store/tag-id-for-name (attr :tag-name))]
+    (sync/chsk-send! [:thread/add-tag {:thread-id (attr :thread-id)
+                                       :tag-id tag-id}])
+    (store/add-tag-to-thread! tag-id (attr :thread-id))))
 
 (defmethod dispatch! :auth [_ data]
   (edn-xhr {:url "/auth"
@@ -49,18 +54,20 @@
 
 (defmethod sync/event-handler :chat/new-message
   [[_ data]]
-  (store/add-message! data)
-  (store/show-thread! (data :thread-id)))
+  (store/add-message! data))
 
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
   (store/set-session! {:user-id (data :user-id)})
   (store/add-users! (data :users))
-  (store/add-messages! (data :messages))
   (store/add-tags! (data :tags))
-  (store/set-user-open-thread-ids! (data :user-open-thread-ids))
-  (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids)))
+  (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))
+  (store/set-threads! (data :user-threads)))
 
 (defmethod sync/event-handler :socket/connected
   [[_ _]]
   (sync/chsk-send! [:session/start nil]))
+
+(defmethod sync/event-handler :thread/add-tag
+  [[_ data]]
+  (store/add-tag-to-thread! (data :tag-id) (data :thread-id)))

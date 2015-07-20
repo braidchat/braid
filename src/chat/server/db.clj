@@ -233,7 +233,7 @@
             (d/db *conn*))
        (map (comp db->message first))))
 
-(defn get-open-threads-for-user [user-id]
+(defn get-open-thread-ids-for-user [user-id]
   (d/q '[:find [?thread-id ...]
                 :in $ ?user-id
                 :where
@@ -243,7 +243,33 @@
        (d/db *conn*)
        user-id))
 
-(defn get-subscribed-threads-for-user [user-id]
+(defn get-open-threads-for-user [user-id]
+  (->> (d/q '[:find (pull ?thread [:thread/id
+                                  {:thread/tag [:tag/id]}
+                                  {:message/_thread [:message/id
+                                                     :message/content
+                                                     {:message/user [:user/id]}
+                                                     :message/created-at]}])
+             :in $ ?user-id
+             :where
+             [?e :user/id ?user-id]
+             [?e :user/open-thread ?thread]]
+           (d/db *conn*)
+           user-id)
+      (map first)
+      (map (fn [thread]
+             {:id (thread :thread/id)
+              :messages (map (fn [msg]
+                               {:id (msg :message/id)
+                                :content (msg :message/content)
+                                :user-id (get-in msg [:message/user :user/id])
+                                :created-at (msg :message/created-at)})
+                             (thread :message/_thread))
+              :tag-ids (map (fn [tag]
+                           (tag :tag/id))
+                         (thread :thread/tag))}))))
+
+(defn get-subscribed-thread-ids-for-user [user-id]
   (d/q '[:find [?thread-id ...]
          :in $ ?user-id
          :where
@@ -276,7 +302,7 @@
   (d/transact *conn* [[:db/retract [:user/id user-id]
                        :user/subscribed-tag [:tag/id tag-id]]]))
 
-(defn get-user-subscribed-tags [user-id]
+(defn get-user-subscribed-tag-ids [user-id]
   (d/q '[:find [?tag-id ...]
          :in $ ?user-id
          :where

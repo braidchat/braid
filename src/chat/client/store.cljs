@@ -1,6 +1,6 @@
 (ns chat.client.store)
 
-(def app-state (atom {:messages {}
+(def app-state (atom {:threads {}
                       :users {}
                       :tags {}
                       :session nil
@@ -9,11 +9,14 @@
                              :user-id nil}
                       :open-thread-ids #{}}))
 
-(defn transact! [ks f]
+(defn- key-by-id [coll]
+  (reduce (fn [memo x]
+            (assoc memo (x :id) x)) {} coll))
+
+(defn- transact! [ks f]
   (swap! app-state update-in ks f))
 
-(defn add-message! [message]
-  (transact! [:messages] #(assoc % (message :id) message)))
+; session
 
 (defn set-session! [session]
   (transact! [:session] (constantly session)))
@@ -21,28 +24,48 @@
 (defn clear-session! []
   (transact! [:session] (constantly nil)))
 
-(defn add-messages! [messages]
-  (transact! [:messages] #(merge % (->> messages
-                                       (reduce (fn [memo m]
-                                                 (assoc memo (m :id) m)) {})))))
+; users
+
+
 (defn add-users! [users]
-  (transact! [:users] #(merge % (->> users
-                                     (reduce (fn [memo u]
-                                               (assoc memo (u :id) u)) {})))))
+  (transact! [:users] #(merge % (key-by-id users))))
 
-(defn add-tags! [tags]
-  (transact! [:tags] #(merge % (->> tags
-                                     (reduce (fn [memo t]
-                                               (assoc memo (t :id) t)) {})))))
+; threads and messages
 
-(defn set-user-open-thread-ids! [thread-ids]
-  (transact! [:user :open-thread-ids] (constantly (set thread-ids))))
+(defn set-threads! [threads]
+  (transact! [:threads] (constantly (key-by-id threads))))
+
+(defn- maybe-create-thread! [thread-id]
+  (when-not (get-in @app-state [:threads thread-id])
+    (transact! [:threads thread-id] (constantly {:id thread-id
+                                                 :messages []
+                                                 :tag-ids #{}}))))
+
+(defn add-message! [message]
+  (maybe-create-thread! (message :thread-id))
+  (transact! [:threads (message :thread-id) :messages] #(conj % message)))
 
 (defn hide-thread! [thread-id]
-  (transact! [:user :open-thread-ids] #(disj % thread-id)))
+  (transact! [:threads] #(dissoc % thread-id)))
 
-(defn show-thread! [thread-id]
-  (transact! [:user :open-thread-ids] #(conj % thread-id)))
+; tags
+
+(defn add-tags! [tags]
+  (transact! [:tags] #(merge % (key-by-id tags))))
+
+(defn add-tag-to-thread! [tag-id thread-id]
+  (transact! [:threads thread-id :tag-ids] #(set (conj % tag-id))))
+
+(defn tag-id-for-name
+  "returns id for tag with name tag-name if exists, otherwise nil"
+  [tag-name]
+  (-> (@app-state :tags)
+      vals
+      (->> (filter (fn [t] (= tag-name (t :name)))))
+      first
+      (get :id)))
+
+; subscribed tags
 
 (defn set-user-subscribed-tag-ids! [tag-ids]
   (transact! [:user :subscribed-tag-ids] (constantly (set tag-ids))))
@@ -52,3 +75,4 @@
 
 (defn subscribe-to-tag! [tag-id]
   (transact! [:user :subscribed-tag-ids] #(conj % tag-id)))
+

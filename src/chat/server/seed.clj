@@ -45,6 +45,7 @@
                                  :thread-id (msg :thread-id)
                                  :user-id (user-2 :id)
                                  :created-at (java.util.Date.)
-                                 :content "Yep"})]
+                                 :content "Yep"})
+          _ (db/thread-add-tag! (msg :thread-id) (tag-1 :id))]
       (println "users" user-1 user-2)
       (println "tags" tag-2 tag-2))))

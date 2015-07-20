@@ -9,7 +9,7 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "message"}
-        (dom/img #js {:className "avatar" :src (get-in @store/app-state [:users (message :user-id) :icon])})
+        (dom/img #js {:className "avatar" :src (get-in @store/app-state [:users (message :user-id) :avatar])})
         (dom/div #js {:className "content"}
           (message :content))))))
 
@@ -19,12 +19,39 @@
     (render [_]
       (dom/div #js {:className "message new"}
         (dom/textarea #js {:placeholder (config :placeholder)
-                           :onKeyDown (fn [e]
-                                        (when (and (= 13 e.keyCode) (= e.shiftKey false))
-                                          (dispatch! :new-message {:thread-id (config :thread-id)
-                                                                   :content (.. e -target -value)})
-                                          (.preventDefault e)
-                                          (aset (.. e -target) "value" "")))})))))
+                           :onKeyDown
+                           (fn [e]
+                             (when (and (= 13 e.keyCode) (= e.shiftKey false))
+                               (let [text (.. e -target -value)]
+                                 (if-let [tag (second (re-matches #"#(.*)" text))]
+                                   (dispatch! :tag-thread {:thread-id (config :thread-id)
+                                                           :tag-name tag})
+                                   (dispatch! :new-message {:thread-id (config :thread-id)
+                                                            :content text})))
+                               (.preventDefault e)
+                               (aset (.. e -target) "value" "")))})))))
+
+(defn tag->color [tag]
+  ; normalized is approximately evenly distributed between 0 and 1
+  (let [normalized (-> (tag :id)
+                       str
+                       (.substring 33 36)
+                       (js/parseInt 16)
+                       (->> (/ 4096)))]
+    (str "hsl(" (* 360 normalized) ",50%,50%)")))
+
+(defn thread-tags-view [thread owner]
+  (reify
+    om/IRender
+    (render [_]
+      (let [tags (->> (thread :tag-ids)
+                      (map #(get-in @store/app-state [:tags %])))]
+        (apply dom/div #js {:className "tags"}
+          (map (fn [tag]
+                 (dom/div #js {:className "tag"
+                               :style #js {:width (str (/ 100 (count tags)) "%")
+                                           :backgroundColor (tag->color tag)}
+                               :title (str "#" (tag :name))})) tags))))))
 
 (defn thread-view [thread owner]
   (reify
@@ -34,8 +61,10 @@
         (dom/div #js {:className "close"
                       :onClick (fn [_]
                                  (dispatch! :hide-thread {:thread-id (thread :id)}))} "×")
+        (om/build thread-tags-view thread)
         (apply dom/div #js {:className "messages"}
-          (om/build-all message-view (thread :messages)))
+          (om/build-all message-view (->> (thread :messages)
+                                          (sort-by :created-at))))
         (om/build new-message-view {:thread-id (thread :id) :placeholder "Reply..."})))))
 
 (defn new-thread-view [data owner]
@@ -70,28 +99,17 @@
   (reify
     om/IRender
     (render [_]
-      (let [remove-keys (fn [ks coll]
-                          (apply dissoc coll ks))
-            open-thread-ids (set (data :open-thread-ids))
-            threads (->> (data :messages)
-                         vals
-                         (sort-by :created-at)
-                         (group-by :thread-id)
-                         (map (fn [[id ms]] {:id id
-                                             :messages ms}))
-                         (filter (fn [t] (contains? open-thread-ids (t :id)))))
+      (let [threads (vals (data :threads))
             tags (->> (data :tags)
                       vals
                       (map (fn [tag]
                              (assoc tag :subscribed?
-                               (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id))))))
-
-            ]
+                               (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id))))))]
         (dom/div nil
           (dom/div #js {:className "user-meta"}
             (dom/img #js {:className "avatar"
                           :src (let [user-id (get-in @store/app-state [:session :user-id])]
-                                 (get-in @store/app-state [:users user-id :icon]))})
+                                 (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "logout"
                           :onClick (fn [_] (dispatch! :logout nil))} "×"))
           (om/build tags-view tags)

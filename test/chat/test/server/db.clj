@@ -63,9 +63,9 @@
         (testing "returns message"
           (is (= message-data message)))
         (testing "user has thread open"
-          (is (contains? (set (db/get-open-threads-for-user (user-1 :id))) thread-id)))
+          (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
         (testing "user has thread subscribed"
-          (is (contains? (set (db/get-subscribed-threads-for-user (user-1 :id))) thread-id)))))
+          (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))
 
     (testing "create-message w/ existing thread-id"
       (let [message-2-data {:id (db/uuid)
@@ -77,9 +77,9 @@
         (testing "returns message"
           (is (= message-2-data message-2)))
         (testing "user has thread open"
-          (is (contains? (set (db/get-open-threads-for-user (user-1 :id))) thread-id)))
+          (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
         (testing "user has thread subscribed"
-          (is (contains? (set (db/get-subscribed-threads-for-user (user-1 :id))) thread-id)))))))
+          (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))))
 
 
 (deftest fetch-messages
@@ -124,15 +124,15 @@
                                        :created-at (java.util.Date.)
                                        :content "Hello?"})]
     (testing "thread 1 is open"
-      (is (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-1 :thread-id))))
+      (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-1 :thread-id))))
     (testing "thread 2 is open"
-      (is (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-2 :thread-id))))
+      (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id))))
     (testing "user can hide thread"
       (db/user-hide-thread! (user-1 :id) (message-1 :thread-id))
-      (is (not (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-1 :thread-id)))))
+      (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-1 :thread-id)))))
     (testing "user can hide thread"
       (db/user-hide-thread! (user-1 :id) (message-2 :thread-id))
-      (is (not (contains? (set (db/get-open-threads-for-user (user-1 :id))) (message-2 :thread-id)))))))
+      (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id)))))))
 
 (deftest new-message-opens-for-other-user
   (let [user-1 (db/create-user! {:id (db/uuid)
@@ -155,20 +155,20 @@
                                        :created-at (java.util.Date.)
                                        :content "Hello?"})]
     (testing "both users have open and are subscribed"
-      (is (contains? (set (db/get-open-threads-for-user (user-1 :id))) thread-id))
-      (is (contains? (set (db/get-open-threads-for-user (user-2 :id))) thread-id))
-      (is (contains? (set (db/get-subscribed-threads-for-user (user-1 :id))) thread-id))
-      (is (contains? (set (db/get-subscribed-threads-for-user (user-2 :id))) thread-id)))
+      (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id))
+      (is (contains? (set (db/get-open-thread-ids-for-user (user-2 :id))) thread-id))
+      (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id))
+      (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-2 :id))) thread-id)))
     (testing "user 2 can hide"
       (db/user-hide-thread! (user-2 :id) thread-id)
-      (is (not (contains? (set (db/get-open-threads-for-user (user-2 :id))) thread-id))))
+      (is (not (contains? (set (db/get-open-thread-ids-for-user (user-2 :id))) thread-id))))
     (testing "if new message by other user, user who hid thread has thread opened"
       (db/create-message! {:id (db/uuid)
                            :user-id (user-1 :id)
                            :thread-id thread-id
                            :created-at (java.util.Date.)
                            :content "Hello?"})
-      (is (contains? (set (db/get-open-threads-for-user (user-2 :id))) thread-id)))))
+      (is (contains? (set (db/get-open-thread-ids-for-user (user-2 :id))) thread-id)))))
 
 (deftest tags
   (testing "can create tag"
@@ -200,7 +200,7 @@
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
         (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
       (testing "get-user-subscribed-tags"
-        (let [tags (db/get-user-subscribed-tags (user :id))]
+        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
           (testing "returns subscribed tags"
             (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))
     (testing "user can unsubscribe from tags"
@@ -208,7 +208,7 @@
         (db/user-unsubscribe-from-tag! (user :id) (tag-1 :id))
         (db/user-unsubscribe-from-tag! (user :id) (tag-2 :id)))
       (testing "is unsubscribed"
-        (let [tags (db/get-user-subscribed-tags (user :id))]
+        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
           (is (= (set tags) #{})))))))
 
 (deftest can-add-tags-to-thread
@@ -255,6 +255,6 @@
                                        :content "Hello?"})]
           (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
           (testing "then the user is subscribed to that thread"
-            (let [user-threads (db/get-subscribed-threads-for-user (user-1 :id))]
+            (let [user-threads (db/get-subscribed-thread-ids-for-user (user-1 :id))]
               (is (contains? (set user-threads) (msg :thread-id))))))))))
 
