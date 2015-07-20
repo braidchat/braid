@@ -53,6 +53,9 @@
 (defn add-tags! [tags]
   (transact! [:tags] #(merge % (key-by-id tags))))
 
+(defn add-tag! [tag]
+  (transact! [:tags (tag :id)] (constantly tag)))
+
 (defn add-tag-to-thread! [tag-id thread-id]
   (transact! [:threads thread-id :tag-ids] #(set (conj % tag-id))))
 

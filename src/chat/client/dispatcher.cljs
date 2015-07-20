@@ -17,6 +17,11 @@
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
+(defmethod dispatch! :create-tag [_ tag-name]
+  (let [tag (schema/make-tag {:name tag-name})]
+    (store/add-tag! tag)
+    (sync/chsk-send! [:chat/create-tag tag])))
+
 (defmethod dispatch! :unsubscribe-from-tag [_ tag-id]
   (sync/chsk-send! [:user/unsubscribe-from-tag tag-id])
   (store/unsubscribe-from-tag! tag-id))
@@ -71,3 +76,7 @@
 (defmethod sync/event-handler :thread/add-tag
   [[_ data]]
   (store/add-tag-to-thread! (data :tag-id) (data :thread-id)))
+
+(defmethod sync/event-handler :chat/create-tag
+  [[_ data]]
+  (store/add-tag! data))

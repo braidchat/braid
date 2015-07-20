@@ -64,6 +64,15 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (db/with-conn (db/user-hide-thread! (get-in ring-req [:session :user-id]) ?data)))
 
+(defmethod event-msg-handler :chat/create-tag
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (db/with-conn (db/create-tag! {:id (?data :id)
+                                 :name (?data :name)}))
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (doseq [uid (->> (:any @connected-uids)
+                     (remove (partial = user-id)))]
+      (chsk-send! uid [:chat/create-tag ?data]))))
+
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]

@@ -95,6 +95,21 @@
       (apply dom/div #js {:className "tags"}
         (om/build-all tag-view tags)))))
 
+
+(defn new-tag-view [_ owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/input #js {:className "new-tag"
+                      :onKeyDown
+                      (fn [e]
+                        (when (= 13 e.keyCode)
+                          (let [text (.. e -target -value)]
+                            (dispatch! :create-tag text))
+                          (.preventDefault e)
+                          (aset (.. e -target) "value" "")))
+                      :placeholder "New Tag"}))))
+
 (defn chat-view [data owner]
   (reify
     om/IRender
@@ -112,6 +127,7 @@
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
               (om/build tags-view tags)
+              (om/build new-tag-view {})
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
