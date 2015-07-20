@@ -106,14 +106,15 @@
                              (assoc tag :subscribed?
                                (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id))))))]
         (dom/div nil
-          (dom/div #js {:className "user-meta"}
+          (dom/div #js {:className "meta"}
             (dom/img #js {:className "avatar"
                           :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                  (get-in @store/app-state [:users user-id :avatar]))})
-            (dom/div #js {:className "logout"
-                          :onClick (fn [_] (dispatch! :logout nil))} "×"))
-          (om/build tags-view tags)
-          (apply dom/div nil
+            (dom/div #js {:className "extras"}
+              (om/build tags-view tags)
+              (dom/div #js {:className "logout"
+                            :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
+          (apply dom/div #js {:className "threads"}
             (concat (om/build-all thread-view threads)
                     [(om/build new-thread-view {})])))))))
 
