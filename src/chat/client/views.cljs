@@ -38,7 +38,7 @@
                        (.substring 33 36)
                        (js/parseInt 16)
                        (/ 4096))]
-    (str "hsl(" (* 360 normalized) ",50%,50%)")))
+    (str "hsl(" (* 360 normalized) ",60%,60%)")))
 
 (defn thread-tags-view [thread owner]
   (reify
@@ -79,14 +79,16 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className "tag"}
-        (dom/label nil
-          (dom/input #js {:type "checkbox"
-                          :checked (tag :subscribed?)
-                          :onClick (fn [_]
-                                     (if (tag :subscribed?)
-                                       (dispatch! :unsubscribe-from-tag (tag :id))
-                                       (dispatch! :subscribe-to-tag (tag :id))))})
+      (dom/div #js {:className "tag"
+                    :onClick (fn [_]
+                               (if (tag :subscribed?)
+                                 (dispatch! :unsubscribe-from-tag (tag :id))
+                                 (dispatch! :subscribe-to-tag (tag :id))))}
+        (dom/div #js {:className "color-block"
+                      :style #js {:backgroundColor (tag->color tag)}}
+          (when (tag :subscribed?)
+            "✔"))
+        (dom/span #js {:className "name"}
           (tag :name))))))
 
 (defn tags-view [tags owner]
