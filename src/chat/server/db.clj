@@ -148,7 +148,7 @@
     (->> (d/resolve-tempid db-after tempids new-id)
          (d/entity db-after))))
 
-(defn- get-users-subscribed-to-thread [thread-id]
+(defn get-users-subscribed-to-thread [thread-id]
   (d/q '[:find [?user-id ...]
          :in $ ?thread-id
          :where

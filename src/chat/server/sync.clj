@@ -4,7 +4,8 @@
             [compojure.core :refer [GET POST routes defroutes context]]
             [taoensso.timbre :as timbre :refer [debugf]]
             [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
-            [chat.server.db :as db]))
+            [chat.server.db :as db]
+            [clojure.set :refer [intersection]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -38,9 +39,14 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn (db/create-message! ?data))
-    (doseq [uid (->> (:any @connected-uids)
-                     (remove (partial = user-id)))]
-      (chsk-send! uid [:chat/new-message ?data]))))
+    (let [subscribed-user-ids (db/with-conn
+                                (db/get-users-subscribed-to-thread (?data :thread-id)))
+          user-ids-to-send-to (-> (intersection
+                                    (set subscribed-user-ids)
+                                    (set (:any @connected-uids)))
+                                  (disj user-id))]
+      (doseq [uid user-ids-to-send-to]
+        (chsk-send! uid [:chat/new-message ?data])))))
 
 (defmethod event-msg-handler :thread/add-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
