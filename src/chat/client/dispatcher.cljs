@@ -57,9 +57,9 @@
 
 ; Websocket Events
 
-(defmethod sync/event-handler :chat/new-message
+(defmethod sync/event-handler :chat/thread
   [[_ data]]
-  (store/add-message! data))
+  (store/add-thread! data))
 
 (defmethod sync/event-handler :session/init-data
   [[_ data]]

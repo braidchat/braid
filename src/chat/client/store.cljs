@@ -45,6 +45,9 @@
   (maybe-create-thread! (message :thread-id))
   (transact! [:threads (message :thread-id) :messages] #(conj % message)))
 
+(defn add-thread! [thread]
+  (transact! [:threads (thread :id)] (constantly thread)))
+
 (defn hide-thread! [thread-id]
   (transact! [:threads] #(dissoc % thread-id)))
 

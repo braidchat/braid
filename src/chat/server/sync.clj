@@ -5,7 +5,7 @@
             [taoensso.timbre :as timbre :refer [debugf]]
             [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
             [chat.server.db :as db]
-            [clojure.set :refer [intersection]]))
+            [clojure.set :refer [difference intersection]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -35,18 +35,26 @@
     (when ?reply-fn
       (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
 
+(defn broadcast-thread
+  "broadcasts thread to all subscribed users, except those in ids-to-skip"
+  [thread-id ids-to-skip]
+  (let [subscribed-user-ids (db/with-conn
+                              (db/get-users-subscribed-to-thread thread-id))
+        user-ids-to-send-to (-> (difference
+                                  (intersection
+                                    (set subscribed-user-ids)
+                                    (set (:any @connected-uids)))
+                                  (set ids-to-skip)))
+        thread (db/with-conn
+                 (db/get-thread thread-id))]
+    (doseq [uid user-ids-to-send-to]
+      (chsk-send! uid [:chat/thread thread]))))
+
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn (db/create-message! ?data))
-    (let [subscribed-user-ids (db/with-conn
-                                (db/get-users-subscribed-to-thread (?data :thread-id)))
-          user-ids-to-send-to (-> (intersection
-                                    (set subscribed-user-ids)
-                                    (set (:any @connected-uids)))
-                                  (disj user-id))]
-      (doseq [uid user-ids-to-send-to]
-        (chsk-send! uid [:chat/new-message ?data])))))
+    (broadcast-thread (?data :thread-id) [user-id])))
 
 (defmethod event-msg-handler :thread/add-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -54,7 +62,8 @@
     (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
     (doseq [uid (->> (:any @connected-uids)
                      (remove (partial = user-id)))]
-      (chsk-send! uid [:thread/add-tag ?data]))))
+      (chsk-send! uid [:thread/add-tag ?data]))
+    (broadcast-thread (?data :thread-id) [user-id])))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

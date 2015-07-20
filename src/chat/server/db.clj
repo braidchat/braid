@@ -243,31 +243,49 @@
        (d/db *conn*)
        user-id))
 
+(defn- db->thread [thread]
+  {:id (thread :thread/id)
+   :messages (map (fn [msg]
+                    {:id (msg :message/id)
+                     :content (msg :message/content)
+                     :user-id (get-in msg [:message/user :user/id])
+                     :created-at (msg :message/created-at)})
+                  (thread :message/_thread))
+   :tag-ids (map (fn [tag]
+                   (tag :tag/id))
+                 (thread :thread/tag))})
+
 (defn get-open-threads-for-user [user-id]
   (->> (d/q '[:find (pull ?thread [:thread/id
+                                   {:thread/tag [:tag/id]}
+                                   {:message/_thread [:message/id
+                                                      :message/content
+                                                      {:message/user [:user/id]}
+                                                      :message/created-at]}])
+              :in $ ?user-id
+              :where
+              [?e :user/id ?user-id]
+              [?e :user/open-thread ?thread]]
+            (d/db *conn*)
+            user-id)
+       (map first)
+       (map db->thread)))
+
+(defn get-thread [thread-id]
+  (-> (d/q '[:find (pull ?thread [:thread/id
                                   {:thread/tag [:tag/id]}
                                   {:message/_thread [:message/id
                                                      :message/content
                                                      {:message/user [:user/id]}
                                                      :message/created-at]}])
-             :in $ ?user-id
+             :in $ ?thread-id
              :where
-             [?e :user/id ?user-id]
-             [?e :user/open-thread ?thread]]
+             [?thread :thread/id ?thread-id]]
            (d/db *conn*)
-           user-id)
-      (map first)
-      (map (fn [thread]
-             {:id (thread :thread/id)
-              :messages (map (fn [msg]
-                               {:id (msg :message/id)
-                                :content (msg :message/content)
-                                :user-id (get-in msg [:message/user :user/id])
-                                :created-at (msg :message/created-at)})
-                             (thread :message/_thread))
-              :tag-ids (map (fn [tag]
-                           (tag :tag/id))
-                         (thread :thread/tag))}))))
+           thread-id)
+      first
+      first
+      db->thread))
 
 (defn get-subscribed-thread-ids-for-user [user-id]
   (d/q '[:find [?thread-id ...]
