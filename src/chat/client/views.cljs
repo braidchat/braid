@@ -49,9 +49,8 @@
         (apply dom/div #js {:className "tags"}
           (map (fn [tag]
                  (dom/div #js {:className "tag"
-                               :style #js {:width (str (/ 100 (count tags)) "%")
-                                           :backgroundColor (tag->color tag)}
-                               :title (str "#" (tag :name))})) tags))))))
+                               :style #js {:background-color (tag->color tag)}}
+                   (tag :name))) tags))))))
 
 (defn thread-view [thread owner]
   (reify
