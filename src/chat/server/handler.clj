@@ -3,9 +3,11 @@
             [compojure.route :refer [resources]]
             [compojure.handler :refer [api]]
             [compojure.core :refer [GET POST routes defroutes context]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [ring.middleware.defaults :refer [wrap-defaults secure-site-defaults site-defaults]]
             [ring.middleware.edn :refer [wrap-edn-params]]
+            [taoensso.carmine.ring :as carmine]
             [chat.server.sync :refer [sync-routes]]
+            [environ.core :refer [env]]
             [chat.server.db :as db]))
 
 (defn edn-response [clj-body]
@@ -29,6 +31,10 @@
 (defroutes resource-routes
   (resources "/"))
 
+(def ^:dynamic *redis-conf* {:pool {}
+                             :spec {:host "127.0.0.1"
+                                    :port 6379}})
+
 (def app
   (->
     (wrap-defaults
@@ -36,7 +42,12 @@
         resource-routes
         site-routes
         sync-routes)
-      (-> site-defaults ; TODO: switch to secure-site-defaults when in using https in prod
+      (-> (if (= (env :environment) "prod")
+            secure-site-defaults
+            site-defaults)
+          (assoc-in [:session :store] (carmine/carmine-store *redis-conf*
+                                                             {:expiration-secs (* 60 60 24 7)
+                                                              :key-prefix "lpchat"}))
           (assoc-in [:security :anti-forgery]
             {:read-token (fn [req] (-> req :params :csrf-token))})))
       wrap-edn-params))
