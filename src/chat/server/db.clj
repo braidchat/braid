@@ -1,10 +1,11 @@
 (ns chat.server.db
   (:require [datomic.api :as d]
+            [environ.core :refer [env]]
             [crypto.password.scrypt :as password]))
 
 (def ^:dynamic *uri*
   "URI for the datomic database"
-  "datomic:dev://localhost:4334/chat-dev")
+  (get env :db-url "datomic:dev://localhost:4334/chat-dev"))
 
 (def ^:dynamic *conn* nil)
 
