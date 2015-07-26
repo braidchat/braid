@@ -1,10 +1,12 @@
 (ns chat.server.handler
+  (:gen-class)
   (:require [org.httpkit.server :refer [run-server]]
             [compojure.route :refer [resources]]
             [compojure.handler :refer [api]]
             [compojure.core :refer [GET POST routes defroutes context]]
             [ring.middleware.defaults :refer [wrap-defaults secure-site-defaults site-defaults]]
             [ring.middleware.edn :refer [wrap-edn-params]]
+            [clojure.tools.nrepl.server :as nrepl]
             [taoensso.carmine.ring :as carmine]
             [chat.server.sync :refer [sync-routes]]
             [environ.core :refer [env]]
@@ -68,8 +70,11 @@
   (reset! server (run-server #'app {:port port})))
 
 (defn -main  [& args]
-  (let [port (Integer/parseInt (first args))]
+  (let [port (Integer/parseInt (first args))
+        repl-port (Integer/parseInt (second args))]
     (start-server! port)
+    (chat.server.sync/start-router!)
+    (nrepl/start-server :port repl-port)
     (println "starting on port " port)))
 
 
