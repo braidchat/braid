@@ -20,7 +20,6 @@
   (GET "/" []
     (-> "chat.html"
         clojure.java.io/resource
-        clojure.java.io/file
         slurp))
   (GET "/92ddKI0spxFCkzmVkgOuMH80zhYikCvD7OVaFqy1l1YkN6N" req
     (let [user-id (db/with-conn (db/authenticate-user "test@ycombinator.com" (env :tester-password)))]
