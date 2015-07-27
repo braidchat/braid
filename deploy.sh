@@ -20,6 +20,6 @@ JAR_NAME=${PROJECT_NAME}-${DATE}.jar
 VERSION="0.0.1"
 lein uberjar
 scp target/${PROJECT_NAME}-${VERSION}-standalone.jar $SERVER:/www/deploys/${PROJECT_NAME}/${JAR_NAME}
-ssh flexdb "cd /www/deploys/${PROJECT_NAME} && ln -sf ${JAR_NAME} ${PROJECT_NAME}.jar"
+ssh $SERVER "cd /www/deploys/${PROJECT_NAME} && ln -sf ${JAR_NAME} ${PROJECT_NAME}.jar"
 git tag "${DATE}"
 echo "Update supervisord on remote now"
