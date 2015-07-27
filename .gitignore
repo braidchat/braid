@@ -1,0 +1,8 @@
+/resources/public
+/target
+.lein-env
+.lein-repl-history
+.nrepl-port
+*-init.clj
+profiles.clj
+.lein-failures

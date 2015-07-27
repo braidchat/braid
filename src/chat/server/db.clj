@@ -1,10 +1,11 @@
 (ns chat.server.db
   (:require [datomic.api :as d]
+            [environ.core :refer [env]]
             [crypto.password.scrypt :as password]))
 
 (def ^:dynamic *uri*
   "URI for the datomic database"
-  "datomic:dev://localhost:4334/chat-dev")
+  (get env :db-url "datomic:dev://localhost:4334/chat-dev"))
 
 (def ^:dynamic *conn* nil)
 
@@ -28,6 +29,7 @@
       {:db/ident :user/email
        :db/valueType :db.type/string
        :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
       {:db/ident :user/password-token
