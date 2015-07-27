@@ -15,3 +15,12 @@ lein with-profile lp repl
 # running tests
 
 lein with-profile test,lp quickie "chat.*"
+
+
+# deploying
+
+`./deploy.sh`
+
+then ssh to chat.leanpixel.com and
+
+`sudo supervisorctl restart chat`
