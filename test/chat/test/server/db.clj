@@ -140,7 +140,7 @@
                                  :password "foobar"
                                  :avatar ""})
         user-2 (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
+                                 :email "quux@bar.com"
                                  :password "foobar"
                                  :avatar ""})
         thread-id (db/uuid)
