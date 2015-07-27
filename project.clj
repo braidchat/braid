@@ -5,6 +5,7 @@
                  [org.clojure/clojure "1.7.0-RC2"]
                  [javax.servlet/servlet-api "2.5"]
                  [commons-codec "1.10"]
+                 [org.postgresql/postgresql "9.3-1103-jdbc4"]
                  [http-kit "2.1.19"]
                  [ring/ring-defaults "0.1.5"]
                  [fogus/ring-edn "0.3.0"]
