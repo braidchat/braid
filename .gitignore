@@ -5,3 +5,4 @@
 .nrepl-port
 *-init.clj
 profiles.clj
+.lein-failures
