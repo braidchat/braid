@@ -1,6 +1,8 @@
 (ns chat.client.views
   (:require [om.core :as om]
             [om.dom :as dom]
+            [clojure.string :as string]
+            [cljs-uuid-utils.core :as uuid]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]))
 
@@ -13,6 +15,13 @@
         (dom/div #js {:className "content"}
           (message :content))))))
 
+(def tag-pattern
+  "Pattern to extract tags.  Would prefer for the first subpattern to be a
+  zero-width assertion, but javascript doesn't support lookbehind. The last
+  subpattern needs to be zero-width so that two adjacent tags will be removed
+  for the tagless text. The tag name itself is the first capture group."
+  #"(?:^|\s)#(\S+)(?=\s|$)")
+
 (defn new-message-view [config owner]
   (reify
     om/IRender
@@ -22,12 +31,16 @@
                            :onKeyDown
                            (fn [e]
                              (when (and (= 13 e.keyCode) (= e.shiftKey false))
-                               (let [text (.. e -target -value)]
-                                 (if-let [tag (second (re-matches #"#(.*)" text))]
-                                   (dispatch! :tag-thread {:thread-id (config :thread-id)
-                                                           :tag-name tag})
+                               (let [text (.. e -target -value)
+                                     tags (->> (re-seq tag-pattern text) (map second))
+                                     tagless-text (string/replace text tag-pattern "")]
+                                 (when (or (config :new-thread) (not (string/blank? tagless-text)))
                                    (dispatch! :new-message {:thread-id (config :thread-id)
-                                                            :content text})))
+                                                            :content tagless-text}))
+                                 (when-not (empty? tags)
+                                   (doseq [tag tags]
+                                     (dispatch! :tag-thread {:thread-id (config :thread-id)
+                                                             :tag-name tag}))))
                                (.preventDefault e)
                                (aset (.. e -target) "value" "")))})))))
 
@@ -73,7 +86,8 @@
     (render [_]
       (dom/div #js {:className "thread"}
         (om/build new-message-view {:placeholder "Start a new conversation..."
-                                   :thread-id (uuid/make-random-squuid)})))))
+                                    :new-thread true
+                                    :thread-id (uuid/make-random-squuid)})))))
 
 (defn tag-view [tag owner]
   (reify
