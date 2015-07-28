@@ -47,7 +47,7 @@
         site-routes
         sync-routes)
       (-> site-defaults ; ssl stuff will be handled by nginx
-          (assoc-in [:session :cookie-attrs :secure] true)
+          (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
           (assoc-in [:session :store] (carmine/carmine-store *redis-conf*
                                                              {:expiration-secs (* 60 60 24 7)
                                                               :key-prefix "lpchat"}))
