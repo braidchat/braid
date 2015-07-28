@@ -72,7 +72,8 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
-        (om/build new-message-view {:placeholder "Start a new conversation..."})))))
+        (om/build new-message-view {:placeholder "Start a new conversation..."
+                                   :thread-id (uuid/make-random-squuid)})))))
 
 (defn tag-view [tag owner]
   (reify
