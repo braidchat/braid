@@ -8,6 +8,16 @@
 
 (defmulti dispatch! (fn [event data] event))
 
+; TODO: keep track of what failed to resend when reconnected? How do we detect reconnection?
+(defn send!
+  "Wrap sync/chsk-send! with timeout & error handling"
+  [data]
+  (sync/chsk-send!
+    data 2000
+    (fn [reply]
+      (when-not (sync/cb-success? reply)
+        (sync/event-handler [:socket/disconnected reply data])))))
+
 (def tag-pattern
   "Pattern to extract tags.  Would prefer for the first subpattern to be a
   zero-width assertion, but javascript doesn't support lookbehind. The last
@@ -26,33 +36,33 @@
                                           :content tagless-text
                                           :thread-id (data :thread-id)})]
         (store/add-message! message)
-        (sync/chsk-send! [:chat/new-message message])))
+        (send! [:chat/new-message message])))
     (when-not (empty? tags)
       (doseq [tag tags]
         (dispatch! :tag-thread {:thread-id (data :thread-id)
                                 :tag-name tag})))))
 
 (defmethod dispatch! :hide-thread [_ data]
-  (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
+  (send! [:chat/hide-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
 (defmethod dispatch! :create-tag [_ tag-name]
   (let [tag (schema/make-tag {:name tag-name})]
     (store/add-tag! tag)
-    (sync/chsk-send! [:chat/create-tag tag])
+    (send! [:chat/create-tag tag])
     (dispatch! :subscribe-to-tag (tag :id))))
 
 (defmethod dispatch! :unsubscribe-from-tag [_ tag-id]
-  (sync/chsk-send! [:user/unsubscribe-from-tag tag-id])
+  (send! [:user/unsubscribe-from-tag tag-id])
   (store/unsubscribe-from-tag! tag-id))
 
 (defmethod dispatch! :subscribe-to-tag [_ tag-id]
-  (sync/chsk-send! [:user/subscribe-to-tag tag-id])
+  (send! [:user/subscribe-to-tag tag-id])
   (store/subscribe-to-tag! tag-id))
 
 (defmethod dispatch! :tag-thread [_ attr]
   (when-let [tag-id (store/tag-id-for-name (attr :tag-name))]
-    (sync/chsk-send! [:thread/add-tag {:thread-id (attr :thread-id)
+    (send! [:thread/add-tag {:thread-id (attr :thread-id)
                                        :tag-id tag-id}])
     (store/add-tag-to-thread! tag-id (attr :thread-id))))
 
@@ -91,7 +101,13 @@
 
 (defmethod sync/event-handler :socket/connected
   [[_ _]]
+  (store/clear-connection-error!)
   (sync/chsk-send! [:session/start nil]))
+
+(defmethod sync/event-handler :socket/disconnected
+  [[_ reply data]]
+  (println "disconnected" reply data)
+  (store/set-connection-error!))
 
 (defmethod sync/event-handler :chat/create-tag
   [[_ data]]

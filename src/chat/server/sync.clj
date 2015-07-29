@@ -50,36 +50,53 @@
     (doseq [uid user-ids-to-send-to]
       (chsk-send! uid [:chat/thread thread]))))
 
+(defmethod event-msg-handler :chsk/ws-ping
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when ?reply-fn
+    (?reply-fn [:chsk/ws-pong])))
+
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn (db/create-message! ?data))
+    (when ?reply-fn
+      (?reply-fn [:chsk/okay]))
     (broadcast-thread (?data :thread-id) [user-id])))
 
 (defmethod event-msg-handler :thread/add-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
+    (when ?reply-fn
+      (?reply-fn [:chsk/okay]))
     (broadcast-thread (?data :thread-id) [user-id])))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (db/with-conn (db/user-subscribe-to-tag! user-id ?data))))
+    (db/with-conn (db/user-subscribe-to-tag! user-id ?data))
+    (when ?reply-fn
+      (?reply-fn [:chsk/okay]))))
 
 (defmethod event-msg-handler :user/unsubscribe-from-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (db/with-conn (db/user-unsubscribe-from-tag! user-id ?data))))
+    (db/with-conn (db/user-unsubscribe-from-tag! user-id ?data))
+    (when ?reply-fn
+      (?reply-fn [:chsk/okay]))))
 
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (db/with-conn (db/user-hide-thread! (get-in ring-req [:session :user-id]) ?data)))
+  (db/with-conn (db/user-hide-thread! (get-in ring-req [:session :user-id]) ?data))
+  (when ?reply-fn
+    (?reply-fn [:chsk/okay])))
 
 (defmethod event-msg-handler :chat/create-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (db/with-conn (db/create-tag! {:id (?data :id)
                                  :name (?data :name)}))
+  (when ?reply-fn
+    (?reply-fn [:chsk/okay]))
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (doseq [uid (->> (:any @connected-uids)
                      (remove (partial = user-id)))]

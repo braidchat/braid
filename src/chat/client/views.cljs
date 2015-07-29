@@ -163,6 +163,9 @@
     om/IRender
     (render [_]
       (dom/div nil
+        (when (data :connection-error)
+          (dom/div #js {:className "error"}
+            "Error Connecting to Server"))
         (if (data :session)
           (om/build chat-view data)
           (om/build login-view data))))))

@@ -2,12 +2,14 @@
   (:require-macros
     [cljs.core.async.macros :as asyncm :refer [go go-loop]])
   (:require [cljs.core.async :as async :refer [<! >! put! chan alts!]]
-            [taoensso.sente  :as sente :refer [cb-success?]]
+            [taoensso.sente  :as sente]
             [goog.string :as gstring]
             [goog.string.format]))
 
 (defn debugf [s & args]
   (js/console.log (apply gstring/format s args)))
+
+(def cb-success? sente/cb-success?)
 
 (let [{:keys [chsk ch-recv send-fn state]}
       (sente/make-channel-socket! "/chsk" {:type :auto})]

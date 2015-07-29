@@ -4,6 +4,7 @@
                       :users {}
                       :tags {}
                       :session nil
+                      :connection-error false
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
                              :user-id nil}
@@ -15,6 +16,16 @@
 
 (defn- transact! [ks f]
   (swap! app-state update-in ks f))
+
+; error state
+
+(defn clear-connection-error!
+  []
+  (transact! [:connection-error] (constantly false)))
+
+(defn set-connection-error!
+  []
+  (transact! [:connection-error] (constantly true)))
 
 ; session
 
