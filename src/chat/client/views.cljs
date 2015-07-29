@@ -165,7 +165,8 @@
       (dom/div nil
         (when (data :connection-error)
           (dom/div #js {:className "error"}
-            "Error Connecting to Server"))
+            (dom/h1 nil "Error Connecting to Server")
+            (dom/span nil "Try copying what you typed & refreshing")))
         (if (data :session)
           (om/build chat-view data)
           (om/build login-view data))))))
