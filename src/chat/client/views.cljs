@@ -131,7 +131,7 @@
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
             (concat (om/build-all thread-view threads {:key :id})
-                    [(om/build new-thread-view {})])))))))
+                    [(om/build new-thread-view {} {:react-key "new-thread"})])))))))
 
 (defn login-view [data owner]
   (reify
