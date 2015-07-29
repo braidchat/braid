@@ -107,6 +107,8 @@
 (defmethod sync/event-handler :socket/disconnected
   [[_ reply data]]
   (println "disconnected" reply data)
+  ; TODO: indicate which change has failed?
+  ; TODO: attempt to reconnect?
   (store/set-connection-error!))
 
 (defmethod sync/event-handler :chat/create-tag
