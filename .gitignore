@@ -6,3 +6,4 @@
 *-init.clj
 profiles.clj
 .lein-failures
+.DS_Store

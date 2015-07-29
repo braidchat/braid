@@ -13,11 +13,11 @@
     (let [user-1 (db/create-user! {:id (db/uuid)
                                    :email "raf@leanpixel.com"
                                    :password (get env :rafal-password "foobar")
-                                   :avatar "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-08/4801271456_41230ac0b881cdf85c28_72.jpg"})
+                                   :avatar "https://s3.amazonaws.com/chat.leanpixel.com/avatars/4801271456_41230ac0b881cdf85c28_72.jpg"})
           user-2 (db/create-user! {:id (db/uuid)
                                    :email "james@leanpixel.com"
                                    :password (get env :james-password "foobar")
-                                   :avatar "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2015-05-09/4805955000_07dc272f0a7f9de7719e_192.jpg"})
+                                   :avatar "https://s3.amazonaws.com/chat.leanpixel.com/avatars/4805955000_07dc272f0a7f9de7719e_192.jpg"})
           user-3 (db/create-user! {:id (db/uuid)
                                    :email "test@ycombinator.com"
                                    :password (get env :tester-password "")

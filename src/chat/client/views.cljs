@@ -23,11 +23,8 @@
                            (fn [e]
                              (when (and (= 13 e.keyCode) (= e.shiftKey false))
                                (let [text (.. e -target -value)]
-                                 (if-let [tag (second (re-matches #"#(.*)" text))]
-                                   (dispatch! :tag-thread {:thread-id (config :thread-id)
-                                                           :tag-name tag})
-                                   (dispatch! :new-message {:thread-id (config :thread-id)
-                                                            :content text})))
+                                 (dispatch! :new-message {:thread-id (config :thread-id)
+                                                          :content text}))
                                (.preventDefault e)
                                (aset (.. e -target) "value" "")))})))))
 
