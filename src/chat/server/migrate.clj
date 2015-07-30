@@ -30,4 +30,16 @@
         :db/valueType :db.type/ref
         :db/cardinality :db.cardinality/many
         :db/id #db/id [:db.part/db]
-        :db.install/_attribute :db.part/db}])))
+        :db.install/_attribute :db.part/db}]))
+  (println "You'll now need to create a group and add existing users & tags to that group"))
+
+(defn create-group-for-users-and-tags
+  "Helper function for migrate-2015-07-29 - give a group name to create that
+  group and add all existing users and tags to that group"
+  [group-name]
+  (db/with-conn
+    (let [group (db/create-group! {:group/id (db/uuid) :group/name group-name})
+          all-users (->> (d/q '[:find ?u :where [?u :user/id]] (d/db db/*conn*)) (map first))
+          all-tags (->> (d/q '[:find ?t :where [?t :tag/id]] (d/db db/*conn*)) (map first))]
+      (d/transact db/*conn* (mapv (fn [u] [:db/add [:group/id (group :id)] :group/user u]) all-users))
+      (d/transact db/*conn* (mapv (fn [t] [:db/add t :tag/group [:group/id (group :id)]]) all-tags)))))
