@@ -116,6 +116,11 @@
        :db/cardinality :db.cardinality/one
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
+      {:db/ident :tag/group
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
 
       ; groups
       {:db/ident :group/id
@@ -359,13 +364,15 @@
 
 (defn- db->tag [e]
   {:id (:tag/id e)
-   :name (:tag/name e)})
+   :name (:tag/name e)
+   :group-id (get-in e [:tag/group :group/id])})
 
 (defn create-tag! [attrs]
   (-> {:tag/id (attrs :id)
-       :tag/name (attrs :name)}
-    create-entity!
-    db->tag))
+       :tag/name (attrs :name)
+       :tag/group [:group/id (attrs :group-id)]}
+      create-entity!
+      db->tag))
 
 (defn user-subscribe-to-tag! [user-id tag-id]
   (d/transact *conn* [[:db/add [:user/id user-id]
@@ -423,7 +430,8 @@
 
 (defn fetch-tags []
   (->> (d/q '[:find (pull ?e [:tag/id
-                              :tag/name])
+                              :tag/name
+                              {:tag/group [:group/id]}])
               :where [?e :tag/id]]
             (d/db *conn*))
        (map (comp db->tag first))))

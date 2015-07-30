@@ -189,8 +189,11 @@
 
 (deftest tags
   (testing "can create tag"
-    (let [tag-data {:id (db/uuid)
-                    :name "acme"}]
+    (let [group (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+          tag-data {:id (db/uuid)
+                    :name "acme"
+                    :group-id (group :id)}]
       (testing "create-tag!"
         (let [tag (db/create-tag! tag-data)]
           (testing "returns tag"
@@ -198,8 +201,9 @@
 
 (deftest fetch-tags
   (testing "can fetch tags"
-    (let [tag-1 (db/create-tag! {:id (db/uuid) :name "tag1"})
-          tag-2 (db/create-tag! {:id (db/uuid) :name "tag2"})]
+    (let [group (db/create-group! {:id (db/uuid) :name "LP"})
+          tag-1 (db/create-tag! {:id (db/uuid) :name "tag1" :group-id (group :id)})
+          tag-2 (db/create-tag! {:id (db/uuid) :name "tag2" :group-id (group :id)})]
       (testing "fetch-tags"
         (let [tags (db/fetch-tags)]
           (testing "returns tags"
@@ -210,8 +214,10 @@
                                :email "foo@bar.com"
                                :password "foobar"
                                :avatar ""})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2"})]
+        group (db/create-group! {:id (db/uuid)
+                                 :name "Lean Pixel"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
     (testing "user can subscribe to tags"
       (testing "user-subscribe-to-tag!"
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
@@ -239,8 +245,10 @@
                                    :thread-id (db/uuid)
                                    :created-at (java.util.Date.)
                                    :content "Hello?"})
-          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
-          tag-2 (db/create-tag! {:id (db/uuid) :name "acme2"})]
+          group (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
+          tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
 
       (testing "thread-add-tag!"
         (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
@@ -253,7 +261,9 @@
 
 (deftest tag-thread-user-subscribe
   (testing "given a user subscribed to a tag"
-    (let [tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
+    (let [group (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
           user-1 (db/create-user! {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
