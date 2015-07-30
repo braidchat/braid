@@ -375,7 +375,8 @@
 (defn- db->tag [e]
   {:id (:tag/id e)
    :name (:tag/name e)
-   :group-id (get-in e [:tag/group :group/id])})
+   :group-id (get-in e [:tag/group :group/id])
+   :group-name (get-in e [:tag/group :group/name])})
 
 (defn create-tag! [attrs]
   (-> {:tag/id (attrs :id)
@@ -457,7 +458,7 @@
   [user-id]
   (->> (d/q '[:find (pull ?e [:tag/id
                               :tag/name
-                              {:tag/group [:group/id]}])
+                              {:tag/group [:group/id :group/name]}])
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]

@@ -223,7 +223,7 @@
       (testing "create-tag!"
         (let [tag (db/create-tag! tag-data)]
           (testing "returns tag"
-            (is (= tag tag-data))))))))
+            (is (= tag (assoc tag-data :group-name "Lean Pixel")))))))))
 
 (deftest user-can-subscribe-to-tags
   (let [user (db/create-user! {:id (db/uuid)
