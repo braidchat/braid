@@ -3,6 +3,7 @@
 (def app-state (atom {:threads {}
                       :users {}
                       :tags {}
+                      :groups {}
                       :session nil
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
@@ -29,6 +30,9 @@
 
 (defn add-users! [users]
   (transact! [:users] #(merge % (key-by-id users))))
+
+(defn set-user-joined-groups! [groups]
+  (transact! [:groups] (constantly groups)))
 
 ; threads and messages
 

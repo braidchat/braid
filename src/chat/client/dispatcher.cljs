@@ -87,6 +87,7 @@
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))
+  (store/set-user-joined-groups! (data :user-groups))
   (store/set-threads! (data :user-threads)))
 
 (defmethod sync/event-handler :socket/connected

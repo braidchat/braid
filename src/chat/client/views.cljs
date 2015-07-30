@@ -87,12 +87,22 @@
         (dom/span #js {:className "name"}
           (tag :name))))))
 
+(defn tag-group-view [tag-group owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "tag-group"}
+        (dom/h2 #js {:className "group-name"}
+          (get-in tag-group [1 0 :group-name]))
+        (apply dom/div #js {:className "tags"}
+          (om/build-all tag-view (second tag-group)))))))
+
 (defn tags-view [tags owner]
   (reify
     om/IRender
     (render [_]
-      (apply dom/div #js {:className "tags"}
-        (om/build-all tag-view tags)))))
+      (apply dom/div #js {:className "tag-groups"}
+        (om/build-all tag-group-view tags)))))
 
 
 (defn new-tag-view [_ owner]
@@ -118,7 +128,8 @@
                       vals
                       (map (fn [tag]
                              (assoc tag :subscribed?
-                               (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id))))))]
+                               (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id)))))
+                      (group-by :group-id))]
         (dom/div nil
           (dom/div #js {:className "meta"}
             (dom/img #js {:className "avatar"
