@@ -91,10 +91,11 @@
     (chsk-send! user-id [:session/init-data
                          (db/with-conn
                            {:user-id user-id
+                            :user-groups (db/get-groups-for-user user-id)
                             :user-threads (db/get-open-threads-for-user user-id)
                             :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
-                            :users (db/fetch-users)
-                            :tags (db/fetch-tags)})])))
+                            :users (db/fetch-users-for-user user-id)
+                            :tags (db/fetch-tags-for-user user-id)})])))
 
 (defonce router_ (atom nil))
 

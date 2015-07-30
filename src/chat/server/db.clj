@@ -253,15 +253,25 @@
          (when (and user-id (password/check password password-token))
            user-id))))
 
-(defn fetch-users []
+(defn fetch-users-for-user
+  "Get all users visible to given user"
+  [user-id]
   (->> (d/q '[:find (pull ?e [:user/id
                               :user/email
                               :user/avatar])
-              :where [?e :user/id]]
-            (d/db *conn*))
-       (map (comp db->user first))))
+              :in $ ?user-id
+              :where
+              [?u :user/id ?user-id]
+              [?g :group/user ?u]
+              [?g :group/user ?e]]
+            (d/db *conn*) user-id)
+       (map (comp db->user first))
+       set))
 
-(defn fetch-messages []
+(defn fetch-messages
+  "This almost certainly shouldn't be called outside of tests"
+  []
+  {:pre [(not= (env :environment) "production")]}
   (->> (d/q '[:find (pull ?e [:message/id
                               :message/content
                               :message/created-at
@@ -442,10 +452,17 @@
        (d/db *conn*)
        thread-id))
 
-(defn fetch-tags []
+(defn fetch-tags-for-user
+  "Get all tags visible to the given user"
+  [user-id]
   (->> (d/q '[:find (pull ?e [:tag/id
                               :tag/name
                               {:tag/group [:group/id]}])
-              :where [?e :tag/id]]
-            (d/db *conn*))
-       (map (comp db->tag first))))
+              :in $ ?user-id
+              :where
+              [?u :user/id ?user-id]
+              [?g :group/user ?u]
+              [?e :tag/group ?g]]
+            (d/db *conn*) user-id)
+       (map (comp db->tag first))
+       set))

@@ -29,9 +29,35 @@
                       :password "barbaz"
                       :avatar "http://www.barbaz.com/1.jpg"}
         user-2 (db/create-user! user-2-data)
-        users (db/fetch-users)]
+        group (db/create-group! {:id (db/uuid) :name "aoeu"})
+        _ (db/user-add-to-group! (user-1 :id) (group :id))
+        _ (db/user-add-to-group! (user-2 :id) (group :id))
+        users (db/fetch-users-for-user (user-1 :id))]
     (testing "returns all users"
       (is (= (set users) #{user-1 user-2})))))
+
+(deftest only-see-users-in-group
+  (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
+        group-2 (db/create-group! {:id (db/uuid) :name "g2"})
+        user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar "http://www.foobar.com/1.jpg"})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "bar@baz.com"
+                                 :password "barbaz"
+                                 :avatar "http://www.barbaz.com/1.jpg"})
+        user-3 (db/create-user! {:id (db/uuid)
+                                 :email "quux@baz.com"
+                                 :password "barbaz"
+                                 :avatar "http://www.barbaz.com/2.jpg"})]
+    (db/user-add-to-group! (user-1 :id) (group-1 :id))
+    (db/user-add-to-group! (user-2 :id) (group-1 :id))
+    (db/user-add-to-group! (user-2 :id) (group-2 :id))
+    (db/user-add-to-group! (user-3 :id) (group-2 :id))
+    (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id)))
+    (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id)))
+    (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id)))))
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
@@ -199,16 +225,6 @@
           (testing "returns tag"
             (is (= tag tag-data))))))))
 
-(deftest fetch-tags
-  (testing "can fetch tags"
-    (let [group (db/create-group! {:id (db/uuid) :name "LP"})
-          tag-1 (db/create-tag! {:id (db/uuid) :name "tag1" :group-id (group :id)})
-          tag-2 (db/create-tag! {:id (db/uuid) :name "tag2" :group-id (group :id)})]
-      (testing "fetch-tags"
-        (let [tags (db/fetch-tags)]
-          (testing "returns tags"
-            (is (= (set tags) #{tag-1 tag-2}))))))))
-
 (deftest user-can-subscribe-to-tags
   (let [user (db/create-user! {:id (db/uuid)
                                :email "foo@bar.com"
@@ -255,6 +271,35 @@
         (let [tags (db/get-user-subscribed-tag-ids (user :id))]
           (testing "returns subscribed tags"
             (is (= (set tags) #{(tag-1 :id)}))))))))
+
+(deftest user-can-only-see-tags-in-group
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "quux@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-3 (db/create-user! {:id (db/uuid)
+                                 :email "qaax@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        group-1 (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+        group-2 (db/create-group! {:id (db/uuid)
+                                   :name "Penyo Pal"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
+        tag-3 (db/create-tag! {:id (db/uuid) :name "acme3" :group-id (group-2 :id)})]
+    (db/user-add-to-group! (user-1 :id) (group-1 :id))
+    (db/user-add-to-group! (user-2 :id) (group-1 :id))
+    (db/user-add-to-group! (user-2 :id) (group-2 :id))
+    (db/user-add-to-group! (user-3 :id) (group-2 :id))
+    (testing "user can only see tags in their group(s)"
+      (is (= #{tag-1} (db/fetch-tags-for-user (user-1 :id))))
+      (is (= #{tag-1 tag-2 tag-3} (db/fetch-tags-for-user (user-2 :id))))
+      (is (= #{tag-2 tag-3} (db/fetch-tags-for-user (user-3 :id)))))))
 
 (deftest can-add-tags-to-thread
   (testing "can add tags to thread"
