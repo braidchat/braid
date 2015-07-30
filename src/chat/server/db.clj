@@ -117,6 +117,25 @@
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
 
+      ; groups
+      {:db/ident :group/id
+       :db/valueType :db.type/uuid
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :group/name
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :group/user
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/many
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+
       ]))
 
 
@@ -134,6 +153,11 @@
    :user-id (:user/id (:message/user e))
    :thread-id (:thread/id (:message/thread e))
    :created-at (:message/created-at e)})
+
+(defn- db->group [e]
+  {:id (:group/id e)
+   :name (:group/name e)
+   :users (:group/user e)})
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -192,6 +216,13 @@
                             :message/created-at])
          db->message)))
 
+(defn create-group!
+  [{:keys [name id]}]
+  (-> {:group/id id
+       :group/name name}
+      create-entity!
+      db->group))
+
 (defn create-user!
   "creates a user, returns id"
   [attrs]
@@ -244,6 +275,28 @@
                 [?thread :thread/id ?thread-id]]
        (d/db *conn*)
        user-id))
+
+(defn get-groups-for-user [user-id]
+  (->> (d/q '[:find (pull ?g [:group/id :group/name])
+              :in $ ?user-id
+              :where
+              [?u :user/id ?user-id]
+              [?g :group/user ?u]]
+            (d/db *conn*)
+            user-id)
+       (map (comp #(dissoc % :users) db->group first))
+       set))
+
+(defn get-users-in-group [group-id]
+  (->> (d/q '[:find (pull ?u [:user/id :user/email :user/avatar])
+              :in $ ?group-id
+              :where
+              [?g :group/id ?group-id]
+              [?g :group/user ?u]]
+            (d/db *conn*)
+            group-id)
+       (map (comp db->user first))
+       set))
 
 (defn- db->thread [thread]
   {:id (thread :thread/id)
@@ -321,6 +374,10 @@
 (defn user-unsubscribe-from-tag! [user-id tag-id]
   (d/transact *conn* [[:db/retract [:user/id user-id]
                        :user/subscribed-tag [:tag/id tag-id]]]))
+
+(defn user-add-to-group! [user-id group-id]
+  (d/transact *conn* [[:db/add [:group/id group-id]
+                       :group/user [:user/id user-id]]]))
 
 (defn get-user-subscribed-tag-ids [user-id]
   (d/q '[:find [?tag-id ...]

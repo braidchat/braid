@@ -46,6 +46,23 @@
     (testing "returns nil when email+password wrong"
       (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
 
+(deftest create-group
+  (let [data {:id (db/uuid)
+              :name "Lean Pixel"}
+        group (db/create-group! data)]
+    (testing "can create a group"
+      (is (= group (assoc data :users nil))))
+    (testing "can add a user to the group"
+      (let [user (db/create-user! {:id (db/uuid)
+                                   :email "foo@bar.com"
+                                   :password "foobar"
+                                   :avatar "http://www.foobar.com/1.jpg"})]
+        (is (= #{} (db/get-groups-for-user (user :id))))
+        (is (= #{} (db/get-users-in-group (group :id))))
+        (db/user-add-to-group! (user :id) (group :id))
+        (is (= #{data} (db/get-groups-for-user (user :id))))
+        (is (= #{user} (db/get-users-in-group (group :id))))))))
+
 (deftest create-message-new
   (let [user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
