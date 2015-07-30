@@ -374,9 +374,23 @@
       create-entity!
       db->tag))
 
+(defn user-in-tag-group? [user-id tag-id]
+  (seq (d/q '[:find ?g
+              :in $ ?user-id ?tag-id
+              :where
+              [?u :user/id ?user-id]
+              [?t :tag/id ?tag-id]
+              [?t :tag/group ?g]
+              [?g :group/user ?u]]
+            (d/db *conn*)
+            user-id tag-id)))
+
 (defn user-subscribe-to-tag! [user-id tag-id]
-  (d/transact *conn* [[:db/add [:user/id user-id]
-                       :user/subscribed-tag [:tag/id tag-id]]]))
+  ; TODO: throw an exception/some sort of error condition if user tried to
+  ; subscribe to a tag they can't?
+  (when (user-in-tag-group? user-id tag-id)
+    (d/transact *conn* [[:db/add [:user/id user-id]
+                         :user/subscribed-tag [:tag/id tag-id]]])))
 
 (defn user-unsubscribe-from-tag! [user-id tag-id]
   (d/transact *conn* [[:db/retract [:user/id user-id]
