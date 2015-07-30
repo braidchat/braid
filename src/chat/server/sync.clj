@@ -78,8 +78,7 @@
 
 (defmethod event-msg-handler :chat/create-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (db/with-conn (db/create-tag! {:id (?data :id)
-                                 :name (?data :name)}))
+  (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (doseq [uid (->> (:any @connected-uids)
                      (remove (partial = user-id)))]

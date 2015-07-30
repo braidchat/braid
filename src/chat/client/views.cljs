@@ -87,25 +87,7 @@
         (dom/span #js {:className "name"}
           (tag :name))))))
 
-(defn tag-group-view [tag-group owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "tag-group"}
-        (dom/h2 #js {:className "group-name"}
-          (get-in tag-group [1 0 :group-name]))
-        (apply dom/div #js {:className "tags"}
-          (om/build-all tag-view (second tag-group)))))))
-
-(defn tags-view [tags owner]
-  (reify
-    om/IRender
-    (render [_]
-      (apply dom/div #js {:className "tag-groups"}
-        (om/build-all tag-group-view tags)))))
-
-
-(defn new-tag-view [_ owner]
+(defn new-tag-view [data owner]
   (reify
     om/IRender
     (render [_]
@@ -114,10 +96,29 @@
                       (fn [e]
                         (when (= 13 e.keyCode)
                           (let [text (.. e -target -value)]
-                            (dispatch! :create-tag text))
+                            (dispatch! :create-tag [text (data :group-id)]))
                           (.preventDefault e)
                           (aset (.. e -target) "value" "")))
                       :placeholder "New Tag"}))))
+
+(defn tag-group-view [group-tags owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "group-tags"}
+        (dom/h2 #js {:className "group-name"}
+          (get-in group-tags [1 0 :group-name]))
+        (apply dom/div #js {:className "tags"}
+          (om/build-all tag-view (second group-tags)))
+        (om/build new-tag-view {:group-id (first group-tags)})))))
+
+(defn tags-view [tags owner]
+  (reify
+    om/IRender
+    (render [_]
+      (apply dom/div #js {:className "tag-groups"}
+        (om/build-all tag-group-view tags)))))
+
 
 (defn chat-view [data owner]
   (reify
@@ -137,7 +138,6 @@
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
               (om/build tags-view tags)
-              (om/build new-tag-view {})
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}

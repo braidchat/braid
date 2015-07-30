@@ -36,8 +36,8 @@
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
-(defmethod dispatch! :create-tag [_ tag-name]
-  (let [tag (schema/make-tag {:name tag-name})]
+(defmethod dispatch! :create-tag [_ [tag-name group-id]]
+  (let [tag (schema/make-tag {:name tag-name :group-id group-id})]
     (store/add-tag! tag)
     (sync/chsk-send! [:chat/create-tag tag])
     (dispatch! :subscribe-to-tag (tag :id))))
