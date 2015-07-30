@@ -144,15 +144,18 @@
       ]))
 
 
-(defn uuid []
+(defn uuid
+  []
   (d/squuid))
 
-(defn- db->user [e]
+(defn- db->user
+  [e]
   {:id (:user/id e)
    :email (:user/email e)
    :avatar (:user/avatar e)})
 
-(defn- db->message [e]
+(defn- db->message
+  [e]
   {:id (:message/id e)
    :content (:message/content e)
    :user-id (:user/id (:message/user e))
@@ -179,7 +182,8 @@
     (->> (d/resolve-tempid db-after tempids new-id)
          (d/entity db-after))))
 
-(defn get-users-subscribed-to-thread [thread-id]
+(defn get-users-subscribed-to-thread
+  [thread-id]
   (d/q '[:find [?user-id ...]
          :in $ ?thread-id
          :where
@@ -189,24 +193,25 @@
        (d/db *conn*)
        thread-id))
 
-(defn create-message! [attrs]
+(defn create-message!
+  [{:keys [thread-id id content user-id created-at]}]
   (let [; show thread for all users subscribed to thread
         add-open-transactions (map (fn [user-id]
                                      [:db/add [:user/id user-id]
-                                      :user/open-thread [:thread/id (attrs :thread-id)]])
-                                   (get-users-subscribed-to-thread (attrs :thread-id)))
+                                      :user/open-thread [:thread/id thread-id]])
+                                   (get-users-subscribed-to-thread thread-id))
         ; upsert thread
         thread-data {:db/id (d/tempid :entities)
-                     :thread/id (attrs :thread-id)}
+                     :thread/id thread-id}
         ; upsert message
         msg-data {:db/id (d/tempid :entities)
-                  :message/id (attrs :id)
-                  :message/content (attrs :content)
-                  :message/user [:user/id (attrs :user-id)]
+                  :message/id id
+                  :message/content content
+                  :message/user [:user/id user-id]
                   :message/thread (:db/id thread-data)
-                  :message/created-at (attrs :created-at)}
+                  :message/created-at created-at}
         ; user who created message: show thread, subscribe to thread
-        subscribe-data {:db/id [:user/id (attrs :user-id)]
+        subscribe-data {:db/id [:user/id user-id]
                         :user/open-thread (thread-data :db/id)
                         :user/subscribed-thread (thread-data :db/id)}
         {:keys [db-after tempids]} @(d/transact *conn* (concat [thread-data
@@ -230,11 +235,11 @@
 
 (defn create-user!
   "creates a user, returns id"
-  [attrs]
-  (-> {:user/id (attrs :id)
-       :user/email (attrs :email)
-       :user/avatar (attrs :avatar)
-       :user/password-token (password/encrypt (attrs :password))}
+  [{:keys [id email avatar password]}]
+  (-> {:user/id id
+       :user/email email
+       :user/avatar avatar
+       :user/password-token (password/encrypt password)}
       create-entity!
       db->user))
 
@@ -281,7 +286,8 @@
             (d/db *conn*))
        (map (comp db->message first))))
 
-(defn get-open-thread-ids-for-user [user-id]
+(defn get-open-thread-ids-for-user
+  [user-id]
   (d/q '[:find [?thread-id ...]
                 :in $ ?user-id
                 :where
@@ -313,7 +319,8 @@
        (map (comp db->user first))
        set))
 
-(defn- db->thread [thread]
+(defn- db->thread
+  [thread]
   {:id (thread :thread/id)
    :messages (map (fn [msg]
                     {:id (msg :message/id)
@@ -325,7 +332,8 @@
                    (tag :tag/id))
                  (thread :thread/tag))})
 
-(defn get-open-threads-for-user [user-id]
+(defn get-open-threads-for-user
+  [user-id]
   (->> (d/q '[:find (pull ?thread [:thread/id
                                    {:thread/tag [:tag/id]}
                                    {:message/_thread [:message/id
@@ -341,7 +349,8 @@
        (map first)
        (map db->thread)))
 
-(defn get-thread [thread-id]
+(defn get-thread
+  [thread-id]
   (-> (d/q '[:find (pull ?thread [:thread/id
                                   {:thread/tag [:tag/id]}
                                   {:message/_thread [:message/id
@@ -357,7 +366,8 @@
       first
       db->thread))
 
-(defn get-subscribed-thread-ids-for-user [user-id]
+(defn get-subscribed-thread-ids-for-user
+  [user-id]
   (d/q '[:find [?thread-id ...]
          :in $ ?user-id
          :where
@@ -367,12 +377,14 @@
        (d/db *conn*)
        user-id))
 
-(defn user-hide-thread! [user-id thread-id]
+(defn user-hide-thread!
+  [user-id thread-id]
   (d/transact
     *conn*
     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
-(defn- db->tag [e]
+(defn- db->tag
+  [e]
   {:id (:tag/id e)
    :name (:tag/name e)
    :group-id (get-in e [:tag/group :group/id])
@@ -403,7 +415,8 @@
     (d/transact *conn* [[:db/add [:user/id user-id]
                          :user/subscribed-tag [:tag/id tag-id]]])))
 
-(defn user-unsubscribe-from-tag! [user-id tag-id]
+(defn user-unsubscribe-from-tag!
+  [user-id tag-id]
   (d/transact *conn* [[:db/retract [:user/id user-id]
                        :user/subscribed-tag [:tag/id tag-id]]]))
 
@@ -411,7 +424,8 @@
   (d/transact *conn* [[:db/add [:group/id group-id]
                        :group/user [:user/id user-id]]]))
 
-(defn get-user-subscribed-tag-ids [user-id]
+(defn get-user-subscribed-tag-ids
+  [user-id]
   (d/q '[:find [?tag-id ...]
          :in $ ?user-id
          :where
@@ -421,7 +435,8 @@
        (d/db *conn*)
        user-id))
 
-(defn- get-users-subscribed-to-tag [tag-id]
+(defn- get-users-subscribed-to-tag
+  [tag-id]
   (d/q '[:find [?user-id ...]
          :in $ ?tag-id
          :where
@@ -431,7 +446,8 @@
        (d/db *conn*)
        tag-id))
 
-(defn thread-add-tag! [thread-id tag-id]
+(defn thread-add-tag!
+  [thread-id tag-id]
   (let [subscriber-transactions
         (mapcat (fn [user-id]
                [[:db/add [:user/id user-id]
@@ -443,7 +459,8 @@
                              [:db/add [:thread/id thread-id]
                               :thread/tag [:tag/id tag-id]]))))
 
-(defn get-thread-tags [thread-id]
+(defn get-thread-tags
+  [thread-id]
   (d/q '[:find [?tag-id ...]
          :in $ ?thread-id
          :where
