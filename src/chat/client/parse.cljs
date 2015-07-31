@@ -16,5 +16,5 @@
                   (map second)
                   (filter avail-tags))
         tagless-text (string/replace text tag-pattern
-                                     (fn [m] (if (avail-tags (subs m 1)) "" m)))]
+                                     (fn [m] (if (avail-tags (subs (string/trim m) 1)) "" m)))]
     [tags tagless-text]))
