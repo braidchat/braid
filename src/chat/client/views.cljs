@@ -2,6 +2,7 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [chat.client.dispatcher :refer [dispatch!]]
+            [chat.client.parse :refer [parse-tags]]
             [chat.client.store :as store]))
 
 (defn message-view [message owner]
@@ -13,21 +14,6 @@
         (dom/div #js {:className "content"}
           (message :content))))))
 
-(defn new-message-view [config owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "message new"}
-        (dom/textarea #js {:placeholder (config :placeholder)
-                           :onKeyDown
-                           (fn [e]
-                             (when (and (= 13 e.keyCode) (= e.shiftKey false))
-                               (let [text (.. e -target -value)]
-                                 (dispatch! :new-message {:thread-id (config :thread-id)
-                                                          :content text}))
-                               (.preventDefault e)
-                               (aset (.. e -target) "value" "")))})))))
-
 (defn tag->color [tag]
   ; normalized is approximately evenly distributed between 0 and 1
   (let [normalized (-> (tag :id)
@@ -36,6 +22,35 @@
                        (js/parseInt 16)
                        (/ 4096))]
     (str "hsl(" (* 360 normalized) ",60%,60%)")))
+
+(defn new-message-view [config owner]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:preview-tags []})
+    om/IRenderState
+    (render-state [_ state]
+      (dom/div #js {:className "message new"}
+        (dom/textarea #js {:placeholder (config :placeholder)
+                           :onKeyUp (fn [e]
+                                      (let [text (.. e -target -value)
+                                            [tag-names _] (parse-tags text)]
+                                        (om/set-state! owner :preview-tags tag-names)))
+                           :onKeyDown
+                           (fn [e]
+                             (when (and (= 13 e.keyCode) (= e.shiftKey false))
+                               (let [text (.. e -target -value)]
+                                 (dispatch! :new-message {:thread-id (config :thread-id)
+                                                          :content text}))
+                               (.preventDefault e)
+                               (aset (.. e -target) "value" "")))})
+        (apply dom/div #js {:className "tags-preview"}
+          (map (fn [tag-name]
+                 (let [tag-id (store/tag-id-for-name tag-name)]
+                   (dom/div #js {:className "tag"
+                                 :style #js {:background-color (tag->color {:id tag-id})}}
+                     tag-name)))
+               (state :preview-tags)))))))
 
 (defn thread-tags-view [thread owner]
   (reify
