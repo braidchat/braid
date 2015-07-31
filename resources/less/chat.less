@@ -77,13 +77,27 @@ body {
     &.new {
       margin-left: 2em;
       textarea {
+        padding: 0;
         width: 100%;
         border: none;
         resize: none;
         &:focus {
           outline: none;
         }
-
+        background-color: transparent;
+        z-index: 10;
+      }
+      .text-highlight {
+        z-index: 9;
+        cursor: text;
+        background-color: white;
+        color: red;
+        position: absolute;
+        top: 0;
+        left: 0;
+        b {
+          color: blue;
+        }
       }
     }
   }

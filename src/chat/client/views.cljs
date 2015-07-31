@@ -15,10 +15,20 @@
 
 (defn new-message-view [config owner]
   (reify
-    om/IRender
-    (render [_]
+    om/IInitState
+    (init-state [_]
+      {:attributed-content ""})
+    om/IRenderState
+    (render-state [_ {:keys [attributed-content]}]
       (dom/div #js {:className "message new"}
+        (dom/div #js {:className "text-highlight"
+                      :onClick (fn [e] (.focus (om/get-node owner "message-textarea")))}
+          attributed-content)
         (dom/textarea #js {:placeholder (config :placeholder)
+                           :ref "message-textarea"
+                           :onKeyUp
+                             (fn [e]
+                               (om/set-state! owner :attributed-content (.. e -target -value)))
                            :onKeyDown
                            (fn [e]
                              (when (and (= 13 e.keyCode) (= e.shiftKey false))
@@ -26,7 +36,8 @@
                                  (dispatch! :new-message {:thread-id (config :thread-id)
                                                           :content text}))
                                (.preventDefault e)
-                               (aset (.. e -target) "value" "")))})))))
+                               (aset (.. e -target) "value" "")))})
+        ))))
 
 (defn tag->color [tag]
   ; normalized is approximately evenly distributed between 0 and 1
@@ -41,6 +52,7 @@
   (reify
     om/IRender
     (render [_]
+      ; TODO: don't access store directly in view?
       (let [tags (->> (thread :tag-ids)
                       (map #(get-in @store/app-state [:tags %])))]
         (apply dom/div #js {:className "tags"}
