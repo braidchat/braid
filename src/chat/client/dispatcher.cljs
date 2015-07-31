@@ -4,21 +4,14 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
+            [chat.client.parse :refer [parse-tags]]
             [cljs-utils.core :refer [edn-xhr]]))
 
 (defmulti dispatch! (fn [event data] event))
 
-(def tag-pattern
-  "Pattern to extract tags.  Would prefer for the first subpattern to be a
-  zero-width assertion, but javascript doesn't support lookbehind. The last
-  subpattern needs to be zero-width so that two adjacent tags will be removed
-  for the tagless text. The tag name itself is the first capture group."
-  #"(?:^|\s)#(\S+)(?=\s|$)")
-
 (defmethod dispatch! :new-message [_ data]
   (let [text (data :content)
-        tags (->> (re-seq tag-pattern text) (map second))
-        tagless-text (string/replace text tag-pattern "")
+        [tags tagless-text] (parse-tags text)
         new-thread? (nil? (data :thread-id))
         data (update data :thread-id #(or % (uuid/make-random-squuid)))]
     (when (or new-thread? (not (string/blank? tagless-text)))
