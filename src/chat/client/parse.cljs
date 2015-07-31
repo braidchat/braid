@@ -10,6 +10,10 @@
   #"(?:^|\s)#(\S+)(?=\s|$)")
 
 (defn parse-tags
+  "Given some text, extract the tags.  Returns a list of three elements: The
+  valid (i.e. already existing) tag names, the text with all valid tags
+  removed, and a set of found tags that are ambigiuous (i.e. multiple groups
+  have a tag with that name)"
   [text]
   (let [avail-tags (->> (@store/app-state :tags) vals (map :name) set)
         tags (->> (re-seq tag-pattern text)

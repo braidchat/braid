@@ -1,6 +1,7 @@
 (ns chat.client.views
   (:require [om.core :as om]
             [om.dom :as dom]
+            [clojure.string :as string]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.parse :refer [parse-tags]]
             [chat.client.store :as store]))
@@ -23,34 +24,50 @@
                        (/ 4096))]
     (str "hsl(" (* 360 normalized) ",60%,60%)")))
 
+(defn tags-preview
+  [tags]
+  (apply dom/div #js {:className "tags-preview"}
+    (map (fn [tag-name]
+           (let [tag-id (store/tag-id-for-name tag-name)]
+             (dom/div #js {:className "tag"
+                           :style #js {:background-color (tag->color {:id tag-id})}}
+               (when-let [groups (store/ambiguous-tag? tag-name)]
+                 (apply dom/div #js {:className "ambiguous"}
+                   (interpose
+                     " or "
+                     (map (fn [g]
+                            (dom/span #js {:className "group"
+                                           :onClick (fn [e]
+                                                      (println "group" g))}
+                              (g :group-name)))
+                          groups))))
+               tag-name)))
+         tags)))
+
 (defn new-message-view [config owner]
   (reify
     om/IInitState
     (init-state [_]
-      {:preview-tags []})
+      {:preview-tags []
+       :text ""})
     om/IRenderState
-    (render-state [_ state]
+    (render-state [_ {:keys [text] :as state}]
       (dom/div #js {:className "message new"}
         (dom/textarea #js {:placeholder (config :placeholder)
-                           :onKeyUp (fn [e]
+                           :value (state :text)
+                           :onChange (fn [e]
                                       (let [text (.. e -target -value)
                                             [tag-names _] (parse-tags text)]
-                                        (om/set-state! owner :preview-tags tag-names)))
+                                        (om/set-state! owner :preview-tags tag-names)
+                                        (om/set-state! owner :text text)))
                            :onKeyDown
                            (fn [e]
                              (when (and (= 13 e.keyCode) (= e.shiftKey false))
-                               (let [text (.. e -target -value)]
-                                 (dispatch! :new-message {:thread-id (config :thread-id)
-                                                          :content text}))
+                               (dispatch! :new-message {:thread-id (config :thread-id)
+                                                        :content text})
                                (.preventDefault e)
-                               (aset (.. e -target) "value" "")))})
-        (apply dom/div #js {:className "tags-preview"}
-          (map (fn [tag-name]
-                 (let [tag-id (store/tag-id-for-name tag-name)]
-                   (dom/div #js {:className "tag"
-                                 :style #js {:background-color (tag->color {:id tag-id})}}
-                     tag-name)))
-               (state :preview-tags)))))))
+                               (om/set-state! owner {:preview-tags [] :text ""})))})
+        (tags-preview (state :preview-tags))))))
 
 (defn thread-tags-view [thread owner]
   (reify
