@@ -35,6 +35,11 @@
     (when ?reply-fn
       (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
 
+(defmethod event-msg-handler :chsk/ws-ping
+  [ev-msg]
+  ; Do nothing, just avoid unhandled event message
+  )
+
 (defn broadcast-thread
   "broadcasts thread to all subscribed users, except those in ids-to-skip"
   [thread-id ids-to-skip]
