@@ -9,6 +9,21 @@
   for the tagless text. The tag name itself is the first capture group."
   #"(?:^|\s)#(\S+)(?=\s|$)")
 
+(defn extract-tags
+  "Get the valid tags from the text"
+  [text]
+  (let [avail-tags (->> (@store/app-state :tags) vals (map :name) set)]
+    (->> (re-seq tag-pattern text)
+         (map second)
+         (filter avail-tags))))
+
+(defn extract-text
+  "Get the text, with valid tags removed"
+  [text]
+  (let [avail-tags (->> (@store/app-state :tags) vals (map :name) set)]
+    (string/replace text tag-pattern
+                    (fn [m] (if (avail-tags (subs (string/trim m) 1)) "" m)))))
+
 (defn parse-tags
   "Given some text, extract the tags.  Returns a list of three elements: The
   valid (i.e. already existing) tag names, the text with all valid tags

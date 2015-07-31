@@ -90,7 +90,7 @@
   (when (contains? (get-ambiguous-tags) tag-name)
     (->> @app-state :tags vals
          (filter #(= (% :name) tag-name))
-         (map #(select-keys % [:group-id :group-name])))))
+         (map #(select-keys % [:group-id :group-name :id])))))
 
 ; subscribed tags
 

@@ -4,14 +4,14 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
-            [chat.client.parse :refer [parse-tags]]
+            [chat.client.parse :refer [extract-text]]
             [cljs-utils.core :refer [edn-xhr]]))
 
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
   (let [text (data :content)
-        [tags tagless-text] (parse-tags text)
+        tagless-text (extract-text text)
         new-thread? (nil? (data :thread-id))
         data (update data :thread-id #(or % (uuid/make-random-squuid)))]
     (when (or new-thread? (not (string/blank? tagless-text)))
@@ -20,10 +20,10 @@
                                           :thread-id (data :thread-id)})]
         (store/add-message! message)
         (sync/chsk-send! [:chat/new-message message])))
-    (when-not (empty? tags)
-      (doseq [tag tags]
+    (when-let [tag-ids (seq (data :tag-ids))]
+      (doseq [tag-id tag-ids]
         (dispatch! :tag-thread {:thread-id (data :thread-id)
-                                :tag-name tag})))))
+                                :id tag-id})))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
@@ -44,7 +44,7 @@
   (store/subscribe-to-tag! tag-id))
 
 (defmethod dispatch! :tag-thread [_ attr]
-  (when-let [tag-id (store/tag-id-for-name (attr :tag-name))]
+  (when-let [tag-id (or (attr :id) (store/tag-id-for-name (attr :tag-name)))]
     (sync/chsk-send! [:thread/add-tag {:thread-id (attr :thread-id)
                                        :tag-id tag-id}])
     (store/add-tag-to-thread! tag-id (attr :thread-id))))
