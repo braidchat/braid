@@ -11,4 +11,5 @@
 
 (defn make-tag [data]
   {:id (or (data :id) (uuid/make-random-squuid))
-   :name (data :name)})
+   :name (data :name)
+   :group-id (data :group-id)})

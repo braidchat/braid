@@ -78,8 +78,7 @@
 
 (defmethod event-msg-handler :chat/create-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (db/with-conn (db/create-tag! {:id (?data :id)
-                                 :name (?data :name)}))
+  (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (doseq [uid (->> (:any @connected-uids)
                      (remove (partial = user-id)))]
@@ -91,10 +90,11 @@
     (chsk-send! user-id [:session/init-data
                          (db/with-conn
                            {:user-id user-id
+                            :user-groups (db/get-groups-for-user user-id)
                             :user-threads (db/get-open-threads-for-user user-id)
                             :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
-                            :users (db/fetch-users)
-                            :tags (db/fetch-tags)})])))
+                            :users (db/fetch-users-for-user user-id)
+                            :tags (db/fetch-tags-for-user user-id)})])))
 
 (defonce router_ (atom nil))
 

@@ -3,6 +3,7 @@
 (def app-state (atom {:threads {}
                       :users {}
                       :tags {}
+                      :groups {}
                       :session nil
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
@@ -29,6 +30,9 @@
 
 (defn add-users! [users]
   (transact! [:users] #(merge % (key-by-id users))))
+
+(defn set-user-joined-groups! [groups]
+  (transact! [:groups] (constantly groups)))
 
 ; threads and messages
 
@@ -70,6 +74,23 @@
       (->> (filter (fn [t] (= tag-name (t :name)))))
       first
       (get :id)))
+
+(defn get-ambiguous-tags
+  "Get a set of all ambiguous tag names"
+  []
+  (let [tag-names (->> @app-state :tags vals (map :name))]
+    (set (for [[tag-name freq] (frequencies tag-names)
+               :when (> freq 1)]
+           tag-name))))
+
+(defn ambiguous-tag?
+  "Returns a set of the groups with a tag of the given name if the tag exists
+  in multiple groups, or nil if the tag is only present in one or zero groups"
+  [tag-name]
+  (when (contains? (get-ambiguous-tags) tag-name)
+    (->> @app-state :tags vals
+         (filter #(= (% :name) tag-name))
+         (map #(select-keys % [:group-id :group-name :id])))))
 
 ; subscribed tags
 
