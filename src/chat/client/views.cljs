@@ -196,7 +196,7 @@
     (render [_]
       (dom/div #js {:className "group-tags"}
         (dom/h2 #js {:className "group-name"}
-          (get-in group-tags [1 0 :group-name]))
+          (store/group-name (first group-tags)))
         (apply dom/div #js {:className "tags"}
           (om/build-all tag-view (second group-tags)))
         (om/build new-tag-view {:group-id (first group-tags)})))))

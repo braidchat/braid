@@ -31,9 +31,6 @@
 (defn add-users! [users]
   (transact! [:users] #(merge % (key-by-id users))))
 
-(defn set-user-joined-groups! [groups]
-  (transact! [:groups] (constantly groups)))
-
 ; threads and messages
 
 (defn set-threads! [threads]
@@ -103,3 +100,13 @@
 (defn subscribe-to-tag! [tag-id]
   (transact! [:user :subscribed-tag-ids] #(conj % tag-id)))
 
+
+; groups
+
+(defn set-user-joined-groups! [groups]
+  (transact! [:groups] (constantly groups)))
+
+(defn group-name
+  [group-id]
+  (->> @app-state :groups (filter #(= group-id (% :id)))
+       first :name))
