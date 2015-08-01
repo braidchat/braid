@@ -214,5 +214,9 @@ server {
 
 then symlink it into sites-enabled, delete the symlink to `default` in sites-enabled and `sudo service nginx reload`
 
+## Annoying stuff
+
+May need to also `sudo apt-get install haveged` to make sure there's enough
+entropy to hash passwords when creating users
 
 Things should be working now!
