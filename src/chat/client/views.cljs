@@ -38,26 +38,27 @@
   (apply dom/div #js {:className "tags-preview"}
     (map (fn [tag]
            (dom/div #js {:className "tag"
+                         ; TODO: style ambiguous tags in some way
                          :style #js {:background-color (if-let [tag-id (tag :id)]
                                                          (tag->color {:id tag-id}))}}
 
-             (when-let [possible-tags (tag :possibilities)]
              ; If the tag is ambiguous, show the groups it could be in
+             (when-let [possible-tags (tag :possibilities)]
                (apply dom/div #js {:className "ambiguous"}
-               (interpose
-                 " or "
-                 (map (fn [t]
-                        (dom/span #js {:className "group"
-                                       :onClick
-                                       (fn [_]
-                                         (om/update-state!
-                                           owner [:ambiguous-tags (tag :idx)]
-                                           (fn [amb-tag]
-                                             (-> amb-tag
-                                                 (dissoc :possibilities)
-                                                 (assoc :id (t :id))))))}
-                          (t :group-name)))
-                      possible-tags))))
+                 (interpose
+                   " or "
+                   (map (fn [t]
+                          (dom/span #js {:className "group"
+                                         :onClick
+                                         (fn [_]
+                                           (om/update-state!
+                                             owner [:ambiguous-tags (tag :idx)]
+                                             (fn [amb-tag]
+                                               (-> amb-tag
+                                                   (dissoc :possibilities)
+                                                   (assoc :id (t :id))))))}
+                            (t :group-name)))
+                        possible-tags))))
 
              (tag :name)))
          tags)))
