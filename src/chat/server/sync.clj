@@ -58,14 +58,18 @@
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
+    ; TODO: Verify user has permission to do this
     (db/with-conn (db/create-message! ?data))
     (broadcast-thread (?data :thread-id) [user-id])))
 
 (defmethod event-msg-handler :thread/add-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
-    (broadcast-thread (?data :thread-id) [user-id])))
+    (if (db/with-conn (db/user-in-tag-group? user-id (?data :tag-id)))
+      (do (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
+          (broadcast-thread (?data :thread-id) [user-id]))
+      ; TODO: indicate permissions error to user?
+      (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id (?data :tag-id)))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -83,11 +87,15 @@
 
 (defmethod event-msg-handler :chat/create-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (doseq [uid (->> (:any @connected-uids)
-                     (remove (partial = user-id)))]
-      (chsk-send! uid [:chat/create-tag ?data]))))
+    (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
+      (do (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))
+          (doseq [uid (->> (:any @connected-uids)
+                           (remove (partial = user-id)))]
+            (chsk-send! uid [:chat/create-tag ?data])))
+      ; TODO: indicate permissions error to user?
+      (timbre/warnf "User %s attempted to create a tag %s in a disallowed group"
+                    user-id (?data :name) (?data :group-id)))))
 
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
