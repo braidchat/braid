@@ -24,7 +24,7 @@
 (defmulti event-msg-handler :id)
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
-  (debugf "Event: %s" event)
+  (when-not (= event [:chsk/ws-ping]) (debugf "Event: %s" event))
   (event-msg-handler ev-msg))
 
 (defmethod event-msg-handler :default
