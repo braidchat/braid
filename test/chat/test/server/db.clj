@@ -51,10 +51,13 @@
                                  :email "quux@baz.com"
                                  :password "barbaz"
                                  :avatar "http://www.barbaz.com/2.jpg"})]
+    (is (not (db/user-in-group? (user-1 :id) (group-1 :id))))
     (db/user-add-to-group! (user-1 :id) (group-1 :id))
+    (is (db/user-in-group? (user-1 :id) (group-1 :id)))
     (db/user-add-to-group! (user-2 :id) (group-1 :id))
     (db/user-add-to-group! (user-2 :id) (group-2 :id))
     (db/user-add-to-group! (user-3 :id) (group-2 :id))
+    (is (not (db/user-in-group? (user-1 :id) (group-2 :id))))
     (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id)))
     (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id)))
     (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id)))))

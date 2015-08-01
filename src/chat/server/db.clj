@@ -397,6 +397,17 @@
       create-entity!
       db->tag))
 
+(defn user-in-group?
+  [user-id group-id]
+  (seq (d/q '[:find ?g
+              :in $ ?user-id ?group-id
+              :where
+              [?u :user/id ?user-id]
+              [?g :group/id ?group-id]
+              [?g :group/user ?u]]
+            (d/db *conn*)
+            user-id group-id)))
+
 (defn user-in-tag-group? [user-id tag-id]
   (seq (d/q '[:find ?g
               :in $ ?user-id ?tag-id
