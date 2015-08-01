@@ -38,7 +38,7 @@
   group and add all existing users and tags to that group"
   [group-name]
   (db/with-conn
-    (let [group (db/create-group! {:group/id (db/uuid) :group/name group-name})
+    (let [group (create-group! {:id (db/uuid) :name group-name})
           all-users (->> (d/q '[:find ?u :where [?u :user/id]] (d/db db/*conn*)) (map first))
           all-tags (->> (d/q '[:find ?t :where [?t :tag/id]] (d/db db/*conn*)) (map first))]
       (d/transact db/*conn* (mapv (fn [u] [:db/add [:group/id (group :id)] :group/user u]) all-users))
