@@ -361,3 +361,58 @@
           (testing "then the user has that thread open"
             (let [user-threads (db/get-open-thread-ids-for-user (user-1 :id))]
               (is (contains? (set user-threads) (msg :thread-id))))))))))
+
+(deftest user-thread-visibility
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "quux@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-3 (db/create-user! {:id (db/uuid)
+                                 :email "qaax@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        group-1 (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+        group-2 (db/create-group! {:id (db/uuid)
+                                   :name "Penyo Pal"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
+
+        thread-1-id (db/uuid)
+        thread-2-id (db/uuid)]
+
+    (testing "everyone can see threads because they haven't been created"
+      (is (db/user-can-see-thread? (user-1 :id) thread-1-id))
+      (is (db/user-can-see-thread? (user-2 :id) thread-1-id))
+      (is (db/user-can-see-thread? (user-3 :id) thread-1-id)))
+
+    (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
+                         :user-id (user-1 :id) :created-at (java.util.Date.)})
+    (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
+                         :user-id (user-2 :id) :created-at (java.util.Date.)})
+
+    (db/user-add-to-group! (user-2 :id) (group-1 :id))
+    (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
+    (db/thread-add-tag! thread-1-id (tag-1 :id))
+    (db/thread-add-tag! thread-2-id (tag-2 :id))
+
+    (db/user-add-to-group! (user-3 :id) (group-2 :id))
+
+    (testing "user 1 can see thread 1 because they created it"
+      (is (db/user-can-see-thread? (user-1 :id) thread-1-id)))
+    (testing "user 1 can't see thread 2"
+      (is (not (db/user-can-see-thread? (user-1 :id) thread-2-id))))
+
+    (testing "user 2 can see thread 1 because they've already been subscribed"
+      (is (db/user-can-see-thread? (user-2 :id) thread-1-id)))
+    (testing "user 2 can see thread 2 because they created it"
+      (is (db/user-can-see-thread? (user-2 :id) thread-2-id)))
+
+    (testing "user 3 can't see thread 1"
+      (is (not (db/user-can-see-thread? (user-3 :id) thread-1-id))))
+    (testing "user 3 can see thread 2 because they have the tag"
+      (is (db/user-can-see-thread? (user-3 :id) thread-2-id)))))

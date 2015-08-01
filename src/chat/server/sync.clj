@@ -58,9 +58,12 @@
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    ; TODO: Verify user has permission to do this
-    (db/with-conn (db/create-message! ?data))
-    (broadcast-thread (?data :thread-id) [user-id])))
+    (if (db/with-conn (db/user-can-see-thread? user-id (?data :thread-id)))
+      (do (db/with-conn (db/create-message! ?data))
+        (broadcast-thread (?data :thread-id) [user-id]))
+      ; TODO: indicate permissions error to user?
+      (timbre/warnf "User %s attempted to add message to disallowed thread %s"
+                    user-id (?data :thread-id)))))
 
 (defmethod event-msg-handler :thread/add-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -69,7 +72,8 @@
       (do (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
           (broadcast-thread (?data :thread-id) [user-id]))
       ; TODO: indicate permissions error to user?
-      (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id (?data :tag-id)))))
+      (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id
+                    (?data :tag-id)))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

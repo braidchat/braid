@@ -419,6 +419,26 @@
             (d/db *conn*)
             user-id tag-id)))
 
+(defn user-can-see-thread?
+  [user-id thread-id]
+  (or
+    ;user can see the thread if it's a new (i.e. not yet in the database) thread...
+    (empty? (d/q '[:find ?t :in $ ?thread-id
+                   :where [?t :thread/id ?thread-id]]
+                 (d/db *conn*) thread-id))
+    ; ...or they're already subscribed to the thread...
+    (contains? (set (get-users-subscribed-to-thread thread-id)) user-id)
+    ; ...or they are in the group of any tags on the thread
+    (seq (d/q '[:find (pull ?group [:group/id])
+                :in $ ?thread-id ?user-id
+                :where
+                [?thread :thread/id ?thread-id]
+                [?thread :thread/tag ?tag]
+                [?tag :tag/group ?group]
+                [?group :group/user ?user]
+                [?user :user/id ?user-id]]
+              (d/db *conn*) thread-id user-id))))
+
 (defn user-subscribe-to-tag! [user-id tag-id]
   ; TODO: throw an exception/some sort of error condition if user tried to
   ; subscribe to a tag they can't?
