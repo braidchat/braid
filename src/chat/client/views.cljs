@@ -214,12 +214,16 @@
     om/IRender
     (render [_]
       (let [threads (vals (data :threads))
+            groups-map (into {} (map (juxt :id (constantly nil))) (data :groups))
+            ; groups-map is just map of group-ids to nil, to be merged with
+            ; tags, so there is still an entry for groups without any tags
             tags (->> (data :tags)
                       vals
                       (map (fn [tag]
                              (assoc tag :subscribed?
                                (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id)))))
-                      (group-by :group-id))]
+                      (group-by :group-id)
+                      (merge groups-map))]
         (dom/div nil
           (dom/div #js {:className "meta"}
             (dom/img #js {:className "avatar"
