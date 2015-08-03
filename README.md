@@ -51,7 +51,7 @@ setting up a production instance of chat looks as follows:
 
 ## install required programs:
 
-`sudo apt-get install postgresql nginx redis-server supervisor`
+`sudo apt-get install postgresql nginx redis-server supervisor fail2ban`
 
 [Download & install Java 1.8 from Oracle](http://www.devsniper.com/install-jdk-8-on-ubuntu/)
 
