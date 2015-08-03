@@ -49,6 +49,22 @@ setting up a production instance of chat looks as follows:
 
 (assuming a server has been deployed, users & ssh keys added for us, root login disabled, users added to admin group, etc)
 
+## Security stuff
+
+Disable root login and disallow cleartext logins over ssh
+
+```
+sudo apt-get install fail2ban
+sudo service fail2ban start
+```
+
+```
+sudo ufw allow ssh
+sudo ufw allow www
+sudo ufw allow 443
+sudo ufw enable
+```
+
 ## install required programs:
 
 `sudo apt-get install postgresql nginx redis-server supervisor fail2ban`
