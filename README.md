@@ -49,9 +49,25 @@ setting up a production instance of chat looks as follows:
 
 (assuming a server has been deployed, users & ssh keys added for us, root login disabled, users added to admin group, etc)
 
+## Security stuff
+
+Disable root login and disallow cleartext logins over ssh
+
+```
+sudo apt-get install fail2ban
+sudo service fail2ban start
+```
+
+```
+sudo ufw allow ssh
+sudo ufw allow www
+sudo ufw allow 443
+sudo ufw enable
+```
+
 ## install required programs:
 
-`sudo apt-get install postgresql nginx redis-server supervisor`
+`sudo apt-get install postgresql nginx redis-server supervisor fail2ban`
 
 [Download & install Java 1.8 from Oracle](http://www.devsniper.com/install-jdk-8-on-ubuntu/)
 
@@ -214,5 +230,9 @@ server {
 
 then symlink it into sites-enabled, delete the symlink to `default` in sites-enabled and `sudo service nginx reload`
 
+## Annoying stuff
+
+May need to also `sudo apt-get install haveged` to make sure there's enough
+entropy to hash passwords when creating users
 
 Things should be working now!

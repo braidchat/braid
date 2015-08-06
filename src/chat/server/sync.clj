@@ -24,7 +24,7 @@
 (defmulti event-msg-handler :id)
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
-  (debugf "Event: %s" event)
+  (when-not (= event [:chsk/ws-ping]) (debugf "Event: %s" event))
   (event-msg-handler ev-msg))
 
 (defmethod event-msg-handler :default
@@ -34,6 +34,11 @@
     (debugf "Unhandled event: %s" event)
     (when ?reply-fn
       (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
+
+(defmethod event-msg-handler :chsk/ws-ping
+  [ev-msg]
+  ; Do nothing, just avoid unhandled event message
+  )
 
 (defn broadcast-thread
   "broadcasts thread to all subscribed users, except those in ids-to-skip"
@@ -53,14 +58,22 @@
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (db/with-conn (db/create-message! ?data))
-    (broadcast-thread (?data :thread-id) [user-id])))
+    (if (db/with-conn (db/user-can-see-thread? user-id (?data :thread-id)))
+      (do (db/with-conn (db/create-message! ?data))
+        (broadcast-thread (?data :thread-id) [user-id]))
+      ; TODO: indicate permissions error to user?
+      (timbre/warnf "User %s attempted to add message to disallowed thread %s"
+                    user-id (?data :thread-id)))))
 
 (defmethod event-msg-handler :thread/add-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
-    (broadcast-thread (?data :thread-id) [user-id])))
+    (if (db/with-conn (db/user-in-tag-group? user-id (?data :tag-id)))
+      (do (db/with-conn (db/thread-add-tag! (?data :thread-id) (?data :tag-id)))
+          (broadcast-thread (?data :thread-id) [user-id]))
+      ; TODO: indicate permissions error to user?
+      (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id
+                    (?data :tag-id)))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -78,12 +91,15 @@
 
 (defmethod event-msg-handler :chat/create-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (db/with-conn (db/create-tag! {:id (?data :id)
-                                 :name (?data :name)}))
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (doseq [uid (->> (:any @connected-uids)
-                     (remove (partial = user-id)))]
-      (chsk-send! uid [:chat/create-tag ?data]))))
+    (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
+      (do (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))
+          (doseq [uid (->> (:any @connected-uids)
+                           (remove (partial = user-id)))]
+            (chsk-send! uid [:chat/create-tag ?data])))
+      ; TODO: indicate permissions error to user?
+      (timbre/warnf "User %s attempted to create a tag %s in a disallowed group"
+                    user-id (?data :name) (?data :group-id)))))
 
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -91,10 +107,11 @@
     (chsk-send! user-id [:session/init-data
                          (db/with-conn
                            {:user-id user-id
+                            :user-groups (db/get-groups-for-user user-id)
                             :user-threads (db/get-open-threads-for-user user-id)
                             :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
-                            :users (db/fetch-users)
-                            :tags (db/fetch-tags)})])))
+                            :users (db/fetch-users-for-user user-id)
+                            :tags (db/fetch-tags-for-user user-id)})])))
 
 (defonce router_ (atom nil))
 

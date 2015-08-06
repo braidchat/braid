@@ -4,21 +4,14 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
+            [chat.client.parse :refer [extract-text]]
             [cljs-utils.core :refer [edn-xhr]]))
 
 (defmulti dispatch! (fn [event data] event))
 
-(def tag-pattern
-  "Pattern to extract tags.  Would prefer for the first subpattern to be a
-  zero-width assertion, but javascript doesn't support lookbehind. The last
-  subpattern needs to be zero-width so that two adjacent tags will be removed
-  for the tagless text. The tag name itself is the first capture group."
-  #"(?:^|\s)#(\S+)(?=\s|$)")
-
 (defmethod dispatch! :new-message [_ data]
   (let [text (data :content)
-        tags (->> (re-seq tag-pattern text) (map second))
-        tagless-text (string/replace text tag-pattern "")
+        tagless-text (extract-text text)
         new-thread? (nil? (data :thread-id))
         data (update data :thread-id #(or % (uuid/make-random-squuid)))]
     (when (or new-thread? (not (string/blank? tagless-text)))
@@ -27,17 +20,17 @@
                                           :thread-id (data :thread-id)})]
         (store/add-message! message)
         (sync/chsk-send! [:chat/new-message message])))
-    (when-not (empty? tags)
-      (doseq [tag tags]
+    (when-let [tag-ids (seq (data :tag-ids))]
+      (doseq [tag-id tag-ids]
         (dispatch! :tag-thread {:thread-id (data :thread-id)
-                                :tag-name tag})))))
+                                :id tag-id})))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
-(defmethod dispatch! :create-tag [_ tag-name]
-  (let [tag (schema/make-tag {:name tag-name})]
+(defmethod dispatch! :create-tag [_ [tag-name group-id]]
+  (let [tag (schema/make-tag {:name tag-name :group-id group-id})]
     (store/add-tag! tag)
     (sync/chsk-send! [:chat/create-tag tag])
     (dispatch! :subscribe-to-tag (tag :id))))
@@ -51,7 +44,7 @@
   (store/subscribe-to-tag! tag-id))
 
 (defmethod dispatch! :tag-thread [_ attr]
-  (when-let [tag-id (store/tag-id-for-name (attr :tag-name))]
+  (when-let [tag-id (or (attr :id) (store/tag-id-for-name (attr :tag-name)))]
     (sync/chsk-send! [:thread/add-tag {:thread-id (attr :thread-id)
                                        :tag-id tag-id}])
     (store/add-tag-to-thread! tag-id (attr :thread-id))))
@@ -87,6 +80,7 @@
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))
+  (store/set-user-joined-groups! (data :user-groups))
   (store/set-threads! (data :user-threads)))
 
 (defmethod sync/event-handler :socket/connected

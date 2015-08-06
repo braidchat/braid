@@ -29,9 +29,38 @@
                       :password "barbaz"
                       :avatar "http://www.barbaz.com/1.jpg"}
         user-2 (db/create-user! user-2-data)
-        users (db/fetch-users)]
+        group (db/create-group! {:id (db/uuid) :name "aoeu"})
+        _ (db/user-add-to-group! (user-1 :id) (group :id))
+        _ (db/user-add-to-group! (user-2 :id) (group :id))
+        users (db/fetch-users-for-user (user-1 :id))]
     (testing "returns all users"
       (is (= (set users) #{user-1 user-2})))))
+
+(deftest only-see-users-in-group
+  (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
+        group-2 (db/create-group! {:id (db/uuid) :name "g2"})
+        user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar "http://www.foobar.com/1.jpg"})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "bar@baz.com"
+                                 :password "barbaz"
+                                 :avatar "http://www.barbaz.com/1.jpg"})
+        user-3 (db/create-user! {:id (db/uuid)
+                                 :email "quux@baz.com"
+                                 :password "barbaz"
+                                 :avatar "http://www.barbaz.com/2.jpg"})]
+    (is (not (db/user-in-group? (user-1 :id) (group-1 :id))))
+    (db/user-add-to-group! (user-1 :id) (group-1 :id))
+    (is (db/user-in-group? (user-1 :id) (group-1 :id)))
+    (db/user-add-to-group! (user-2 :id) (group-1 :id))
+    (db/user-add-to-group! (user-2 :id) (group-2 :id))
+    (db/user-add-to-group! (user-3 :id) (group-2 :id))
+    (is (not (db/user-in-group? (user-1 :id) (group-2 :id))))
+    (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id)))
+    (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id)))
+    (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id)))))
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
@@ -45,6 +74,23 @@
 
     (testing "returns nil when email+password wrong"
       (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
+
+(deftest create-group
+  (let [data {:id (db/uuid)
+              :name "Lean Pixel"}
+        group (db/create-group! data)]
+    (testing "can create a group"
+      (is (= group (assoc data :users nil))))
+    (testing "can add a user to the group"
+      (let [user (db/create-user! {:id (db/uuid)
+                                   :email "foo@bar.com"
+                                   :password "foobar"
+                                   :avatar "http://www.foobar.com/1.jpg"})]
+        (is (= #{} (db/get-groups-for-user (user :id))))
+        (is (= #{} (db/get-users-in-group (group :id))))
+        (db/user-add-to-group! (user :id) (group :id))
+        (is (= #{data} (db/get-groups-for-user (user :id))))
+        (is (= #{user} (db/get-users-in-group (group :id))))))))
 
 (deftest create-message-new
   (let [user-1 (db/create-user! {:id (db/uuid)
@@ -172,29 +218,26 @@
 
 (deftest tags
   (testing "can create tag"
-    (let [tag-data {:id (db/uuid)
-                    :name "acme"}]
+    (let [group (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+          tag-data {:id (db/uuid)
+                    :name "acme"
+                    :group-id (group :id)}]
       (testing "create-tag!"
         (let [tag (db/create-tag! tag-data)]
           (testing "returns tag"
-            (is (= tag tag-data))))))))
-
-(deftest fetch-tags
-  (testing "can fetch tags"
-    (let [tag-1 (db/create-tag! {:id (db/uuid) :name "tag1"})
-          tag-2 (db/create-tag! {:id (db/uuid) :name "tag2"})]
-      (testing "fetch-tags"
-        (let [tags (db/fetch-tags)]
-          (testing "returns tags"
-            (is (= (set tags) #{tag-1 tag-2}))))))))
+            (is (= tag (assoc tag-data :group-name "Lean Pixel")))))))))
 
 (deftest user-can-subscribe-to-tags
   (let [user (db/create-user! {:id (db/uuid)
                                :email "foo@bar.com"
                                :password "foobar"
                                :avatar ""})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2"})]
+        group (db/create-group! {:id (db/uuid)
+                                 :name "Lean Pixel"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
+    (db/user-add-to-group! (user :id) (group :id))
     (testing "user can subscribe to tags"
       (testing "user-subscribe-to-tag!"
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
@@ -211,6 +254,56 @@
         (let [tags (db/get-user-subscribed-tag-ids (user :id))]
           (is (= (set tags) #{})))))))
 
+(deftest user-can-only-subscribe-to-tags-in-group
+  (let [user (db/create-user! {:id (db/uuid)
+                               :email "foo@bar.com"
+                               :password "foobar"
+                               :avatar ""})
+        group-1 (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+        group-2 (db/create-group! {:id (db/uuid)
+                                   :name "Penyo Pal"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})]
+    (db/user-add-to-group! (user :id) (group-1 :id))
+    (testing "user can subscribe to tags"
+      (testing "user-subscribe-to-tag!"
+        (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
+        (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
+      (testing "get-user-subscribed-tags"
+        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
+          (testing "returns subscribed tags"
+            (is (= (set tags) #{(tag-1 :id)}))))))))
+
+(deftest user-can-only-see-tags-in-group
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "quux@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-3 (db/create-user! {:id (db/uuid)
+                                 :email "qaax@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        group-1 (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+        group-2 (db/create-group! {:id (db/uuid)
+                                   :name "Penyo Pal"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
+        tag-3 (db/create-tag! {:id (db/uuid) :name "acme3" :group-id (group-2 :id)})]
+    (db/user-add-to-group! (user-1 :id) (group-1 :id))
+    (db/user-add-to-group! (user-2 :id) (group-1 :id))
+    (db/user-add-to-group! (user-2 :id) (group-2 :id))
+    (db/user-add-to-group! (user-3 :id) (group-2 :id))
+    (testing "user can only see tags in their group(s)"
+      (is (= #{tag-1} (db/fetch-tags-for-user (user-1 :id))))
+      (is (= #{tag-1 tag-2 tag-3} (db/fetch-tags-for-user (user-2 :id))))
+      (is (= #{tag-2 tag-3} (db/fetch-tags-for-user (user-3 :id)))))))
+
 (deftest can-add-tags-to-thread
   (testing "can add tags to thread"
     (let [user (db/create-user! {:id (db/uuid)
@@ -222,8 +315,10 @@
                                    :thread-id (db/uuid)
                                    :created-at (java.util.Date.)
                                    :content "Hello?"})
-          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
-          tag-2 (db/create-tag! {:id (db/uuid) :name "acme2"})]
+          group (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
+          tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
 
       (testing "thread-add-tag!"
         (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
@@ -236,11 +331,14 @@
 
 (deftest tag-thread-user-subscribe
   (testing "given a user subscribed to a tag"
-    (let [tag-1 (db/create-tag! {:id (db/uuid) :name "acme1"})
+    (let [group (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
           user-1 (db/create-user! {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar ""})]
+      (db/user-add-to-group! (user-1 :id) (group :id))
       (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
 
       (testing "when a thread is tagged with that tag"
@@ -253,6 +351,7 @@
                                        :thread-id (db/uuid)
                                        :created-at (java.util.Date.)
                                        :content "Hello?"})]
+          (db/user-add-to-group! (user-2 :id) (group :id))
           (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
           (testing "then the user is subscribed to that thread"
             (let [user-threads (db/get-subscribed-thread-ids-for-user (user-1 :id))]
@@ -263,3 +362,57 @@
             (let [user-threads (db/get-open-thread-ids-for-user (user-1 :id))]
               (is (contains? (set user-threads) (msg :thread-id))))))))))
 
+(deftest user-thread-visibility
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "quux@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-3 (db/create-user! {:id (db/uuid)
+                                 :email "qaax@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        group-1 (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+        group-2 (db/create-group! {:id (db/uuid)
+                                   :name "Penyo Pal"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
+
+        thread-1-id (db/uuid)
+        thread-2-id (db/uuid)]
+
+    (testing "everyone can see threads because they haven't been created"
+      (is (db/user-can-see-thread? (user-1 :id) thread-1-id))
+      (is (db/user-can-see-thread? (user-2 :id) thread-1-id))
+      (is (db/user-can-see-thread? (user-3 :id) thread-1-id)))
+
+    (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
+                         :user-id (user-1 :id) :created-at (java.util.Date.)})
+    (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
+                         :user-id (user-2 :id) :created-at (java.util.Date.)})
+
+    (db/user-add-to-group! (user-2 :id) (group-1 :id))
+    (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
+    (db/thread-add-tag! thread-1-id (tag-1 :id))
+    (db/thread-add-tag! thread-2-id (tag-2 :id))
+
+    (db/user-add-to-group! (user-3 :id) (group-2 :id))
+
+    (testing "user 1 can see thread 1 because they created it"
+      (is (db/user-can-see-thread? (user-1 :id) thread-1-id)))
+    (testing "user 1 can't see thread 2"
+      (is (not (db/user-can-see-thread? (user-1 :id) thread-2-id))))
+
+    (testing "user 2 can see thread 1 because they've already been subscribed"
+      (is (db/user-can-see-thread? (user-2 :id) thread-1-id)))
+    (testing "user 2 can see thread 2 because they created it"
+      (is (db/user-can-see-thread? (user-2 :id) thread-2-id)))
+
+    (testing "user 3 can't see thread 1"
+      (is (not (db/user-can-see-thread? (user-3 :id) thread-1-id))))
+    (testing "user 3 can see thread 2 because they have the tag"
+      (is (db/user-can-see-thread? (user-3 :id) thread-2-id)))))
