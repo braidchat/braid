@@ -91,6 +91,27 @@ body {
         }
 
       }
+      .autocomplete {
+        border: 1px solid #ccc;
+        box-shadow: 0 1px 2px 0 #ccc;
+        .result {
+          padding: 0.25em 0.5em;
+          .tag-name {
+
+          }
+          .group-name {
+            color: #ccc;
+          }
+          &:hover {
+            background: #eee;
+          }
+          &.highlight {
+            .tag-name {
+              font-weight: bold;
+            }
+          }
+        }
+      }
     }
   }
 }
