@@ -103,10 +103,8 @@
 
 ; groups
 
-(defn set-user-joined-groups! [groups]
-  (transact! [:groups] (constantly groups)))
+(defn id->group [group-id]
+  (get-in @app-state [:groups group-id]))
 
-(defn group-name
-  [group-id]
-  (->> @app-state :groups (filter #(= group-id (% :id)))
-       first :name))
+(defn set-user-joined-groups! [groups]
+  (transact! [:groups] (constantly (key-by-id groups))))

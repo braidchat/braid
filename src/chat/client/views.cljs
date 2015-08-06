@@ -190,24 +190,23 @@
                           (aset (.. e -target) "value" "")))
                       :placeholder "New Tag"}))))
 
-(defn tag-group-view [group-tags owner]
+(defn tag-group-view [[group-id tags] owner]
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className "group-tags"}
-        (dom/h2 #js {:className "group-name"}
-          (store/group-name (first group-tags)))
+      (dom/div #js {:className "group"}
+        (dom/h2 #js {:className "name"}
+          (:name (store/id->group group-id)))
         (apply dom/div #js {:className "tags"}
-          (om/build-all tag-view (second group-tags)))
-        (om/build new-tag-view {:group-id (first group-tags)})))))
+          (om/build-all tag-view tags))
+        (om/build new-tag-view {:group-id group-id})))))
 
-(defn tags-view [tags owner]
+(defn tags-view [grouped-tags owner]
   (reify
     om/IRender
     (render [_]
       (apply dom/div #js {:className "tag-groups"}
-        (om/build-all tag-group-view tags)))))
-
+        (om/build-all tag-group-view grouped-tags)))))
 
 (defn chat-view [data owner]
   (reify
@@ -217,20 +216,20 @@
             groups-map (into {} (map (juxt :id (constantly nil))) (data :groups))
             ; groups-map is just map of group-ids to nil, to be merged with
             ; tags, so there is still an entry for groups without any tags
-            tags (->> (data :tags)
-                      vals
-                      (map (fn [tag]
-                             (assoc tag :subscribed?
-                               (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id)))))
-                      (group-by :group-id)
-                      (merge groups-map))]
+            grouped-tags (->> (data :tags)
+                              vals
+                              (map (fn [tag]
+                                     (assoc tag :subscribed?
+                                       (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id)))))
+                              (group-by :group-id)
+                              (merge groups-map))]
         (dom/div nil
           (dom/div #js {:className "meta"}
             (dom/img #js {:className "avatar"
                           :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
-              (om/build tags-view tags)
+              (om/build tags-view grouped-tags)
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
