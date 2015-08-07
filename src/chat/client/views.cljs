@@ -1,6 +1,7 @@
 (ns chat.client.views
   (:require [om.core :as om]
             [om.dom :as dom]
+            [cljs-uuid-utils.core :as uuid]
             [chat.client.views.new-message :refer [new-message-view]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]))
@@ -40,22 +41,21 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
-        (dom/div #js {:className "close"
-                      :onClick (fn [_]
-                                 (dispatch! :hide-thread {:thread-id (thread :id)}))} "×")
+        (when-not (thread :new?)
+          (dom/div #js {:className "close"
+                        :onClick (fn [_]
+                                   (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
         (om/build thread-tags-view thread)
-        (apply dom/div #js {:className "messages"}
-          (om/build-all message-view (->> (thread :messages)
-                                          (sort-by :created-at))
-                        {:key :id}))
-        (om/build new-message-view {:thread-id (thread :id) :placeholder "Reply..."})))))
-
-(defn new-thread-view [data owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "thread"}
-        (om/build new-message-view {:placeholder "Start a new conversation..."})))))
+        (when-not (thread :new?)
+          (apply dom/div #js {:className "messages"}
+            (om/build-all message-view (->> (thread :messages)
+                                            (sort-by :created-at))
+                          {:key :id})))
+        (om/build new-message-view {:thread-id (thread :id)
+                                    :react-key "message"
+                                    :placeholder (if (thread :new?)
+                                                   "Start a conversation..."
+                                                   "Reply...")})))))
 
 (defn tag-view [tag owner]
   (reify
@@ -109,7 +109,11 @@
   (reify
     om/IRender
     (render [_]
-      (let [threads (vals (data :threads))
+      (let [threads (concat (vals (data :threads))
+                          [{:id (uuid/make-random-squuid)
+                            :new? true
+                            :tag-ids []
+                            :messages []}])
             groups-map (into {} (map (juxt :id (constantly nil))) (data :groups))
             ; groups-map is just map of group-ids to nil, to be merged with
             ; tags, so there is still an entry for groups without any tags
@@ -130,8 +134,7 @@
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
-            (concat (om/build-all thread-view threads {:key :id})
-                    [(om/build new-thread-view {} {:react-key "new-thread"})])))))))
+            (concat (om/build-all thread-view threads {:key :id}))))))))
 
 (defn login-view [data owner]
   (reify

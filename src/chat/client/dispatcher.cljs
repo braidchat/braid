@@ -10,14 +10,12 @@
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
-  (let [text (data :content)
-        data (update data :thread-id #(or % (uuid/make-random-squuid)))]
-    (when (not (string/blank? text))
-      (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
-                                          :content text
-                                          :thread-id (data :thread-id)})]
-        (store/add-message! message)
-        (sync/chsk-send! [:chat/new-message message])))))
+  (when-not (string/blank? (data :content))
+    (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
+                                        :content (data :content)
+                                        :thread-id (data :thread-id)})]
+      (store/add-message! message)
+      (sync/chsk-send! [:chat/new-message message]))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
