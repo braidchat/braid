@@ -481,14 +481,18 @@
   [thread-id tag-id]
   (let [subscriber-transactions
         (mapcat (fn [user-id]
-               [[:db/add [:user/id user-id]
-                  :user/subscribed-thread [:thread/id thread-id]]
-                [:db/add [:user/id user-id]
-                 :user/open-thread [:thread/id thread-id]]])
-             (get-users-subscribed-to-tag tag-id))]
-    (d/transact *conn* (conj subscriber-transactions
-                             [:db/add [:thread/id thread-id]
-                              :thread/tag [:tag/id tag-id]]))))
+                  [[:db/add [:user/id user-id]
+                    :user/subscribed-thread [:thread/id thread-id]]
+                   [:db/add [:user/id user-id]
+                    :user/open-thread [:thread/id thread-id]]])
+                (get-users-subscribed-to-tag tag-id))]
+    ; upsert thread (should be a way to do in same transaction?)
+    (d/transact *conn* (concat [{:db/id (d/tempid :entities)
+                                 :thread/id thread-id}]))
+    ; add tag, subscribers
+    (d/transact *conn* (concat [[:db/add [:thread/id thread-id]
+                                 :thread/tag [:tag/id tag-id]]]
+                               subscriber-transactions))))
 
 (defn get-thread-tags
   [thread-id]
