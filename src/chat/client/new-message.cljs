@@ -2,6 +2,7 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [clojure.string :as string]
+            [chat.client.views.helpers :as helpers]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]))
 
@@ -102,6 +103,8 @@
                                                  (dispatch! :tag-thread {:thread-id (config :thread-id)
                                                                          :id (tag :id)})
                                                  (close-autocomplete!))}
+                          (dom/div #js {:className "color-block"
+                                        :style #js {:backgroundColor (helpers/tag->color tag)}})
                           (dom/div #js {:className "tag-name"}
                             (tag :name))
                           (dom/div #js {:className "group-name"}

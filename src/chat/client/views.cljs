@@ -4,7 +4,8 @@
             [cljs-uuid-utils.core :as uuid]
             [chat.client.views.new-message :refer [new-message-view]]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.store :as store]))
+            [chat.client.store :as store]
+            [chat.client.views.helpers :as helpers]))
 
 (defn message-view [message owner]
   (reify
@@ -15,15 +16,6 @@
         (dom/div #js {:className "content"}
           (message :content))))))
 
-(defn tag->color [tag]
-  ; normalized is approximately evenly distributed between 0 and 1
-  (let [normalized (-> (tag :id)
-                       str
-                       (.substring 33 36)
-                       (js/parseInt 16)
-                       (/ 4096))]
-    (str "hsl(" (* 360 normalized) ",60%,60%)")))
-
 (defn thread-tags-view [thread owner]
   (reify
     om/IRender
@@ -33,7 +25,7 @@
         (apply dom/div #js {:className "tags"}
           (map (fn [tag]
                  (dom/div #js {:className "tag"
-                               :style #js {:background-color (tag->color tag)}}
+                               :style #js {:background-color (helpers/tag->color tag)}}
                    (tag :name))) tags))))))
 
 (defn thread-view [thread owner]
@@ -67,7 +59,7 @@
                                  (dispatch! :unsubscribe-from-tag (tag :id))
                                  (dispatch! :subscribe-to-tag (tag :id))))}
         (dom/div #js {:className "color-block"
-                      :style #js {:backgroundColor (tag->color tag)}}
+                      :style #js {:backgroundColor (helpers/tag->color tag)}}
           (when (tag :subscribed?)
             "✔"))
         (dom/span #js {:className "name"}
