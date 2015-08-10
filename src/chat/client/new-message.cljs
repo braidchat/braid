@@ -25,12 +25,12 @@
             thread-tag-ids (-> (store/id->thread (config :thread-id))
                                :tag-ids
                                set)
-            partial-tag (second (re-matches #".*#(.*)" text))
+            partial-tag (second (re-matches #"(?:.|\n)*#(.*)" text))
             results (->> (store/all-tags)
                          (remove (fn [t]
                                    (contains? thread-tag-ids (t :id))))
                          (filter (fn [t]
-                                   (re-matches (re-pattern (str ".*" partial-tag ".*")) (t :name)))))
+                                   (not= -1 (.indexOf (t :name) partial-tag)))))
             highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
