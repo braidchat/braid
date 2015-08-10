@@ -57,37 +57,34 @@
                                            (om/set-state! owner :text (.. e -target -value)))
                                :onKeyDown
                                (fn [e]
-                                 (cond
-                                   ; enter when autocomplete -> tag
-                                   (and (= KeyCodes.ENTER e.keyCode) autocomplete-open?)
-                                   (do
-                                     (.preventDefault e)
-                                     (when-let [tag (nth results highlighted-result-index nil)]
-                                       (dispatch! :tag-thread {:thread-id (config :thread-id)
-                                                               :id (tag :id)})
-                                       (close-autocomplete!)))
-                                   ; enter otherwise -> message
-                                   (and (= KeyCodes.ENTER e.keyCode) (= e.shiftKey false))
-                                   (do
-                                     (.preventDefault e)
-                                     (dispatch! :new-message {:thread-id (config :thread-id)
-                                                              :content text})
-                                     (clear-text!))
+                                 (condp = e.keyCode
+                                   KeyCodes.ENTER
+                                   (cond
+                                     ; enter when autocomplete -> tag
+                                     autocomplete-open?
+                                     (do
+                                       (.preventDefault e)
+                                       (when-let [tag (nth results highlighted-result-index nil)]
+                                         (dispatch! :tag-thread {:thread-id (config :thread-id)
+                                                                 :id (tag :id)})
+                                         (close-autocomplete!)))
+                                     ; enter otherwise -> message
+                                     (not e.shiftKey)
+                                     (do
+                                       (.preventDefault e)
+                                       (dispatch! :new-message {:thread-id (config :thread-id)
+                                                                :content text})
+                                       (clear-text!)))
 
-                                   (= KeyCodes.ESC e.keyCode)
-                                   (do
-                                     (close-autocomplete!))
+                                   KeyCodes.ESC (close-autocomplete!)
 
-                                   (= KeyCodes.UP e.keyCode)
-                                   (do
-                                     (.preventDefault e)
-                                     (highlight-prev!))
+                                   KeyCodes.UP (do
+                                                 (.preventDefault e)
+                                                 (highlight-prev!))
 
-                                   (= KeyCodes.DOWN e.keyCode)
-                                   (do
-                                     (.preventDefault e)
-                                     (highlight-next!))
-                                   :else
+                                   KeyCodes.DOWN (do
+                                                   (.preventDefault e)
+                                                   (highlight-next!))
                                    (when (KeyCodes.isTextModifyingKeyEvent e)
                                      ; Don't clear if a modifier key alone was pressed
                                      (highlight-clear!))))})
