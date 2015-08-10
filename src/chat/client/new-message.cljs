@@ -4,7 +4,8 @@
             [clojure.string :as string]
             [chat.client.views.helpers :as helpers]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.store :as store]))
+            [chat.client.store :as store])
+  (:import [goog.events KeyCodes]))
 
 (defn new-message-view [config owner]
   (reify
@@ -87,7 +88,8 @@
                                      (.preventDefault e)
                                      (highlight-next!))
                                    :else
-                                   (do
+                                   (when (KeyCodes.isTextModifyingKeyEvent e)
+                                     ; Don't clear if a modifier key alone was pressed
                                      (highlight-clear!))))})
 
             (when autocomplete-open?
