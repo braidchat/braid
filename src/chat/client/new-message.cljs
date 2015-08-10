@@ -12,7 +12,7 @@
     om/IInitState
     (init-state [_]
       {:text ""
-       :highlighted-result-index -1 })
+       :highlighted-result-index -1})
     om/IRenderState
     (render-state [_ {:keys [text highlighted-result-index] :as state}]
       (let [clear-tags! (fn []
@@ -59,7 +59,7 @@
                                (fn [e]
                                  (cond
                                    ; enter when autocomplete -> tag
-                                   (and (= 13 e.keyCode) autocomplete-open?)
+                                   (and (= KeyCodes.ENTER e.keyCode) autocomplete-open?)
                                    (do
                                      (.preventDefault e)
                                      (when-let [tag (nth results highlighted-result-index nil)]
@@ -67,23 +67,23 @@
                                                                :id (tag :id)})
                                        (close-autocomplete!)))
                                    ; enter otherwise -> message
-                                   (and (= 13 e.keyCode) (= e.shiftKey false))
+                                   (and (= KeyCodes.ENTER e.keyCode) (= e.shiftKey false))
                                    (do
                                      (.preventDefault e)
                                      (dispatch! :new-message {:thread-id (config :thread-id)
                                                               :content text})
                                      (clear-text!))
-                                   ; esc
-                                   (= 27 e.keyCode)
+
+                                   (= KeyCodes.ESC e.keyCode)
                                    (do
                                      (close-autocomplete!))
-                                   ; up
-                                   (= 38 e.keyCode)
+
+                                   (= KeyCodes.UP e.keyCode)
                                    (do
                                      (.preventDefault e)
                                      (highlight-prev!))
-                                   ; down
-                                   (= 40 e.keyCode)
+
+                                   (= KeyCodes.DOWN e.keyCode)
                                    (do
                                      (.preventDefault e)
                                      (highlight-next!))
