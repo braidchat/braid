@@ -78,11 +78,11 @@
 
                                    KeyCodes.ESC (close-autocomplete!)
 
-                                   KeyCodes.UP (do
+                                   KeyCodes.UP (when autocomplete-open?
                                                  (.preventDefault e)
                                                  (highlight-prev!))
 
-                                   KeyCodes.DOWN (do
+                                   KeyCodes.DOWN (when autocomplete-open?
                                                    (.preventDefault e)
                                                    (highlight-next!))
                                    (when (KeyCodes.isTextModifyingKeyEvent e)
