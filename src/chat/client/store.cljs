@@ -52,6 +52,9 @@
 (defn hide-thread! [thread-id]
   (transact! [:threads] #(dissoc % thread-id)))
 
+(defn id->thread [thread-id]
+  (get-in @app-state [:threads thread-id]))
+
 ; tags
 
 (defn add-tags! [tags]
@@ -61,7 +64,11 @@
   (transact! [:tags (tag :id)] (constantly tag)))
 
 (defn add-tag-to-thread! [tag-id thread-id]
+  (maybe-create-thread! thread-id)
   (transact! [:threads thread-id :tag-ids] #(set (conj % tag-id))))
+
+(defn all-tags []
+  (vals (get-in @app-state [:tags])))
 
 (defn tag-id-for-name
   "returns id for tag with name tag-name if exists, otherwise nil"

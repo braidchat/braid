@@ -329,6 +329,25 @@
           (testing "returns assigned tags"
             (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))))
 
+(deftest adding-tag-can-create-thread
+  (testing "can create thread via tag"
+    (let [user (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+          group (db/create-group! {:id (db/uuid)
+                                   :name "Lean Pixel"})
+          tag (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
+          thread-id (db/uuid)]
+
+      (testing "thread-add-tag!"
+        (db/thread-add-tag! thread-id (tag :id)))
+
+      (testing "get-thread-tags"
+        (let [tags (db/get-thread-tags thread-id)]
+          (testing "returns assigned tags"
+            (is (= (set tags) #{(tag :id)}))))))))
+
 (deftest tag-thread-user-subscribe
   (testing "given a user subscribed to a tag"
     (let [group (db/create-group! {:id (db/uuid)
