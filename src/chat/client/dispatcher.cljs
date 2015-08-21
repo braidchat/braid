@@ -80,4 +80,5 @@
 
 (defmethod sync/event-handler :chat/create-tag
   [[_ data]]
-  (store/add-tag! data))
+  (store/add-tag! data)
+  (dispatch! :subscribe-to-tag (data :id)))
