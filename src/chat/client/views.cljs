@@ -13,8 +13,8 @@
     (render [_]
       (dom/div #js {:className "message"}
         (dom/img #js {:className "avatar" :src (get-in @store/app-state [:users (message :user-id) :avatar])})
-        (dom/div #js {:className "content"}
-          (message :content))))))
+        (apply dom/div #js {:className "content"}
+          (helpers/format-message (message :content)))))))
 
 (defn thread-tags-view [thread owner]
   (reify
