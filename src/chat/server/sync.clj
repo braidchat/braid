@@ -93,10 +93,11 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
-      (do (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))
-          (doseq [uid (->> (:any @connected-uids)
-                           (remove (partial = user-id)))]
-            (chsk-send! uid [:chat/create-tag ?data])))
+      (let [new-tag (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))]
+        (doseq [uid (->> (:any @connected-uids)
+                         (filter #(db/with-conn (db/user-in-tag-group? % (:id new-tag))))
+                         (remove (partial = user-id)))]
+          (chsk-send! uid [:chat/create-tag ?data])))
       ; TODO: indicate permissions error to user?
       (timbre/warnf "User %s attempted to create a tag %s in a disallowed group"
                     user-id (?data :name) (?data :group-id)))))
