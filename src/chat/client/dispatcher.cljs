@@ -4,7 +4,6 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
-            [chat.client.parse :refer [extract-text]]
             [cljs-utils.core :refer [edn-xhr]]))
 
 (defmulti dispatch! (fn [event data] event))
