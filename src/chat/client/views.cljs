@@ -106,7 +106,7 @@
                             :new? true
                             :tag-ids []
                             :messages []}])
-            groups-map (into {} (map (juxt :id (constantly nil))) (data :groups))
+            groups-map (into {} (map (juxt identity (constantly nil))) (keys (data :groups)))
             ; groups-map is just map of group-ids to nil, to be merged with
             ; tags, so there is still an entry for groups without any tags
             grouped-tags (->> (data :tags)
