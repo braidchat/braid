@@ -107,6 +107,8 @@
 (defn subscribe-to-tag! [tag-id]
   (transact! [:user :subscribed-tag-ids] #(conj % tag-id)))
 
+(defn is-subscribed-to-tag? [tag-id]
+  (contains? (get-in @app-state [:user :subscribed-tag-ids]) tag-id))
 
 ; groups
 

@@ -113,7 +113,7 @@
                               vals
                               (map (fn [tag]
                                      (assoc tag :subscribed?
-                                       (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id)))))
+                                       (store/is-subscribed-to-tag? (tag :id)))))
                               (group-by :group-id)
                               (merge groups-map))]
         (dom/div nil
