@@ -18,10 +18,11 @@
   [text]
   (let [url-re #"http(?:s)?://\S+(?:\w|\d|/)"
         text-links-seq (interleave
-                         (map (partial assoc {} :text)
-                              (string/split text url-re))
-                         (map (partial assoc {} :link)
-                              (re-seq url-re text)))]
+                         (->> (string/split text url-re)
+                              seq (or [""])
+                              (map (partial assoc {} :text)))
+                         (->> (re-seq url-re text)
+                              (map (partial assoc {} :link))))]
     (if (empty? text-links-seq)
       (list text)
       (map
