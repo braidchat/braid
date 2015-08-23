@@ -1,6 +1,7 @@
 (ns chat.client.views.helpers
   (:require [om.dom :as dom]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [cljs-utils.core :refer [flip]]))
 
 (defn tag->color [tag]
   ; normalized is approximately evenly distributed between 0 and 1
@@ -17,12 +18,22 @@
   ; tried doing this with instaparse, but the js parser generator is way too slow, it seems
   [text]
   (let [url-re #"http(?:s)?://\S+(?:\w|\d|/)"
+        flipped-or (fn [x y] (or y x))
+        flipped-conj (fn [x y] (conj y x))
+        nop {:text ""}
+        ensure-seq (fn [s]
+                     (->> s
+                          ; make sure seq is non-empty
+                          seq (flipped-or [nop])
+                          ; make sure interleave consumes all of both
+                          vec (flipped-conj nop)))
         text-links-seq (interleave
                          (->> (string/split text url-re)
-                              seq (or [""])
-                              (map (partial assoc {} :text)))
+                              (map (partial assoc {} :text))
+                              ensure-seq)
                          (->> (re-seq url-re text)
-                              (map (partial assoc {} :link))))]
+                              (map (partial assoc {} :link))
+                              ensure-seq))]
     (if (empty? text-links-seq)
       (list text)
       (map
