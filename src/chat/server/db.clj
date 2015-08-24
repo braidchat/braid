@@ -226,6 +226,10 @@
                             :message/created-at])
          db->message)))
 
+(defn group-exists?
+  [group-name]
+  (some? (d/pull (d/db *conn*) '[:group/id] [:group/name group-name])))
+
 (defn create-group!
   [{:keys [name id]}]
   (-> {:group/id id
