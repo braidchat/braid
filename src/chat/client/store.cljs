@@ -5,6 +5,7 @@
                       :tags {}
                       :groups {}
                       :session nil
+                      :error-msg nil
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
                              :user-id nil}
@@ -16,6 +17,14 @@
 
 (defn- transact! [ks f]
   (swap! app-state update-in ks f))
+
+; error
+
+(defn display-error! [msg]
+  (transact! [:error-msg] (constantly msg)))
+
+(defn clear-error! []
+  (transact! [:error-msg] (constantly nil)))
 
 ; session
 

@@ -117,6 +117,12 @@
                               (group-by :group-id)
                               (merge groups-map))]
         (dom/div nil
+          (when-let [err (data :error-msg)]
+            (dom/div #js {:className "error-banner"}
+              err
+              (dom/span #js {:className "close"
+                            :onClick (fn [_] (store/clear-error!))}
+                "×")))
           (dom/div #js {:className "meta"}
             (dom/img #js {:className "avatar"
                           :src (let [user-id (get-in @store/app-state [:session :user-id])]
