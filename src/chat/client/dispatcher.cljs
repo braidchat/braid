@@ -40,6 +40,18 @@
                                        :tag-id tag-id}])
     (store/add-tag-to-thread! tag-id (attr :thread-id))))
 
+(defmethod dispatch! :create-group [_ group]
+  (let [group (schema/make-group group)]
+    (sync/chsk-send!
+      [:chat/create-group group]
+      1000
+      (fn [reply]
+        (when-let [msg (reply :error)]
+          (.error js/console msg)
+          (store/display-error! msg)
+          (store/remove-group! group))))
+    (store/add-group! group)))
+
 (defmethod dispatch! :auth [_ data]
   (edn-xhr {:url "/auth"
             :method :post
