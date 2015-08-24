@@ -103,6 +103,21 @@
       (timbre/warnf "User %s attempted to create a tag %s in a disallowed group"
                     user-id (?data :name) (?data :group-id)))))
 
+(defmethod event-msg-handler :chat/create-group
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (println "Creating group" ?data)
+    (db/with-conn
+      (if-not (db/group-exists? (?data :name))
+        (let [new-group (db/create-group! ?data)]
+          (db/user-add-to-group! user-id (new-group :id)))
+        (do
+          (timbre/warnf "User %s attempted to create group that already exsits %s"
+                        user-id (?data :name))
+          (when ?reply-fn
+            (println "sending reply")
+            (?reply-fn {:error "Group name already taken"})))))))
+
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
