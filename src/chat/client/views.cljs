@@ -5,7 +5,8 @@
             [chat.client.views.new-message :refer [new-message-view]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.helpers :as helpers]))
+            [chat.client.views.helpers :as helpers])
+  (:import [goog.events KeyCodes]))
 
 (defn message-view [message owner]
   (reify
@@ -129,6 +130,16 @@
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
               (om/build tags-view grouped-tags)
+              (dom/div #js {:className "new-group"}
+                (dom/label nil "New Group"
+                  (dom/input #js {:placeholder "Group Name"
+                                  :onKeyDown
+                                  (fn [e]
+                                    (when (= KeyCodes.ENTER e.keyCode)
+                                      (.preventDefault e)
+                                      (let [group-name (.. e -target -value)]
+                                        (dispatch! :create-group {:name group-name})
+                                        (set! (.. e -target -value) "")))) })))
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
