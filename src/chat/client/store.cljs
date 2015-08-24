@@ -1,4 +1,5 @@
-(ns chat.client.store)
+(ns chat.client.store
+  (:require [cljs-utils.core :refer [flip]]))
 
 (def app-state (atom {:threads {}
                       :users {}
@@ -126,3 +127,9 @@
 
 (defn set-user-joined-groups! [groups]
   (transact! [:groups] (constantly (key-by-id groups))))
+
+(defn add-group! [group]
+  (transact! [:groups] (flip assoc (group :id) group)))
+
+(defn remove-group! [group]
+  (transact! [:groups] (flip dissoc (group :id))))
