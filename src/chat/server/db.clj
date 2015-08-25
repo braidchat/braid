@@ -314,7 +314,7 @@
 
 (defn get-invite
   [invite-id]
-  (-> (d/pull (d/db *conn*)
+  (some-> (d/pull (d/db *conn*)
               [:invite/id
                {:invite/from [:user/id]}
                :invite/to
