@@ -312,6 +312,16 @@
       create-entity!
       db->invitation))
 
+(defn get-invite
+  [invite-id]
+  (-> (d/pull (d/db *conn*)
+              [:invite/id
+               {:invite/from [:user/id]}
+               :invite/to
+               {:invite/group [:group/id]}]
+              [:invite/id invite-id])
+      db->invitation))
+
 (defn fetch-users-for-user
   "Get all users visible to given user"
   [user-id]

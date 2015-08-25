@@ -452,9 +452,10 @@
     (db/user-add-to-group! (user-1 :id) (group :id))
     (is (empty? (db/fetch-invitations-for-user (user-1 :id))))
     (is (empty? (db/fetch-invitations-for-user (user-2 :id))))
-    (db/create-invitation! {:id (db/uuid)
-                            :inviter-id (user-1 :id)
-                            :invitee-email (user-2 :email)
-                            :group-id (group :id)})
-    (is (seq (db/fetch-invitations-for-user (user-2 :id))))
-    ))
+    (let [invite-id (db/uuid)
+          invite (db/create-invitation! {:id invite-id
+                                         :inviter-id (user-1 :id)
+                                         :invitee-email (user-2 :email)
+                                         :group-id (group :id)})]
+      (is (= invite (db/get-invite invite-id)))
+      (is (seq (db/fetch-invitations-for-user (user-2 :id)))))))
