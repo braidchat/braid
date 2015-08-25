@@ -141,6 +141,34 @@
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
 
+      ; invitations
+      {:db/ident :invite/id
+       :db/valueType :db.type/uuid
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :invite/group
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :invite/from
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :invite/to
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :invite/created-at
+       :db/valueType :db.type/instant
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+
       ]))
 
 
@@ -166,6 +194,12 @@
   {:id (:group/id e)
    :name (:group/name e)
    :users (:group/user e)})
+
+(defn- db->invitation [e]
+  {:id (:invite/id e)
+   :from (:user/id (:invite/from e))
+   :to (:invite/to e)
+   :group (:group/id (:invite/group e)) })
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -262,6 +296,16 @@
          (when (and user-id (password/check password password-token))
            user-id))))
 
+(defn create-invitation!
+  [{:keys [inviter-id invitee-email group-id]}]
+  (-> {:invite/id (uuid)
+       :invite/group [:group/id group-id]
+       :invite/from [:user/id inviter-id]
+       :invite/to invitee-email
+       :invite/created-at (java.util.Date.)}
+      create-entity!
+      db->invitation))
+
 (defn fetch-users-for-user
   "Get all users visible to given user"
   [user-id]
@@ -276,6 +320,17 @@
             (d/db *conn*) user-id)
        (map (comp db->user first))
        set))
+
+(defn fetch-invitations-for-user
+  [user-id]
+  (d/q '[:find (pull ?i [{:invite/group [:group/id]}
+                         {:invite/from [:user/id]}])
+         :in $ ?user-id
+         :where
+         [?u :user/id ?user-id]
+         [?u :user/email ?email]
+         [?i :invite/to ?email]]
+       (d/db *conn*) user-id))
 
 (defn fetch-messages
   "This almost certainly shouldn't be called outside of tests"

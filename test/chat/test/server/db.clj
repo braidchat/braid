@@ -435,3 +435,22 @@
       (is (not (db/user-can-see-thread? (user-3 :id) thread-1-id))))
     (testing "user 3 can see thread 2 because they have the tag"
       (is (db/user-can-see-thread? (user-3 :id) thread-2-id)))))
+
+(deftest user-invite-to-group
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "bar@baz.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        group (db/create-group! {:name "group 1" :id (db/uuid)})]
+    (db/user-add-to-group! (user-1 :id) (group :id))
+    (is (empty? (db/fetch-invitations-for-user (user-1 :id))))
+    (is (empty? (db/fetch-invitations-for-user (user-2 :id))))
+    (db/create-invitation! {:inviter-id (user-1 :id)
+                            :invitee-email (user-2 :email)
+                            :group-id (group :id)})
+    (is (seq (db/fetch-invitations-for-user (user-2 :id))))
+    ))
