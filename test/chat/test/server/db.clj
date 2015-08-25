@@ -458,4 +458,6 @@
                                          :invitee-email (user-2 :email)
                                          :group-id (group :id)})]
       (is (= invite (db/get-invite invite-id)))
-      (is (seq (db/fetch-invitations-for-user (user-2 :id)))))))
+      (is (seq (db/fetch-invitations-for-user (user-2 :id))))
+      (db/retract-invitation! invite-id)
+      (is (empty? (db/fetch-invitations-for-user (user-2 :id)))))))

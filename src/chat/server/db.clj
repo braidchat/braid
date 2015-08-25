@@ -322,6 +322,10 @@
               [:invite/id invite-id])
       db->invitation))
 
+(defn retract-invitation!
+  [invite-id]
+  (d/transact *conn* [[:db.fn/retractEntity [:invite/id invite-id]]]))
+
 (defn fetch-users-for-user
   "Get all users visible to given user"
   [user-id]
