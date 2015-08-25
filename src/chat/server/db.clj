@@ -303,8 +303,8 @@
           db->user))
 
 (defn create-invitation!
-  [{:keys [inviter-id invitee-email group-id]}]
-  (-> {:invite/id (uuid)
+  [{:keys [id inviter-id invitee-email group-id]}]
+  (-> {:invite/id id
        :invite/group [:group/id group-id]
        :invite/from [:user/id inviter-id]
        :invite/to invitee-email
