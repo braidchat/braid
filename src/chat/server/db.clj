@@ -296,6 +296,12 @@
          (when (and user-id (password/check password password-token))
            user-id))))
 
+(defn user-with-email
+  "get the user with the given email address or nil if no such user registered"
+  [email]
+  (some-> (d/pull (d/db *conn*) '[:user/id :user/email :user/avatar] [:user/email email])
+          db->user))
+
 (defn create-invitation!
   [{:keys [inviter-id invitee-email group-id]}]
   (-> {:invite/id (uuid)

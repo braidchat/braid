@@ -34,7 +34,10 @@
         _ (db/user-add-to-group! (user-2 :id) (group :id))
         users (db/fetch-users-for-user (user-1 :id))]
     (testing "returns all users"
-      (is (= (set users) #{user-1 user-2})))))
+      (is (= (set users) #{user-1 user-2})))
+    (testing "get user by email"
+      (is (= user-1 (db/user-with-email (user-1-data :email))))
+      (is (nil? (db/user-with-email "zzzzz@zzzzzz.ru"))))))
 
 (deftest only-see-users-in-group
   (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
