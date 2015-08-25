@@ -197,9 +197,9 @@
 
 (defn- db->invitation [e]
   {:id (:invite/id e)
-   :from (:user/id (:invite/from e))
-   :to (:invite/to e)
-   :group (:group/id (:invite/group e)) })
+   :inviter-id (:user/id (:invite/from e))
+   :invitee-email (:invite/to e)
+   :group-id (:group/id (:invite/group e)) })
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
