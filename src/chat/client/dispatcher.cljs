@@ -52,6 +52,16 @@
           (store/remove-group! group))))
     (store/add-group! group)))
 
+(defmethod dispatch! :invite [_ data]
+  (let [invite (schema/make-invitation data)]
+    (sync/chsk-send! [:chat/invite-to-group invite])))
+
+(defmethod dispatch! :accept-invite [_ invite]
+  (sync/chsk-send! [:chat/invitation-accept invite]))
+
+(defmethod dispatch! :accept-decline [_ invite]
+  (sync/chsk-send! [:chat/invitation-decline invite]))
+
 (defmethod dispatch! :auth [_ data]
   (edn-xhr {:url "/auth"
             :method :post
@@ -84,6 +94,7 @@
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))
   (store/set-user-joined-groups! (data :user-groups))
+  (store/set-invitations! (data :invitations))
   (store/set-threads! (data :user-threads)))
 
 (defmethod sync/event-handler :socket/connected

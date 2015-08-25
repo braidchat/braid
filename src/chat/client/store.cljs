@@ -7,6 +7,7 @@
                       :groups {}
                       :session nil
                       :error-msg nil
+                      :invitations []
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
                              :user-id nil}
@@ -133,3 +134,8 @@
 
 (defn remove-group! [group]
   (transact! [:groups] (flip dissoc (group :id))))
+
+; invitations
+
+(defn set-invitations! [invitations]
+  (transact! [:invitations] (constantly invitations)))
