@@ -118,6 +118,38 @@
             (println "sending reply")
             (?reply-fn {:error "Group name already taken"})))))))
 
+(defmethod event-msg-handler :chat/invite-to-group
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
+      (let [data (assoc data :inviter-id user-id)
+            invitation (db/with-conn (db/create-invitation! data))]
+        (when-let [invited-user (db/with-conn (db/user-with-email (invitation :to)))]
+          (chsk-send! (invited-user :id) [:chat/invitation-recieved invitation])))
+      ; TODO: indicate permissions error to user?
+      (timbre/warnf "User %s attempted to invite %s to a group %s they don't have access to"
+                    user-id (?data :invitee-email) (?data :group-id)))))
+
+(defmethod event-msg-handler :chat/invitation-accept
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (if-let [invite (db/with-conn (db/get-invite (?data :id)))]
+      (do
+        (db/with-conn
+          ; TODO: need to send group info to user
+          (db/user-add-to-group! user-id (invite :group-id))
+          (db/retract-invitation! (invite :id))))
+      (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
+                    user-id (?data :id)))))
+
+(defmethod event-msg-handler :chat/invitation-decline
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (if-let [invite (db/with-conn (db/get-invite (?data :id)))]
+      (db/with-conn (db/retract-invitation! (invite :id)))
+      (timbre/warnf "User %s attempted to decline nonexistant invitaiton %s"
+                    user-id (?data :id)))))
+
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
@@ -128,6 +160,7 @@
                             :user-threads (db/get-open-threads-for-user user-id)
                             :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
                             :users (db/fetch-users-for-user user-id)
+                            :invitations (db/fetch-invitations-for-user user-id)
                             :tags (db/fetch-tags-for-user user-id)})])))
 
 (defonce router_ (atom nil))
