@@ -122,7 +122,7 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
-      (let [data (assoc data :inviter-id user-id)
+      (let [data (assoc ?data :inviter-id user-id)
             invitation (db/with-conn (db/create-invitation! data))]
         (when-let [invited-user (db/with-conn (db/user-with-email (invitation :to)))]
           (chsk-send! (invited-user :id) [:chat/invitation-recieved invitation])))
