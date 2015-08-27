@@ -105,3 +105,11 @@
   [[_ data]]
   (store/add-tag! data)
   (dispatch! :subscribe-to-tag (data :id)))
+
+(defmethod sync/event-handler :chat/joined-group
+  [[_ group]]
+  (store/add-group! group))
+
+(defmethod sync/event-handler :chat/update-users
+  [[_ data]]
+  (store/add-users! data))
