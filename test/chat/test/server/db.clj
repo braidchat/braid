@@ -461,3 +461,20 @@
       (is (seq (db/fetch-invitations-for-user (user-2 :id))))
       (db/retract-invitation! invite-id)
       (is (empty? (db/fetch-invitations-for-user (user-2 :id)))))))
+
+(deftest adding-user-to-group-subscribes-tags
+  (let [user (db/create-user! {:id (db/uuid)
+                               :email "foo@bar.com"
+                               :password "foobar"
+                               :avatar ""})
+        group (db/create-group! {:name "group" :id (db/uuid)})
+        group-tags (doall
+                     (map db/create-tag!
+                          [{:id (db/uuid) :name "t1" :group-id (group :id)}
+                           {:id (db/uuid) :name "t2" :group-id (group :id)}
+                           {:id (db/uuid) :name "t3" :group-id (group :id)}]))]
+    (is (= group (db/get-group (group :id))))
+    (db/user-add-to-group! (user :id) (group :id))
+    (db/user-subscribe-to-group-tags! (user :id) (group :id))
+    (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
+           (set (map :id group-tags))))))

@@ -376,6 +376,11 @@
        (d/db *conn*)
        user-id))
 
+(defn get-group
+  [group-id]
+  (-> (d/pull (d/db *conn*) [:group/id :group/name] [:group/id group-id])
+      db->group))
+
 (defn get-groups-for-user [user-id]
   (->> (d/q '[:find (pull ?g [:group/id :group/name])
               :in $ ?user-id
@@ -533,6 +538,20 @@
 (defn user-add-to-group! [user-id group-id]
   (d/transact *conn* [[:db/add [:group/id group-id]
                        :group/user [:user/id user-id]]]))
+
+(defn user-subscribe-to-group-tags!
+  "Subscribe the user to all current tags in the group"
+  [user-id group-id]
+  (->> (d/q '[:find ?tag
+              :in $ ?group-id
+              :where
+              [?tag :tag/group ?g]
+              [?g :group/id ?group-id]]
+            (d/db *conn*) group-id)
+       (map (fn [[tag]]
+              [:db/add [:user/id user-id]
+               :user/subscribed-tag tag]))
+       (d/transact *conn*)))
 
 (defn get-user-subscribed-tag-ids
   [user-id]
