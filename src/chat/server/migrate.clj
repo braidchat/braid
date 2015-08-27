@@ -47,33 +47,34 @@
 (defn migrate-2015-08-26
   "schema change for invites"
   []
-  (d/transact db/*conn*
-    [
-     ; invitations
-     {:db/ident :invite/id
-      :db/valueType :db.type/uuid
-      :db/cardinality :db.cardinality/one
-      :db/unique :db.unique/identity
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
-     {:db/ident :invite/group
-      :db/valueType :db.type/ref
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
-     {:db/ident :invite/from
-      :db/valueType :db.type/ref
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
-     {:db/ident :invite/to
-      :db/valueType :db.type/string
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
-     {:db/ident :invite/created-at
-      :db/valueType :db.type/instant
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
-     ]))
+  (db/with-conn
+    (d/transact db/*conn*
+      [
+       ; invitations
+       {:db/ident :invite/id
+        :db/valueType :db.type/uuid
+        :db/cardinality :db.cardinality/one
+        :db/unique :db.unique/identity
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :invite/group
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :invite/from
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :invite/to
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :invite/created-at
+        :db/valueType :db.type/instant
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       ])))
