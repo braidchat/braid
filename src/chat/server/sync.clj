@@ -134,11 +134,12 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (if-let [invite (db/with-conn (db/get-invite (?data :id)))]
-      (do
-        (db/with-conn
-          ; TODO: need to send group info to user
-          (db/user-add-to-group! user-id (invite :group-id))
-          (db/retract-invitation! (invite :id))))
+      (db/with-conn
+        (db/user-add-to-group! user-id (invite :group-id))
+        (db/user-subscribe-to-group-tags! user-id (invite :group-id))
+        (db/retract-invitation! (invite :id))
+        ; TODO: update users visible to user
+        (chsk-send! user-id [:chat/joined-group (db/get-group (invite :group-id))]))
       (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                     user-id (?data :id)))))
 
