@@ -27,6 +27,7 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [com.taoensso/sente "1.5.0"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
+                 [org.clojars.leanpixel/om-fields "1.8.6"]
                  ]
 
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
