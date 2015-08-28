@@ -2,9 +2,10 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [cljs-uuid-utils.core :as uuid]
-            [chat.client.views.new-message :refer [new-message-view]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
+            [chat.client.views.new-message :refer [new-message-view]]
+            [chat.client.views.group-invite :refer [group-invite-view]]
             [chat.client.views.helpers :as helpers])
   (:import [goog.events KeyCodes]))
 
@@ -80,23 +81,24 @@
                           (aset (.. e -target) "value" "")))
                       :placeholder "New Tag"}))))
 
-(defn tag-group-view [[group-id tags] owner]
+(defn group-tags-view [[group-id tags] owner]
   (reify
     om/IRender
     (render [_]
       (dom/div #js {:className "group"}
         (dom/h2 #js {:className "name"}
           (:name (store/id->group group-id)))
+        (om/build group-invite-view group-id)
         (apply dom/div #js {:className "tags"}
           (om/build-all tag-view tags))
         (om/build new-tag-view {:group-id group-id})))))
 
-(defn tags-view [grouped-tags owner]
+(defn groups-view [grouped-tags owner]
   (reify
     om/IRender
     (render [_]
       (apply dom/div #js {:className "tag-groups"}
-        (om/build-all tag-group-view grouped-tags)))))
+        (om/build-all group-tags-view grouped-tags)))))
 
 (defn chat-view [data owner]
   (reify
@@ -129,7 +131,7 @@
                           :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
-              (om/build tags-view grouped-tags)
+              (om/build groups-view grouped-tags)
               (dom/div #js {:className "new-group"}
                 (dom/label nil "New Group"
                   (dom/input #js {:placeholder "Group Name"

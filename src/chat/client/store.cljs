@@ -42,6 +42,13 @@
 (defn add-users! [users]
   (transact! [:users] #(merge % (key-by-id users))))
 
+(defn get-user-emails []
+  (let [me (get-in @app-state [:session :user-id])]
+    (->> (get @app-state :users)
+         vals
+         (remove #(= me (% :id)))
+         (map :email))))
+
 ; threads and messages
 
 (defn set-threads! [threads]
@@ -80,6 +87,9 @@
 
 (defn all-tags []
   (vals (get-in @app-state [:tags])))
+
+(defn tags-in-group [group-id]
+  (filter #(= group-id (% :group-id)) (vals (@app-state :tags))))
 
 (defn tag-id-for-name
   "returns id for tag with name tag-name if exists, otherwise nil"
