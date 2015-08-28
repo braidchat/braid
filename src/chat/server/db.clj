@@ -343,14 +343,15 @@
 
 (defn fetch-invitations-for-user
   [user-id]
-  (d/q '[:find (pull ?i [{:invite/group [:group/id]}
-                         {:invite/from [:user/id]}])
-         :in $ ?user-id
-         :where
-         [?u :user/id ?user-id]
-         [?u :user/email ?email]
-         [?i :invite/to ?email]]
-       (d/db *conn*) user-id))
+  (->> (d/q '[:find (pull ?i [{:invite/group [:group/id :group/name]}
+                              {:invite/from [:user/id :user/email]}])
+              :in $ ?user-id
+              :where
+              [?u :user/id ?user-id]
+              [?u :user/email ?email]
+              [?i :invite/to ?email]]
+            (d/db *conn*) user-id)
+       (map first)))
 
 (defn fetch-messages
   "This almost certainly shouldn't be called outside of tests"
