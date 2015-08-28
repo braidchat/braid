@@ -4,26 +4,17 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
-            [chat.client.parse :refer [extract-text]]
             [cljs-utils.core :refer [edn-xhr]]))
 
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
-  (let [text (data :content)
-        tagless-text (extract-text text)
-        new-thread? (nil? (data :thread-id))
-        data (update data :thread-id #(or % (uuid/make-random-squuid)))]
-    (when (or new-thread? (not (string/blank? tagless-text)))
-      (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
-                                          :content tagless-text
-                                          :thread-id (data :thread-id)})]
-        (store/add-message! message)
-        (sync/chsk-send! [:chat/new-message message])))
-    (when-let [tag-ids (seq (data :tag-ids))]
-      (doseq [tag-id tag-ids]
-        (dispatch! :tag-thread {:thread-id (data :thread-id)
-                                :id tag-id})))))
+  (when-not (string/blank? (data :content))
+    (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
+                                        :content (data :content)
+                                        :thread-id (data :thread-id)})]
+      (store/add-message! message)
+      (sync/chsk-send! [:chat/new-message message]))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
@@ -89,4 +80,5 @@
 
 (defmethod sync/event-handler :chat/create-tag
   [[_ data]]
-  (store/add-tag! data))
+  (store/add-tag! data)
+  (dispatch! :subscribe-to-tag (data :id)))

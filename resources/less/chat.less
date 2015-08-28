@@ -91,6 +91,34 @@ body {
         }
 
       }
+      .autocomplete {
+        border: 1px solid #ccc;
+        box-shadow: 0 1px 2px 0 #ccc;
+        .result {
+          padding: 0.25em 0.5em;
+          .color-block {
+            width: 1em;
+            height: 2em;
+            float: left;
+            border-radius: 2px;
+            margin: 0.25em 0.5em 0.25em 0;
+          }
+          .tag-name {
+
+          }
+          .group-name {
+            color: #ccc;
+          }
+          &:hover {
+            background: #eee;
+          }
+          &.highlight {
+            .tag-name {
+              font-weight: bold;
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -116,6 +144,8 @@ body {
   transition: right 0.5s ease;
   padding: 1em;
   box-sizing: border-box;
+  overflow-y: scroll;
+  overflow-x: hidden;
   .extras {
     display: none;
   }

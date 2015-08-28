@@ -36,6 +36,7 @@
             [lein-cljsbuild "1.0.6"]
             [jamesnvc/lein-lesscss "1.4.0"] ]
 
+  ;:clean-targets ^{:protect false} ["resources/public/js/out"]
   :lesscss-paths ["resources/less"]
   :lesscss-output-path "resources/public/css/out"
   :cljsbuild {:builds

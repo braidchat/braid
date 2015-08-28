@@ -1,18 +1,11 @@
 (ns chat.client.views
   (:require [om.core :as om]
             [om.dom :as dom]
-            [clojure.string :as string]
-            [clojure.set :refer [union]]
+            [cljs-uuid-utils.core :as uuid]
+            [chat.client.views.new-message :refer [new-message-view]]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.parse :refer [extract-tags]]
-            [chat.client.store :as store]))
-
-(defn index-of
-  "clojurescript doesn't get .indexOf as clojure does.  Return nil on not-found instead of -1"
-  [coll v]
-  (let [i (count (take-while (partial not= v) coll))]
-    (when (< i (count coll))
-      i)))
+            [chat.client.store :as store]
+            [chat.client.views.helpers :as helpers]))
 
 (defn message-view [message owner]
   (reify
@@ -20,111 +13,8 @@
     (render [_]
       (dom/div #js {:className "message"}
         (dom/img #js {:className "avatar" :src (get-in @store/app-state [:users (message :user-id) :avatar])})
-        (dom/div #js {:className "content"}
-          (message :content))))))
-
-(defn tag->color [tag]
-  ; normalized is approximately evenly distributed between 0 and 1
-  (let [normalized (-> (tag :id)
-                       str
-                       (.substring 33 36)
-                       (js/parseInt 16)
-                       (/ 4096))]
-    (str "hsl(" (* 360 normalized) ",60%,60%)")))
-
-(defn make-tags-preview
-  "Helper function for new-message-view to display a preview of typed tags"
-  [tags owner]
-  (apply dom/div #js {:className "tags-preview"}
-    (map (fn [tag]
-           (dom/div #js {:className "tag"
-                         ; TODO: style ambiguous tags in some way
-                         :style #js {:background-color (if-let [tag-id (tag :id)]
-                                                         (tag->color {:id tag-id}))}}
-
-             ; If the tag is ambiguous, show the groups it could be in
-             (when-let [possible-tags (tag :possibilities)]
-               (apply dom/div #js {:className "ambiguous"}
-                 (interpose
-                   " or "
-                   (map (fn [t]
-                          (dom/span #js {:className "group"
-                                         :onClick
-                                         (fn [_]
-                                           (om/update-state!
-                                             owner [:ambiguous-tags (tag :idx)]
-                                             (fn [amb-tag]
-                                               (-> amb-tag
-                                                   (dissoc :possibilities)
-                                                   (assoc :id (t :id))))))}
-                            (t :group-name)))
-                        possible-tags))))
-
-             (tag :name)))
-         tags)))
-
-(defn- set-state-for-text
-  "Helper function to set the state (preview-tag-names and tags) of the
-  new-message-view based on the input"
-  [text owner]
-  (om/set-state! owner :text text)
-  (let [tag-names (extract-tags text)
-        {obvious-names true ambiguous-names false} (group-by (complement store/ambiguous-tag?) tag-names)]
-    (om/set-state! owner :obvious-tags (map (fn [tag-name]
-                                              {:name tag-name
-                                               :id (store/tag-id-for-name tag-name)})
-                                            obvious-names))
-    ; setting the ambiguous tags is slightly complicated; we can't just replace
-    ; the existing ambiguous tags, since it's possible the user has selected
-    ; the tag they meant, which we want to retain
-    (om/update-state! owner :ambiguous-tags
-                      (fn [old-tags]
-                        (loop [old-names (mapv :name old-tags)
-                               to-add ambiguous-names
-                               acc []
-                               i 0]
-                          (if (empty? to-add)
-                            acc
-                            (let [tag-name (first to-add)
-                                  idx (index-of old-names tag-name)]
-                              (if (nil? idx)
-                                (recur old-names
-                                       (rest to-add)
-                                       (conj acc {:name tag-name
-                                                  :possibilities (store/ambiguous-tag? tag-name)
-                                                  :idx i})
-                                       (inc i))
-                                (recur (assoc old-names idx nil)
-                                       (rest to-add)
-                                       (conj acc (assoc (nth old-tags idx) :idx i))
-                                       (inc i))))))))))
-
-(defn new-message-view [config owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:obvious-tags []
-       :ambiguous-tags []
-       :text ""})
-    om/IRenderState
-    (render-state [_ {:keys [text] :as state}]
-      (dom/div #js {:className "message new"}
-        (dom/textarea #js {:placeholder (config :placeholder)
-                           :value (state :text)
-                           :onChange (fn [e] (set-state-for-text (.. e -target -value) owner))
-                           :onKeyDown
-                           (fn [e]
-                             (when (and (= 13 e.keyCode) (= e.shiftKey false))
-                               (dispatch! :new-message {:thread-id (config :thread-id)
-                                                        :content text
-                                                        :tag-ids (->> (map :id (concat (state :obvious-tags)
-                                                                                       (state :ambiguous-tags)))
-                                                                      (remove nil?)
-                                                                      set)})
-                               (.preventDefault e)
-                               (om/set-state! owner {:obvious-tags [] :ambiguous-tags [] :text ""})))})
-        (make-tags-preview (concat (state :obvious-tags) (state :ambiguous-tags))
-                           owner)))))
+        (apply dom/div #js {:className "content"}
+          (helpers/format-message (message :content)))))))
 
 (defn thread-tags-view [thread owner]
   (reify
@@ -135,7 +25,7 @@
         (apply dom/div #js {:className "tags"}
           (map (fn [tag]
                  (dom/div #js {:className "tag"
-                               :style #js {:background-color (tag->color tag)}}
+                               :style #js {:background-color (helpers/tag->color tag)}}
                    (tag :name))) tags))))))
 
 (defn thread-view [thread owner]
@@ -143,22 +33,21 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
-        (dom/div #js {:className "close"
-                      :onClick (fn [_]
-                                 (dispatch! :hide-thread {:thread-id (thread :id)}))} "×")
+        (when-not (thread :new?)
+          (dom/div #js {:className "close"
+                        :onClick (fn [_]
+                                   (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
         (om/build thread-tags-view thread)
-        (apply dom/div #js {:className "messages"}
-          (om/build-all message-view (->> (thread :messages)
-                                          (sort-by :created-at))
-                        {:key :id}))
-        (om/build new-message-view {:thread-id (thread :id) :placeholder "Reply..."})))))
-
-(defn new-thread-view [data owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "thread"}
-        (om/build new-message-view {:placeholder "Start a new conversation..."})))))
+        (when-not (thread :new?)
+          (apply dom/div #js {:className "messages"}
+            (om/build-all message-view (->> (thread :messages)
+                                            (sort-by :created-at))
+                          {:key :id})))
+        (om/build new-message-view {:thread-id (thread :id)
+                                    :react-key "message"
+                                    :placeholder (if (thread :new?)
+                                                   "Start a conversation..."
+                                                   "Reply...")})))))
 
 (defn tag-view [tag owner]
   (reify
@@ -170,7 +59,7 @@
                                  (dispatch! :unsubscribe-from-tag (tag :id))
                                  (dispatch! :subscribe-to-tag (tag :id))))}
         (dom/div #js {:className "color-block"
-                      :style #js {:backgroundColor (tag->color tag)}}
+                      :style #js {:backgroundColor (helpers/tag->color tag)}}
           (when (tag :subscribed?)
             "✔"))
         (dom/span #js {:className "name"}
@@ -212,15 +101,19 @@
   (reify
     om/IRender
     (render [_]
-      (let [threads (vals (data :threads))
-            groups-map (into {} (map (juxt :id (constantly nil))) (data :groups))
+      (let [threads (concat (vals (data :threads))
+                          [{:id (uuid/make-random-squuid)
+                            :new? true
+                            :tag-ids []
+                            :messages []}])
+            groups-map (into {} (map (juxt identity (constantly nil))) (keys (data :groups)))
             ; groups-map is just map of group-ids to nil, to be merged with
             ; tags, so there is still an entry for groups without any tags
             grouped-tags (->> (data :tags)
                               vals
                               (map (fn [tag]
                                      (assoc tag :subscribed?
-                                       (contains? (get-in @store/app-state [:user :subscribed-tag-ids]) (tag :id)))))
+                                       (store/is-subscribed-to-tag? (tag :id)))))
                               (group-by :group-id)
                               (merge groups-map))]
         (dom/div nil
@@ -233,8 +126,7 @@
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
-            (concat (om/build-all thread-view threads {:key :id})
-                    [(om/build new-thread-view {} {:react-key "new-thread"})])))))))
+            (concat (om/build-all thread-view threads {:key :id}))))))))
 
 (defn login-view [data owner]
   (reify
