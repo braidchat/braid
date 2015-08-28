@@ -197,9 +197,11 @@
 
 (defn- db->invitation [e]
   {:id (:invite/id e)
-   :inviter-id (:user/id (:invite/from e))
+   :inviter-id (get-in e [:invite/from :user/id])
+   :inviter-email (get-in e [:invite/from :user/email])
    :invitee-email (:invite/to e)
-   :group-id (:group/id (:invite/group e)) })
+   :group-id (get-in e [:invite/group :group/id])
+   :group-name (get-in e [:invite/group :group/name])})
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -316,9 +318,9 @@
   [invite-id]
   (some-> (d/pull (d/db *conn*)
               [:invite/id
-               {:invite/from [:user/id]}
+               {:invite/from [:user/id :user/email]}
                :invite/to
-               {:invite/group [:group/id]}]
+               {:invite/group [:group/id :group/name]}]
               [:invite/id invite-id])
       db->invitation))
 
@@ -344,14 +346,15 @@
 (defn fetch-invitations-for-user
   [user-id]
   (->> (d/q '[:find (pull ?i [{:invite/group [:group/id :group/name]}
-                              {:invite/from [:user/id :user/email]}])
+                              {:invite/from [:user/id :user/email]}
+                              :invite/id])
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]
               [?u :user/email ?email]
               [?i :invite/to ?email]]
             (d/db *conn*) user-id)
-       (map first)))
+       (map (comp db->invitation first))))
 
 (defn fetch-messages
   "This almost certainly shouldn't be called outside of tests"
