@@ -138,8 +138,9 @@
         (db/user-add-to-group! user-id (invite :group-id))
         (db/user-subscribe-to-group-tags! user-id (invite :group-id))
         (db/retract-invitation! (invite :id))
-        ; TODO: update tags
-        (chsk-send! user-id [:chat/joined-group (db/get-group (invite :group-id))])
+        (chsk-send! user-id [:chat/joined-group
+                             {:group (db/get-group (invite :group-id))
+                              :tags (db/get-group-tags (invite :group-id))}])
         (chsk-send! user-id [:chat/update-users (db/fetch-users-for-user user-id)]))
       (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                     user-id (?data :id)))))

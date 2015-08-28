@@ -109,8 +109,11 @@
   (dispatch! :subscribe-to-tag (data :id)))
 
 (defmethod sync/event-handler :chat/joined-group
-  [[_ group]]
-  (store/add-group! group))
+  [[_ data]]
+  (store/add-group! (data :group))
+  (store/add-tags! (data :tags))
+  (doseq [t (data :tags)]
+    (store/subscribe-to-tag! (t :id))))
 
 (defmethod sync/event-handler :chat/update-users
   [[_ data]]
