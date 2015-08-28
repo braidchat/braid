@@ -31,6 +31,7 @@
                             :placeholder "User to invite"
                             :search-fn
                             (fn [s ch]
+                              ; TODO: don't show users already in group
                               (let [emails (->> (store/get-user-emails)
                                                 (filter #(not= -1 (.indexOf % s))))]
                                 (put! ch emails)))
@@ -41,7 +42,8 @@
                            :onClick
                            (fn [_]
                              (dispatch! :invite {:group-id group-id
-                                                 :invitee-email invitee-email}))}
+                                                 :invitee-email invitee-email})
+                             (om/set-state! owner {:collapsed? true :invitee-email ""}))}
             "invite")
           (dom/button #js {:className "close"
                          :onClick (fn [_]
