@@ -597,6 +597,7 @@
                                subscriber-transactions))))
 
 (defn get-thread-tags
+  "Only used for testing"
   [thread-id]
   (d/q '[:find [?tag-id ...]
          :in $ ?thread-id
@@ -606,6 +607,18 @@
          [?tag :tag/id ?tag-id]]
        (d/db *conn*)
        thread-id))
+
+(defn get-group-tags
+  [group-id]
+  (->> (d/q '[:find (pull ?t [:tag/id
+                              :tag/name
+                              {:tag/group [:group/id :group/name]}])
+              :in $ ?group-id
+              :where
+              [?g :group/id ?group-id]
+              [?t :tag/group ?g]]
+            (d/db *conn*) group-id)
+       (map (comp db->tag first))))
 
 (defn fetch-tags-for-user
   "Get all tags visible to the given user"

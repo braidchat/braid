@@ -473,7 +473,10 @@
                           [{:id (db/uuid) :name "t1" :group-id (group :id)}
                            {:id (db/uuid) :name "t2" :group-id (group :id)}
                            {:id (db/uuid) :name "t3" :group-id (group :id)}]))]
-    (is (= group (db/get-group (group :id))))
+    (testing "some misc functions"
+      (is (= group (db/get-group (group :id))))
+      (is (= (set group-tags)
+             (set (db/get-group-tags (group :id))))))
     (db/user-add-to-group! (user :id) (group :id))
     (db/user-subscribe-to-group-tags! (user :id) (group :id))
     (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
