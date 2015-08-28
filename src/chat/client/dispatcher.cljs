@@ -57,10 +57,12 @@
     (sync/chsk-send! [:chat/invite-to-group invite])))
 
 (defmethod dispatch! :accept-invite [_ invite]
-  (sync/chsk-send! [:chat/invitation-accept invite]))
+  (sync/chsk-send! [:chat/invitation-accept invite])
+  (store/remove-invite! invite))
 
-(defmethod dispatch! :accept-decline [_ invite]
-  (sync/chsk-send! [:chat/invitation-decline invite]))
+(defmethod dispatch! :decline-invite [_ invite]
+  (sync/chsk-send! [:chat/invitation-decline invite])
+  (store/remove-invite! invite))
 
 (defmethod dispatch! :auth [_ data]
   (edn-xhr {:url "/auth"
@@ -113,3 +115,7 @@
 (defmethod sync/event-handler :chat/update-users
   [[_ data]]
   (store/add-users! data))
+
+(defmethod sync/event-handler :chat/invitation-recieved
+  [[_ invite]]
+  (store/add-invite! invite))

@@ -124,7 +124,7 @@
     (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
       (let [data (assoc ?data :inviter-id user-id)
             invitation (db/with-conn (db/create-invitation! data))]
-        (when-let [invited-user (db/with-conn (db/user-with-email (invitation :to)))]
+        (when-let [invited-user (db/with-conn (db/user-with-email (invitation :invitee-email)))]
           (chsk-send! (invited-user :id) [:chat/invitation-recieved invitation])))
       ; TODO: indicate permissions error to user?
       (timbre/warnf "User %s attempted to invite %s to a group %s they don't have access to"
@@ -138,6 +138,7 @@
         (db/user-add-to-group! user-id (invite :group-id))
         (db/user-subscribe-to-group-tags! user-id (invite :group-id))
         (db/retract-invitation! (invite :id))
+        ; TODO: update tags
         (chsk-send! user-id [:chat/joined-group (db/get-group (invite :group-id))])
         (chsk-send! user-id [:chat/update-users (db/fetch-users-for-user user-id)]))
       (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"

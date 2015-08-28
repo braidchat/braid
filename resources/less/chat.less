@@ -172,17 +172,16 @@ body {
     display: inline-block;
   }
   .extras {
+    .pending-invites {
+      color: #999;
+      ul.invites {
+        padding-left: 15px;
+      }
+    }
     .group {
       .name {
         color: #999;
         margin-bottom: 0.25em;
-      }
-      .invite-open, .invite-close {
-        cursor: pointer;
-        color: #2b2b2b;
-        border-radius: 2px;
-        background-color: #838383;
-        padding: 0.25em;
       }
       .tags {
         margin: 1em 0;
@@ -204,6 +203,12 @@ body {
             vertical-align: middle;
           }
         }
+      }
+    }
+    .new-group {
+      label {
+        color: #999;
+        font-size: 1.2em;
       }
     }
     .logout {

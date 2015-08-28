@@ -100,6 +100,31 @@
       (apply dom/div #js {:className "tag-groups"}
         (om/build-all group-tags-view grouped-tags)))))
 
+(defn invitations-view
+  [invites owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "pending-invites"}
+        (dom/h2 nil "Invites")
+        (apply dom/ul #js {:className "invites"}
+          (map (fn [invite]
+                 (dom/li #js {:className "invite"}
+                   "Group "
+                   (dom/strong nil (invite :group-name))
+                   " from "
+                   (dom/strong nil (invite :inviter-email))
+                   (dom/br nil)
+                   (dom/button #js {:onClick
+                                    (fn [_]
+                                      (dispatch! :accept-invite invite))}
+                     "Accept")
+                   (dom/button #js {:onClick
+                                    (fn [_]
+                                      (dispatch! :decline-invite invite))}
+                     "Decline")))
+               invites))))))
+
 (defn chat-view [data owner]
   (reify
     om/IRender
@@ -132,6 +157,8 @@
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
               (om/build groups-view grouped-tags)
+              (when (seq (data :invitations))
+                (om/build invitations-view (data :invitations)))
               (dom/div #js {:className "new-group"}
                 (dom/label nil "New Group"
                   (dom/input #js {:placeholder "Group Name"

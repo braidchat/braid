@@ -149,3 +149,9 @@
 
 (defn set-invitations! [invitations]
   (transact! [:invitations] (constantly invitations)))
+
+(defn add-invite! [invite]
+  (transact! [:invitations] #(conj % invite)))
+
+(defn remove-invite! [invite]
+  (transact! [:invitations] (partial remove (partial = invite))))
