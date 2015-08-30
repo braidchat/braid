@@ -21,9 +21,6 @@
     (-> "chat.html"
         clojure.java.io/resource
         slurp))
-  (GET "/92ddKI0spxFCkzmVkgOuMH80zhYikCvD7OVaFqy1l1YkN6N" req
-    (let [user-id (db/with-conn (db/authenticate-user "test@ycombinator.com" (env :tester-password)))]
-      {:status 302 :headers {"Location" "/"} :session (assoc (req :session) :user-id user-id)}))
   (POST "/auth" req
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
