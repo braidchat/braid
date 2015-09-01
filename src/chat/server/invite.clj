@@ -81,7 +81,7 @@
 
 (defn invite-message
   [invite]
-  (let [accept-link ""]
+  (let [accept-link (make-invite-link invite)]
     {:text (str (invite :inviter-email) " has invited to join the " (invite :group-name)
                 " group on chat.leanpixel.com.\n\n"
                 "Go to " accept-link " to accept.")
@@ -96,7 +96,9 @@
   [invite]
   (http/post "https://api.mailgun.net/v3/chat.leanpixel.com/messages"
              {:basic-auth ["api" (env :mailgun-password)]
-              :form-params (merge {:to (invite :invitee-email)}
+              :form-params (merge {:to (invite :invitee-email)
+                                   :from "noreply@chat.leanpixel.com"
+                                   :subject "Join the conversation"}
                                   (invite-message invite))}))
 
 (defn register-page
