@@ -33,7 +33,8 @@
                             (fn [s ch]
                               ; TODO: don't show users already in group
                               (let [emails (->> (store/get-user-emails)
-                                                (filter #(not= -1 (.indexOf % s))))]
+                                                (filter #(not= -1 (.indexOf % s)))
+                                                (cons s))]
                                 (put! ch emails)))
                             :choice-render-fn str
                             :class "autocomplete"}})
