@@ -141,6 +141,34 @@
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
 
+      ; invitations
+      {:db/ident :invite/id
+       :db/valueType :db.type/uuid
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :invite/group
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :invite/from
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :invite/to
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :invite/created-at
+       :db/valueType :db.type/instant
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+
       ]))
 
 
@@ -166,6 +194,14 @@
   {:id (:group/id e)
    :name (:group/name e)
    :users (:group/user e)})
+
+(defn- db->invitation [e]
+  {:id (:invite/id e)
+   :inviter-id (get-in e [:invite/from :user/id])
+   :inviter-email (get-in e [:invite/from :user/email])
+   :invitee-email (:invite/to e)
+   :group-id (get-in e [:invite/group :group/id])
+   :group-name (get-in e [:invite/group :group/name])})
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -226,6 +262,10 @@
                             :message/created-at])
          db->message)))
 
+(defn group-exists?
+  [group-name]
+  (some? (d/pull (d/db *conn*) '[:group/id] [:group/name group-name])))
+
 (defn create-group!
   [{:keys [name id]}]
   (-> {:group/id id
@@ -258,6 +298,36 @@
          (when (and user-id (password/check password password-token))
            user-id))))
 
+(defn user-with-email
+  "get the user with the given email address or nil if no such user registered"
+  [email]
+  (some-> (d/pull (d/db *conn*) '[:user/id :user/email :user/avatar] [:user/email email])
+          db->user))
+
+(defn create-invitation!
+  [{:keys [id inviter-id invitee-email group-id]}]
+  (-> {:invite/id id
+       :invite/group [:group/id group-id]
+       :invite/from [:user/id inviter-id]
+       :invite/to invitee-email
+       :invite/created-at (java.util.Date.)}
+      create-entity!
+      db->invitation))
+
+(defn get-invite
+  [invite-id]
+  (some-> (d/pull (d/db *conn*)
+              [:invite/id
+               {:invite/from [:user/id :user/email]}
+               :invite/to
+               {:invite/group [:group/id :group/name]}]
+              [:invite/id invite-id])
+      db->invitation))
+
+(defn retract-invitation!
+  [invite-id]
+  (d/transact *conn* [[:db.fn/retractEntity [:invite/id invite-id]]]))
+
 (defn fetch-users-for-user
   "Get all users visible to given user"
   [user-id]
@@ -272,6 +342,19 @@
             (d/db *conn*) user-id)
        (map (comp db->user first))
        set))
+
+(defn fetch-invitations-for-user
+  [user-id]
+  (->> (d/q '[:find (pull ?i [{:invite/group [:group/id :group/name]}
+                              {:invite/from [:user/id :user/email]}
+                              :invite/id])
+              :in $ ?user-id
+              :where
+              [?u :user/id ?user-id]
+              [?u :user/email ?email]
+              [?i :invite/to ?email]]
+            (d/db *conn*) user-id)
+       (map (comp db->invitation first))))
 
 (defn fetch-messages
   "This almost certainly shouldn't be called outside of tests"
@@ -296,6 +379,11 @@
                 [?thread :thread/id ?thread-id]]
        (d/db *conn*)
        user-id))
+
+(defn get-group
+  [group-id]
+  (-> (d/pull (d/db *conn*) [:group/id :group/name] [:group/id group-id])
+      db->group))
 
 (defn get-groups-for-user [user-id]
   (->> (d/q '[:find (pull ?g [:group/id :group/name])
@@ -455,6 +543,20 @@
   (d/transact *conn* [[:db/add [:group/id group-id]
                        :group/user [:user/id user-id]]]))
 
+(defn user-subscribe-to-group-tags!
+  "Subscribe the user to all current tags in the group"
+  [user-id group-id]
+  (->> (d/q '[:find ?tag
+              :in $ ?group-id
+              :where
+              [?tag :tag/group ?g]
+              [?g :group/id ?group-id]]
+            (d/db *conn*) group-id)
+       (map (fn [[tag]]
+              [:db/add [:user/id user-id]
+               :user/subscribed-tag tag]))
+       (d/transact *conn*)))
+
 (defn get-user-subscribed-tag-ids
   [user-id]
   (d/q '[:find [?tag-id ...]
@@ -495,6 +597,7 @@
                                subscriber-transactions))))
 
 (defn get-thread-tags
+  "Only used for testing"
   [thread-id]
   (d/q '[:find [?tag-id ...]
          :in $ ?thread-id
@@ -504,6 +607,18 @@
          [?tag :tag/id ?tag-id]]
        (d/db *conn*)
        thread-id))
+
+(defn get-group-tags
+  [group-id]
+  (->> (d/q '[:find (pull ?t [:tag/id
+                              :tag/name
+                              {:tag/group [:group/id :group/name]}])
+              :in $ ?group-id
+              :where
+              [?g :group/id ?group-id]
+              [?t :tag/group ?g]]
+            (d/db *conn*) group-id)
+       (map (comp db->tag first))))
 
 (defn fetch-tags-for-user
   "Get all tags visible to the given user"

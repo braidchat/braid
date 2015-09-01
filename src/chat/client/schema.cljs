@@ -13,3 +13,12 @@
   {:id (or (data :id) (uuid/make-random-squuid))
    :name (data :name)
    :group-id (data :group-id)})
+
+(defn make-group [data]
+  {:id (or (data :id) (uuid/make-random-squuid))
+   :name (data :name)})
+
+(defn make-invitation [data]
+  {:id (or (data :id) (uuid/make-random-squuid))
+   :invitee-email (data :invitee-email)
+   :group-id (data :group-id)})
