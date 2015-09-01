@@ -5,6 +5,7 @@
             [taoensso.timbre :as timbre :refer [debugf]]
             [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
             [chat.server.db :as db]
+            [chat.server.invite :as invites]
             [clojure.set :refer [difference intersection]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
@@ -124,8 +125,9 @@
     (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
       (let [data (assoc ?data :inviter-id user-id)
             invitation (db/with-conn (db/create-invitation! data))]
-        (when-let [invited-user (db/with-conn (db/user-with-email (invitation :invitee-email)))]
-          (chsk-send! (invited-user :id) [:chat/invitation-recieved invitation])))
+        (if-let [invited-user (db/with-conn (db/user-with-email (invitation :invitee-email)))]
+          (chsk-send! (invited-user :id) [:chat/invitation-recieved invitation])
+          (invites/send-invite invitation)))
       ; TODO: indicate permissions error to user?
       (timbre/warnf "User %s attempted to invite %s to a group %s they don't have access to"
                     user-id (?data :invitee-email) (?data :group-id)))))
