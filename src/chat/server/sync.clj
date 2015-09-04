@@ -1,6 +1,6 @@
 (ns chat.server.sync
   (:require [taoensso.sente :as sente]
-            [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)]
+            [taoensso.sente.server-adapters.http-kit :refer [sente-web-server-adapter]]
             [compojure.core :refer [GET POST routes defroutes context]]
             [taoensso.timbre :as timbre :refer [debugf]]
             [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
@@ -51,8 +51,7 @@
                                     (set subscribed-user-ids)
                                     (set (:any @connected-uids)))
                                   (set ids-to-skip)))
-        thread (db/with-conn
-                 (db/get-thread thread-id))]
+        thread (db/with-conn (db/get-thread thread-id))]
     (doseq [uid user-ids-to-send-to]
       (chsk-send! uid [:chat/thread thread]))))
 
