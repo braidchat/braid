@@ -71,8 +71,8 @@
                    :password (data :password)
                    :csrf-token (:csrf-token @sync/chsk-state)}
             :on-error (fn [e]
-                        ; TODO
-                        )
+                        (when-let [cb (data :on-error)]
+                          (cb)))
             :on-complete (fn [data]
                            (sync/reconnect!))}))
 

@@ -179,10 +179,14 @@
     om/IInitState
     (init-state [_]
       {:email ""
-       :password ""})
+       :password ""
+       :error false})
     om/IRenderState
     (render-state [_ state]
       (dom/div #js {:className "login"}
+        (when (state :error)
+          (dom/div #js {:className "error"}
+            "Bad credentials, please try again"))
         (dom/input
           #js {:placeholder "Email"
                :type "text"
@@ -195,8 +199,12 @@
                :onChange (fn [e] (om/set-state! owner :password (.. e -target -value)))})
         (dom/button
           #js {:onClick (fn [e]
-                          (dispatch! :auth {:email (state :email)
-                                            :password (state :password)}))}
+                          (dispatch! :auth
+                                     {:email (state :email)
+                                      :password (state :password)
+                                      :on-error
+                                      (fn []
+                                        (om/set-state! owner :error true))}))}
           "Let's do this!")))))
 
 (defn app-view [data owner]
