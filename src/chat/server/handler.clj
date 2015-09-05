@@ -59,6 +59,7 @@
 
 (defroutes api-routes
   (POST "/auth" req
+    (println "auth" req (req :params))
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
                          (db/with-conn (db/authenticate-user email password))))]
@@ -73,27 +74,27 @@
                                     :port 6379}})
 
 (def app
-  (routes
-    (wrap-defaults
-      (routes sync-routes api-routes)
-      (-> api-defaults
-          (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
-          (assoc-in [:session :store] (carmine/carmine-store *redis-conf*
-                                                             {:expiration-secs (* 60 60 24 7)
-                                                              :key-prefix "lpchat"}))))
-      (->
-        (wrap-defaults
-          (routes
-            resource-routes
-            site-routes)
-          (-> site-defaults ; ssl stuff will be handled by nginx
-              (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
-              (assoc-in [:session :store] (carmine/carmine-store *redis-conf*
-                                                                 {:expiration-secs (* 60 60 24 7)
-                                                                  :key-prefix "lpchat"}))
-              (assoc-in [:security :anti-forgery]
-                {:read-token (fn [req] (-> req :params :csrf-token))})))
-        wrap-edn-params)))
+  (->
+    (routes
+      (wrap-defaults
+        (routes sync-routes api-routes)
+        (-> api-defaults
+            (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
+            (assoc-in [:session :store] (carmine/carmine-store *redis-conf*
+                                                               {:expiration-secs (* 60 60 24 7)
+                                                                :key-prefix "lpchat"}))))
+      (wrap-defaults
+        (routes
+          resource-routes
+          site-routes)
+        (-> site-defaults ; ssl stuff will be handled by nginx
+            (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
+            (assoc-in [:session :store] (carmine/carmine-store *redis-conf*
+                                                               {:expiration-secs (* 60 60 24 7)
+                                                                :key-prefix "lpchat"}))
+            (assoc-in [:security :anti-forgery]
+              {:read-token (fn [req] (-> req :params :csrf-token))}))))
+    wrap-edn-params))
 
 (defonce server (atom nil))
 
