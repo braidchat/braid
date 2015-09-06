@@ -203,6 +203,26 @@
    :group-id (get-in e [:invite/group :group/id])
    :group-name (get-in e [:invite/group :group/name])})
 
+(defn- db->tag
+  [e]
+  {:id (:tag/id e)
+   :name (:tag/name e)
+   :group-id (get-in e [:tag/group :group/id])
+   :group-name (get-in e [:tag/group :group/name])})
+
+(defn- db->thread
+  [thread]
+  {:id (thread :thread/id)
+   :messages (map (fn [msg]
+                    {:id (msg :message/id)
+                     :content (msg :message/content)
+                     :user-id (get-in msg [:message/user :user/id])
+                     :created-at (msg :message/created-at)})
+                  (thread :message/_thread))
+   :tag-ids (map (fn [tag]
+                   (tag :tag/id))
+                 (thread :thread/tag))})
+
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
   [& body]
@@ -407,19 +427,6 @@
        (map (comp db->user first))
        set))
 
-(defn- db->thread
-  [thread]
-  {:id (thread :thread/id)
-   :messages (map (fn [msg]
-                    {:id (msg :message/id)
-                     :content (msg :message/content)
-                     :user-id (get-in msg [:message/user :user/id])
-                     :created-at (msg :message/created-at)})
-                  (thread :message/_thread))
-   :tag-ids (map (fn [tag]
-                   (tag :tag/id))
-                 (thread :thread/tag))})
-
 (defn get-open-threads-for-user
   [user-id]
   (->> (d/q '[:find (pull ?thread [:thread/id
@@ -470,13 +477,6 @@
   (d/transact
     *conn*
     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
-
-(defn- db->tag
-  [e]
-  {:id (:tag/id e)
-   :name (:tag/name e)
-   :group-id (get-in e [:tag/group :group/id])
-   :group-name (get-in e [:tag/group :group/name])})
 
 (defn create-tag! [attrs]
   (-> {:tag/id (attrs :id)
