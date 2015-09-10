@@ -59,7 +59,6 @@
 
 (defroutes api-routes
   (POST "/auth" req
-    (println "auth" req (req :params))
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
                          (db/with-conn (db/authenticate-user email password))))]
