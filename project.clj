@@ -18,6 +18,8 @@
                  [com.taoensso/carmine "2.11.1"]
                  [org.clojure/tools.nrepl "0.2.10"]
                  [crypto-password "0.1.3"]
+                 [clj-aws-s3 "0.3.10" :exclusions [joda-time]]
+                 [joda-time "2.8.2"]
                  ;client
                  [org.clojure/clojurescript "0.0-3308"]
                  [org.omcljs/om "0.8.8"]
@@ -27,6 +29,7 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [com.taoensso/sente "1.5.0"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
+                 [org.clojars.leanpixel/om-fields "1.8.6"]
                  ]
 
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"

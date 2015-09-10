@@ -1,10 +1,13 @@
-(ns chat.client.store)
+(ns chat.client.store
+  (:require [cljs-utils.core :refer [flip]]))
 
 (def app-state (atom {:threads {}
                       :users {}
                       :tags {}
                       :groups {}
                       :session nil
+                      :error-msg nil
+                      :invitations []
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
                              :user-id nil}
@@ -16,6 +19,14 @@
 
 (defn- transact! [ks f]
   (swap! app-state update-in ks f))
+
+; error
+
+(defn display-error! [msg]
+  (transact! [:error-msg] (constantly msg)))
+
+(defn clear-error! []
+  (transact! [:error-msg] (constantly nil)))
 
 ; session
 
@@ -30,6 +41,13 @@
 
 (defn add-users! [users]
   (transact! [:users] #(merge % (key-by-id users))))
+
+(defn get-user-emails []
+  (let [me (get-in @app-state [:session :user-id])]
+    (->> (get @app-state :users)
+         vals
+         (remove #(= me (% :id)))
+         (map :email))))
 
 ; threads and messages
 
@@ -69,6 +87,9 @@
 
 (defn all-tags []
   (vals (get-in @app-state [:tags])))
+
+(defn tags-in-group [group-id]
+  (filter #(= group-id (% :group-id)) (vals (@app-state :tags))))
 
 (defn tag-id-for-name
   "returns id for tag with name tag-name if exists, otherwise nil"
@@ -117,3 +138,20 @@
 
 (defn set-user-joined-groups! [groups]
   (transact! [:groups] (constantly (key-by-id groups))))
+
+(defn add-group! [group]
+  (transact! [:groups] (flip assoc (group :id) group)))
+
+(defn remove-group! [group]
+  (transact! [:groups] (flip dissoc (group :id))))
+
+; invitations
+
+(defn set-invitations! [invitations]
+  (transact! [:invitations] (constantly invitations)))
+
+(defn add-invite! [invite]
+  (transact! [:invitations] #(conj % invite)))
+
+(defn remove-invite! [invite]
+  (transact! [:invitations] (partial remove (partial = invite))))

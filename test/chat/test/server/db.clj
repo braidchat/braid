@@ -34,7 +34,10 @@
         _ (db/user-add-to-group! (user-2 :id) (group :id))
         users (db/fetch-users-for-user (user-1 :id))]
     (testing "returns all users"
-      (is (= (set users) #{user-1 user-2})))))
+      (is (= (set users) #{user-1 user-2})))
+    (testing "get user by email"
+      (is (= user-1 (db/user-with-email (user-1-data :email))))
+      (is (nil? (db/user-with-email "zzzzz@zzzzzz.ru"))))))
 
 (deftest only-see-users-in-group
   (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
@@ -435,3 +438,46 @@
       (is (not (db/user-can-see-thread? (user-3 :id) thread-1-id))))
     (testing "user 3 can see thread 2 because they have the tag"
       (is (db/user-can-see-thread? (user-3 :id) thread-2-id)))))
+
+(deftest user-invite-to-group
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "bar@baz.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        group (db/create-group! {:name "group 1" :id (db/uuid)})]
+    (db/user-add-to-group! (user-1 :id) (group :id))
+    (is (empty? (db/fetch-invitations-for-user (user-1 :id))))
+    (is (empty? (db/fetch-invitations-for-user (user-2 :id))))
+    (let [invite-id (db/uuid)
+          invite (db/create-invitation! {:id invite-id
+                                         :inviter-id (user-1 :id)
+                                         :invitee-email (user-2 :email)
+                                         :group-id (group :id)})]
+      (is (= invite (db/get-invite invite-id)))
+      (is (seq (db/fetch-invitations-for-user (user-2 :id))))
+      (db/retract-invitation! invite-id)
+      (is (empty? (db/fetch-invitations-for-user (user-2 :id)))))))
+
+(deftest adding-user-to-group-subscribes-tags
+  (let [user (db/create-user! {:id (db/uuid)
+                               :email "foo@bar.com"
+                               :password "foobar"
+                               :avatar ""})
+        group (db/create-group! {:name "group" :id (db/uuid)})
+        group-tags (doall
+                     (map db/create-tag!
+                          [{:id (db/uuid) :name "t1" :group-id (group :id)}
+                           {:id (db/uuid) :name "t2" :group-id (group :id)}
+                           {:id (db/uuid) :name "t3" :group-id (group :id)}]))]
+    (testing "some misc functions"
+      (is (= group (db/get-group (group :id))))
+      (is (= (set group-tags)
+             (set (db/get-group-tags (group :id))))))
+    (db/user-add-to-group! (user :id) (group :id))
+    (db/user-subscribe-to-group-tags! (user :id) (group :id))
+    (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
+           (set (map :id group-tags))))))

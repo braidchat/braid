@@ -43,3 +43,38 @@
           all-tags (->> (d/q '[:find ?t :where [?t :tag/id]] (d/db db/*conn*)) (map first))]
       (d/transact db/*conn* (mapv (fn [u] [:db/add [:group/id (group :id)] :group/user u]) all-users))
       (d/transact db/*conn* (mapv (fn [t] [:db/add t :tag/group [:group/id (group :id)]]) all-tags)))))
+
+(defn migrate-2015-08-26
+  "schema change for invites"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [
+       ; invitations
+       {:db/ident :invite/id
+        :db/valueType :db.type/uuid
+        :db/cardinality :db.cardinality/one
+        :db/unique :db.unique/identity
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :invite/group
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :invite/from
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :invite/to
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :invite/created-at
+        :db/valueType :db.type/instant
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       ])))

@@ -2,10 +2,12 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [cljs-uuid-utils.core :as uuid]
-            [chat.client.views.new-message :refer [new-message-view]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.helpers :as helpers]))
+            [chat.client.views.new-message :refer [new-message-view]]
+            [chat.client.views.group-invite :refer [group-invite-view]]
+            [chat.client.views.helpers :as helpers])
+  (:import [goog.events KeyCodes]))
 
 (defn message-view [message owner]
   (reify
@@ -79,23 +81,49 @@
                           (aset (.. e -target) "value" "")))
                       :placeholder "New Tag"}))))
 
-(defn tag-group-view [[group-id tags] owner]
+(defn group-tags-view [[group-id tags] owner]
   (reify
     om/IRender
     (render [_]
       (dom/div #js {:className "group"}
         (dom/h2 #js {:className "name"}
           (:name (store/id->group group-id)))
+        (om/build group-invite-view group-id)
         (apply dom/div #js {:className "tags"}
           (om/build-all tag-view tags))
         (om/build new-tag-view {:group-id group-id})))))
 
-(defn tags-view [grouped-tags owner]
+(defn groups-view [grouped-tags owner]
   (reify
     om/IRender
     (render [_]
       (apply dom/div #js {:className "tag-groups"}
-        (om/build-all tag-group-view grouped-tags)))))
+        (om/build-all group-tags-view grouped-tags)))))
+
+(defn invitations-view
+  [invites owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "pending-invites"}
+        (dom/h2 nil "Invites")
+        (apply dom/ul #js {:className "invites"}
+          (map (fn [invite]
+                 (dom/li #js {:className "invite"}
+                   "Group "
+                   (dom/strong nil (invite :group-name))
+                   " from "
+                   (dom/strong nil (invite :inviter-email))
+                   (dom/br nil)
+                   (dom/button #js {:onClick
+                                    (fn [_]
+                                      (dispatch! :accept-invite invite))}
+                     "Accept")
+                   (dom/button #js {:onClick
+                                    (fn [_]
+                                      (dispatch! :decline-invite invite))}
+                     "Decline")))
+               invites))))))
 
 (defn chat-view [data owner]
   (reify
@@ -117,12 +145,30 @@
                               (group-by :group-id)
                               (merge groups-map))]
         (dom/div nil
+          (when-let [err (data :error-msg)]
+            (dom/div #js {:className "error-banner"}
+              err
+              (dom/span #js {:className "close"
+                            :onClick (fn [_] (store/clear-error!))}
+                "×")))
           (dom/div #js {:className "meta"}
             (dom/img #js {:className "avatar"
                           :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
-              (om/build tags-view grouped-tags)
+              (om/build groups-view grouped-tags)
+              (when (seq (data :invitations))
+                (om/build invitations-view (data :invitations)))
+              (dom/div #js {:className "new-group"}
+                (dom/label nil "New Group"
+                  (dom/input #js {:placeholder "Group Name"
+                                  :onKeyDown
+                                  (fn [e]
+                                    (when (= KeyCodes.ENTER e.keyCode)
+                                      (.preventDefault e)
+                                      (let [group-name (.. e -target -value)]
+                                        (dispatch! :create-group {:name group-name})
+                                        (set! (.. e -target -value) "")))) })))
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
@@ -133,10 +179,14 @@
     om/IInitState
     (init-state [_]
       {:email ""
-       :password ""})
+       :password ""
+       :error false})
     om/IRenderState
     (render-state [_ state]
       (dom/div #js {:className "login"}
+        (when (state :error)
+          (dom/div #js {:className "error"}
+            "Bad credentials, please try again"))
         (dom/input
           #js {:placeholder "Email"
                :type "text"
@@ -149,8 +199,12 @@
                :onChange (fn [e] (om/set-state! owner :password (.. e -target -value)))})
         (dom/button
           #js {:onClick (fn [e]
-                          (dispatch! :auth {:email (state :email)
-                                            :password (state :password)}))}
+                          (dispatch! :auth
+                                     {:email (state :email)
+                                      :password (state :password)
+                                      :on-error
+                                      (fn []
+                                        (om/set-state! owner :error true))}))}
           "Let's do this!")))))
 
 (defn app-view [data owner]

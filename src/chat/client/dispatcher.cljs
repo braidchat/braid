@@ -40,6 +40,30 @@
                                        :tag-id tag-id}])
     (store/add-tag-to-thread! tag-id (attr :thread-id))))
 
+(defmethod dispatch! :create-group [_ group]
+  (let [group (schema/make-group group)]
+    (sync/chsk-send!
+      [:chat/create-group group]
+      1000
+      (fn [reply]
+        (when-let [msg (reply :error)]
+          (.error js/console msg)
+          (store/display-error! msg)
+          (store/remove-group! group))))
+    (store/add-group! group)))
+
+(defmethod dispatch! :invite [_ data]
+  (let [invite (schema/make-invitation data)]
+    (sync/chsk-send! [:chat/invite-to-group invite])))
+
+(defmethod dispatch! :accept-invite [_ invite]
+  (sync/chsk-send! [:chat/invitation-accept invite])
+  (store/remove-invite! invite))
+
+(defmethod dispatch! :decline-invite [_ invite]
+  (sync/chsk-send! [:chat/invitation-decline invite])
+  (store/remove-invite! invite))
+
 (defmethod dispatch! :auth [_ data]
   (edn-xhr {:url "/auth"
             :method :post
@@ -47,8 +71,8 @@
                    :password (data :password)
                    :csrf-token (:csrf-token @sync/chsk-state)}
             :on-error (fn [e]
-                        ; TODO
-                        )
+                        (when-let [cb (data :on-error)]
+                          (cb)))
             :on-complete (fn [data]
                            (sync/reconnect!))}))
 
@@ -72,6 +96,7 @@
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))
   (store/set-user-joined-groups! (data :user-groups))
+  (store/set-invitations! (data :invitations))
   (store/set-threads! (data :user-threads)))
 
 (defmethod sync/event-handler :socket/connected
@@ -82,3 +107,18 @@
   [[_ data]]
   (store/add-tag! data)
   (dispatch! :subscribe-to-tag (data :id)))
+
+(defmethod sync/event-handler :chat/joined-group
+  [[_ data]]
+  (store/add-group! (data :group))
+  (store/add-tags! (data :tags))
+  (doseq [t (data :tags)]
+    (store/subscribe-to-tag! (t :id))))
+
+(defmethod sync/event-handler :chat/update-users
+  [[_ data]]
+  (store/add-users! data))
+
+(defmethod sync/event-handler :chat/invitation-recieved
+  [[_ invite]]
+  (store/add-invite! invite))
