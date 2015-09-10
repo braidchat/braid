@@ -129,12 +129,7 @@
   (reify
     om/IRender
     (render [_]
-      (let [threads (concat (vals (data :threads))
-                          [{:id (uuid/make-random-squuid)
-                            :new? true
-                            :tag-ids []
-                            :messages []}])
-            groups-map (into {} (map (juxt identity (constantly nil))) (keys (data :groups)))
+      (let [groups-map (into {} (map (juxt identity (constantly nil))) (keys (data :groups)))
             ; groups-map is just map of group-ids to nil, to be merged with
             ; tags, so there is still an entry for groups without any tags
             grouped-tags (->> (data :tags)
@@ -172,7 +167,13 @@
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
-            (om/build-all thread-view threads {:key :id})))))))
+            (concat (om/build-all thread-view (vals (data :threads)) {:key :id})
+                    [(om/build thread-view
+                               {:id (uuid/make-random-squuid)
+                                :new? true
+                                :tag-ids []
+                                :messages []}
+                               {:react-key "new-thread"})])))))))
 
 (defn login-view [data owner]
   (reify
