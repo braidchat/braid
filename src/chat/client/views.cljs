@@ -46,10 +46,10 @@
                                             (sort-by :created-at))
                           {:key :id})))
         (om/build new-message-view {:thread-id (thread :id)
-                                    :react-key "message"
                                     :placeholder (if (thread :new?)
                                                    "Start a conversation..."
-                                                   "Reply...")})))))
+                                                   "Reply...")}
+                  {:react-key "message"})))))
 
 (defn tag-view [tag owner]
   (reify
