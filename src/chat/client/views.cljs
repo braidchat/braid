@@ -172,7 +172,7 @@
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
-            (concat (om/build-all thread-view threads {:key :id}))))))))
+            (om/build-all thread-view threads {:key :id})))))))
 
 (defn login-view [data owner]
   (reify
