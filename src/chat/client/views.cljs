@@ -167,7 +167,11 @@
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (apply dom/div #js {:className "threads"}
-            (concat (om/build-all thread-view (vals (data :threads)) {:key :id})
+            (concat (om/build-all thread-view
+                                  (->> (vals (data :threads))
+                                       (sort-by (fn [t]
+                                                  (apply min (map :created-at (t :messages))))))
+                                  {:key :id})
                     [(om/build thread-view
                                {:id (uuid/make-random-squuid)
                                 :new? true
