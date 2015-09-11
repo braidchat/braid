@@ -169,8 +169,8 @@
           (apply dom/div #js {:className "threads"}
             (concat (om/build-all thread-view
                                   (->> (vals (data :threads))
-                                       (sort-by (fn [t]
-                                                  (apply min (map :created-at (t :messages))))))
+                                       (sort-by
+                                         (comp (partial apply min) (partial map :created-at) :messages)))
                                   {:key :id})
                     [(om/build thread-view
                                {:id (uuid/make-random-squuid)
