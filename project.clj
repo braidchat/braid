@@ -23,7 +23,7 @@
                  ;client
                  [org.clojure/clojurescript "0.0-3308"]
                  [org.omcljs/om "0.8.8"]
-                 [org.clojars.leanpixel/cljs-utils "0.2.0"]
+                 [org.clojars.leanpixel/cljs-utils "0.2.1"]
                  [prismatic/schema "0.4.3"]
                  [secretary "1.2.3"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
