@@ -53,7 +53,9 @@
                                   (set ids-to-skip)))
         thread (db/with-conn (db/get-thread thread-id))]
     (doseq [uid user-ids-to-send-to]
-      (chsk-send! uid [:chat/thread thread]))))
+      (let [user-tags (db/with-conn (db/get-user-visible-tag-ids uid))
+            filtered-thread (update-in thread [:tag-ids] (partial filter user-tags))]
+        (chsk-send! uid [:chat/thread filtered-thread])))))
 
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

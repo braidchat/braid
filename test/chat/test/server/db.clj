@@ -480,4 +480,45 @@
     (db/user-add-to-group! (user :id) (group :id))
     (db/user-subscribe-to-group-tags! (user :id) (group :id))
     (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
+           (db/get-user-visible-tag-ids (user :id))
            (set (map :id group-tags))))))
+
+(deftest tagging-thread-with-disjoint-groups
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "bar@foo.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        group-1 (db/create-group! {:name "group1" :id (db/uuid)})
+        group-2 (db/create-group! {:name "group2" :id (db/uuid)})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "tag1" :group-id (group-1 :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "tag2" :group-id (group-2 :id)})
+        thread-id (db/uuid)]
+
+    (db/user-add-to-group! (user-1 :id) (group-1 :id))
+    (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
+
+    (db/user-add-to-group! (user-1 :id) (group-2 :id))
+    (db/user-subscribe-to-tag! (user-1 :id) (tag-2 :id))
+
+    (db/user-add-to-group! (user-2 :id) (group-1 :id))
+    (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
+
+    (db/create-message! {:thread-id thread-id :id (db/uuid) :content "zzz"
+                         :user-id (user-1 :id) :created-at (java.util.Date.)})
+    (db/thread-add-tag! thread-id (tag-1 :id))
+    (db/thread-add-tag! thread-id (tag-2 :id))
+
+    (is (db/user-can-see-thread? (user-1 :id) thread-id))
+    (is (db/user-can-see-thread? (user-2 :id) thread-id))
+    (let [u1-threads (db/get-open-threads-for-user (user-1 :id))
+          u2-threads (db/get-open-threads-for-user (user-2 :id))]
+      (is (= 1 (count u1-threads)))
+      (is (= 1 (count u2-threads)))
+      (is (= #{(tag-1 :id) (tag-2 :id)}
+             (set (:tag-ids (first u1-threads)))))
+      (is (= #{(tag-1 :id)}
+             (set (:tag-ids (first u2-threads))))))))

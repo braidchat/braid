@@ -1,7 +1,8 @@
 (ns chat.server.db
   (:require [datomic.api :as d]
             [environ.core :refer [env]]
-            [crypto.password.scrypt :as password]))
+            [crypto.password.scrypt :as password]
+            [clojure.core.reducers :as r]))
 
 (def ^:dynamic *uri*
   "URI for the datomic database"
@@ -427,22 +428,38 @@
        (map (comp db->user first))
        set))
 
-(defn get-open-threads-for-user
+(defn get-user-visible-tag-ids
   [user-id]
-  (->> (d/q '[:find (pull ?thread [:thread/id
-                                   {:thread/tag [:tag/id]}
-                                   {:message/_thread [:message/id
-                                                      :message/content
-                                                      {:message/user [:user/id]}
-                                                      :message/created-at]}])
+  (->> (d/q '[:find ?tag-id
               :in $ ?user-id
               :where
-              [?e :user/id ?user-id]
-              [?e :user/open-thread ?thread]]
-            (d/db *conn*)
-            user-id)
+              [?u :user/id ?user-id]
+              [?g :group/user ?u]
+              [?t :tag/group ?g]
+              [?t :tag/id ?tag-id]]
+            (d/db *conn*) user-id)
        (map first)
-       (map db->thread)))
+       set))
+
+(defn get-open-threads-for-user
+  [user-id]
+  (let [visible-tags (get-user-visible-tag-ids user-id)]
+    (->> (d/q '[:find (pull ?thread [:thread/id
+                                     {:thread/tag [:tag/id]}
+                                     {:message/_thread [:message/id
+                                                        :message/content
+                                                        {:message/user [:user/id]}
+                                                        :message/created-at]}])
+                :in $ ?user-id
+                :where
+                [?e :user/id ?user-id]
+                [?e :user/open-thread ?thread]]
+              (d/db *conn*) user-id)
+         (r/map first)
+         (r/map db->thread)
+         (r/map (fn [t]
+                  (update-in t [:tag-ids] (partial filter visible-tags))))
+         (into ()))))
 
 (defn get-thread
   [thread-id]
