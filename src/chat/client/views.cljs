@@ -27,7 +27,7 @@
         (apply dom/div #js {:className "tags"}
           (map (fn [tag]
                  (dom/div #js {:className "tag"
-                               :style #js {:background-color (helpers/tag->color tag)}}
+                               :style #js {:backgroundColor (helpers/tag->color tag)}}
                    (tag :name))) tags))))))
 
 (defn thread-view [thread owner]
