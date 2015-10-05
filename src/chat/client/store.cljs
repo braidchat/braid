@@ -8,6 +8,8 @@
                       :session nil
                       :error-msg nil
                       :invitations []
+                      :notifications {:window-visible? true
+                                      :unread-count 0}
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
                              :user-id nil}
@@ -19,6 +21,15 @@
 
 (defn- transact! [ks f]
   (swap! app-state update-in ks f))
+
+; window visibility & notifications
+
+(defn set-window-visibility!
+  [visible?]
+  (when visible?
+    (transact! [:notifications :unread-count] (constantly 0))
+    (set! (.-title js/document) "Chat"))
+  (transact! [:notifications :window-visible?] (constantly visible?)))
 
 ; error
 
@@ -65,6 +76,10 @@
   (transact! [:threads (message :thread-id) :messages] #(conj % message)))
 
 (defn add-thread! [thread]
+  (when-not (get-in @app-state [:notifications :window-visible?])
+    (transact! [:notifications :unread-count] inc)
+    (set! (.-title js/document)
+          (str "Chat (" (get-in @app-state [:notifications :unread-count]) ")")))
   (transact! [:threads (thread :id)] (constantly thread)))
 
 (defn hide-thread! [thread-id]
