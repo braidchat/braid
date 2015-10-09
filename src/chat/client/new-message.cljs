@@ -7,6 +7,12 @@
             [chat.client.store :as store])
   (:import [goog.events KeyCodes]))
 
+(defn fuzzy-matches?
+  [s m]
+  (letfn [(normalize [s]
+            (-> (.toLowerCase s) (string/replace #"\s" "")))]
+    (not= -1 (.indexOf (normalize s) (normalize m)))))
+
 (defn new-message-view [config owner]
   (reify
     om/IInitState
@@ -30,7 +36,7 @@
                          (remove (fn [t]
                                    (contains? thread-tag-ids (t :id))))
                          (filter (fn [t]
-                                   (not= -1 (.indexOf (t :name) partial-tag)))))
+                                   (fuzzy-matches? (t :name) partial-tag))))
             highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
