@@ -25,7 +25,7 @@
             thread-tag-ids (-> (store/id->thread (config :thread-id))
                                :tag-ids
                                set)
-            partial-tag (second (re-matches #"(?:.|\n)*#(.*)" text))
+            partial-tag (second (re-matches #"(?:.|\n)*#(\S*)" text))
             results (->> (store/all-tags)
                          (remove (fn [t]
                                    (contains? thread-tag-ids (t :id))))
