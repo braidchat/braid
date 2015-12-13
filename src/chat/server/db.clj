@@ -642,6 +642,7 @@
 
 (defn search-threads-as
   [user-id text]
+  ; TODO: add pagination
   (->> (d/q '[:find [?t-id ...]
               :in $ ?txt
               :where
