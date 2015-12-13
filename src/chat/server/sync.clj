@@ -121,8 +121,10 @@
 (defmethod event-msg-handler :chat/search
   [{:keys [event id ?data ring-req ?reply-fn send-fn] :as ev-msg}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (let [threads (db/with-conn (->> (db/search-threads-as user-id ?data)
-                                     (map db/get-thread)
+    (let [user-tags (db/with-conn (db/get-user-visible-tag-ids user-id))
+          filter-tags (fn [t] (update-in t [:tag-ids] (partial filter user-tags)))
+          threads (db/with-conn (->> (db/search-threads-as user-id ?data)
+                                     (map (comp filter-tags db/get-thread))
                                      doall))]
       (when ?reply-fn
         (?reply-fn {:threads threads})))))
