@@ -70,6 +70,7 @@
        :db.install/_attribute :db.part/db}
       {:db/ident :message/content
        :db/valueType :db.type/string
+       :db/fulltext true
        :db/cardinality :db.cardinality/one
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
@@ -651,3 +652,13 @@
             (d/db *conn*) user-id)
        (map (comp db->tag first))
        set))
+
+(defn search-threads
+  [text]
+  (set (d/q '[:find [?t-id ...]
+              :in $ ?txt
+              :where
+              [(fulltext $ :message/content ?txt) [[?m _]]]
+              [?m :message/thread ?t]
+              [?t :thread/id ?t-id]]
+            (d/db *conn*) text)))
