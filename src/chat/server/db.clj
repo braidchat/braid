@@ -643,6 +643,8 @@
 (defn search-threads-as
   [user-id text]
   ; TODO: add pagination
+  ; TODO: ability to search by tag?
+  ; TODO: consistent order for results
   (->> (d/q '[:find [?t-id ...]
               :in $ ?txt
               :where
