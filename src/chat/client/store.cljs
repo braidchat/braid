@@ -13,7 +13,8 @@
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
                              :user-id nil}
-                      :open-thread-ids #{}}))
+                      :open-thread-ids #{}
+                      :search-results {}}))
 
 (defn- key-by-id [coll]
   (reduce (fn [memo x]
@@ -87,6 +88,11 @@
 
 (defn id->thread [thread-id]
   (get-in @app-state [:threads thread-id]))
+
+; search threads
+
+(defn set-search-results! [threads]
+  (transact! [:search-results] (constantly (key-by-id threads))))
 
 ; tags
 

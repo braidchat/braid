@@ -1,6 +1,9 @@
 (ns chat.client.views
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om]
             [om.dom :as dom]
+            [clojure.string :as string]
+            [cljs.core.async :as async :refer [<! >! put! chan alts! timeout]]
             [cljs-uuid-utils.core :as uuid]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
@@ -125,6 +128,48 @@
                      "Decline")))
                invites))))))
 
+(defn debounce
+  "Given the input channel source and a debouncing time of msecs, return a new
+  channel that will forward the latest event from source at most every msecs
+  milliseconds"
+  [source msecs]
+  (let [out (chan)]
+    (go
+      (loop [state ::init
+             lastv nil
+             chans [source]]
+        (let [[_ threshold] chans]
+          (let [[v sc] (alts! chans)]
+            (condp = sc
+              source (recur ::debouncing v
+                            (case state
+                              ::init (conj chans (timeout msecs))
+                              ::debouncing (conj (pop chans) (timeout msecs))))
+              threshold (do (when lastv
+                              (put! out lastv))
+                            (recur ::init nil (pop chans))))))))
+    out))
+
+(defn search-view [data owner]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:search-chan (chan)})
+    om/IWillMount
+    (will-mount [_]
+      (let [search (debounce (om/get-state owner :search-chan) 1000)]
+        (go (while true
+              (let [{:keys [query]} (<! search)]
+                (if (string/blank? query)
+                  (store/set-search-results! {})
+                  (dispatch! :search-history query)))))))
+    om/IRenderState
+    (render-state [_ {:keys [search-chan]}]
+      (dom/div #js {:className "search"}
+        (dom/input #js {:type "search" :placeholder "Search History"
+                        :onChange
+                        (fn [e] (put! search-chan {:query (.. e -target -value)}))})))))
+
 (defn chat-view [data owner]
   (reify
     om/IRender
@@ -166,9 +211,11 @@
                                         (set! (.. e -target -value) "")))) })))
               (dom/div #js {:className "logout"
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
+          (om/build search-view {})
           (apply dom/div #js {:className "threads"}
             (concat (om/build-all thread-view
-                                  (->> (vals (data :threads))
+                                  (->> (vals (merge (data :threads)
+                                                    (data :search-results)))
                                        (sort-by
                                          (comp (partial apply min) (partial map :created-at) :messages)))
                                   {:key :id})

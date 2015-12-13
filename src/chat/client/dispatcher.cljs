@@ -52,6 +52,14 @@
           (store/remove-group! group))))
     (store/add-group! group)))
 
+(defmethod dispatch! :search-history [_ query]
+  (sync/chsk-send!
+    [:chat/search query]
+    2000
+    (fn [reply]
+      (when-let [results (:threads reply)]
+       (store/set-search-results! results)))))
+
 (defmethod dispatch! :invite [_ data]
   (let [invite (schema/make-invitation data)]
     (sync/chsk-send! [:chat/invite-to-group invite])))
