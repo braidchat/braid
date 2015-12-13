@@ -1,5 +1,6 @@
 (ns chat.test.server.db
   (:require [clojure.test :refer :all]
+            [chat.test.server.test-utils :refer [fetch-messages]]
             [chat.server.db :as db]))
 
 (use-fixtures :each
@@ -8,6 +9,7 @@
                   (db/init!)
                   (db/with-conn (t))
                   (datomic.api/delete-database db/*uri*))))
+
 
 (deftest create-user
   (let [data {:id (db/uuid)
@@ -131,7 +133,7 @@
           (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))))
 
 
-(deftest fetch-messages
+(deftest fetch-messages-test
   (let [user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
@@ -148,7 +150,7 @@
                         :created-at (java.util.Date.)
                         :content "Hello?"}
         message-2 (db/create-message! message-2-data)
-        messages (db/fetch-messages)]
+        messages (fetch-messages)]
     (testing "fetch-messages returns all messages"
       (is (= (set messages) #{message-1 message-2})))))
 

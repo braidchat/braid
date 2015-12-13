@@ -378,19 +378,6 @@
             (d/db *conn*) user-id)
        (map (comp db->invitation first))))
 
-(defn fetch-messages
-  "This almost certainly shouldn't be called outside of tests"
-  []
-  {:pre [(not= (env :environment) "production")]}
-  (->> (d/q '[:find (pull ?e [:message/id
-                              :message/content
-                              :message/created-at
-                              {:message/user [:user/id]}
-                              {:message/thread [:thread/id]}])
-              :where [?e :message/id]]
-            (d/db *conn*))
-       (map (comp db->message first))))
-
 (defn get-open-thread-ids-for-user
   [user-id]
   (d/q '[:find [?thread-id ...]
