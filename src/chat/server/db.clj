@@ -653,12 +653,13 @@
        (map (comp db->tag first))
        set))
 
-(defn search-threads
-  [text]
-  (set (d/q '[:find [?t-id ...]
+(defn search-threads-as
+  [user-id text]
+  (->> (d/q '[:find [?t-id ...]
               :in $ ?txt
               :where
-              [(fulltext $ :message/content ?txt) [[?m _]]]
+              [(fulltext $ :message/content ?txt) [[?m]]]
               [?m :message/thread ?t]
               [?t :thread/id ?t-id]]
-            (d/db *conn*) text)))
+            (d/db *conn*) text)
+       (into #{} (filter (partial user-can-see-thread? user-id)))))
