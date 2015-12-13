@@ -118,6 +118,15 @@
           (when ?reply-fn
             (?reply-fn {:error "Group name already taken"})))))))
 
+(defmethod event-msg-handler :chat/search
+  [{:keys [event id ?data ring-req ?reply-fn send-fn] :as ev-msg}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (let [threads (db/with-conn (->> (db/search-threads-as user-id ?data)
+                                     (map db/get-thread)
+                                     doall))]
+      (when ?reply-fn
+        (?reply-fn {:threads threads})))))
+
 (defmethod event-msg-handler :chat/invite-to-group
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
