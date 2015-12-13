@@ -68,9 +68,12 @@
 
 (defn- maybe-create-thread! [thread-id]
   (when-not (get-in @app-state [:threads thread-id])
-    (transact! [:threads thread-id] (constantly {:id thread-id
-                                                 :messages []
-                                                 :tag-ids #{}}))))
+    (if-let [thread (get-in @app-state [:search-results thread-id])]
+      (do (transact! [:threads thread-id] (constantly thread))
+          (transact! [:search-results] #(dissoc % thread-id)))
+      (transact! [:threads thread-id] (constantly {:id thread-id
+                                                   :messages []
+                                                   :tag-ids #{}})))))
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
