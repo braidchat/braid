@@ -1,8 +1,5 @@
 (ns chat.client.sync
-  (:require-macros
-    [cljs.core.async.macros :as asyncm :refer [go go-loop]])
-  (:require [cljs.core.async :as async :refer [<! >! put! chan alts!]]
-            [taoensso.sente  :as sente :refer [cb-success?]]
+  (:require [taoensso.sente  :as sente :refer [cb-success?]]
             [goog.string :as gstring]
             [chat.client.store :as store]
             [goog.string.format]))
