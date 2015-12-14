@@ -1,8 +1,7 @@
 (ns chat.server.db
   (:require [datomic.api :as d]
             [environ.core :refer [env]]
-            [crypto.password.scrypt :as password]
-            [clojure.core.reducers :as r]))
+            [crypto.password.scrypt :as password]))
 
 (def ^:dynamic *uri*
   "URI for the datomic database"
@@ -443,11 +442,11 @@
                 [?e :user/id ?user-id]
                 [?e :user/open-thread ?thread]]
               (d/db *conn*) user-id)
-         (r/map first)
-         (r/map db->thread)
-         (r/map (fn [t]
-                  (update-in t [:tag-ids] (partial filter visible-tags))))
-         (into ()))))
+         (into ()
+               (map (comp (fn [t]
+                            (update-in t [:tag-ids] (partial filter visible-tags)))
+                          db->thread
+                          first))))))
 
 (defn get-thread
   [thread-id]
