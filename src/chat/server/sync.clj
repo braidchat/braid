@@ -5,6 +5,7 @@
             [taoensso.timbre :as timbre :refer [debugf]]
             [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
             [chat.server.db :as db]
+            [chat.server.search :as search]
             [chat.server.invite :as invites]
             [clojure.set :refer [difference intersection]]))
 
@@ -123,7 +124,7 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (let [user-tags (db/with-conn (db/get-user-visible-tag-ids user-id))
           filter-tags (fn [t] (update-in t [:tag-ids] (partial filter user-tags)))
-          threads (db/with-conn (->> (db/search-threads-as user-id ?data)
+          threads (db/with-conn (->> (search/search-threads-as user-id ?data)
                                      (map (comp filter-tags db/get-thread))
                                      doall))]
       (when ?reply-fn

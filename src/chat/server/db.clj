@@ -638,17 +638,3 @@
             (d/db *conn*) user-id)
        (map (comp db->tag first))
        set))
-
-(defn search-threads-as
-  [user-id text]
-  ; TODO: add pagination
-  ; TODO: ability to search by tag?
-  ; TODO: consistent order for results
-  (->> (d/q '[:find [?t-id ...]
-              :in $ ?txt
-              :where
-              [(fulltext $ :message/content ?txt) [[?m]]]
-              [?m :message/thread ?t]
-              [?t :thread/id ?t-id]]
-            (d/db *conn*) text)
-       (into #{} (filter (partial user-can-see-thread? user-id)))))
