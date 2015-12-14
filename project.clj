@@ -2,7 +2,7 @@
   :source-paths ["src"]
 
   :dependencies [;server
-                 [org.clojure/clojure "1.7.0-RC2"]
+                 [org.clojure/clojure "1.7.0"]
                  [javax.servlet/servlet-api "2.5"]
                  [commons-codec "1.10"]
                  [org.postgresql/postgresql "9.3-1103-jdbc4"]
