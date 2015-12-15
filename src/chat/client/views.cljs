@@ -174,7 +174,8 @@
   (reify
     om/IRender
     (render [_]
-      (let [groups-map (into {} (map (juxt identity (constantly nil))) (keys (data :groups)))
+      (let [groups-map (->> (keys (data :groups))
+                            (into {} (map (juxt identity (constantly nil))) ))
             ; groups-map is just map of group-ids to nil, to be merged with
             ; tags, so there is still an entry for groups without any tags
             grouped-tags (->> (data :tags)
@@ -217,7 +218,9 @@
                                   (->> (vals (merge (data :threads)
                                                     (data :search-results)))
                                        (sort-by
-                                         (comp (partial apply min) (partial map :created-at) :messages)))
+                                         (comp (partial apply min)
+                                               (partial map :created-at)
+                                               :messages)))
                                   {:key :id})
                     [(om/build thread-view
                                {:id (uuid/make-random-squuid)
