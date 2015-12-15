@@ -10,6 +10,24 @@
                   (db/with-conn (t))
                   (datomic.api/delete-database db/*uri*))))
 
+(deftest query-parsing
+  (testing "can properly parse queries"
+    (is (= (search/parse-query "#baz")
+           {:text ""
+            :tags ["baz"]}))
+    (is (= (search/parse-query "#baz #quux")
+           {:text ""
+            :tags ["baz" "quux"]}))
+    (is (= (search/parse-query "baz")
+           {:text "baz"
+            :tags []}))
+    (is (= (search/parse-query "foo bar #baz quux")
+           {:text "foo bar quux"
+            :tags ["baz"]}))
+    (is (= (search/parse-query "#foo bar #baz quux")
+           {:text "bar quux"
+            :tags ["foo" "baz"]}))))
+
 (deftest searching-threads
   (let [user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
@@ -23,6 +41,7 @@
         group-2 (db/create-group! {:name "group2" :id (db/uuid)})
         tag-1 (db/create-tag! {:id (db/uuid) :name "tag1" :group-id (group-1 :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "tag2" :group-id (group-2 :id)})
+        tag-3 (db/create-tag! {:id (db/uuid) :name "tag3" :group-id (group-1 :id)})
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)
         thread-3-id (db/uuid)
@@ -41,12 +60,14 @@
     (db/create-message! {:thread-id thread-1-id :id (db/uuid)
                          :content "Hey world" :user-id (user-2 :id)
                          :created-at (java.util.Date.)})
+    (db/thread-add-tag! thread-1-id (tag-1 :id))
 
     ; this thread should be visible to user 1
     (db/create-message! {:thread-id thread-2-id :id (db/uuid)
                          :content "Goodbye World" :user-id (user-2 :id)
                          :created-at (java.util.Date.)})
     (db/thread-add-tag! thread-2-id (tag-1 :id))
+    (db/thread-add-tag! thread-2-id (tag-3 :id))
 
     ; this thread should not be visible to user 1
     (db/create-message! {:thread-id thread-3-id :id (db/uuid)
@@ -60,10 +81,16 @@
                          :created-at (java.util.Date.)})
     (db/thread-add-tag! thread-4-id (tag-2 :id))
 
-    (testing "user can seach and see threads"
+    (testing "user can search by text and see threads"
       (is (= #{thread-1-id}
              (search/search-threads-as (user-1 :id) "hello")
              (search/search-threads-as (user-1 :id) "HELLO")))
       (is (= #{thread-1-id thread-2-id}
              (search/search-threads-as (user-1 :id) "world")))
-      (is (= #{} (search/search-threads-as (user-1 :id) "something"))))))
+      (is (= #{} (search/search-threads-as (user-1 :id) "something"))))
+
+    (testing "can search by tag name"
+      (is (= #{thread-1-id thread-2-id}
+             (search/search-threads-as (user-1 :id) "#tag1")))
+      (is (= #{thread-2-id}
+             (search/search-threads-as (user-1 :id) "#tag3 world"))))))
