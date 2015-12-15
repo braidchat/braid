@@ -51,6 +51,7 @@
                      (set (d/q '[:find [?t-id ...]
                                  :in $ [?tag-name ...]
                                  :where
+                                 ; TODO: be more flexible/allow partial match?
                                  [?tag :tag/name ?tag-name]
                                  [?t :thread/tag ?tag]
                                  [?t :thread/id ?t-id]]
