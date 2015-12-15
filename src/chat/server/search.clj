@@ -30,7 +30,7 @@
                           {:DOT str
                            :TAG (constantly "")})
                         rest
-                        (apply str)
+                        (string/join "")
                         squash)
         tag-query (->> parsed
                        (insta/transform
