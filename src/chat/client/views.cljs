@@ -19,7 +19,9 @@
       (dom/div #js {:className "message"}
         (dom/img #js {:className "avatar" :src (get-in @store/app-state [:users (message :user-id) :avatar])})
         (apply dom/div #js {:className "content"}
-          (helpers/format-message (message :content)))))))
+          (helpers/format-message (message :content)))
+        (dom/div #js {:className "info"}
+          (helpers/format-date (message :created-at)))))))
 
 (defn thread-tags-view [thread owner]
   (reify
