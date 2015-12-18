@@ -70,11 +70,13 @@
         (dom/span #js {:className "name"}
           (tag :name))))))
 
-(defn new-tag-view [data owner]
+(defn new-tag-view [data owner {:keys [on-focus on-blur]}]
   (reify
     om/IRender
     (render [_]
       (dom/input #js {:className "new-tag"
+                      :onFocus (fn [_] (when on-focus (on-focus)))
+                      :onBlur (fn [_] (when on-blur (on-blur)))
                       :onKeyDown
                       (fn [e]
                         (when (= 13 e.keyCode)
@@ -84,24 +86,24 @@
                           (aset (.. e -target) "value" "")))
                       :placeholder "New Tag"}))))
 
-(defn group-tags-view [[group-id tags] owner]
+(defn group-tags-view [[group-id tags] owner {:keys [on-focus on-blur] :as opts}]
   (reify
     om/IRender
     (render [_]
       (dom/div #js {:className "group"}
         (dom/h2 #js {:className "name"}
           (:name (store/id->group group-id)))
-        (om/build group-invite-view group-id)
+        (om/build group-invite-view group-id {:opts opts})
         (apply dom/div #js {:className "tags"}
           (om/build-all tag-view tags))
-        (om/build new-tag-view {:group-id group-id})))))
+        (om/build new-tag-view {:group-id group-id} {:opts opts})))))
 
-(defn groups-view [grouped-tags owner]
+(defn groups-view [grouped-tags owner {:keys [on-focus on-blur] :as opts}]
   (reify
     om/IRender
     (render [_]
       (apply dom/div #js {:className "tag-groups"}
-        (om/build-all group-tags-view grouped-tags)))))
+        (om/build-all group-tags-view grouped-tags {:opts opts})))))
 
 (defn invitations-view
   [invites owner]
@@ -172,8 +174,11 @@
 
 (defn chat-view [data owner]
   (reify
-    om/IRender
-    (render [_]
+    om/IInitState
+    (init-state [_]
+      {:focused? false})
+    om/IRenderState
+    (render-state [_ {:keys [focused?] :as state}]
       (let [groups-map (->> (keys (data :groups))
                             (into {} (map (juxt identity (constantly nil))) ))
             ; groups-map is just map of group-ids to nil, to be merged with
@@ -184,7 +189,9 @@
                                      (assoc tag :subscribed?
                                        (store/is-subscribed-to-tag? (tag :id)))))
                               (group-by :group-id)
-                              (merge groups-map))]
+                              (merge groups-map))
+            on-focus (fn [] (om/set-state! owner :focused? true))
+            on-blur (fn [] (om/set-state! owner :focused? false))]
         (dom/div nil
           (when-let [err (data :error-msg)]
             (dom/div #js {:className "error-banner"}
@@ -192,17 +199,19 @@
               (dom/span #js {:className "close"
                             :onClick (fn [_] (store/clear-error!))}
                 "×")))
-          (dom/div #js {:className "meta"}
+          (dom/div #js {:className (str "meta " (when focused? "focused"))}
             (dom/img #js {:className "avatar"
                           :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
-              (om/build groups-view grouped-tags)
+              (om/build groups-view grouped-tags {:opts {:on-focus on-focus :on-blur on-blur}})
               (when (seq (data :invitations))
                 (om/build invitations-view (data :invitations)))
               (dom/div #js {:className "new-group"}
                 (dom/label nil "New Group"
                   (dom/input #js {:placeholder "Group Name"
+                                  :onFocus (fn [_] (on-focus))
+                                  :onBlur (fn [_] (on-blur))
                                   :onKeyDown
                                   (fn [e]
                                     (when (= KeyCodes.ENTER e.keyCode)
