@@ -35,12 +35,12 @@
                                :style #js {:backgroundColor (helpers/tag->color tag)}}
                    (tag :name))) tags))))))
 
-(defn thread-view [thread owner]
+(defn thread-view [thread owner {:keys [searched?] :as opts}]
   (reify
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
-        (when-not (thread :new?)
+        (when-not (or (thread :new?) searched?)
           (dom/div #js {:className "close"
                         :onClick (fn [_]
                                    (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
@@ -225,20 +225,22 @@
                             :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
           (om/build search-view {})
           (apply dom/div #js {:className "threads"}
-            (concat (om/build-all thread-view
-                                  (->> (vals (merge (data :threads)
-                                                    (data :search-results)))
-                                       (sort-by
-                                         (comp (partial apply min)
-                                               (partial map :created-at)
-                                               :messages)))
-                                  {:key :id})
-                    [(om/build thread-view
-                               {:id (uuid/make-random-squuid)
-                                :new? true
-                                :tag-ids []
-                                :messages []}
-                               {:react-key "new-thread"})])))))))
+            (concat
+              (map (fn [t] (om/build thread-view t
+                                     {:key :id
+                                      :opts {:searched? (some? (get-in data [:search-results (t :id)]))}}))
+                   (->> (vals (merge (data :threads)
+                                     (data :search-results)))
+                        (sort-by
+                          (comp (partial apply min)
+                                (partial map :created-at)
+                                :messages))))
+              [(om/build thread-view
+                         {:id (uuid/make-random-squuid)
+                          :new? true
+                          :tag-ids []
+                          :messages []}
+                         {:react-key "new-thread"})])))))))
 
 (defn login-view [data owner]
   (reify
