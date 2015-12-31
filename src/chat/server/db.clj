@@ -32,6 +32,12 @@
        :db/unique :db.unique/identity
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
+      {:db/ident :user/nickname
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
       {:db/ident :user/password-token
        :db/valueType :db.type/string
        :db/cardinality :db.cardinality/one
@@ -180,6 +186,7 @@
 (defn- db->user
   [e]
   {:id (:user/id e)
+   :nickname (:user/nickname e)
    :email (:user/email e)
    :avatar (:user/avatar e)})
 
@@ -200,6 +207,7 @@
   {:id (:invite/id e)
    :inviter-id (get-in e [:invite/from :user/id])
    :inviter-email (get-in e [:invite/from :user/email])
+   :inviter-nickname (get-in e [:invite/from :user/nickname])
    :invitee-email (:invite/to e)
    :group-id (get-in e [:invite/group :group/id])
    :group-name (get-in e [:invite/group :group/name])})
@@ -304,6 +312,11 @@
       create-entity!
       db->user))
 
+(defn set-nickname!
+  "Set the user's nickname"
+  [user-id nickname]
+  (d/transact *conn* [[:db/add [:user/id user-id] :user/nickname nickname]]))
+
 (defn authenticate-user
   "returns user-id if email and password are correct"
   [email password]
@@ -322,7 +335,7 @@
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
   [email]
-  (some-> (d/pull (d/db *conn*) '[:user/id :user/email :user/avatar] [:user/email email])
+  (some-> (d/pull (d/db *conn*) '[:user/id :user/email :user/avatar :user/nickname] [:user/email email])
           db->user))
 
 (defn create-invitation!
@@ -339,7 +352,7 @@
   [invite-id]
   (some-> (d/pull (d/db *conn*)
               [:invite/id
-               {:invite/from [:user/id :user/email]}
+               {:invite/from [:user/id :user/email :user/nickname]}
                :invite/to
                {:invite/group [:group/id :group/name]}]
               [:invite/id invite-id])
@@ -354,6 +367,7 @@
   [user-id]
   (->> (d/q '[:find (pull ?e [:user/id
                               :user/email
+                              :user/nickname
                               :user/avatar])
               :in $ ?user-id
               :where
@@ -367,7 +381,7 @@
 (defn fetch-invitations-for-user
   [user-id]
   (->> (d/q '[:find (pull ?i [{:invite/group [:group/id :group/name]}
-                              {:invite/from [:user/id :user/email]}
+                              {:invite/from [:user/id :user/email :user/nickname]}
                               :invite/id])
               :in $ ?user-id
               :where
@@ -405,7 +419,7 @@
        set))
 
 (defn get-users-in-group [group-id]
-  (->> (d/q '[:find (pull ?u [:user/id :user/email :user/avatar])
+  (->> (d/q '[:find (pull ?u [:user/id :user/email :user/nickname :user/avatar])
               :in $ ?group-id
               :where
               [?g :group/id ?group-id]

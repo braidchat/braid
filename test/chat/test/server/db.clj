@@ -19,7 +19,13 @@
               :avatar "http://www.foobar.com/1.jpg"}
         user (db/create-user! data)]
     (testing "create returns a user"
-      (is (= user (dissoc data :password))))))
+      (is (= user (-> data (dissoc :password) (assoc :nickname nil)))))
+    (testing "can set nickname"
+      @(db/set-nickname! (user :id) "ol' fooy")
+      (is (= (db/user-with-email "foo@bar.com")
+             (-> data (dissoc :password) (assoc :nickname "ol' fooy")))))
+    (testing "user email must be unique")
+    (testing  "user nickname must be unique")))
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)

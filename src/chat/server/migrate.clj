@@ -2,6 +2,18 @@
   (:require [chat.server.db :as db]
             [datomic.api :as d]))
 
+(defn migrate-2015-12-19
+  "Add user nicknames"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [{:db/ident :user/nickname
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/unique :db.unique/identity
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])))
+
 (defn migrate-2015-12-12
   "Make content fulltext"
   []
