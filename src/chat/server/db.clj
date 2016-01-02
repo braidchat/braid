@@ -65,6 +65,14 @@
        :db/cardinality :db.cardinality/many
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
+      ; user - create
+      {:db/ident :add-user
+       :db/id #db/id [:db.part/user]
+       :db/fn (d/function {:lang "clojure"
+                           :params '[db params]
+                           :code '(if-let [e (datomic.api/entity db [:user/email (:user/email params)])]
+                                    (throw (Exception. "User already exists with email"))
+                                    [params])})}
 
       ; message
       {:db/ident :message/id
@@ -302,15 +310,30 @@
       create-entity!
       db->group))
 
+(defn email-taken?
+  [email]
+  (-> (d/q '[:find ?e :in $ ?email :where [?e :user/email ?email]] (d/db *conn*) email)
+      first
+      some?))
+
 (defn create-user!
   "creates a user, returns id"
-  [{:keys [id email avatar password]}]
-  (-> {:user/id id
-       :user/email email
-       :user/avatar avatar
-       :user/password-token (password/encrypt password)}
-      create-entity!
-      db->user))
+  [{:keys [id email avatar nickname password]}]
+  (let [new-id (d/tempid :entities)
+        {:keys  [db-after tempids]} @(d/transact *conn*
+                                       [[:add-user
+                                         {:db/id new-id
+                                          :user/id id
+                                          :user/email email
+                                          :user/avatar avatar
+                                          :user/password-token (password/encrypt password)}]])]
+    (->> (d/resolve-tempid db-after tempids new-id)
+         (d/entity db-after)
+         db->user)))
+
+(defn nickname-taken?
+  [nickname]
+  (some? (d/entity (d/db *conn*) [:user/nickname nickname])))
 
 (defn set-nickname!
   "Set the user's nickname"
