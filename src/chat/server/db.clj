@@ -29,13 +29,13 @@
       {:db/ident :user/email
        :db/valueType :db.type/string
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/identity
+       :db/unique :db.unique/value
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
       {:db/ident :user/nickname
        :db/valueType :db.type/string
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/identity
+       :db/unique :db.unique/value
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
       {:db/ident :user/password-token
@@ -65,14 +65,6 @@
        :db/cardinality :db.cardinality/many
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
-      ; user - create
-      {:db/ident :add-user
-       :db/id #db/id [:db.part/user]
-       :db/fn (d/function {:lang "clojure"
-                           :params '[db params]
-                           :code '(if-let [e (datomic.api/entity db [:user/email (:user/email params)])]
-                                    (throw (Exception. "User already exists with email"))
-                                    [params])})}
 
       ; message
       {:db/ident :message/id
@@ -319,17 +311,12 @@
 (defn create-user!
   "creates a user, returns id"
   [{:keys [id email avatar nickname password]}]
-  (let [new-id (d/tempid :entities)
-        {:keys  [db-after tempids]} @(d/transact *conn*
-                                       [[:add-user
-                                         {:db/id new-id
-                                          :user/id id
-                                          :user/email email
-                                          :user/avatar avatar
-                                          :user/password-token (password/encrypt password)}]])]
-    (->> (d/resolve-tempid db-after tempids new-id)
-         (d/entity db-after)
-         db->user)))
+  (-> {:user/id id
+       :user/email email
+       :user/avatar avatar
+       :user/password-token (password/encrypt password)}
+      create-entity!
+      db->user))
 
 (defn nickname-taken?
   [nickname]
