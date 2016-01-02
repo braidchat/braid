@@ -24,19 +24,24 @@
     (testing "create returns a user"
       (is (= user (-> data (dissoc :password) (assoc :nickname nil)))))
     (testing "can set nickname"
+      (is (not (db/nickname-taken? "ol' fooy")))
       @(db/set-nickname! (user :id) "ol' fooy")
+      (is (db/nickname-taken? "ol' fooy"))
       (is (= (db/user-with-email "foo@bar.com")
              (-> data (dissoc :password) (assoc :nickname "ol' fooy")))))
     (testing "user email must be unique"
-      ; TODO
       (is (thrown? Exception
                    (db/create-user! {:id (db/uuid)
                                      :email (data :email)
                                      :password "zzz"
                                      :avatar "http://zzz.com/2.jpg"}))))
     (testing "user nickname must be unique"
-      ; TODO
-      )))
+      (let [other {:id (db/uuid)
+                   :email "baz@quux.com"
+                   :password "foobar"
+                   :avatar "foo@bar.com"}]
+        (is (some? (db/create-user! other)))
+        (is (thrown? Exception @(db/set-nickname! (other :id)  "ol' fooy")))))))
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)
