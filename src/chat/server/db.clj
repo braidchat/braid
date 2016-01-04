@@ -393,6 +393,19 @@
        (map (comp db->user first))
        set))
 
+(defn user-visible-to-user?
+  "Are the two user ids users that can see each other? i.e. do they have at least one group in common"
+  [user1-id user2-id]
+  (-> (d/q '[:find ?g
+         :in $ ?u1-id ?u2-id
+         :where
+         [?u1 :user/id ?u1-id]
+         [?u2 :user/id ?u2-id]
+         [?g :group/user ?u1]
+         [?g :group/user ?u2]]
+       (d/db *conn*) user1-id user2-id)
+      seq boolean))
+
 (defn fetch-invitations-for-user
   [user-id]
   (->> (d/q '[:find (pull ?i [{:invite/group [:group/id :group/name]}

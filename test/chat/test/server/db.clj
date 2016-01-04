@@ -86,9 +86,14 @@
     (db/user-add-to-group! (user-2 :id) (group-2 :id))
     (db/user-add-to-group! (user-3 :id) (group-2 :id))
     (is (not (db/user-in-group? (user-1 :id) (group-2 :id))))
-    (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id)))
-    (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id)))
-    (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id)))))
+    (is (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id))))
+    (is (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id))))
+    (is (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id))))
+    (is (db/user-visible-to-user? (user-1 :id) (user-2 :id)))
+    (is (not (db/user-visible-to-user? (user-1 :id) (user-3 :id))))
+    (is (not (db/user-visible-to-user? (user-3 :id) (user-1 :id))))
+    (is (db/user-visible-to-user? (user-2 :id) (user-3 :id)))
+    (is (db/user-visible-to-user? (user-3 :id) (user-2 :id)))))
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
