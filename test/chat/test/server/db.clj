@@ -28,7 +28,9 @@
       @(db/set-nickname! (user :id) "ol' fooy")
       (is (db/nickname-taken? "ol' fooy"))
       (is (= (db/user-with-email "foo@bar.com")
-             (-> data (dissoc :password) (assoc :nickname "ol' fooy")))))
+             (-> data (dissoc :password) (assoc :nickname "ol' fooy"))))
+      (is (= "ol' fooy" (db/get-nickname (user :id)))))
+
     (testing "user email must be unique"
       (is (thrown? Exception
                    (db/create-user! {:id (db/uuid)

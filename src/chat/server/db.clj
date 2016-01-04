@@ -332,6 +332,10 @@
   [user-id nickname]
   (d/transact *conn* [[:db/add [:user/id user-id] :user/nickname nickname]]))
 
+(defn get-nickname
+  [user-id]
+  (:user/nickname (d/pull (d/db *conn*) '[:user/nickname] [:user/id user-id])))
+
 (defn authenticate-user
   "returns user-id if email and password are correct"
   [email password]
