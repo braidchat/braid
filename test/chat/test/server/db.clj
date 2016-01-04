@@ -32,7 +32,7 @@
       (is (= "ol' fooy" (db/get-nickname (user :id)))))
 
     (testing "user email must be unique"
-      (is (thrown? Exception
+      (is (thrown? java.util.concurrent.ExecutionException
                    (db/create-user! {:id (db/uuid)
                                      :email (data :email)
                                      :password "zzz"
@@ -43,7 +43,7 @@
                    :password "foobar"
                    :avatar "foo@bar.com"}]
         (is (some? (db/create-user! other)))
-        (is (thrown? Exception @(db/set-nickname! (other :id)  "ol' fooy")))))))
+        (is (thrown? java.util.concurrent.ExecutionException @(db/set-nickname! (other :id)  "ol' fooy")))))))
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)
