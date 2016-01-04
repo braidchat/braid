@@ -547,3 +547,25 @@
              (set (:tag-ids (first u1-threads)))))
       (is (= #{(tag-1 :id)}
              (set (:tag-ids (first u2-threads))))))))
+
+(deftest mentioning-users-in-threads
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "bar@foo.com"
+                                 :password "foobar"
+                                 :avatar ""}) ]
+
+    (db/set-nickname! (user-1 :id) "foo")
+    (db/set-nickname! (user-2 :id) "bar")
+
+    (testing "Can mention a user to open the thread for them"
+      (let [thread-id (db/uuid)]
+        (db/create-message! {:thread-id thread-id :id (db/uuid) :content  "hi @bar"
+                             :user-id (user-1 :id) :created-at (java.util.Date.)})
+        (is (not (db/user-can-see-thread? (user-2 :id) thread-id)))
+        (db/thread-add-mentioned! thread-id (user-2 :id))
+        (is (db/user-can-see-thread? (user-2 :id) thread-id)))
+      )))

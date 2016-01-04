@@ -3,13 +3,18 @@
             [datomic.api :as d]))
 
 (defn migrate-2016-01-01
-  "Change email uniqueness to /value"
+  "Change email uniqueness to /value, add thread mentions"
   []
   (db/with-conn
     (d/transact db/*conn*
       [{:db/id :user/email
         :db/unique :db.unique/value
-        :db.alter/_attribute :db.part/db}])))
+        :db.alter/_attribute :db.part/db}
+       {:db/ident :thread/mentioned
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/many
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])))
 
 (defn migrate-2015-12-19
   "Add user nicknames"

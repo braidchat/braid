@@ -110,6 +110,12 @@
        :db/cardinality :db.cardinality/many
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
+      ; thread - mentions
+      {:db/ident :thread/mentioned
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/many
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
 
       ; tag
       {:db/ident :tag/id
@@ -623,6 +629,14 @@
     (d/transact *conn* (concat [[:db/add [:thread/id thread-id]
                                  :thread/tag [:tag/id tag-id]]]
                                subscriber-transactions))))
+
+(defn thread-add-mentioned!
+  [thread-id user-id]
+  ; TODO: upsert thread if needed
+  (d/transact *conn*
+    [[:db/add [:thread/id thread-id] :thread/mentioned [:user/id user-id]]
+     [:db/add [:user/id user-id] :user/subscribed-thread [:thread/id thread-id]]
+     [:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
 (defn get-thread-tags
   "Only used for testing"
