@@ -20,8 +20,7 @@
         (let [nick->id (reduce (fn [m [id {:keys [email nickname]}]] (assoc m (or nickname email) id))
                                {}
                                (@store/app-state :users))
-              mentioned (into () (comp (remove nil?) (map nick->id)) mentioned-names)]
-          (println "nick->id" nick->id "mentioned " mentioned-names)
+              mentioned (->> mentioned-names (map nick->id) (remove nil?))]
           (doseq [mention mentioned]
             (sync/chsk-send! [:thread/add-mention {:thread-id (message :thread-id)
                                                    :mentioned-id mention}])
