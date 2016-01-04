@@ -568,6 +568,10 @@
                  (d/db *conn*) thread-id))
     ; ...or they're already subscribed to the thread...
     (contains? (set (get-users-subscribed-to-thread thread-id)) user-id)
+    ; ...or they're mentioned in the thread
+    (contains? (-> (d/pull *conn* [:thread/mentioned] [:thread/id thread-id])
+                   :thread/mentioned set)
+               user-id)
     ; ...or they are in the group of any tags on the thread
     (seq (d/q '[:find (pull ?group [:group/id])
                 :in $ ?thread-id ?user-id
@@ -651,7 +655,7 @@
 (defn thread-add-mentioned!
   [thread-id user-id]
   ; TODO: upsert thread if needed
-  (d/transact *conn*
+  @(d/transact *conn*
     [[:db/add [:thread/id thread-id] :thread/mentioned [:user/id user-id]]
      [:db/add [:user/id user-id] :user/subscribed-thread [:thread/id thread-id]]
      [:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))

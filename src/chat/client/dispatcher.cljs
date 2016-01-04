@@ -14,7 +14,18 @@
                                         :content (data :content)
                                         :thread-id (data :thread-id)})]
       (store/add-message! message)
-      (sync/chsk-send! [:chat/new-message message]))))
+      (sync/chsk-send! [:chat/new-message message])
+      (when-let [mentioned-names (->> (re-seq #"(?:^|\s)@(\S+)" (message :content))
+                                      (map second))]
+        (let [nick->id (reduce (fn [m [id {:keys [email nickname]}]] (assoc m (or nickname email) id))
+                               {}
+                               (@store/app-state :users))
+              mentioned (into () (comp (remove nil?) (map nick->id)) mentioned-names)]
+          (println "nick->id" nick->id "mentioned " mentioned-names)
+          (doseq [mention mentioned]
+            (sync/chsk-send! [:thread/add-mention {:thread-id (message :thread-id)
+                                                   :mentioned-id mention}])
+            (store/add-mention-to-thread! mention (message :thread-id))))))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
@@ -39,6 +50,11 @@
     (sync/chsk-send! [:thread/add-tag {:thread-id (attr :thread-id)
                                        :tag-id tag-id}])
     (store/add-tag-to-thread! tag-id (attr :thread-id))))
+
+(defmethod dispatch! :mention-user [_ [thread-id user-id]]
+  (sync/chsk-send! [:thread/add-mention {:thread-id thread-id
+                                         :mentioned-id user-id}])
+  (store/add-mention-to-thread! user-id thread-id))
 
 (defmethod dispatch! :create-group [_ group]
   (let [group (schema/make-group group)]

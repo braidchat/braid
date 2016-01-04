@@ -78,6 +78,20 @@
       (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id
                     (?data :tag-id)))))
 
+(defmethod event-msg-handler :thread/add-mention
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  ; TODO: verify that all required keys are present?
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (let [{:keys [thread-id mentioned-id]} ?data]
+      (if (db/with-conn (db/user-visible-to-user? user-id mentioned-id))
+        (do (db/with-conn (db/thread-add-mentioned! thread-id mentioned-id))
+            (let [tags (db/with-conn (db/get-user-visible-tag-ids mentioned-id))
+                  thread (db/with-conn (-> (db/get-thread thread-id)
+                                           (update-in [:tag-ids] (partial filter tags))))]
+              (chsk-send! mentioned-id [:chat/thread thread])))
+        ; TODO: indicate permissions error to user?
+        (timbre/warnf "User %s attempted to mention disallowed user %s" user-id mentioned-id)))))
+
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]

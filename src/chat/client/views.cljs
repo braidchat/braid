@@ -16,24 +16,33 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className "message"}
-        (dom/img #js {:className "avatar" :src (get-in @store/app-state [:users (message :user-id) :avatar])})
-        (apply dom/div #js {:className "content"}
-          (helpers/format-message (message :content)))
-        (dom/div #js {:className "info"}
-          (helpers/format-date (message :created-at)))))))
+      (let [sender (get-in @store/app-state [:users (message :user-id)])]
+        (dom/div #js {:className "message"}
+          (dom/img #js {:className "avatar" :src (sender :avatar)})
+          (apply dom/div #js {:className "content"}
+            (helpers/format-message (message :content)))
+          (dom/div #js {:className "info"}
+            (str (or (sender :nickname) (sender :email)) " @ " (helpers/format-date (message :created-at)))))))))
 
 (defn thread-tags-view [thread owner]
   (reify
     om/IRender
     (render [_]
       (let [tags (->> (thread :tag-ids)
-                      (map #(get-in @store/app-state [:tags %])))]
+                      (map #(get-in @store/app-state [:tags %])))
+            mentions (->> (thread :mentioned-ids)
+                          (map #(get-in @store/app-state [:users %])))]
         (apply dom/div #js {:className "tags"}
-          (map (fn [tag]
-                 (dom/div #js {:className "tag"
-                               :style #js {:backgroundColor (helpers/tag->color tag)}}
-                   (tag :name))) tags))))))
+          (pr-str (thread :mentioned-ids))
+          (concat
+            (map (fn [u]
+                   (dom/div #js {:className "tag"
+                                 :style #js {:backgroundColor (helpers/tag->color u)}}
+                     (str "@" (or (u :nickname) (u :email))))) mentions)
+            (map (fn [tag]
+                   (dom/div #js {:className "tag"
+                                 :style #js {:backgroundColor (helpers/tag->color tag)}}
+                     (tag :name))) tags)))))))
 
 (defn thread-view [thread owner {:keys [searched?] :as opts}]
   (reify
@@ -129,7 +138,7 @@
                (fn [e]
                  (om/set-state! owner :error false)
                  (let [nickname (.. e -target -value)]
-                   (when (and (= KeyCodes.ENTER e.keyCode) (not (string/blank? nickname)))
+                   (when (and (= KeyCodes.ENTER e.keyCode) (re-matches #"\S+" nickname))
                      (dispatch! :set-nickname [nickname (fn [] (om/set-state! owner :error true))]))))})))))
 
 (defn invitations-view

@@ -113,6 +113,9 @@
   (maybe-create-thread! thread-id)
   (transact! [:threads thread-id :tag-ids] #(set (conj % tag-id))))
 
+(defn add-mention-to-thread! [user-id thread-id]
+  (transact! [:threads thread-id :mentioned-ids] #(set (conj % user-id))))
+
 (defn all-tags []
   (vals (get-in @app-state [:tags])))
 
