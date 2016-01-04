@@ -88,6 +88,16 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn (db/user-unsubscribe-from-tag! user-id ?data))))
 
+(defmethod event-msg-handler :user/set-nickname
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (println "Setting nickname " ?data "for" user-id)
+    (try
+      (do (db/with-conn @(db/set-nickname! user-id (?data :nickname)))
+          (when ?reply-fn (?reply-fn {:ok true})))
+      (catch Exception e
+        (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))))
+
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (db/with-conn (db/user-hide-thread! (get-in ring-req [:session :user-id]) ?data)))
@@ -172,6 +182,7 @@
     (chsk-send! user-id [:session/init-data
                          (db/with-conn
                            {:user-id user-id
+                            :user-nickname (db/get-nickname user-id)
                             :user-groups (db/get-groups-for-user user-id)
                             :user-threads (db/get-open-threads-for-user user-id)
                             :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)

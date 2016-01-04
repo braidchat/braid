@@ -81,7 +81,7 @@
                       :onBlur (fn [_] (when on-blur (on-blur)))
                       :onKeyDown
                       (fn [e]
-                        (when (= 13 e.keyCode)
+                        (when (= KeyCodes.ENTER e.keyCode)
                           (let [text (.. e -target -value)]
                             (dispatch! :create-tag [text (data :group-id)]))
                           (.preventDefault e)
@@ -106,6 +106,31 @@
     (render [_]
       (apply dom/div #js {:className "tag-groups"}
         (om/build-all group-tags-view grouped-tags {:opts opts})))))
+
+(defn nickname-view [data owner {:keys [on-focus on-blur] :as opts}]
+  (reify
+    ; TODO: check if nickname is taken while typing
+    om/IInitState
+    (init-state [_]
+      {:error false})
+    om/IRenderState
+    (render-state [_ state]
+      (dom/div #js {:className "nickname"}
+        (when-let [current (data :nickname)]
+          (dom/div #js {:className "current-name"} current))
+        (when (state :error)
+          (dom/span #js {:className "error"} "Nickname taken"))
+        (dom/input
+          #js {:className "new-name"
+               :placeholder "New Nickname"
+               :onFocus (fn [_] (when on-focus (on-focus)))
+               :onBlur (fn [_] (when on-blur (on-blur)))
+               :onKeyDown
+               (fn [e]
+                 (om/set-state! owner :error false)
+                 (when (= KeyCodes.ENTER e.keyCode)
+                   (let [nickname (.. e -target -value)]
+                     (dispatch! :set-nickname [nickname (fn [] (om/set-state! owner :error true))]))))})))))
 
 (defn invitations-view
   [invites owner]
@@ -206,6 +231,8 @@
                           :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
+              (om/build nickname-view (data :session)
+                        {:opts {:on-focus on-focus :on-blur on-blur}})
               (om/build groups-view grouped-tags {:opts {:on-focus on-focus :on-blur on-blur}})
               (when (seq (data :invitations))
                 (om/build invitations-view (data :invitations)))

@@ -52,6 +52,15 @@
           (store/remove-group! group))))
     (store/add-group! group)))
 
+(defmethod dispatch! :set-nickname [_ [nickname on-error]]
+  (sync/chsk-send!
+    [:user/set-nickname {:nickname nickname}]
+    1000
+    (fn [reply]
+      (if (reply :error)
+        (on-error)
+        (store/set-nickname! nickname)))))
+
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
     [:chat/search query]
@@ -99,7 +108,7 @@
 
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
-  (store/set-session! {:user-id (data :user-id)})
+  (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))

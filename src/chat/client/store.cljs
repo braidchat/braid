@@ -12,7 +12,8 @@
                                       :unread-count 0}
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
-                             :user-id nil}
+                             :user-id nil
+                             :nickname nil}
                       :open-thread-ids #{}
                       :search-results {}}))
 
@@ -47,6 +48,9 @@
 
 (defn clear-session! []
   (transact! [:session] (constantly nil)))
+
+(defn set-nickname! [nick]
+  (transact! [:session :nickname] (constantly nick)))
 
 ; users
 
