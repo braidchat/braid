@@ -234,9 +234,8 @@
                      :user-id (get-in msg [:message/user :user/id])
                      :created-at (msg :message/created-at)})
                   (thread :message/_thread))
-   :tag-ids (map (fn [tag]
-                   (tag :tag/id))
-                 (thread :thread/tag))})
+   :tag-ids (map :tag/id (thread :thread/tag))
+   :mentioned-ids (map :user/id (thread :thread/mentioned))})
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -463,6 +462,7 @@
   (let [visible-tags (get-user-visible-tag-ids user-id)]
     (->> (d/q '[:find (pull ?thread [:thread/id
                                      {:thread/tag [:tag/id]}
+                                     {:thread/mentioned [:user/id]}
                                      {:message/_thread [:message/id
                                                         :message/content
                                                         {:message/user [:user/id]}
@@ -482,6 +482,7 @@
   [thread-id]
   (-> (d/q '[:find (pull ?thread [:thread/id
                                   {:thread/tag [:tag/id]}
+                                  {:thread/mentioned [:user/id]}
                                   {:message/_thread [:message/id
                                                      :message/content
                                                      {:message/user [:user/id]}

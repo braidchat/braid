@@ -566,6 +566,14 @@
         (db/create-message! {:thread-id thread-id :id (db/uuid) :content  "hi @bar"
                              :user-id (user-1 :id) :created-at (java.util.Date.)})
         (is (not (db/user-can-see-thread? (user-2 :id) thread-id)))
+        (is (empty? (db/get-open-thread-ids-for-user (user-2 :id))))
         (db/thread-add-mentioned! thread-id (user-2 :id))
-        (is (db/user-can-see-thread? (user-2 :id) thread-id)))
-      )))
+        (is (db/user-can-see-thread? (user-2 :id) thread-id))
+        (is (= [thread-id] (db/get-open-thread-ids-for-user (user-2 :id))))
+
+        (testing "and the thread has a collection of mentions"
+          (is  (= [(user-2 :id)]
+                  (-> (db/get-thread thread-id) :mentioned-ids)
+                  (-> (db/get-open-threads-for-user (user-2 :id))
+                      first
+                      :mentioned-ids))))))))
