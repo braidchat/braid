@@ -109,7 +109,6 @@
 
 (defn nickname-view [data owner {:keys [on-focus on-blur] :as opts}]
   (reify
-    ; TODO: check if nickname is taken while typing
     om/IInitState
     (init-state [_]
       {:error false})
@@ -120,6 +119,7 @@
           (dom/div #js {:className "current-name"} current))
         (when (state :error)
           (dom/span #js {:className "error"} "Nickname taken"))
+        ; TODO: check if nickname is taken while typing
         (dom/input
           #js {:className "new-name"
                :placeholder "New Nickname"
@@ -128,8 +128,8 @@
                :onKeyDown
                (fn [e]
                  (om/set-state! owner :error false)
-                 (when (= KeyCodes.ENTER e.keyCode)
-                   (let [nickname (.. e -target -value)]
+                 (let [nickname (.. e -target -value)]
+                   (when (and (= KeyCodes.ENTER e.keyCode) (not (string/blank? nickname)))
                      (dispatch! :set-nickname [nickname (fn [] (om/set-state! owner :error true))]))))})))))
 
 (defn invitations-view

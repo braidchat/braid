@@ -91,11 +91,10 @@
 (defmethod event-msg-handler :user/set-nickname
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (println "Setting nickname " ?data "for" user-id)
     (try
       (do (db/with-conn @(db/set-nickname! user-id (?data :nickname)))
           (when ?reply-fn (?reply-fn {:ok true})))
-      (catch Exception e
+      (catch java.util.concurrent.ExecutionException _
         (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))))
 
 (defmethod event-msg-handler :chat/hide-thread
