@@ -13,6 +13,7 @@
             (-> (.toLowerCase s) (string/replace #"\s" "")))]
     (not= -1 (.indexOf (normalize s) (normalize m)))))
 
+; TODO: autocomplete mentions
 (defn new-message-view [config owner]
   (reify
     om/IInitState

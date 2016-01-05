@@ -16,24 +16,33 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className "message"}
-        (dom/img #js {:className "avatar" :src (get-in @store/app-state [:users (message :user-id) :avatar])})
-        (apply dom/div #js {:className "content"}
-          (helpers/format-message (message :content)))
-        (dom/div #js {:className "info"}
-          (helpers/format-date (message :created-at)))))))
+      (let [sender (get-in @store/app-state [:users (message :user-id)])]
+        (dom/div #js {:className "message"}
+          (dom/img #js {:className "avatar" :src (sender :avatar)})
+          (apply dom/div #js {:className "content"}
+            (helpers/format-message (message :content)))
+          (dom/div #js {:className "info"}
+            (str (or (sender :nickname) (sender :email)) " @ " (helpers/format-date (message :created-at)))))))))
 
 (defn thread-tags-view [thread owner]
   (reify
     om/IRender
     (render [_]
       (let [tags (->> (thread :tag-ids)
-                      (map #(get-in @store/app-state [:tags %])))]
+                      (map #(get-in @store/app-state [:tags %])))
+            mentions (->> (thread :mentioned-ids)
+                          (map #(get-in @store/app-state [:users %])))]
         (apply dom/div #js {:className "tags"}
-          (map (fn [tag]
-                 (dom/div #js {:className "tag"
-                               :style #js {:backgroundColor (helpers/tag->color tag)}}
-                   (tag :name))) tags))))))
+          (pr-str (thread :mentioned-ids))
+          (concat
+            (map (fn [u]
+                   (dom/div #js {:className "tag"
+                                 :style #js {:backgroundColor (helpers/tag->color u)}}
+                     (str "@" (or (u :nickname) (u :email))))) mentions)
+            (map (fn [tag]
+                   (dom/div #js {:className "tag"
+                                 :style #js {:backgroundColor (helpers/tag->color tag)}}
+                     (tag :name))) tags)))))))
 
 (defn thread-view [thread owner {:keys [searched?] :as opts}]
   (reify
@@ -81,7 +90,7 @@
                       :onBlur (fn [_] (when on-blur (on-blur)))
                       :onKeyDown
                       (fn [e]
-                        (when (= 13 e.keyCode)
+                        (when (= KeyCodes.ENTER e.keyCode)
                           (let [text (.. e -target -value)]
                             (dispatch! :create-tag [text (data :group-id)]))
                           (.preventDefault e)
@@ -106,6 +115,31 @@
     (render [_]
       (apply dom/div #js {:className "tag-groups"}
         (om/build-all group-tags-view grouped-tags {:opts opts})))))
+
+(defn nickname-view [data owner {:keys [on-focus on-blur] :as opts}]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:error false})
+    om/IRenderState
+    (render-state [_ state]
+      (dom/div #js {:className "nickname"}
+        (when-let [current (data :nickname)]
+          (dom/div #js {:className "current-name"} current))
+        (when (state :error)
+          (dom/span #js {:className "error"} "Nickname taken"))
+        ; TODO: check if nickname is taken while typing
+        (dom/input
+          #js {:className "new-name"
+               :placeholder "New Nickname"
+               :onFocus (fn [_] (when on-focus (on-focus)))
+               :onBlur (fn [_] (when on-blur (on-blur)))
+               :onKeyDown
+               (fn [e]
+                 (om/set-state! owner :error false)
+                 (let [nickname (.. e -target -value)]
+                   (when (and (= KeyCodes.ENTER e.keyCode) (re-matches #"\S+" nickname))
+                     (dispatch! :set-nickname [nickname (fn [] (om/set-state! owner :error true))]))))})))))
 
 (defn invitations-view
   [invites owner]
@@ -206,6 +240,8 @@
                           :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                  (get-in @store/app-state [:users user-id :avatar]))})
             (dom/div #js {:className "extras"}
+              (om/build nickname-view (data :session)
+                        {:opts {:on-focus on-focus :on-blur on-blur}})
               (om/build groups-view grouped-tags {:opts {:on-focus on-focus :on-blur on-blur}})
               (when (seq (data :invitations))
                 (om/build invitations-view (data :invitations)))

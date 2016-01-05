@@ -12,7 +12,8 @@
                                       :unread-count 0}
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
-                             :user-id nil}
+                             :user-id nil
+                             :nickname nil}
                       :open-thread-ids #{}
                       :search-results {}}))
 
@@ -47,6 +48,9 @@
 
 (defn clear-session! []
   (transact! [:session] (constantly nil)))
+
+(defn set-nickname! [nick]
+  (transact! [:session :nickname] (constantly nick)))
 
 ; users
 
@@ -108,6 +112,9 @@
 (defn add-tag-to-thread! [tag-id thread-id]
   (maybe-create-thread! thread-id)
   (transact! [:threads thread-id :tag-ids] #(set (conj % tag-id))))
+
+(defn add-mention-to-thread! [user-id thread-id]
+  (transact! [:threads thread-id :mentioned-ids] #(set (conj % user-id))))
 
 (defn all-tags []
   (vals (get-in @app-state [:tags])))

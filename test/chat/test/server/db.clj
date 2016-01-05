@@ -18,8 +18,32 @@
               :password "foobar"
               :avatar "http://www.foobar.com/1.jpg"}
         user (db/create-user! data)]
+    (testing "can check if an email has been used"
+      (is (db/email-taken? (:email data)))
+      (is (not (db/email-taken? "baz@quux.net"))))
     (testing "create returns a user"
-      (is (= user (dissoc data :password))))))
+      (is (= user (-> data (dissoc :password) (assoc :nickname nil)))))
+    (testing "can set nickname"
+      (is (not (db/nickname-taken? "ol' fooy")))
+      @(db/set-nickname! (user :id) "ol' fooy")
+      (is (db/nickname-taken? "ol' fooy"))
+      (is (= (db/user-with-email "foo@bar.com")
+             (-> data (dissoc :password) (assoc :nickname "ol' fooy"))))
+      (is (= "ol' fooy" (db/get-nickname (user :id)))))
+
+    (testing "user email must be unique"
+      (is (thrown? java.util.concurrent.ExecutionException
+                   (db/create-user! {:id (db/uuid)
+                                     :email (data :email)
+                                     :password "zzz"
+                                     :avatar "http://zzz.com/2.jpg"}))))
+    (testing "user nickname must be unique"
+      (let [other {:id (db/uuid)
+                   :email "baz@quux.com"
+                   :password "foobar"
+                   :avatar "foo@bar.com"}]
+        (is (some? (db/create-user! other)))
+        (is (thrown? java.util.concurrent.ExecutionException @(db/set-nickname! (other :id)  "ol' fooy")))))))
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)
@@ -64,9 +88,14 @@
     (db/user-add-to-group! (user-2 :id) (group-2 :id))
     (db/user-add-to-group! (user-3 :id) (group-2 :id))
     (is (not (db/user-in-group? (user-1 :id) (group-2 :id))))
-    (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id)))
-    (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id)))
-    (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id)))))
+    (is (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id))))
+    (is (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id))))
+    (is (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id))))
+    (is (db/user-visible-to-user? (user-1 :id) (user-2 :id)))
+    (is (not (db/user-visible-to-user? (user-1 :id) (user-3 :id))))
+    (is (not (db/user-visible-to-user? (user-3 :id) (user-1 :id))))
+    (is (db/user-visible-to-user? (user-2 :id) (user-3 :id)))
+    (is (db/user-visible-to-user? (user-3 :id) (user-2 :id)))))
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
@@ -525,3 +554,33 @@
              (set (:tag-ids (first u1-threads)))))
       (is (= #{(tag-1 :id)}
              (set (:tag-ids (first u2-threads))))))))
+
+(deftest mentioning-users-in-threads
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "bar@foo.com"
+                                 :password "foobar"
+                                 :avatar ""}) ]
+
+    (db/set-nickname! (user-1 :id) "foo")
+    (db/set-nickname! (user-2 :id) "bar")
+
+    (testing "Can mention a user to open the thread for them"
+      (let [thread-id (db/uuid)]
+        (db/create-message! {:thread-id thread-id :id (db/uuid) :content  "hi @bar"
+                             :user-id (user-1 :id) :created-at (java.util.Date.)})
+        (is (not (db/user-can-see-thread? (user-2 :id) thread-id)))
+        (is (empty? (db/get-open-thread-ids-for-user (user-2 :id))))
+        (db/thread-add-mentioned! thread-id (user-2 :id))
+        (is (db/user-can-see-thread? (user-2 :id) thread-id))
+        (is (= [thread-id] (db/get-open-thread-ids-for-user (user-2 :id))))
+
+        (testing "and the thread has a collection of mentions"
+          (is  (= [(user-2 :id)]
+                  (-> (db/get-thread thread-id) :mentioned-ids)
+                  (-> (db/get-open-threads-for-user (user-2 :id))
+                      first
+                      :mentioned-ids))))))))

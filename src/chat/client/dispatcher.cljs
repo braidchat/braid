@@ -14,7 +14,17 @@
                                         :content (data :content)
                                         :thread-id (data :thread-id)})]
       (store/add-message! message)
-      (sync/chsk-send! [:chat/new-message message]))))
+      (sync/chsk-send! [:chat/new-message message])
+      (when-let [mentioned-names (->> (re-seq #"(?:^|\s)@(\S+)" (message :content))
+                                      (map second))]
+        (let [nick->id (reduce (fn [m [id {:keys [email nickname]}]] (assoc m (or nickname email) id))
+                               {}
+                               (@store/app-state :users))
+              mentioned (->> mentioned-names (map nick->id) (remove nil?))]
+          (doseq [mention mentioned]
+            (sync/chsk-send! [:thread/add-mention {:thread-id (message :thread-id)
+                                                   :mentioned-id mention}])
+            (store/add-mention-to-thread! mention (message :thread-id))))))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
@@ -40,6 +50,11 @@
                                        :tag-id tag-id}])
     (store/add-tag-to-thread! tag-id (attr :thread-id))))
 
+(defmethod dispatch! :mention-user [_ [thread-id user-id]]
+  (sync/chsk-send! [:thread/add-mention {:thread-id thread-id
+                                         :mentioned-id user-id}])
+  (store/add-mention-to-thread! user-id thread-id))
+
 (defmethod dispatch! :create-group [_ group]
   (let [group (schema/make-group group)]
     (sync/chsk-send!
@@ -51,6 +66,15 @@
           (store/display-error! msg)
           (store/remove-group! group))))
     (store/add-group! group)))
+
+(defmethod dispatch! :set-nickname [_ [nickname on-error]]
+  (sync/chsk-send!
+    [:user/set-nickname {:nickname nickname}]
+    1000
+    (fn [reply]
+      (if (reply :error)
+        (on-error)
+        (store/set-nickname! nickname)))))
 
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
@@ -99,7 +123,7 @@
 
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
-  (store/set-session! {:user-id (data :user-id)})
+  (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))
