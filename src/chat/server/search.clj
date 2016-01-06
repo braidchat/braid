@@ -63,7 +63,7 @@
                                   [(fulltext $ :message/content ?txt) [[?m]]]
                                   [?m :message/thread ?t]
                                   [?t :thread/id ?t-id]]
-                                (d/db db/*conn*) text)))]
+                                search-db text)))]
     (->> (if (every? some? [text-search tag-search])
            (intersection text-search tag-search)
            (first (remove nil? [text-search tag-search])))
