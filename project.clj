@@ -43,7 +43,9 @@
             [jamesnvc/lein-lesscss "1.4.0"] ]
 
   :repl-options {:timeout 120000}
-  ;:clean-targets ^{:protect false} ["resources/public/js/out"]
+  :clean-targets ^{:protect false}
+  ["resources/public/js/out"
+   "resources/public/css/out"]
   :lesscss-paths ["resources/less"]
   :lesscss-output-path "resources/public/css/out"
   :cljsbuild {:builds
@@ -56,4 +58,6 @@
 
   :min-lein-version "2.5.0"
 
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all
+                       :hooks [leiningen.cljsbuild
+                               leiningen.hooks.lesscss]}})
