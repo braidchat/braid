@@ -208,7 +208,7 @@
                         :onChange
                         (fn [e] (put! search-chan {:query (.. e -target -value)}))})))))
 
-(defn chat-view [data owner]
+(defn user-modal-view [data owner]
   (reify
     om/IInitState
     (init-state [_]
@@ -228,55 +228,61 @@
                               (merge groups-map))
             on-focus (fn [] (om/set-state! owner :focused? true))
             on-blur (fn [] (om/set-state! owner :focused? false))]
-        (dom/div nil
-          (when-let [err (data :error-msg)]
-            (dom/div #js {:className "error-banner"}
-              err
-              (dom/span #js {:className "close"
-                            :onClick (fn [_] (store/clear-error!))}
-                "×")))
-          (dom/div #js {:className (str "meta " (when focused? "focused"))}
-            (dom/img #js {:className "avatar"
-                          :src (let [user-id (get-in @store/app-state [:session :user-id])]
-                                 (get-in @store/app-state [:users user-id :avatar]))})
-            (dom/div #js {:className "extras"}
-              (om/build nickname-view (data :session)
-                        {:opts {:on-focus on-focus :on-blur on-blur}})
-              (om/build groups-view grouped-tags {:opts {:on-focus on-focus :on-blur on-blur}})
-              (when (seq (data :invitations))
-                (om/build invitations-view (data :invitations)))
-              (dom/div #js {:className "new-group"}
-                (dom/label nil "New Group"
-                  (dom/input #js {:placeholder "Group Name"
-                                  :onFocus (fn [_] (on-focus))
-                                  :onBlur (fn [_] (on-blur))
-                                  :onKeyDown
-                                  (fn [e]
-                                    (when (= KeyCodes.ENTER e.keyCode)
-                                      (.preventDefault e)
-                                      (let [group-name (.. e -target -value)]
-                                        (dispatch! :create-group {:name group-name})
-                                        (set! (.. e -target -value) "")))) })))
-              (dom/div #js {:className "logout"
-                            :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))
-          (om/build search-view {})
-          (apply dom/div #js {:className "threads"}
-            (concat
-              (map (fn [t] (om/build thread-view t
-                                     {:key :id
-                                      :opts {:searched? (some? (get-in data [:search-results (t :id)]))}}))
-                   (->> (vals (merge (data :threads)
-                                     (data :search-results)))
-                        (sort-by
-                          (comp (partial apply min)
-                                (partial map :created-at)
-                                :messages))))
-              [(om/build thread-view
-                         {:id (uuid/make-random-squuid)
-                          :new? true
-                          :tag-ids []
-                          :messages []}
-                         {:react-key "new-thread"})])))))))
+        (dom/div #js {:className (str "meta " (when focused? "focused"))}
+          (dom/img #js {:className "avatar"
+                        :src (let [user-id (get-in @store/app-state [:session :user-id])]
+                               (get-in @store/app-state [:users user-id :avatar]))})
+          (dom/div #js {:className "extras"}
+            (om/build nickname-view (data :session)
+                      {:opts {:on-focus on-focus :on-blur on-blur}})
+            (om/build groups-view grouped-tags {:opts {:on-focus on-focus :on-blur on-blur}})
+            (when (seq (data :invitations))
+              (om/build invitations-view (data :invitations)))
+            (dom/div #js {:className "new-group"}
+              (dom/label nil "New Group"
+                (dom/input #js {:placeholder "Group Name"
+                                :onFocus (fn [_] (on-focus))
+                                :onBlur (fn [_] (on-blur))
+                                :onKeyDown
+                                (fn [e]
+                                  (when (= KeyCodes.ENTER e.keyCode)
+                                    (.preventDefault e)
+                                    (let [group-name (.. e -target -value)]
+                                      (dispatch! :create-group {:name group-name})
+                                      (set! (.. e -target -value) "")))) })))
+            (dom/div #js {:className "logout"
+                          :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))))))
+
+(defn chat-view [data owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div nil
+        (when-let [err (data :error-msg)]
+          (dom/div #js {:className "error-banner"}
+            err
+            (dom/span #js {:className "close"
+                           :onClick (fn [_] (store/clear-error!))}
+              "×")))
+        (om/build user-modal-view data)
+        (om/build search-view {})
+        (apply dom/div #js {:className "threads"}
+          (concat
+            (map (fn [t] (om/build thread-view t
+                                   {:key :id
+                                    :opts {:searched? (some? (get-in data [:search-results (t :id)]))}}))
+                 (->> (vals (merge (data :threads)
+                                   (data :search-results)))
+                      (sort-by
+                        (comp (partial apply min)
+                              (partial map :created-at)
+                              :messages))))
+            [(om/build thread-view
+                       {:id (uuid/make-random-squuid)
+                        :new? true
+                        :tag-ids []
+                        :messages []}
+                       {:react-key "new-thread"})]))))))
 
 (defn login-view [data owner]
   (reify
