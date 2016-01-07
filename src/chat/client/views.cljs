@@ -208,9 +208,9 @@
   (reify
     om/IInitState
     (init-state [_]
-      {:focused? false})
+      {:active? false})
     om/IRenderState
-    (render-state [_ {:keys [focused?] :as state}]
+    (render-state [_ {:keys [active?] :as state}]
       (let [groups-map (->> (keys (data :groups))
                             (into {} (map (juxt identity (constantly nil))) ))
             ; groups-map is just map of group-ids to nil, to be merged with
@@ -222,10 +222,10 @@
                                        (store/is-subscribed-to-tag? (tag :id)))))
                               (group-by :group-id)
                               (merge groups-map))]
-        (dom/div #js {:className (str "meta " (when focused? "focused"))}
+        (dom/div #js {:className (str "meta " (when active? "active"))}
           (dom/img #js {:className "avatar"
                         :onClick (fn [e]
-                                   (om/update-state! owner :focused? not))
+                                   (om/update-state! owner :active? not))
                         :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                (get-in @store/app-state [:users user-id :avatar]))})
           (dom/div #js {:className "extras"}
