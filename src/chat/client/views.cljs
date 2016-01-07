@@ -222,13 +222,17 @@
                                        (store/is-subscribed-to-tag? (tag :id)))))
                               (group-by :group-id)
                               (merge groups-map))]
-        (dom/div #js {:className (str "meta " (when active? "active"))}
+
+        (dom/div #js {:className "meta"}
           (dom/img #js {:className "avatar"
                         :onClick (fn [e]
                                    (om/update-state! owner :active? not))
                         :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                (get-in @store/app-state [:users user-id :avatar]))})
-          (dom/div #js {:className "extras"}
+          (dom/div #js {:className (str "user-modal " (when active? "active"))}
+            (dom/div #js {:className "close"
+                          :onClick (fn [_]
+                                     (om/set-state! owner :active? false))} "×")
             (om/build nickname-view (data :session))
             (om/build groups-view grouped-tags)
             (when (seq (data :invitations))

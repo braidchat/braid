@@ -153,42 +153,44 @@ body {
 }
 
 .meta {
-  background: #333;
-  position: fixed;
-  z-index: 100;
-  width: 13em;
-  right: -9em;
-  top: 0;
-  bottom: 0;
-  transition: right 0.5s ease;
-  padding: 1em;
-  box-sizing: border-box;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  .nickname {
-    .current-name {
-      color: white;
-    }
-    .error {
-      color: red;
-    }
-  }
-  .extras {
-    display: none;
-  }
-  &.active {
-    right: 0;
-    .extras {
-      display: block;
-    }
-  }
   .avatar {
     width: 2em;
     height: 2em;
-    display: inline-block;
     cursor: pointer;
+    position: absolute;
+    top: 1em;
+    right: 1em;
   }
-  .extras {
+  .user-modal {
+    background: #333;
+    position: absolute;
+    z-index: 100;
+    top: 2em;
+    left: 2em;
+    bottom: 2em;
+    right: 2em;
+    padding: 1em;
+    box-sizing: border-box;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    display: none;
+    .close {
+      color: white;
+      font-size: 2em;
+      cursor: pointer;
+      float: right;
+    }
+    .nickname {
+      .current-name {
+        color: white;
+      }
+      .error {
+        color: red;
+      }
+    }
+    &.active {
+      display: block;
+    }
     .pending-invites {
       color: #999;
       ul.invites {
