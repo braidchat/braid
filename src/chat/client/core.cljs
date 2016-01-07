@@ -12,6 +12,7 @@
 (defn init []
   (.addEventListener js/document "visibilitychange"
                 (fn [e] (store/set-window-visibility! (= "visible" (.-visibilityState js/document)))))
-  (om/root views/app-view store/app-state
-           {:target (. js/document (getElementById "app"))})
   (sync/start-router!))
+
+(om/root views/app-view store/app-state
+           {:target (. js/document (getElementById "app"))})
