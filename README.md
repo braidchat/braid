@@ -14,6 +14,14 @@ lein with-profile lp repl
 (chat.server.sync/start-router!)
 ```
 
+# compiling js
+
+rlwrap lein run -m clojure.main script/figwheel.clj
+
+# compiling css
+
+lein lesscss auto
+
 # running tests
 
 `lein with-profile test,lp quickie "chat.*"`
