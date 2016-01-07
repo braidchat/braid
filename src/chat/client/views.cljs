@@ -81,13 +81,11 @@
         (dom/span #js {:className "name"}
           (tag :name))))))
 
-(defn new-tag-view [data owner {:keys [on-focus on-blur]}]
+(defn new-tag-view [data owner]
   (reify
     om/IRender
     (render [_]
       (dom/input #js {:className "new-tag"
-                      :onFocus (fn [_] (when on-focus (on-focus)))
-                      :onBlur (fn [_] (when on-blur (on-blur)))
                       :onKeyDown
                       (fn [e]
                         (when (= KeyCodes.ENTER e.keyCode)
@@ -97,7 +95,7 @@
                           (aset (.. e -target) "value" "")))
                       :placeholder "New Tag"}))))
 
-(defn group-tags-view [[group-id tags] owner {:keys [on-focus on-blur] :as opts}]
+(defn group-tags-view [[group-id tags] owner opts]
   (reify
     om/IRender
     (render [_]
@@ -109,14 +107,14 @@
           (om/build-all tag-view tags))
         (om/build new-tag-view {:group-id group-id} {:opts opts})))))
 
-(defn groups-view [grouped-tags owner {:keys [on-focus on-blur] :as opts}]
+(defn groups-view [grouped-tags owner opts]
   (reify
     om/IRender
     (render [_]
       (apply dom/div #js {:className "tag-groups"}
         (om/build-all group-tags-view grouped-tags {:opts opts})))))
 
-(defn nickname-view [data owner {:keys [on-focus on-blur] :as opts}]
+(defn nickname-view [data owner opts]
   (reify
     om/IInitState
     (init-state [_]
@@ -132,8 +130,6 @@
         (dom/input
           #js {:className "new-name"
                :placeholder "New Nickname"
-               :onFocus (fn [_] (when on-focus (on-focus)))
-               :onBlur (fn [_] (when on-blur (on-blur)))
                :onKeyDown
                (fn [e]
                  (om/set-state! owner :error false)
@@ -225,24 +221,21 @@
                                      (assoc tag :subscribed?
                                        (store/is-subscribed-to-tag? (tag :id)))))
                               (group-by :group-id)
-                              (merge groups-map))
-            on-focus (fn [] (om/set-state! owner :focused? true))
-            on-blur (fn [] (om/set-state! owner :focused? false))]
+                              (merge groups-map))]
         (dom/div #js {:className (str "meta " (when focused? "focused"))}
           (dom/img #js {:className "avatar"
+                        :onClick (fn [e]
+                                   (om/update-state! owner :focused? not))
                         :src (let [user-id (get-in @store/app-state [:session :user-id])]
                                (get-in @store/app-state [:users user-id :avatar]))})
           (dom/div #js {:className "extras"}
-            (om/build nickname-view (data :session)
-                      {:opts {:on-focus on-focus :on-blur on-blur}})
-            (om/build groups-view grouped-tags {:opts {:on-focus on-focus :on-blur on-blur}})
+            (om/build nickname-view (data :session))
+            (om/build groups-view grouped-tags)
             (when (seq (data :invitations))
               (om/build invitations-view (data :invitations)))
             (dom/div #js {:className "new-group"}
               (dom/label nil "New Group"
                 (dom/input #js {:placeholder "Group Name"
-                                :onFocus (fn [_] (on-focus))
-                                :onBlur (fn [_] (on-blur))
                                 :onKeyDown
                                 (fn [e]
                                   (when (= KeyCodes.ENTER e.keyCode)
