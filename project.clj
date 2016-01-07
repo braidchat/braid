@@ -53,7 +53,9 @@
               [{:id "release"
                 :source-paths ["src/chat/client"]
                 :compiler {:main chat.client.core
+                           :asset-path "/js/out"
                            :output-to "resources/public/js/out/chat.js"
+                           :output-dir "resources/public/js/out"
                            :optimizations :advanced
                            :pretty-print false }}]}
 
