@@ -19,7 +19,7 @@
 
 (defroutes site-routes
   (GET "/" []
-    (-> "chat.html"
+    (-> "public/index.html"
         clojure.java.io/resource
         slurp))
   (GET "/accept" [invite tok]

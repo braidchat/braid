@@ -1,4 +1,5 @@
-/resources/public
+/resources/public/js
+/resources/public/css
 /target
 .lein-env
 .lein-repl-history
