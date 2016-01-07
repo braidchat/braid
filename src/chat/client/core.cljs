@@ -9,7 +9,7 @@
 
 (enable-console-print!)
 
-(defn init []
+(defn ^:export init []
   (.addEventListener js/document "visibilitychange"
                 (fn [e] (store/set-window-visibility! (= "visible" (.-visibilityState js/document)))))
   (sync/start-router!))
