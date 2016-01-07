@@ -45,7 +45,8 @@
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
   ["resources/public/js/out"
-   "resources/public/css/out"]
+   ;"resources/public/css/out" ; need to fix lein-lesscss to create the director if it doesn't exist
+   ]
   :lesscss-paths ["resources/less"]
   :lesscss-output-path "resources/public/css/out"
   :cljsbuild {:builds
