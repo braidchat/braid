@@ -33,7 +33,6 @@
             mentions (->> (thread :mentioned-ids)
                           (map #(get-in @store/app-state [:users %])))]
         (apply dom/div #js {:className "tags"}
-          (pr-str (thread :mentioned-ids))
           (concat
             (map (fn [u]
                    (dom/div #js {:className "tag"
