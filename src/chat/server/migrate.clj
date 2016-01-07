@@ -2,6 +2,58 @@
   (:require [chat.server.db :as db]
             [datomic.api :as d]))
 
+(defn migrate-2016-01-01
+  "Change email uniqueness to /value, add thread mentions"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [{:db/id :user/email
+        :db/unique :db.unique/value
+        :db.alter/_attribute :db.part/db}
+       {:db/ident :thread/mentioned
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/many
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])))
+
+(defn migrate-2015-12-19
+  "Add user nicknames"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [{:db/ident :user/nickname
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/unique :db.unique/value
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])))
+
+(defn migrate-2015-12-12
+  "Make content fulltext"
+  []
+  ; rename content
+  (db/with-conn (d/transact db/*conn* [{:db/id :message/content :db/ident :message/content-old}]))
+  (db/with-conn (d/transact db/*conn* [{:db/ident :message/content
+                                        :db/valueType :db.type/string
+                                        :db/fulltext true
+                                        :db/cardinality :db.cardinality/one
+                                        :db/id #db/id [:db.part/db]
+                                        :db.install/_attribute :db.part/db}]))
+  (let [messages (db/with-conn (->> (d/q '[:find (pull ?e [:message/id
+                                                           :message/content-old
+                                                           :message/created-at
+                                                           {:message/user [:user/id]}
+                                                           {:message/thread [:thread/id]}])
+                                           :where [?e :message/id]]
+                                         (d/db db/*conn*))
+                                    (map first)))]
+    (db/with-conn
+      (let [msg-tx (->> messages
+                        (map (fn [msg]
+                               [:db/add [:message/id (msg :message/id)]
+                                :message/content (msg :message/content-old)])))]
+        (d/transact db/*conn* (doall msg-tx))))))
+
 (defn migrate-2015-07-29
   "Schema changes for groups"
   []

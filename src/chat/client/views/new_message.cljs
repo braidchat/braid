@@ -7,6 +7,13 @@
             [chat.client.store :as store])
   (:import [goog.events KeyCodes]))
 
+(defn fuzzy-matches?
+  [s m]
+  (letfn [(normalize [s]
+            (-> (.toLowerCase s) (string/replace #"\s" "")))]
+    (not= -1 (.indexOf (normalize s) (normalize m)))))
+
+; TODO: autocomplete mentions
 (defn new-message-view [config owner]
   (reify
     om/IInitState
@@ -25,12 +32,12 @@
             thread-tag-ids (-> (store/id->thread (config :thread-id))
                                :tag-ids
                                set)
-            partial-tag (second (re-matches #"(?:.|\n)*#(.*)" text))
+            partial-tag (second (re-matches #"(?:.|\n)*#(\S*)" text))
             results (->> (store/all-tags)
                          (remove (fn [t]
                                    (contains? thread-tag-ids (t :id))))
                          (filter (fn [t]
-                                   (not= -1 (.indexOf (t :name) partial-tag)))))
+                                   (fuzzy-matches? (t :name) partial-tag))))
             highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index

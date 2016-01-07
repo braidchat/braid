@@ -131,6 +131,14 @@ body {
         }
       }
     }
+    .info {
+      position: absolute;
+      color: rgba(0,0,0,0);
+      font-size: 0.8em;
+    }
+    &:hover .info, &:last-child .info {
+      color: grey;
+    }
   }
 }
 
@@ -157,10 +165,18 @@ body {
   box-sizing: border-box;
   overflow-y: scroll;
   overflow-x: hidden;
+  .nickname {
+    .current-name {
+      color: white;
+    }
+    .error {
+      color: red;
+    }
+  }
   .extras {
     display: none;
   }
-  &:hover {
+  &:hover, &.focused {
     right: 0;
     .extras {
       display: block;

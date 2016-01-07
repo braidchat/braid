@@ -1,9 +1,7 @@
 (ns chat.client.sync
-  (:require-macros
-    [cljs.core.async.macros :as asyncm :refer [go go-loop]])
-  (:require [cljs.core.async :as async :refer [<! >! put! chan alts!]]
-            [taoensso.sente  :as sente :refer [cb-success?]]
+  (:require [taoensso.sente  :as sente :refer [cb-success?]]
             [goog.string :as gstring]
+            [chat.client.store :as store]
             [goog.string.format]))
 
 (defn debugf [s & args]
@@ -32,7 +30,11 @@
   [{:as ev-msg :keys [?data]}]
   (if (?data :first-open?)
     (debugf "Channel socket successfully established!")
-    (debugf "Channel socket state change: %s" ?data))
+    (do
+      (debugf "Channel socket state change: %s" ?data)
+      (if (not (:open? ?data))
+        (store/display-error! "Disconnected")
+        (store/clear-error!))))
   (event-handler [:socket/connected ?data]))
 
 (defmethod event-msg-handler :chsk/recv

@@ -8,10 +8,14 @@
                       :session nil
                       :error-msg nil
                       :invitations []
+                      :notifications {:window-visible? true
+                                      :unread-count 0}
                       :user {:open-thread-ids #{}
                              :subscribed-tag-ids #{}
-                             :user-id nil}
-                      :open-thread-ids #{}}))
+                             :user-id nil
+                             :nickname nil}
+                      :open-thread-ids #{}
+                      :search-results {}}))
 
 (defn- key-by-id [coll]
   (reduce (fn [memo x]
@@ -19,6 +23,15 @@
 
 (defn- transact! [ks f]
   (swap! app-state update-in ks f))
+
+; window visibility & notifications
+
+(defn set-window-visibility!
+  [visible?]
+  (when visible?
+    (transact! [:notifications :unread-count] (constantly 0))
+    (set! (.-title js/document) "Chat"))
+  (transact! [:notifications :window-visible?] (constantly visible?)))
 
 ; error
 
@@ -35,6 +48,9 @@
 
 (defn clear-session! []
   (transact! [:session] (constantly nil)))
+
+(defn set-nickname! [nick]
+  (transact! [:session :nickname] (constantly nick)))
 
 ; users
 
@@ -56,15 +72,22 @@
 
 (defn- maybe-create-thread! [thread-id]
   (when-not (get-in @app-state [:threads thread-id])
-    (transact! [:threads thread-id] (constantly {:id thread-id
-                                                 :messages []
-                                                 :tag-ids #{}}))))
+    (if-let [thread (get-in @app-state [:search-results thread-id])]
+      (do (transact! [:threads thread-id] (constantly thread))
+          (transact! [:search-results] #(dissoc % thread-id)))
+      (transact! [:threads thread-id] (constantly {:id thread-id
+                                                   :messages []
+                                                   :tag-ids #{}})))))
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
   (transact! [:threads (message :thread-id) :messages] #(conj % message)))
 
 (defn add-thread! [thread]
+  (when-not (get-in @app-state [:notifications :window-visible?])
+    (transact! [:notifications :unread-count] inc)
+    (set! (.-title js/document)
+          (str "Chat (" (get-in @app-state [:notifications :unread-count]) ")")))
   (transact! [:threads (thread :id)] (constantly thread)))
 
 (defn hide-thread! [thread-id]
@@ -72,6 +95,11 @@
 
 (defn id->thread [thread-id]
   (get-in @app-state [:threads thread-id]))
+
+; search threads
+
+(defn set-search-results! [threads]
+  (transact! [:search-results] (constantly (key-by-id threads))))
 
 ; tags
 
@@ -84,6 +112,9 @@
 (defn add-tag-to-thread! [tag-id thread-id]
   (maybe-create-thread! thread-id)
   (transact! [:threads thread-id :tag-ids] #(set (conj % tag-id))))
+
+(defn add-mention-to-thread! [user-id thread-id]
+  (transact! [:threads thread-id :mentioned-ids] #(set (conj % user-id))))
 
 (defn all-tags []
   (vals (get-in @app-state [:tags])))

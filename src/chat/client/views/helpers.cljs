@@ -42,3 +42,8 @@
             (dom/a #js {:href link} link)
             (elt :text)))
         text-links-seq))))
+
+(defn format-date
+  "Turn a Date object into a nicely formatted string"
+  [date]
+  (str (.toLocaleDateString date) " " (.toLocaleTimeString date)))

@@ -1,6 +1,8 @@
 (ns chat.test.server.db
   (:require [clojure.test :refer :all]
-            [chat.server.db :as db]))
+            [chat.test.server.test-utils :refer [fetch-messages]]
+            [chat.server.db :as db]
+            [chat.server.search :as search]))
 
 (use-fixtures :each
               (fn [t]
@@ -9,14 +11,39 @@
                   (db/with-conn (t))
                   (datomic.api/delete-database db/*uri*))))
 
+
 (deftest create-user
   (let [data {:id (db/uuid)
               :email "foo@bar.com"
               :password "foobar"
               :avatar "http://www.foobar.com/1.jpg"}
         user (db/create-user! data)]
+    (testing "can check if an email has been used"
+      (is (db/email-taken? (:email data)))
+      (is (not (db/email-taken? "baz@quux.net"))))
     (testing "create returns a user"
-      (is (= user (dissoc data :password))))))
+      (is (= user (-> data (dissoc :password) (assoc :nickname nil)))))
+    (testing "can set nickname"
+      (is (not (db/nickname-taken? "ol' fooy")))
+      @(db/set-nickname! (user :id) "ol' fooy")
+      (is (db/nickname-taken? "ol' fooy"))
+      (is (= (db/user-with-email "foo@bar.com")
+             (-> data (dissoc :password) (assoc :nickname "ol' fooy"))))
+      (is (= "ol' fooy" (db/get-nickname (user :id)))))
+
+    (testing "user email must be unique"
+      (is (thrown? java.util.concurrent.ExecutionException
+                   (db/create-user! {:id (db/uuid)
+                                     :email (data :email)
+                                     :password "zzz"
+                                     :avatar "http://zzz.com/2.jpg"}))))
+    (testing "user nickname must be unique"
+      (let [other {:id (db/uuid)
+                   :email "baz@quux.com"
+                   :password "foobar"
+                   :avatar "foo@bar.com"}]
+        (is (some? (db/create-user! other)))
+        (is (thrown? java.util.concurrent.ExecutionException @(db/set-nickname! (other :id)  "ol' fooy")))))))
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)
@@ -61,9 +88,14 @@
     (db/user-add-to-group! (user-2 :id) (group-2 :id))
     (db/user-add-to-group! (user-3 :id) (group-2 :id))
     (is (not (db/user-in-group? (user-1 :id) (group-2 :id))))
-    (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id)))
-    (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id)))
-    (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id)))))
+    (is (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id))))
+    (is (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id))))
+    (is (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id))))
+    (is (db/user-visible-to-user? (user-1 :id) (user-2 :id)))
+    (is (not (db/user-visible-to-user? (user-1 :id) (user-3 :id))))
+    (is (not (db/user-visible-to-user? (user-3 :id) (user-1 :id))))
+    (is (db/user-visible-to-user? (user-2 :id) (user-3 :id)))
+    (is (db/user-visible-to-user? (user-3 :id) (user-2 :id)))))
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
@@ -131,7 +163,7 @@
           (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))))
 
 
-(deftest fetch-messages
+(deftest fetch-messages-test
   (let [user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
@@ -148,7 +180,7 @@
                         :created-at (java.util.Date.)
                         :content "Hello?"}
         message-2 (db/create-message! message-2-data)
-        messages (db/fetch-messages)]
+        messages (fetch-messages)]
     (testing "fetch-messages returns all messages"
       (is (= (set messages) #{message-1 message-2})))))
 
@@ -480,4 +512,75 @@
     (db/user-add-to-group! (user :id) (group :id))
     (db/user-subscribe-to-group-tags! (user :id) (group :id))
     (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
+           (db/get-user-visible-tag-ids (user :id))
            (set (map :id group-tags))))))
+
+(deftest tagging-thread-with-disjoint-groups
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "bar@foo.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        group-1 (db/create-group! {:name "group1" :id (db/uuid)})
+        group-2 (db/create-group! {:name "group2" :id (db/uuid)})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "tag1" :group-id (group-1 :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "tag2" :group-id (group-2 :id)})
+        thread-id (db/uuid)]
+
+    (db/user-add-to-group! (user-1 :id) (group-1 :id))
+    (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
+
+    (db/user-add-to-group! (user-1 :id) (group-2 :id))
+    (db/user-subscribe-to-tag! (user-1 :id) (tag-2 :id))
+
+    (db/user-add-to-group! (user-2 :id) (group-1 :id))
+    (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
+
+    (db/create-message! {:thread-id thread-id :id (db/uuid) :content "zzz"
+                         :user-id (user-1 :id) :created-at (java.util.Date.)})
+    (db/thread-add-tag! thread-id (tag-1 :id))
+    (db/thread-add-tag! thread-id (tag-2 :id))
+
+    (is (db/user-can-see-thread? (user-1 :id) thread-id))
+    (is (db/user-can-see-thread? (user-2 :id) thread-id))
+    (let [u1-threads (db/get-open-threads-for-user (user-1 :id))
+          u2-threads (db/get-open-threads-for-user (user-2 :id))]
+      (is (= 1 (count u1-threads)))
+      (is (= 1 (count u2-threads)))
+      (is (= #{(tag-1 :id) (tag-2 :id)}
+             (set (:tag-ids (first u1-threads)))))
+      (is (= #{(tag-1 :id)}
+             (set (:tag-ids (first u2-threads))))))))
+
+(deftest mentioning-users-in-threads
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        user-2 (db/create-user! {:id (db/uuid)
+                                 :email "bar@foo.com"
+                                 :password "foobar"
+                                 :avatar ""}) ]
+
+    (db/set-nickname! (user-1 :id) "foo")
+    (db/set-nickname! (user-2 :id) "bar")
+
+    (testing "Can mention a user to open the thread for them"
+      (let [thread-id (db/uuid)]
+        (db/create-message! {:thread-id thread-id :id (db/uuid) :content  "hi @bar"
+                             :user-id (user-1 :id) :created-at (java.util.Date.)})
+        (is (not (db/user-can-see-thread? (user-2 :id) thread-id)))
+        (is (empty? (db/get-open-thread-ids-for-user (user-2 :id))))
+        (db/thread-add-mentioned! thread-id (user-2 :id))
+        (is (db/user-can-see-thread? (user-2 :id) thread-id))
+        (is (= [thread-id] (db/get-open-thread-ids-for-user (user-2 :id))))
+
+        (testing "and the thread has a collection of mentions"
+          (is  (= [(user-2 :id)]
+                  (-> (db/get-thread thread-id) :mentioned-ids)
+                  (-> (db/get-open-threads-for-user (user-2 :id))
+                      first
+                      :mentioned-ids))))))))
