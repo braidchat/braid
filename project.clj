@@ -22,7 +22,7 @@
                  [joda-time "2.8.2"]
                  [instaparse "1.4.1"]
                  ;client
-                 [org.clojure/clojurescript "0.0-3308"]
+                 [org.clojure/clojurescript "1.7.145"]
                  [org.omcljs/om "0.8.8"]
                  [org.clojars.leanpixel/cljs-utils "0.2.1"]
                  [prismatic/schema "0.4.3"]
@@ -31,6 +31,8 @@
                  [com.taoensso/sente "1.5.0"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [org.clojars.leanpixel/om-fields "1.8.6"]
+                 ; dev
+                 [figwheel-sidecar "0.4.0"]
                  ]
 
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
@@ -41,25 +43,24 @@
             [jamesnvc/lein-lesscss "1.4.0"] ]
 
   :repl-options {:timeout 120000}
-  ;:clean-targets ^{:protect false} ["resources/public/js/out"]
+  :clean-targets ^{:protect false}
+  ["resources/public/js/out"
+   ;"resources/public/css/out" ; need to fix lein-lesscss to create the director if it doesn't exist
+   ]
   :lesscss-paths ["resources/less"]
   :lesscss-output-path "resources/public/css/out"
   :cljsbuild {:builds
-              [{:id "dev"
+              [{:id "release"
                 :source-paths ["src/chat/client"]
                 :compiler {:main chat.client.core
                            :asset-path "/js/out"
                            :output-to "resources/public/js/out/chat.js"
                            :output-dir "resources/public/js/out"
-                           :optimizations :none
-                           :source-map true}}
-               {:id "release"
-                :source-paths ["src/chat/client"]
-                :compiler {:main chat.client.core
-                           :output-to "resources/public/js/out/chat.js"
                            :optimizations :advanced
                            :pretty-print false }}]}
 
   :min-lein-version "2.5.0"
 
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all
+                       :hooks [leiningen.cljsbuild
+                               leiningen.hooks.lesscss]}})
