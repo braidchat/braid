@@ -4,8 +4,8 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.group-invite :refer [group-invite-view]]
-            [chat.client.views.helpers :as helpers]
-            ))
+            [chat.client.views.helpers :as helpers])
+  (:import [goog.events KeyCodes]))
 
 (defn tag-view [tag owner]
   (reify

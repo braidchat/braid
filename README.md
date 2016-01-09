@@ -1,44 +1,20 @@
-# starting
+# Braid
 
-Create a `profiles.clj` that looks something like
-```clojure
-{:chat
- {:env {:rafal-password "some test password"
-        :james-password "some test password"
-        :mailgun-domain "braid.mysite.com"
-        :mailgun-password "my_mailgun_key"
-        :site-url "http://localhost:5555"
-        :hmac-secret "foobar"
-        :aws-domain "braid.mysite.com"
-        :aws-access-key "my_aws_key"
-        :aws-secret-key "my_aws_secrete"
-        :db-url "datomic:dev://localhost:4334/chat-dev"
-        }}}
-```
+Braid is an open-source group chat application for teams and communities designed to promote productive conversations.
 
-```bash
-# start datomic db elsewhere
-lein with-profile +chat repl
-```
+It is written in clojure(script) and developed by the clojure community.
 
-```clojure
-(chat.server.db/init!) ; first time only
+Here's what it looks like: https://www.youtube.com/watch?v=pa2bUsChFqM (early prototype)
 
-(chat.server.seed/seed!) ; optional
+Read [the Background](https://github.com/braidchat/braid/wiki) and [Motivation](https://github.com/braidchat/braid/wiki/Motivation).
 
-(chat.server.handler/start-server! 5555)
-(chat.server.sync/start-router!)
-```
 
-# compiling js
+Circumstances led us to open-source this sooner than we were planning, so there are a lot of rough edges. Please be patient.
 
-rlwrap lein run -m clojure.main script/figwheel.clj
+In the short-term, we will be focusing on the ‘get-it-running-on-your-machine’ experience. In the meantime, you can try to decipher our development and setup notes here:
 
-# compiling css
+https://github.com/braidchat/braid/blob/master/developing.md
 
-lein lesscss auto
+https://github.com/braidchat/braid/blob/master/deploying.md
 
-# running tests
-
-`lein with-profile test,lp quickie "chat.*"`
-
+Conversations are current happening on the #clj-chat-project channel at clojurians.slack.com (until we start dogfooding, of course!)
