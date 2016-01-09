@@ -4,6 +4,8 @@ Braid is an open-source group chat application for teams and communities designe
 
 It is written in clojure(script) and developed by the clojure community.
 
+Here's what it looks like: https://www.youtube.com/watch?v=pa2bUsChFqM (early prototype) 
+
 Read [the Background](https://github.com/braidchat/braid/wiki) and [Motivation](https://github.com/braidchat/braid/wiki/Motivation).
 
 
