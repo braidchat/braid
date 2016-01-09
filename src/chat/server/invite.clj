@@ -83,21 +83,21 @@
   [invite]
   (let [accept-link (make-invite-link invite)]
     {:text (str (invite :inviter-email) " has invited to join the " (invite :group-name)
-                " group on chat.leanpixel.com.\n\n"
+                " group on " (env :site-url) ".\n\n"
                 "Go to " accept-link " to accept.")
      :html (str "<html><body>"
                 (invite :inviter-email) " has invited to join the " (invite :group-name)
-                " group on <a href=\"https://chat.leanpixel.com\">chat.leanpixel.com.</a>"
+                " group on <a href=\"" (env :site-url) "\">" (env :site-url) "</a>."
                 "<br>"
                 "<a href=\"" accept-link "\">Click here</a> to accept."
                 "</body></html>")}))
 
 (defn send-invite
   [invite]
-  (http/post "https://api.mailgun.net/v3/chat.leanpixel.com/messages"
+  (http/post "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages"
              {:basic-auth ["api" (env :mailgun-password)]
               :form-params (merge {:to (invite :invitee-email)
-                                   :from "noreply@chat.leanpixel.com"
+                                   :from (str "noreply@" (env :mailgun-domain))
                                    :subject "Join the conversation"}
                                   (invite-message invite))}))
 
@@ -146,7 +146,7 @@
               ; TODO
               (last (string/split (f :filename) #"\.")))
         avatar-filename (str (java.util.UUID/randomUUID) "." ext)]
-    (s3/put-object creds "chat.leanpixel.com" (str "avatars/" avatar-filename) (f :tempfile)
+    (s3/put-object creds (env :aws-domain) (str "avatars/" avatar-filename) (f :tempfile)
                    {:content-type (f :content-type)})
-    (s3/update-object-acl creds "chat.leanpixel.com" (str "avatars/" avatar-filename) (s3/grant :all-users :read))
-    (str "https://s3.amazonaws.com/chat.leanpixel.com/avatars/" avatar-filename)))
+    (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename) (s3/grant :all-users :read))
+    (str "https://s3.amazonaws.com/" (env :aws-domain) "/avatars/" avatar-filename)))
