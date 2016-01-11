@@ -24,21 +24,8 @@
                                     (when on-focus (on-focus)))}
           "invite")
         (dom/div #js {:className "invite-form"}
-          (om/build input {:value invitee-email}
-                    {:opts {:type :autocomplete
-                            :edit-key [:value]
-                            :update-fn (fn [v]
-                                         (om/set-state! owner :invitee-email (str v)))
-                            :placeholder "User to invite"
-                            :search-fn
-                            (fn [s ch]
-                              ; TODO: don't show users already in group
-                              (let [emails (->> (store/get-user-emails)
-                                                (filter #(not= -1 (.indexOf % s)))
-                                                (cons s))]
-                                (put! ch emails)))
-                            :choice-render-fn str
-                            :class "autocomplete"}})
+          (dom/input #js {:value invitee-email :type "email" :placeholder "email address"
+                           :onChange (fn [e] (om/set-state! owner :invitee-email (.. e -target -value)))})
           (dom/button #js {:className "invite"
                            :disabled (string/blank? invitee-email)
                            :onClick
