@@ -55,7 +55,9 @@ body {
   left: 0;
   padding-left: @pad;
 
+  display: -webkit-flex;
   display: flex;
+  -webkit-align-items: flex-end;
   align-items: flex-end;
   overflow: scroll;
 }
@@ -66,18 +68,23 @@ body {
   min-width: @card-width;
   box-sizing: border-box;
 
+  display: -webkit-flex;
   display: flex;
+  -webkit-flex-direction: column;
   flex-direction: column;
   height: 100%;
 
   &:before { // switch to after to align at top
     content: "";
+    -webkit-flex-grow: 1;
     flex-grow: 1;
     height: 1em;
   }
 
   .card {
+    display: -webkit-flex;
     display: flex;
+    -webkit-flex-direction: column;
     flex-direction: column;
     box-shadow: 0 1px 2px 0 #ccc;
     max-height: 100%;
@@ -88,6 +95,7 @@ body {
     height: 3.5em;
     width: 100%;
     position: relative;
+    -webkit-flex-shrink: 0;
     flex-shrink: 0;
     //box-shadow: 0 2px 2px -2px #ccc;
 
@@ -115,6 +123,7 @@ body {
     padding: 0 @pad;
   }
   .message.new {
+    -webkit-flex-shrink: 0;
     flex-shrink: 0;
     min-height: 3.5em;
   }
