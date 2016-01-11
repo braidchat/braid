@@ -48,11 +48,13 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
-        (when-not (or (thread :new?) searched?)
-          (dom/div #js {:className "close"
-                        :onClick (fn [_]
-                                   (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
-        (om/build thread-tags-view thread)
+
+        (dom/div #js {:className "head"}
+          (when-not (or (thread :new?) searched?)
+            (dom/div #js {:className "close"
+                          :onClick (fn [_]
+                                     (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
+          (om/build thread-tags-view thread))
         (when-not (thread :new?)
           (apply dom/div #js {:className "messages"}
             (om/build-all message-view (->> (thread :messages)
