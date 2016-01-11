@@ -5,9 +5,11 @@ Create a `profiles.clj` that looks something like
 {:chat
  {:env {:rafal-password "some test password"
         :james-password "some test password"
+        :mailgun-domain "braid.mysite.com"
         :mailgun-password "my_mailgun_key"
         :site-url "http://localhost:5555"
         :hmac-secret "foobar"
+        :aws-domain "braid.mysite.com"
         :aws-access-key "my_aws_key"
         :aws-secret-key "my_aws_secrete"
         :db-url "datomic:free://localhost:4334/chat-dev"
