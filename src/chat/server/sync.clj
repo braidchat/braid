@@ -58,6 +58,13 @@
             filtered-thread (update-in thread [:tag-ids] (partial filter user-tags))]
         (chsk-send! uid [:chat/thread filtered-thread])))))
 
+(defn broadcast-user-change
+  "Broadcast user info change to clients that can see this user"
+  [user-id info]
+  (let [ids-to-send-to (map :id (db/with-conn (db/fetch-users-for-user user-id)))]
+    (doseq [uid ids-to-send-to]
+      (chsk-send! uid info))))
+
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
@@ -107,6 +114,7 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (try
       (do (db/with-conn @(db/set-nickname! user-id (?data :nickname)))
+          (broadcast-user-change user-id [:user/name-change {:user-id user-id :nickname (?data :nickname)}])
           (when ?reply-fn (?reply-fn {:ok true})))
       (catch java.util.concurrent.ExecutionException _
         (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))))

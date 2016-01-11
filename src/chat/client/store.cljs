@@ -66,6 +66,9 @@
          (remove #(= me (% :id)))
          (map :email))))
 
+(defn update-user-nick! [user-id nick]
+  (transact! [:users user-id :nickname] (constantly nick)))
+
 ; threads and messages
 
 (defn set-threads! [threads]
