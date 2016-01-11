@@ -48,23 +48,23 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
-
-        (dom/div #js {:className "head"}
-          (when-not (or (thread :new?) searched?)
-            (dom/div #js {:className "close"
-                          :onClick (fn [_]
-                                     (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
-          (om/build thread-tags-view thread))
-        (when-not (thread :new?)
-          (apply dom/div #js {:className "messages"}
-            (om/build-all message-view (->> (thread :messages)
-                                            (sort-by :created-at))
-                          {:key :id})))
-        (om/build new-message-view {:thread-id (thread :id)
-                                    :placeholder (if (thread :new?)
-                                                   "Start a conversation..."
-                                                   "Reply...")}
-                  {:react-key "message"})))))
+        (dom/div #js {:className "card"}
+          (dom/div #js {:className "head"}
+            (when-not (or (thread :new?) searched?)
+              (dom/div #js {:className "close"
+                            :onClick (fn [_]
+                                       (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
+            (om/build thread-tags-view thread))
+          (when-not (thread :new?)
+            (apply dom/div #js {:className "messages"}
+              (om/build-all message-view (->> (thread :messages)
+                                              (sort-by :created-at))
+                            {:key :id})))
+          (om/build new-message-view {:thread-id (thread :id)
+                                      :placeholder (if (thread :new?)
+                                                     "Start a conversation..."
+                                                     "Reply...")}
+                    {:react-key "message"}))))))
 
 (defn debounce
   "Given the input channel source and a debouncing time of msecs, return a new
