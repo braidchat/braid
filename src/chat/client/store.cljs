@@ -59,13 +59,6 @@
 (defn add-users! [users]
   (transact! [:users] #(merge % (key-by-id users))))
 
-(defn get-user-emails []
-  (let [me (get-in @app-state [:session :user-id])]
-    (->> (get @app-state :users)
-         vals
-         (remove #(= me (% :id)))
-         (map :email))))
-
 (defn update-user-nick! [user-id nick]
   (transact! [:users user-id :nickname] (constantly nick)))
 
