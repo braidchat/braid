@@ -1,3 +1,7 @@
+@top-bar-height: 2em;
+@card-width: 20em;
+@pad: 1em;
+
 body {
   margin: 0;
   padding: 0;
@@ -8,12 +12,12 @@ body {
 
 .floating-box() {
   background: white;
-  margin: 1em;
   box-shadow: 0 1px 2px 0 #ccc;
-  width: 18em;
-  padding: 1em;
-  display: inline-block;
-  vertical-align: top;
+  width: @card-width;
+  padding: @pad;
+  box-sizing: border-box;
+//  display: inline-block;
+//  vertical-align: bottom;
 
   position: relative;
 }
@@ -33,42 +37,95 @@ body {
   }
 }
 
-.thread {
-  .floating-box;
-  padding-top: 3.5em;
+.tag {
+  font-size: 0.75em;
+  display: inline-block;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-right: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
 
-  .tags {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    color: white;
-    margin: 1em;
-    z-index: 1;
+.threads {
+  position: absolute;
+  top: @top-bar-height;
+  right: 0;
+  bottom: @pad;
+  left: 0;
+  padding-left: @pad;
+
+  display: flex;
+  align-items: flex-end;
+  overflow: scroll;
+}
+
+.thread {
+  margin-right: @pad;
+
+  min-width: @card-width;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &:before { // switch to after to align at top
+    content: "";
+    flex-grow: 1;
+    height: 1em;
   }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 2px 0 #ccc;
+    max-height: 100%;
+    background: white;
+  }
+
+  .head {
+    height: 3.5em;
+    width: 100%;
+    position: relative;
+    flex-shrink: 0;
+    //box-shadow: 0 2px 2px -2px #ccc;
+
+    .tags {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      color: white;
+      margin: @pad;
+      z-index: 1;
+    }
+    .close {
+      position: absolute;
+      padding: @pad;
+      top: 0;
+      right: 0;
+      z-index: 10;
+      cursor: pointer;
+    }
+  }
+
+  .messages {
+    overflow: scroll;
+    padding: 0 @pad;
+  }
+  .message.new {
+    flex-shrink: 0;
+    min-height: 3.5em;
+  }
+}
+
+.thread {
   .tags-preview {
     .ambiguous .group {
       border: 1px dashed black;
       cursor: pointer;
     }
-  }
-  .tag {
-    font-size: 0.75em;
-    display: inline-block;
-    padding: 2px 4px;
-    border-radius: 4px;
-    margin-right: 0.5em;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .close {
-    position: absolute;
-    padding: 1em;
-    top: 0;
-    right: 0;
-    z-index: 10;
-    cursor: pointer;
   }
 
   .message {
@@ -92,11 +149,15 @@ body {
     }
 
     &.new {
-      margin-left: 2em;
+      padding-left: @pad + 2em;
+      padding-top: @pad;
+      padding-right: @pad;
+      margin-bottom: 0;
       textarea {
         width: 100%;
         border: none;
-        resize: none;
+        resize: vertical;
+        box-sizing: border-box;
         &:focus {
           outline: none;
         }
@@ -257,7 +318,4 @@ body {
       cursor: pointer;
     }
   }
-}
-
-.threads {
 }
