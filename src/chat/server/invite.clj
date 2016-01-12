@@ -94,7 +94,7 @@
 
 (defn send-invite
   [invite]
-  (http/post "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages"
+  (http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
              {:basic-auth ["api" (env :mailgun-password)]
               :form-params (merge {:to (invite :invitee-email)
                                    :from (str "noreply@" (env :mailgun-domain))

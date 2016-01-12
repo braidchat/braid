@@ -154,3 +154,7 @@
 (defmethod sync/event-handler :chat/invitation-recieved
   [[_ invite]]
   (store/add-invite! invite))
+
+(defmethod sync/event-handler :user/name-change
+  [[_ {:keys [user-id nickname]}]]
+  (store/update-user-nick! user-id nickname))
