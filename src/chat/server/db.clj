@@ -569,7 +569,8 @@
     ; ...or they're already subscribed to the thread...
     (contains? (set (get-users-subscribed-to-thread thread-id)) user-id)
     ; ...or they're mentioned in the thread
-    (contains? (-> (d/pull *conn* [:thread/mentioned] [:thread/id thread-id])
+    ; TODO: is it possible for them to be mentioned but not subscribed?
+    (contains? (-> (d/pull (d/db *conn*) [:thread/mentioned] [:thread/id thread-id])
                    :thread/mentioned set)
                user-id)
     ; ...or they are in the group of any tags on the thread
