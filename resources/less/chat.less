@@ -1,6 +1,7 @@
 @top-bar-height: 2em;
 @card-width: 20em;
-@pad: 1em;
+@pad: 1rem;
+@sidebar-width: 200px;
 
 body {
   margin: 0;
@@ -37,7 +38,7 @@ body {
   }
 }
 
-.tag {
+.pill-box() {
   font-size: 0.75em;
   display: inline-block;
   padding: 2px 4px;
@@ -45,6 +46,34 @@ body {
   margin-right: 0.5em;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  background-color: #222;
+  vertical-align: middle;
+}
+
+.tag {
+  .pill-box();
+}
+.user {
+  .pill-box();
+  .status {
+    margin-left: 0.5em;
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    border: solid 2px black;
+    border-radius: 50%;
+    box-sizing: border-box;
+    vertical-align: middle;
+    &.online {
+      background: black;
+    }
+    &.offline {
+
+    }
+    &.away {
+
+    }
+  }
 }
 
 .threads {
@@ -52,7 +81,7 @@ body {
   top: @top-bar-height;
   right: 0;
   bottom: @pad;
-  left: 0;
+  left: @sidebar-width;
   padding-left: @pad;
 
   display: -webkit-flex;
@@ -327,6 +356,44 @@ body {
       color: #999;
       padding: 0.25em;
       cursor: pointer;
+    }
+  }
+}
+
+.sidebar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: @sidebar-width;
+  background: #333;
+  color: #ccc;
+
+  h2 {
+    margin-left: @pad;
+    text-transform: uppercase;
+    font-size: 1em;
+    letter-spacing: 0.09em;
+    font-weight: normal;
+  }
+
+  .all {
+    .pill-box()
+  }
+
+  .conversations, .recommended, .users {
+    margin-left: @pad;
+  }
+
+  .all, .tag, .user {
+    margin-bottom: 1em;
+  }
+  .search {
+    margin: @pad;
+    display: block;
+    box-sizing: border-box;
+    input {
+      width: 100%;
     }
   }
 }

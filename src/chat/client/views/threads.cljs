@@ -24,6 +24,23 @@
           (dom/div #js {:className "info"}
             (str (or (sender :nickname) (sender :email)) " @ " (helpers/format-date (message :created-at)))))))))
 
+(defn tag-view [tag owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className (str "tag " (rand-nth ["subscribed" ""]))
+                    :style #js {:backgroundColor (helpers/tag->color tag)}}
+        (dom/span #js {:className "name"} (tag :name))))))
+
+(defn user-view [user owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "user"
+                    :style #js {:backgroundColor (helpers/tag->color user)}}
+        (dom/span #js {:className "name"} (str "@" (or (user :nickname) (user :email))))
+        (dom/div #js {:className (str "status " (rand-nth ["online" "away" "offline"]))})))))
+
 (defn thread-tags-view [thread owner]
   (reify
     om/IRender
@@ -35,13 +52,9 @@
         (apply dom/div #js {:className "tags"}
           (concat
             (map (fn [u]
-                   (dom/div #js {:className "tag"
-                                 :style #js {:backgroundColor (helpers/tag->color u)}}
-                     (str "@" (or (u :nickname) (u :email))))) mentions)
+                   (om/build user-view u)) mentions)
             (map (fn [tag]
-                   (dom/div #js {:className "tag"
-                                 :style #js {:backgroundColor (helpers/tag->color tag)}}
-                     (tag :name))) tags)))))))
+                   (om/build tag-view tag)) tags)))))))
 
 (defn thread-view [thread owner {:keys [searched?] :as opts}]
   (reify
@@ -108,6 +121,58 @@
                         :onChange
                         (fn [e] (put! search-chan {:query (.. e -target -value)}))})))))
 
+
+
+(defn sidebar-view [data owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "sidebar"}
+        (om/build search-view {})
+
+        (dom/div nil "note: below sections are currently non-functional")
+        (dom/h2 nil "Channels")
+        (dom/div #js {:className "conversations"}
+          (dom/div nil
+            (dom/div #js {:className "all"} "ALL")
+             "[20]")
+          (apply dom/div nil
+            (->> [{:name "foo"
+                   :id (uuid/make-random-squuid)}
+                  {:name "bar"
+                   :id (uuid/make-random-squuid)}
+                  {:name "baz"
+                   :id (uuid/make-random-squuid)}]
+                 (map (fn [tag]
+                        (dom/div nil (om/build tag-view tag) (str "[" (rand-int 10) "]"))))))
+          (apply dom/div nil
+            (->> [{:nickname "jon"
+                   :id (uuid/make-random-squuid)}
+                  {:nickname "bob"
+                   :id (uuid/make-random-squuid)}]
+                 (map (fn [user]
+                        (dom/div nil (om/build user-view user) (str "[" (rand-int 10) "]")))))))
+
+        (dom/h2 nil "Recommended")
+        (apply dom/div #js {:className "recommended"}
+          (->> [{:name "barbaz"
+                 :id (uuid/make-random-squuid)}
+                {:name "general"
+                 :id (uuid/make-random-squuid)}
+                {:name "asdf"
+                 :id (uuid/make-random-squuid)}]
+               (map (fn [tag]
+                      (dom/div nil (om/build tag-view tag))))))
+
+        (dom/h2 nil "Members")
+        (apply dom/div #js {:className "users"}
+          (->> [{:nickname "foobar"
+                 :id (uuid/make-random-squuid)}
+                {:nickname "michael"
+                 :id (uuid/make-random-squuid)}]
+               (map (fn [user]
+                      (dom/div nil (om/build user-view user))))))))))
+
 (defn threads-view [data owner]
   (reify
     om/IRender
@@ -120,7 +185,7 @@
                            :onClick (fn [_] (store/clear-error!))}
               "×")))
         (om/build user-modal-view data)
-        (om/build search-view {})
+        (om/build sidebar-view {})
         (apply dom/div #js {:className "threads"}
           (concat
             (map (fn [t] (om/build thread-view t
