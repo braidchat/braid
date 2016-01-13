@@ -28,12 +28,13 @@
         {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
         {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
-  (POST "/register" [token invite_id password email now hmac avatar :as req]
+  (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
         (string/blank? password) (assoc fail :body "Must provide a password")
         (not (invites/verify-hmac hmac (str now token invite_id email))) (assoc fail :body "Invalid HMAC")
         (string/blank? invite_id) (assoc fail :body "Invalid invitation ID")
+        (or (string/blank? nickname) (db/with-conn (db/nickname-taken? nickname))) (assoc fail :body "nickname taken")
         ; TODO: be smarter about this
         (not (#{"image/jpeg" "image/png"} (:content-type avatar))) (assoc fail :body "Invalid image")
 
