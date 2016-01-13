@@ -41,13 +41,20 @@ body {
 .pill-box() {
   font-size: 0.75em;
   display: inline-block;
-  padding: 2px 4px;
-  border-radius: 4px;
+  padding: 0.25em 0.5em;
+  border-radius: 0.5em;
   margin-right: 0.5em;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   background-color: #222;
   vertical-align: middle;
+  height: 1.25em;
+  max-width: 10em;
+  white-space: nowrap;
+  overflow: hidden;
+  &:hover {
+    max-width: none;
+  }
 }
 
 .tag {
