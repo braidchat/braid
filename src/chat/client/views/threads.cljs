@@ -61,7 +61,6 @@
         (fn []
           (when-not (thread :new?) ; need this here b/c get-node breaks if no refs???
             (when-let [messages (om/get-node owner "messages")]
-              ; scroll to bottom of messages
               (set! (.-scrollTop messages) (.-scrollHeight messages)))))]
     (reify
       om/IDidMount
