@@ -31,6 +31,7 @@
                  [com.taoensso/sente "1.5.0"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [org.clojars.leanpixel/om-fields "1.8.6"]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
                  ; dev
                  [figwheel-sidecar "0.4.0"]
                  ]

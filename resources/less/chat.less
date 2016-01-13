@@ -1,6 +1,8 @@
 @top-bar-height: 2em;
-@card-width: 20em;
-@pad: 1em;
+@card-width: 17rem;
+@pad: 1rem;
+@sidebar-width: 150px;
+@avatar-size: 2rem;
 
 body {
   margin: 0;
@@ -22,9 +24,9 @@ body {
   position: relative;
 }
 
-.tiny-avatar() {
-  width: 1.2em;
-  height: 1.2em;
+.avatar() {
+  width: @avatar-size;
+  height: @avatar-size;
 }
 
 .error-banner {
@@ -37,14 +39,48 @@ body {
   }
 }
 
-.tag {
+.pill-box() {
   font-size: 0.75em;
   display: inline-block;
-  padding: 2px 4px;
-  border-radius: 4px;
+  padding: 0.25em 0.5em;
+  border-radius: 0.5em;
   margin-right: 0.5em;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  background-color: #222;
+  vertical-align: middle;
+  height: 1.25em;
+  max-width: 10em;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-bottom: 0.5em;
+  color: white;
+}
+
+.tag {
+  .pill-box();
+}
+.user {
+  .pill-box();
+  .status {
+    margin-left: 0.5em;
+    width: 1em;
+    height: 1em;
+    display: inline-block;
+    border: solid 2px black;
+    border-radius: 50%;
+    box-sizing: border-box;
+    vertical-align: middle;
+    &.online {
+      background: black;
+    }
+    &.offline {
+
+    }
+    &.away {
+
+    }
+  }
 }
 
 .threads {
@@ -52,7 +88,7 @@ body {
   top: @top-bar-height;
   right: 0;
   bottom: @pad;
-  left: 0;
+  left: @sidebar-width;
   padding-left: @pad;
 
   display: -webkit-flex;
@@ -93,7 +129,7 @@ body {
   }
 
   .head {
-    height: 3.5em;
+    min-height: 3.5em;
     width: 100%;
     position: relative;
     -webkit-flex-shrink: 0;
@@ -101,13 +137,7 @@ body {
     //box-shadow: 0 2px 2px -2px #ccc;
 
     .tags {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      color: white;
       margin: @pad;
-      z-index: 1;
     }
     .close {
       position: absolute;
@@ -140,23 +170,46 @@ body {
 
   .message {
     position: relative;
-    margin: 0 0 1em;
+    margin: 0 0 @pad;
 
     .avatar {
-      .tiny-avatar();
+      .avatar();
       display: inline-block;
       position: absolute;
       border-radius: 25%;
      }
 
+    .info {
+      height: 1rem;
+      margin-left: @avatar-size + 0.5rem;
+      overflow: hidden;
+      white-space: nowrap;
+      .nickname {
+        font-weight: bold;
+      }
+      .time {
+        margin-left: 0.25rem;
+        color: #ccc;
+      }
+    }
+
     .content {
       white-space: pre-wrap;
       word-break: break-word;
       display: inline-block;
-      padding-left: 2em;
+      padding-left: @avatar-size + 0.5rem;
       width: 100%;
       box-sizing: border-box;
+      line-height: 1.25em;
     }
+
+    &.collapse {
+      margin-top: -@pad;
+      .avatar, .info {
+        display: none;
+      }
+    }
+
 
     &.new {
       padding-left: @pad + 2em;
@@ -171,7 +224,6 @@ body {
         &:focus {
           outline: none;
         }
-
       }
       .autocomplete {
         border: 1px solid #ccc;
@@ -201,14 +253,6 @@ body {
           }
         }
       }
-    }
-    .info {
-      position: absolute;
-      color: rgba(0,0,0,0);
-      font-size: 0.8em;
-    }
-    &:hover .info, &:last-child .info {
-      color: grey;
     }
   }
 }
@@ -327,6 +371,44 @@ body {
       color: #999;
       padding: 0.25em;
       cursor: pointer;
+    }
+  }
+}
+
+.sidebar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: @sidebar-width;
+  background: #333;
+  color: #ccc;
+
+  h2 {
+    margin-left: @pad;
+    text-transform: uppercase;
+    font-size: 1em;
+    letter-spacing: 0.09em;
+    font-weight: normal;
+  }
+
+  .all {
+    .pill-box()
+  }
+
+  .conversations, .recommended, .users {
+    margin-left: @pad;
+  }
+
+  .all, .tag, .user {
+    margin-bottom: 1em;
+  }
+  .search {
+    margin: @pad;
+    display: block;
+    box-sizing: border-box;
+    input {
+      width: 100%;
     }
   }
 }

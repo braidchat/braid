@@ -1,7 +1,9 @@
 (ns chat.client.views.helpers
   (:require [om.dom :as dom]
             [clojure.string :as string]
-            [cljs-utils.core :refer [flip]]))
+            [cljs-utils.core :refer [flip]]
+            [cljs-time.format :as f]
+            [cljs-time.coerce :as c]))
 
 (defn tag->color [tag]
   ; normalized is approximately evenly distributed between 0 and 1
@@ -10,7 +12,7 @@
                        (.substring 33 36)
                        (js/parseInt 16)
                        (/ 4096))]
-    (str "hsl(" (* 360 normalized) ",60%,60%)")))
+    (str "hsl(" (* 360 normalized) ",70%,35%)")))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
@@ -46,4 +48,4 @@
 (defn format-date
   "Turn a Date object into a nicely formatted string"
   [date]
-  (str (.toLocaleDateString date) " " (.toLocaleTimeString date)))
+  (f/unparse (f/formatter "H:mm A") (c/from-date date)))
