@@ -12,17 +12,18 @@
             [chat.client.views.helpers :as helpers])
   (:import [goog.events KeyCodes]))
 
-(defn message-view [message owner]
+(defn message-view [message owner opts]
   (reify
     om/IRender
     (render [_]
       (let [sender (get-in @store/app-state [:users (message :user-id)])]
-        (dom/div #js {:className "message"}
+        (dom/div #js {:className (str "message " (when (:collapse? opts) "collapse"))}
           (dom/img #js {:className "avatar" :src (sender :avatar)})
-          (apply dom/div #js {:className "content"}
-            (helpers/format-message (message :content)))
           (dom/div #js {:className "info"}
-            (str (or (sender :nickname) (sender :email)) " @ " (helpers/format-date (message :created-at)))))))))
+            (dom/span #js {:className "nickname"} (or (sender :nickname) (sender :email)))
+            (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
+          (apply dom/div #js {:className "content"}
+            (helpers/format-message (message :content))))))))
 
 (defn tag-view [tag owner]
   (reify
@@ -82,9 +83,20 @@
             (when-not (thread :new?)
               (apply dom/div #js {:className "messages"
                                   :ref "messages"}
-                (om/build-all message-view (->> (thread :messages)
-                                                (sort-by :created-at))
-                              {:key :id})))
+                (->> (thread :messages)
+                     (sort-by :created-at)
+                     (cons nil)
+                     (partition 2 1)
+                     (map (fn [[prev-message message]]
+                            (om/build message-view
+                                      message
+                                      {:key :id
+                                       :opts {:collapse?
+                                              (and (= (:user-id message)
+                                                      (:user-id prev-message))
+                                                (> (* 2 60 1000) ; 2 minutes
+                                                   (- (:created-at message)
+                                                      (or (:created-at prev-message) 0))))}}))))))
             (om/build new-message-view {:thread-id (thread :id)
                                         :placeholder (if (thread :new?)
                                                        "Start a conversation..."
