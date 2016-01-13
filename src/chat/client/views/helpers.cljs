@@ -10,7 +10,7 @@
                        (.substring 33 36)
                        (js/parseInt 16)
                        (/ 4096))]
-    (str "hsl(" (* 360 normalized) ",60%,60%)")))
+    (str "hsl(" (* 360 normalized) ",70%,35%)")))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
