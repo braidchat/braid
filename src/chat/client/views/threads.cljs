@@ -58,6 +58,12 @@
 
 (defn thread-view [thread owner {:keys [searched?] :as opts}]
   (reify
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (when-not (thread :new?) ; need this here b/c get-node breaks if no refs???
+        (when-let [messages (om/get-node owner "messages")]
+          ; scroll to bottom of messages
+          (set! (.-scrollTop messages) (.-scrollHeight messages)))))
     om/IRender
     (render [_]
       (dom/div #js {:className "thread"}
@@ -69,7 +75,8 @@
                                        (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
             (om/build thread-tags-view thread))
           (when-not (thread :new?)
-            (apply dom/div #js {:className "messages"}
+            (apply dom/div #js {:className "messages"
+                                :ref "messages"}
               (om/build-all message-view (->> (thread :messages)
                                               (sort-by :created-at))
                             {:key :id})))
