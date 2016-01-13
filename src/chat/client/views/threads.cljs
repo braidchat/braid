@@ -19,10 +19,11 @@
       (let [sender (get-in @store/app-state [:users (message :user-id)])]
         (dom/div #js {:className "message"}
           (dom/img #js {:className "avatar" :src (sender :avatar)})
-          (apply dom/div #js {:className "content"}
-            (helpers/format-message (message :content)))
           (dom/div #js {:className "info"}
-            (str (or (sender :nickname) (sender :email)) " @ " (helpers/format-date (message :created-at)))))))))
+            (dom/span #js {:className "nickname"} (or (sender :nickname) (sender :email)))
+            (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
+          (apply dom/div #js {:className "content"}
+            (helpers/format-message (message :content))))))))
 
 (defn tag-view [tag owner]
   (reify
