@@ -18,3 +18,5 @@ https://github.com/braidchat/braid/blob/master/developing.md
 https://github.com/braidchat/braid/blob/master/deploying.md
 
 Conversations are current happening on the #braid-chat channel at clojurians.slack.com (until we start dogfooding, of course!)
+
+If you'd like to contribute, read: https://github.com/braidchat/meta/wiki/Contributing
