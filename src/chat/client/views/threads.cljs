@@ -57,34 +57,40 @@
                    (om/build tag-view tag)) tags)))))))
 
 (defn thread-view [thread owner {:keys [searched?] :as opts}]
-  (reify
-    om/IDidUpdate
-    (did-update [_ _ _]
-      (when-not (thread :new?) ; need this here b/c get-node breaks if no refs???
-        (when-let [messages (om/get-node owner "messages")]
-          ; scroll to bottom of messages
-          (set! (.-scrollTop messages) (.-scrollHeight messages)))))
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "thread"}
-        (dom/div #js {:className "card"}
-          (dom/div #js {:className "head"}
-            (when-not (or (thread :new?) searched?)
-              (dom/div #js {:className "close"
-                            :onClick (fn [_]
-                                       (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
-            (om/build thread-tags-view thread))
-          (when-not (thread :new?)
-            (apply dom/div #js {:className "messages"
-                                :ref "messages"}
-              (om/build-all message-view (->> (thread :messages)
-                                              (sort-by :created-at))
-                            {:key :id})))
-          (om/build new-message-view {:thread-id (thread :id)
-                                      :placeholder (if (thread :new?)
-                                                     "Start a conversation..."
-                                                     "Reply...")}
-                    {:react-key "message"}))))))
+  (let [scroll-to-bottom
+        (fn []
+          (when-not (thread :new?) ; need this here b/c get-node breaks if no refs???
+            (when-let [messages (om/get-node owner "messages")]
+              ; scroll to bottom of messages
+              (set! (.-scrollTop messages) (.-scrollHeight messages)))))]
+    (reify
+      om/IDidMount
+      (did-mount [_]
+        (scroll-to-bottom))
+      om/IDidUpdate
+      (did-update [_ _ _]
+        (scroll-to-bottom))
+      om/IRender
+      (render [_]
+        (dom/div #js {:className "thread"}
+          (dom/div #js {:className "card"}
+            (dom/div #js {:className "head"}
+              (when-not (or (thread :new?) searched?)
+                (dom/div #js {:className "close"
+                              :onClick (fn [_]
+                                         (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
+              (om/build thread-tags-view thread))
+            (when-not (thread :new?)
+              (apply dom/div #js {:className "messages"
+                                  :ref "messages"}
+                (om/build-all message-view (->> (thread :messages)
+                                                (sort-by :created-at))
+                              {:key :id})))
+            (om/build new-message-view {:thread-id (thread :id)
+                                        :placeholder (if (thread :new?)
+                                                       "Start a conversation..."
+                                                       "Reply...")}
+                      {:react-key "message"})))))))
 
 (defn debounce
   "Given the input channel source and a debouncing time of msecs, return a new
