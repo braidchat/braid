@@ -122,6 +122,7 @@
          "    <input type=\"hidden\" name=\"now\" value=\"" now "\">"
          "    <input type=\"hidden\" name=\"hmac\" value=\"" form-hmac "\">"
          "    <input type=\"file\" name=\"avatar\" size=\"20\">"
+         "    <label>Nickname: <input type=\"text\" name=\"nickname\"></label>"
          "    <label>Password: <input type=\"password\" name=\"password\"></label>"
          "    <input type=\"submit\" value=\"Register\")>"
          "  </form>"
