@@ -52,6 +52,8 @@ body {
   max-width: 10em;
   white-space: nowrap;
   overflow: hidden;
+  margin-bottom: 0.5em;
+  color: white;
   &:hover {
     max-width: none;
   }
@@ -129,7 +131,7 @@ body {
   }
 
   .head {
-    height: 3.5em;
+    min-height: 3.5em;
     width: 100%;
     position: relative;
     -webkit-flex-shrink: 0;
@@ -137,13 +139,7 @@ body {
     //box-shadow: 0 2px 2px -2px #ccc;
 
     .tags {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      color: white;
       margin: @pad;
-      z-index: 1;
     }
     .close {
       position: absolute;
