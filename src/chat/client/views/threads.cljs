@@ -59,17 +59,17 @@
 
 (defn thread-view [thread owner {:keys [searched?] :as opts}]
   (let [scroll-to-bottom
-        (fn []
+        (fn [owner thread]
           (when-not (thread :new?) ; need this here b/c get-node breaks if no refs???
             (when-let [messages (om/get-node owner "messages")]
               (set! (.-scrollTop messages) (.-scrollHeight messages)))))]
     (reify
       om/IDidMount
       (did-mount [_]
-        (scroll-to-bottom))
+        (scroll-to-bottom owner thread))
       om/IDidUpdate
       (did-update [_ _ _]
-        (scroll-to-bottom))
+        (scroll-to-bottom owner thread))
       om/IRender
       (render [_]
         (dom/div #js {:className "thread"}
