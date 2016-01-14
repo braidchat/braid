@@ -38,7 +38,16 @@
               (remove (fn [t]
                         (contains? thread-tag-ids (t :id))))
               (filter (fn [t]
-                        (fuzzy-matches? (t :name) query)))))))])
+                        (fuzzy-matches? (t :name) query)))
+              (map (fn [tag]
+                     {:html
+                      (dom/div #js {:className "tag-match"}
+                        (dom/div #js {:className "color-block"
+                                      :style #js {:backgroundColor (helpers/tag->color tag)}})
+                        (dom/div #js {:className "tag-name"}
+                          (tag :name))
+                        (dom/div #js {:className "group-name"}
+                          (:name (store/id->group (tag :group-id)))))}))))))])
 
 
 ; TODO: autocomplete mentions
@@ -129,12 +138,7 @@
                                                  (dispatch! :tag-thread {:thread-id (config :thread-id)
                                                                          :id (tag :id)})
                                                  (close-autocomplete!))}
-                          (dom/div #js {:className "color-block"
-                                        :style #js {:backgroundColor (helpers/tag->color tag)}})
-                          (dom/div #js {:className "tag-name"}
-                            (tag :name))
-                          (dom/div #js {:className "group-name"}
-                            (:name (store/id->group (tag :group-id))))))
+                          (tag :html)))
                       results))
                   (dom/div #js {:className "result"}
                     "No Results")))))))))
