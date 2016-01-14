@@ -14,38 +14,33 @@
     (not= -1 (.indexOf (normalize s) (normalize m)))))
 
 
-
-; matcher - fn that determines if engine is to be used, returns text to use
+; fn that returns results that will be shown if pattern matches
 ;    inputs:
-;        text - current text of user's message
-;    outputs
-;        string containing matched text OR nil
-; results - fn that returns results that will be shown if pattern matches
-;    inputs:
-;       query - is the partial text that was matched
+;       text - current text of user's message
 ;       thread-id - id of the thread
 ;    output:
-;       an array of maps, each containing:
+;       if a trigger pattern was matched, an array of maps, each containing:
 ;         :html - html to be displayed for the result
 ;         :action - fn to be triggered when result picked
+;         (this array may be empty)
+;       otherwise nil
 
 
 (def engines
   [
-   {:pattern #"(?:.|\n)*#(\S*)"
+   (fn [text thread-id]
+     (when-let [query (second (re-matches #"(?:.|\n)*#(\S*)" text))]
+       (let [thread-tag-ids (-> (store/id->thread thread-id)
+                                :tag-ids
+                                set)]
+         ; suggest tags
+         (->> (store/all-tags)
+              (remove (fn [t]
+                        (contains? thread-tag-ids (t :id))))
+              (filter (fn [t]
+                        (fuzzy-matches? (t :name) query)))))))])
 
-   {:matcher (fn [text] (second (re-matches #"(?:.|\n)*#(\S*)" text)))
-    :results (fn [query thread-id]
-               (when query
-                 (let [thread-tag-ids (-> (store/id->thread thread-id)
-                                          :tag-ids
-                                          set)]
-                   ; suggest tags
-                   (->> (store/all-tags)
-                        (remove (fn [t]
-                                  (contains? thread-tag-ids (t :id))))
-                        (filter (fn [t]
-                                  (fuzzy-matches? (t :name) query)))))))}])
+
 ; TODO: autocomplete mentions
 (defn new-message-view [config owner]
   (reify
@@ -62,8 +57,7 @@
                           (> x z) z
                           (< x a) a
                           :else x))
-            query ((get-in engines [0 :matcher]) text)
-            results ((get-in engines [0 :results]) query (config :thread-id))
+            results ((get-in engines [0]) text (config :thread-id))
             highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
@@ -82,7 +76,7 @@
             (fn []
               (clear-tags!)
               (highlight-clear!))
-            autocomplete-open? (not (nil? query))]
+            autocomplete-open? (not (nil? results))]
           (dom/div #js {:className "message new"}
             (dom/textarea #js {:placeholder (config :placeholder)
                                :value (state :text)
