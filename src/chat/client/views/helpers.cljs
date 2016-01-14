@@ -41,11 +41,11 @@
       (map
         (fn [elt]
           (if-let [link (elt :link)]
-            (dom/a #js {:href link} link)
+            (dom/a #js {:href link :target "_blank"} link)
             (elt :text)))
         text-links-seq))))
 
 (defn format-date
   "Turn a Date object into a nicely formatted string"
   [date]
-  (f/unparse (f/formatter "H:mm A") (t/to-default-time-zone date)))
+  (f/unparse (f/formatter "h:mm A") (t/to-default-time-zone date)))
