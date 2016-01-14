@@ -55,8 +55,8 @@
                           (> x z) z
                           (< x a) a
                           :else x))
-            partial-tag (second (re-matches #"(?:.|\n)*#(\S*)" text))
-            results ((get-in engines [0 :results]) partial-tag (config :thread-id))
+            query (second (re-matches #"(?:.|\n)*#(\S*)" text))
+            results ((get-in engines [0 :results]) query (config :thread-id))
             highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
@@ -75,7 +75,7 @@
             (fn []
               (clear-tags!)
               (highlight-clear!))
-            autocomplete-open? (not (nil? partial-tag))]
+            autocomplete-open? (not (nil? query))]
           (dom/div #js {:className "message new"}
             (dom/textarea #js {:placeholder (config :placeholder)
                                :value (state :text)
