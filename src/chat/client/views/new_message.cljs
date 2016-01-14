@@ -20,8 +20,16 @@
 ;       thread-id - id of the thread
 ;    output:
 ;       if a trigger pattern was matched, an array of maps, each containing:
-;         :html - html to be displayed for the result
+;         :html - fn that returns html to be displayed for the result
+;             inputs:
+;                 none
+;             output:
+;                 html (as returned by (dom/*) functions)
 ;         :action - fn to be triggered when result picked
+;             inputs:
+;                 thread-id
+;             output:
+;                 none expected
 ;         (this array may be empty)
 ;       otherwise nil
 
@@ -45,13 +53,14 @@
                         (dispatch! :tag-thread {:thread-id thread-id
                                                 :id (tag :id)}))
                       :html
-                      (dom/div #js {:className "tag-match"}
-                        (dom/div #js {:className "color-block"
-                                      :style #js {:backgroundColor (helpers/tag->color tag)}})
-                        (dom/div #js {:className "tag-name"}
-                          (tag :name))
-                        (dom/div #js {:className "group-name"}
-                          (:name (store/id->group (tag :group-id)))))}))))))])
+                      (fn []
+                        (dom/div #js {:className "tag-match"}
+                          (dom/div #js {:className "color-block"
+                                        :style #js {:backgroundColor (helpers/tag->color tag)}})
+                          (dom/div #js {:className "tag-name"}
+                            (tag :name))
+                          (dom/div #js {:className "group-name"}
+                            (:name (store/id->group (tag :group-id))))))}))))))])
 
 
 ; TODO: autocomplete mentions
@@ -140,7 +149,7 @@
                                       :onClick (fn []
                                                  ((result :action) (config :thread-id))
                                                  (close-autocomplete!))}
-                          (result :html)))
+                          ((result :html))))
                       results))
                   (dom/div #js {:className "result"}
                     "No Results")))))))))
