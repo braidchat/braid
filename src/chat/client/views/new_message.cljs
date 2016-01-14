@@ -104,8 +104,8 @@
                                      autocomplete-open?
                                      (do
                                        (.preventDefault e)
-                                       (when-let [tag (nth results highlighted-result-index nil)]
-                                         ((tag :action) (config :thread-id))
+                                       (when-let [result (nth results highlighted-result-index nil)]
+                                         ((result :action) (config :thread-id))
                                          (close-autocomplete!)))
                                      ; ENTER otherwise -> send message
                                      (not e.shiftKey)
@@ -133,14 +133,14 @@
                 (if (seq results)
                   (apply dom/div nil
                     (map-indexed
-                      (fn [i tag]
+                      (fn [i result]
                         (dom/div #js {:className (str "result" " "
                                                       (when (= i highlighted-result-index) "highlight"))
                                       :style #js {:cursor "pointer"}
                                       :onClick (fn []
-                                                 ((tag :action) (config :thread-id))
+                                                 ((result :action) (config :thread-id))
                                                  (close-autocomplete!))}
-                          (tag :html)))
+                          (result :html)))
                       results))
                   (dom/div #js {:className "result"}
                     "No Results")))))))))
