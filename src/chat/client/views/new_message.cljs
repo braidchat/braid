@@ -55,9 +55,6 @@
                           (> x z) z
                           (< x a) a
                           :else x))
-            thread-tag-ids (-> (store/id->thread (config :thread-id))
-                               :tag-ids
-                               set)
             partial-tag (second (re-matches #"(?:.|\n)*#(\S*)" text))
             results ((get-in engines [0 :results]) partial-tag (config :thread-id))
             highlight-next!
