@@ -52,6 +52,9 @@
                       (fn [thread-id]
                         (dispatch! :tag-thread {:thread-id thread-id
                                                 :id (tag :id)}))
+                      :message-transform
+                      (fn [text]
+                        (string/replace text #"( *#\S*)" ""))
                       :html
                       (fn []
                         (dom/div #js {:className "tag-match"}
@@ -69,12 +72,11 @@
     om/IInitState
     (init-state [_]
       {:text ""
+       :force-close? false
        :highlighted-result-index -1})
     om/IRenderState
-    (render-state [_ {:keys [text highlighted-result-index] :as state}]
-      (let [clear-tags! (fn []
-                          (om/set-state! owner :text (string/replace text #"( *#\S*)" "")))
-            constrain (fn [x a z]
+    (render-state [_ {:keys [text force-close? highlighted-result-index] :as state}]
+      (let [constrain (fn [x a z]
                         (cond
                           (> x z) z
                           (< x a) a
@@ -96,14 +98,22 @@
               (om/set-state! owner :text ""))
             close-autocomplete!
             (fn []
-              (clear-tags!)
               (highlight-clear!))
-            autocomplete-open? (not (nil? results))]
+            choose-result!
+            (fn [result]
+              ((result :action) (config :thread-id))
+              (om/set-state! owner :text ((result :message-transform) text))
+              (close-autocomplete!))
+            autocomplete-open? (and (not force-close?) (not (nil? results)))]
           (dom/div #js {:className "message new"}
             (dom/textarea #js {:placeholder (config :placeholder)
                                :value (state :text)
                                :onChange (fn [e]
-                                           (om/set-state! owner :text (.. e -target -value)))
+                                           (om/update-state! owner
+                                                             (fn [s]
+                                                               (assoc s
+                                                                 :text (.. e -target -value)
+                                                                 :force-close? false))))
                                :onKeyDown
                                (fn [e]
                                  (condp = e.keyCode
@@ -114,8 +124,7 @@
                                      (do
                                        (.preventDefault e)
                                        (when-let [result (nth results highlighted-result-index nil)]
-                                         ((result :action) (config :thread-id))
-                                         (close-autocomplete!)))
+                                         (choose-result! result)))
                                      ; ENTER otherwise -> send message
                                      (not e.shiftKey)
                                      (do
@@ -124,7 +133,9 @@
                                                                 :content text})
                                        (clear-text!)))
 
-                                   KeyCodes.ESC (close-autocomplete!)
+                                   KeyCodes.ESC (do
+                                                  (om/set-state! owner :force-close? true)
+                                                  (close-autocomplete!))
 
                                    KeyCodes.UP (when autocomplete-open?
                                                  (.preventDefault e)
@@ -147,8 +158,7 @@
                                                       (when (= i highlighted-result-index) "highlight"))
                                       :style #js {:cursor "pointer"}
                                       :onClick (fn []
-                                                 ((result :action) (config :thread-id))
-                                                 (close-autocomplete!))}
+                                                 (choose-result! result))}
                           ((result :html))))
                       results))
                   (dom/div #js {:className "result"}
