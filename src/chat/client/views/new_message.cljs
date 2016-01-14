@@ -44,6 +44,29 @@
 
 (def engines
   [
+   ; ... @<user>  -> autocompletes user name
+   (fn [text thread-id]
+     (let [pattern #"\B@(\S{1,})$"]
+       (when-let [query (second (re-find pattern text))]
+         (->> (store/all-users)
+              (filter (fn [u]
+                        (fuzzy-matches? (u :nickname) query)))
+              (map (fn [user]
+                     {:action
+                      (fn [thread-id])
+                      :message-transform
+                      (fn [text]
+                        (string/replace text pattern (str "@" (user :nickname) " ")))
+                      :html
+                      (fn []
+                        (dom/div #js {:className "user-match"}
+                          (dom/img #js {:className "avatar"
+                                        :src (user :avatar)})
+                          (dom/div #js {:className "user-nickname"}
+                            (user :nickname))
+                          (dom/div #js {:className "group-name"}
+                            "...")))}))))))
+
    ; ... #<tag>   -> autocompletes tag
    (fn [text thread-id]
      (let [pattern #"\B#(\S{1,})$"]

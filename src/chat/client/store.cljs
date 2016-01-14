@@ -62,6 +62,9 @@
 (defn update-user-nick! [user-id nick]
   (transact! [:users user-id :nickname] (constantly nick)))
 
+(defn all-users []
+  (vals (get-in @app-state [:users])))
+
 ; threads and messages
 
 (defn set-threads! [threads]

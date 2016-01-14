@@ -172,7 +172,7 @@ body {
     position: relative;
     margin: 0 0 @pad;
 
-    .avatar {
+    > .avatar {
       .avatar();
       display: inline-block;
       position: absolute;
@@ -237,6 +237,14 @@ body {
             border-radius: 2px;
             margin: 0.25em 0.5em 0.25em 0;
           }
+          .avatar {
+            display: block;
+            width: 2em;
+            height: 2em;
+            float: left;
+            border-radius: 2px;
+            margin: 0.25em 0.5em 0.25em 0;
+          }
           .tag-name {
 
           }
@@ -247,7 +255,7 @@ body {
             background: #eee;
           }
           &.highlight {
-            .tag-name {
+            .tag-name, .user-nickname {
               font-weight: bold;
             }
           }
