@@ -89,7 +89,10 @@
                           (> x z) z
                           (< x a) a
                           :else x))
-            results ((get-in engines [0]) text (config :thread-id))
+            results (let [engine-results (map (fn [e] (e text (config :thread-id))) engines)]
+                      (if (every? nil? engine-results)
+                         nil
+                        (apply concat engine-results)))
             highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
