@@ -41,7 +41,7 @@
       (map
         (fn [elt]
           (if-let [link (elt :link)]
-            (dom/a #js {:href link} link)
+            (dom/a #js {:href link :target "_blank"} link)
             (elt :text)))
         text-links-seq))))
 
