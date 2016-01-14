@@ -100,14 +100,14 @@
                                  (condp = e.keyCode
                                    KeyCodes.ENTER
                                    (cond
-                                     ; enter when autocomplete -> tag
+                                     ; ENTER when autocomplete -> trigger chosen result's action
                                      autocomplete-open?
                                      (do
                                        (.preventDefault e)
                                        (when-let [tag (nth results highlighted-result-index nil)]
                                          ((tag :action) (config :thread-id))
                                          (close-autocomplete!)))
-                                     ; enter otherwise -> message
+                                     ; ENTER otherwise -> send message
                                      (not e.shiftKey)
                                      (do
                                        (.preventDefault e)
@@ -125,7 +125,7 @@
                                                    (.preventDefault e)
                                                    (highlight-next!))
                                    (when (KeyCodes.isTextModifyingKeyEvent e)
-                                     ; Don't clear if a modifier key alone was pressed
+                                     ; don't clear if a modifier key alone was pressed
                                      (highlight-clear!))))})
 
             (when autocomplete-open?
