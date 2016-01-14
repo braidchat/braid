@@ -42,19 +42,19 @@ body {
 .pill-box() {
   font-size: 0.75em;
   display: inline-block;
-  padding: 0.25em 0.5em;
+  padding: 0em 0.5em;
   border-radius: 0.5em;
-  margin-right: 0.5em;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   background-color: #222;
   vertical-align: middle;
-  height: 1.25em;
+  height: 1.75em;
+  line-height: 1.75em;
   max-width: 10em;
   white-space: nowrap;
   overflow: hidden;
-  margin-bottom: 0.5em;
   color: white;
+  vertical-align: middle;
 }
 
 .tag {
@@ -138,6 +138,10 @@ body {
 
     .tags {
       margin: @pad;
+      .tag {
+        margin-bottom: 0.5em;
+        margin-right: 0.5em;
+      }
     }
     .close {
       position: absolute;
@@ -172,7 +176,7 @@ body {
     position: relative;
     margin: 0 0 @pad;
 
-    .avatar {
+    > .avatar {
       .avatar();
       display: inline-block;
       position: absolute;
@@ -193,6 +197,13 @@ body {
       }
     }
 
+    .user-mention {
+      .pill-box();
+    }
+    .tag-mention {
+      .pill-box();
+    }
+
     .content {
       white-space: pre-wrap;
       word-break: break-word;
@@ -201,6 +212,7 @@ body {
       width: 100%;
       box-sizing: border-box;
       line-height: 1.25em;
+      //vertical-align: middle;
     }
 
     &.collapse {
@@ -237,6 +249,14 @@ body {
             border-radius: 2px;
             margin: 0.25em 0.5em 0.25em 0;
           }
+          .avatar {
+            display: block;
+            width: 2em;
+            height: 2em;
+            float: left;
+            border-radius: 2px;
+            margin: 0.25em 0.5em 0.25em 0;
+          }
           .tag-name {
 
           }
@@ -247,7 +267,7 @@ body {
             background: #eee;
           }
           &.highlight {
-            .tag-name {
+            .tag-name, .user-nickname {
               font-weight: bold;
             }
           }
