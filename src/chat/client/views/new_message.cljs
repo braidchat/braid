@@ -14,7 +14,12 @@
     (not= -1 (.indexOf (normalize s) (normalize m)))))
 
 
-; pattern - regex that will be tried
+
+; matcher - fn that determines if engine is to be used, returns text to use
+;    inputs:
+;        text - current text of user's message
+;    outputs
+;        string containing matched text OR nil
 ; results - fn that returns results that will be shown if pattern matches
 ;    inputs:
 ;       query - is the partial text that was matched
@@ -28,6 +33,8 @@
 (def engines
   [
    {:pattern #"(?:.|\n)*#(\S*)"
+
+   {:matcher (fn [text] (second (re-matches #"(?:.|\n)*#(\S*)" text)))
     :results (fn [query thread-id]
                (when query
                  (let [thread-tag-ids (-> (store/id->thread thread-id)
@@ -55,7 +62,7 @@
                           (> x z) z
                           (< x a) a
                           :else x))
-            query (second (re-matches #"(?:.|\n)*#(\S*)" text))
+            query ((get-in engines [0 :matcher]) text)
             results ((get-in engines [0 :results]) query (config :thread-id))
             highlight-next!
             (fn []
