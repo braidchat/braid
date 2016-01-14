@@ -1,6 +1,21 @@
 (ns chat.server.migrate
   (:require [chat.server.db :as db]
-            [datomic.api :as d]))
+            [datomic.api :as d]
+            [clojure.string :as string]))
+
+(defn migrate-2016-01-14
+  "All users must have a nickname"
+  []
+  (db/with-conn
+    (let [give-nicks (->> (d/q '[:find (pull ?u [:user/id :user/email :user/nickname])
+                                 :where
+                                 [?u :user/id]]
+                               (d/db db/*conn*))
+                          (map first)
+                          (filter (comp nil? :user/nickname))
+                          (mapv (fn [u] [:db/add [:user/id (:user/id u)]
+                                         :user/nickname (-> (:user/email u) (string/split #"@") first)])))]
+      (d/transact db/*conn* give-nicks))))
 
 (defn migrate-2016-01-01
   "Change email uniqueness to /value, add thread mentions"

@@ -1,6 +1,7 @@
 (ns chat.server.db
   (:require [datomic.api :as d]
             [environ.core :refer [env]]
+            [clojure.string :as string]
             [crypto.password.scrypt :as password]))
 
 (def ^:dynamic *uri*
@@ -319,6 +320,7 @@
   (-> {:user/id id
        :user/email email
        :user/avatar avatar
+       :user/nickname (or nickname (-> email (string/split #"@") first))
        :user/password-token (password/encrypt password)}
       create-entity!
       db->user))
@@ -350,6 +352,11 @@
                   email)]
          (when (and user-id (password/check password password-token))
            user-id))))
+
+(defn user-by-id
+  [id]
+  (some-> (d/pull (d/db *conn*) '[:user/id :user/avatar :user/nickname] [:user/id id])
+          db->user))
 
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
@@ -385,7 +392,6 @@
   "Get all users visible to given user"
   [user-id]
   (->> (d/q '[:find (pull ?e [:user/id
-                              :user/email
                               :user/nickname
                               :user/avatar])
               :in $ ?user-id

@@ -22,7 +22,7 @@
       (is (db/email-taken? (:email data)))
       (is (not (db/email-taken? "baz@quux.net"))))
     (testing "create returns a user"
-      (is (= user (-> data (dissoc :password) (assoc :nickname nil)))))
+      (is (= user (-> data (dissoc :password) (assoc :nickname "foo")))))
     (testing "can set nickname"
       (is (not (db/nickname-taken? "ol' fooy")))
       @(db/set-nickname! (user :id) "ol' fooy")
