@@ -7,6 +7,10 @@
             [chat.client.store :as store])
   (:import [goog.events KeyCodes]))
 
+
+(defn tee [x]
+  (println x) x)
+
 (defn fuzzy-matches?
   [s m]
   (letfn [(normalize [s]
@@ -19,6 +23,7 @@
 ;       text - current text of user's message
 ;       thread-id - id of the thread
 ;    output:
+;       if no pattern matched, return nil
 ;       if a trigger pattern was matched, an array of maps, each containing:
 ;         :html - fn that returns html to be displayed for the result
 ;             inputs:
@@ -30,8 +35,11 @@
 ;                 thread-id
 ;             output:
 ;                 none expected
-;         (this array may be empty)
-;       otherwise nil
+;         :message-transform - fn to apply to text of message
+;             inputs:
+;                text
+;             output:
+;                text to replace message with
 
 
 (def engines
