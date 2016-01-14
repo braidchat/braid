@@ -8,7 +8,7 @@
             [clojure.string :as string]
             [clojure.tools.nrepl.server :as nrepl]
             [taoensso.carmine.ring :as carmine]
-            [chat.server.sync :refer [sync-routes]]
+            [chat.server.sync :as sync :refer [sync-routes]]
             [environ.core :refer [env]]
             [chat.server.db :as db]
             [chat.server.invite :as invites]))
@@ -46,11 +46,13 @@
                   user (db/with-conn (db/create-user! {:id (db/uuid)
                                                        :email email
                                                        :avatar avatar-url
+                                                       :nickname nickname
                                                        :password password}))]
               (db/with-conn
                 (db/user-add-to-group! (user :id) (invite :group-id))
                 (db/user-subscribe-to-group-tags! (user :id) (invite :group-id))
                 (db/retract-invitation! (invite :id)))
+              (sync/broadcast-user-change (user :id) [:chat/new-user (dissoc user :email)])
               {:status 302 :headers {"Location" "/"}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))))))

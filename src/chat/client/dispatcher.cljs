@@ -151,6 +151,10 @@
   [[_ data]]
   (store/add-users! data))
 
+(defmethod sync/event-handler :chat/new-user
+  [[_ user]]
+  (store/add-user! user))
+
 (defmethod sync/event-handler :chat/invitation-recieved
   [[_ invite]]
   (store/add-invite! invite))

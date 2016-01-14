@@ -59,6 +59,9 @@
 (defn add-users! [users]
   (transact! [:users] #(merge % (key-by-id users))))
 
+(defn add-user! [user]
+  (transact! [:users] #(assoc % (:id user) user)))
+
 (defn update-user-nick! [user-id nick]
   (transact! [:users user-id :nickname] (constantly nick)))
 

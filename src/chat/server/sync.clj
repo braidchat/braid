@@ -185,7 +185,12 @@
         (chsk-send! user-id [:chat/joined-group
                              {:group (db/get-group (invite :group-id))
                               :tags (db/get-group-tags (invite :group-id))}])
-        (chsk-send! user-id [:chat/update-users (db/fetch-users-for-user user-id)]))
+        (chsk-send! user-id [:chat/update-users (db/fetch-users-for-user user-id)])
+        (let [other-users (->> (db/get-users-in-group (invite :group-id))
+                               (into [] (comp (remove (partial = user-id)) (map :id))))
+              new-user (db/user-by-id user-id)]
+          (doseq [other-id other-users]
+            (chsk-send! other-id [:chat/new-user new-user]))))
       (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                     user-id (?data :id)))))
 
