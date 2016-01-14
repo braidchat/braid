@@ -44,6 +44,29 @@
 
 (def engines
   [
+   ; ... #<tag>   -> autocompletes tag
+   (fn [text thread-id]
+     (let [pattern #"\B#(\S{1,})$"]
+       (when-let [query (second (re-find pattern text))]
+         (->> (store/all-tags)
+              (filter (fn [t]
+                        (fuzzy-matches? (t :name) query)))
+              (map (fn [tag]
+                     {:action
+                      (fn [thread-id])
+                      :message-transform
+                      (fn [text]
+                        (string/replace text pattern (str "#" (tag :name) " ")))
+                      :html
+                      (fn []
+                        (dom/div #js {:className "tag-match"}
+                          (dom/div #js {:className "color-block"
+                                        :style #js {:backgroundColor (helpers/tag->color tag)}})
+                          (dom/div #js {:className "tag-name"}
+                            (tag :name))
+                          (dom/div #js {:className "group-name"}
+                            (:name (store/id->group (tag :group-id))))))}))))))
+
    ; /<tag-name>  ->  adds tag to message
    (fn [text thread-id]
      (when-let [query (second (re-matches #"^/(\S{1,})" text))]
