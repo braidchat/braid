@@ -44,8 +44,9 @@
 
 (def engines
   [
+   ; /<tag-name>  ->  adds tag to message
    (fn [text thread-id]
-     (when-let [query (second (re-matches #"(?:.|\n)*#(\S*)" text))]
+     (when-let [query (second (re-matches #"^/(\S{1,})" text))]
        (let [thread-tag-ids (-> (store/id->thread thread-id)
                                 :tag-ids
                                 set)]
@@ -61,8 +62,7 @@
                         (dispatch! :tag-thread {:thread-id thread-id
                                                 :id (tag :id)}))
                       :message-transform
-                      (fn [text]
-                        (string/replace text #"( *#\S*)" ""))
+                      (fn [text] "")
                       :html
                       (fn []
                         (dom/div #js {:className "tag-match"}
