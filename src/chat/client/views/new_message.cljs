@@ -13,6 +13,32 @@
             (-> (.toLowerCase s) (string/replace #"\s" "")))]
     (not= -1 (.indexOf (normalize s) (normalize m)))))
 
+
+; pattern - regex that will be tried
+; results - fn that returns results that will be shown if pattern matches
+;    inputs:
+;       query - is the partial text that was matched
+;       thread-id - id of the thread
+;    output:
+;       an array of maps, each containing:
+;         :html - html to be displayed for the result
+;         :action - fn to be triggered when result picked
+
+
+(def engines
+  [
+   {:pattern #"(?:.|\n)*#(\S*)"
+    :results (fn [query thread-id]
+               (when query
+                 (let [thread-tag-ids (-> (store/id->thread thread-id)
+                                          :tag-ids
+                                          set)]
+                   ; suggest tags
+                   (->> (store/all-tags)
+                        (remove (fn [t]
+                                  (contains? thread-tag-ids (t :id))))
+                        (filter (fn [t]
+                                  (fuzzy-matches? (t :name) query)))))))}])
 ; TODO: autocomplete mentions
 (defn new-message-view [config owner]
   (reify
@@ -33,11 +59,7 @@
                                :tag-ids
                                set)
             partial-tag (second (re-matches #"(?:.|\n)*#(\S*)" text))
-            results (->> (store/all-tags)
-                         (remove (fn [t]
-                                   (contains? thread-tag-ids (t :id))))
-                         (filter (fn [t]
-                                   (fuzzy-matches? (t :name) partial-tag))))
+            results ((get-in engines [0 :results]) partial-tag (config :thread-id))
             highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
