@@ -40,7 +40,11 @@
               (filter (fn [t]
                         (fuzzy-matches? (t :name) query)))
               (map (fn [tag]
-                     {:html
+                     {:action
+                      (fn [thread-id]
+                        (dispatch! :tag-thread {:thread-id thread-id
+                                                :id (tag :id)}))
+                      :html
                       (dom/div #js {:className "tag-match"}
                         (dom/div #js {:className "color-block"
                                       :style #js {:backgroundColor (helpers/tag->color tag)}})
@@ -101,8 +105,7 @@
                                      (do
                                        (.preventDefault e)
                                        (when-let [tag (nth results highlighted-result-index nil)]
-                                         (dispatch! :tag-thread {:thread-id (config :thread-id)
-                                                                 :id (tag :id)})
+                                         ((tag :action) (config :thread-id))
                                          (close-autocomplete!)))
                                      ; enter otherwise -> message
                                      (not e.shiftKey)
@@ -135,8 +138,7 @@
                                                       (when (= i highlighted-result-index) "highlight"))
                                       :style #js {:cursor "pointer"}
                                       :onClick (fn []
-                                                 (dispatch! :tag-thread {:thread-id (config :thread-id)
-                                                                         :id (tag :id)})
+                                                 ((tag :action) (config :thread-id))
                                                  (close-autocomplete!))}
                           (tag :html)))
                       results))
