@@ -17,7 +17,7 @@
       (sync/chsk-send! [:chat/new-message message])
       (when-let [mentioned-names (->> (re-seq #"(?:^|\s)@(\S+)" (message :content))
                                       (map second))]
-        (let [nick->id (reduce (fn [m [id {:keys [email nickname]}]] (assoc m (or nickname email) id))
+        (let [nick->id (reduce (fn [m [id {:keys [nickname]}]] (assoc m nickname id))
                                {}
                                (@store/app-state :users))
               mentioned (->> mentioned-names (map nick->id) (remove nil?))]

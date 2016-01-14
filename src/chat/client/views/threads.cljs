@@ -20,7 +20,7 @@
         (dom/div #js {:className (str "message " (when (:collapse? opts) "collapse"))}
           (dom/img #js {:className "avatar" :src (sender :avatar)})
           (dom/div #js {:className "info"}
-            (dom/span #js {:className "nickname"} (or (sender :nickname) (sender :email)))
+            (dom/span #js {:className "nickname"} (sender :nickname))
             (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
           (apply dom/div #js {:className "content"}
             (helpers/format-message (message :content))))))))
@@ -39,7 +39,7 @@
     (render [_]
       (dom/div #js {:className "user"
                     :style #js {:backgroundColor (helpers/tag->color user)}}
-        (dom/span #js {:className "name"} (str "@" (or (user :nickname) (user :email))))
+        (dom/span #js {:className "name"} (str "@" (user :nickname)))
         (dom/div #js {:className (str "status " (rand-nth ["online" "away" "offline"]))})))))
 
 (defn thread-tags-view [thread owner]

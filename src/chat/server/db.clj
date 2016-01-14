@@ -392,7 +392,6 @@
   "Get all users visible to given user"
   [user-id]
   (->> (d/q '[:find (pull ?e [:user/id
-                              :user/email
                               :user/nickname
                               :user/avatar])
               :in $ ?user-id
