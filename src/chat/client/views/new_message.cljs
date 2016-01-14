@@ -93,12 +93,20 @@
             highlight-clear!
             (fn []
               (om/set-state! owner :highlighted-result-index -1))
-            clear-text!
-            (fn []
-              (om/set-state! owner :text ""))
             close-autocomplete!
             (fn []
               (highlight-clear!))
+            reset-state!
+            (fn []
+              (om/set-state! owner
+                             {:text ""
+                              :force-close? false
+                              :highlighted-result-index -1}))
+            send-message!
+            (fn []
+              (dispatch! :new-message {:thread-id (config :thread-id)
+                                       :content text})
+              (reset-state!))
             choose-result!
             (fn [result]
               ((result :action) (config :thread-id))
@@ -119,19 +127,20 @@
                                  (condp = e.keyCode
                                    KeyCodes.ENTER
                                    (cond
-                                     ; ENTER when autocomplete -> trigger chosen result's action
+                                     ; ENTER when autocomplete -> trigger chosen result's action (or exit autocomplete if no result chosen)
                                      autocomplete-open?
                                      (do
                                        (.preventDefault e)
-                                       (when-let [result (nth results highlighted-result-index nil)]
-                                         (choose-result! result)))
+                                       (if-let [result (nth results highlighted-result-index nil)]
+                                         (choose-result! result)
+                                         (do
+                                           (close-autocomplete!)
+                                           (om/set-state! owner :force-close? true))))
                                      ; ENTER otherwise -> send message
                                      (not e.shiftKey)
                                      (do
                                        (.preventDefault e)
-                                       (dispatch! :new-message {:thread-id (config :thread-id)
-                                                                :content text})
-                                       (clear-text!)))
+                                       (send-message!)))
 
                                    KeyCodes.ESC (do
                                                   (om/set-state! owner :force-close? true)
