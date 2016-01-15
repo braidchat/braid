@@ -3,7 +3,8 @@
             [clojure.string :as string]
             [cljs-utils.core :refer [flip]]
             [cljs-time.format :as f]
-            [cljs-time.core :as t]))
+            [cljs-time.core :as t]
+            [chat.client.emoji :as emoji]))
 
 (defn tag->color [tag]
   ; normalized is approximately evenly distributed between 0 and 1
@@ -24,7 +25,15 @@
                       (dom/span #js {:className "user-mention"} "@" match)) }
    :tags {:pattern #"#(\S*)"
           :replace (fn [match]
-                     (dom/span #js {:className "tag-mention"} "#" match))}})
+                     (dom/span #js {:className "tag-mention"} "#" match))}
+   :emoji {:pattern #"(:\S*:)"
+           :replace (fn [match]
+                      (if (emoji/unicode match)
+                        (dom/object #js {:className "emojione"
+                                         :data (str "//cdn.jsdelivr.net/emojione/assets/svg/" (last (emoji/unicode match)) ".svg")
+                                         :type "image/svg+xml"
+                                         :standby match})
+                        match))}})
 
  ; should be able to do this with much less repetition
 
@@ -55,6 +64,15 @@
         text))
     text-or-node))
 
+(defn emoji-replace [text-or-node]
+  (if (string? text-or-node)
+    (let [text text-or-node
+          pattern (get-in replacements [:emoji :pattern])]
+      (if-let [match (second (re-find pattern text))]
+        ((get-in replacements [:emoji :replace]) match)
+        text))
+    text-or-node))
+
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
   links"
@@ -64,7 +82,8 @@
                           (->> w
                                url-replace
                                user-replace
-                               tag-replace)))
+                               tag-replace
+                               emoji-replace)))
                    (interleave (repeat " "))
                    rest)]
     words))
