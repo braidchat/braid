@@ -9,11 +9,13 @@
       :png
       (dom/img #js {:className "emojione"
                     :alt shortcode
+                    :title shortcode
                     :src (str "//cdn.jsdelivr.net/emojione/assets/png/" (last (unicode shortcode)) ".png")})
       :svg
       (dom/object #js {:className "emojione"
                        :data (str "//cdn.jsdelivr.net/emojione/assets/svg/" (last (unicode shortcode)) ".svg")
                        :type "image/svg+xml"
+                       :title shortcode
                        :standby shortcode}))))
 
 
