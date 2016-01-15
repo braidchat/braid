@@ -246,8 +246,14 @@ body {
         }
       }
       .autocomplete {
-        border: 1px solid #ccc;
-        box-shadow: 0 1px 2px 0 #ccc;
+        box-shadow: 0 1px 4px 0 #ccc;
+        background: white;
+        max-height: 20em;
+        overflow: scroll;
+        width: @card-width;
+        // will be an issue when text area expands
+        position: absolute;
+        bottom: @pad * 3;
         .result {
           padding: 0.25em 0.5em;
           .color-block {
@@ -266,7 +272,8 @@ body {
             margin: 0.25em 0.5em 0.25em 0;
           }
           .tag-name {
-
+            height: 1em;
+            white-space: nowrap;
           }
           .group-name {
             color: #ccc;
