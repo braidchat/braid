@@ -70,7 +70,7 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (if (db/with-conn (db/user-can-see-thread? user-id (?data :thread-id)))
-      (do (db/with-conn (db/create-message! ?data))
+      (do (db/with-conn (db/create-message! (assoc ?data :created-at (java.util.Date.))))
         (broadcast-thread (?data :thread-id) [user-id]))
       ; TODO: indicate permissions error to user?
       (timbre/warnf "User %s attempted to add message to disallowed thread %s"
