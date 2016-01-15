@@ -7,7 +7,8 @@
             [chat.server.db :as db]
             [chat.server.search :as search]
             [chat.server.invite :as invites]
-            [clojure.set :refer [difference intersection]]))
+            [clojure.set :refer [difference intersection]]
+            [chat.server.util :refer [valid-nickname?]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -112,12 +113,14 @@
 (defmethod event-msg-handler :user/set-nickname
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (try
-      (do (db/with-conn @(db/set-nickname! user-id (?data :nickname)))
-          (broadcast-user-change user-id [:user/name-change {:user-id user-id :nickname (?data :nickname)}])
-          (when ?reply-fn (?reply-fn {:ok true})))
-      (catch java.util.concurrent.ExecutionException _
-        (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))))
+    (if (valid-nickname? (?data :nickname))
+      (try
+        (do (db/with-conn @(db/set-nickname! user-id (?data :nickname)))
+            (broadcast-user-change user-id [:user/name-change {:user-id user-id :nickname (?data :nickname)}])
+            (when ?reply-fn (?reply-fn {:ok true})))
+        (catch java.util.concurrent.ExecutionException _
+          (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))
+      (when ?reply-fn (?reply-fn {:error "Invalid nickname"})))))
 
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
