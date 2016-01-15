@@ -22,13 +22,13 @@
       (is (db/email-taken? (:email data)))
       (is (not (db/email-taken? "baz@quux.net"))))
     (testing "create returns a user"
-      (is (= user (-> data (dissoc :password) (assoc :nickname "foo")))))
+      (is (= user (-> data (dissoc :password :email) (assoc :nickname "foo")))))
     (testing "can set nickname"
       (is (not (db/nickname-taken? "ol' fooy")))
       @(db/set-nickname! (user :id) "ol' fooy")
       (is (db/nickname-taken? "ol' fooy"))
       (is (= (db/user-with-email "foo@bar.com")
-             (-> data (dissoc :password) (assoc :nickname "ol' fooy"))))
+             (-> data (dissoc :password :email) (assoc :nickname "ol' fooy"))))
       (is (= "ol' fooy" (db/get-nickname (user :id)))))
 
     (testing "user email must be unique"
@@ -487,7 +487,7 @@
     (let [invite-id (db/uuid)
           invite (db/create-invitation! {:id invite-id
                                          :inviter-id (user-1 :id)
-                                         :invitee-email (user-2 :email)
+                                         :invitee-email "bar@baz.com"
                                          :group-id (group :id)})]
       (is (= invite (db/get-invite invite-id)))
       (is (seq (db/fetch-invitations-for-user (user-2 :id))))
