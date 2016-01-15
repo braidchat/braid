@@ -62,7 +62,9 @@
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
   [user-id info]
-  (let [ids-to-send-to (map :id (db/with-conn (db/fetch-users-for-user user-id)))]
+  (let [ids-to-send-to (intersection
+                         (set (:any @connected-uids))
+                         (set (map :id (db/with-conn (db/fetch-users-for-user user-id)))))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
@@ -70,8 +72,8 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (if (db/with-conn (db/user-can-see-thread? user-id (?data :thread-id)))
-      (do (db/with-conn (db/create-message! ?data))
-        (broadcast-thread (?data :thread-id) [user-id]))
+      (do (db/with-conn (db/create-message! (assoc ?data :created-at (java.util.Date.))))
+        (broadcast-thread (?data :thread-id) []))
       ; TODO: indicate permissions error to user?
       (timbre/warnf "User %s attempted to add message to disallowed thread %s"
                     user-id (?data :thread-id)))))
