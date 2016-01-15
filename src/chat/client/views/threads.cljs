@@ -208,6 +208,8 @@
             (dom/span #js {:className "close"
                            :onClick (fn [_] (store/clear-error!))}
               "×")))
+        (dom/div #js {:className "instructions"}
+          "Tag a conversation with /... Mention tags with #... and users with @...")
         (om/build user-modal-view data)
         (om/build sidebar-view {})
         (apply dom/div #js {:className "threads"}

@@ -1,4 +1,4 @@
-@top-bar-height: 2em;
+@top-bar-height: 2rem;
 @card-width: 17rem;
 @pad: 1rem;
 @sidebar-width: 150px;
@@ -81,6 +81,14 @@ body {
 
     }
   }
+}
+
+.instructions {
+  position: absolute;
+  top: @pad;
+  right: @pad + @top-bar-height + @pad;
+  line-height: @top-bar-height;
+  color: #aaa;
 }
 
 .threads {
@@ -289,8 +297,8 @@ body {
 
 .meta {
   .avatar {
-    width: 2em;
-    height: 2em;
+    width: @top-bar-height;
+    height: @top-bar-height;
     cursor: pointer;
     position: absolute;
     top: 1em;
