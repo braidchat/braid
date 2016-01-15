@@ -62,7 +62,9 @@
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
   [user-id info]
-  (let [ids-to-send-to (map :id (db/with-conn (db/fetch-users-for-user user-id)))]
+  (let [ids-to-send-to (intersection
+                         (set (:any @connected-uids))
+                         (set (map :id (db/with-conn (db/fetch-users-for-user user-id)))))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
