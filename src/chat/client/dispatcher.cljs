@@ -72,8 +72,8 @@
     [:user/set-nickname {:nickname nickname}]
     1000
     (fn [reply]
-      (if (reply :error)
-        (on-error)
+      (if-let [msg (reply :error)]
+        (on-error msg)
         (store/set-nickname! nickname)))))
 
 (defmethod dispatch! :search-history [_ query]

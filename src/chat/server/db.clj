@@ -194,7 +194,6 @@
   [e]
   {:id (:user/id e)
    :nickname (:user/nickname e)
-   :email (:user/email e)
    :avatar (:user/avatar e)})
 
 (defn- db->message

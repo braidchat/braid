@@ -60,24 +60,24 @@
   (reify
     om/IInitState
     (init-state [_]
-      {:error false})
+      {:error nil})
     om/IRenderState
     (render-state [_ state]
       (dom/div #js {:className "nickname"}
         (when-let [current (data :nickname)]
           (dom/div #js {:className "current-name"} current))
-        (when (state :error)
-          (dom/span #js {:className "error"} "Nickname taken"))
+        (when-let [msg (state :error)]
+          (dom/span #js {:className "error"} msg))
         ; TODO: check if nickname is taken while typing
         (dom/input
           #js {:className "new-name"
                :placeholder "New Nickname"
                :onKeyDown
                (fn [e]
-                 (om/set-state! owner :error false)
+                 (om/set-state! owner :error nil)
                  (let [nickname (.. e -target -value)]
                    (when (and (= KeyCodes.ENTER e.keyCode) (re-matches #"\S+" nickname))
-                     (dispatch! :set-nickname [nickname (fn [] (om/set-state! owner :error true))]))))})))))
+                     (dispatch! :set-nickname [nickname (fn [err] (om/set-state! owner :error err))]))))})))))
 
 (defn invitations-view
   [invites owner]

@@ -10,6 +10,7 @@
             [taoensso.carmine.ring :as carmine]
             [chat.server.sync :as sync :refer [sync-routes]]
             [environ.core :refer [env]]
+            [chat.server.util :refer [valid-nickname?]]
             [chat.server.db :as db]
             [chat.server.invite :as invites]))
 
@@ -34,7 +35,9 @@
         (string/blank? password) (assoc fail :body "Must provide a password")
         (not (invites/verify-hmac hmac (str now token invite_id email))) (assoc fail :body "Invalid HMAC")
         (string/blank? invite_id) (assoc fail :body "Invalid invitation ID")
-        (or (string/blank? nickname) (db/with-conn (db/nickname-taken? nickname))) (assoc fail :body "nickname taken")
+        (not (valid-nickname? nickname)) (assoc fail :body "Nickname must be 1-30 characters without whitespace")
+        (db/with-conn (db/nickname-taken? nickname)) (assoc fail :body "nickname taken")
+
         ; TODO: be smarter about this
         (not (#{"image/jpeg" "image/png"} (:content-type avatar))) (assoc fail :body "Invalid image")
 
