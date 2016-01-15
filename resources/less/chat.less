@@ -29,6 +29,19 @@ body {
   height: @avatar-size;
 }
 
+.emojione {
+  font-size: inherit;
+  height: 3ex;
+  width: 3.1ex;
+  min-height: 20px;
+  min-width: 20px;
+
+  display: inline-block;
+  margin: -.2ex .15em .2ex;
+  line-height: normal;
+  vertical-align: middle;
+}
+
 .error-banner {
   font-size: 2em;
   background-color: rgba(255, 5, 14, 0.6);
@@ -222,18 +235,6 @@ body {
       line-height: 1.25em;
       //vertical-align: middle;
 
-      .emojione {
-        font-size: inherit;
-        height: 3ex;
-        width: 3.1ex;
-        min-height: 20px;
-        min-width: 20px;
-
-        display: inline-block;
-        margin: -.2ex .15em .2ex;
-        line-height: normal;
-        vertical-align: middle;
-      }
     }
 
     &.collapse {
@@ -269,33 +270,28 @@ body {
         bottom: @pad * 3;
         .result {
           padding: 0.25em 0.5em;
-          .color-block {
-            width: 1em;
-            height: 2em;
-            float: left;
-            border-radius: 2px;
-            margin: 0.25em 0.5em 0.25em 0;
-          }
-          .avatar {
+          .emojione, .avatar, .color-block {
             display: block;
             width: 2em;
             height: 2em;
             float: left;
-            border-radius: 2px;
             margin: 0.25em 0.5em 0.25em 0;
           }
-          .tag-name {
+          .color-block {
+            width: 1em;
+          }
+          .name {
             height: 1em;
             white-space: nowrap;
           }
-          .group-name {
+          .extra {
             color: #ccc;
           }
           &:hover {
             background: #eee;
           }
           &.highlight {
-            .tag-name, .user-nickname {
+            .name {
               font-weight: bold;
             }
           }

@@ -29,10 +29,7 @@
    :emoji {:pattern #"(:\S*:)"
            :replace (fn [match]
                       (if (emoji/unicode match)
-                        (dom/object #js {:className "emojione"
-                                         :data (str "//cdn.jsdelivr.net/emojione/assets/svg/" (last (emoji/unicode match)) ".svg")
-                                         :type "image/svg+xml"
-                                         :standby match})
+                        (emoji/shortcode->html match)
                         match))}})
 
  ; should be able to do this with much less repetition
