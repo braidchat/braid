@@ -4,7 +4,8 @@
             [clojure.string :as string]
             [chat.client.views.helpers :as helpers]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.store :as store])
+            [chat.client.store :as store]
+            [chat.client.emoji :as emoji])
   (:import [goog.events KeyCodes]))
 
 
@@ -16,6 +17,10 @@
   (letfn [(normalize [s]
             (-> (.toLowerCase s) (string/replace #"\s" "")))]
     (not= -1 (.indexOf (normalize s) (normalize m)))))
+
+(defn simple-matches?
+  [s m]
+  (re-find (re-pattern m) s))
 
 
 ; fn that returns results that will be shown if pattern matches
@@ -44,6 +49,28 @@
 
 (def engines
   [
+   ; ... :emoji  -> autocomplete emoji
+   (fn [text thread-id]
+     (let [pattern #"\B:(\S{3,})$"]
+       (when-let [query (second (re-find pattern text))]
+         (->> emoji/unicode
+              (filter (fn [[k v]]
+                        (simple-matches? k query)))
+              (map (fn [[k v]]
+                     {:action
+                      (fn [thread-id])
+                      :message-transform
+                      (fn [text]
+                        (string/replace text pattern (str k " ")))
+                      :html
+                      (fn []
+                        (dom/div #js {:className "emoji-match"}
+                          (emoji/shortcode->html k)
+                          (dom/div #js {:className "name"}
+                            k)
+                          (dom/div #js {:className "extra"}
+                            "...")))}))))))
+
    ; ... @<user>  -> autocompletes user name
    (fn [text thread-id]
      (let [pattern #"\B@(\S{1,})$"]
@@ -62,9 +89,9 @@
                         (dom/div #js {:className "user-match"}
                           (dom/img #js {:className "avatar"
                                         :src (user :avatar)})
-                          (dom/div #js {:className "user-nickname"}
+                          (dom/div #js {:className "name"}
                             (user :nickname))
-                          (dom/div #js {:className "group-name"}
+                          (dom/div #js {:className "extra"}
                             "...")))}))))))
 
    ; ... #<tag>   -> autocompletes tag
@@ -85,9 +112,9 @@
                         (dom/div #js {:className "tag-match"}
                           (dom/div #js {:className "color-block"
                                         :style #js {:backgroundColor (helpers/tag->color tag)}})
-                          (dom/div #js {:className "tag-name"}
+                          (dom/div #js {:className "name"}
                             (tag :name))
-                          (dom/div #js {:className "group-name"}
+                          (dom/div #js {:className "extra"}
                             (:name (store/id->group (tag :group-id))))))}))))))
 
    ; /<tag-name>  ->  adds tag to message
@@ -114,9 +141,9 @@
                         (dom/div #js {:className "tag-match"}
                           (dom/div #js {:className "color-block"
                                         :style #js {:backgroundColor (helpers/tag->color tag)}})
-                          (dom/div #js {:className "tag-name"}
+                          (dom/div #js {:className "name"}
                             (tag :name))
-                          (dom/div #js {:className "group-name"}
+                          (dom/div #js {:className "extra"}
                             (:name (store/id->group (tag :group-id))))))}))))))])
 
 
