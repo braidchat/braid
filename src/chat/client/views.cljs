@@ -82,7 +82,6 @@
                     (store/set-search-searching! false)
                     (store/set-page! {:type :home}))
                   (do
-                    (store/set-search-query! query)
                     (store/set-page! {:type :search})
                     (store/set-search-searching! true)
                     (dispatch! :search-history query))))))))
@@ -101,17 +100,17 @@
       (dom/div #js {:className "page search"}
         (cond
           ; searching...
-          (data :search-searching)
+          (get-in data [:page :search-searching])
           (dom/div #js {:className "title"} "Searching...")
 
           ; results
-          (seq (data :search-results))
+          (seq (get-in data [:page :search-results]))
           (apply dom/div #js {:className "threads"}
             (map (fn [t] (om/build thread-view t
                                    {:key :id
                                     :opts {:searched? true}}))
                  ; sort-by last reply, newest first
-                 (->> (vals (data :search-results))
+                 (->> (vals (get-in data [:page :search-results]))
                       (sort-by
                         (comp (partial apply max)
                               (partial map :created-at)

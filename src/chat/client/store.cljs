@@ -16,10 +16,7 @@
                 :subscribed-tag-ids #{}
                 :user-id nil
                 :nickname nil}
-         :open-thread-ids #{}
-         :search-results {}
-         :search-query nil
-         :search-searching false}))
+         :open-thread-ids #{}}))
 
 (defn- key-by-id [coll]
   (reduce (fn [memo x]
@@ -83,9 +80,9 @@
 
 (defn- maybe-create-thread! [thread-id]
   (when-not (get-in @app-state [:threads thread-id])
-    (if-let [thread (get-in @app-state [:search-results thread-id])]
+    (if-let [thread (get-in @app-state [:page :search-results thread-id])]
       (do (transact! [:threads thread-id] (constantly thread))
-          (transact! [:search-results] #(dissoc % thread-id)))
+          (transact! [:page :search-results] #(dissoc % thread-id)))
       (transact! [:threads thread-id] (constantly {:id thread-id
                                                    :messages []
                                                    :tag-ids #{}})))))
@@ -110,13 +107,10 @@
 ; search threads
 
 (defn set-search-results! [threads]
-  (transact! [:search-results] (constantly (key-by-id threads))))
-
-(defn set-search-query! [query]
-  (transact! [:search-query] (constantly query)))
+  (transact! [:page :search-results] (constantly (key-by-id threads))))
 
 (defn set-search-searching! [bool]
-  (transact! [:search-searching] (constantly bool)))
+  (transact! [:page :search-searching] (constantly bool)))
 
 ; tags
 
