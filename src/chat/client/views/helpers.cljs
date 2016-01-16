@@ -17,20 +17,31 @@
 
 
 (def replacements
-  {:urls {:pattern #"http(?:s)?://\S+(?:\w|\d|/)"
-          :replace (fn [match]
-                     (dom/a #js {:href match :target "_blank"} match))}
-   :users {:pattern #"@(\S*)"
-           :replace (fn [match]
-                      (dom/span #js {:className "user-mention"} "@" match)) }
-   :tags {:pattern #"#(\S*)"
-          :replace (fn [match]
-                     (dom/span #js {:className "tag-mention"} "#" match))}
-   :emoji {:pattern #"(:\S*:)"
-           :replace (fn [match]
-                      (if (emoji/unicode match)
-                        (emoji/shortcode->html match)
-                        match))}})
+  {:urls
+   {:pattern #"http(?:s)?://\S+(?:\w|\d|/)"
+    :replace (fn [match]
+               (dom/a #js {:href match :target "_blank"} match))}
+   :users
+   {:pattern #"@(\S*)"
+    :replace (fn [match]
+               (dom/span #js {:className "user-mention"} "@" match)) }
+   :tags
+   {:pattern #"#(\S*)"
+    :replace (fn [match]
+               (dom/span #js {:className "tag-mention"} "#" match))}
+   :emoji-shortcodes
+   {:pattern #"(:\S*:)"
+    :replace (fn [match]
+               (if (emoji/unicode match)
+                 (emoji/shortcode->html match)
+                 match))}
+   :emoji-ascii
+   {
+    :replace (fn [match]
+               (if-let [shortcode (emoji/ascii match)]
+                 (emoji/shortcode->html shortcode)
+                 match))}
+   })
 
  ; should be able to do this with much less repetition
 
@@ -61,12 +72,20 @@
         text))
     text-or-node))
 
-(defn emoji-replace [text-or-node]
+(defn emoji-shortcodes-replace [text-or-node]
   (if (string? text-or-node)
     (let [text text-or-node
-          pattern (get-in replacements [:emoji :pattern])]
+          pattern (get-in replacements [:emoji-shortcodes :pattern])]
       (if-let [match (second (re-find pattern text))]
-        ((get-in replacements [:emoji :replace]) match)
+        ((get-in replacements [:emoji-shortcodes :replace]) match)
+        text))
+    text-or-node))
+
+(defn emoji-ascii-replace [text-or-node]
+  (if (string? text-or-node)
+    (let [text text-or-node]
+      (if (contains? emoji/ascii-set text)
+        ((get-in replacements [:emoji-ascii :replace]) text)
         text))
     text-or-node))
 
@@ -80,7 +99,8 @@
                                url-replace
                                user-replace
                                tag-replace
-                               emoji-replace)))
+                               emoji-shortcodes-replace
+                               emoji-ascii-replace)))
                    (interleave (repeat " "))
                    rest)]
     words))

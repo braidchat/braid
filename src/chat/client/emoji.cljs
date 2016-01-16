@@ -1,7 +1,7 @@
 (ns chat.client.emoji
   (:require [om.dom :as dom]))
 
-(declare unicode)
+(declare unicode ascii)
 
 (defn shortcode->html [shortcode]
   (let [ext :png]
@@ -9,12 +9,17 @@
       :png
       (dom/img #js {:className "emojione"
                     :alt shortcode
+                    :title shortcode
                     :src (str "//cdn.jsdelivr.net/emojione/assets/png/" (last (unicode shortcode)) ".png")})
       :svg
       (dom/object #js {:className "emojione"
                        :data (str "//cdn.jsdelivr.net/emojione/assets/svg/" (last (unicode shortcode)) ".svg")
                        :type "image/svg+xml"
+                       :title shortcode
                        :standby shortcode}))))
+
+
+(def ascii-set (set (keys ascii)))
 
 (def unicode {
 ":kiss_ww:" ["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"]
@@ -2064,3 +2069,136 @@
 ":heart_exclamation:" ["2763"]
 ":heavy_heart_exclamation_mark_ornament:" ["2763"]
 })
+
+
+(def ascii
+{
+        "<3" ":heart:"
+        "</3" ":broken_heart:"
+        ":\")" ":joy:"
+        ":\"-)" ":joy:"
+        ":D" ":smiley:"
+        ":-D" ":smiley:"
+        "=D" ":smiley:"
+        ":)" ":smile:"
+        ":-)" ":smile:"
+        "=]" ":smile:"
+        "=)" ":smile:"
+        ":]" ":smile:"
+        "\":)" ":sweat_smile:"
+        "\":-)" ":sweat_smile:"
+        "\"=)" ":sweat_smile:"
+        "\":D" ":sweat_smile:"
+        "\":-D" ":sweat_smile:"
+        "\"=D" ":sweat_smile:"
+        ">:)" ":laughing:"
+        ">;)" ":laughing:"
+        ">:-)" ":laughing:"
+        ">=)" ":laughing:"
+        ";)" ":wink:"
+        ";-)" ":wink:"
+        "*-)" ":wink:"
+        "*)" ":wink:"
+        ";-]" ":wink:"
+        ";]" ":wink:"
+        ";D" ":wink:"
+        ";^)" ":wink:"
+        "\":(" ":sweat:"
+        "\":-(" ":sweat:"
+        "\"=(" ":sweat:"
+        ":*" ":kissing_heart:"
+        ":-*" ":kissing_heart:"
+        "=*" ":kissing_heart:"
+        ":^*" ":kissing_heart:"
+        ">:P" ":stuck_out_tongue_winking_eye:"
+        "X-P" ":stuck_out_tongue_winking_eye:"
+        "x-p" ":stuck_out_tongue_winking_eye:"
+        ">:[" ":disappointed:"
+        ":-(" ":disappointed:"
+        ":(" ":disappointed:"
+        ":-[" ":disappointed:"
+        ":[" ":disappointed:"
+        "=(" ":disappointed:"
+        ">:(" ":angry:"
+        ">:-(" ":angry:"
+        ":@" ":angry:"
+        ":\"(" ":cry:"
+        ":\"-(" ":cry:"
+        ";(" ":cry:"
+        ";-(" ":cry:"
+        ">.<" ":persevere:"
+        "D:" ":fearful:"
+        ":$" ":flushed:"
+        "=$" ":flushed:"
+        "#-)" ":dizzy_face:"
+        "#)" ":dizzy_face:"
+        "%-)" ":dizzy_face:"
+        "%)" ":dizzy_face:"
+        "X)" ":dizzy_face:"
+        "X-)" ":dizzy_face:"
+        "*\\0/*" ":ok_woman:"
+        "\\0/" ":ok_woman:"
+        "*\\O/*" ":ok_woman:"
+        "\\O/" ":ok_woman:"
+        "O:-)" ":innocent:"
+        "0:-3" ":innocent:"
+        "0:3" ":innocent:"
+        "0:-)" ":innocent:"
+        "0:)" ":innocent:"
+        "0;^)" ":innocent:"
+        "O:)" ":innocent:"
+        "O;-)" ":innocent:"
+        "O=)" ":innocent:"
+        "0;-)" ":innocent:"
+        "O:-3" ":innocent:"
+        "O:3" ":innocent:"
+        "B-)" ":sunglasses:"
+        "B)" ":sunglasses:"
+        "8)" ":sunglasses:"
+        "8-)" ":sunglasses:"
+        "B-D" ":sunglasses:"
+        "8-D" ":sunglasses:"
+        "-_-" ":expressionless:"
+        "-__-" ":expressionless:"
+        "-___-" ":expressionless:"
+        ">:\\" ":confused:"
+        ">:/" ":confused:"
+        ":-/" ":confused:"
+        ":-." ":confused:"
+        ":/" ":confused:"
+        ":\\" ":confused:"
+        "=/" ":confused:"
+        "=\\" ":confused:"
+        ":L" ":confused:"
+        "=L" ":confused:"
+        ":P" ":stuck_out_tongue:"
+        ":-P" ":stuck_out_tongue:"
+        "=P" ":stuck_out_tongue:"
+        ":-p" ":stuck_out_tongue:"
+        ":p" ":stuck_out_tongue:"
+        "=p" ":stuck_out_tongue:"
+        ":-Þ" ":stuck_out_tongue:"
+        ":Þ" ":stuck_out_tongue:"
+        ":þ" ":stuck_out_tongue:"
+        ":-þ" ":stuck_out_tongue:"
+        ":-b" ":stuck_out_tongue:"
+        ":b" ":stuck_out_tongue:"
+        "d:" ":stuck_out_tongue:"
+        ":-O" ":open_mouth:"
+        ":O" ":open_mouth:"
+        ":-o" ":open_mouth:"
+        ":o" ":open_mouth:"
+        "O_O" ":open_mouth:"
+        ">:O" ":open_mouth:"
+        ":-X" ":no_mouth:"
+        ":X" ":no_mouth:"
+        ":-#" ":no_mouth:"
+        ":#" ":no_mouth:"
+        "=X" ":no_mouth:"
+        "=x" ":no_mouth:"
+        ":x" ":no_mouth:"
+        ":-x" ":no_mouth:"
+        "=#" ":no_mouth:"
+    })
+
+
