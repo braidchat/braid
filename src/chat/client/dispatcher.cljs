@@ -125,7 +125,7 @@
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
   (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
-  (store/set-page! :home)
+  (store/set-page! {:type :home})
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))

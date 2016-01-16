@@ -80,10 +80,10 @@
                 (if (string/blank? query)
                   (do
                     (store/set-search-searching! false)
-                    (store/set-page! :home))
+                    (store/set-page! {:type :home}))
                   (do
                     (store/set-search-query! query)
-                    (store/set-page! :search)
+                    (store/set-page! {:type :search})
                     (store/set-search-searching! true)
                     (dispatch! :search-history query))))))))
     om/IRenderState
@@ -135,7 +135,7 @@
           (dom/div nil
             (dom/div #js {:className "all"
                           :onClick (fn []
-                                     (store/set-page! :home))} "ALL")
+                                     (store/set-page! {:type :home}))} "ALL")
              "[20]")
           (apply dom/div nil
             (->> [{:name "foo"
@@ -188,7 +188,7 @@
           "Tag a conversation with /... Mention tags with #... and users with @... Emoji :shortcode: support too!")
         (om/build user-modal-view data)
         (om/build sidebar-view {})
-        (case (data :page)
+        (case (get-in data [:page :type])
           :home (om/build threads-view data)
           :search (om/build search-view data))))))
 
