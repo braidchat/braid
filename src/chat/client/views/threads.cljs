@@ -18,7 +18,6 @@
           (dom/img #js {:className "avatar" :src (sender :avatar)})
           (dom/div #js {:className "info"}
             (dom/span #js {:className "nickname"} (sender :nickname))
-            (dom/span #js {:className "status"} (str (sender :status)))
             (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
           (apply dom/div #js {:className "content"}
             (helpers/format-message (message :content))))))))
@@ -38,7 +37,7 @@
       (dom/div #js {:className "user"
                     :style #js {:backgroundColor (helpers/tag->color user)}}
         (dom/span #js {:className "name"} (str "@" (user :nickname)))
-        (dom/div #js {:className (str "status " (rand-nth ["online" "away" "offline"]))})))))
+        (dom/div #js {:className (str "status " ((fnil name "") (user :status)))})))))
 
 (defn thread-tags-view [thread owner]
   (reify

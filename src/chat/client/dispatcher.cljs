@@ -167,7 +167,7 @@
 
 (defmethod sync/event-handler :user/connected
   [[_ user-id]]
-  (store/update-user-status! user-id :active))
+  (store/update-user-status! user-id :online))
 
 (defmethod sync/event-handler :user/disconnected
   [[_ user-id]]

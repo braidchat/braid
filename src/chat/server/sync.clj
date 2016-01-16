@@ -228,8 +228,8 @@
                               :user-groups (db/get-groups-for-user user-id)
                               :user-threads (db/get-open-threads-for-user user-id)
                               :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
-                              :users(into () (map #(assoc % :status (if (connected (% :user-id)) :active :offline)))
-                                         (db/fetch-users-for-user user-id))
+                              :users (into () (map #(assoc % :status (if (connected (% :id)) :online :offline)))
+                                           (db/fetch-users-for-user user-id))
                               :invitations (db/fetch-invitations-for-user user-id)
                               :tags (db/fetch-tags-for-user user-id)})]))))
 
