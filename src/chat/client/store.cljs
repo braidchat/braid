@@ -112,6 +112,9 @@
 (defn set-search-searching! [bool]
   (transact! [:page :search-searching] (constantly bool)))
 
+(defn set-search-query! [query]
+  (transact! [:page :search-query] (constantly query)))
+
 ; tags
 
 (defn add-tags! [tags]

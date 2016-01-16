@@ -82,16 +82,19 @@
                     (store/set-search-searching! false)
                     (store/set-page! {:type :home}))
                   (do
-                    (store/set-page! {:type :search})
+                    (store/set-page! {:type :search :search-query query})
                     (store/set-search-searching! true)
                     (dispatch! :search-history query))))))))
     om/IRenderState
     (render-state [_ {:keys [search-chan]}]
       (dom/div #js {:className "search"}
         (dom/input #js {:type "search" :placeholder "Search History"
+                        :value (:search-query data)
                         :onChange
                         (fn [e]
-                          (put! search-chan {:query (.. e -target -value)}))})))))
+                          (let [query (.. e -target -value)]
+                            (store/set-search-query! query)
+                            (put! search-chan {:query query})))})))))
 
 (defn search-view [data owner]
   (reify
@@ -126,7 +129,7 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "sidebar"}
-        (om/build search-box-view {})
+        (om/build search-box-view (data :page))
 
         (dom/div nil "note: below sections are currently non-functional")
         (dom/h2 nil "Channels")
@@ -186,7 +189,7 @@
         (dom/div #js {:className "instructions"}
           "Tag a conversation with /... Mention tags with #... and users with @... Emoji :shortcode: support too!")
         (om/build user-modal-view data)
-        (om/build sidebar-view {})
+        (om/build sidebar-view data)
         (case (get-in data [:page :type])
           :home (om/build threads-view data)
           :search (om/build search-view data))))))
