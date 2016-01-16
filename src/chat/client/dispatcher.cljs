@@ -79,10 +79,11 @@
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
     [:chat/search query]
-    2000
+    2500
     (fn [reply]
       (when-let [results (:threads reply)]
-       (store/set-search-results! results)))))
+          (store/set-search-searching! false)
+          (store/set-search-results! results)))))
 
 (defmethod dispatch! :invite [_ data]
   (let [invite (schema/make-invitation data)]
@@ -124,6 +125,7 @@
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
   (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
+  (store/set-page! :home)
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))

@@ -6,6 +6,7 @@
          :users {}
          :tags {}
          :groups {}
+         :page :home
          :session nil
          :error-msg nil
          :invitations []
@@ -16,7 +17,9 @@
                 :user-id nil
                 :nickname nil}
          :open-thread-ids #{}
-         :search-results {}}))
+         :search-results {}
+         :search-query nil
+         :search-searching false}))
 
 (defn- key-by-id [coll]
   (reduce (fn [memo x]
@@ -41,6 +44,11 @@
 
 (defn clear-error! []
   (transact! [:error-msg] (constantly nil)))
+
+; page
+
+(defn set-page! [page]
+  (transact! [:page] (constantly page)))
 
 ; session
 
@@ -103,6 +111,12 @@
 
 (defn set-search-results! [threads]
   (transact! [:search-results] (constantly (key-by-id threads))))
+
+(defn set-search-query! [query]
+  (transact! [:search-query] (constantly query)))
+
+(defn set-search-searching! [bool]
+  (transact! [:search-searching] (constantly bool)))
 
 ; tags
 
