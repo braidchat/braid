@@ -120,7 +120,7 @@
 
 (defmethod sync/event-handler :chat/thread
   [[_ data]]
-  (store/add-thread! data))
+  (store/add-open-thread! data))
 
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
@@ -131,7 +131,7 @@
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))
   (store/set-user-joined-groups! (data :user-groups))
   (store/set-invitations! (data :invitations))
-  (store/set-threads! (data :user-threads)))
+  (store/set-open-threads! (data :user-threads)))
 
 (defmethod sync/event-handler :socket/connected
   [[_ _]]
