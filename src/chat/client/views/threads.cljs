@@ -13,7 +13,7 @@
   (reify
     om/IRender
     (render [_]
-      (let [sender (get-in @store/app-state [:users (message :user-id)])]
+      (let [sender (om/observe owner (om/ref-cursor (get-in (om/root-cursor store/app-state) [:users (message :user-id)])))]
         (dom/div #js {:className (str "message " (when (:collapse? opts) "collapse"))}
           (dom/img #js {:className "avatar" :src (sender :avatar)})
           (dom/div #js {:className "info"}
