@@ -80,19 +80,21 @@
                 (if (string/blank? query)
                   (do
                     (store/set-search-searching! false)
-                    (store/set-page! :home))
+                    (store/set-page! {:type :home}))
                   (do
-                    (store/set-search-query! query)
-                    (store/set-page! :search)
+                    (store/set-page! {:type :search :search-query query})
                     (store/set-search-searching! true)
                     (dispatch! :search-history query))))))))
     om/IRenderState
     (render-state [_ {:keys [search-chan]}]
       (dom/div #js {:className "search"}
         (dom/input #js {:type "search" :placeholder "Search History"
+                        :value (:search-query data)
                         :onChange
                         (fn [e]
-                          (put! search-chan {:query (.. e -target -value)}))})))))
+                          (let [query (.. e -target -value)]
+                            (store/set-search-query! query)
+                            (put! search-chan {:query query})))})))))
 
 (defn search-view [data owner]
   (reify
@@ -101,17 +103,17 @@
       (dom/div #js {:className "page search"}
         (cond
           ; searching...
-          (data :search-searching)
+          (get-in data [:page :search-searching])
           (dom/div #js {:className "title"} "Searching...")
 
           ; results
-          (seq (data :search-results))
+          (seq (get-in data [:page :search-results]))
           (apply dom/div #js {:className "threads"}
             (map (fn [t] (om/build thread-view t
                                    {:key :id
                                     :opts {:searched? true}}))
                  ; sort-by last reply, newest first
-                 (->> (vals (data :search-results))
+                 (->> (vals (get-in data [:page :search-results]))
                       (sort-by
                         (comp (partial apply max)
                               (partial map :created-at)
@@ -127,7 +129,7 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "sidebar"}
-        (om/build search-box-view {})
+        (om/build search-box-view (data :page))
 
         (dom/div nil "note: below sections are currently non-functional")
         (dom/h2 nil "Channels")
@@ -135,7 +137,7 @@
           (dom/div nil
             (dom/div #js {:className "all"
                           :onClick (fn []
-                                     (store/set-page! :home))} "ALL")
+                                     (store/set-page! {:type :home}))} "ALL")
              "[20]")
           (apply dom/div nil
             (->> [{:name "foo"
@@ -187,8 +189,8 @@
         (dom/div #js {:className "instructions"}
           "Tag a conversation with /... Mention tags with #... and users with @... Emoji :shortcode: support too!")
         (om/build user-modal-view data)
-        (om/build sidebar-view {})
-        (case (data :page)
+        (om/build sidebar-view data)
+        (case (get-in data [:page :type])
           :home (om/build threads-view data)
           :search (om/build search-view data))))))
 
