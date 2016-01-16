@@ -107,13 +107,14 @@
           (dom/div #js {:className "title"} "Searching...")
 
           ; results
-          (seq (get-in data [:page :search-results]))
+          (seq (get-in data [:page :search-result-ids]))
           (apply dom/div #js {:className "threads"}
             (map (fn [t] (om/build thread-view t
                                    {:key :id
                                     :opts {:searched? true}}))
                  ; sort-by last reply, newest first
-                 (->> (vals (get-in data [:page :search-results]))
+                 (->> (select-keys (data :threads) (get-in data [:page :search-result-ids]))
+                      vals
                       (sort-by
                         (comp (partial apply max)
                               (partial map :created-at)
@@ -198,6 +199,7 @@
   (reify
     om/IRender
     (render [_]
+      (println (data :user))
       (dom/div nil
         (if (data :session)
           (om/build main-view data)

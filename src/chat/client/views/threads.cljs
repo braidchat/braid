@@ -116,7 +116,8 @@
             (map (fn [t] (om/build thread-view t {:key :id}))
                  (let [user-id (get-in @store/app-state [:session :user-id])]
                    ; sort by last message sent by logged-in user, most recent first
-                   (->> (vals (data :threads))
+                   (->> (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
+                        vals
                         (sort-by
                           (comp (partial apply max)
                                 (partial map :created-at)
