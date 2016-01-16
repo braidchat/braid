@@ -107,5 +107,17 @@
 
 (defn format-date
   "Turn a Date object into a nicely formatted string"
-  [date]
-  (f/unparse (f/formatter "h:mm A") (t/to-default-time-zone date)))
+  [datetime]
+  (let [datetime (t/to-default-time-zone datetime)
+        now (t/to-default-time-zone (t/now))
+        format (cond
+                 (= (f/unparse (f/formatter "yyyydM") now)
+                    (f/unparse (f/formatter "yyyydM") datetime))
+                 "h:mm A"
+
+                 (= (t/year now) (t/year datetime))
+                 "h:mm A MMM d"
+
+                 :else
+                 "h:mm A MMM d yyyy")]
+    (f/unparse (f/formatter format) datetime)))

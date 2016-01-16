@@ -1,7 +1,7 @@
 @top-bar-height: 2rem;
 @card-width: 17rem;
 @pad: 1rem;
-@sidebar-width: 150px;
+@sidebar-width: 10rem;
 @avatar-size: 2rem;
 
 body {
@@ -102,11 +102,12 @@ body {
   right: @pad + @top-bar-height + @pad;
   line-height: @top-bar-height;
   color: #aaa;
+  height: @top-bar-height;
 }
 
 .threads {
   position: absolute;
-  top: @top-bar-height;
+  top: @top-bar-height + @pad + @pad;
   right: 0;
   bottom: @pad;
   left: @sidebar-width;
@@ -317,8 +318,8 @@ body {
     height: @top-bar-height;
     cursor: pointer;
     position: absolute;
-    top: 1em;
-    right: 1em;
+    top: @pad;
+    right: @pad;
     z-index: 5;
   }
   .user-modal {
@@ -449,10 +450,20 @@ body {
   }
   .search {
     margin: @pad;
-    display: block;
-    box-sizing: border-box;
+    line-height: @top-bar-height;
     input {
       width: 100%;
     }
+  }
+}
+
+.page {
+  .title {
+    position: absolute;
+    left: @sidebar-width + @pad;
+    top: @pad;
+    height: @top-bar-height;
+    line-height: @top-bar-height;
+    color: #aaa;
   }
 }

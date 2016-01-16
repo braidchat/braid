@@ -1,13 +1,10 @@
 (ns chat.client.views.threads
-  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om]
             [om.dom :as dom]
             [clojure.string :as string]
-            [cljs.core.async :as async :refer [<! >! put! chan alts! timeout]]
             [cljs-uuid-utils.core :as uuid]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.user-modal :refer [user-modal-view]]
             [chat.client.views.new-message :refer [new-message-view]]
             [chat.client.views.helpers :as helpers])
   (:import [goog.events KeyCodes]))
@@ -104,129 +101,27 @@
                                                        "Reply...")}
                       {:react-key "message"})))))))
 
-(defn debounce
-  "Given the input channel source and a debouncing time of msecs, return a new
-  channel that will forward the latest event from source at most every msecs
-  milliseconds"
-  [source msecs]
-  (let [out (chan)]
-    (go
-      (loop [state ::init
-             lastv nil
-             chans [source]]
-        (let [[_ threshold] chans]
-          (let [[v sc] (alts! chans)]
-            (condp = sc
-              source (recur ::debouncing v
-                            (case state
-                              ::init (conj chans (timeout msecs))
-                              ::debouncing (conj (pop chans) (timeout msecs))))
-              threshold (do (when lastv
-                              (put! out lastv))
-                            (recur ::init nil (pop chans))))))))
-    out))
-
-(defn search-view [data owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:search-chan (chan)})
-    om/IWillMount
-    (will-mount [_]
-      (let [search (debounce (om/get-state owner :search-chan) 1000)]
-        (go (while true
-              (let [{:keys [query]} (<! search)]
-                (if (string/blank? query)
-                  (store/set-search-results! {})
-                  (dispatch! :search-history query)))))))
-    om/IRenderState
-    (render-state [_ {:keys [search-chan]}]
-      (dom/div #js {:className "search"}
-        (dom/input #js {:type "search" :placeholder "Search History"
-                        :onChange
-                        (fn [e] (put! search-chan {:query (.. e -target -value)}))})))))
-
-
-
-(defn sidebar-view [data owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "sidebar"}
-        (om/build search-view {})
-
-        (dom/div nil "note: below sections are currently non-functional")
-        (dom/h2 nil "Channels")
-        (dom/div #js {:className "conversations"}
-          (dom/div nil
-            (dom/div #js {:className "all"} "ALL")
-             "[20]")
-          (apply dom/div nil
-            (->> [{:name "foo"
-                   :id (uuid/make-random-squuid)}
-                  {:name "bar"
-                   :id (uuid/make-random-squuid)}
-                  {:name "baz"
-                   :id (uuid/make-random-squuid)}]
-                 (map (fn [tag]
-                        (dom/div nil (om/build tag-view tag) (str "[" (rand-int 10) "]"))))))
-          (apply dom/div nil
-            (->> [{:nickname "jon"
-                   :id (uuid/make-random-squuid)}
-                  {:nickname "bob"
-                   :id (uuid/make-random-squuid)}]
-                 (map (fn [user]
-                        (dom/div nil (om/build user-view user) (str "[" (rand-int 10) "]")))))))
-
-        (dom/h2 nil "Recommended")
-        (apply dom/div #js {:className "recommended"}
-          (->> [{:name "barbaz"
-                 :id (uuid/make-random-squuid)}
-                {:name "general"
-                 :id (uuid/make-random-squuid)}
-                {:name "asdf"
-                 :id (uuid/make-random-squuid)}]
-               (map (fn [tag]
-                      (dom/div nil (om/build tag-view tag))))))
-
-        (dom/h2 nil "Members")
-        (apply dom/div #js {:className "users"}
-          (->> [{:nickname "foobar"
-                 :id (uuid/make-random-squuid)}
-                {:nickname "michael"
-                 :id (uuid/make-random-squuid)}]
-               (map (fn [user]
-                      (dom/div nil (om/build user-view user))))))))))
-
 (defn threads-view [data owner]
   (reify
     om/IRender
     (render [_]
       (dom/div nil
-        (when-let [err (data :error-msg)]
-          (dom/div #js {:className "error-banner"}
-            err
-            (dom/span #js {:className "close"
-                           :onClick (fn [_] (store/clear-error!))}
-              "×")))
-        (dom/div #js {:className "instructions"}
-          "Tag a conversation with /... Mention tags with #... and users with @... Emoji :shortcode: support too!")
-        (om/build user-modal-view data)
-        (om/build sidebar-view {})
         (apply dom/div #js {:className "threads"}
           (concat
-            (map (fn [t] (om/build thread-view t
-                                   {:key :id
-                                    :opts {:searched? (some? (get-in data [:search-results (t :id)]))}}))
-                 (->> (vals (merge (data :threads)
-                                   (data :search-results)))
-                      (sort-by
-                        (comp (partial apply min)
-                              (partial map :created-at)
-                              :messages))))
             [(om/build thread-view
                        {:id (uuid/make-random-squuid)
                         :new? true
                         :tag-ids []
                         :messages []}
-                       {:react-key "new-thread"})]))))))
+                       {:react-key "new-thread"})]
+            (map (fn [t] (om/build thread-view t {:key :id}))
+                 (let [user-id (get-in @store/app-state [:session :user-id])]
+                   ; sort by last message sent by logged-in user, most recent first
+                   (->> (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
+                        vals
+                        (sort-by
+                          (comp (partial apply max)
+                                (partial map :created-at)
+                                (partial filter (fn [m] (= (m :user-id) user-id)))
+                                :messages))
+                        reverse)))))))))
