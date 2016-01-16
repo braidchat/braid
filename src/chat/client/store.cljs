@@ -55,7 +55,6 @@
 
 ; users
 
-
 (defn add-users! [users]
   (transact! [:users] #(merge % (key-by-id users))))
 
@@ -64,6 +63,9 @@
 
 (defn update-user-nick! [user-id nick]
   (transact! [:users user-id :nickname] (constantly nick)))
+
+(defn update-user-status! [user-id status]
+  (transact! [:users user-id :status] (constantly status)))
 
 (defn all-users []
   (vals (get-in @app-state [:users])))

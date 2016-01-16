@@ -21,6 +21,7 @@
           (dom/img #js {:className "avatar" :src (sender :avatar)})
           (dom/div #js {:className "info"}
             (dom/span #js {:className "nickname"} (sender :nickname))
+            (dom/span #js {:className "status"} (str (sender :status)))
             (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
           (apply dom/div #js {:className "content"}
             (helpers/format-message (message :content))))))))
