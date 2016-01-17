@@ -164,3 +164,11 @@
 (defmethod sync/event-handler :user/name-change
   [[_ {:keys [user-id nickname]}]]
   (store/update-user-nick! user-id nickname))
+
+(defmethod sync/event-handler :user/connected
+  [[_ user-id]]
+  (store/update-user-status! user-id :online))
+
+(defmethod sync/event-handler :user/disconnected
+  [[_ user-id]]
+  (store/update-user-status! user-id :offline))

@@ -37,7 +37,7 @@
       (dom/div #js {:className "user"
                     :style #js {:backgroundColor (helpers/tag->color user)}}
         (dom/span #js {:className "name"} (str "@" (user :nickname)))
-        (dom/div #js {:className (str "status " (rand-nth ["online" "away" "offline"]))})))))
+        (dom/div #js {:className (str "status " ((fnil name "") (user :status)))})))))
 
 (defn thread-tags-view [thread owner]
   (reify

@@ -68,6 +68,16 @@
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
+(defmethod event-msg-handler :chsk/uidport-open
+  [{:as ev-msg :keys [event id ring-req]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (broadcast-user-change user-id [:user/connected user-id])))
+
+(defmethod event-msg-handler :chsk/uidport-close
+  [{:as ev-msg :keys [event id ring-req]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (broadcast-user-change user-id [:user/disconnected user-id])))
+
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
@@ -210,16 +220,18 @@
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (chsk-send! user-id [:session/init-data
-                         (db/with-conn
-                           {:user-id user-id
-                            :user-nickname (db/get-nickname user-id)
-                            :user-groups (db/get-groups-for-user user-id)
-                            :user-threads (db/get-open-threads-for-user user-id)
-                            :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
-                            :users (db/fetch-users-for-user user-id)
-                            :invitations (db/fetch-invitations-for-user user-id)
-                            :tags (db/fetch-tags-for-user user-id)})])))
+    (let [connected (set (:any @connected-uids))]
+      (chsk-send! user-id [:session/init-data
+                           (db/with-conn
+                             {:user-id user-id
+                              :user-nickname (db/get-nickname user-id)
+                              :user-groups (db/get-groups-for-user user-id)
+                              :user-threads (db/get-open-threads-for-user user-id)
+                              :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
+                              :users (into () (map #(assoc % :status (if (connected (% :id)) :online :offline)))
+                                           (db/fetch-users-for-user user-id))
+                              :invitations (db/fetch-invitations-for-user user-id)
+                              :tags (db/fetch-tags-for-user user-id)})]))))
 
 (defonce router_ (atom nil))
 
