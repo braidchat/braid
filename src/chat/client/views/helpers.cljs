@@ -71,11 +71,10 @@
   []
   (fn [xf]
     (let [state (volatile! ::start)
-          code-lang (volatile! "")
           block-type (volatile! nil)
           in-code (volatile! [])]
       (fn
-        ([]  (xf))
+        ([] (xf))
         ([result] (if (= @state ::in-code)
                     (let [prefix (if (= @block-type :block) "```" "`")]
                       (reduce xf result (update-in @in-code [0] (partial str prefix))))
@@ -86,18 +85,16 @@
              ; TODO: handle starting code block with backtick not at beginning of word
              ; start multiline
              (and (= @state ::start) (.startsWith input "```"))
-             (do (vreset! state ::in-code)
-                 (vreset! block-type :block)
-                 ; Note: using [\s\S] to match anything because javascript doesn't have (?s) flag
-                 ; to make dot match newlines as well, apparently
-                 (let [[_ type code] (re-matches #"```(\w*)\s?([\s\S]*)" input)]
-                   (vreset! code-lang type)
-                   (vswap! in-code conj code))
-                 result)
+             (if (and (not= "```" input) (.endsWith input "```"))
+               (xf result (dom/code #js {:className "multiline-code"} (.slice input 3 (- (.-length input) 3))))
+               (do (vreset! state ::in-code)
+                   (vreset! block-type :block)
+                   (vswap! in-code conj (.slice input 3))
+                   result))
 
              ; start inline
              (and (= @state ::start) (.startsWith input "`"))
-             (if (.endsWith input "`")
+             (if (and (not= input "`") (.endsWith input "`"))
                (xf result (dom/code #js {:className "inline-code"} (.slice input 1 (dec (.-length input)))))
                (do (vreset! state ::in-code)
                    (vswap! in-code conj (.slice input 1))
@@ -105,12 +102,10 @@
 
              ; end multiline
              (and (= @state ::in-code) (= @block-type :block) (.endsWith input "```"))
-             (let [code (conj @in-code (.slice input 0 (- (.-length input) 3)))
-                   code-class @code-lang]
+             (let [code (conj @in-code (.slice input 0 (- (.-length input) 3)))]
                (vreset! state ::start)
                (vreset! in-code [])
-               (vreset! code-lang "")
-               (xf result (dom/code #js {:className (str "multiline-code " code-class)} (string/join " " code))))
+               (xf result (dom/code #js {:className "multiline-code"} (string/join " " code))))
 
              ; end inline
              (and (= @state ::in-code) (.endsWith input "`"))
