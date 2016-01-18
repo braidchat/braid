@@ -19,8 +19,6 @@
                        :standby shortcode}))))
 
 
-(def ascii-set (set (keys ascii)))
-
 (def unicode {
 ":kiss_ww:" ["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"]
 ":couplekiss_ww:" ["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"]
@@ -2201,4 +2199,4 @@
         "=#" ":no_mouth:"
     })
 
-
+(def ascii-set (set (keys ascii)))
