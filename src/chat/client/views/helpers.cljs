@@ -66,59 +66,50 @@
         text))
     text-or-node))
 
-(defn extract-code-blocks
-  "Return a transducer to processs the sequence of words into multiline code blocks"
-  []
+(defn make-delimited-processor
+  "Make a new transducer to process the stream of words"
+  [{:keys [delimiter result-fn]}]
   (fn [xf]
     (let [state (volatile! ::start)
-          block-type (volatile! nil)
           in-code (volatile! [])]
       (fn
         ([] (xf))
         ([result] (if (= @state ::in-code)
-                    (let [prefix (if (= @block-type :block) "```" "`")]
-                      (reduce xf result (update-in @in-code [0] (partial str prefix))))
+                    (reduce xf result (update-in @in-code [0] (partial str delimiter)))
                     (xf result)))
         ([result input]
          (if (string? input)
            (cond
-             ; TODO: handle starting code block with backtick not at beginning of word
-             ; start multiline
-             (and (= @state ::start) (.startsWith input "```"))
-             (if (and (not= "```" input) (.endsWith input "```"))
-               (xf result (dom/code #js {:className "multiline-code"} (.slice input 3 (- (.-length input) 3))))
+             ; TODO: handle starting code block with delimiter not at beginning of word
+             ; start
+             (and (= @state ::start) (.startsWith input delimiter))
+             (if (and (not= input "`") (.endsWith input delimiter))
+               (xf result (result-fn (.slice input (count delimiter) (- (.-length input) (count delimiter)))))
                (do (vreset! state ::in-code)
-                   (vreset! block-type :block)
-                   (vswap! in-code conj (.slice input 3))
+                   (vswap! in-code conj (.slice input (count delimiter)))
                    result))
 
-             ; start inline
-             (and (= @state ::start) (.startsWith input "`"))
-             (if (and (not= input "`") (.endsWith input "`"))
-               (xf result (dom/code #js {:className "inline-code"} (.slice input 1 (dec (.-length input)))))
-               (do (vreset! state ::in-code)
-                   (vswap! in-code conj (.slice input 1))
-                   result))
-
-             ; end multiline
-             (and (= @state ::in-code) (= @block-type :block) (.endsWith input "```"))
-             (let [code (conj @in-code (.slice input 0 (- (.-length input) 3)))]
+             ; end
+             (and (= @state ::in-code) (.endsWith input delimiter))
+             (let [code (conj @in-code (.slice input 0 (- (.-length input) (count delimiter))))]
                (vreset! state ::start)
                (vreset! in-code [])
-               (xf result (dom/code #js {:className "multiline-code"} (string/join " " code))))
+               (xf result (result-fn (string/join " " code))))
 
-             ; end inline
-             (and (= @state ::in-code) (.endsWith input "`"))
-             (let [code (conj @in-code (.slice input 0 (dec (.-length input))))]
-               (vreset! state ::start)
-               (vreset! in-code [])
-               (xf result (dom/code #js {:className "inline-code"} (string/join " " code))))
-
-             ; both
              (= @state ::in-code) (do (vswap! in-code conj input) result)
 
              :else (xf result input))
            (xf result input)))))))
+
+(def extract-code-blocks
+  (make-delimited-processor {:delimiter "```"
+                             :result-fn (fn [input]
+                                       (dom/code #js {:className "multiline-code"} input))}))
+(def extract-code-inline
+  (make-delimited-processor {:delimiter "`"
+                             :result-fn (fn [input]
+                                       (dom/code #js {:className "inline-code"}
+                                                 input))}))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
@@ -130,7 +121,7 @@
                                    tag-replace
                                    emoji-shortcodes-replace
                                    emoji-ascii-replace))
-        statefull-transform (extract-code-blocks)]
+        statefull-transform (comp extract-code-blocks extract-code-inline)]
     (->> (into [] (comp statefull-transform stateless-transform) (string/split text #" "))
          (interleave (repeat " "))
          rest)))
