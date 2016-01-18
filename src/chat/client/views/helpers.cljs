@@ -42,7 +42,8 @@
                  match))}
    })
 
-(defn text-replacer
+(defn make-text-replacer
+  "Make a new function to perform a simple stateless replacement of a single element"
   [match-type]
   (fn [text-or-node]
     (if (string? text-or-node)
@@ -52,19 +53,6 @@
           ((get-in replacements [match-type :replace]) match)
           text))
       text-or-node)))
-
-(def url-replace (text-replacer :urls))
-(def user-replace (text-replacer :users))
-(def tag-replace (text-replacer :tags))
-(def emoji-shortcodes-replace (text-replacer :emoji-shortcodes))
-
-(defn emoji-ascii-replace [text-or-node]
-  (if (string? text-or-node)
-    (let [text text-or-node]
-      (if (contains? emoji/ascii-set text)
-        ((get-in replacements [:emoji-ascii :replace]) text)
-        text))
-    text-or-node))
 
 (defn make-delimited-processor
   "Make a new transducer to process the stream of words"
@@ -101,15 +89,26 @@
              :else (xf result input))
            (xf result input)))))))
 
+
+(def url-replace (make-text-replacer :urls))
+(def user-replace (make-text-replacer :users))
+(def tag-replace (make-text-replacer :tags))
+(def emoji-shortcodes-replace (make-text-replacer :emoji-shortcodes))
+
+(defn emoji-ascii-replace [text-or-node]
+  (if (string? text-or-node)
+    (let [text text-or-node]
+      (if (contains? emoji/ascii-set text)
+        ((get-in replacements [:emoji-ascii :replace]) text)
+        text))
+    text-or-node))
+
 (def extract-code-blocks
   (make-delimited-processor {:delimiter "```"
-                             :result-fn (fn [input]
-                                       (dom/code #js {:className "multiline-code"} input))}))
+                             :result-fn (partial dom/code #js {:className "multiline-code"})}))
 (def extract-code-inline
   (make-delimited-processor {:delimiter "`"
-                             :result-fn (fn [input]
-                                       (dom/code #js {:className "inline-code"}
-                                                 input))}))
+                             :result-fn (partial dom/code #js {:className "inline-code"})}))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
