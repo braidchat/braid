@@ -18,7 +18,7 @@
 
 (def replacements
   {:urls
-   {:pattern #"http(?:s)?://\S+(?:\w|\d|/)"
+   {:pattern #"(http(?:s)?://\S+(?:\w|\d|/))"
     :replace (fn [match]
                (dom/a #js {:href match :target "_blank"} match))}
    :users
@@ -36,50 +36,27 @@
                  (emoji/shortcode->html match)
                  match))}
    :emoji-ascii
-   {
-    :replace (fn [match]
+   {:replace (fn [match]
                (if-let [shortcode (emoji/ascii match)]
                  (emoji/shortcode->html shortcode)
                  match))}
    })
 
- ; should be able to do this with much less repetition
+(defn text-replacer
+  [match-type]
+  (fn [text-or-node]
+    (if (string? text-or-node)
+      (let [text text-or-node
+            pattern (get-in replacements [match-type :pattern])]
+        (if-let [match (second (re-find pattern text))]
+          ((get-in replacements [match-type :replace]) match)
+          text))
+      text-or-node)))
 
-(defn url-replace [text-or-node]
-  (if (string? text-or-node)
-    (let [text text-or-node
-          pattern (get-in replacements [:urls :pattern])]
-      (if-let [match (re-find pattern text)]
-        ((get-in replacements [:urls :replace]) match)
-        text))
-    text-or-node))
-
-(defn user-replace [text-or-node]
-  (if (string? text-or-node)
-    (let [text text-or-node
-          pattern (get-in replacements [:users :pattern])]
-      (if-let [match (second (re-find pattern text))]
-        ((get-in replacements [:users :replace]) match)
-        text))
-    text-or-node))
-
-(defn tag-replace [text-or-node]
-  (if (string? text-or-node)
-    (let [text text-or-node
-          pattern (get-in replacements [:tags :pattern])]
-      (if-let [match (second (re-find pattern text))]
-        ((get-in replacements [:tags :replace]) match)
-        text))
-    text-or-node))
-
-(defn emoji-shortcodes-replace [text-or-node]
-  (if (string? text-or-node)
-    (let [text text-or-node
-          pattern (get-in replacements [:emoji-shortcodes :pattern])]
-      (if-let [match (second (re-find pattern text))]
-        ((get-in replacements [:emoji-shortcodes :replace]) match)
-        text))
-    text-or-node))
+(def url-replace (text-replacer :urls))
+(def user-replace (text-replacer :users))
+(def tag-replace (text-replacer :tags))
+(def emoji-shortcodes-replace (text-replacer :emoji-shortcodes))
 
 (defn emoji-ascii-replace [text-or-node]
   (if (string? text-or-node)
@@ -89,21 +66,75 @@
         text))
     text-or-node))
 
+(defn extract-code-blocks
+  "Return a transducer to processs the sequence of words into multiline code blocks"
+  []
+  (fn [xf]
+    (let [state (volatile! ::start)
+          code-lang (volatile! "")
+          block-type (volatile! nil)
+          in-code (volatile! [])]
+      (fn
+        ([] (xf))
+        ([result] (xf result))
+        ([result input]
+         (if (string? input)
+           (cond
+             ; start multiline
+             (and (= @state ::start) (.startsWith input "```"))
+             (do (vreset! state ::in-code)
+                 (vreset! block-type :block)
+                 ; Note: using [\s\S] to match anything because javascript doesn't have (?s) flag
+                 ; to make dot match newlines as well, apparently
+                 (let [[_ type code] (re-matches #"```(\w*)\s?([\s\S]*)" input)]
+                   (vreset! code-lang type)
+                   (vswap! in-code conj code))
+                 result)
+
+             ; start inline
+             (and (= @state ::start) (.startsWith input "`"))
+             (if (.endsWith input "`")
+               (xf result (dom/code #js {:className "inline-code"} (.slice input 1 (dec (.-length input)))))
+               (do (vreset! state ::in-code)
+                   (vswap! in-code conj (.slice input 1))
+                   result))
+
+             ; end multiline
+             (and (= @state ::in-code) (= @block-type :block) (.endsWith input "```"))
+             (let [code (conj @in-code (.slice input 0 (- (.-length input) 3)))
+                   code-class @code-lang]
+               (vreset! state ::start)
+               (vreset! in-code [])
+               (vreset! code-lang "")
+               (xf result (dom/code #js {:className (str "multiline-code " code-class)} (string/join " " code))))
+
+             ; end inline
+             (and (= @state ::in-code) (.endsWith input "`"))
+             (let [code (conj @in-code (.slice input 0 (dec (.-length input))))]
+               (vreset! state ::start)
+               (vreset! in-code [])
+               (xf result (dom/code #js {:className "inline-code"} (string/join " " code))))
+
+             ; both
+             (= @state ::in-code) (do (vswap! in-code conj input) result)
+
+             :else (xf result input))
+           (xf result input)))))))
+
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
   links"
   [text]
-  (let [words (->> (string/split text #" ")
-                   (map (fn [w]
-                          (->> w
-                               url-replace
-                               user-replace
-                               tag-replace
-                               emoji-shortcodes-replace
-                               emoji-ascii-replace)))
-                   (interleave (repeat " "))
-                   rest)]
-    words))
+  (let [stateless-transform (map (comp
+                                   url-replace
+                                   user-replace
+                                   tag-replace
+                                   emoji-shortcodes-replace
+                                   emoji-ascii-replace))
+        statefull-transform (extract-code-blocks)]
+    (->> (into [] (comp stateless-transform statefull-transform) (string/split text #" "))
+         (interleave (repeat " "))
+         rest)))
 
 (defn format-date
   "Turn a Date object into a nicely formatted string"
