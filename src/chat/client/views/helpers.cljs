@@ -110,6 +110,10 @@
   (make-delimited-processor {:delimiter "`"
                              :result-fn (partial dom/code #js {:className "inline-code"})}))
 
+(def extract-emphasized
+  (make-delimited-processor {:delimiter "*"
+                             :result-fn (partial dom/strong #js {:className "starred"})}))
+
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
   links"
@@ -120,7 +124,7 @@
                                    tag-replace
                                    emoji-shortcodes-replace
                                    emoji-ascii-replace))
-        statefull-transform (comp extract-code-blocks extract-code-inline)]
+        statefull-transform (comp extract-code-blocks extract-code-inline extract-emphasized)]
     (->> (into [] (comp statefull-transform stateless-transform) (string/split text #" "))
          (interleave (repeat " "))
          rest)))
