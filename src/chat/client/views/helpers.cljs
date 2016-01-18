@@ -75,11 +75,15 @@
           block-type (volatile! nil)
           in-code (volatile! [])]
       (fn
-        ([] (xf))
-        ([result] (xf result))
+        ([]  (xf))
+        ([result] (if (= @state ::in-code)
+                    (let [prefix (if (= @block-type :block) "```" "`")]
+                      (reduce xf result (update-in @in-code [0] (partial str prefix))))
+                    (xf result)))
         ([result input]
          (if (string? input)
            (cond
+             ; TODO: handle starting code block with backtick not at beginning of word
              ; start multiline
              (and (= @state ::start) (.startsWith input "```"))
              (do (vreset! state ::in-code)
