@@ -132,7 +132,7 @@
                                    emoji-shortcodes-replace
                                    emoji-ascii-replace))
         statefull-transform (extract-code-blocks)]
-    (->> (into [] (comp stateless-transform statefull-transform) (string/split text #" "))
+    (->> (into [] (comp statefull-transform stateless-transform) (string/split text #" "))
          (interleave (repeat " "))
          rest)))
 
