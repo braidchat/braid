@@ -83,7 +83,7 @@
              ; TODO: handle starting code block with delimiter not at beginning of word
              ; start
              (and (= @state ::start) (.startsWith input delimiter))
-             (if (and (not= input "`") (.endsWith input delimiter))
+             (if (and (not= input delimiter) (.endsWith input delimiter))
                (xf result (result-fn (.slice input (count delimiter) (- (.-length input) (count delimiter)))))
                (do (vreset! state ::in-code)
                    (vswap! in-code conj (.slice input (count delimiter)))
