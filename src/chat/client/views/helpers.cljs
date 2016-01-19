@@ -118,12 +118,14 @@
   "Given the text of a message body, turn it into dom nodes, making urls into
   links"
   [text]
-  (let [stateless-transform (map (comp
-                                   url-replace
-                                   user-replace
-                                   tag-replace
-                                   emoji-shortcodes-replace
-                                   emoji-ascii-replace))
+  (let [; Caution: order of transforms is important! url-replace should come before
+        ; user/tag replace at least so urls with octothorpes or at-signs don't get
+        ; wrecked
+        stateless-transform (map (comp emoji-ascii-replace
+                                       emoji-shortcodes-replace
+                                       tag-replace
+                                       user-replace
+                                       url-replace))
         statefull-transform (comp extract-code-blocks extract-code-inline extract-emphasized)]
     (->> (into [] (comp statefull-transform stateless-transform) (string/split text #" "))
          (interleave (repeat " "))
