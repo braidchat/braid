@@ -42,7 +42,8 @@
                  match))}
    })
 
-(defn text-replacer
+(defn make-text-replacer
+  "Make a new function to perform a simple stateless replacement of a single element"
   [match-type]
   (fn [text-or-node]
     (if (string? text-or-node)
@@ -53,10 +54,46 @@
           text))
       text-or-node)))
 
-(def url-replace (text-replacer :urls))
-(def user-replace (text-replacer :users))
-(def tag-replace (text-replacer :tags))
-(def emoji-shortcodes-replace (text-replacer :emoji-shortcodes))
+(defn make-delimited-processor
+  "Make a new transducer to process the stream of words"
+  [{:keys [delimiter result-fn]}]
+  (fn [xf]
+    (let [state (volatile! ::start)
+          in-code (volatile! [])]
+      (fn
+        ([] (xf))
+        ([result] (if (= @state ::in-code)
+                    (reduce xf result (update-in @in-code [0] (partial str delimiter)))
+                    (xf result)))
+        ([result input]
+         (if (string? input)
+           (cond
+             ; TODO: handle starting code block with delimiter not at beginning of word
+             ; start
+             (and (= @state ::start) (.startsWith input delimiter))
+             (if (and (not= input delimiter) (.endsWith input delimiter))
+               (xf result (result-fn (.slice input (count delimiter) (- (.-length input) (count delimiter)))))
+               (do (vreset! state ::in-code)
+                   (vswap! in-code conj (.slice input (count delimiter)))
+                   result))
+
+             ; end
+             (and (= @state ::in-code) (.endsWith input delimiter))
+             (let [code (conj @in-code (.slice input 0 (- (.-length input) (count delimiter))))]
+               (vreset! state ::start)
+               (vreset! in-code [])
+               (xf result (result-fn (string/join " " code))))
+
+             (= @state ::in-code) (do (vswap! in-code conj input) result)
+
+             :else (xf result input))
+           (xf result input)))))))
+
+
+(def url-replace (make-text-replacer :urls))
+(def user-replace (make-text-replacer :users))
+(def tag-replace (make-text-replacer :tags))
+(def emoji-shortcodes-replace (make-text-replacer :emoji-shortcodes))
 
 (defn emoji-ascii-replace [text-or-node]
   (if (string? text-or-node)
@@ -66,71 +103,30 @@
         text))
     text-or-node))
 
-(defn extract-code-blocks
-  "Return a transducer to processs the sequence of words into multiline code blocks"
-  []
-  (fn [xf]
-    (let [state (volatile! ::start)
-          block-type (volatile! nil)
-          in-code (volatile! [])]
-      (fn
-        ([] (xf))
-        ([result] (if (= @state ::in-code)
-                    (let [prefix (if (= @block-type :block) "```" "`")]
-                      (reduce xf result (update-in @in-code [0] (partial str prefix))))
-                    (xf result)))
-        ([result input]
-         (if (string? input)
-           (cond
-             ; TODO: handle starting code block with backtick not at beginning of word
-             ; start multiline
-             (and (= @state ::start) (.startsWith input "```"))
-             (if (and (not= "```" input) (.endsWith input "```"))
-               (xf result (dom/code #js {:className "multiline-code"} (.slice input 3 (- (.-length input) 3))))
-               (do (vreset! state ::in-code)
-                   (vreset! block-type :block)
-                   (vswap! in-code conj (.slice input 3))
-                   result))
+(def extract-code-blocks
+  (make-delimited-processor {:delimiter "```"
+                             :result-fn (partial dom/code #js {:className "multiline-code"})}))
+(def extract-code-inline
+  (make-delimited-processor {:delimiter "`"
+                             :result-fn (partial dom/code #js {:className "inline-code"})}))
 
-             ; start inline
-             (and (= @state ::start) (.startsWith input "`"))
-             (if (and (not= input "`") (.endsWith input "`"))
-               (xf result (dom/code #js {:className "inline-code"} (.slice input 1 (dec (.-length input)))))
-               (do (vreset! state ::in-code)
-                   (vswap! in-code conj (.slice input 1))
-                   result))
-
-             ; end multiline
-             (and (= @state ::in-code) (= @block-type :block) (.endsWith input "```"))
-             (let [code (conj @in-code (.slice input 0 (- (.-length input) 3)))]
-               (vreset! state ::start)
-               (vreset! in-code [])
-               (xf result (dom/code #js {:className "multiline-code"} (string/join " " code))))
-
-             ; end inline
-             (and (= @state ::in-code) (.endsWith input "`"))
-             (let [code (conj @in-code (.slice input 0 (dec (.-length input))))]
-               (vreset! state ::start)
-               (vreset! in-code [])
-               (xf result (dom/code #js {:className "inline-code"} (string/join " " code))))
-
-             ; both
-             (= @state ::in-code) (do (vswap! in-code conj input) result)
-
-             :else (xf result input))
-           (xf result input)))))))
+(def extract-emphasized
+  (make-delimited-processor {:delimiter "*"
+                             :result-fn (partial dom/strong #js {:className "starred"})}))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
   links"
   [text]
-  (let [stateless-transform (map (comp
-                                   url-replace
-                                   user-replace
-                                   tag-replace
-                                   emoji-shortcodes-replace
-                                   emoji-ascii-replace))
-        statefull-transform (extract-code-blocks)]
+  (let [; Caution: order of transforms is important! url-replace should come before
+        ; user/tag replace at least so urls with octothorpes or at-signs don't get
+        ; wrecked
+        stateless-transform (map (comp emoji-ascii-replace
+                                       emoji-shortcodes-replace
+                                       tag-replace
+                                       user-replace
+                                       url-replace))
+        statefull-transform (comp extract-code-blocks extract-code-inline extract-emphasized)]
     (->> (into [] (comp statefull-transform stateless-transform) (string/split text #" "))
          (interleave (repeat " "))
          rest)))
