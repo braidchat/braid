@@ -84,7 +84,7 @@
             (dom/span #js {:className "close"
                            :onClick (fn [_] (store/clear-error!))} "×")))
         (dom/div #js {:className "instructions"}
-          "Tag a conversation with /... Mention tags with #... and users with @... Emoji :shortcode: support too!")
+          "Tag conversations with #... Add/mention users with @... Emoji :shortcode: support")
         (om/build user-modal-view data)
         (om/build sidebar-view data)
         (case (get-in data [:page :type])

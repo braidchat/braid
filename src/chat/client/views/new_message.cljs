@@ -103,7 +103,9 @@
                         (fuzzy-matches? (t :name) query)))
               (map (fn [tag]
                      {:action
-                      (fn [thread-id])
+                      (fn [thread-id]
+                        (dispatch! :tag-thread {:thread-id thread-id
+                                                :id (tag :id)}))
                       :message-transform
                       (fn [text]
                         (string/replace text pattern (str "#" (tag :name) " ")))
@@ -118,7 +120,7 @@
                             (:name (store/id->group (tag :group-id))))))}))))))
 
    ; /<tag-name>  ->  adds tag to message
-   (fn [text thread-id]
+   #_(fn [text thread-id]
      (when-let [query (second (re-matches #"^/(\S{1,})" text))]
        (let [thread-tag-ids (-> (store/id->thread thread-id)
                                 :tag-ids

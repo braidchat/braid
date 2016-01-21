@@ -6,25 +6,27 @@
             [chat.client.schema :as schema]
             [cljs-utils.core :refer [edn-xhr]]))
 
+(defn- extract-mentioned-ids [text]
+  (let [mentioned-names (->> (re-seq #"(?:^|\s)@(\S+)" text)
+                             (map second))
+        nick->id (reduce (fn [m [id {:keys [nickname]}]] (assoc m nickname id))
+                         {}
+                         (@store/app-state :users))]
+    (->> mentioned-names
+         (map nick->id)
+         (remove nil?))))
+
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
   (when-not (string/blank? (data :content))
     (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
                                         :content (data :content)
-                                        :thread-id (data :thread-id)})]
+                                        :thread-id (data :thread-id)
+
+                                        :mentioned-user-ids (extract-mentioned-ids (data :content))})]
       (store/add-message! message)
-      (sync/chsk-send! [:chat/new-message message])
-      (when-let [mentioned-names (->> (re-seq #"(?:^|\s)@(\S+)" (message :content))
-                                      (map second))]
-        (let [nick->id (reduce (fn [m [id {:keys [nickname]}]] (assoc m nickname id))
-                               {}
-                               (@store/app-state :users))
-              mentioned (->> mentioned-names (map nick->id) (remove nil?))]
-          (doseq [mention mentioned]
-            (sync/chsk-send! [:thread/add-mention {:thread-id (message :thread-id)
-                                                   :mentioned-id mention}])
-            (store/add-mention-to-thread! mention (message :thread-id))))))))
+      (sync/chsk-send! [:chat/new-message message]))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
@@ -49,11 +51,6 @@
     (sync/chsk-send! [:thread/add-tag {:thread-id (attr :thread-id)
                                        :tag-id tag-id}])
     (store/add-tag-to-thread! tag-id (attr :thread-id))))
-
-(defmethod dispatch! :mention-user [_ [thread-id user-id]]
-  (sync/chsk-send! [:thread/add-mention {:thread-id thread-id
-                                         :mentioned-id user-id}])
-  (store/add-mention-to-thread! user-id thread-id))
 
 (defmethod dispatch! :create-group [_ group]
   (let [group (schema/make-group group)]
