@@ -8,7 +8,9 @@
    :thread-id (or (data :thread-id) (uuid/make-random-squuid))
    :user-id (or (data :user-id) nil)
    :created-at (or (data :created-at) (js/Date.))
-   :mentioned-user-ids (or (data :mentioned-user-ids) []) })
+   :mentioned-user-ids (or (data :mentioned-user-ids) [])
+   :mentioned-tag-ids (or (data :mentioned-tag-ids) [])
+   })
 
 (defn make-tag [data]
   {:id (or (data :id) (uuid/make-random-squuid))
