@@ -264,7 +264,7 @@
        thread-id))
 
 (defn create-message!
-  [{:keys [thread-id id content user-id created-at]}]
+  [{:keys [thread-id id content user-id created-at mentioned-user-ids]}]
   (let [; show thread for all users subscribed to thread
         add-open-transactions (map (fn [user-id]
                                      [:db/add [:user/id user-id]
@@ -272,7 +272,9 @@
                                    (get-users-subscribed-to-thread thread-id))
         ; upsert thread
         thread-data {:db/id (d/tempid :entities)
-                     :thread/id thread-id}
+                     :thread/id thread-id
+                     :thread/mentioned (map (fn [user-id] [:user/id user-id])
+                                            mentioned-user-ids)}
         ; upsert message
         msg-data {:db/id (d/tempid :entities)
                   :message/id id
