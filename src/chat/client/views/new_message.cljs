@@ -103,9 +103,7 @@
                         (fuzzy-matches? (t :name) query)))
               (map (fn [tag]
                      {:action
-                      (fn [thread-id]
-                        (dispatch! :tag-thread {:thread-id thread-id
-                                                :id (tag :id)}))
+                      (fn [thread-id])
                       :message-transform
                       (fn [text]
                         (string/replace text pattern (str "#" (tag :name) " ")))
@@ -118,35 +116,7 @@
                             (tag :name))
                           (dom/div #js {:className "extra"}
                             (:name (store/id->group (tag :group-id))))))}))))))
-
-   ; /<tag-name>  ->  adds tag to message
-   #_(fn [text thread-id]
-     (when-let [query (second (re-matches #"^/(\S{1,})" text))]
-       (let [thread-tag-ids (-> (store/id->thread thread-id)
-                                :tag-ids
-                                set)]
-         ; suggest tags
-         (->> (store/all-tags)
-              (remove (fn [t]
-                        (contains? thread-tag-ids (t :id))))
-              (filter (fn [t]
-                        (fuzzy-matches? (t :name) query)))
-              (map (fn [tag]
-                     {:action
-                      (fn [thread-id]
-                        (dispatch! :tag-thread {:thread-id thread-id
-                                                :id (tag :id)}))
-                      :message-transform
-                      (fn [text] "")
-                      :html
-                      (fn []
-                        (dom/div #js {:className "tag-match"}
-                          (dom/div #js {:className "color-block"
-                                        :style #js {:backgroundColor (helpers/tag->color tag)}})
-                          (dom/div #js {:className "name"}
-                            (tag :name))
-                          (dom/div #js {:className "extra"}
-                            (:name (store/id->group (tag :group-id))))))}))))))])
+   ])
 
 
 ; TODO: autocomplete mentions

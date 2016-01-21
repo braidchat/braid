@@ -6,7 +6,17 @@
             [chat.client.schema :as schema]
             [cljs-utils.core :refer [edn-xhr]]))
 
-(defn- extract-mentioned-ids [text]
+(defn- extract-tag-ids [text]
+  (let [mentioned-names (->> (re-seq #"(?:^|\s)#(\S+)" text)
+                             (map second))
+        name->id (reduce (fn [m [id {:keys [name]}]] (assoc m name id))
+                         {}
+                         (@store/app-state :tags))]
+    (->> mentioned-names
+         (map name->id)
+         (remove nil?))))
+
+(defn- extract-user-ids [text]
   (let [mentioned-names (->> (re-seq #"(?:^|\s)@(\S+)" text)
                              (map second))
         nick->id (reduce (fn [m [id {:keys [nickname]}]] (assoc m nickname id))
@@ -24,7 +34,8 @@
                                         :content (data :content)
                                         :thread-id (data :thread-id)
 
-                                        :mentioned-user-ids (extract-mentioned-ids (data :content))})]
+                                        :mentioned-tag-ids (extract-tag-ids (data :content))
+                                        :mentioned-user-ids (extract-user-ids (data :content))})]
       (store/add-message! message)
       (sync/chsk-send! [:chat/new-message message]))))
 
@@ -45,12 +56,6 @@
 (defmethod dispatch! :subscribe-to-tag [_ tag-id]
   (sync/chsk-send! [:user/subscribe-to-tag tag-id])
   (store/subscribe-to-tag! tag-id))
-
-(defmethod dispatch! :tag-thread [_ attr]
-  (when-let [tag-id (or (attr :id) (store/tag-id-for-name (attr :tag-name)))]
-    (sync/chsk-send! [:thread/add-tag {:thread-id (attr :thread-id)
-                                       :tag-id tag-id}])
-    (store/add-tag-to-thread! tag-id (attr :thread-id))))
 
 (defmethod dispatch! :create-group [_ group]
   (let [group (schema/make-group group)]
