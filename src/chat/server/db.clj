@@ -263,18 +263,46 @@
        (d/db *conn*)
        thread-id))
 
+(defn- get-users-subscribed-to-tag
+  [tag-id]
+  (d/q '[:find [?user-id ...]
+         :in $ ?tag-id
+         :where
+         [?tag :tag/id ?tag-id]
+         [?user :user/subscribed-tag ?tag]
+         [?user :user/id ?user-id]]
+       (d/db *conn*)
+       tag-id))
+
 (defn create-message!
-  [{:keys [thread-id id content user-id created-at mentioned-user-ids]}]
-  (let [; show thread for all users subscribed to thread
-        add-open-transactions (map (fn [user-id]
-                                     [:db/add [:user/id user-id]
-                                      :user/open-thread [:thread/id thread-id]])
-                                   (get-users-subscribed-to-thread thread-id))
-        ; upsert thread
-        thread-data {:db/id (d/tempid :entities)
+  [{:keys [thread-id id content user-id created-at
+           mentioned-user-ids mentioned-tag-ids]}]
+  (let [; upsert thread
+        thread-data {:db/id (d/tempid :entities -5)
                      :thread/id thread-id
-                     :thread/mentioned (map (fn [user-id] [:user/id user-id])
-                                            mentioned-user-ids)}
+                     ; add mentioned tag
+                     :thread/tag (map (fn [tag-id] [:tag/id tag-id])
+                                      mentioned-tag-ids)}
+        ; for users subscribed to mentioned tags, open and subscribe them to the thread
+        txs-for-tag-mentions (mapcat (fn [tag-id]
+                                       (mapcat (fn [user-id]
+                                                 [[:db/add [:user/id user-id]
+                                                   :user/subscribed-thread (d/tempid :entities -5)]
+                                                  [:db/add [:user/id user-id]
+                                                   :user/open-thread  (d/tempid :entities -5)]])
+                                               (get-users-subscribed-to-tag tag-id)))
+                                     mentioned-tag-ids)
+        ; subscribe and open thread for users mentioned
+        txs-for-user-mentions (mapcat (fn [user-id]
+                                        [[:db/add (d/tempid :entities -5) :thread/mentioned [:user/id user-id]]
+                                         [:db/add [:user/id user-id] :user/subscribed-thread  (d/tempid :entities -5)]
+                                         [:db/add [:user/id user-id] :user/open-thread  (d/tempid :entities -5)]])
+                                      mentioned-user-ids)
+        ; open thread for users already subscribed to thread
+        txs-for-tag-subscribers (map (fn [user-id]
+                                       [:db/add [:user/id user-id]
+                                        :user/open-thread (d/tempid :entities -1)])
+                                     (get-users-subscribed-to-thread thread-id))
         ; upsert message
         msg-data {:db/id (d/tempid :entities)
                   :message/id id
@@ -289,7 +317,9 @@
         {:keys [db-after tempids]} @(d/transact *conn* (concat [thread-data
                                                                 msg-data
                                                                 subscribe-data]
-                                                               add-open-transactions))]
+                                                               txs-for-tag-subscribers
+                                                               txs-for-tag-mentions
+                                                               txs-for-user-mentions))]
     (->> (d/resolve-tempid db-after tempids (msg-data :db/id))
          (d/pull db-after '[:message/id
                             :message/content
@@ -632,41 +662,6 @@
        (d/db *conn*)
        user-id))
 
-(defn- get-users-subscribed-to-tag
-  [tag-id]
-  (d/q '[:find [?user-id ...]
-         :in $ ?tag-id
-         :where
-         [?tag :tag/id ?tag-id]
-         [?user :user/subscribed-tag ?tag]
-         [?user :user/id ?user-id]]
-       (d/db *conn*)
-       tag-id))
-
-(defn thread-add-tag!
-  [thread-id tag-id]
-  (let [subscriber-transactions
-        (mapcat (fn [user-id]
-                  [[:db/add [:user/id user-id]
-                    :user/subscribed-thread [:thread/id thread-id]]
-                   [:db/add [:user/id user-id]
-                    :user/open-thread [:thread/id thread-id]]])
-                (get-users-subscribed-to-tag tag-id))]
-    ; upsert thread (should be a way to do in same transaction?)
-    (d/transact *conn* (concat [{:db/id (d/tempid :entities)
-                                 :thread/id thread-id}]))
-    ; add tag, subscribers
-    (d/transact *conn* (concat [[:db/add [:thread/id thread-id]
-                                 :thread/tag [:tag/id tag-id]]]
-                               subscriber-transactions))))
-
-(defn thread-add-mentioned!
-  [thread-id user-id]
-  ; TODO: upsert thread if needed
-  @(d/transact *conn*
-    [[:db/add [:thread/id thread-id] :thread/mentioned [:user/id user-id]]
-     [:db/add [:user/id user-id] :user/subscribed-thread [:thread/id thread-id]]
-     [:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
 (defn get-thread-tags
   "Only used for testing"

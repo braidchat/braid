@@ -339,49 +339,9 @@
       (is (= #{tag-1 tag-2 tag-3} (db/fetch-tags-for-user (user-2 :id))))
       (is (= #{tag-2 tag-3} (db/fetch-tags-for-user (user-3 :id)))))))
 
-(deftest can-add-tags-to-thread
-  (testing "can add tags to thread"
-    (let [user (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-          msg (db/create-message! {:id (db/uuid)
-                                   :user-id (user :id)
-                                   :thread-id (db/uuid)
-                                   :created-at (java.util.Date.)
-                                   :content "Hello?"})
-          group (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
-          tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
+; TODO can add tag to thread (via message)
 
-      (testing "thread-add-tag!"
-        (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
-        (db/thread-add-tag! (msg :thread-id) (tag-2 :id)))
-
-      (testing "get-thread-tags"
-        (let [tags (db/get-thread-tags (msg :thread-id))]
-          (testing "returns assigned tags"
-            (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))))
-
-(deftest adding-tag-can-create-thread
-  (testing "can create thread via tag"
-    (let [user (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-          group (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-          tag (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
-          thread-id (db/uuid)]
-
-      (testing "thread-add-tag!"
-        (db/thread-add-tag! thread-id (tag :id)))
-
-      (testing "get-thread-tags"
-        (let [tags (db/get-thread-tags thread-id)]
-          (testing "returns assigned tags"
-            (is (= (set tags) #{(tag :id)}))))))))
+; TODO can create thread and tag immediately (via message)
 
 (deftest tag-thread-user-subscribe
   (testing "given a user subscribed to a tag"
