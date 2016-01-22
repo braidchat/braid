@@ -661,19 +661,6 @@
        (d/db *conn*)
        user-id))
 
-
-(defn get-thread-tags
-  "Only used for testing"
-  [thread-id]
-  (d/q '[:find [?tag-id ...]
-         :in $ ?thread-id
-         :where
-         [?thread :thread/id ?thread-id]
-         [?thread :thread/tag ?tag]
-         [?tag :tag/id ?tag-id]]
-       (d/db *conn*)
-       thread-id))
-
 (defn get-group-tags
   [group-id]
   (->> (d/q '[:find (pull ?t [:tag/id
