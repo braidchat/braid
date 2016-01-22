@@ -45,3 +45,20 @@ lein lesscss auto
 
 `lein with-profile test quickie "chat.*"`
 
+
+
+# permgen issues?
+
+if you're having the following error:
+
+`java.lang.OutOfMemoryError: PermGen space`
+
+try:
+
+1: add the following to project.clj or profiles
+`:jvm-opts ["-XX:MaxPermSize=128m" "-XX:+UseConcMarkSweepGC" "-XX:+CMSClassUnloadingEnabled"]`
+
+2: if you have lots of plugins in your lein user profile (`~/.lein/profiles.clj`), remove them
+
+3: switch to java 1.8
+
