@@ -49,6 +49,7 @@
 
     (db/user-add-to-group! (user-1 :id) (group-1 :id))
     (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
+    (db/user-subscribe-to-tag! (user-1 :id) (tag-3 :id))
 
     (db/user-add-to-group! (user-2 :id) (group-2 :id))
     (db/user-subscribe-to-tag! (user-2 :id) (tag-2 :id))
@@ -59,27 +60,26 @@
                          :created-at (java.util.Date.)})
     (db/create-message! {:thread-id thread-1-id :id (db/uuid)
                          :content "Hey world" :user-id (user-2 :id)
-                         :created-at (java.util.Date.)})
-    (db/thread-add-tag! thread-1-id (tag-1 :id))
+                         :created-at (java.util.Date.)
+                         :mentioned-tag-ids [(tag-1 :id)]})
 
     ; this thread should be visible to user 1
     (db/create-message! {:thread-id thread-2-id :id (db/uuid)
                          :content "Goodbye World" :user-id (user-2 :id)
-                         :created-at (java.util.Date.)})
-    (db/thread-add-tag! thread-2-id (tag-1 :id))
-    (db/thread-add-tag! thread-2-id (tag-3 :id))
+                         :created-at (java.util.Date.)
+                         :mentioned-tag-ids [(tag-1 :id) (tag-3 :id)]})
 
     ; this thread should not be visible to user 1
     (db/create-message! {:thread-id thread-3-id :id (db/uuid)
                          :content "Hello world" :user-id (user-2 :id)
-                         :created-at (java.util.Date.)})
-    (db/thread-add-tag! thread-3-id (tag-2 :id))
+                         :created-at (java.util.Date.)
+                         :mentioned-tag-ids [(tag-2 :id)]})
 
     ; this thread should not be visible to user 1
     (db/create-message! {:thread-id thread-4-id :id (db/uuid)
                          :content "Something else" :user-id (user-2 :id)
-                         :created-at (java.util.Date.)})
-    (db/thread-add-tag! thread-4-id (tag-2 :id))
+                         :created-at (java.util.Date.)
+                         :mentioned-tag-ids [(tag-2 :id)]})
 
     (testing "user can search by text and see threads"
       (is (= #{thread-1-id}
