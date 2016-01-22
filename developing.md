@@ -1,5 +1,11 @@
 ## starting
 
+The first step will be to get a datomic db running.  You can do so by following
+the steps at [http://docs.datomic.com/getting-started.html]().  For testing
+purposes, you may prefer to use Datomic Free, in which case you should change
+the dependency in `project.clj` from `datomic-pro` to `datomic-free` and use the
+appropriate db URI (e.g. `"datomic:free://localhost:4334/chat"`).
+
 Create a `profiles.clj` that looks something like
 ```clojure
 {:chat
@@ -19,7 +25,6 @@ Create a `profiles.clj` that looks something like
    you can probably get by with only db-url and hmac-secret)
 
 ```bash
-# start datomic db elsewhere
 # then:
 lein with-profile +chat repl
 ```
