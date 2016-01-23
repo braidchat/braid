@@ -89,7 +89,10 @@
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
-  (transact! [:threads (message :thread-id) :messages] #(conj % message)))
+  (transact! [:threads (message :thread-id) :messages] #(conj % message))
+
+  (transact! [:threads (message :thread-id) :tags] #(conj % (message :mentioned-tag-ids)))
+  (transact! [:threads (message :thread-id) :mentioned-ids] #(conj % (message :mentioned-user-ids))))
 
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here
@@ -127,13 +130,6 @@
 
 (defn add-tag! [tag]
   (transact! [:tags (tag :id)] (constantly tag)))
-
-(defn add-tag-to-thread! [tag-id thread-id]
-  (maybe-create-thread! thread-id)
-  (transact! [:threads thread-id :tag-ids] #(set (conj % tag-id))))
-
-(defn add-mention-to-thread! [user-id thread-id]
-  (transact! [:threads thread-id :mentioned-ids] #(set (conj % user-id))))
 
 (defn all-tags []
   (vals (get-in @app-state [:tags])))

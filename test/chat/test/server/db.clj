@@ -127,42 +127,6 @@
         (is (= #{data} (db/get-groups-for-user (user :id))))
         (is (= #{user} (db/get-users-in-group (group :id))))))))
 
-(deftest create-message-new
-  (let [user-1 (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar "http://www.foobar.com/1.jpg"})
-        thread-id (db/uuid)]
-
-    (testing "create-message w/ new thread-id"
-      (let [message-data {:id (db/uuid)
-                          :user-id (user-1 :id)
-                          :thread-id thread-id
-                          :created-at (java.util.Date.)
-                          :content "Hello?"}
-            message (db/create-message! message-data)]
-        (testing "returns message"
-          (is (= message-data message)))
-        (testing "user has thread open"
-          (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
-        (testing "user has thread subscribed"
-          (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))
-
-    (testing "create-message w/ existing thread-id"
-      (let [message-2-data {:id (db/uuid)
-                            :user-id (user-1 :id)
-                            :thread-id thread-id
-                            :created-at (java.util.Date.)
-                            :content "Goodbye."}
-            message-2 (db/create-message! message-2-data)]
-        (testing "returns message"
-          (is (= message-2-data message-2)))
-        (testing "user has thread open"
-          (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
-        (testing "user has thread subscribed"
-          (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))))
-
-
 (deftest fetch-messages-test
   (let [user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
@@ -215,206 +179,6 @@
       (db/user-hide-thread! (user-1 :id) (message-2 :thread-id))
       (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id)))))))
 
-(deftest new-message-opens-for-other-user
-  (let [user-1 (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-        user-2 (db/create-user! {:id (db/uuid)
-                                 :email "quux@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-        thread-id (db/uuid)
-        message-1 (db/create-message! {:id (db/uuid)
-                                       :user-id (user-1 :id)
-                                       :thread-id thread-id
-                                       :created-at (java.util.Date.)
-                                       :content "Hello?"})
-        message-2 (db/create-message! {:id (db/uuid)
-                                       :user-id (user-2 :id)
-                                       :thread-id thread-id
-                                       :created-at (java.util.Date.)
-                                       :content "Hello?"})]
-    (testing "both users have open and are subscribed"
-      (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id))
-      (is (contains? (set (db/get-open-thread-ids-for-user (user-2 :id))) thread-id))
-      (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id))
-      (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-2 :id))) thread-id)))
-    (testing "user 2 can hide"
-      (db/user-hide-thread! (user-2 :id) thread-id)
-      (is (not (contains? (set (db/get-open-thread-ids-for-user (user-2 :id))) thread-id))))
-    (testing "if new message by other user, user who hid thread has thread opened"
-      (db/create-message! {:id (db/uuid)
-                           :user-id (user-1 :id)
-                           :thread-id thread-id
-                           :created-at (java.util.Date.)
-                           :content "Hello?"})
-      (is (contains? (set (db/get-open-thread-ids-for-user (user-2 :id))) thread-id)))))
-
-(deftest tags
-  (testing "can create tag"
-    (let [group (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-          tag-data {:id (db/uuid)
-                    :name "acme"
-                    :group-id (group :id)}]
-      (testing "create-tag!"
-        (let [tag (db/create-tag! tag-data)]
-          (testing "returns tag"
-            (is (= tag (assoc tag-data :group-name "Lean Pixel")))))))))
-
-(deftest user-can-subscribe-to-tags
-  (let [user (db/create-user! {:id (db/uuid)
-                               :email "foo@bar.com"
-                               :password "foobar"
-                               :avatar ""})
-        group (db/create-group! {:id (db/uuid)
-                                 :name "Lean Pixel"})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
-    (db/user-add-to-group! (user :id) (group :id))
-    (testing "user can subscribe to tags"
-      (testing "user-subscribe-to-tag!"
-        (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
-        (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
-      (testing "get-user-subscribed-tags"
-        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
-          (testing "returns subscribed tags"
-            (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))
-    (testing "user can unsubscribe from tags"
-      (testing "user-unsubscribe-from-tag!"
-        (db/user-unsubscribe-from-tag! (user :id) (tag-1 :id))
-        (db/user-unsubscribe-from-tag! (user :id) (tag-2 :id)))
-      (testing "is unsubscribed"
-        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
-          (is (= (set tags) #{})))))))
-
-(deftest user-can-only-subscribe-to-tags-in-group
-  (let [user (db/create-user! {:id (db/uuid)
-                               :email "foo@bar.com"
-                               :password "foobar"
-                               :avatar ""})
-        group-1 (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-        group-2 (db/create-group! {:id (db/uuid)
-                                   :name "Penyo Pal"})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})]
-    (db/user-add-to-group! (user :id) (group-1 :id))
-    (testing "user can subscribe to tags"
-      (testing "user-subscribe-to-tag!"
-        (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
-        (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
-      (testing "get-user-subscribed-tags"
-        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
-          (testing "returns subscribed tags"
-            (is (= (set tags) #{(tag-1 :id)}))))))))
-
-(deftest user-can-only-see-tags-in-group
-  (let [user-1 (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-        user-2 (db/create-user! {:id (db/uuid)
-                                 :email "quux@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-        user-3 (db/create-user! {:id (db/uuid)
-                                 :email "qaax@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-        group-1 (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-        group-2 (db/create-group! {:id (db/uuid)
-                                   :name "Penyo Pal"})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
-        tag-3 (db/create-tag! {:id (db/uuid) :name "acme3" :group-id (group-2 :id)})]
-    (db/user-add-to-group! (user-1 :id) (group-1 :id))
-    (db/user-add-to-group! (user-2 :id) (group-1 :id))
-    (db/user-add-to-group! (user-2 :id) (group-2 :id))
-    (db/user-add-to-group! (user-3 :id) (group-2 :id))
-    (testing "user can only see tags in their group(s)"
-      (is (= #{tag-1} (db/fetch-tags-for-user (user-1 :id))))
-      (is (= #{tag-1 tag-2 tag-3} (db/fetch-tags-for-user (user-2 :id))))
-      (is (= #{tag-2 tag-3} (db/fetch-tags-for-user (user-3 :id)))))))
-
-(deftest can-add-tags-to-thread
-  (testing "can add tags to thread"
-    (let [user (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-          msg (db/create-message! {:id (db/uuid)
-                                   :user-id (user :id)
-                                   :thread-id (db/uuid)
-                                   :created-at (java.util.Date.)
-                                   :content "Hello?"})
-          group (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
-          tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
-
-      (testing "thread-add-tag!"
-        (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
-        (db/thread-add-tag! (msg :thread-id) (tag-2 :id)))
-
-      (testing "get-thread-tags"
-        (let [tags (db/get-thread-tags (msg :thread-id))]
-          (testing "returns assigned tags"
-            (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))))
-
-(deftest adding-tag-can-create-thread
-  (testing "can create thread via tag"
-    (let [user (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-          group (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-          tag (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
-          thread-id (db/uuid)]
-
-      (testing "thread-add-tag!"
-        (db/thread-add-tag! thread-id (tag :id)))
-
-      (testing "get-thread-tags"
-        (let [tags (db/get-thread-tags thread-id)]
-          (testing "returns assigned tags"
-            (is (= (set tags) #{(tag :id)}))))))))
-
-(deftest tag-thread-user-subscribe
-  (testing "given a user subscribed to a tag"
-    (let [group (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
-          user-1 (db/create-user! {:id (db/uuid)
-                                   :email "foo@bar.com"
-                                   :password "foobar"
-                                   :avatar ""})]
-      (db/user-add-to-group! (user-1 :id) (group :id))
-      (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
-
-      (testing "when a thread is tagged with that tag"
-        (let [user-2 (db/create-user! {:id (db/uuid)
-                                       :email "bar@baz.com"
-                                       :password "foobar"
-                                       :avatar ""})
-              msg (db/create-message! {:id (db/uuid)
-                                       :user-id (user-2 :id)
-                                       :thread-id (db/uuid)
-                                       :created-at (java.util.Date.)
-                                       :content "Hello?"})]
-          (db/user-add-to-group! (user-2 :id) (group :id))
-          (db/thread-add-tag! (msg :thread-id) (tag-1 :id))
-          (testing "then the user is subscribed to that thread"
-            (let [user-threads (db/get-subscribed-thread-ids-for-user (user-1 :id))]
-              (is (contains? (set user-threads) (msg :thread-id))))
-            (let [users (db/get-users-subscribed-to-thread (msg :thread-id))]
-              (is (contains? (set users) (user-1 :id)))))
-          (testing "then the user has that thread open"
-            (let [user-threads (db/get-open-thread-ids-for-user (user-1 :id))]
-              (is (contains? (set user-threads) (msg :thread-id))))))))))
 
 (deftest user-thread-visibility
   (let [user-1 (db/create-user! {:id (db/uuid)
@@ -444,17 +208,17 @@
       (is (db/user-can-see-thread? (user-2 :id) thread-1-id))
       (is (db/user-can-see-thread? (user-3 :id) thread-1-id)))
 
-    (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
-                         :user-id (user-1 :id) :created-at (java.util.Date.)})
-    (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
-                         :user-id (user-2 :id) :created-at (java.util.Date.)})
-
     (db/user-add-to-group! (user-2 :id) (group-1 :id))
     (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
-    (db/thread-add-tag! thread-1-id (tag-1 :id))
-    (db/thread-add-tag! thread-2-id (tag-2 :id))
-
     (db/user-add-to-group! (user-3 :id) (group-2 :id))
+    (db/user-subscribe-to-group-tags! (user-3 :id) (group-2 :id))
+    (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
+                         :user-id (user-1 :id) :created-at (java.util.Date.)
+                         :mentioned-tag-ids [(tag-1 :id)] })
+    (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
+                         :user-id (user-2 :id) :created-at (java.util.Date.)
+                         :mentioned-tag-ids [(tag-2 :id)] })
+
 
     (testing "user 1 can see thread 1 because they created it"
       (is (db/user-can-see-thread? (user-1 :id) thread-1-id)))
@@ -515,7 +279,7 @@
            (db/get-user-visible-tag-ids (user :id))
            (set (map :id group-tags))))))
 
-(deftest tagging-thread-with-disjoint-groups
+#_(deftest tagging-thread-with-disjoint-groups
   (let [user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
@@ -540,9 +304,8 @@
     (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
 
     (db/create-message! {:thread-id thread-id :id (db/uuid) :content "zzz"
-                         :user-id (user-1 :id) :created-at (java.util.Date.)})
-    (db/thread-add-tag! thread-id (tag-1 :id))
-    (db/thread-add-tag! thread-id (tag-2 :id))
+                         :user-id (user-1 :id) :created-at (java.util.Date.)
+                         :mentioned-tag-ids [(tag-1 :id) (tag-2 :id)]})
 
     (is (db/user-can-see-thread? (user-1 :id) thread-id))
     (is (db/user-can-see-thread? (user-2 :id) thread-id))
@@ -555,32 +318,3 @@
       (is (= #{(tag-1 :id)}
              (set (:tag-ids (first u2-threads))))))))
 
-(deftest mentioning-users-in-threads
-  (let [user-1 (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-        user-2 (db/create-user! {:id (db/uuid)
-                                 :email "bar@foo.com"
-                                 :password "foobar"
-                                 :avatar ""}) ]
-
-    (db/set-nickname! (user-1 :id) "foo")
-    (db/set-nickname! (user-2 :id) "bar")
-
-    (testing "Can mention a user to open the thread for them"
-      (let [thread-id (db/uuid)]
-        (db/create-message! {:thread-id thread-id :id (db/uuid) :content  "hi @bar"
-                             :user-id (user-1 :id) :created-at (java.util.Date.)})
-        (is (not (db/user-can-see-thread? (user-2 :id) thread-id)))
-        (is (empty? (db/get-open-thread-ids-for-user (user-2 :id))))
-        (db/thread-add-mentioned! thread-id (user-2 :id))
-        (is (db/user-can-see-thread? (user-2 :id) thread-id))
-        (is (= [thread-id] (db/get-open-thread-ids-for-user (user-2 :id))))
-
-        (testing "and the thread has a collection of mentions"
-          (is  (= [(user-2 :id)]
-                  (-> (db/get-thread thread-id) :mentioned-ids)
-                  (-> (db/get-open-threads-for-user (user-2 :id))
-                      first
-                      :mentioned-ids))))))))
