@@ -24,6 +24,9 @@ Create a `profiles.clj` that looks something like
 (quick note until we clean this up:
    you can probably get by with only db-url and hmac-secret)
 
+Start Redis running (used for cookies & invite tokens).  Braid currently assumes
+Redis is running on localhost on port 6379.
+
 ```bash
 # then:
 lein with-profile +chat repl
