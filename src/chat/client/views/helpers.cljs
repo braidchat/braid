@@ -25,13 +25,13 @@
    {:pattern #"@(\S*)"
     :replace (fn [match]
                (dom/span #js {:className "user-mention"
-                              :style #js {:background-color (tag->color (store/nickname->user match))}}
+                              :style #js {:backgroundColor (tag->color (store/nickname->user match))}}
                  "@" match))}
    :tags
    {:pattern #"#(\S*)"
     :replace (fn [match]
                (dom/span #js {:className "tag-mention"
-                              :style #js {:background-color (tag->color (store/name->tag match))}}
+                              :style #js {:backgroundColor (tag->color (store/name->tag match))}}
                  "#" match))}
    :emoji-shortcodes
    {:pattern #"(:\S*:)"
