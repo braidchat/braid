@@ -24,15 +24,19 @@
    :users
    {:pattern #"@(\S*)"
     :replace (fn [match]
-               (dom/span #js {:className "user-mention"
-                              :style #js {:backgroundColor (tag->color (store/nickname->user match))}}
-                 "@" match))}
+               (if-let [user (store/nickname->user match)]
+                 (dom/span #js {:className "user-mention"
+                                :style #js {:backgroundColor (tag->color user)}}
+                   "@" match)
+                 (dom/span nil "@" match)))}
    :tags
    {:pattern #"#(\S*)"
     :replace (fn [match]
-               (dom/span #js {:className "tag-mention"
-                              :style #js {:backgroundColor (tag->color (store/name->tag match))}}
-                 "#" match))}
+               (if-let [tag (store/name->tag match)]
+                 (dom/span #js {:className "tag-mention"
+                                :style #js {:backgroundColor (tag->color tag)}}
+                   "#" match)
+                 (dom/span nil "#" match)))}
    :emoji-shortcodes
    {:pattern #"(:\S*:)"
     :replace (fn [match]
