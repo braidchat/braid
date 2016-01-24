@@ -7,7 +7,6 @@
             [ring.middleware.edn :refer [wrap-edn-params]]
             [clojure.string :as string]
             [clojure.tools.nrepl.server :as nrepl]
-            [taoensso.carmine.ring :as carmine]
             [chat.server.sync :as sync :refer [sync-routes]]
             [environ.core :refer [env]]
             [chat.server.util :refer [valid-nickname?]]
@@ -74,9 +73,21 @@
 (defroutes resource-routes
   (resources "/"))
 
-(def ^:dynamic *redis-conf* {:pool {}
-                             :spec {:host "127.0.0.1"
-                                    :port 6379}})
+(if (= (env :environment) "prod")
+  (do
+    (require 'taoensso.carmine.ring)
+    (def ^:dynamic *redis-conf* {:pool {}
+                                 :spec {:host "127.0.0.1"
+                                        :port 6379}})
+    (let [carmine-store (ns-resolve 'taoensso.carmine.ring 'carmine-store)]
+      (def session-store
+        (carmine-store '*redis-conf* {:expiration-secs (* 60 60 24 7)
+                                      :key-prefix "braid"}))))
+  (do
+    (require 'ring.middleware.session.memory)
+    (let [memory-store (ns-resolve 'ring.middleware.session.memory 'memory-store)]
+      (def session-store
+        (memory-store)))))
 
 (def app
   (->
@@ -85,18 +96,14 @@
         (routes sync-routes api-routes)
         (-> api-defaults
             (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
-            (assoc-in [:session :store] (carmine/carmine-store *redis-conf*
-                                                               {:expiration-secs (* 60 60 24 7)
-                                                                :key-prefix "lpchat"}))))
+            (assoc-in [:session :store] session-store)))
       (wrap-defaults
         (routes
           resource-routes
           site-routes)
         (-> site-defaults ; ssl stuff will be handled by nginx
             (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
-            (assoc-in [:session :store] (carmine/carmine-store *redis-conf*
-                                                               {:expiration-secs (* 60 60 24 7)
-                                                                :key-prefix "lpchat"}))
+            (assoc-in [:session :store] session-store)
             (assoc-in [:security :anti-forgery]
               {:read-token (fn [req] (-> req :params :csrf-token))}))))
     wrap-edn-params))

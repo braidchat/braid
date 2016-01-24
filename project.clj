@@ -5,7 +5,6 @@
                  [org.clojure/clojure "1.7.0"]
                  [javax.servlet/servlet-api "2.5"]
                  [commons-codec "1.10"]
-                 [org.postgresql/postgresql "9.3-1103-jdbc4"]
                  [http-kit "2.1.19"]
                  [ring/ring-defaults "0.1.5"]
                  [fogus/ring-edn "0.3.0"]
@@ -14,11 +13,7 @@
                  [com.taoensso/sente "1.5.0"]
                  [com.taoensso/timbre "4.0.2"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [com.datomic/datomic-pro "0.9.5201" :exclusions [joda-time]]
-                 [com.taoensso/carmine "2.11.1"]
-                 [org.clojure/tools.nrepl "0.2.10"]
                  [crypto-password "0.1.3"]
-                 [clj-aws-s3 "0.3.10" :exclusions [joda-time]]
                  [joda-time "2.8.2"]
                  [instaparse "1.4.1"]
                  ;client
@@ -31,13 +26,8 @@
                  [com.taoensso/sente "1.5.0"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [org.clojars.leanpixel/om-fields "1.8.6"]
-                 [com.andrewmcveigh/cljs-time "0.4.0"]
-                 ; dev
-                 [figwheel-sidecar "0.4.0"]
-                 ]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]]
 
-  :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
-                                   :creds :gpg}}
   :main chat.server.handler
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.0.6"]
@@ -62,6 +52,14 @@
 
   :min-lein-version "2.5.0"
 
-  :profiles {:uberjar {:aot :all
-                       :hooks [leiningen.cljsbuild
-                               leiningen.hooks.lesscss]}})
+  :profiles {:dev {:dependencies [[com.datomic/datomic-free "0.9.5201" :exclusions [joda-time]]
+                                  [figwheel-sidecar "0.4.0"]]}
+             :prod {:dependencies [[com.datomic/datomic-pro "0.9.5201" :exclusions [joda-time]]
+                                   [org.postgresql/postgresql "9.3-1103-jdbc4"]
+                                   [clj-aws-s3 "0.3.10" :exclusions [joda-time]]
+                                   [com.taoensso/carmine "2.11.1"]
+                                   [org.clojure/tools.nrepl "0.2.10"]]}
+             :uberjar [:prod
+                       {:aot :all
+                        :hooks [leiningen.cljsbuild
+                                leiningen.hooks.lesscss]}]})
