@@ -97,8 +97,8 @@
   (maybe-create-thread! (message :thread-id))
   (transact! [:threads (message :thread-id) :messages] #(conj % message))
 
-  (transact! [:threads (message :thread-id) :tags] #(conj % (message :mentioned-tag-ids)))
-  (transact! [:threads (message :thread-id) :mentioned-ids] #(conj % (message :mentioned-user-ids))))
+  (transact! [:threads (message :thread-id) :tags] #(apply conj % (message :mentioned-tag-ids)))
+  (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj % (message :mentioned-user-ids))))
 
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here
