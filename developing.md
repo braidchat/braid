@@ -1,72 +1,175 @@
-## starting
+# Dev
 
-The first step will be to get a datomic db running.  You can do so by following
-the steps at [http://docs.datomic.com/getting-started.html]().  For testing
-purposes, you may prefer to use Datomic Free, in which case you should change
-the dependency in `project.clj` from `datomic-pro` to `datomic-free` and use the
-appropriate db URI (e.g. `"datomic:free://localhost:4334/chat"`).
+To get Braid running locally, you will need to have 4 terminal sessions open:
+1 - Datomic transactor
+2 - Braid REPL and server
+3 - Figwheel (JS + CSS compile and Hot Reload)
+4 - Less CSS Compiler
 
-Create a `profiles.clj` that looks something like
+## datomic
+
+Download Datomic Free 0.9.5201 from [https://my.datomic.com/downloads/free]()
+
+Unzip the download
+
+In a terminal session, cd into the directory:
+```bash
+cd datomic-free-0.9.5201
+```
+
+Run the transactor:
+```bash
+bin/transactor config/samples/free-transactor-template.properties
+```
+
+Datomic Free runs in memory, so if you quit the transactor process, all data will be lost (which is OK in dev). If you want to avoid this, you can use Datomic Pro (see notes below).
+
+## braid server
+
+In a seperate terminal session:
+
+Clone the braid repo (you may want to change the URL to your fork):
+```bash
+git clone git@github.com:braidchat/braid.git
+```
+
+then:
+```bash
+lein repl
+```
+
+Inside the REPL:
+
+Set up the database schema (first time only):
+```clojure
+(chat.server.db/init!)
+```
+
+Seed some data (first time only):
+```clojure
+(chat.server.seed/seed!)
+```
+
+Run the web server:
+```clojure
+(chat.server.handler/start-server! 5555)
+```
+
+Run the websocket server:
+```clojure
+(chat.server.sync/start-router!)
+```
+
+## Figwheel - JS and CSS compiling and hot-reload
+
+In a seperate terminal session:
+
+```bash
+lein run -m clojure.main script/figwheel.clj
+```
+
+## LessCSS
+
+In a seperate terminal session:
+
+```bash
+lein lesscss auto
+```
+
+## ...and you're good!
+
+Open your browser to: `http://localhost:5555`
+
+Login with `foo@example.com` `foo`
+
+You should see a few messages and be able to reply.
+
+If you edit a cljs file in the repo, it should auto-update the page in the browser (no need for refreshing).
+
+# Issues and Extras
+
+## better clojurescript repl
+
+Install rlwrap
+```bash
+brew install rlwrap
+```
+
+Then, to start figwheel, use:
+```bash
+rlwrap lein run -m clojure.main script/figwheel.clj
+```
+
+## running tests
+
+`lein test`
+
+or if you have quickie:
+`lein with-profile test quickie "chat.*"`
+
+## permgen issues?
+
+if you're having the error: `java.lang.OutOfMemoryError: PermGen space`
+
+try:
+
+1: add the following to project.clj or profiles.clj
+`:jvm-opts ["-XX:MaxPermSize=128m" "-XX:+UseConcMarkSweepGC" "-XX:+CMSClassUnloadingEnabled"]`
+
+2: if you have lots of plugins in your lein :user profile (`~/.lein/profiles.clj`), remove them
+
+3: switch to java 1.8
+
+## Using Datomic Pro
+
+To run Datomic Pro locally, you will need to:
+  - sign up for an account with Datomic
+  - download the pro version
+  - unzip and run the transactor similarly as with the free version (but different template file)
+  - add the following to the :chat lein profile (in your profiles.clj):
+
+```clojure
+  {:chat
+    {:env {:db-url "datomic:dev://localhost:4333/braid"}}
+     :dependencies [[com.datomic/datomic-pro "0.9.5201" :exclusions [joda-time]]]
+     :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
+                                      :creds :gpg
+                                      :username "USERNAME-HERE"
+                                      :password "PASSWORD-HERE"}}}}
+```
+
+Henceforth, you will need to run lein with: `lein with-profile +chat repl`
+
+
+## Other Profile Options
+
+In the project folder, create a profil
 ```clojure
 {:chat
- {:env {:rafal-password "some test password"
-        :james-password "some test password"
+ {:env {
+        ; for invite emails:
         :mailgun-domain "braid.mysite.com"
         :mailgun-password "my_mailgun_key"
         :site-url "http://localhost:5555"
         :hmac-secret "foobar"
+        ; for image uploads
         :aws-domain "braid.mysite.com"
         :aws-access-key "my_aws_key"
-        :aws-secret-key "my_aws_secrete"
-        :db-url "datomic:free://localhost:4334/chat-dev"
+        :aws-secret-key "my_aws_secret"
         }}}
 ```
-(quick note until we clean this up:
-   you can probably get by with only db-url and hmac-secret)
+
+## Getting Started w/ Clojure
+
+If you don't have leiningen installed, then:
+
+On Mac:
+  Install brew by following the insturctions at: [http://brew.sh/]()
+  Then: `brew install leiningen`
+
+For other platforms, see: [https://github.com/technomancy/leiningen/wiki/Packaging]()
+
+## Running in :prod
 
 Start Redis running (used for cookies & invite tokens).  Braid currently assumes
 Redis is running on localhost on port 6379.
-
-```bash
-# then:
-lein with-profile +chat repl
-```
-
-```clojure
-(chat.server.db/init!) ; first time only
-
-(chat.server.seed/seed!) ; optional
-
-(chat.server.handler/start-server! 5555)
-(chat.server.sync/start-router!)
-```
-
-# compiling js + figwheel
-
-rlwrap lein run -m clojure.main script/figwheel.clj
-
-# compiling css
-
-lein lesscss auto
-
-# running tests
-
-`lein with-profile test quickie "chat.*"`
-
-
-
-# permgen issues?
-
-if you're having the following error:
-
-`java.lang.OutOfMemoryError: PermGen space`
-
-try:
-
-1: add the following to project.clj or profiles
-`:jvm-opts ["-XX:MaxPermSize=128m" "-XX:+UseConcMarkSweepGC" "-XX:+CMSClassUnloadingEnabled"]`
-
-2: if you have lots of plugins in your lein user profile (`~/.lein/profiles.clj`), remove them
-
-3: switch to java 1.8
-
