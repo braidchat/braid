@@ -74,19 +74,20 @@
   (resources "/"))
 
 (if (= (env :environment) "prod")
-  (eval `(do
-           (require '[taoensso.carmine.ring :as carmine])
-
-           (def ^:dynamic *redis-conf* {:pool {}
-                                        :spec {:host "127.0.0.1"
-                                               :port 6379}})
-           (def session-store
-             (carmine/carmine-store *redis-conf*
-                                    {:expiration-secs (* 60 60 24 7)
-                                     :key-prefix "braid"}))))
   (do
-    (require '[ring.middleware.session.memory])
-    (def session-store (ring.middleware.session.memory/memory-store))))
+    (require 'taoensso.carmine.ring)
+    (def ^:dynamic *redis-conf* {:pool {}
+                                 :spec {:host "127.0.0.1"
+                                        :port 6379}})
+    (let [carmine-store (ns-resolve 'taoensso.carmine.ring 'carmine-store)]
+      (def session-store
+        (carmine-store '*redis-conf* {:expiration-secs (* 60 60 24 7)
+                                      :key-prefix "braid"}))))
+  (do
+    (require 'ring.middleware.session.memory)
+    (let [memory-store (ns-resolve 'ring.middleware.session.memory 'memory-store)]
+      (def session-store
+        (memory-store)))))
 
 (def app
   (->
