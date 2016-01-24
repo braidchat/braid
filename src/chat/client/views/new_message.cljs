@@ -19,7 +19,7 @@
     (not= -1 (.indexOf (normalize s) (normalize m)))))
 
 (defn simple-matches?
-  [s m]
+  [m s]
   (re-find (re-pattern m) s))
 
 
