@@ -4,7 +4,8 @@
             [cljs-utils.core :refer [flip]]
             [cljs-time.format :as f]
             [cljs-time.core :as t]
-            [chat.client.emoji :as emoji]))
+            [chat.client.emoji :as emoji]
+            [chat.client.store :as store]))
 
 (defn tag->color [tag]
   ; normalized is approximately evenly distributed between 0 and 1
@@ -15,7 +16,6 @@
                        (/ 4096))]
     (str "hsl(" (* 360 normalized) ",70%,35%)")))
 
-
 (def replacements
   {:urls
    {:pattern #"(http(?:s)?://\S+(?:\w|\d|/))"
@@ -24,11 +24,15 @@
    :users
    {:pattern #"@(\S*)"
     :replace (fn [match]
-               (dom/span #js {:className "user-mention"} "@" match)) }
+               (dom/span #js {:className "user-mention"
+                              :style #js {:background-color (tag->color (store/nickname->user match))}}
+                 "@" match))}
    :tags
    {:pattern #"#(\S*)"
     :replace (fn [match]
-               (dom/span #js {:className "tag-mention"} "#" match))}
+               (dom/span #js {:className "tag-mention"
+                              :style #js {:background-color (tag->color (store/name->tag match))}}
+                 "#" match))}
    :emoji-shortcodes
    {:pattern #"(:\S*:)"
     :replace (fn [match]
