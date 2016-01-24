@@ -51,7 +51,7 @@
   [
    ; ... :emoji  -> autocomplete emoji
    (fn [text thread-id]
-     (let [pattern #"\B:(\S{3,})$"]
+     (let [pattern #"\B:(\S{1,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
               (filter (fn [[k v]]
@@ -73,7 +73,7 @@
 
    ; ... @<user>  -> autocompletes user name
    (fn [text thread-id]
-     (let [pattern #"\B@(\S{1,})$"]
+     (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> (store/all-users)
               (filter (fn [u]
@@ -96,7 +96,7 @@
 
    ; ... #<tag>   -> autocompletes tag
    (fn [text thread-id]
-     (let [pattern #"\B#(\S{1,})$"]
+     (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> (store/all-tags)
               (filter (fn [t]
