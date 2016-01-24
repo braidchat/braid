@@ -86,6 +86,8 @@ You should see a few messages and be able to reply.
 
 If you edit a cljs file in the repo, it should auto-update the page in the browser (no need for refreshing).
 
+Note: currently in dev mode (the default profile), you cannot invite users or upload avatars. We're working on it.
+
 # Issues and Extras
 
 ## better clojurescript repl
