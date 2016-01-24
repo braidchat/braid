@@ -74,6 +74,12 @@
 (defn all-users []
   (vals (get-in @app-state [:users])))
 
+(defn nickname->user [nickname]
+  (->> (get-in @app-state [:users])
+       vals
+       (filter (fn [u] (= nickname (u :nickname))))
+       first))
+
 ; threads and messages
 
 (defn set-open-threads! [threads]
@@ -137,14 +143,11 @@
 (defn tags-in-group [group-id]
   (filter #(= group-id (% :group-id)) (vals (@app-state :tags))))
 
-(defn tag-id-for-name
-  "returns id for tag with name tag-name if exists, otherwise nil"
-  [tag-name]
-  (-> (@app-state :tags)
+(defn name->tag [tag-name]
+  (->> (@app-state :tags)
       vals
-      (->> (filter (fn [t] (= tag-name (t :name)))))
-      first
-      (get :id)))
+      (filter (fn [t] (= tag-name (t :name))))
+      first))
 
 (defn get-ambiguous-tags
   "Get a set of all ambiguous tag names"
