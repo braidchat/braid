@@ -50,16 +50,28 @@
                  match))}
    })
 
+(defn re-replace
+  [re s replace-fn]
+  (if-let [match (second (re-find re s))]
+    ; TODO: recurse, incease the rest has more matches?
+    ; using Javascript split beacuse we don't want the match to be in the last
+    ; component
+    (let [[pre _ post] (seq (.split s re 3))]
+      (if (and (or (string/blank? pre) (re-matches #".*\s$" pre))
+            (or (string/blank? post) (re-matches #"^\s.*" post)))
+      ; XXX: find a way to use return a seq & use mapcat instead of this hack
+      (dom/span #js {:className "dummy"} pre (replace-fn match) post)
+      s))
+    s))
+
 (defn make-text-replacer
   "Make a new function to perform a simple stateless replacement of a single element"
   [match-type]
   (fn [text-or-node]
     (if (string? text-or-node)
       (let [text text-or-node
-            pattern (get-in replacements [match-type :pattern])]
-        (if-let [match (second (re-find pattern text))]
-          ((get-in replacements [match-type :replace]) match)
-          text))
+            type-info (get replacements match-type)]
+        (re-replace (type-info :pattern) text (type-info :replace)))
       text-or-node)))
 
 (defn make-delimited-processor
