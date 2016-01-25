@@ -18,8 +18,8 @@
     (render [_]
       (dom/div #js {:className (str "tag pill"
                                     (if (store/is-subscribed-to-tag? (tag :id))
-                                      " subscribed"
-                                      " not-subscribed"))
+                                      " on"
+                                      " off"))
                     :style #js {:backgroundColor (id->color (tag :id))
                                 :color (id->color (tag :id))
                                 :borderColor (id->color (tag :id))}
@@ -32,11 +32,14 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className "user pill "
+      (dom/div #js {:className (str "user pill" (case (user :state)
+                                                   :online " on"
+                                                   " off"))
                     :style #js {:backgroundColor (id->color (user :id))
+                                :color (id->color (user :id))
                                 :borderColor (id->color (user :id))}
                     :onClick (fn [e]
                                (store/set-page! {:type :user
                                                  :id (user :id)}))}
         (dom/span #js {:className "name"} (str "@" (user :nickname)))
-        (dom/div #js {:className (str "status " ((fnil name "") (user :status)))})))))
+        #_(dom/div #js {:className (str "status " ((fnil name "") (user :status)))})))))

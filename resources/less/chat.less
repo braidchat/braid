@@ -71,19 +71,21 @@ body {
   color: white;
   vertical-align: middle;
   cursor: pointer;
+  &.on {
+    color: white !important;
+  }
+  &.off {
+    background-color: white !important;
+  }
 }
 
 .tag {
   .pill-box();
-  &.not-subscribed {
-    background-color: white !important;
-  }
-  &.subscribed {
-    color: white !important;
-  }
 }
 .user {
   .pill-box();
+
+  /* removed for now
   .status {
     margin-left: 0.3em;
     width: 0.85em;
@@ -104,6 +106,7 @@ body {
 
     }
   }
+  */
 }
 
 .button {
