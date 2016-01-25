@@ -5,6 +5,7 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.new-message :refer [new-message-view]]
+            [chat.client.views.pills :refer [tag-view user-view]]
             [chat.client.views.helpers :as helpers])
   (:import [goog.events KeyCodes]))
 
@@ -20,23 +21,6 @@
             (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
           (apply dom/div #js {:className "content"}
             (helpers/format-message (message :content))))))))
-
-(defn tag-view [tag owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className (str "tag " (rand-nth ["subscribed" ""]))
-                    :style #js {:backgroundColor (helpers/tag->color tag)}}
-        (dom/span #js {:className "name"} (tag :name))))))
-
-(defn user-view [user owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "user"
-                    :style #js {:backgroundColor (helpers/tag->color user)}}
-        (dom/span #js {:className "name"} (str "@" (user :nickname)))
-        (dom/div #js {:className (str "status " ((fnil name "") (user :status)))})))))
 
 (defn thread-tags-view [thread owner]
   (reify

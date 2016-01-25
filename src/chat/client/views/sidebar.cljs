@@ -7,7 +7,7 @@
             [cljs.core.async :as async :refer [<! >! put! chan alts! timeout]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.threads :refer [tag-view user-view]]))
+            [chat.client.views.pills :refer [tag-view user-view]]))
 
 (defn debounce
   "Given the input channel source and a debouncing time of msecs, return a new
