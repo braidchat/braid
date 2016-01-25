@@ -56,7 +56,7 @@
         (dom/div #js {:className "instructions"}
           "Tag conversations with #... Add/mention users with @... Emoji :shortcode: support")
         (om/build user-modal-view data)
-        (om/build sidebar-view (data :page))
+        (om/build sidebar-view data)
         (case (get-in data [:page :type])
           :inbox (om/build inbox-page-view data)
           :search (om/build search-page-view data)

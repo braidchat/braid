@@ -66,14 +66,15 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "sidebar"}
-        (om/build search-box-view data)
+        (om/build search-box-view (data :page))
 
         (dom/div nil "note: below sections are currently non-functional")
         (dom/h2 #js {:className "inbox"
                      :onClick (fn []
                                 (store/set-page! {:type :inbox}))}
           "Inbox"
-          "[20]")
+          (dom/span #js {:className "count"}
+            (count (get-in @store/app-state [:user :open-thread-ids]))))
         (dom/h2 nil "Channels")
         (dom/div #js {:className "conversations"}
           (apply dom/div nil
