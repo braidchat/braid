@@ -32,7 +32,7 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className (str "user pill" (case (user :state)
+      (dom/div #js {:className (str "user pill" (case (user :status)
                                                    :online " on"
                                                    " off"))
                     :style #js {:backgroundColor (id->color (user :id))
