@@ -145,7 +145,7 @@ Henceforth, you will need to run lein with: `lein with-profile +chat repl`
 
 ## Other Profile Options
 
-In the project folder, create a profil
+In the project folder, create a profile
 ```clojure
 {:chat
  {:env {
