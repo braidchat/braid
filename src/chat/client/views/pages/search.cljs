@@ -1,7 +1,6 @@
 (ns chat.client.views.pages.search
   (:require [om.core :as om]
             [om.dom :as dom]
-            [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.threads :refer [thread-view]]))
 
