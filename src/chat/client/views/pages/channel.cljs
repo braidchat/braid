@@ -26,19 +26,24 @@
                 "Subscribe")))
 
           (dom/div #js {:className "description"}
-            (dom/span nil "One day, a channel description will be here."))
+            (dom/span nil "One day, a channel description will be here.")
+            (dom/br nil)
+            (dom/br nil)
+            (dom/span nil "Currently only showing your open threads for this channel. Showing all threads for this channel coming soon."))
 
           (apply dom/div #js {:className "threads"}
             (concat
               [(new-thread-view)]
               (map (fn [t] (om/build thread-view t {:key :id}))
                    (let [user-id (get-in @store/app-state [:session :user-id])]
-                     ; sort by last reply
-                     (->> (select-keys (data :threads) (get-in data [:page :search-result-ids]))
+                     ; sort by last message sent by logged-in user, most recent first
+                     (->> (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
                           vals
+                          (filter (fn [thread]
+                                    (contains? (set (thread :tag-ids)) tag-id)))
                           (sort-by
                             (comp (partial apply max)
                                   (partial map :created-at)
+                                  (partial filter (fn [m] (= (m :user-id) user-id)))
                                   :messages))
-                          reverse)
-                     )))))))))
+                          reverse))))))))))
