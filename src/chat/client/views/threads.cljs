@@ -6,6 +6,7 @@
             [chat.client.store :as store]
             [chat.client.views.new-message :refer [new-message-view]]
             [chat.client.views.pills :refer [tag-view user-view]]
+            [cljs-uuid-utils.core :as uuid]
             [chat.client.views.helpers :as helpers])
   (:import [goog.events KeyCodes]))
 
@@ -83,3 +84,9 @@
                                                        "Reply...")}
                       {:react-key "message"})))))))
 
+(defn new-thread-view []
+  (om/build thread-view {:id (uuid/make-random-squuid)
+                         :new? true
+                         :tag-ids []
+                         :messages []}
+            {:react-key "new-thread"}))
