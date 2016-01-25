@@ -77,16 +77,17 @@ body {
 .user {
   .pill-box();
   .status {
-    margin-left: 0.5em;
-    width: 1em;
-    height: 1em;
+    margin-left: 0.3em;
+    width: 0.85em;
+    height: 0.85em;
     display: inline-block;
-    border: solid 2px black;
-    border-radius: 50%;
+    border: solid 1px white;
+    border-radius: 0.5em;
     box-sizing: border-box;
     vertical-align: middle;
+    margin-bottom: 0.15em;
     &.online {
-      background: black;
+      background: white;
     }
     &.offline {
 
@@ -178,8 +179,8 @@ body {
     //box-shadow: 0 2px 2px -2px #ccc;
 
     .tags {
-      margin: @pad;
-      .tag {
+      margin: @pad 2*@pad @pad @pad;
+      .pill {
         margin-bottom: 0.5em;
         margin-right: 0.5em;
       }
