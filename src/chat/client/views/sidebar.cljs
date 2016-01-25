@@ -7,8 +7,7 @@
             [cljs.core.async :as async :refer [<! >! put! chan alts! timeout]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.threads :refer [threads-view tag-view user-view thread-view]]
-            ))
+            [chat.client.views.threads :refer [tag-view user-view]]))
 
 (defn debounce
   "Given the input channel source and a debouncing time of msecs, return a new
@@ -46,7 +45,7 @@
                 (if (string/blank? query)
                   (do
                     (store/set-search-searching! false)
-                    (store/set-page! {:type :home}))
+                    (store/set-page! {:type :inbox}))
                   (do
                     (store/set-page! {:type :search :search-query query})
                     (store/set-search-searching! true)
@@ -75,7 +74,7 @@
           (dom/div nil
             (dom/div #js {:className "all"
                           :onClick (fn []
-                                     (store/set-page! {:type :home}))} "ALL")
+                                     (store/set-page! {:type :inbox}))} "ALL")
              "[20]")
           (apply dom/div nil
             (->> [{:name "foo"

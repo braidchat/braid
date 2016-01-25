@@ -56,7 +56,7 @@
         (om/build user-modal-view data)
         (om/build sidebar-view data)
         (case (get-in data [:page :type])
-          :home (om/build inbox-page-view data)
+          :inbox (om/build inbox-page-view data)
           :search (om/build search-page-view data))))))
 
 (defn app-view [data owner]

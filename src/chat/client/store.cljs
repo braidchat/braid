@@ -6,7 +6,7 @@
          :users {}
          :tags {}
          :groups {}
-         :page {:type :home}
+         :page {:type :inbox}
          :session nil
          :error-msg nil
          :invitations []
