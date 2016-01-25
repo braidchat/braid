@@ -11,6 +11,7 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "page inbox"}
+        (dom/div #js {:className "title"} "Inbox")
         (apply dom/div #js {:className "threads"}
           (concat
             [(om/build thread-view

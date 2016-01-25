@@ -12,23 +12,27 @@
         (cond
           ; searching...
           (get-in data [:page :search-searching])
-          (dom/div #js {:className "title"} "Searching...")
+          (dom/div nil
+            (dom/div #js {:className "title"} "Searching..."))
 
           ; results
           (seq (get-in data [:page :search-result-ids]))
-          (apply dom/div #js {:className "threads"}
-            (map (fn [t] (om/build thread-view t
-                                   {:key :id
-                                    :opts {:searched? true}}))
-                 ; sort-by last reply, newest first
-                 (->> (select-keys (data :threads) (get-in data [:page :search-result-ids]))
-                      vals
-                      (sort-by
-                        (comp (partial apply max)
-                              (partial map :created-at)
-                              :messages))
-                      reverse)))
+          (dom/div nil
+            (dom/div #js {:className "title"} "Search Results")
+            (apply dom/div #js {:className "threads"}
+              (map (fn [t] (om/build thread-view t
+                                     {:key :id
+                                      :opts {:searched? true}}))
+                   ; sort-by last reply, newest first
+                   (->> (select-keys (data :threads) (get-in data [:page :search-result-ids]))
+                        vals
+                        (sort-by
+                          (comp (partial apply max)
+                                (partial map :created-at)
+                                :messages))
+                        reverse))))
 
           ; no results
           :else
-          (dom/div #js {:className "title"} "No results"))))))
+          (dom/div nil
+            (dom/div #js {:className "title"} "No results")))))))
