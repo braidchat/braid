@@ -63,7 +63,6 @@
   (reify
     om/IRender
     (render [_]
-      (println (data :user))
       (dom/div nil
         (if (data :session)
           (om/build main-view data)
