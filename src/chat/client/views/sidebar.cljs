@@ -97,6 +97,7 @@
         (apply dom/div #js {:className "recommended"}
           (->> (@store/app-state :tags)
                vals
+               (remove (fn [t] (store/is-subscribed-to-tag? (t :id))))
                shuffle
                (take 4)
                (map (fn [tag]
