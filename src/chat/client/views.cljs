@@ -5,8 +5,8 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.user-modal :refer [user-modal-view]]
             [chat.client.views.sidebar :refer [sidebar-view]]
-            [chat.client.views.threads :refer [threads-view tag-view user-view thread-view]]
-            [chat.client.views.pages.search :refer [search-page-view]]))
+            [chat.client.views.pages.search :refer [search-page-view]]
+            [chat.client.views.pages.inbox :refer [inbox-page-view]]))
 
 (defn login-view [data owner]
   (reify
@@ -56,7 +56,7 @@
         (om/build user-modal-view data)
         (om/build sidebar-view data)
         (case (get-in data [:page :type])
-          :home (om/build threads-view data)
+          :home (om/build inbox-page-view data)
           :search (om/build search-page-view data))))))
 
 (defn app-view [data owner]

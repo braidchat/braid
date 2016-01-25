@@ -2,7 +2,6 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [clojure.string :as string]
-            [cljs-uuid-utils.core :as uuid]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.new-message :refer [new-message-view]]
@@ -100,27 +99,3 @@
                                                        "Reply...")}
                       {:react-key "message"})))))))
 
-(defn threads-view [data owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div nil
-        (apply dom/div #js {:className "threads"}
-          (concat
-            [(om/build thread-view
-                       {:id (uuid/make-random-squuid)
-                        :new? true
-                        :tag-ids []
-                        :messages []}
-                       {:react-key "new-thread"})]
-            (map (fn [t] (om/build thread-view t {:key :id}))
-                 (let [user-id (get-in @store/app-state [:session :user-id])]
-                   ; sort by last message sent by logged-in user, most recent first
-                   (->> (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
-                        vals
-                        (sort-by
-                          (comp (partial apply max)
-                                (partial map :created-at)
-                                (partial filter (fn [m] (= (m :user-id) user-id)))
-                                :messages))
-                        reverse)))))))))
