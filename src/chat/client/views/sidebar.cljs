@@ -68,7 +68,6 @@
       (dom/div #js {:className "sidebar"}
         (om/build search-box-view (data :page))
 
-        (dom/div nil "note: below sections are currently non-functional")
         (dom/h2 #js {:className "inbox"
                      :onClick (fn []
                                 (store/set-page! {:type :inbox}))}
