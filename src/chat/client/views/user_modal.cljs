@@ -4,7 +4,7 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.group-invite :refer [group-invite-view]]
-            [chat.client.views.helpers :as helpers])
+            [chat.client.views.pills :refer [id->color]])
   (:import [goog.events KeyCodes]))
 
 (defn tag-view [tag owner]
@@ -17,7 +17,7 @@
                                  (dispatch! :unsubscribe-from-tag (tag :id))
                                  (dispatch! :subscribe-to-tag (tag :id))))}
         (dom/div #js {:className "color-block"
-                      :style #js {:backgroundColor (helpers/tag->color tag)}}
+                      :style #js {:backgroundColor (id->color (tag :id))}}
           (when (tag :subscribed?)
             "✔"))
         (dom/span #js {:className "name"}
