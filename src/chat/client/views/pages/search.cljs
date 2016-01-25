@@ -9,16 +9,16 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "page search"}
+        (dom/div #js {:className "title"} "Search")
         (cond
           ; searching...
           (get-in data [:page :search-searching])
           (dom/div nil
-            (dom/div #js {:className "title"} "Searching..."))
+            (dom/div #js {:className "description"} "Searching..."))
 
           ; results
           (seq (get-in data [:page :search-result-ids]))
           (dom/div nil
-            (dom/div #js {:className "title"} "Search Results")
             (apply dom/div #js {:className "threads"}
               (map (fn [t] (om/build thread-view t
                                      {:key :id
@@ -35,4 +35,4 @@
           ; no results
           :else
           (dom/div nil
-            (dom/div #js {:className "title"} "No results")))))))
+            (dom/div #js {:className "description"} "No results.")))))))
