@@ -66,49 +66,49 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "sidebar"}
-        (om/build search-box-view (data :page))
+        (om/build search-box-view data)
 
         (dom/div nil "note: below sections are currently non-functional")
+        (dom/h2 #js {:className "inbox"
+                     :onClick (fn []
+                                (store/set-page! {:type :inbox}))}
+          "Inbox"
+          "[20]")
         (dom/h2 nil "Channels")
         (dom/div #js {:className "conversations"}
-          (dom/div nil
-            (dom/div #js {:className "all"
-                          :onClick (fn []
-                                     (store/set-page! {:type :inbox}))} "ALL")
-             "[20]")
           (apply dom/div nil
-            (->> [{:name "foo"
-                   :id (uuid/make-random-squuid)}
-                  {:name "bar"
-                   :id (uuid/make-random-squuid)}
-                  {:name "baz"
-                   :id (uuid/make-random-squuid)}]
+            (->> (@store/app-state :tags)
+                 vals
+                 (take 5)
                  (map (fn [tag]
-                        (dom/div nil (om/build tag-view tag) (str "[" (rand-int 10) "]"))))))
-          (apply dom/div nil
-            (->> [{:nickname "jon"
-                   :id (uuid/make-random-squuid)}
-                  {:nickname "bob"
-                   :id (uuid/make-random-squuid)}]
-                 (map (fn [user]
-                        (dom/div nil (om/build user-view user) (str "[" (rand-int 10) "]")))))))
+                        (dom/div nil (om/build tag-view tag) (str "[" (rand-int 10) "]")))))))
+
+        (dom/h2 nil "Direct Messages")
+        (apply dom/div #js {:className "users"}
+          (->> (@store/app-state :users)
+               vals
+               (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
+               (map (fn [user]
+                      (dom/div nil
+                        (om/build user-view user)
+                        (str "[" (rand-int 10) "]"))))))
 
         (dom/h2 nil "Recommended")
         (apply dom/div #js {:className "recommended"}
-          (->> [{:name "barbaz"
-                 :id (uuid/make-random-squuid)}
-                {:name "general"
-                 :id (uuid/make-random-squuid)}
-                {:name "asdf"
-                 :id (uuid/make-random-squuid)}]
+          (->> (@store/app-state :tags)
+               vals
+               shuffle
+               (take 4)
                (map (fn [tag]
                       (dom/div nil (om/build tag-view tag))))))
 
-        (dom/h2 nil "Members")
+        (dom/h2 nil "Online")
         (apply dom/div #js {:className "users"}
           (->> (@store/app-state :users)
                vals
                (filter (fn [user] (= :online (user :status))))
                (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
                (map (fn [user]
-                      (dom/div nil (om/build user-view user))))))))))
+                      (dom/div nil
+                        (om/build user-view user)
+                        (str "[" (rand-int 10) "]"))))))))))
