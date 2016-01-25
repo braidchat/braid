@@ -16,18 +16,22 @@
             (om/build user-view user))
           (dom/div #js {:className "description"}
             (dom/img #js {:className "avatar" :src (user :avatar)})
-            (dom/span nil "One day, a profile will be here."))
+            (dom/p nil "One day, a profile will be here.")
+            (dom/p nil "Currently only showing your open threads that mention this user.")
+            (dom/p nil "Soon, you will see all recent threads this user has participated in."))
           (apply dom/div #js {:className "threads"}
             (concat
               [(new-thread-view)]
               (map (fn [t] (om/build thread-view t {:key :id}))
-                   (let [user-id (get-in @store/app-state [:session :user-id])]
-                     ; sort by last reply
-                     (->> (select-keys (data :threads) (get-in data [:page :search-result-ids]))
+                   (let [current-user-id (get-in @store/app-state [:session :user-id])]
+                     ; sort by last message sent by logged-in user, most recent first
+                     (->> (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
                           vals
+                          (filter (fn [thread]
+                                    (contains? (set (thread :mentioned-ids)) user-id)))
                           (sort-by
                             (comp (partial apply max)
                                   (partial map :created-at)
+                                  (partial filter (fn [m] (= (m :user-id) current-user-id)))
                                   :messages))
-                          reverse)
-                     )))))))))
+                          reverse))))))))))
