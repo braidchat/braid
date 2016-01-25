@@ -112,5 +112,4 @@
                (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
                (map (fn [user]
                       (dom/div nil
-                        (om/build user-view user)
-                        (str "[" (rand-int 10) "]"))))))))))
+                        (om/build user-view user))))))))))
