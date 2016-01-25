@@ -53,26 +53,6 @@ body {
 }
 
 
-.button {
-  border: 1px solid #aaa;
-  border-radius: 0.5em;
-  display: inline-block;
-  line-height: 1em;
-  padding: 0.35em;
-  margin-left: 1em;
-  &:hover {
-    color: #eee;
-    background: #aaa;
-    cursor: pointer;
-  }
-  &:active {
-    color: #eee;
-    background: #666;
-    border-color: #666;
-    cursor: pointer;
-  }
-}
-
 .pill-box() {
   font-size: 0.75em;
   display: inline-block;
@@ -116,6 +96,25 @@ body {
     &.away {
 
     }
+  }
+}
+
+.button {
+  .pill-box();
+  color: #aaa;
+  border: 1px solid #aaa;
+  background: none;
+  margin-left: 1em;
+  &:hover {
+    color: #eee;
+    background: #aaa;
+    cursor: pointer;
+  }
+  &:active {
+    color: #eee;
+    background: #666;
+    border-color: #666;
+    cursor: pointer;
   }
 }
 

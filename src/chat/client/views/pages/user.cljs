@@ -2,7 +2,8 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [chat.client.store :as store]
-            [chat.client.views.threads :refer [thread-view new-thread-view]]))
+            [chat.client.views.threads :refer [thread-view new-thread-view]]
+            [chat.client.views.pills :refer [user-view]]))
 
 (defn user-page-view [data owner]
   (reify
@@ -12,7 +13,7 @@
             user (get-in @store/app-state [:users user-id])]
         (dom/div #js {:className "page channel"}
           (dom/div #js {:className "title"}
-            "@" (user :nickname))
+            (om/build user-view user))
           (apply dom/div #js {:className "threads"}
             (concat
               [(new-thread-view)]

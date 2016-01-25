@@ -3,7 +3,8 @@
             [om.dom :as dom]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.views.threads :refer [thread-view new-thread-view]]))
+            [chat.client.views.threads :refer [thread-view new-thread-view]]
+            [chat.client.views.pills :refer [tag-view]]))
 
 (defn channel-page-view [data owner]
   (reify
@@ -13,7 +14,7 @@
             tag (get-in @store/app-state [:tags tag-id])]
         (dom/div #js {:className "page channel"}
           (dom/div #js {:className "title"}
-            "#" (tag :name)
+            (om/build tag-view tag)
             (if (store/is-subscribed-to-tag? (tag :id))
               (dom/a #js {:className "button"
                           :onClick (fn [_]
