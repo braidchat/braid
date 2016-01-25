@@ -21,7 +21,7 @@
             (dom/p nil "Soon, you will see all recent threads this user has participated in."))
           (apply dom/div #js {:className "threads"}
             (concat
-              [(new-thread-view)]
+              [(new-thread-view {:mentioned-ids [user-id]})]
               (map (fn [t] (om/build thread-view t {:key :id}))
                    (let [current-user-id (get-in @store/app-state [:session :user-id])]
                      ; sort by last message sent by logged-in user, most recent first

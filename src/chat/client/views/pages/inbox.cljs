@@ -12,7 +12,7 @@
         (dom/div #js {:className "title"} "Inbox")
         (apply dom/div #js {:className "threads"}
           (concat
-            [(new-thread-view)]
+            [(new-thread-view {})]
             (map (fn [t] (om/build thread-view t {:key :id}))
                  (let [user-id (get-in @store/app-state [:session :user-id])]
                    ; sort by last message sent by logged-in user, most recent first

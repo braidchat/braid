@@ -34,8 +34,10 @@
                                         :content (data :content)
                                         :thread-id (data :thread-id)
 
-                                        :mentioned-tag-ids (extract-tag-ids (data :content))
-                                        :mentioned-user-ids (extract-user-ids (data :content))})]
+                                        :mentioned-tag-ids (concat (data :mentioned-tag-ids)
+                                                                   (extract-tag-ids (data :content)))
+                                        :mentioned-user-ids (concat (data :mentioned-user-ids)
+                                                                    (extract-user-ids (data :content)))})]
       (store/add-message! message)
       (sync/chsk-send! [:chat/new-message message]))))
 

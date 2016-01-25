@@ -161,7 +161,9 @@
             send-message!
             (fn []
               (dispatch! :new-message {:thread-id (config :thread-id)
-                                       :content text})
+                                       :content text
+                                       :mentioned-user-ids (config :mentioned-user-ids)
+                                       :mentioned-tag-ids (config :mentioned-tag-ids)})
               (reset-state!))
             choose-result!
             (fn [result]

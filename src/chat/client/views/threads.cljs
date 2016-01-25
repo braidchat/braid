@@ -81,12 +81,16 @@
             (om/build new-message-view {:thread-id (thread :id)
                                         :placeholder (if (thread :new?)
                                                        "Start a conversation..."
-                                                       "Reply...")}
+                                                       "Reply...")
+                                        :mentioned-user-ids (thread :mentioned-ids)
+                                        :mentioned-tag-ids (thread :tag-ids)}
                       {:react-key "message"})))))))
 
-(defn new-thread-view []
-  (om/build thread-view {:id (uuid/make-random-squuid)
-                         :new? true
-                         :tag-ids []
-                         :messages []}
+(defn new-thread-view [opts]
+  (om/build thread-view (merge {:id (uuid/make-random-squuid)
+                                :new? true
+                                :tag-ids []
+                                :mentioned-ids []
+                                :messages []}
+                               opts)
             {:react-key "new-thread"}))
