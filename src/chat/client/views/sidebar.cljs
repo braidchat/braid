@@ -80,6 +80,7 @@
           (apply dom/div nil
             (->> (@store/app-state :tags)
                  vals
+                 (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
                  (take 5)
                  (map (fn [tag]
                         (dom/div nil (om/build tag-view tag) (str "[" (rand-int 10) "]")))))))
