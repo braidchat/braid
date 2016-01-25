@@ -26,10 +26,9 @@
                 "Subscribe")))
 
           (dom/div #js {:className "description"}
-            (dom/span nil "One day, a channel description will be here.")
-            (dom/br nil)
-            (dom/br nil)
-            (dom/span nil "Currently only showing your open threads for this channel. Showing all threads for this channel coming soon."))
+            (dom/p nil "One day, a channel description will be here.")
+            (dom/p nil "Currently only showing your open threads for this channel.")
+            (dom/p nil "Soon, you will see all recent threads for this channel."))
 
           (apply dom/div #js {:className "threads"}
             (concat
