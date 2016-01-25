@@ -132,12 +132,12 @@ To run Datomic Pro locally, you will need to:
 
 ```clojure
   {:chat
+    [:prod
     {:env {:db-url "datomic:dev://localhost:4333/braid"}}
-     :dependencies [[com.datomic/datomic-pro "0.9.5201" :exclusions [joda-time]]]
      :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
                                       :creds :gpg
                                       :username "USERNAME-HERE"
-                                      :password "PASSWORD-HERE"}}}}
+                                      :password "PASSWORD-HERE"}}}]}
 ```
 
 Henceforth, you will need to run lein with: `lein with-profile +chat repl`
@@ -145,7 +145,7 @@ Henceforth, you will need to run lein with: `lein with-profile +chat repl`
 
 ## Other Profile Options
 
-In the project folder, create a profil
+In the project folder, create a profile
 ```clojure
 {:chat
  {:env {

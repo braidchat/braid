@@ -2,10 +2,11 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [clojure.string :as string]
-            [cljs-uuid-utils.core :as uuid]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.new-message :refer [new-message-view]]
+            [chat.client.views.pills :refer [tag-view user-view]]
+            [cljs-uuid-utils.core :as uuid]
             [chat.client.views.helpers :as helpers])
   (:import [goog.events KeyCodes]))
 
@@ -21,23 +22,6 @@
             (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
           (apply dom/div #js {:className "content"}
             (helpers/format-message (message :content))))))))
-
-(defn tag-view [tag owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className (str "tag " (rand-nth ["subscribed" ""]))
-                    :style #js {:backgroundColor (helpers/tag->color tag)}}
-        (dom/span #js {:className "name"} (tag :name))))))
-
-(defn user-view [user owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "user"
-                    :style #js {:backgroundColor (helpers/tag->color user)}}
-        (dom/span #js {:className "name"} (str "@" (user :nickname)))
-        (dom/div #js {:className (str "status " ((fnil name "") (user :status)))})))))
 
 (defn thread-tags-view [thread owner]
   (reify
@@ -64,8 +48,8 @@
       om/IDidMount
       (did-mount [_]
         (scroll-to-bottom owner thread))
-      om/IDidUpdate
-      (did-update [_ _ _]
+      om/IWillReceiveProps
+      (will-receive-props [_ _]
         (scroll-to-bottom owner thread))
       om/IRender
       (render [_]
@@ -97,30 +81,16 @@
             (om/build new-message-view {:thread-id (thread :id)
                                         :placeholder (if (thread :new?)
                                                        "Start a conversation..."
-                                                       "Reply...")}
+                                                       "Reply...")
+                                        :mentioned-user-ids (thread :mentioned-ids)
+                                        :mentioned-tag-ids (thread :tag-ids)}
                       {:react-key "message"})))))))
 
-(defn threads-view [data owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div nil
-        (apply dom/div #js {:className "threads"}
-          (concat
-            [(om/build thread-view
-                       {:id (uuid/make-random-squuid)
-                        :new? true
-                        :tag-ids []
-                        :messages []}
-                       {:react-key "new-thread"})]
-            (map (fn [t] (om/build thread-view t {:key :id}))
-                 (let [user-id (get-in @store/app-state [:session :user-id])]
-                   ; sort by last message sent by logged-in user, most recent first
-                   (->> (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
-                        vals
-                        (sort-by
-                          (comp (partial apply max)
-                                (partial map :created-at)
-                                (partial filter (fn [m] (= (m :user-id) user-id)))
-                                :messages))
-                        reverse)))))))))
+(defn new-thread-view [opts]
+  (om/build thread-view (merge {:id (uuid/make-random-squuid)
+                                :new? true
+                                :tag-ids []
+                                :mentioned-ids []
+                                :messages []}
+                               opts)
+            {:react-key "new-thread"}))

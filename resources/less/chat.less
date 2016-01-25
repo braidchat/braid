@@ -52,6 +52,7 @@ body {
   }
 }
 
+
 .pill-box() {
   font-size: 0.75em;
   display: inline-block;
@@ -68,6 +69,7 @@ body {
   overflow: hidden;
   color: white;
   vertical-align: middle;
+  cursor: pointer;
 }
 
 .tag {
@@ -76,16 +78,17 @@ body {
 .user {
   .pill-box();
   .status {
-    margin-left: 0.5em;
-    width: 1em;
-    height: 1em;
+    margin-left: 0.3em;
+    width: 0.85em;
+    height: 0.85em;
     display: inline-block;
-    border: solid 2px black;
-    border-radius: 50%;
+    border: solid 1px white;
+    border-radius: 0.5em;
     box-sizing: border-box;
     vertical-align: middle;
+    margin-bottom: 0.15em;
     &.online {
-      background: black;
+      background: white;
     }
     &.offline {
 
@@ -93,6 +96,25 @@ body {
     &.away {
 
     }
+  }
+}
+
+.button {
+  .pill-box();
+  color: #aaa;
+  border: 1px solid #aaa;
+  background: none;
+  margin-left: 1em;
+  &:hover {
+    color: #eee;
+    background: #aaa;
+    cursor: pointer;
+  }
+  &:active {
+    color: #eee;
+    background: #666;
+    border-color: #666;
+    cursor: pointer;
   }
 }
 
@@ -177,8 +199,8 @@ body {
     //box-shadow: 0 2px 2px -2px #ccc;
 
     .tags {
-      margin: @pad;
-      .tag {
+      margin: @pad 2*@pad @pad @pad;
+      .pill {
         margin-bottom: 0.5em;
         margin-right: 0.5em;
       }
@@ -235,13 +257,6 @@ body {
         margin-left: 0.25rem;
         color: #ccc;
       }
-    }
-
-    .user-mention {
-      .pill-box();
-    }
-    .tag-mention {
-      .pill-box();
     }
 
     .content {
@@ -447,6 +462,15 @@ body {
   background: #333;
   color: #ccc;
 
+  .count {
+    .pill-box();
+    background: none;
+    border: 1px solid #999;
+    margin-left: 0.5em;
+    color: #aaa;
+    margin-bottom: 0.2em;
+  }
+
   h2 {
     margin-left: @pad;
     text-transform: uppercase;
@@ -455,8 +479,11 @@ body {
     font-weight: normal;
   }
 
-  .all {
-    .pill-box()
+  .inbox {
+    &:hover {
+      cursor: pointer;
+      color: white;
+    }
   }
 
   .conversations, .recommended, .users {
@@ -483,5 +510,19 @@ body {
     height: @top-bar-height;
     line-height: @top-bar-height;
     color: #aaa;
+  }
+  .description {
+    position: absolute;
+    left: @sidebar-width + @pad;
+    top: 2*@pad + @top-bar-height;
+    color: #aaa;
+    width: @card-width;
+    .avatar {
+      width: 4rem;
+      height: 4rem;
+      display: block;
+      border-radius: 1rem;
+      margin-bottom: @pad;
+    }
   }
 }
