@@ -25,6 +25,9 @@
                                      (dispatch! :subscribe-to-tag (tag :id)))}
                 "Subscribe")))
 
+          (dom/div #js {:className "description"}
+            (dom/span nil "One day, a channel description will be here."))
+
           (apply dom/div #js {:className "threads"}
             (concat
               [(new-thread-view)]

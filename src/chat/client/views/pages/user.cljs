@@ -14,6 +14,9 @@
         (dom/div #js {:className "page channel"}
           (dom/div #js {:className "title"}
             (om/build user-view user))
+          (dom/div #js {:className "description"}
+            (dom/img #js {:className "avatar" :src (user :avatar)})
+            (dom/span nil "One day, a profile will be here."))
           (apply dom/div #js {:className "threads"}
             (concat
               [(new-thread-view)]
