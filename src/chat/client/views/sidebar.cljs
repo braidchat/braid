@@ -83,7 +83,7 @@
                  (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
                  (take 5)
                  (map (fn [tag]
-                        (dom/div nil (om/build tag-view tag) (str "[" (rand-int 10) "]")))))))
+                        (dom/div nil (om/build tag-view tag)))))))
 
         (dom/h2 nil "Direct Messages")
         (apply dom/div #js {:className "users"}
@@ -92,8 +92,7 @@
                (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
                (map (fn [user]
                       (dom/div nil
-                        (om/build user-view user)
-                        (str "[" (rand-int 10) "]"))))))
+                        (om/build user-view user))))))
 
         (dom/h2 nil "Recommended")
         (apply dom/div #js {:className "recommended"}
