@@ -6,7 +6,7 @@
 
 (def ^:dynamic *uri*
   "URI for the datomic database"
-  (get env :db-url "datomic:dev://localhost:4334/chat-dev"))
+  (get env :db-url "datomic:free://localhost:4334/braid"))
 
 (def ^:dynamic *conn* nil)
 

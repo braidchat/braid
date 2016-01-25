@@ -1,7 +1,6 @@
 (ns chat.server.invite
   (:require [org.httpkit.client :as http]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
-            [taoensso.carmine :as car]
             [clojure.string :as string]
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
@@ -10,6 +9,43 @@
            javax.crypto.Mac
            javax.crypto.spec.SecretKeySpec
            [org.apache.commons.codec.binary Base64]))
+
+(when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
+  (println "WARNING: No :hmac-secret set, using an insecure default."))
+
+(def hmac-secret (or (env :hmac-secret) "secret"))
+
+(if (= (env :environment) "prod")
+  (do
+    (require 'taoensso.carmine)
+    (let [wcar (ns-resolve 'taoensso.carmine 'wcar)
+          set (ns-resolve 'taoensso.carmine 'set)
+          get (ns-resolve 'taoensso.carmine 'get)
+          del (ns-resolve 'taoensso.carmine 'del)]
+      ; same as conf in handler, but w/e
+      (def redis-conn {:pool {}
+                       :spec {:host "127.0.0.1"
+                              :port 6379}})
+
+      (defn cache-set! [k v]
+        (wcar redis-conn (set k v)))
+
+      (defn cache-get [k]
+        (wcar redis-conn (get k)))
+
+      (defn cache-del! [k]
+        (wcar redis-conn (del k)))))
+  (do
+    (def cache (atom {}))
+
+    (defn cache-set! [k v]
+      (swap! cache assoc k v))
+
+    (defn cache-get [k]
+      (@cache k))
+
+    (defn cache-del! [k]
+      (swap! cache dissoc k))))
 
 (defn random-nonce
   "url-safe random nonce"
@@ -51,19 +87,13 @@
   [mac data]
   (constant-comp
     mac
-    (hmac (env :hmac-secret) data)))
+    (hmac hmac-secret data)))
 
-; same as conf in handler, but w/e
-(def redis-conn {:pool {}
-                 :spec {:host "127.0.0.1"
-                        :port 6379}})
-
-(defmacro wcar* [& body] `(car/wcar redis-conn ~@body))
 
 (defn make-invite-link
   [invite]
   (let [secret-nonce (random-nonce 20)]
-    (wcar* (car/set (str (invite :id)) secret-nonce))
+    (cache-set! (str (invite :id)) secret-nonce)
     (str (env :site-url)
          "/accept?tok=" secret-nonce
          "&invite=" (invite :id))))
@@ -71,9 +101,9 @@
 (defn verify-invite-nonce
   "Verify that the given nonce is valid for the invite"
   [invite nonce]
-  (if-let [stored-nonce (wcar* (car/get (str (invite :id))))]
+  (if-let [stored-nonce (cache-get (str (invite :id)))]
     (if (constant-comp stored-nonce nonce)
-      (do (wcar* (car/del (str (invite :id))))
+      (do (cache-del! (str (invite :id)))
           {:success true})
       {:error "Invalid token"})
     (do (timbre/warnf "Expired nonce %s for invite %s" nonce invite)
@@ -104,7 +134,7 @@
 (defn register-page
   [invite token]
   (let [now (.getTime (java.util.Date.))
-        form-hmac (hmac (env :hmac-secret)
+        form-hmac (hmac hmac-secret
                         (str now token (invite :id) (invite :invitee-email)))]
     (str "<!DOCTYPE html>"
          "<html>"
@@ -133,7 +163,7 @@
   [params]
   (constant-comp
     (params :hmac)
-    (hmac (env :hmac-secret)
+    (hmac hmac-secret
           (str (params :now) (params :token) (params :invite_id) (params :email)))))
 
 (defn upload-avatar

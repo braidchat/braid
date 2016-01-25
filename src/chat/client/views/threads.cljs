@@ -64,8 +64,8 @@
       om/IDidMount
       (did-mount [_]
         (scroll-to-bottom owner thread))
-      om/IDidUpdate
-      (did-update [_ _ _]
+      om/IWillReceiveProps
+      (will-receive-props [_ _]
         (scroll-to-bottom owner thread))
       om/IRender
       (render [_]
