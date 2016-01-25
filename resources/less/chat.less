@@ -56,11 +56,12 @@ body {
 .pill-box() {
   font-size: 0.75em;
   display: inline-block;
-  padding: 0em 0.5em;
+  padding: 0 0.5em;
   border-radius: 0.5em;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   background-color: #222;
+  border: 1px solid #222;
   vertical-align: middle;
   height: 1.75em;
   line-height: 1.75em;
@@ -74,6 +75,12 @@ body {
 
 .tag {
   .pill-box();
+  &.not-subscribed {
+    background-color: white !important;
+  }
+  &.subscribed {
+    color: white !important;
+  }
 }
 .user {
   .pill-box();

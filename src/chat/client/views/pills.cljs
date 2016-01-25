@@ -16,8 +16,13 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className (str "tag pill " (rand-nth ["subscribed" ""]))
-                    :style #js {:backgroundColor (id->color (tag :id))}
+      (dom/div #js {:className (str "tag pill"
+                                    (if (store/is-subscribed-to-tag? (tag :id))
+                                      " subscribed"
+                                      " not-subscribed"))
+                    :style #js {:backgroundColor (id->color (tag :id))
+                                :color (id->color (tag :id))
+                                :borderColor (id->color (tag :id))}
                     :onClick (fn [e]
                                (store/set-page! {:type :channel
                                                  :id (tag :id)}))}
@@ -28,7 +33,8 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "user pill "
-                    :style #js {:backgroundColor (id->color (user :id))}
+                    :style #js {:backgroundColor (id->color (user :id))
+                                :borderColor (id->color (user :id))}
                     :onClick (fn [e]
                                (store/set-page! {:type :user
                                                  :id (user :id)}))}
