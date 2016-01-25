@@ -7,8 +7,7 @@
             [cljs.core.async :as async :refer [<! >! put! chan alts! timeout]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.threads :refer [threads-view tag-view user-view thread-view]]
-            ))
+            [chat.client.views.pills :refer [tag-view user-view]]))
 
 (defn debounce
   "Given the input channel source and a debouncing time of msecs, return a new
@@ -46,7 +45,7 @@
                 (if (string/blank? query)
                   (do
                     (store/set-search-searching! false)
-                    (store/set-page! {:type :home}))
+                    (store/set-page! {:type :inbox}))
                   (do
                     (store/set-page! {:type :search :search-query query})
                     (store/set-search-searching! true)
@@ -69,47 +68,48 @@
       (dom/div #js {:className "sidebar"}
         (om/build search-box-view (data :page))
 
-        (dom/div nil "note: below sections are currently non-functional")
+        (dom/h2 #js {:className "inbox"
+                     :onClick (fn []
+                                (store/set-page! {:type :inbox}))}
+          "Inbox"
+          (dom/span #js {:className "count"}
+            (count (get-in @store/app-state [:user :open-thread-ids]))))
         (dom/h2 nil "Channels")
         (dom/div #js {:className "conversations"}
-          (dom/div nil
-            (dom/div #js {:className "all"
-                          :onClick (fn []
-                                     (store/set-page! {:type :home}))} "ALL")
-             "[20]")
           (apply dom/div nil
-            (->> [{:name "foo"
-                   :id (uuid/make-random-squuid)}
-                  {:name "bar"
-                   :id (uuid/make-random-squuid)}
-                  {:name "baz"
-                   :id (uuid/make-random-squuid)}]
+            (->> (@store/app-state :tags)
+                 vals
+                 (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
+                 (take 5)
                  (map (fn [tag]
-                        (dom/div nil (om/build tag-view tag) (str "[" (rand-int 10) "]"))))))
-          (apply dom/div nil
-            (->> [{:nickname "jon"
-                   :id (uuid/make-random-squuid)}
-                  {:nickname "bob"
-                   :id (uuid/make-random-squuid)}]
+                        (dom/div nil (om/build tag-view tag)))))))
+
+        (comment
+          (dom/h2 nil "Direct Messages")
+          (apply dom/div #js {:className "users"}
+            (->> (@store/app-state :users)
+                 vals
+                 (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
                  (map (fn [user]
-                        (dom/div nil (om/build user-view user) (str "[" (rand-int 10) "]")))))))
+                        (dom/div nil
+                          (om/build user-view user)))))))
 
         (dom/h2 nil "Recommended")
         (apply dom/div #js {:className "recommended"}
-          (->> [{:name "barbaz"
-                 :id (uuid/make-random-squuid)}
-                {:name "general"
-                 :id (uuid/make-random-squuid)}
-                {:name "asdf"
-                 :id (uuid/make-random-squuid)}]
+          (->> (@store/app-state :tags)
+               vals
+               (remove (fn [t] (store/is-subscribed-to-tag? (t :id))))
+               shuffle
+               (take 4)
                (map (fn [tag]
                       (dom/div nil (om/build tag-view tag))))))
 
-        (dom/h2 nil "Members")
+        (dom/h2 nil "Online")
         (apply dom/div #js {:className "users"}
           (->> (@store/app-state :users)
                vals
                (filter (fn [user] (= :online (user :status))))
                (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
                (map (fn [user]
-                      (dom/div nil (om/build user-view user))))))))))
+                      (dom/div nil
+                        (om/build user-view user))))))))))

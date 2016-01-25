@@ -34,8 +34,10 @@
                                         :content (data :content)
                                         :thread-id (data :thread-id)
 
-                                        :mentioned-tag-ids (extract-tag-ids (data :content))
-                                        :mentioned-user-ids (extract-user-ids (data :content))})]
+                                        :mentioned-tag-ids (concat (data :mentioned-tag-ids)
+                                                                   (extract-tag-ids (data :content)))
+                                        :mentioned-user-ids (concat (data :mentioned-user-ids)
+                                                                    (extract-user-ids (data :content)))})]
       (store/add-message! message)
       (sync/chsk-send! [:chat/new-message message]))))
 
@@ -127,7 +129,7 @@
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
   (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
-  (store/set-page! {:type :home})
+  (store/set-page! {:type :inbox})
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))

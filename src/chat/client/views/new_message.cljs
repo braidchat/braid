@@ -2,10 +2,10 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [clojure.string :as string]
-            [chat.client.views.helpers :as helpers]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.emoji :as emoji])
+            [chat.client.emoji :as emoji]
+            [chat.client.views.pills :refer [id->color]])
   (:import [goog.events KeyCodes]))
 
 
@@ -111,7 +111,7 @@
                       (fn []
                         (dom/div #js {:className "tag-match"}
                           (dom/div #js {:className "color-block"
-                                        :style #js {:backgroundColor (helpers/tag->color tag)}})
+                                        :style #js {:backgroundColor (id->color (tag :id))}})
                           (dom/div #js {:className "name"}
                             (tag :name))
                           (dom/div #js {:className "extra"}
@@ -161,7 +161,9 @@
             send-message!
             (fn []
               (dispatch! :new-message {:thread-id (config :thread-id)
-                                       :content text})
+                                       :content text
+                                       :mentioned-user-ids (config :mentioned-user-ids)
+                                       :mentioned-tag-ids (config :mentioned-tag-ids)})
               (reset-state!))
             choose-result!
             (fn [result]

@@ -1,20 +1,13 @@
 (ns chat.client.views.helpers
   (:require [om.dom :as dom]
+            [om.core :as om]
             [clojure.string :as string]
             [cljs-utils.core :refer [flip]]
             [cljs-time.format :as f]
             [cljs-time.core :as t]
             [chat.client.emoji :as emoji]
-            [chat.client.store :as store]))
-
-(defn tag->color [tag]
-  ; normalized is approximately evenly distributed between 0 and 1
-  (let [normalized (-> (tag :id)
-                       str
-                       (.substring 33 36)
-                       (js/parseInt 16)
-                       (/ 4096))]
-    (str "hsl(" (* 360 normalized) ",70%,35%)")))
+            [chat.client.store :as store]
+            [chat.client.views.pills :refer [tag-view user-view]]))
 
 (def replacements
   {:urls
@@ -25,17 +18,13 @@
    {:pattern #"@(\S*)"
     :replace (fn [match]
                (if-let [user (store/nickname->user match)]
-                 (dom/span #js {:className "user-mention"
-                                :style #js {:backgroundColor (tag->color user)}}
-                   "@" match)
+                 (om/build user-view user)
                  (dom/span nil "@" match)))}
    :tags
    {:pattern #"#(\S*)"
     :replace (fn [match]
                (if-let [tag (store/name->tag match)]
-                 (dom/span #js {:className "tag-mention"
-                                :style #js {:backgroundColor (tag->color tag)}}
-                   "#" match)
+                 (om/build tag-view tag)
                  (dom/span nil "#" match)))}
    :emoji-shortcodes
    {:pattern #"(:\S*:)"
