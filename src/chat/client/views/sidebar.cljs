@@ -80,6 +80,7 @@
             (->> (@store/app-state :tags)
                  vals
                  (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
+                 (sort-by :count)
                  (take 5)
                  (map (fn [tag]
                         (dom/div nil (om/build tag-view tag)))))))
@@ -99,8 +100,9 @@
           (->> (@store/app-state :tags)
                vals
                (remove (fn [t] (store/is-subscribed-to-tag? (t :id))))
-               shuffle
+               (sort-by :count)
                (take 4)
+               ; shuffle
                (map (fn [tag]
                       (dom/div nil (om/build tag-view tag))))))
 

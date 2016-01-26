@@ -223,7 +223,8 @@
   {:id (:tag/id e)
    :name (:tag/name e)
    :group-id (get-in e [:tag/group :group/id])
-   :group-name (get-in e [:tag/group :group/name])})
+   :group-name (get-in e [:tag/group :group/name])
+   :count (:tag/count e)})
 
 (defn- db->thread
   [thread]
@@ -676,14 +677,18 @@
 (defn fetch-tags-for-user
   "Get all tags visible to the given user"
   [user-id]
-  (->> (d/q '[:find (pull ?e [:tag/id
-                              :tag/name
-                              {:tag/group [:group/id :group/name]}])
+  (->> (d/q '[:find
+              (pull ?t [:tag/id
+                        :tag/name
+                        {:tag/group [:group/id :group/name]}])
+              (count ?th)
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]
               [?g :group/user ?u]
-              [?e :tag/group ?g]]
+              [?t :tag/group ?g]
+              [?th :thread/tag ?t]]
             (d/db *conn*) user-id)
-       (map (comp db->tag first))
+       (map (fn [[tag cnt]]
+              (db->tag (assoc tag :tag/count cnt))))
        set))
