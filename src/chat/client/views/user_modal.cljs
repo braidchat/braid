@@ -4,7 +4,8 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.group-invite :refer [group-invite-view]]
-            [chat.client.views.pills :refer [id->color]])
+            [chat.client.views.pills :refer [id->color]]
+            [chat.shared.util :refer [valid-tag-name? valid-nickname?]])
   (:import [goog.events KeyCodes]))
 
 (defn tag-view [tag owner]
@@ -25,9 +26,16 @@
 
 (defn new-tag-view [data owner]
   (reify
-    om/IRender
-    (render [_]
-      (dom/input #js {:className "new-tag"
+    om/IInitState
+    (init-state [_]
+      {:error nil})
+    om/IRenderState
+    (render-state [_ state]
+      (dom/input #js {:className (str "new-tag " (when (state :error) "error"))
+                      :onKeyUp
+                      (fn [e]
+                        (let [text (.. e -target -value)]
+                          (om/set-state! owner :error (not (valid-tag-name? text)))))
                       :onKeyDown
                       (fn [e]
                         (when (= KeyCodes.ENTER e.keyCode)
@@ -60,7 +68,8 @@
   (reify
     om/IInitState
     (init-state [_]
-      {:error nil})
+      {:error nil
+       :format-error false})
     om/IRenderState
     (render-state [_ state]
       (dom/div #js {:className "nickname"}
@@ -70,8 +79,12 @@
           (dom/span #js {:className "error"} msg))
         ; TODO: check if nickname is taken while typing
         (dom/input
-          #js {:className "new-name"
+          #js {:className (str "new-name " (when (state :format-error) "error"))
                :placeholder "New Nickname"
+               :onKeyUp
+               (fn [e]
+                 (let [text (.. e -target -value)]
+                   (om/set-state! owner :format-error (not (valid-nickname? text)))))
                :onKeyDown
                (fn [e]
                  (om/set-state! owner :error nil)

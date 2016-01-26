@@ -43,7 +43,7 @@
   :lesscss-output-path "resources/public/css/out"
   :cljsbuild {:builds
               [{:id "release"
-                :source-paths ["src/chat/client"]
+                :source-paths ["src/chat/client" "src/chat/shared"]
                 :compiler {:main chat.client.core
                            :asset-path "/js/out"
                            :output-to "resources/public/js/out/chat.js"

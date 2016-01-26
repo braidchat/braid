@@ -8,7 +8,7 @@
             [chat.server.search :as search]
             [chat.server.invite :as invites]
             [clojure.set :refer [difference intersection]]
-            [chat.server.util :refer [valid-nickname?]]))
+            [chat.shared.util :refer [valid-nickname? valid-tag-name?]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -142,12 +142,19 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
-      (let [new-tag (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))]
-        (db/with-conn
-          (doseq [uid (->> (:any @connected-uids)
-                           (filter #(db/user-in-tag-group? % (:id new-tag)))
-                           (remove (partial = user-id)))]
-            (chsk-send! uid [:chat/create-tag ?data]))))
+      (if (valid-tag-name? (?data :name))
+        (let [new-tag (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))]
+          (db/with-conn
+            (doseq [uid (->> (:any @connected-uids)
+                             (filter #(db/user-in-tag-group? % (:id new-tag)))
+                             (remove (partial = user-id)))]
+              (chsk-send! uid [:chat/create-tag ?data])))
+          (when ?reply-fn
+            (?reply-fn {:ok true})))
+        (do (timbre/warnf "User %s attempted to create a tag %s with an invalid name"
+                          user-id (?data :name))
+            (when ?reply-fn
+              (?reply-fn {:error "invalid tag name"}))))
       ; TODO: indicate permissions error to user?
       (timbre/warnf "User %s attempted to create a tag %s in a disallowed group"
                     user-id (?data :name) (?data :group-id)))))
