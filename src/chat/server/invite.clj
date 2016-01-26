@@ -16,32 +16,30 @@
 
 (def hmac-secret (or (env :hmac-secret) "secret"))
 
-(if (= (env :environment) "prod")
-  (do
-    ; same as conf in handler, but w/e
-    (def redis-conn {:pool {}
-                     :spec {:host "127.0.0.1"
-                            :port 6379}})
+; same as conf in handler, but w/e
+(def redis-conn {:pool {}
+                 :spec {:host "127.0.0.1"
+                        :port 6379}})
 
-    (defn cache-set! [k v]
-      (car/wcar redis-conn (car/set k v)))
+(def prod? (= (env :environment) "prod"))
+(def dev-cache
+  "Cache used in place of redis when running in dev/demo mode"
+  (atom {}))
 
-    (defn cache-get [k]
-      (car/wcar redis-conn (car/get k)))
+(defn cache-set! [k v]
+  (if prod?
+    (car/wcar redis-conn (car/set k v))
+    (swap! cache assoc k v)))
 
-    (defn cache-del! [k]
-      (car/wcar redis-conn (car/del k))))
-  (do
-    (def cache (atom {}))
+(defn cache-get [k]
+  (if prod?
+    (car/wcar redis-conn (car/get k))
+    (@cache k)))
 
-    (defn cache-set! [k v]
-      (swap! cache assoc k v))
-
-    (defn cache-get [k]
-      (@cache k))
-
-    (defn cache-del! [k]
-      (swap! cache dissoc k))))
+(defn cache-del! [k]
+  (if prod?
+    (car/wcar redis-conn (car/del k))
+    (swap! cache dissoc k)))
 
 (defn random-nonce
   "url-safe random nonce"
