@@ -21,14 +21,25 @@
                  :spec {:host "127.0.0.1"
                         :port 6379}})
 
+(def prod? (= (env :environment) "prod"))
+(def dev-cache
+  "Cache used in place of redis when running in dev/demo mode"
+  (atom {}))
+
 (defn cache-set! [k v]
-  (car/wcar redis-conn (car/set k v)))
+  (if prod?
+    (car/wcar redis-conn (car/set k v))
+    (swap! cache assoc k v)))
 
 (defn cache-get [k]
-  (car/wcar redis-conn (car/get k)))
+  (if prod?
+    (car/wcar redis-conn (car/get k))
+    (@cache k)))
 
 (defn cache-del! [k]
-  (car/wcar redis-conn (car/del k)))
+  (if prod?
+    (car/wcar redis-conn (car/del k))
+    (swap! cache dissoc k)))
 
 (defn random-nonce
   "url-safe random nonce"
