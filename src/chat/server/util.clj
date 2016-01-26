@@ -13,6 +13,6 @@
   "Checks if a tag name is valid, but not if already taken"
   [tag]
   (not (or (string/blank? tag)
-           (< 30 (count tag))
+           (< 50 (count tag))
            (re-find #"\s" tag)
            (re-find #"\p{Punct}" tag))))
