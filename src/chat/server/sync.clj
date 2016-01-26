@@ -8,7 +8,7 @@
             [chat.server.search :as search]
             [chat.server.invite :as invites]
             [clojure.set :refer [difference intersection]]
-            [chat.server.util :refer [valid-nickname? valid-tag-name?]]))
+            [chat.shared.util :refer [valid-nickname? valid-tag-name?]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
