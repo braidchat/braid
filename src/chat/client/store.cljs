@@ -137,6 +137,9 @@
 (defn add-tag! [tag]
   (transact! [:tags (tag :id)] (constantly tag)))
 
+(defn remove-tag! [tag-id]
+  (transact! [:tags] #(dissoc % tag-id)))
+
 (defn all-tags []
   (vals (get-in @app-state [:tags])))
 

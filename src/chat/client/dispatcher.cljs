@@ -48,8 +48,15 @@
 (defmethod dispatch! :create-tag [_ [tag-name group-id]]
   (let [tag (schema/make-tag {:name tag-name :group-id group-id})]
     (store/add-tag! tag)
-    (sync/chsk-send! [:chat/create-tag tag])
-    (dispatch! :subscribe-to-tag (tag :id))))
+    (sync/chsk-send!
+      [:chat/create-tag tag]
+      1000
+      (fn [reply]
+        (if-let [msg (:error reply)]
+          (do
+            (store/remove-tag! (tag :id))
+            (store/display-error! msg))
+          (dispatch! :subscribe-to-tag (tag :id)))))))
 
 (defmethod dispatch! :unsubscribe-from-tag [_ tag-id]
   (sync/chsk-send! [:user/unsubscribe-from-tag tag-id])
