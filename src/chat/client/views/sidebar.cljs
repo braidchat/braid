@@ -81,6 +81,7 @@
                  vals
                  (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
                  (sort-by :count)
+                 reverse
                  (take 5)
                  (map (fn [tag]
                         (dom/div nil (om/build tag-view tag)))))))
@@ -101,6 +102,7 @@
                vals
                (remove (fn [t] (store/is-subscribed-to-tag? (t :id))))
                (sort-by :count)
+               reverse
                (take 4)
                ; shuffle
                (map (fn [tag]
