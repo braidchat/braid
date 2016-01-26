@@ -4,7 +4,8 @@
             [clojure.string :as string]
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
-            [aws.sdk.s3 :as s3])
+            [aws.sdk.s3 :as s3]
+            [taoensso.carmine :as car])
   (:import java.security.SecureRandom
            javax.crypto.Mac
            javax.crypto.spec.SecretKeySpec
@@ -17,24 +18,19 @@
 
 (if (= (env :environment) "prod")
   (do
-    (require 'taoensso.carmine)
-    (let [wcar (ns-resolve 'taoensso.carmine 'wcar)
-          set (ns-resolve 'taoensso.carmine 'set)
-          get (ns-resolve 'taoensso.carmine 'get)
-          del (ns-resolve 'taoensso.carmine 'del)]
-      ; same as conf in handler, but w/e
-      (def redis-conn {:pool {}
-                       :spec {:host "127.0.0.1"
-                              :port 6379}})
+    ; same as conf in handler, but w/e
+    (def redis-conn {:pool {}
+                     :spec {:host "127.0.0.1"
+                            :port 6379}})
 
-      (defn cache-set! [k v]
-        (wcar redis-conn (set k v)))
+    (defn cache-set! [k v]
+      (car/wcar redis-conn (car/set k v)))
 
-      (defn cache-get [k]
-        (wcar redis-conn (get k)))
+    (defn cache-get [k]
+      (car/wcar redis-conn (car/get k)))
 
-      (defn cache-del! [k]
-        (wcar redis-conn (del k)))))
+    (defn cache-del! [k]
+      (car/wcar redis-conn (car/del k))))
   (do
     (def cache (atom {}))
 
