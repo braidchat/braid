@@ -4,7 +4,8 @@
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.pills :refer [tag-view subscribe-button]]
-            [chat.shared.util :refer [valid-tag-name? valid-nickname?]]))
+            [chat.shared.util :refer [valid-tag-name? valid-nickname?]])
+  (:import [goog.events KeyCodes]))
 
 (defn new-tag-view [data owner]
   (reify
