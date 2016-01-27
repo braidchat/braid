@@ -20,7 +20,7 @@
 
 (defn simple-matches?
   [m s]
-  (re-find (re-pattern m) s))
+  (not= -1 (.indexOf m s)))
 
 
 ; fn that returns results that will be shown if pattern matches
