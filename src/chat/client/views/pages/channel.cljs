@@ -37,8 +37,6 @@
 
           (dom/div #js {:className "description"}
             (dom/p nil "One day, a channel description will be here.")
-            (dom/p nil "Currently only showing your open threads for this channel.")
-            (dom/p nil "Soon, you will see all recent threads for this channel.")
 
             (dom/div nil
               (case status
