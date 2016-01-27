@@ -93,7 +93,6 @@
     2500
     (fn [reply]
       (when-let [results (:threads reply)]
-          (store/set-search-searching! false)
           (store/set-search-results! results)))))
 
 (defmethod dispatch! :threads-for-tag [_ tag-id]

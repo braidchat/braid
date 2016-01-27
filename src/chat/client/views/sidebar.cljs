@@ -44,11 +44,10 @@
                 (store/set-search-results! {})
                 (if (string/blank? query)
                   (do
-                    (store/set-search-searching! false)
                     (store/set-page! {:type :inbox}))
                   (do
                     (store/set-page! {:type :search :search-query query})
-                    (store/set-search-searching! true)
+                    ; consider moving this dispatch! into search-page-view
                     (dispatch! :search-history query))))))))
     om/IRenderState
     (render-state [_ {:keys [search-chan]}]

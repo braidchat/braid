@@ -8,31 +8,31 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className "page search"}
-        (dom/div #js {:className "title"} "Search")
-        (cond
-          ; searching...
-          (get-in data [:page :search-searching])
-          (dom/div nil
-            (dom/div #js {:className "description"} "Searching..."))
+      (let [page (data :page)
+            status (cond
+                     (not (contains? page :thread-ids)) :searching
+                     (seq (page :thread-ids)) :done-results
+                     :else :done-empty)]
+        (dom/div #js {:className "page search"}
+          (dom/div #js {:className "title"} "Search")
+          (case status
+            :searching
+            (dom/div #js {:className "description"} "Searching...")
 
-          ; results
-          (seq (get-in data [:page :search-result-ids]))
-          (dom/div nil
-            (apply dom/div #js {:className "threads"}
-              (map (fn [t] (om/build thread-view t
-                                     {:key :id
-                                      :opts {:searched? true}}))
-                   ; sort-by last reply, newest first
-                   (->> (select-keys (data :threads) (get-in data [:page :search-result-ids]))
-                        vals
-                        (sort-by
-                          (comp (partial apply max)
-                                (partial map :created-at)
-                                :messages))
-                        reverse))))
+            :done-results
+            (dom/div nil
+              (apply dom/div #js {:className "threads"}
+                (map (fn [t] (om/build thread-view t
+                                       {:key :id
+                                        :opts {:searched? true}}))
+                     ; sort-by last reply, newest first
+                     (->> (select-keys (data :threads) (page :thread-ids))
+                          vals
+                          (sort-by
+                            (comp (partial apply max)
+                                  (partial map :created-at)
+                                  :messages))
+                          reverse))))
 
-          ; no results
-          :else
-          (dom/div nil
+            :done-empty
             (dom/div #js {:className "description"} "No results.")))))))

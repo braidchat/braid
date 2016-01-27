@@ -127,10 +127,7 @@
 
 (defn set-search-results! [threads]
   (transact! [:threads] #(merge % (key-by-id threads)))
-  (transact! [:page :search-result-ids] (constantly (map :id threads))))
-
-(defn set-search-searching! [bool]
-  (transact! [:page :search-searching] (constantly bool)))
+  (transact! [:page :thread-ids] (constantly (map :id threads))))
 
 (defn set-search-query! [query]
   (transact! [:page :search-query] (constantly query)))
