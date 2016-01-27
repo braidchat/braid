@@ -61,7 +61,7 @@
         (case (get-in data [:page :type])
           :inbox (om/build inbox-page-view data)
           :search (om/build search-page-view data)
-          :channel (om/build channel-page-view data)
+          :channel (om/build channel-page-view data {:react-key (get-in data [:page :id])})
           :user (om/build user-page-view data)
           :channels (om/build channels-page-view data))))))
 
