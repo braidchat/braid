@@ -38,7 +38,7 @@
             (map (fn [tag]
                    (om/build tag-view tag)) tags)))))))
 
-(defn thread-view [thread owner {:keys [searched?] :as opts}]
+(defn thread-view [thread owner opts]
   (let [scroll-to-bottom
         (fn [owner thread]
           (when-not (thread :new?) ; need this here b/c get-node breaks if no refs???
@@ -56,7 +56,7 @@
         (dom/div #js {:className "thread"}
           (dom/div #js {:className "card"}
             (dom/div #js {:className "head"}
-              (when-not (or (thread :new?) searched?)
+              (when (store/open-thread? (thread :id))
                 (dom/div #js {:className "close"
                               :onClick (fn [_]
                                          (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))

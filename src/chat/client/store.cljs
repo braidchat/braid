@@ -117,6 +117,9 @@
 (defn id->thread [thread-id]
   (get-in @app-state [:threads thread-id]))
 
+(defn open-thread? [thread-id]
+  (contains? (set (get-in @app-state [:user :open-thread-ids])) thread-id))
+
 ; channels page
 
 (defn set-channel-results! [threads]

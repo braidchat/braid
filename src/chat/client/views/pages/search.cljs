@@ -23,8 +23,7 @@
             (dom/div nil
               (apply dom/div #js {:className "threads"}
                 (map (fn [t] (om/build thread-view t
-                                       {:key :id
-                                        :opts {:searched? true}}))
+                                       {:key :id}))
                      ; sort-by last reply, newest first
                      (->> (select-keys (data :threads) (page :thread-ids))
                           vals
