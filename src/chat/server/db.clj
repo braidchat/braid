@@ -715,17 +715,21 @@
          set)))
 
 (defn threads-with-tag
-  [user-id tag-id]
-  ; TODO: pagination?
-  ; TODO: consistent order for results
-  (->> (d/q '[:find (pull ?thread pull-pattern)
-              :in $ ?tag-id pull-pattern
-              :where
-              [?tag :tag/id ?tag-id]
-              [?thread :thread/tag ?tag]]
-            (d/db *conn*)
-            tag-id
-            thread-pull-pattern)
-       (map first)
-       (map db->thread)
-       (filter (fn [thread] (user-can-see-thread? user-id (thread :id))))))
+  [user-id tag-id skip limit]
+  (let [thread-eids (->> (d/q '[:find ?thread (max ?time)
+                                :in $ ?tag-id
+                                :where
+                                [?tag :tag/id ?tag-id]
+                                [?thread :thread/tag ?tag]
+                                [?msg :message/thread ?thread]
+                                [?msg :message/created-at ?time]]
+                              (d/db *conn*)
+                              tag-id)
+                         (sort-by second)
+                         reverse
+                         (drop skip)
+                         (take limit)
+                         (map first))]
+    (->> (d/pull-many (d/db *conn*) thread-pull-pattern thread-eids)
+         (map db->thread)
+         (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))))

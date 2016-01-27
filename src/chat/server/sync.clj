@@ -188,7 +188,7 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (let [user-tags (db/with-conn (db/get-user-visible-tag-ids user-id))
           filter-tags (fn [t] (update-in t [:tag-ids] (partial filter user-tags)))
-          threads (db/with-conn (->> (db/threads-with-tag user-id ?data)
+          threads (db/with-conn (->> (db/threads-with-tag user-id ?data 0 50)
                                      (map filter-tags)
                                      doall))]
       (when ?reply-fn
