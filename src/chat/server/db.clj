@@ -227,6 +227,15 @@
    :threads-count (get e :tag/threads-count 0)
    :subscribers-count (get e :tag/subscribers-count 0)})
 
+(def thread-pull-pattern
+  [:thread/id
+   {:thread/tag [:tag/id]}
+   {:thread/mentioned [:user/id]}
+   {:message/_thread [:message/id
+                      :message/content
+                      {:message/user [:user/id]}
+                      :message/created-at]}])
+
 (defn- db->thread
   [thread]
   {:id (thread :thread/id)
@@ -515,18 +524,14 @@
 (defn get-open-threads-for-user
   [user-id]
   (let [visible-tags (get-user-visible-tag-ids user-id)]
-    (->> (d/q '[:find (pull ?thread [:thread/id
-                                     {:thread/tag [:tag/id]}
-                                     {:thread/mentioned [:user/id]}
-                                     {:message/_thread [:message/id
-                                                        :message/content
-                                                        {:message/user [:user/id]}
-                                                        :message/created-at]}])
-                :in $ ?user-id
+    (->> (d/q '[:find (pull ?thread pull-pattern)
+                :in $ ?user-id pull-pattern
                 :where
                 [?e :user/id ?user-id]
                 [?e :user/open-thread ?thread]]
-              (d/db *conn*) user-id)
+              (d/db *conn*)
+              user-id
+              thread-pull-pattern)
          (into ()
                (map (comp (fn [t]
                             (update-in t [:tag-ids] (partial filter visible-tags)))
@@ -535,18 +540,13 @@
 
 (defn get-thread
   [thread-id]
-  (-> (d/q '[:find (pull ?thread [:thread/id
-                                  {:thread/tag [:tag/id]}
-                                  {:thread/mentioned [:user/id]}
-                                  {:message/_thread [:message/id
-                                                     :message/content
-                                                     {:message/user [:user/id]}
-                                                     :message/created-at]}])
-             :in $ ?thread-id
+  (-> (d/q '[:find (pull ?thread pull-pattern)
+             :in $ ?thread-id pull-pattern
              :where
              [?thread :thread/id ?thread-id]]
            (d/db *conn*)
-           thread-id)
+           thread-id
+           thread-pull-pattern)
       first
       first
       db->thread))
@@ -713,3 +713,19 @@
          (map (fn [[tag]]
                 (db->tag (merge tag (tag-stats (tag :tag/id))))))
          set)))
+
+(defn threads-with-tag
+  [user-id tag-id]
+  ; TODO: pagination?
+  ; TODO: consistent order for results
+  (->> (d/q '[:find (pull ?thread pull-pattern)
+              :in $ ?tag-id pull-pattern
+              :where
+              [?tag :tag/id ?tag-id]
+              [?thread :thread/tag ?tag]]
+            (d/db *conn*)
+            tag-id
+            thread-pull-pattern)
+       (map first)
+       (map db->thread)
+       (filter (fn [thread] (user-can-see-thread? user-id (thread :id))))))

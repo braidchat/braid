@@ -96,6 +96,14 @@
           (store/set-search-searching! false)
           (store/set-search-results! results)))))
 
+(defmethod dispatch! :threads-for-tag [_ tag-id]
+  (sync/chsk-send!
+    [:chat/threads-for-tag tag-id]
+    2500
+    (fn [reply]
+      (when-let [results (:threads reply)]
+          (store/set-channel-results! results)))))
+
 (defmethod dispatch! :invite [_ data]
   (let [invite (schema/make-invitation data)]
     (sync/chsk-send! [:chat/invite-to-group invite])))
