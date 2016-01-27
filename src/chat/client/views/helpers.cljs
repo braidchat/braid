@@ -93,6 +93,14 @@
                (vreset! in-code [])
                (xf result (result-fn (string/join " " code))))
 
+             (and (= @state ::in-code) (not= -1 (.indexOf input delimiter)))
+             (let [idx (.indexOf input delimiter)
+                   code (conj @in-code (.slice input 0 idx))
+                   after (.slice input (inc idx) (.-length input))]
+               (vreset! state ::start)
+               (vreset! in-code [])
+               (reduce xf result [(result-fn (string/join " " code)) after]))
+
              (= @state ::in-code) (do (vswap! in-code conj input) result)
 
              :else (xf result input))
