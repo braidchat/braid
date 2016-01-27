@@ -4,7 +4,7 @@
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.threads :refer [thread-view new-thread-view]]
-            [chat.client.views.pills :refer [tag-view]]))
+            [chat.client.views.pills :refer [tag-view subscribe-button]]))
 
 (defn channel-page-view [data owner]
   (reify
@@ -15,15 +15,7 @@
         (dom/div #js {:className "page channel"}
           (dom/div #js {:className "title"}
             (om/build tag-view tag)
-            (if (store/is-subscribed-to-tag? (tag :id))
-              (dom/a #js {:className "button"
-                          :onClick (fn [_]
-                                     (dispatch! :unsubscribe-from-tag (tag :id)))}
-                "Unsubscribe")
-              (dom/a #js {:className "button"
-                          :onClick (fn [_]
-                                     (dispatch! :subscribe-to-tag (tag :id)))}
-                "Subscribe")))
+            (subscribe-button tag))
 
           (dom/div #js {:className "description"}
             (dom/p nil "One day, a channel description will be here.")

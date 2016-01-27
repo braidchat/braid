@@ -1,8 +1,12 @@
+@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");
+
 @top-bar-height: 2rem;
 @card-width: 17rem;
 @pad: 1rem;
 @sidebar-width: 10rem;
 @avatar-size: 2rem;
+
+@grey-text: #888;
 
 body {
   margin: 0;
@@ -111,13 +115,13 @@ body {
 
 .button {
   .pill-box();
-  color: #aaa;
-  border: 1px solid #aaa;
+  color: @grey-text;
+  border: 1px solid @grey-text;
   background: none;
   margin-left: 1em;
   &:hover {
     color: #eee;
-    background: #aaa;
+    background: @grey-text;
     cursor: pointer;
   }
   &:active {
@@ -133,7 +137,7 @@ body {
   top: @pad;
   right: @pad + @top-bar-height + @pad;
   line-height: @top-bar-height;
-  color: #aaa;
+  color: @grey-text;
   height: @top-bar-height;
 }
 
@@ -378,6 +382,7 @@ body {
     overflow-y: scroll;
     overflow-x: hidden;
     display: none;
+    color: #fff;
     .close {
       color: white;
       font-size: 2em;
@@ -492,7 +497,7 @@ body {
     font-weight: normal;
   }
 
-  .inbox {
+  h2.link {
     &:hover {
       cursor: pointer;
       color: white;
@@ -516,19 +521,19 @@ body {
 }
 
 .page {
-  .title {
+  > .title {
     position: absolute;
     left: @sidebar-width + @pad;
     top: @pad;
     height: @top-bar-height;
     line-height: @top-bar-height;
-    color: #aaa;
+    color: @grey-text;
   }
-  .description {
+  > .description {
     position: absolute;
     left: @sidebar-width + @pad;
     top: 2*@pad + @top-bar-height;
-    color: #aaa;
+    color: @grey-text;
     width: @card-width;
     .avatar {
       width: 4rem;
@@ -536,6 +541,43 @@ body {
       display: block;
       border-radius: 1rem;
       margin-bottom: @pad;
+    }
+  }
+  > .content {
+    position: absolute;
+    left: @sidebar-width + @pad;
+    top: 2*@pad + @top-bar-height;
+    right: @pad;
+    bottom: @pad;
+    overflow: scroll;
+  }
+}
+
+.page.channels {
+  .tags {
+    margin-top: 1em;
+    color: @grey-text;
+    .tag-info {
+      margin-bottom: 1em;
+    }
+    .description {
+    }
+  }
+  .count {
+    margin-right: 0.5em;
+    &:after {
+      font-family: "fontawesome";
+      margin-left: 0.25em;
+    }
+    &.threads-count {
+      &:after {
+        content: "\f181";
+      }
+    }
+    &.subscribers-count {
+      &:after {
+        content: "\f0c0";
+      }
     }
   }
 }
