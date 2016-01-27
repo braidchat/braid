@@ -28,7 +28,6 @@
                          (sort-by
                            (comp (partial apply max)
                                  (partial map :created-at)
-                                 (partial filter (fn [m] (= (m :user-id) user-id)))
                                  :messages))
                          reverse)]
         (dom/div #js {:className "page channel"}
