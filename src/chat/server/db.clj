@@ -224,7 +224,8 @@
    :name (:tag/name e)
    :group-id (get-in e [:tag/group :group/id])
    :group-name (get-in e [:tag/group :group/name])
-   :count (:tag/count e)})
+   :threads-count (get e :tag/threads-count 0)
+   :subscribers-count (get e :tag/subscribers-count 0)})
 
 (defn- db->thread
   [thread]
@@ -674,21 +675,41 @@
             (d/db *conn*) group-id)
        (map (comp db->tag first))))
 
-(defn fetch-tags-for-user
-  "Get all tags visible to the given user"
+(defn fetch-tag-statistics-for-user
   [user-id]
   (->> (d/q '[:find
-              (pull ?t [:tag/id
-                        :tag/name
-                        {:tag/group [:group/id :group/name]}])
-              (count ?th)
+              ?tag-id
+              (count-distinct ?th)
+              (count-distinct ?sub)
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]
               [?g :group/user ?u]
               [?t :tag/group ?g]
+              [?t :tag/id ?tag-id]
+              [?sub :user/subscribed-tag ?t]
               [?th :thread/tag ?t]]
             (d/db *conn*) user-id)
-       (map (fn [[tag cnt]]
-              (db->tag (assoc tag :tag/count cnt))))
-       set))
+       (reduce (fn [memo [tag-id threads-count subscribers-count]]
+                 (assoc memo tag-id
+                   {:tag/threads-count threads-count
+                    :tag/subscribers-count subscribers-count}))
+               {})))
+
+(defn fetch-tags-for-user
+  "Get all tags visible to the given user"
+  [user-id]
+  (let [tag-stats (fetch-tag-statistics-for-user user-id)]
+    (->> (d/q '[:find
+                (pull ?t [:tag/id
+                          :tag/name
+                          {:tag/group [:group/id :group/name]}])
+                :in $ ?user-id
+                :where
+                [?u :user/id ?user-id]
+                [?g :group/user ?u]
+                [?t :tag/group ?g]]
+              (d/db *conn*) user-id)
+         (map (fn [[tag]]
+                (db->tag (merge tag (tag-stats (tag :tag/id))))))
+         set)))

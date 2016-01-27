@@ -24,45 +24,6 @@
         (dom/span #js {:className "name"}
           (tag :name))))))
 
-(defn new-tag-view [data owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:error nil})
-    om/IRenderState
-    (render-state [_ state]
-      (dom/input #js {:className (str "new-tag " (when (state :error) "error"))
-                      :onKeyUp
-                      (fn [e]
-                        (let [text (.. e -target -value)]
-                          (om/set-state! owner :error (not (valid-tag-name? text)))))
-                      :onKeyDown
-                      (fn [e]
-                        (when (= KeyCodes.ENTER e.keyCode)
-                          (let [text (.. e -target -value)]
-                            (dispatch! :create-tag [text (data :group-id)]))
-                          (.preventDefault e)
-                          (aset (.. e -target) "value" "")))
-                      :placeholder "New Tag"}))))
-
-(defn group-tags-view [[group-id tags] owner opts]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "group"}
-        (dom/h2 #js {:className "name"}
-          (:name (store/id->group group-id)))
-        (om/build group-invite-view group-id {:opts opts})
-        (apply dom/div #js {:className "tags"}
-          (om/build-all tag-view tags))
-        (om/build new-tag-view {:group-id group-id} {:opts opts})))))
-
-(defn groups-view [grouped-tags owner opts]
-  (reify
-    om/IRender
-    (render [_]
-      (apply dom/div #js {:className "tag-groups"}
-        (om/build-all group-tags-view grouped-tags {:opts opts})))))
 
 (defn nickname-view [data owner opts]
   (reify
@@ -124,41 +85,36 @@
       {:active? false})
     om/IRenderState
     (render-state [_ {:keys [active?] :as state}]
-      (let [groups-map (->> (keys (data :groups))
-                            (into {} (map (juxt identity (constantly nil))) ))
-            ; groups-map is just map of group-ids to nil, to be merged with
-            ; tags, so there is still an entry for groups without any tags
-            grouped-tags (->> (data :tags)
-                              vals
-                              (map (fn [tag]
-                                     (assoc tag :subscribed?
-                                       (store/is-subscribed-to-tag? (tag :id)))))
-                              (group-by :group-id)
-                              (merge groups-map))]
+      (dom/div #js {:className "meta"}
+        (dom/img #js {:className "avatar"
+                      :onClick (fn [e]
+                                 (om/update-state! owner :active? not))
+                      :src (let [user-id (get-in @store/app-state [:session :user-id])]
+                             (get-in @store/app-state [:users user-id :avatar]))})
+        (dom/div #js {:className (str "user-modal " (when active? "active"))}
+          (dom/div #js {:className "close"
+                        :onClick (fn [_]
+                                   (om/set-state! owner :active? false))} "×")
+          (om/build nickname-view (data :session))
+          (apply dom/div nil
+            (map
+              (fn [group]
+                (dom/div #js {}
+                  (dom/div nil (group :name))
+                  (om/build group-invite-view (group :id))))
+              (vals (data :groups))))
 
-        (dom/div #js {:className "meta"}
-          (dom/img #js {:className "avatar"
-                        :onClick (fn [e]
-                                   (om/update-state! owner :active? not))
-                        :src (let [user-id (get-in @store/app-state [:session :user-id])]
-                               (get-in @store/app-state [:users user-id :avatar]))})
-          (dom/div #js {:className (str "user-modal " (when active? "active"))}
-            (dom/div #js {:className "close"
-                          :onClick (fn [_]
-                                     (om/set-state! owner :active? false))} "×")
-            (om/build nickname-view (data :session))
-            (om/build groups-view grouped-tags)
-            (when (seq (data :invitations))
-              (om/build invitations-view (data :invitations)))
-            (dom/div #js {:className "new-group"}
-              (dom/label nil "New Group"
-                (dom/input #js {:placeholder "Group Name"
-                                :onKeyDown
-                                (fn [e]
-                                  (when (= KeyCodes.ENTER e.keyCode)
-                                    (.preventDefault e)
-                                    (let [group-name (.. e -target -value)]
-                                      (dispatch! :create-group {:name group-name})
-                                      (set! (.. e -target -value) "")))) })))
-            (dom/div #js {:className "logout"
-                          :onClick (fn [_] (dispatch! :logout nil))} "Log Out")))))))
+          (when (seq (data :invitations))
+            (om/build invitations-view (data :invitations)))
+          (dom/div #js {:className "new-group"}
+            (dom/label nil "New Group"
+              (dom/input #js {:placeholder "Group Name"
+                              :onKeyDown
+                              (fn [e]
+                                (when (= KeyCodes.ENTER e.keyCode)
+                                  (.preventDefault e)
+                                  (let [group-name (.. e -target -value)]
+                                    (dispatch! :create-group {:name group-name})
+                                    (set! (.. e -target -value) "")))) })))
+          (dom/div #js {:className "logout"
+                        :onClick (fn [_] (dispatch! :logout nil))} "Log Out"))))))

@@ -68,19 +68,22 @@
       (dom/div #js {:className "sidebar"}
         (om/build search-box-view (data :page))
 
-        (dom/h2 #js {:className "inbox"
+        (dom/h2 #js {:className "inbox link"
                      :onClick (fn []
                                 (store/set-page! {:type :inbox}))}
           "Inbox"
           (dom/span #js {:className "count"}
             (count (get-in @store/app-state [:user :open-thread-ids]))))
-        (dom/h2 nil "Channels")
+        (dom/h2 #js {:className "channels link"
+                     :onClick (fn []
+                                (store/set-page! {:type :channels}))}
+          "Channels")
         (dom/div #js {:className "conversations"}
           (apply dom/div nil
             (->> (@store/app-state :tags)
                  vals
                  (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
-                 (sort-by :count)
+                 (sort-by :threads-count)
                  reverse
                  (take 8)
                  (map (fn [tag]
@@ -101,7 +104,7 @@
           (->> (@store/app-state :tags)
                vals
                (remove (fn [t] (store/is-subscribed-to-tag? (t :id))))
-               (sort-by :count)
+               (sort-by :threads-count)
                reverse
                (take 2)
                ; shuffle
