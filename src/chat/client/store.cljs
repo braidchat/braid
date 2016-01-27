@@ -117,14 +117,20 @@
 (defn id->thread [thread-id]
   (get-in @app-state [:threads thread-id]))
 
+(defn open-thread? [thread-id]
+  (contains? (set (get-in @app-state [:user :open-thread-ids])) thread-id))
+
+; channels page
+
+(defn set-channel-results! [threads]
+  (transact! [:threads] #(merge % (key-by-id threads)))
+  (transact! [:page :thread-ids] (constantly (map :id threads))))
+
 ; search threads
 
 (defn set-search-results! [threads]
   (transact! [:threads] #(merge % (key-by-id threads)))
-  (transact! [:page :search-result-ids] (constantly (map :id threads))))
-
-(defn set-search-searching! [bool]
-  (transact! [:page :search-searching] (constantly bool)))
+  (transact! [:page :thread-ids] (constantly (map :id threads))))
 
 (defn set-search-query! [query]
   (transact! [:page :search-query] (constantly query)))
@@ -207,3 +213,4 @@
 
 (defn remove-invite! [invite]
   (transact! [:invitations] (partial remove (partial = invite))))
+

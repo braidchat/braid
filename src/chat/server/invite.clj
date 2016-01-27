@@ -29,17 +29,17 @@
 (defn cache-set! [k v]
   (if prod?
     (car/wcar redis-conn (car/set k v))
-    (swap! cache assoc k v)))
+    (swap! dev-cache assoc k v)))
 
 (defn cache-get [k]
   (if prod?
     (car/wcar redis-conn (car/get k))
-    (@cache k)))
+    (@dev-cache k)))
 
 (defn cache-del! [k]
   (if prod?
     (car/wcar redis-conn (car/del k))
-    (swap! cache dissoc k)))
+    (swap! dev-cache dissoc k)))
 
 (defn random-nonce
   "url-safe random nonce"

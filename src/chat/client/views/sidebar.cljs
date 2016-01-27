@@ -44,11 +44,10 @@
                 (store/set-search-results! {})
                 (if (string/blank? query)
                   (do
-                    (store/set-search-searching! false)
                     (store/set-page! {:type :inbox}))
                   (do
                     (store/set-page! {:type :search :search-query query})
-                    (store/set-search-searching! true)
+                    ; consider moving this dispatch! into search-page-view
                     (dispatch! :search-history query))))))))
     om/IRenderState
     (render-state [_ {:keys [search-chan]}]
@@ -68,19 +67,24 @@
       (dom/div #js {:className "sidebar"}
         (om/build search-box-view (data :page))
 
-        (dom/h2 #js {:className "inbox"
+        (dom/h2 #js {:className "inbox link"
                      :onClick (fn []
                                 (store/set-page! {:type :inbox}))}
           "Inbox"
           (dom/span #js {:className "count"}
             (count (get-in @store/app-state [:user :open-thread-ids]))))
-        (dom/h2 nil "Channels")
+        (dom/h2 #js {:className "channels link"
+                     :onClick (fn []
+                                (store/set-page! {:type :channels}))}
+          "Channels")
         (dom/div #js {:className "conversations"}
           (apply dom/div nil
             (->> (@store/app-state :tags)
                  vals
                  (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
-                 (take 5)
+                 (sort-by :threads-count)
+                 reverse
+                 (take 8)
                  (map (fn [tag]
                         (dom/div nil (om/build tag-view tag)))))))
 
@@ -99,8 +103,10 @@
           (->> (@store/app-state :tags)
                vals
                (remove (fn [t] (store/is-subscribed-to-tag? (t :id))))
-               shuffle
-               (take 4)
+               (sort-by :threads-count)
+               reverse
+               (take 2)
+               ; shuffle
                (map (fn [tag]
                       (dom/div nil (om/build tag-view tag))))))
 
