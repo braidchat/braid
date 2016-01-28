@@ -175,11 +175,12 @@
             (dom/textarea #js {:placeholder (config :placeholder)
                                :value (state :text)
                                :onChange (fn [e]
-                                           (om/update-state! owner
-                                                             (fn [s]
-                                                               (assoc s
-                                                                 :text (.. e -target -value)
-                                                                 :force-close? false))))
+                                           (let [text (.slice (.. e -target -value) 0 5000)]
+                                             (om/update-state! owner
+                                                               (fn [s]
+                                                                 (assoc s
+                                                                   :text text
+                                                                   :force-close? false)))))
                                :onKeyDown
                                (fn [e]
                                  (condp = e.keyCode
