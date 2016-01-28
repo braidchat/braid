@@ -19,7 +19,8 @@
       (testing "create-tag!"
         (let [tag (db/create-tag! tag-data)]
           (testing "returns tag"
-            (is (= tag (assoc tag-data :group-name "Lean Pixel")))))))))
+            (is (= tag (assoc tag-data :group-name "Lean Pixel"
+                         :threads-count 0 :subscribers-count 0)))))))))
 
 (deftest user-can-subscribe-to-tags
   (let [user (db/create-user! {:id (db/uuid)
