@@ -238,6 +238,12 @@
                       {:message/user [:user/id]}
                       :message/created-at]}])
 
+(def user-pull-pattern
+  '[:user/id
+    :user/nickname
+    :user/avatar
+    {:group/_user [:group/id]}])
+
 (defn- db->thread
   [thread]
   {:id (thread :thread/id)
@@ -398,13 +404,13 @@
 
 (defn user-by-id
   [id]
-  (some-> (d/pull (d/db *conn*) '[:user/id :user/avatar :user/nickname] [:user/id id])
+  (some-> (d/pull (d/db *conn*) user-pull-pattern [:user/id id])
           db->user))
 
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
   [email]
-  (some-> (d/pull (d/db *conn*) '[:user/id :user/email :user/avatar :user/nickname] [:user/email email])
+  (some-> (d/pull (d/db *conn*) user-pull-pattern [:user/email email])
           db->user))
 
 (defn create-invitation!
@@ -434,16 +440,15 @@
 (defn fetch-users-for-user
   "Get all users visible to given user"
   [user-id]
-  (->> (d/q '[:find (pull ?e [:user/id
-                              :user/nickname
-                              :user/avatar
-                              {:group/_user [:group/id]}])
-              :in $ ?user-id
+  (->> (d/q '[:find (pull ?e pull-pattern)
+              :in $ ?user-id pull-pattern
               :where
               [?u :user/id ?user-id]
               [?g :group/user ?u]
               [?g :group/user ?e]]
-            (d/db *conn*) user-id)
+            (d/db *conn*)
+            user-id
+            user-pull-pattern)
        (map (comp db->user first))
        set))
 
@@ -501,13 +506,14 @@
        set))
 
 (defn get-users-in-group [group-id]
-  (->> (d/q '[:find (pull ?u [:user/id :user/email :user/nickname :user/avatar])
-              :in $ ?group-id
+  (->> (d/q '[:find (pull ?u pull-pattern)
+              :in $ ?group-id pull-pattern
               :where
               [?g :group/id ?group-id]
               [?g :group/user ?u]]
             (d/db *conn*)
-            group-id)
+            group-id
+            user-pull-pattern)
        (map (comp db->user first))
        set))
 
