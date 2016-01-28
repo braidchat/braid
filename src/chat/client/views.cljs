@@ -3,6 +3,7 @@
             [om.dom :as dom]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
+            [chat.client.views.groups-nav :refer [groups-nav-view]]
             [chat.client.views.user-modal :refer [user-modal-view]]
             [chat.client.views.sidebar :refer [sidebar-view]]
             [chat.client.views.pages.search :refer [search-page-view]]
@@ -48,7 +49,7 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div nil
+      (dom/div #js {:className "main"}
         (when-let [err (data :error-msg)]
           (dom/div #js {:className "error-banner"}
             err
@@ -56,6 +57,7 @@
                            :onClick (fn [_] (store/clear-error!))} "×")))
         (dom/div #js {:className "instructions"}
           "Tag conversations with #... Add/mention users with @... Emoji :shortcode: support")
+        (om/build groups-nav-view data)
         (om/build user-modal-view data)
         (om/build sidebar-view data)
         (case (get-in data [:page :type])
@@ -69,7 +71,7 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div nil
+      (dom/div #js {:className "app"}
         (if (data :session)
           (om/build main-view data)
           (om/build login-view data))))))

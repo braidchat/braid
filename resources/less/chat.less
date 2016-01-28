@@ -3,6 +3,7 @@
 @top-bar-height: 2rem;
 @card-width: 17rem;
 @pad: 1rem;
+@groups-nav-width: 3rem;
 @sidebar-width: 10rem;
 @avatar-size: 2rem;
 
@@ -14,6 +15,49 @@ body {
   font-family: Tahoma;
   font-size: 12px;
   background: #eee;
+}
+
+.app > .main {
+  > .groups {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: @groups-nav-width;
+  }
+  > .sidebar {
+    position: absolute;
+    left: @groups-nav-width;
+    top: 0;
+    bottom: 0;
+    width: @sidebar-width;
+  }
+  > .page {
+    position: absolute;
+    left: @groups-nav-width + @sidebar-width;
+    top: 0;
+    bottom: 0;
+    right: 0;
+  }
+}
+
+
+.app .main > .groups {
+  background: #222;
+  padding: @pad / 2;
+  > .group {
+    background: white;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 10%;
+    cursor: pointer;
+    margin-bottom: @pad / 2;
+
+    line-height: 2rem;
+    text-align: center;
+    font-size: 1.5em;
+    color: #222;
+  }
 }
 
 .floating-box() {
@@ -146,7 +190,7 @@ body {
   top: @top-bar-height + @pad + @pad;
   right: 0;
   bottom: @pad;
-  left: @sidebar-width;
+  left: 0;
   padding-left: @pad;
 
   display: -webkit-flex;
@@ -471,12 +515,7 @@ body {
   }
 }
 
-.sidebar {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: @sidebar-width;
+.app .main .sidebar {
   background: #333;
   color: #ccc;
 
@@ -522,12 +561,10 @@ body {
 
 .page {
   > .title {
-    position: absolute;
-    left: @sidebar-width + @pad;
-    top: @pad;
     height: @top-bar-height;
     line-height: @top-bar-height;
     color: @grey-text;
+    margin: @pad;
   }
   > .description {
     position: absolute;
@@ -544,12 +581,8 @@ body {
     }
   }
   > .content {
-    position: absolute;
-    left: @sidebar-width + @pad;
-    top: 2*@pad + @top-bar-height;
-    right: @pad;
-    bottom: @pad;
     overflow: scroll;
+    margin: @pad;
   }
 }
 
