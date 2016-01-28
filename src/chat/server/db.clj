@@ -194,7 +194,9 @@
   [e]
   {:id (:user/id e)
    :nickname (:user/nickname e)
-   :avatar (:user/avatar e)})
+   :avatar (:user/avatar e)
+   ; TODO currently leaking all group-ids to the client
+   :group-ids (map :group/id (:group/_user e))})
 
 (defn- db->message
   [e]
@@ -434,7 +436,8 @@
   [user-id]
   (->> (d/q '[:find (pull ?e [:user/id
                               :user/nickname
-                              :user/avatar])
+                              :user/avatar
+                              {:group/_user [:group/id]}])
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]
