@@ -80,6 +80,9 @@
        (filter (fn [u] (= nickname (u :nickname))))
        first))
 
+(defn valid-user-id? [user-id]
+  (some? (get-in @app-state [:users user-id])))
+
 ; threads and messages
 
 (defn set-open-threads! [threads]

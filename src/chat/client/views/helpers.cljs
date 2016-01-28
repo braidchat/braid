@@ -23,8 +23,8 @@
    :users
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
-               (if-let [user (user-cursor (uuid match))]
-                 (om/build user-view user)
+               (if (store/valid-user-id? (uuid match))
+                 (om/build user-view {:id (uuid match)})
                  (dom/span nil "@" match)))}
    :tags
    {:pattern #"#(\S*)"
