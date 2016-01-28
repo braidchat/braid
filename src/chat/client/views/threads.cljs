@@ -5,7 +5,7 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.new-message :refer [new-message-view]]
-            [chat.client.views.pills :refer [tag-view user-view]]
+            [chat.client.views.pills :refer [tag-view user-view id->color]]
             [cljs-uuid-utils.core :as uuid]
             [chat.client.views.helpers :as helpers])
   (:import [goog.events KeyCodes]))
@@ -16,7 +16,9 @@
     (render [_]
       (let [sender (om/observe owner (om/ref-cursor (get-in (om/root-cursor store/app-state) [:users (message :user-id)])))]
         (dom/div #js {:className (str "message " (when (:collapse? opts) "collapse"))}
-          (dom/img #js {:className "avatar" :src (sender :avatar)})
+          (dom/img #js {:className "avatar"
+                        :src (sender :avatar)
+                        :style #js {:backgroundColor (id->color (sender :id))}})
           (dom/div #js {:className "info"}
             (dom/span #js {:className "nickname"} (sender :nickname))
             (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
@@ -50,6 +52,9 @@
         (scroll-to-bottom owner thread))
       om/IWillReceiveProps
       (will-receive-props [_ _]
+        (scroll-to-bottom owner thread))
+      om/IDidUpdate
+      (did-update [_ _ _]
         (scroll-to-bottom owner thread))
       om/IRender
       (render [_]
