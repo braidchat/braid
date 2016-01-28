@@ -9,15 +9,21 @@
             [chat.client.store :as store]
             [chat.client.views.pills :refer [tag-view user-view]]))
 
+(defn user-cursor
+  "Get an om cursor for the given user"
+  [user-id]
+  (when (store/valid-user-id? user-id)
+    (om/ref-cursor (get-in (om/root-cursor store/app-state) [:users user-id]))))
+
 (def replacements
   {:urls
    {:pattern #"(http(?:s)?://\S+(?:\w|\d|/))"
     :replace (fn [match]
                (dom/a #js {:href match :target "_blank"} match))}
    :users
-   {:pattern #"@(\S*)"
+   {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
-               (if-let [user (store/nickname->user match)]
+               (if-let [user (user-cursor (uuid match))]
                  (om/build user-view user)
                  (dom/span nil "@" match)))}
    :tags

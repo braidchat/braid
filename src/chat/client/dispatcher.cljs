@@ -26,12 +26,20 @@
          (map nick->id)
          (remove nil?))))
 
+(defn identify-mentions
+  [content]
+  (string/replace content #"@(\w+)"
+                  (fn [[_ nick]] (str "@"
+                                      (if-let [user (store/nickname->user nick)]
+                                        (user :id)
+                                        nick)))))
+
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
   (when-not (string/blank? (data :content))
     (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
-                                        :content (data :content)
+                                        :content (identify-mentions (data :content))
                                         :thread-id (data :thread-id)
 
                                         :mentioned-tag-ids (concat (data :mentioned-tag-ids)
