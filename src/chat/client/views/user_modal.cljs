@@ -86,11 +86,12 @@
     om/IRenderState
     (render-state [_ {:keys [active?] :as state}]
       (dom/div #js {:className "meta"}
-        (dom/img #js {:className "avatar"
-                      :onClick (fn [e]
-                                 (om/update-state! owner :active? not))
-                      :src (let [user-id (get-in @store/app-state [:session :user-id])]
-                             (get-in @store/app-state [:users user-id :avatar]))})
+        (let [user-id (get-in @store/app-state [:session :user-id])]
+          (dom/img #js {:className "avatar"
+                        :style #js {:backgroundColor (id->color user-id)}
+                        :onClick (fn [e]
+                                   (om/update-state! owner :active? not))
+                        :src (get-in @store/app-state [:users user-id :avatar])}))
         (dom/div #js {:className (str "user-modal " (when active? "active"))}
           (dom/div #js {:className "close"
                         :onClick (fn [_]
