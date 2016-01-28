@@ -144,6 +144,7 @@
   [[_ data]]
   (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
   (store/set-page! {:type :inbox})
+  (store/set-open-group! (:id (first (data :user-groups))))
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))

@@ -2,7 +2,8 @@
   (:require [cljs-utils.core :refer [flip]]))
 
 (defonce app-state
-  (atom {:threads {}
+  (atom {:open-group-id nil
+         :threads {}
          :users {}
          :tags {}
          :groups {}
@@ -190,6 +191,9 @@
   (contains? (get-in @app-state [:user :subscribed-tag-ids]) tag-id))
 
 ; groups
+
+(defn set-open-group! [group-id]
+  (transact! [:open-group-id] (constantly group-id)))
 
 (defn id->group [group-id]
   (get-in @app-state [:groups group-id]))

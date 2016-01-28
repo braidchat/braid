@@ -2,7 +2,8 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [clojure.string :as string]
-            [chat.client.views.pills :refer [id->color]]))
+            [chat.client.views.pills :refer [id->color]]
+            [chat.client.store :as store]))
 
 (defn groups-nav-view [data owner]
   (reify
@@ -10,8 +11,10 @@
     (render [_]
       (apply dom/div #js {:className "groups"}
         (map (fn [group]
-               (dom/div #js {:className "group"
+               (dom/div #js {:className (str "group "
+                                             (when (= (@store/app-state :open-group-id)  (group :id)) "active"))
                              :style #js {:backgroundColor (id->color (group :id))}
-                             :onClick (fn [e])}
+                             :onClick (fn [e]
+                                        (store/set-open-group! (group :id)))}
                  (string/join "" (take 2 (group :name)))))
              (vals (data :groups)))))))
