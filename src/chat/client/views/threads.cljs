@@ -51,6 +51,9 @@
       om/IWillReceiveProps
       (will-receive-props [_ _]
         (scroll-to-bottom owner thread))
+      om/IDidUpdate
+      (did-update [_ _ _]
+        (scroll-to-bottom owner thread))
       om/IRender
       (render [_]
         (dom/div #js {:className "thread"}
