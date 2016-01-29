@@ -28,52 +28,33 @@
                           (aset (.. e -target) "value" "")))
                       :placeholder "New Tag"}))))
 
-(defn group-tags-view [[group-id tags] owner opts]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "group"}
-        (dom/h2 #js {:className "name"}
-          (:name (store/id->group group-id)))
-        (om/build new-tag-view {:group-id group-id} {:opts opts})
-        (apply dom/div #js {:className "tags"}
-          (map (fn [tag]
-                 (dom/div #js {:className "tag-info"}
-                   (dom/span #js {:className "count threads-count"}
-                     (tag :threads-count))
-                   (dom/span #js {:className "count subscribers-count"}
-                     (tag :subscribers-count))
-                   (om/build tag-view tag)
-                   (subscribe-button tag)))
-              tags))))))
-
-(defn groups-view [grouped-tags owner opts]
-  (reify
-    om/IRender
-    (render [_]
-      (apply dom/div #js {:className "groups"}
-        (om/build-all group-tags-view grouped-tags {:opts opts})))))
-
 (defn channels-page-view [data owner]
   (reify
     om/IRender
     (render [_]
       (dom/div #js {:className "page channels"}
         (dom/div #js {:className "title"}
-          "Channels")
+          "Tags")
 
         (dom/div #js {:className "content"}
-          (let [groups-map (->> (keys (data :groups))
-                                (into {} (map (juxt identity (constantly nil))) ))
-                ; groups-map is just map of group-ids to nil, to be merged with
-                ; tags, so there is still an entry for groups without any tags
-                grouped-tags (->> (data :tags)
-                                  vals
-                                  (map (fn [tag]
-                                         (assoc tag :subscribed?
-                                           (store/is-subscribed-to-tag? (tag :id)))))
-                                  (sort-by :threads-count)
-                                  reverse
-                                  (group-by :group-id)
-                                  (merge groups-map))]
-            (om/build groups-view grouped-tags)))))))
+          (let [group-id (data :open-group-id)
+                tags (->> (data :tags)
+                          vals
+                          (filter (fn [t] (= group-id (t :group-id))))
+                          (sort-by :threads-count)
+                          reverse
+                          (map (fn [tag]
+                                 (assoc tag :subscribed?
+                                   (store/is-subscribed-to-tag? (tag :id))))))]
+            (dom/div nil
+              (om/build new-tag-view {:group-id group-id})
+              (apply dom/div #js {:className "tags"}
+                (map (fn [tag]
+                       (dom/div #js {:className "tag-info"}
+                         (dom/span #js {:className "count threads-count"}
+                           (tag :threads-count))
+                         (dom/span #js {:className "count subscribers-count"}
+                           (tag :subscribers-count))
+                         (om/build tag-view tag)
+                         (subscribe-button tag)))
+                     tags)))))))))
