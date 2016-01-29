@@ -3,7 +3,7 @@
             [om.dom :as dom]
             [clojure.string :as string]
             [chat.client.store :as store]
-            [chat.client.views.pills :refer [id->color]]))
+            [chat.client.views.helpers :refer [id->color]]))
 
 (defn groups-nav-view [data owner]
   (reify

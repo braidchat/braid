@@ -4,7 +4,7 @@
             [clojure.string :as string]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.views.pills :refer [id->color]])
+            [chat.client.views.helpers :refer [id->color]])
   (:import [goog.events KeyCodes]))
 
 (defn group-explore-view [data owner]
