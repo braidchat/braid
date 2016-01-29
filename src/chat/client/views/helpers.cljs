@@ -52,8 +52,7 @@
     ; using Javascript split beacuse we don't want the match to be in the last
     ; component
     (let [[pre _ post] (seq (.split s re 3))]
-      (if (and (or (string/blank? pre) (re-matches #".*\s$" pre))
-            (or (string/blank? post) (re-matches #"^\s.*" post)))
+      (if (or (string/blank? pre) (re-matches #".*\s$" pre))
       ; XXX: find a way to use return a seq & use mapcat instead of this hack
       (dom/span #js {:className "dummy"} pre (replace-fn match) post)
       s))
