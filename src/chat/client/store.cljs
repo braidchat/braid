@@ -80,6 +80,9 @@
        (filter (fn [u] (= nickname (u :nickname))))
        first))
 
+(defn valid-user-id? [user-id]
+  (some? (get-in @app-state [:users user-id])))
+
 ; threads and messages
 
 (defn set-open-threads! [threads]
@@ -157,6 +160,9 @@
       vals
       (filter (fn [t] (= tag-name (t :name))))
       first))
+
+(defn get-tag [tag-id]
+  (get-in @app-state [:tags tag-id]))
 
 (defn get-ambiguous-tags
   "Get a set of all ambiguous tag names"

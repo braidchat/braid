@@ -9,21 +9,27 @@
             [chat.client.store :as store]
             [chat.client.views.pills :refer [tag-view user-view]]))
 
+(defn user-cursor
+  "Get an om cursor for the given user"
+  [user-id]
+  (when (store/valid-user-id? user-id)
+    (om/ref-cursor (get-in (om/root-cursor store/app-state) [:users user-id]))))
+
 (def replacements
   {:urls
    {:pattern #"(http(?:s)?://\S+(?:\w|\d|/))"
     :replace (fn [match]
                (dom/a #js {:href match :target "_blank"} match))}
    :users
-   {:pattern #"@(\S*)"
+   {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
-               (if-let [user (store/nickname->user match)]
-                 (om/build user-view user)
+               (if (store/valid-user-id? (uuid match))
+                 (om/build user-view {:id (uuid match)})
                  (dom/span nil "@" match)))}
    :tags
-   {:pattern #"#(\S*)"
+   {:pattern #"#([-0-9a-z]+)"
     :replace (fn [match]
-               (if-let [tag (store/name->tag match)]
+               (if-let [tag (store/get-tag (uuid match))]
                  (om/build tag-view tag)
                  (dom/span nil "#" match)))}
    :emoji-shortcodes
@@ -80,8 +86,17 @@
              ; TODO: handle starting code block with delimiter not at beginning of word
              ; start
              (and (= @state ::start) (.startsWith input delimiter))
-             (if (and (not= input delimiter) (.endsWith input delimiter))
+             (cond
+               (and (not= input delimiter) (.endsWith input delimiter))
                (xf result (result-fn (.slice input (count delimiter) (- (.-length input) (count delimiter)))))
+
+               (and (not= input delimiter) (not= 0 (.lastIndexOf input delimiter)))
+               (let [idx (.lastIndexOf input delimiter)
+                     code (.slice input (count delimiter) idx)
+                     after (.slice input (inc idx) (.-length input))]
+                 (reduce xf result [(result-fn code) after]))
+
+               :else
                (do (vreset! state ::in-code)
                    (vswap! in-code conj (.slice input (count delimiter)))
                    result))
@@ -92,6 +107,14 @@
                (vreset! state ::start)
                (vreset! in-code [])
                (xf result (result-fn (string/join " " code))))
+
+             (and (= @state ::in-code) (not= -1 (.indexOf input delimiter)))
+             (let [idx (.indexOf input delimiter)
+                   code (conj @in-code (.slice input 0 idx))
+                   after (.slice input (inc idx) (.-length input))]
+               (vreset! state ::start)
+               (vreset! in-code [])
+               (reduce xf result [(result-fn (string/join " " code)) after]))
 
              (= @state ::in-code) (do (vswap! in-code conj input) result)
 

@@ -109,7 +109,9 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (when (user-can-message? user-id ?data)
-      (do (db/with-conn (db/create-message! (assoc ?data :created-at (java.util.Date.))))
+      (do (db/with-conn (db/create-message! (-> ?data
+                                                (update-in [:content] #(apply str (take 5000 %)))
+                                                (assoc :created-at (java.util.Date.)))))
         (broadcast-thread (?data :thread-id) [])))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag

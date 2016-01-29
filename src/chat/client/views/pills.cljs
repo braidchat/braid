@@ -44,14 +44,17 @@
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className (str "user pill" (case (user :status)
-                                                   :online " on"
-                                                   " off"))
-                    :style #js {:backgroundColor (id->color (user :id))
-                                :color (id->color (user :id))
-                                :borderColor (id->color (user :id))}
-                    :onClick (fn [e]
-                               (store/set-page! {:type :user
-                                                 :id (user :id)}))}
-        (dom/span #js {:className "name"} (str "@" (user :nickname)))
-        #_(dom/div #js {:className (str "status " ((fnil name "") (user :status)))})))))
+      (let [user (om/observe owner (-> (om/root-cursor store/app-state)
+                                       (get-in [:users (user :id)])
+                                       om/ref-cursor))]
+        (dom/div #js {:className (str "user pill" (case (user :status)
+                                                    :online " on"
+                                                    " off"))
+                      :style #js {:backgroundColor (id->color (user :id))
+                                  :color (id->color (user :id))
+                                  :borderColor (id->color (user :id))}
+                      :onClick (fn [e]
+                                 (store/set-page! {:type :user
+                                                   :id (user :id)}))}
+          (dom/span #js {:className "name"} (str "@" (user :nickname)))
+          #_(dom/div #js {:className (str "status " ((fnil name "") (user :status)))}))))))

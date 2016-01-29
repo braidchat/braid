@@ -9,7 +9,7 @@
             [clojure.tools.nrepl.server :as nrepl]
             [chat.server.sync :as sync :refer [sync-routes]]
             [environ.core :refer [env]]
-            [chat.server.util :refer [valid-nickname?]]
+            [chat.shared.util :refer [valid-nickname?]]
             [chat.server.db :as db]
             [chat.server.invite :as invites]))
 
