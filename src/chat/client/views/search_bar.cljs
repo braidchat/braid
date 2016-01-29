@@ -49,7 +49,7 @@
                     (dispatch! :search-history query))))))))
     om/IRenderState
     (render-state [_ {:keys [search-chan]}]
-      (dom/div #js {:className "search"}
+      (dom/div #js {:className "search-bar"}
         (dom/input #js {:type "search" :placeholder "Search History"
                         :value (:search-query data)
                         :onChange

@@ -23,12 +23,22 @@
                  (dom/div #js {:className (str "group "
                                                (when (= (@store/app-state :open-group-id)  (group :id)) "active"))
                                :style #js {:backgroundColor (id->color (group :id))}
+                               :title (group :name)
                                :onClick (fn [e]
                                           (store/set-open-group! (group :id))
                                           (store/set-page! {:type :inbox}))}
-                   (string/join "" (take 2 (group :name)))))
+                   (string/join "" (take 2 (group :name)))
+                   (let [cnt (->>
+                               (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
+                               vals
+                               (filter (fn [thread]
+                                         (contains? (set (->> (thread :tag-ids)
+                                                              (map  (fn [tag-id]
+                                                                      (get-in @store/app-state [:tags tag-id :group-id]))))) (group :id))))
+                               count)]
+                     (when (< 0 cnt)
+                       (dom/span #js {:className "count"} cnt)))))
                (vals (data :groups))))
 
         (dom/div #js {:className "plus"
-                      :onClick (fn [_] (store/set-page! {:type :group-explore}))}
-          "")))))
+                      :onClick (fn [_] (store/set-page! {:type :group-explore}))} "")))))
