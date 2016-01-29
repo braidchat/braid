@@ -519,23 +519,20 @@ body {
     color: @grey-text;
     margin: @pad;
   }
-  > .description {
-    position: absolute;
-    left: @sidebar-width + @pad;
-    top: 2*@pad + @top-bar-height;
-    color: @grey-text;
-    width: @card-width;
-    .avatar {
-      width: 4rem;
-      height: 4rem;
-      display: block;
-      border-radius: 1rem;
-      margin-bottom: @pad;
-    }
-  }
   > .content {
     overflow: scroll;
     margin: @pad;
+    color: @grey-text;
+    .description {
+      width: @card-width;
+      .avatar {
+        width: 4rem;
+        height: 4rem;
+        display: block;
+        border-radius: 1rem;
+        margin-bottom: @pad;
+      }
+    }
   }
 }
 
@@ -545,8 +542,6 @@ body {
     color: @grey-text;
     .tag-info {
       margin-bottom: 1em;
-    }
-    .description {
     }
   }
   .count {

@@ -14,11 +14,12 @@
         (dom/div #js {:className "page channel"}
           (dom/div #js {:className "title"}
             (om/build user-view user))
-          (dom/div #js {:className "description"}
-            (dom/img #js {:className "avatar" :src (user :avatar)})
-            (dom/p nil "One day, a profile will be here.")
-            (dom/p nil "Currently only showing your open threads that mention this user.")
-            (dom/p nil "Soon, you will see all recent threads this user has participated in."))
+          (dom/div #js {:className "content"}
+            (dom/div #js {:className "description"}
+              (dom/img #js {:className "avatar" :src (user :avatar)})
+              (dom/p nil "One day, a profile will be here.")
+              (dom/p nil "Currently only showing your open threads that mention this user.")
+              (dom/p nil "Soon, you will see all recent threads this user has participated in.")))
           (apply dom/div #js {:className "threads"}
             (concat
               [(new-thread-view {:mentioned-ids [user-id]})]
