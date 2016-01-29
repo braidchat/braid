@@ -22,13 +22,19 @@
       (is (db/email-taken? (:email data)))
       (is (not (db/email-taken? "baz@quux.net"))))
     (testing "create returns a user"
-      (is (= user (-> data (dissoc :password :email) (assoc :nickname "foo")))))
+      (is (= (dissoc user :group-ids)
+             (-> data
+                 (dissoc :password :email)
+                 (assoc :nickname "foo")))))
     (testing "can set nickname"
       (is (not (db/nickname-taken? "ol' fooy")))
       @(db/set-nickname! (user :id) "ol' fooy")
       (is (db/nickname-taken? "ol' fooy"))
-      (is (= (db/user-with-email "foo@bar.com")
-             (-> data (dissoc :password :email) (assoc :nickname "ol' fooy"))))
+      (is (= (-> (db/user-with-email "foo@bar.com")
+                 (dissoc :group-ids))
+             (-> data
+                 (dissoc :password :email)
+                 (assoc :nickname "ol' fooy"))))
       (is (= "ol' fooy" (db/get-nickname (user :id)))))
 
     (testing "user email must be unique"
@@ -61,9 +67,11 @@
         _ (db/user-add-to-group! (user-2 :id) (group :id))
         users (db/fetch-users-for-user (user-1 :id))]
     (testing "returns all users"
-      (is (= (set users) #{user-1 user-2})))
+      (is (= (set (map (fn [u] (dissoc u :group-ids)) users))
+             (set (map (fn [u] (dissoc u :group-ids)) [user-1 user-2])))))
     (testing "get user by email"
-      (is (= user-1 (db/user-with-email (user-1-data :email))))
+      (is (= (dissoc user-1 :group-ids)
+             (dissoc (db/user-with-email (user-1-data :email)) :group-ids)))
       (is (nil? (db/user-with-email "zzzzz@zzzzzz.ru"))))))
 
 (deftest only-see-users-in-group
@@ -88,9 +96,18 @@
     (db/user-add-to-group! (user-2 :id) (group-2 :id))
     (db/user-add-to-group! (user-3 :id) (group-2 :id))
     (is (not (db/user-in-group? (user-1 :id) (group-2 :id))))
-    (is (= #{user-1 user-2} (db/fetch-users-for-user (user-1 :id))))
-    (is (= #{user-1 user-2 user-3} (db/fetch-users-for-user (user-2 :id))))
-    (is (= #{user-2 user-3} (db/fetch-users-for-user (user-3 :id))))
+    (is (= (set (map (fn [u] (dissoc u :group-ids))
+                     [user-1 user-2]))
+           (set (map (fn [u] (dissoc u :group-ids))
+                (db/fetch-users-for-user (user-1 :id))))))
+    (is (= (set (map (fn [u] (dissoc u :group-ids))
+                     [user-1 user-2 user-3]))
+           (set (map (fn [u] (dissoc u :group-ids))
+                (db/fetch-users-for-user (user-2 :id))))))
+    (is (= (set (map (fn [u] (dissoc u :group-ids))
+                     [user-2 user-3]))
+           (set (map (fn [u] (dissoc u :group-ids))
+                (db/fetch-users-for-user (user-3 :id))))))
     (is (db/user-visible-to-user? (user-1 :id) (user-2 :id)))
     (is (not (db/user-visible-to-user? (user-1 :id) (user-3 :id))))
     (is (not (db/user-visible-to-user? (user-3 :id) (user-1 :id))))
@@ -125,7 +142,9 @@
         (is (= #{} (db/get-users-in-group (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
         (is (= #{data} (db/get-groups-for-user (user :id))))
-        (is (= #{user} (db/get-users-in-group (group :id))))))))
+        (is (= #{(dissoc user :group-ids)}
+               (set (map (fn [u] (dissoc user :group-ids))
+                    (db/get-users-in-group (group :id))))))))))
 
 (deftest fetch-messages-test
   (let [user-1 (db/create-user! {:id (db/uuid)
