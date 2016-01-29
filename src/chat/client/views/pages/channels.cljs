@@ -42,10 +42,7 @@
                           vals
                           (filter (fn [t] (= group-id (t :group-id))))
                           (sort-by :threads-count)
-                          reverse
-                          (map (fn [tag]
-                                 (assoc tag :subscribed?
-                                   (store/is-subscribed-to-tag? (tag :id))))))]
+                          reverse)]
             (dom/div nil
               (om/build new-tag-view {:group-id group-id})
               (apply dom/div #js {:className "tags"}
