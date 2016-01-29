@@ -64,7 +64,8 @@
 
         (dom/div #js {:className "header"}
           (dom/div #js {:className "users" :title "Users"} 10)
-          (dom/div #js {:className "tags" :title "Explore"})
+          (dom/div #js {:className "tags" :title "Explore"
+                        :onClick (fn [e] (store/set-page! {:type :channels}))})
           (dom/div #js {:className "help" :title "Help"})
 
           (om/build search-bar-view (data :page)))
