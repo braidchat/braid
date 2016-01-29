@@ -1,29 +1,14 @@
 (ns chat.client.views.threads
   (:require [om.core :as om]
             [om.dom :as dom]
-            [clojure.string :as string]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.new-message :refer [new-message-view]]
-            [chat.client.views.pills :refer [tag-view user-view id->color]]
+            [chat.client.views.pills :refer [tag-view user-view]]
             [cljs-uuid-utils.core :as uuid]
-            [chat.client.views.helpers :as helpers])
+            [chat.client.views.message :refer [message-view]])
   (:import [goog.events KeyCodes]))
 
-(defn message-view [message owner opts]
-  (reify
-    om/IRender
-    (render [_]
-      (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))]
-        (dom/div #js {:className (str "message " (when (:collapse? opts) "collapse"))}
-          (dom/img #js {:className "avatar"
-                        :src (sender :avatar)
-                        :style #js {:backgroundColor (id->color (sender :id))}})
-          (dom/div #js {:className "info"}
-            (dom/span #js {:className "nickname"} (sender :nickname))
-            (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
-          (apply dom/div #js {:className "content"}
-            (helpers/format-message (message :content))))))))
 
 (defn thread-tags-view [thread owner]
   (reify

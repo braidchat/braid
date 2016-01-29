@@ -5,7 +5,7 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.emoji :as emoji]
-            [chat.client.views.pills :refer [id->color]])
+            [chat.client.views.helpers :refer [id->color]])
   (:import [goog.events KeyCodes]))
 
 

@@ -2,16 +2,8 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.store :as store]))
-
-(defn id->color [id]
-  ; normalized is approximately evenly distributed between 0 and 1
-  (let [normalized (-> id
-                       str
-                       (.substring 33 36)
-                       (js/parseInt 16)
-                       (/ 4096))]
-    (str "hsl(" (* 360 normalized) ",70%,35%)")))
+            [chat.client.store :as store]
+            [chat.client.views.helpers :refer [id->color]]))
 
 (defn subscribe-button [tag]
   (if (store/is-subscribed-to-tag? (tag :id))
