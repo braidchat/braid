@@ -468,14 +468,41 @@ body {
   }
 }
 
-.app .main .search-bar {
-  line-height: @top-bar-height;
-  position: absolute;
-  top: @pad;
-  right: @pad;
-  z-index: 100;
-  input {
-    width: 20em;
+.app .main {
+  > .header {
+    position: absolute;
+    top: @pad;
+    right: @pad;
+    z-index: 100;
+    line-height: @top-bar-height;
+    color: @grey-text;
+    .help, .users, .tags {
+      display: inline-block;
+      margin-right: @pad;
+      &:hover {
+        color: #000;
+        cursor: pointer;
+      }
+    }
+    .help:after {
+      font-family: "fontawesome";
+      content: "\f059";
+    }
+    .users:after {
+      font-family: "fontawesome";
+      content: "\f007";
+      margin-left: 0.25em;
+    }
+    .tags:after {
+      font-family: "fontawesome";
+      content: "\f02c";
+    }
+    .search-bar {
+      display: inline-block;
+      input {
+        width: 20em;
+      }
+    }
   }
 }
 

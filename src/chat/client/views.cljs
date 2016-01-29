@@ -61,7 +61,14 @@
           "Tag conversations with #... Add/mention users with @... Emoji :shortcode: support")
         (om/build groups-nav-view data)
         (om/build sidebar-view data)
-        (om/build search-bar-view (data :page))
+
+        (dom/div #js {:className "header"}
+          (dom/div #js {:className "users" :title "Users"} 10)
+          (dom/div #js {:className "tags" :title "Explore"})
+          (dom/div #js {:className "help" :title "Help"})
+
+          (om/build search-bar-view (data :page)))
+
         (case (get-in data [:page :type])
           :inbox (om/build inbox-page-view data)
           :search (om/build search-page-view data)
