@@ -58,8 +58,6 @@
             err
             (dom/span #js {:className "close"
                            :onClick (fn [_] (store/clear-error!))} "×")))
-        #_(dom/div #js {:className "instructions"}
-          "Tag conversations with #... Add/mention users with @... Emoji :shortcode: support")
         (om/build groups-nav-view data)
         (om/build sidebar-view data)
 
@@ -70,17 +68,24 @@
                            (filter (fn [u] (contains? (set (u :group-ids)) (@store/app-state :open-group-id)))))
                 users-online (->> users
                                   (filter (fn [user] (= :online (user :status)))))]
-            (dom/div #js {:className "users" :title "Users"}
-              (dom/div #js {:className "title"}
+            (dom/div #js {:className "users"}
+              (dom/div #js {:className "title" :title "Users"}
                 (count users-online))
               (apply dom/div #js {:className "modal"}
+                (dom/h2 nil "Online")
                 (->> users-online
                      (map (fn [user]
                             (dom/div nil
                               (om/build user-view user))))))))
           (dom/div #js {:className "tags" :title "Explore"
                         :onClick (fn [e] (store/set-page! {:type :channels}))})
-          (dom/div #js {:className "help" :title "Help"})
+          (dom/div #js {:className "help"}
+            (dom/div #js {:className "title" :title "Help"})
+            (dom/div #js {:className "modal"}
+              (dom/p nil "Conversations must be tagged to be seen by other people.")
+              (dom/p nil "Tag a conversation by mentioning a tag in a message: ex. #general")
+              (dom/p nil "You can also mention users to add them to a conversation: ex. @raf")
+              (dom/p nil "Add emoji by using :shortcodes: (they autocomplete).")))
 
           (om/build search-bar-view (data :page)))
 
