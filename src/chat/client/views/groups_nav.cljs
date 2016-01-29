@@ -27,9 +27,11 @@
                                :onClick (fn [e]
                                           (store/set-open-group! (group :id))
                                           (store/set-page! {:type :inbox}))}
-                   (string/join "" (take 2 (group :name)))))
+                   (string/join "" (take 2 (group :name)))
+                   (let [cnt (count (get-in @store/app-state [:user :open-thread-ids]))]
+                     (when (< 0 cnt)
+                       (dom/span #js {:className "count"} cnt)))))
                (vals (data :groups))))
 
         (dom/div #js {:className "plus"
-                      :onClick (fn [_] (store/set-page! {:type :group-explore}))}
-          "")))))
+                      :onClick (fn [_] (store/set-page! {:type :group-explore}))} "")))))

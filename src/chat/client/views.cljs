@@ -4,7 +4,6 @@
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.groups-nav :refer [groups-nav-view]]
-            [chat.client.views.sidebar :refer [sidebar-view]]
             [chat.client.views.pages.search :refer [search-page-view]]
             [chat.client.views.pages.inbox :refer [inbox-page-view]]
             [chat.client.views.pages.channel :refer [channel-page-view]]
@@ -59,7 +58,6 @@
             (dom/span #js {:className "close"
                            :onClick (fn [_] (store/clear-error!))} "×")))
         (om/build groups-nav-view data)
-        (om/build sidebar-view data)
 
         (dom/div #js {:className "header"}
           (let [users (->> (@store/app-state :users)
