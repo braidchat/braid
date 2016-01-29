@@ -57,13 +57,4 @@
                (map (fn [tag]
                       (dom/div nil (om/build tag-view tag))))))
 
-        (dom/h2 nil "Online")
-        (apply dom/div #js {:className "users"}
-          (->> (@store/app-state :users)
-               vals
-               (filter (fn [u] (contains? (set (u :group-ids)) (@store/app-state :open-group-id))))
-               (filter (fn [user] (= :online (user :status))))
-               (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
-               (map (fn [user]
-                      (dom/div nil
-                        (om/build user-view user))))))))))
+        ))))

@@ -476,19 +476,30 @@ body {
     z-index: 100;
     line-height: @top-bar-height;
     color: @grey-text;
+
+    .modal {
+      display: none;
+      background: white;
+      position: absolute;
+    }
+
     .help, .users, .tags {
       display: inline-block;
       margin-right: @pad;
       &:hover {
         color: #000;
         cursor: pointer;
+        .modal {
+          display: block;
+          padding: @pad;
+        }
       }
     }
     .help:after {
       font-family: "fontawesome";
       content: "\f059";
     }
-    .users:after {
+    .users .title:after {
       font-family: "fontawesome";
       content: "\f007";
       margin-left: 0.25em;

@@ -12,7 +12,8 @@
             [chat.client.views.pages.user :refer [user-page-view]]
             [chat.client.views.pages.group-explore :refer [group-explore-view]]
             [chat.client.views.pages.me :refer [me-page-view]]
-            [chat.client.views.search-bar :refer [search-bar-view]]))
+            [chat.client.views.search-bar :refer [search-bar-view]]
+            [chat.client.views.pills :refer [tag-view user-view]]))
 
 (defn login-view [data owner]
   (reify
@@ -63,7 +64,20 @@
         (om/build sidebar-view data)
 
         (dom/div #js {:className "header"}
-          (dom/div #js {:className "users" :title "Users"} 10)
+          (let [users (->> (@store/app-state :users)
+                           vals
+                           (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
+                           (filter (fn [u] (contains? (set (u :group-ids)) (@store/app-state :open-group-id)))))
+                users-online (->> users
+                                  (filter (fn [user] (= :online (user :status)))))]
+            (dom/div #js {:className "users" :title "Users"}
+              (dom/div #js {:className "title"}
+                (count users-online))
+              (apply dom/div #js {:className "modal"}
+                (->> users-online
+                     (map (fn [user]
+                            (dom/div nil
+                              (om/build user-view user))))))))
           (dom/div #js {:className "tags" :title "Explore"
                         :onClick (fn [e] (store/set-page! {:type :channels}))})
           (dom/div #js {:className "help" :title "Help"})
