@@ -28,7 +28,14 @@
                                           (store/set-open-group! (group :id))
                                           (store/set-page! {:type :inbox}))}
                    (string/join "" (take 2 (group :name)))
-                   (let [cnt (count (get-in @store/app-state [:user :open-thread-ids]))]
+                   (let [cnt (->>
+                               (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
+                               vals
+                               (filter (fn [thread]
+                                         (contains? (set (->> (thread :tag-ids)
+                                                              (map  (fn [tag-id]
+                                                                      (get-in @store/app-state [:tags tag-id :group-id]))))) (group :id))))
+                               count)]
                      (when (< 0 cnt)
                        (dom/span #js {:className "count"} cnt)))))
                (vals (data :groups))))
