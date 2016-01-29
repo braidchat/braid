@@ -130,6 +130,9 @@
   (transact! [:threads] #(merge % (key-by-id threads)))
   (transact! [:page :thread-ids] (constantly (map :id threads))))
 
+(defn add-channel-result! [thread-id]
+  (transact! [:page :thread-ids] #(conj % thread-id)))
+
 ; search threads
 
 (defn set-search-results! [threads]
