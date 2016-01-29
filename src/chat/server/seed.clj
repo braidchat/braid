@@ -16,12 +16,12 @@
                                    :email "foo@example.com"
                                    :nickname "foo"
                                    :password "foo"
-                                   :avatar ""})
+                                   :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
           user-2 (db/create-user! {:id (db/uuid)
                                    :email "bar@example.com"
                                    :nickname "bar"
                                    :password "bar"
-                                   :avatar ""})
+                                   :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
           _ (db/user-add-to-group! (user-1 :id) (group-1 :id))
           _ (db/user-add-to-group! (user-2 :id) (group-1 :id))
           _ (db/user-add-to-group! (user-1 :id) (group-2 :id))
