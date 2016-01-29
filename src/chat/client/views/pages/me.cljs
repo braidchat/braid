@@ -1,29 +1,12 @@
-(ns chat.client.views.user-modal
+(ns chat.client.views.pages.me
   (:require [om.core :as om]
             [om.dom :as dom]
-            [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
+            [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.group-invite :refer [group-invite-view]]
-            [chat.client.views.pills :refer [id->color]]
+            [chat.client.views.pills :refer [user-view]]
             [chat.shared.util :refer [valid-tag-name? valid-nickname?]])
   (:import [goog.events KeyCodes]))
-
-(defn tag-view [tag owner]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/div #js {:className "tag"
-                    :onClick (fn [_]
-                               (if (tag :subscribed?)
-                                 (dispatch! :unsubscribe-from-tag (tag :id))
-                                 (dispatch! :subscribe-to-tag (tag :id))))}
-        (dom/div #js {:className "color-block"
-                      :style #js {:backgroundColor (id->color (tag :id))}}
-          (when (tag :subscribed?)
-            "✔"))
-        (dom/span #js {:className "name"}
-          (tag :name))))))
-
 
 (defn nickname-view [data owner opts]
   (reify
@@ -78,25 +61,25 @@
                      "Decline")))
                invites))))))
 
-(defn user-modal-view [data owner]
+(defn me-page-view [data owner]
   (reify
-    om/IInitState
-    (init-state [_]
-      {:active? false})
-    om/IRenderState
-    (render-state [_ {:keys [active?] :as state}]
-      (dom/div #js {:className "meta"}
-        (let [user-id (get-in @store/app-state [:session :user-id])]
-          (dom/img #js {:className "avatar"
-                        :style #js {:backgroundColor (id->color user-id)}
-                        :onClick (fn [e]
-                                   (om/update-state! owner :active? not))
-                        :src (get-in @store/app-state [:users user-id :avatar])}))
-        (dom/div #js {:className (str "user-modal " (when active? "active"))}
-          (dom/div #js {:className "close"
-                        :onClick (fn [_]
-                                   (om/set-state! owner :active? false))} "×")
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "page me"}
+        (dom/div #js {:className "title"} "Me!")
+
+
+
+        (dom/div #js {:className "content"}
+
+          (dom/h2 nil "Log Out")
+          (dom/div #js {:className "logout"
+                        :onClick (fn [_] (dispatch! :logout nil))} "Log Out")
+
+          (dom/h2 nil "Update Nickname")
           (om/build nickname-view (data :session))
+
+          (dom/h2 nil "Send Invites")
           (apply dom/div nil
             (map
               (fn [group]
@@ -105,17 +88,6 @@
                   (om/build group-invite-view (group :id))))
               (vals (data :groups))))
 
+          (dom/h2 nil "Received Invites")
           (when (seq (data :invitations))
-            (om/build invitations-view (data :invitations)))
-          (dom/div #js {:className "new-group"}
-            (dom/label nil "New Group"
-              (dom/input #js {:placeholder "Group Name"
-                              :onKeyDown
-                              (fn [e]
-                                (when (= KeyCodes.ENTER e.keyCode)
-                                  (.preventDefault e)
-                                  (let [group-name (.. e -target -value)]
-                                    (dispatch! :create-group {:name group-name})
-                                    (set! (.. e -target -value) "")))) })))
-          (dom/div #js {:className "logout"
-                        :onClick (fn [_] (dispatch! :logout nil))} "Log Out"))))))
+            (om/build invitations-view (data :invitations))))))))

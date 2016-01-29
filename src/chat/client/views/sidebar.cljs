@@ -81,6 +81,7 @@
           (apply dom/div nil
             (->> (@store/app-state :tags)
                  vals
+                 (filter (fn [t] (= (@store/app-state :open-group-id) (t :group-id))))
                  (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
                  (sort-by :threads-count)
                  reverse
@@ -103,6 +104,7 @@
         (apply dom/div #js {:className "recommended"}
           (->> (@store/app-state :tags)
                vals
+               (filter (fn [t] (= (@store/app-state :open-group-id) (t :group-id))))
                (remove (fn [t] (store/is-subscribed-to-tag? (t :id))))
                (sort-by :threads-count)
                reverse
@@ -115,6 +117,7 @@
         (apply dom/div #js {:className "users"}
           (->> (@store/app-state :users)
                vals
+               (filter (fn [u] (contains? (set (u :group-ids)) (@store/app-state :open-group-id))))
                (filter (fn [user] (= :online (user :status))))
                (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
                (map (fn [user]

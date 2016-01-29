@@ -17,7 +17,9 @@
           (dom/div #js {:className "title"} "Search")
           (case status
             :searching
-            (dom/div #js {:className "description"} "Searching...")
+            (dom/div #js {:className "content"}
+              (dom/div #js {:className "description"}
+                "Searching..."))
 
             :done-results
             (dom/div nil
@@ -34,4 +36,6 @@
                           reverse))))
 
             :done-empty
-            (dom/div #js {:className "description"} "No results.")))))))
+            (dom/div #js {:className "content"}
+              (dom/div #js {:className "description"}
+                "No results."))))))))

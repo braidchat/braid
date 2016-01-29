@@ -59,6 +59,7 @@
                                    [org.postgresql/postgresql "9.3-1103-jdbc4"]
                                    [clj-aws-s3 "0.3.10" :exclusions [joda-time]]
                                    [org.clojure/tools.nrepl "0.2.10"]]}
+             :test [:dev]
              :uberjar [:prod
                        {:aot :all
                         :hooks [leiningen.cljsbuild

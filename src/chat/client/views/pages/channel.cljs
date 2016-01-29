@@ -35,14 +35,15 @@
             (om/build tag-view tag)
             (subscribe-button tag))
 
-          (dom/div #js {:className "description"}
-            (dom/p nil "One day, a channel description will be here.")
+          (dom/div #js {:className "content"}
+            (dom/div #js {:className "description"}
+              (dom/p nil "One day, a channel description will be here.")
 
-            (dom/div nil
-              (case status
-                :searching "Searching..."
-                :done-results "Done!"
-                :done-empty "No Results")))
+              (dom/div nil
+                (case status
+                  :searching "Searching..."
+                  :done-results "Done!"
+                  :done-empty "No Results"))))
 
 
           (apply dom/div #js {:className "threads"}
