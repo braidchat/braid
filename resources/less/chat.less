@@ -4,7 +4,6 @@
 @card-width: 17rem;
 @pad: 1rem;
 @groups-nav-width: @top-bar-height + @pad * 2;
-@sidebar-width: 10rem;
 @avatar-size: 2rem;
 
 @grey-text: #888;
@@ -26,16 +25,9 @@ body {
     width: @groups-nav-width;
     box-sizing: border-box;
   }
-  > .sidebar {
-    position: absolute;
-    left: @groups-nav-width;
-    top: 0;
-    bottom: 0;
-    width: @sidebar-width;
-  }
   > .page {
     position: absolute;
-    left: @groups-nav-width + @sidebar-width;
+    left: @groups-nav-width;
     top: 0;
     bottom: 0;
     right: 0;
@@ -65,6 +57,7 @@ body {
   .group {
     margin: @pad 0;
     color: #222;
+    position: relative;
 
     &.active {
       color: #ccc;
@@ -80,6 +73,20 @@ body {
       background: #555;
     }
   }
+
+
+  .count {
+    .pill-box();
+    font-size: 0.6rem;
+    color: #aaa;
+    background: #B53737;
+    color: white;
+    border-color: #B53737;
+    position: absolute;
+    bottom: -0.5rem;
+    right: -0.5rem;
+  }
+
 }
 
 .floating-box() {
@@ -468,46 +475,55 @@ body {
   }
 }
 
-.app .main .sidebar {
-  background: #333;
-  color: #ccc;
-
-  .count {
-    .pill-box();
-    background: none;
-    border: 1px solid #999;
-    margin-left: 0.5em;
-    color: #aaa;
-    margin-bottom: 0.2em;
-  }
-
-  h2 {
-    margin-left: @pad;
-    text-transform: uppercase;
-    font-size: 1em;
-    letter-spacing: 0.09em;
-    font-weight: normal;
-  }
-
-  h2.link {
-    &:hover {
-      cursor: pointer;
-      color: white;
-    }
-  }
-
-  .conversations, .recommended, .users {
-    margin-left: @pad;
-  }
-
-  .all, .tag, .user {
-    margin-bottom: 1em;
-  }
-  .search {
-    margin: @pad;
+.app .main {
+  > .header {
+    position: absolute;
+    top: @pad;
+    right: @pad;
+    z-index: 100;
     line-height: @top-bar-height;
-    input {
-      width: 100%;
+    color: @grey-text;
+
+    .modal {
+      display: none;
+      background: white;
+      position: absolute;
+      cursor: default;
+      p {
+        line-height: 1.2em;
+      }
+    }
+
+    .help, .users, .tags {
+      display: inline-block;
+      margin-right: @pad;
+      &:hover {
+        color: #000;
+        cursor: pointer;
+        .modal {
+          display: block;
+          padding: @pad;
+        }
+      }
+    }
+    .help .title:after {
+      font-family: "fontawesome";
+      content: "\f059";
+    }
+    .users .title:after {
+      font-family: "fontawesome";
+      content: "\f007";
+      margin-left: 0.25em;
+    }
+    .tags .title:after {
+      font-family: "fontawesome";
+      content: "\f02c";
+    }
+    .search-bar {
+      display: inline-block;
+      input {
+        width: 20em;
+      }
     }
   }
 }
@@ -521,7 +537,7 @@ body {
   }
   > .content {
     overflow: scroll;
-    margin: @pad;
+    padding: @pad;
     color: @grey-text;
     .description {
       width: @card-width;
