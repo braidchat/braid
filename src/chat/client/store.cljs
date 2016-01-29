@@ -161,6 +161,9 @@
       (filter (fn [t] (= tag-name (t :name))))
       first))
 
+(defn get-tag [tag-id]
+  (get-in @app-state [:tags tag-id]))
+
 (defn get-ambiguous-tags
   "Get a set of all ambiguous tag names"
   []

@@ -27,9 +27,9 @@
                  (om/build user-view {:id (uuid match)})
                  (dom/span nil "@" match)))}
    :tags
-   {:pattern #"#(\S*)"
+   {:pattern #"#([-0-9a-z]+)"
     :replace (fn [match]
-               (if-let [tag (store/name->tag match)]
+               (if-let [tag (store/get-tag (uuid match))]
                  (om/build tag-view tag)
                  (dom/span nil "#" match)))}
    :emoji-shortcodes
