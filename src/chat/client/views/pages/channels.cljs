@@ -28,30 +28,53 @@
                           (aset (.. e -target) "value" "")))
                       :placeholder "New Tag"}))))
 
+(defn tag-info-view [tag owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "tag-info"}
+        (dom/span #js {:className "count threads-count"}
+          (tag :threads-count))
+        (dom/span #js {:className "count subscribers-count"}
+          (tag :subscribers-count))
+        (om/build tag-view tag)
+        (subscribe-button tag)))))
+
 (defn channels-page-view [data owner]
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className "page channels"}
-        (dom/div #js {:className "title"}
-          "Tags")
+      (let [group-id (data :open-group-id)
+            tags (->> (data :tags)
+                      vals
+                      (filter (fn [t] (= group-id (t :group-id))))
+                      (sort-by :threads-count)
+                      reverse)]
+        (dom/div #js {:className "page channels"}
+          (dom/div #js {:className "title"} "Tags")
 
-        (dom/div #js {:className "content"}
-          (let [group-id (data :open-group-id)
-                tags (->> (data :tags)
-                          vals
-                          (filter (fn [t] (= group-id (t :group-id))))
-                          (sort-by :threads-count)
-                          reverse)]
-            (dom/div nil
-              (om/build new-tag-view {:group-id group-id})
-              (apply dom/div #js {:className "tags"}
-                (map (fn [tag]
-                       (dom/div #js {:className "tag-info"}
-                         (dom/span #js {:className "count threads-count"}
-                           (tag :threads-count))
-                         (dom/span #js {:className "count subscribers-count"}
-                           (tag :subscribers-count))
-                         (om/build tag-view tag)
-                         (subscribe-button tag)))
-                     tags)))))))))
+          (dom/div #js {:className "content"}
+            (om/build new-tag-view {:group-id group-id})
+
+            (let [subscribed-tags
+                  (->> tags
+                       (filter (fn [t] (store/is-subscribed-to-tag? (t :id)))))]
+              (when (seq subscribed-tags)
+                (dom/div nil
+                  (dom/h2 nil "Subscribed")
+                  (apply dom/div #js {:className "tags"}
+                    (map (fn [tag]
+                           (om/build tag-info-view tag))
+                         subscribed-tags)))))
+
+              (let [recommended-tags
+                    (->> tags
+                         ; TODO actually use some interesting logic here
+                         (remove (fn [t] (store/is-subscribed-to-tag? (t :id)))))]
+                (when (seq recommended-tags)
+                  (dom/div nil
+                    (dom/h2 nil "Recommended")
+                    (apply dom/div #js {:className "tags"}
+                      (map (fn [tag]
+                             (om/build tag-info-view tag))
+                           recommended-tags)))))))))))

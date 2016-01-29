@@ -44,17 +44,4 @@
                         (dom/div nil
                           (om/build user-view user)))))))
 
-        (dom/h2 nil "Recommended")
-        (apply dom/div #js {:className "recommended"}
-          (->> (@store/app-state :tags)
-               vals
-               (filter (fn [t] (= (@store/app-state :open-group-id) (t :group-id))))
-               (remove (fn [t] (store/is-subscribed-to-tag? (t :id))))
-               (sort-by :threads-count)
-               reverse
-               (take 2)
-               ; shuffle
-               (map (fn [tag]
-                      (dom/div nil (om/build tag-view tag))))))
-
         ))))
