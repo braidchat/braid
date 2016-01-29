@@ -468,6 +468,17 @@ body {
   }
 }
 
+.app .main .search-bar {
+  line-height: @top-bar-height;
+  position: absolute;
+  top: @pad;
+  right: @pad;
+  z-index: 100;
+  input {
+    width: 20em;
+  }
+}
+
 .app .main .sidebar {
   background: #333;
   color: #ccc;
@@ -502,13 +513,6 @@ body {
 
   .all, .tag, .user {
     margin-bottom: 1em;
-  }
-  .search {
-    margin: @pad;
-    line-height: @top-bar-height;
-    input {
-      width: 100%;
-    }
   }
 }
 

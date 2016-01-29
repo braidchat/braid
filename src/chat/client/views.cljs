@@ -11,7 +11,8 @@
             [chat.client.views.pages.channels :refer [channels-page-view]]
             [chat.client.views.pages.user :refer [user-page-view]]
             [chat.client.views.pages.group-explore :refer [group-explore-view]]
-            [chat.client.views.pages.me :refer [me-page-view]]))
+            [chat.client.views.pages.me :refer [me-page-view]]
+            [chat.client.views.search-bar :refer [search-bar-view]]))
 
 (defn login-view [data owner]
   (reify
@@ -56,10 +57,11 @@
             err
             (dom/span #js {:className "close"
                            :onClick (fn [_] (store/clear-error!))} "×")))
-        (dom/div #js {:className "instructions"}
+        #_(dom/div #js {:className "instructions"}
           "Tag conversations with #... Add/mention users with @... Emoji :shortcode: support")
         (om/build groups-nav-view data)
         (om/build sidebar-view data)
+        (om/build search-bar-view (data :page))
         (case (get-in data [:page :type])
           :inbox (om/build inbox-page-view data)
           :search (om/build search-page-view data)

@@ -3,14 +3,13 @@
             [om.dom :as dom]
             [chat.client.store :as store]
             [chat.client.views.pills :refer [tag-view user-view]]
-            [chat.client.views.search-bar :refer [search-bar-view]]))
+            ))
 
 (defn sidebar-view [data owner]
   (reify
     om/IRender
     (render [_]
       (dom/div #js {:className "sidebar"}
-        (om/build search-bar-view (data :page))
 
         (dom/h2 #js {:className "inbox link"
                      :onClick (fn []
