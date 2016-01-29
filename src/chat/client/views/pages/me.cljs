@@ -8,7 +8,6 @@
             [chat.shared.util :refer [valid-tag-name? valid-nickname?]])
   (:import [goog.events KeyCodes]))
 
-
 (defn nickname-view [data owner opts]
   (reify
     om/IInitState
@@ -91,16 +90,4 @@
 
           (dom/h2 nil "Received Invites")
           (when (seq (data :invitations))
-            (om/build invitations-view (data :invitations)))
-
-          (dom/h2 nil "Create Group")
-          (dom/div #js {:className "new-group"}
-            (dom/label nil "New Group"
-              (dom/input #js {:placeholder "Group Name"
-                              :onKeyDown
-                              (fn [e]
-                                (when (= KeyCodes.ENTER e.keyCode)
-                                  (.preventDefault e)
-                                  (let [group-name (.. e -target -value)]
-                                    (dispatch! :create-group {:name group-name})
-                                    (set! (.. e -target -value) "")))) }))))))))
+            (om/build invitations-view (data :invitations))))))))

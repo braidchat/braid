@@ -2,7 +2,6 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [clojure.string :as string]
-            [chat.client.views.pills :refer [id->color]]
             [chat.client.store :as store]
             [chat.client.views.pills :refer [id->color]]))
 
@@ -28,4 +27,8 @@
                                           (store/set-open-group! (group :id))
                                           (store/set-page! {:type :inbox}))}
                    (string/join "" (take 2 (group :name)))))
-               (vals (data :groups))))))))
+               (vals (data :groups))))
+
+        (dom/div #js {:className "plus"
+                      :onClick (fn [_] (store/set-page! {:type :group-explore}))}
+          "")))))

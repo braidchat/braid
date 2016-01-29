@@ -47,24 +47,37 @@ body {
   background: #222;
   padding: @pad;
 
-  .avatar, .group {
+  .avatar, .group, .plus {
     width: @top-bar-height;
     height: @top-bar-height;
     border-radius: 10%;
     cursor: pointer;
   }
 
+  .group, .plus {
+    line-height: @top-bar-height;
+    text-align: center;
+    font-size: 1.5em;
+  }
+
   .avatar {
   }
   .group {
     margin: @pad 0;
-
-    line-height: 2rem;
-    text-align: center;
-    font-size: 1.5em;
     color: #222;
+
     &.active {
       color: #ccc;
+    }
+  }
+  .plus {
+    position: absolute;
+    bottom: @pad;
+    background: #333;
+    color: #222;
+    font-family: "fontawesome";
+    &:hover {
+      background: #555;
     }
   }
 }

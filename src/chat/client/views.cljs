@@ -10,6 +10,7 @@
             [chat.client.views.pages.channel :refer [channel-page-view]]
             [chat.client.views.pages.channels :refer [channels-page-view]]
             [chat.client.views.pages.user :refer [user-page-view]]
+            [chat.client.views.pages.group-explore :refer [group-explore-view]]
             [chat.client.views.pages.me :refer [me-page-view]]))
 
 (defn login-view [data owner]
@@ -65,7 +66,8 @@
           :channel (om/build channel-page-view data {:react-key (get-in data [:page :id])})
           :user (om/build user-page-view data)
           :channels (om/build channels-page-view data)
-          :me (om/build me-page-view data))))))
+          :me (om/build me-page-view data)
+          :group-explore (om/build group-explore-view data))))))
 
 (defn app-view [data owner]
   (reify
