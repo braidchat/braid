@@ -3,7 +3,7 @@
 @top-bar-height: 2rem;
 @card-width: 17rem;
 @pad: 1rem;
-@groups-nav-width: 3rem;
+@groups-nav-width: @top-bar-height + @pad * 2;
 @sidebar-width: 10rem;
 @avatar-size: 2rem;
 
@@ -18,12 +18,13 @@ body {
 }
 
 .app > .main {
-  > .groups {
+  > .groups-nav {
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
     width: @groups-nav-width;
+    box-sizing: border-box;
   }
   > .sidebar {
     position: absolute;
@@ -42,16 +43,21 @@ body {
 }
 
 
-.app .main > .groups {
+.app .main > .groups-nav {
   background: #222;
-  padding: @pad / 2;
-  > .group {
-    background: white;
-    width: 2rem;
-    height: 2rem;
+  padding: @pad;
+
+  .avatar, .group {
+    width: @top-bar-height;
+    height: @top-bar-height;
     border-radius: 10%;
     cursor: pointer;
-    margin-bottom: @pad / 2;
+  }
+
+  .avatar {
+  }
+  .group {
+    margin: @pad 0;
 
     line-height: 2rem;
     text-align: center;
@@ -406,114 +412,45 @@ body {
   }
 }
 
-.meta {
-  .avatar {
-    width: @top-bar-height;
-    height: @top-bar-height;
-    cursor: pointer;
-    position: absolute;
-    top: @pad;
-    right: @pad;
-    z-index: 5;
+.page.me {
+  .nickname {
+    .error {
+      color: red;
+    }
   }
-  .user-modal {
-    background: #333;
-    position: absolute;
-    z-index: 100;
-    top: 2em;
-    left: 2em;
-    bottom: 2em;
-    right: 2em;
-    padding: 1em;
-    box-sizing: border-box;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    display: none;
-    color: #fff;
-    .close {
-      color: white;
-      font-size: 2em;
-      cursor: pointer;
-      float: right;
+  &.active {
+    display: block;
+  }
+  .pending-invites {
+    color: #999;
+    ul.invites {
+      padding-left: 15px;
     }
-    .nickname {
-      .current-name {
-        color: white;
-      }
-      .error {
-        color: red;
-      }
-    }
-    &.active {
-      display: block;
-    }
-    .pending-invites {
+  }
+  .group {
+    .name {
       color: #999;
-      ul.invites {
-        padding-left: 15px;
-      }
+      margin-bottom: 0.25em;
     }
-    .group {
-      .name {
-        color: #999;
-        margin-bottom: 0.25em;
-      }
-      .invite-form {
-        .autocomplete {
-          background-color: #999;
-          .results {
-            list-style-type: none;
-            padding-left: 10px;
-            .result {
-              &:hover {
-                background: #eee;
-              }
-            }
-            .active {
-              font-weight: bold;
+    .invite-form {
+      .autocomplete {
+        background-color: #999;
+        .results {
+          list-style-type: none;
+          padding-left: 10px;
+          .result {
+            &:hover {
+              background: #eee;
             }
           }
-        }
-      }
-      .new-tag.error {
-        border-color: red;
-      }
-      .tags {
-        margin: 1em 0;
-        .tag {
-          color: #999;
-          margin: 0.25em 0;
-          cursor: pointer;
-          .color-block {
-            width: 1rem;
-            height: 1rem;
-            display: inline-block;
-            border-radius: 2px;
-            color: #333;
-            vertical-align: middle;
-            margin-right: 0.25em;
-            text-align: center;
-          }
-          .name {
-            vertical-align: middle;
+          .active {
+            font-weight: bold;
           }
         }
       }
     }
-    .new-group {
-      label {
-        color: #999;
-        font-size: 1.2em;
-      }
-    }
-    .logout {
-      // TODO: make this look better with multiple groups
-      margin: 10em 0 0;
-      border-radius: 3px;
-      border: 1px solid #999;
-      color: #999;
-      padding: 0.25em;
-      cursor: pointer;
+    .new-tag.error {
+      border-color: red;
     }
   }
 }

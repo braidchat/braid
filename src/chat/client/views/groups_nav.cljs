@@ -3,18 +3,28 @@
             [om.dom :as dom]
             [clojure.string :as string]
             [chat.client.views.pills :refer [id->color]]
-            [chat.client.store :as store]))
+            [chat.client.store :as store]
+            [chat.client.views.pills :refer [id->color]]))
 
 (defn groups-nav-view [data owner]
   (reify
     om/IRender
     (render [_]
-      (apply dom/div #js {:className "groups"}
-        (map (fn [group]
-               (dom/div #js {:className (str "group "
-                                             (when (= (@store/app-state :open-group-id)  (group :id)) "active"))
-                             :style #js {:backgroundColor (id->color (group :id))}
-                             :onClick (fn [e]
-                                        (store/set-open-group! (group :id)))}
-                 (string/join "" (take 2 (group :name)))))
-             (vals (data :groups)))))))
+      (dom/div #js {:className "groups-nav"}
+
+        (let [user-id (get-in @store/app-state [:session :user-id])]
+          (dom/img #js {:className "avatar"
+                        :style #js {:backgroundColor (id->color user-id)}
+                        :onClick (fn [e]
+                                   (store/set-page! {:type :me}))
+                        :src (get-in @store/app-state [:users user-id :avatar])}))
+
+        (apply dom/div #js {:className "groups"}
+          (map (fn [group]
+                 (dom/div #js {:className (str "group "
+                                               (when (= (@store/app-state :open-group-id)  (group :id)) "active"))
+                               :style #js {:backgroundColor (id->color (group :id))}
+                               :onClick (fn [e]
+                                          (store/set-open-group! (group :id)))}
+                   (string/join "" (take 2 (group :name)))))
+               (vals (data :groups))))))))

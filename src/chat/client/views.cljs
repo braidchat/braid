@@ -4,13 +4,13 @@
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.groups-nav :refer [groups-nav-view]]
-            [chat.client.views.user-modal :refer [user-modal-view]]
             [chat.client.views.sidebar :refer [sidebar-view]]
             [chat.client.views.pages.search :refer [search-page-view]]
             [chat.client.views.pages.inbox :refer [inbox-page-view]]
             [chat.client.views.pages.channel :refer [channel-page-view]]
             [chat.client.views.pages.channels :refer [channels-page-view]]
-            [chat.client.views.pages.user :refer [user-page-view]]))
+            [chat.client.views.pages.user :refer [user-page-view]]
+            [chat.client.views.pages.me :refer [me-page-view]]))
 
 (defn login-view [data owner]
   (reify
@@ -58,14 +58,14 @@
         (dom/div #js {:className "instructions"}
           "Tag conversations with #... Add/mention users with @... Emoji :shortcode: support")
         (om/build groups-nav-view data)
-        (om/build user-modal-view data)
         (om/build sidebar-view data)
         (case (get-in data [:page :type])
           :inbox (om/build inbox-page-view data)
           :search (om/build search-page-view data)
           :channel (om/build channel-page-view data {:react-key (get-in data [:page :id])})
           :user (om/build user-page-view data)
-          :channels (om/build channels-page-view data))))))
+          :channels (om/build channels-page-view data)
+          :me (om/build me-page-view data))))))
 
 (defn app-view [data owner]
   (reify
