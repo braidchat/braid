@@ -25,6 +25,7 @@
                                                (when (= (@store/app-state :open-group-id)  (group :id)) "active"))
                                :style #js {:backgroundColor (id->color (group :id))}
                                :onClick (fn [e]
-                                          (store/set-open-group! (group :id)))}
+                                          (store/set-open-group! (group :id))
+                                          (store/set-page! {:type :inbox}))}
                    (string/join "" (take 2 (group :name)))))
                (vals (data :groups))))))))
