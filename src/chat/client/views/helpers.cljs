@@ -4,6 +4,15 @@
             [cljs-time.core :as t]
             [chat.client.store :as store]))
 
+(defn id->color [id]
+  ; normalized is approximately evenly distributed between 0 and 1
+  (let [normalized (-> id
+                       str
+                       (.substring 33 36)
+                       (js/parseInt 16)
+                       (/ 4096))]
+    (str "hsl(" (* 360 normalized) ",70%,35%)")))
+
 (defn user-cursor
   "Get an om cursor for the given user"
   [user-id]

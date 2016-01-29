@@ -3,7 +3,7 @@
             [om.dom :as dom]
             [clojure.string :as string]
             [chat.client.store :as store]
-            [chat.client.views.pills :refer [id->color]]
+            [chat.client.views.helpers :refer [id->color]]
             [chat.client.emoji :as emoji]
             [chat.client.views.helpers :as helpers]
             [chat.client.views.pills :refer [tag-view user-view]]
