@@ -77,8 +77,20 @@
                      (map (fn [user]
                             (dom/div nil
                               (om/build user-view user))))))))
-          (dom/div #js {:className "tags" :title "Explore"
-                        :onClick (fn [e] (store/set-page! {:type :channels}))})
+          (dom/div #js {:className "tags"}
+            (dom/div #js {:className "title"
+                          :title "Tags"
+                          :onClick (fn [e] (store/set-page! {:type :channels}))})
+            (dom/div #js {:className "modal"}
+              (apply dom/div nil
+                (->> (@store/app-state :tags)
+                     vals
+                     (filter (fn [t] (= (@store/app-state :open-group-id) (t :group-id))))
+                     (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
+                     (sort-by :threads-count)
+                     reverse
+                     (map (fn [tag]
+                            (dom/div nil (om/build tag-view tag))))))))
           (dom/div #js {:className "help"}
             (dom/div #js {:className "title" :title "Help"})
             (dom/div #js {:className "modal"}
