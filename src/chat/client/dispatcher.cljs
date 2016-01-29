@@ -4,7 +4,8 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
-            [cljs-utils.core :refer [edn-xhr]]))
+            [cljs-utils.core :refer [edn-xhr]]
+            [chat.shared.util :as util]))
 
 (defn- extract-tag-ids [text]
   (let [mentioned-names (->> (re-seq #"(?:^|\s)#(\S+)" text)
@@ -26,12 +27,26 @@
          (map nick->id)
          (remove nil?))))
 
+(defn identify-mentions
+  [content]
+  (-> content
+      (string/replace util/sigiled-nickname-re
+                      (fn [[_ nick]]
+                        (str "@" (if-let [user (store/nickname->user nick)]
+                                   (user :id)
+                                   nick))))
+      (string/replace util/sigiled-tag-name-re
+                      (fn [[_ tag-name]]
+                        (str "#" (if-let [tag (store/name->tag tag-name)]
+                                   (tag :id)
+                                   tag-name))))))
+
 (defmulti dispatch! (fn [event data] event))
 
 (defmethod dispatch! :new-message [_ data]
   (when-not (string/blank? (data :content))
     (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
-                                        :content (data :content)
+                                        :content (identify-mentions (data :content))
                                         :thread-id (data :thread-id)
 
                                         :mentioned-tag-ids (concat (data :mentioned-tag-ids)

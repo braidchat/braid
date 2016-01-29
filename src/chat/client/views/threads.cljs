@@ -14,7 +14,7 @@
   (reify
     om/IRender
     (render [_]
-      (let [sender (om/observe owner (om/ref-cursor (get-in (om/root-cursor store/app-state) [:users (message :user-id)])))]
+      (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))]
         (dom/div #js {:className (str "message " (when (:collapse? opts) "collapse"))}
           (dom/img #js {:className "avatar"
                         :src (sender :avatar)
@@ -31,12 +31,10 @@
     (render [_]
       (let [tags (->> (thread :tag-ids)
                       (map #(get-in @store/app-state [:tags %])))
-            mentions (->> (thread :mentioned-ids)
-                          (map #(get-in @store/app-state [:users %])))]
+            mentions (thread :mentioned-ids)]
         (apply dom/div #js {:className "tags"}
           (concat
-            (map (fn [u]
-                   (om/build user-view u)) mentions)
+            (map (fn [u-id] (om/build user-view {:id u-id})) mentions)
             (map (fn [tag]
                    (om/build tag-view tag)) tags)))))))
 

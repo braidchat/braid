@@ -20,7 +20,7 @@
 
 (defn simple-matches?
   [m s]
-  (re-find (re-pattern m) s))
+  (not= -1 (.indexOf m s)))
 
 
 ; fn that returns results that will be shown if pattern matches
@@ -175,11 +175,12 @@
             (dom/textarea #js {:placeholder (config :placeholder)
                                :value (state :text)
                                :onChange (fn [e]
-                                           (om/update-state! owner
-                                                             (fn [s]
-                                                               (assoc s
-                                                                 :text (.. e -target -value)
-                                                                 :force-close? false))))
+                                           (let [text (.slice (.. e -target -value) 0 5000)]
+                                             (om/update-state! owner
+                                                               (fn [s]
+                                                                 (assoc s
+                                                                   :text text
+                                                                   :force-close? false)))))
                                :onKeyDown
                                (fn [e]
                                  (condp = e.keyCode

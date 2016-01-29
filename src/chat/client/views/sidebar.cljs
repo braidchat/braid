@@ -91,6 +91,7 @@
 
         (comment
           (dom/h2 nil "Direct Messages")
+          ; TODO: when this comes back, need to observe the user cursor
           (apply dom/div #js {:className "users"}
             (->> (@store/app-state :users)
                  vals

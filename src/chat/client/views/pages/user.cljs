@@ -3,6 +3,7 @@
             [om.dom :as dom]
             [chat.client.store :as store]
             [chat.client.views.threads :refer [thread-view new-thread-view]]
+            [chat.client.views.helpers :refer [user-cursor]]
             [chat.client.views.pills :refer [user-view]]))
 
 (defn user-page-view [data owner]
@@ -10,7 +11,7 @@
     om/IRender
     (render [_]
       (let [user-id (get-in @store/app-state [:page :id])
-            user (get-in @store/app-state [:users user-id])]
+            user (om/observe owner (user-cursor user-id))]
         (dom/div #js {:className "page channel"}
           (dom/div #js {:className "title"}
             (om/build user-view user))
