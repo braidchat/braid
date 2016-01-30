@@ -15,6 +15,7 @@
                          (@store/app-state :tags))]
     (->> mentioned-names
          (map name->id)
+         (filter store/tag-in-open-group?)
          (remove nil?))))
 
 (defn- extract-user-ids [text]
@@ -25,6 +26,7 @@
                          (@store/app-state :users))]
     (->> mentioned-names
          (map nick->id)
+         (filter store/user-in-open-group?)
          (remove nil?))))
 
 (defn identify-mentions
@@ -32,13 +34,17 @@
   (-> content
       (string/replace util/sigiled-nickname-re
                       (fn [[_ nick]]
-                        (str "@" (if-let [user (store/nickname->user nick)]
-                                   (user :id)
+                        (str "@" (if-let [user-id (:id (store/nickname->user nick))]
+                                   (if (store/user-in-open-group? user-id)
+                                     user-id
+                                     nick)
                                    nick))))
       (string/replace util/sigiled-tag-name-re
                       (fn [[_ tag-name]]
-                        (str "#" (if-let [tag (store/name->tag tag-name)]
-                                   (tag :id)
+                        (str "#" (if-let [tag-id (:id (store/name->tag tag-name))]
+                                   (if (store/tag-in-open-group? tag-id)
+                                     tag-id
+                                     tag-name)
                                    tag-name))))))
 
 (defmulti dispatch! (fn [event data] event))
