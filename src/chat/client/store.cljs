@@ -182,6 +182,11 @@
          (filter #(= (% :name) tag-name))
          (map #(select-keys % [:group-id :group-name :id])))))
 
+(defn group-for-tag
+  "Get the group id for the tag with the given id"
+  [tag-id]
+  (get-in @app-state [:tags tag-id :group-id]))
+
 ; subscribed tags
 
 (defn set-user-subscribed-tag-ids! [tag-ids]
