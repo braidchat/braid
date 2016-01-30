@@ -75,7 +75,7 @@
    (fn [text thread-id]
      (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (->> (store/all-users)
+         (->> (store/users-in-open-group)
               (filter (fn [u]
                         (fuzzy-matches? (u :nickname) query)))
               (map (fn [user]
@@ -98,7 +98,7 @@
    (fn [text thread-id]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (->> (store/tags-in-group (store/open-group-id))
+         (->> (store/tags-in-open-group)
               (filter (fn [t]
                         (fuzzy-matches? (t :name) query)))
               (map (fn [tag]

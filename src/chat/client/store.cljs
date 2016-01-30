@@ -75,6 +75,12 @@
 (defn all-users []
   (vals (get-in @app-state [:users])))
 
+(defn users-in-group [group-id]
+  (filter (fn [u] (contains? (set (u :group-ids)) group-id)) (vals (@app-state :users))))
+
+(defn users-in-open-group []
+  (users-in-group (@app-state :open-group-id)))
+
 (defn nickname->user [nickname]
   (->> (get-in @app-state [:users])
        vals
@@ -156,6 +162,9 @@
 (defn tags-in-group [group-id]
   (filter #(= group-id (% :group-id)) (vals (@app-state :tags))))
 
+(defn tags-in-open-group []
+  (tags-in-group (@app-state :open-group-id)))
+
 (defn name->tag [tag-name]
   (->> (@app-state :tags)
       vals
@@ -205,9 +214,6 @@
 
 (defn set-open-group! [group-id]
   (transact! [:open-group-id] (constantly group-id)))
-
-(defn open-group-id []
-  (get @app-state :open-group-id))
 
 (defn id->group [group-id]
   (get-in @app-state [:groups group-id]))
