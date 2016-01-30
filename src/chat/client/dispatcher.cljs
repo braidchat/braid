@@ -54,12 +54,7 @@
                                         :mentioned-user-ids (concat (data :mentioned-user-ids)
                                                                     (extract-user-ids (data :content)))})]
       (store/add-message! message)
-      (sync/chsk-send! [:chat/new-message message])
-
-      ; if user added message from the tag page, need to add the thread
-      (when (and (= :channel (get-in @store/app-state [:page :type]))
-              (contains? (set (data :mentioned-tag-ids)) (get-in @store/app-state [:page :id])))
-        (store/add-channel-result! (data :thread-id))))))
+      (sync/chsk-send! [:chat/new-message message]))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
@@ -122,7 +117,6 @@
     (fn [reply]
       (when-let [results (:threads reply)]
           (store/set-channel-results! results)))))
-
 (defmethod dispatch! :invite [_ data]
   (let [invite (schema/make-invitation data)]
     (sync/chsk-send! [:chat/invite-to-group invite])))
