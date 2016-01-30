@@ -60,10 +60,8 @@
         (om/build groups-nav-view data)
 
         (dom/div #js {:className "header"}
-          (let [users (->> (@store/app-state :users)
-                           vals
-                           (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id))))
-                           (filter (fn [u] (contains? (set (u :group-ids)) (@store/app-state :open-group-id)))))
+          (let [users (->> (store/users-in-open-group)
+                           (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id)))))
                 users-online (->> users
                                   (filter (fn [user] (= :online (user :status)))))]
             (dom/div #js {:className "users"}
