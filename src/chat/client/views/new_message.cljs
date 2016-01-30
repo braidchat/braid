@@ -173,6 +173,7 @@
             autocomplete-open? (and (not force-close?) (not (nil? results)))]
           (dom/div #js {:className "message new"}
             (dom/textarea #js {:placeholder (config :placeholder)
+                               :ref "message-text"
                                :value (state :text)
                                :onChange (fn [e]
                                            (let [text (.slice (.. e -target -value) 0 5000)]
@@ -226,7 +227,8 @@
                                                       (when (= i highlighted-result-index) "highlight"))
                                       :style #js {:cursor "pointer"}
                                       :onClick (fn []
-                                                 (choose-result! result))}
+                                                 (choose-result! result)
+                                                 (.focus (om/get-node owner "message-text")))}
                           ((result :html))))
                       results))
                   (dom/div #js {:className "result"}
