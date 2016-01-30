@@ -1,7 +1,6 @@
 (ns chat.client.views.pages.channel
   (:require [om.core :as om]
             [om.dom :as dom]
-            [clojure.set :refer [union]]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.threads :refer [thread-view new-thread-view]]
@@ -28,8 +27,7 @@
             threads (->> (page :thread-ids)
                          (select-keys (data :threads))
                          vals
-                         set
-                         (union (set inbox-threads))
+                         (into (set inbox-threads))
                          ; sort-by last reply, newest first
                          (sort-by
                            (comp (partial apply max)
