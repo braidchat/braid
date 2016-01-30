@@ -206,6 +206,9 @@
 (defn set-open-group! [group-id]
   (transact! [:open-group-id] (constantly group-id)))
 
+(defn open-group-id []
+  (get @app-state :open-group-id))
+
 (defn id->group [group-id]
   (get-in @app-state [:groups group-id]))
 

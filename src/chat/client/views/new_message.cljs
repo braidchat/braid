@@ -98,7 +98,7 @@
    (fn [text thread-id]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (->> (store/all-tags)
+         (->> (store/tags-in-group (store/open-group-id))
               (filter (fn [t]
                         (fuzzy-matches? (t :name) query)))
               (map (fn [tag]
