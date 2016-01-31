@@ -42,28 +42,37 @@
      :tags tag-query}))
 
 (defn search-threads-as
-  [user-id query]
+  [user-id [query group-id]]
   ; TODO: pagination?
   ; TODO: consistent order for results
   (let [{:keys [text tags]} (parse-query query)
         search-db (d/db db/*conn*)
         tag-search (when (seq tags)
                      (set (d/q '[:find [?t-id ...]
-                                 :in $ [?tag-name ...]
+                                 :in $ [?tag-name ...] ?g-id
                                  :where
                                  ; TODO: be more flexible/allow partial match?
                                  [?tag :tag/name ?tag-name]
                                  [?t :thread/tag ?tag]
-                                 [?t :thread/id ?t-id]]
-                               search-db tags)))
+                                 [?t :thread/id ?t-id]
+                                 [?tag :tag/group ?g]
+                                 [?g :group/id ?g-id]]
+                               search-db
+                               tags
+                               group-id)))
         text-search (when-not (string/blank? text)
                       (set (d/q '[:find [?t-id ...]
-                                  :in $ ?txt
+                                  :in $ ?txt ?g-id
                                   :where
                                   [(fulltext $ :message/content ?txt) [[?m]]]
                                   [?m :message/thread ?t]
-                                  [?t :thread/id ?t-id]]
-                                search-db text)))]
+                                  [?t :thread/id ?t-id]
+                                  [?t :thread/tag ?tag]
+                                  [?tag :tag/group ?g]
+                                  [?g :group/id ?g-id]]
+                                search-db
+                                text
+                                group-id)))]
     (->> (if (every? some? [text-search tag-search])
            (intersection text-search tag-search)
            (first (remove nil? [text-search tag-search])))

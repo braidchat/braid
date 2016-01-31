@@ -46,7 +46,7 @@
                   (do
                     (store/set-page! {:type :search :search-query query})
                     ; consider moving this dispatch! into search-page-view
-                    (dispatch! :search-history query))))))))
+                    (dispatch! :search-history [query (@store/app-state :open-group-id)]))))))))
     om/IRenderState
     (render-state [_ {:keys [search-chan]}]
       (dom/div #js {:className "search-bar"}
