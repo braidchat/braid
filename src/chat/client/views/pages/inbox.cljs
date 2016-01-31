@@ -20,9 +20,10 @@
                    (->> (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
                         vals
                         (filter (fn [thread]
-                                  (contains? (set (->> (thread :tag-ids)
-                                                       (map  (fn [tag-id]
-                                                               (get-in @store/app-state [:tags tag-id :group-id]))))) group-id)))
+                                  (or (empty? (thread :tag-ids))
+                                      (contains?
+                                        (into #{} (map store/group-for-tag) (thread :tag-ids))
+                                        group-id))))
                         (sort-by
                           (comp (partial apply max)
                                 (partial map :created-at)

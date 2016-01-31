@@ -75,7 +75,7 @@
    (fn [text thread-id]
      (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (->> (store/all-users)
+         (->> (store/users-in-open-group)
               (filter (fn [u]
                         (fuzzy-matches? (u :nickname) query)))
               (map (fn [user]
@@ -98,7 +98,7 @@
    (fn [text thread-id]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (->> (store/all-tags)
+         (->> (store/tags-in-open-group)
               (filter (fn [t]
                         (fuzzy-matches? (t :name) query)))
               (map (fn [tag]
@@ -173,6 +173,7 @@
             autocomplete-open? (and (not force-close?) (not (nil? results)))]
           (dom/div #js {:className "message new"}
             (dom/textarea #js {:placeholder (config :placeholder)
+                               :ref "message-text"
                                :value (state :text)
                                :onChange (fn [e]
                                            (let [text (.slice (.. e -target -value) 0 5000)]
@@ -226,7 +227,8 @@
                                                       (when (= i highlighted-result-index) "highlight"))
                                       :style #js {:cursor "pointer"}
                                       :onClick (fn []
-                                                 (choose-result! result))}
+                                                 (choose-result! result)
+                                                 (.focus (om/get-node owner "message-text")))}
                           ((result :html))))
                       results))
                   (dom/div #js {:className "result"}

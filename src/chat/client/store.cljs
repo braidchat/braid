@@ -75,6 +75,15 @@
 (defn all-users []
   (vals (get-in @app-state [:users])))
 
+(defn users-in-group [group-id]
+  (filter (fn [u] (contains? (set (u :group-ids)) group-id)) (vals (@app-state :users))))
+
+(defn users-in-open-group []
+  (users-in-group (@app-state :open-group-id)))
+
+(defn user-in-open-group? [user-id]
+  (contains? (set (get-in @app-state [:users user-id :group-ids])) (@app-state :open-group-id)))
+
 (defn nickname->user [nickname]
   (->> (get-in @app-state [:users])
        vals
@@ -156,6 +165,12 @@
 (defn tags-in-group [group-id]
   (filter #(= group-id (% :group-id)) (vals (@app-state :tags))))
 
+(defn tags-in-open-group []
+  (tags-in-group (@app-state :open-group-id)))
+
+(defn tag-in-open-group? [tag-id]
+  (= (get-in @app-state [:tags tag-id :group-id]) (@app-state :open-group-id)))
+
 (defn name->tag [tag-name]
   (->> (@app-state :tags)
       vals
@@ -181,6 +196,11 @@
     (->> @app-state :tags vals
          (filter #(= (% :name) tag-name))
          (map #(select-keys % [:group-id :group-name :id])))))
+
+(defn group-for-tag
+  "Get the group id for the tag with the given id"
+  [tag-id]
+  (get-in @app-state [:tags tag-id :group-id]))
 
 ; subscribed tags
 

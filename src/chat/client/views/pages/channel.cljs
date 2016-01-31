@@ -21,9 +21,13 @@
                      (not (contains? page :thread-ids)) :searching
                      (seq (page :thread-ids)) :done-results
                      :else :done-empty)
+            inbox-threads (->> (data :threads)
+                               vals
+                               (filter (fn [t] (contains? (set (t :tag-ids)) tag-id))))
             threads (->> (page :thread-ids)
                          (select-keys (data :threads))
                          vals
+                         (into (set inbox-threads))
                          ; sort-by last reply, newest first
                          (sort-by
                            (comp (partial apply max)

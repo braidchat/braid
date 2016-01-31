@@ -3,7 +3,7 @@
             [om.dom :as dom]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.helpers :refer [id->color]]))
+            [chat.client.views.helpers :refer [id->color user-cursor]]))
 
 (defn subscribe-button [tag]
   (if (store/is-subscribed-to-tag? (tag :id))
@@ -36,9 +36,7 @@
   (reify
     om/IRender
     (render [_]
-      (let [user (om/observe owner (-> (om/root-cursor store/app-state)
-                                       (get-in [:users (user :id)])
-                                       om/ref-cursor))]
+      (let [user (om/observe owner (user-cursor (user :id)))]
         (dom/div #js {:className (str "user pill" (case (user :status)
                                                     :online " on"
                                                     " off"))
