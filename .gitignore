@@ -1,5 +1,5 @@
-/resources/public/js
-/resources/public/css
+/resources/public/js/out
+/resources/public/css/out
 /target
 .lein-env
 .lein-repl-history

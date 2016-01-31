@@ -5,6 +5,7 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.views :as views]
+            [chat.client.clj-highlighter :as highlighter]
             [chat.client.dispatcher :as dispatcher]))
 
 (enable-console-print!)
@@ -14,5 +15,6 @@
                 (fn [e] (store/set-window-visibility! (= "visible" (.-visibilityState js/document)))))
   (sync/start-router!))
 
+(highlighter/install-highlighter)
 (om/root views/app-view store/app-state
            {:target (. js/document (getElementById "app"))})
