@@ -42,7 +42,7 @@ body {
   .avatar, .group, .plus {
     width: @top-bar-height;
     height: @top-bar-height;
-    border-radius: 10%;
+    border-radius: @pad / 3;
     cursor: pointer;
   }
 
@@ -59,9 +59,17 @@ body {
     color: #222;
     position: relative;
 
-    &.active {
-      color: #ccc;
+    &.active:before {
+      @w: @pad / 3;
+      content: "";
+      background: #eee;
+      width: @w;
+      height: 100%;
+      position: absolute;
+      left: -@pad;
+      border-radius: 0 @w @w 0;
     }
+
   }
   .plus {
     position: absolute;
