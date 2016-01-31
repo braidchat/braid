@@ -11,13 +11,6 @@
     (render [_]
       (dom/div #js {:className "groups-nav"}
 
-        (let [user-id (get-in @store/app-state [:session :user-id])]
-          (dom/img #js {:className "avatar"
-                        :style #js {:backgroundColor (id->color user-id)}
-                        :onClick (fn [e]
-                                   (store/set-page! {:type :me}))
-                        :src (get-in @store/app-state [:users user-id :avatar])}))
-
         (apply dom/div #js {:className "groups"}
           (map (fn [group]
                  (dom/div #js {:className (str "group "

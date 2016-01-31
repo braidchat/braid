@@ -34,12 +34,11 @@ body {
   }
 }
 
-
 .app .main > .groups-nav {
   background: #222;
   padding: @pad;
 
-  .avatar, .group, .plus {
+  .group, .plus {
     width: @top-bar-height;
     height: @top-bar-height;
     border-radius: @pad / 3;
@@ -52,10 +51,8 @@ body {
     font-size: 1.5em;
   }
 
-  .avatar {
-  }
   .group {
-    margin: @pad 0;
+    margin: 0 0 @pad 0;
     color: #222;
     position: relative;
 
@@ -107,11 +104,6 @@ body {
 //  vertical-align: bottom;
 
   position: relative;
-}
-
-.avatar() {
-  width: @avatar-size;
-  height: @avatar-size;
 }
 
 .emojione {
@@ -334,10 +326,11 @@ body {
     margin: 0 0 @pad;
 
     > .avatar {
-      .avatar();
+      width: @avatar-size;
+      height: @avatar-size;
       display: inline-block;
       position: absolute;
-      border-radius: 25%;
+      border-radius: 20%;
      }
 
     .info {
@@ -532,6 +525,14 @@ body {
       input {
         width: 20em;
       }
+    }
+    .avatar {
+      width: @top-bar-height;
+      height: @top-bar-height;
+      vertical-align: middle;
+      margin-left: @pad;
+      border-radius: 20%;
+      cursor: pointer;
     }
   }
 }
