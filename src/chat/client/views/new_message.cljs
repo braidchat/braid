@@ -65,7 +65,7 @@
   [
    ; ... :emoji  -> autocomplete emoji
    (fn [text thread-id]
-     (let [pattern #"\B:(\S{1,})$"]
+     (let [pattern #"\B:(\S{2,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
               (filter (fn [[k v]]
