@@ -161,8 +161,8 @@
   (reify
     om/IDidMount
     (did-mount [_]
-      (when-let [PR (.-PR js/window)]
-        (.prettyPrint PR)))
+      (when-let [PR (aget js/window "PR")]
+        ((aget PR "prettyPrint"))))
     om/IRender
     (render [_]
       (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))]
