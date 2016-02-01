@@ -56,6 +56,7 @@
          (->> emoji/unicode
               (filter (fn [[k v]]
                         (simple-matches? k query)))
+              (take 10)
               (map (fn [[k v]]
                      {:action
                       (fn [thread-id])
