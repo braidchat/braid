@@ -129,10 +129,10 @@
 
 (def extract-code-blocks
   (make-delimited-processor {:delimiter "```"
-                             :result-fn (partial dom/code #js {:className "multiline-code"})}))
+                             :result-fn (partial dom/code #js {:className "prettyprint multiline-code lang-clj"})}))
 (def extract-code-inline
   (make-delimited-processor {:delimiter "`"
-                             :result-fn (partial dom/code #js {:className "inline-code"})}))
+                             :result-fn (partial dom/code #js {:className "prettyprint inline-code lang-clj"})}))
 
 (def extract-emphasized
   (make-delimited-processor {:delimiter "*"
@@ -159,6 +159,13 @@
 
 (defn message-view [message owner opts]
   (reify
+    om/IDidMount
+    (did-mount [_]
+      ; TODO: use prettyPrintOne to only do the content of this node
+      ; TODO: also call on IDidUpdate?
+      ; TODO: don't call if don't have code?
+      (when-let [PR (aget js/window "PR")]
+        ((aget PR "prettyPrint"))))
     om/IRender
     (render [_]
       (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))]

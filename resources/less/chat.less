@@ -249,14 +249,18 @@ body {
     height: 1em;
   }
 
-  .inline-code {
-    background-color: rgba(255, 234, 205, 0.8);
+  .prettyprint {
+    background-color: #e2f5ff;
+    color: black;
+    .opn, .clo { color: #e28964; }
+    .kwd { color: #785c28; }
+    .str { color: green; }
+    .typ { color: rgb(65, 125, 255); }
   }
 
   .multiline-code {
     display: block;
     text-overflow: ellipsis;
-    background-color: rgba(255, 234, 205, 0.8);
     white-space: pre;
     word-break: normal;
     width: 100%;
@@ -318,6 +322,55 @@ body {
     .ambiguous .group {
       border: 1px dashed black;
       cursor: pointer;
+    }
+  }
+
+  &.private {
+    .head {
+      .private-notification {
+        text-align: center;
+        .title {
+          margin: 0.5em;
+          .emojione {
+            height: 4ex;
+            width: 4.1ex;
+          }
+        }
+        p {
+          color: gray;
+        }
+
+        .help {
+          .title:after {
+            font-family: "fontawesome";
+            content: "\f059";
+          }
+          .modal {
+            display: none;
+            background: white;
+            position: absolute;
+            cursor: default;
+            p {
+              line-height: 1.2em;
+              font-size: 0.8em;
+            }
+          }
+          display: inline-block;
+          margin-right: @pad;
+          &:hover {
+            color: #000;
+            cursor: pointer;
+            .modal {
+              z-index: 1000;
+              display: block;
+              padding: @pad;
+            }
+          }
+        }
+      }
+    }
+    .card {
+      background-color: rgba(127, 218, 255, 0.36);
     }
   }
 
