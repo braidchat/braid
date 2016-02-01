@@ -156,9 +156,9 @@
     om/IWillUpdate
     (will-update [_ next-props next-state]
       (let [next-text (next-state :text)
-            prev-text (om/get-render-state owner :text)]
-        (when (not= next-text prev-text)
-          (put! (om/get-state owner :autocomplete-chan) next-text))))
+              prev-text (om/get-render-state owner :text)]
+          (when (not= next-text prev-text)
+            (put! (next-state :autocomplete-chan) next-text))))
     om/IRenderState
     (render-state [_ {:keys [results text force-close? highlighted-result-index] :as state}]
       (let [constrain (fn [x a z] (Math/min z (Math/max a x)))
@@ -178,10 +178,12 @@
               (highlight-clear!))
             reset-state!
             (fn []
-              (om/set-state! owner
-                             {:text ""
-                              :force-close? false
-                              :highlighted-result-index -1}))
+              (om/update-state! owner
+                             (fn [s]
+                               (merge s
+                                      {:text ""
+                                       :force-close? false
+                                       :highlighted-result-index -1}))))
             send-message!
             (fn []
               (dispatch! :new-message {:thread-id (config :thread-id)
