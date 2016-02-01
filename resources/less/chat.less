@@ -205,15 +205,6 @@ body {
   }
 }
 
-.instructions {
-  position: absolute;
-  top: @pad;
-  right: @pad + @top-bar-height + @pad;
-  line-height: @top-bar-height;
-  color: @grey-text;
-  height: @top-bar-height;
-}
-
 .threads {
   position: absolute;
   top: @top-bar-height + @pad + @pad;
@@ -241,30 +232,12 @@ body {
   -webkit-flex-direction: column;
   flex-direction: column;
   height: 100%;
+  overflow: hidden;
 
   &:before { // switch to after to align at top
     content: "";
     -webkit-flex-grow: 1;
     flex-grow: 1;
-    height: 1em;
-  }
-
-  .inline-code {
-    background-color: rgba(255, 234, 205, 0.8);
-  }
-
-  .multiline-code {
-    display: block;
-    text-overflow: ellipsis;
-    background-color: rgba(255, 234, 205, 0.8);
-    white-space: pre;
-    word-break: normal;
-    width: 100%;
-    overflow-x: hidden;
-    &:hover {
-      text-overflow: initial;
-      overflow-x: scroll;
-    }
   }
 
   .card {
@@ -275,41 +248,42 @@ body {
     box-shadow: 0 1px 2px 0 #ccc;
     max-height: 100%;
     background: white;
-  }
 
-  .head {
-    min-height: 3.5em;
-    width: 100%;
-    position: relative;
-    -webkit-flex-shrink: 0;
-    flex-shrink: 0;
-    //box-shadow: 0 2px 2px -2px #ccc;
+    .head {
+      min-height: 3.5em;
+      width: 100%;
+      position: relative;
+      -webkit-flex-shrink: 0;
+      flex-shrink: 0;
+      //box-shadow: 0 2px 2px -2px #ccc;
 
-    .tags {
-      margin: @pad 2*@pad @pad @pad;
-      .pill {
-        margin-bottom: 0.5em;
-        margin-right: 0.5em;
+      .tags {
+        margin: @pad 2*@pad @pad @pad;
+        .pill {
+          margin-bottom: 0.5em;
+          margin-right: 0.5em;
+        }
+      }
+      .close {
+        position: absolute;
+        padding: @pad;
+        top: 0;
+        right: 0;
+        z-index: 10;
+        cursor: pointer;
       }
     }
-    .close {
-      position: absolute;
-      padding: @pad;
-      top: 0;
-      right: 0;
-      z-index: 10;
-      cursor: pointer;
-    }
-  }
 
-  .messages {
-    overflow: scroll;
-    padding: 0 @pad;
-  }
-  .message.new {
-    -webkit-flex-shrink: 0;
-    flex-shrink: 0;
-    min-height: 3.5em;
+    .messages {
+      overflow: scroll;
+      padding: 0 @pad;
+    }
+    .message.new {
+      -webkit-flex-shrink: 0;
+      flex-shrink: 0;
+      min-height: 3.5em;
+    }
+
   }
 }
 
@@ -318,6 +292,62 @@ body {
     .ambiguous .group {
       border: 1px dashed black;
       cursor: pointer;
+    }
+  }
+
+  .notice {
+    box-shadow: 0 1px 2px 0 #ccc;
+    padding: @pad;
+    margin-bottom: @pad;
+    &:before {
+      float: left;
+      font-size: @avatar-size;
+      margin-right: 0.5rem;
+      font-family: "fontawesome";
+    }
+  }
+
+  &.private {
+    .card {
+      // needs to be a better way
+      // which is based on the height of the notice
+      max-height: 85%;
+    }
+    .head:before {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 5px;
+      background: #5f7997;
+      position: absolute;
+    }
+    .notice {
+      background: #D2E7FF;
+      color: #5f7997;
+      &:before {
+        content: "\f21b";
+      }
+    }
+  }
+
+  &.limbo {
+    .card {
+      max-height: 85%; // see note above
+    }
+    .head:before{
+      content: "";
+      display: block;
+      width: 100%;
+      height: 5px;
+      background: #CA1414;
+      position: absolute;
+    }
+    .notice {
+      background: #ffe4e4;
+      color: #CA1414;
+      &:before {
+        content: "\f071";
+      }
     }
   }
 
@@ -366,6 +396,27 @@ body {
       }
     }
 
+    .prettyprint {
+      background-color: #e2f5ff;
+      color: black;
+      .opn, .clo { color: #e28964; }
+      .kwd { color: #785c28; }
+      .str { color: green; }
+      .typ { color: rgb(65, 125, 255); }
+    }
+
+    .multiline-code {
+      display: block;
+      text-overflow: ellipsis;
+      white-space: pre;
+      word-break: normal;
+      width: 100%;
+      overflow-x: hidden;
+      &:hover {
+        text-overflow: initial;
+        overflow-x: scroll;
+      }
+    }
 
     // rename unseen -> new; new -> compose
     /*
