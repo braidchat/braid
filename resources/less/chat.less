@@ -326,51 +326,13 @@ body {
   }
 
   &.private {
-    .head {
-      .private-notification {
-        text-align: center;
-        .title {
-          margin: 0.5em;
-          .emojione {
-            height: 4ex;
-            width: 4.1ex;
-          }
-        }
-        p {
-          color: gray;
-        }
-
-        .help {
-          .title:after {
-            font-family: "fontawesome";
-            content: "\f059";
-          }
-          .modal {
-            display: none;
-            background: white;
-            position: absolute;
-            cursor: default;
-            p {
-              line-height: 1.2em;
-              font-size: 0.8em;
-            }
-          }
-          display: inline-block;
-          margin-right: @pad;
-          &:hover {
-            color: #000;
-            cursor: pointer;
-            .modal {
-              z-index: 1000;
-              display: block;
-              padding: @pad;
-            }
-          }
-        }
-      }
-    }
-    .card {
-      background-color: rgba(127, 218, 255, 0.36);
+    .head:before {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 5px;
+      background: #5f7997;
+      position: absolute;
     }
   }
 
