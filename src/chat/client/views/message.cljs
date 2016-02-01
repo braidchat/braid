@@ -161,6 +161,9 @@
   (reify
     om/IDidMount
     (did-mount [_]
+      ; TODO: use prettyPrintOne to only do the content of this node
+      ; TODO: also call on IDidUpdate?
+      ; TODO: don't call if don't have code?
       (when-let [PR (aget js/window "PR")]
         ((aget PR "prettyPrint"))))
     om/IRender
