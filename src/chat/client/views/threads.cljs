@@ -42,48 +42,63 @@
         (scroll-to-bottom owner thread))
       om/IRender
       (render [_]
-        (let [private? (and (not (thread :new?)) (empty? (thread :tag-ids))) ]
-          (dom/div #js {:className (str "thread" (when private? " private"))}
-          (dom/div #js {:className "card"}
-            (dom/div #js {:className "head"}
-              (when private?
-                (dom/div #js {:className "private-notification"}
-                  (dom/span #js {:className "title"}
-                    (emoji/shortcode->html ":see_no_evil:"))
-                  (dom/div #js {:className "help"}
-                    (dom/div #js {:className "title" :title "Help"})
-                    (dom/div #js {:className "modal"}
-                      (dom/p nil "Only you & users you mention can see this thread.")
-                      (dom/p nil "Adding a tag will allow anyone subscribed to the tag to view this thread.")))))
-              (when (store/open-thread? (thread :id))
-                (dom/div #js {:className "close"
-                              :onClick (fn [_]
-                                         (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
-              (om/build thread-tags-view thread))
-            (when-not (thread :new?)
-              (apply dom/div #js {:className "messages"
-                                  :ref "messages"}
-                (->> (thread :messages)
-                     (sort-by :created-at)
-                     (cons nil)
-                     (partition 2 1)
-                     (map (fn [[prev-message message]]
-                            (om/build message-view
-                                      message
-                                      {:key :id
-                                       :opts {:collapse?
-                                              (and (= (:user-id message)
-                                                      (:user-id prev-message))
-                                                (> (* 2 60 1000) ; 2 minutes
-                                                   (- (:created-at message)
-                                                      (or (:created-at prev-message) 0))))}}))))))
-            (om/build new-message-view {:thread-id (thread :id)
-                                        :placeholder (if (thread :new?)
-                                                       "Start a conversation..."
-                                                       "Reply...")
-                                        :mentioned-user-ids (thread :mentioned-ids)
-                                        :mentioned-tag-ids (thread :tag-ids)}
-                      {:react-key "message"}))))))))
+        (let [new? (thread :new?)
+              private? (and
+                         (not (thread :new?))
+                         (empty? (thread :tag-ids))
+                         (seq (thread :mentioned-ids)))
+              limbo? (and
+                       (not (thread :new?))
+                       (empty? (thread :tag-ids))
+                       (empty? (thread :mentioned-ids)))]
+          (dom/div #js {:className (str "thread"
+                                        " " (when new? "new")
+                                        " " (when private? "private")
+                                        " " (when limbo? "limbo"))}
+
+            (when limbo?
+              (dom/div #js {:className "notice"}
+                "No one can see this conversation yet. Mention a @user or #tag in a reply."))
+
+            (when private?
+              (dom/div #js {:className "notice"}
+                "This is a private conversation."
+                (dom/br nil)
+                "Only @mentioned users can see it."))
+
+            (dom/div #js {:className "card"}
+
+              (dom/div #js {:className "head"}
+
+                (when (store/open-thread? (thread :id))
+                  (dom/div #js {:className "close"
+                                :onClick (fn [_]
+                                           (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"))
+                (om/build thread-tags-view thread))
+              (when-not (thread :new?)
+                (apply dom/div #js {:className "messages"
+                                    :ref "messages"}
+                  (->> (thread :messages)
+                       (sort-by :created-at)
+                       (cons nil)
+                       (partition 2 1)
+                       (map (fn [[prev-message message]]
+                              (om/build message-view
+                                        message
+                                        {:key :id
+                                         :opts {:collapse?
+                                                (and (= (:user-id message)
+                                                        (:user-id prev-message))
+                                                  (> (* 2 60 1000) ; 2 minutes
+                                                     (- (:created-at message)
+                                                        (or (:created-at prev-message) 0))))}}))))))
+              (om/build new-message-view {:thread-id (thread :id)
+                                          :placeholder (if (thread :new?)
+                                                         "Start a conversation..."
+                                                         "Reply...")
+                                          :mentioned-user-ids (thread :mentioned-ids)
+                                          :mentioned-tag-ids (thread :tag-ids)}
+                        {:react-key "message"}))))))))
 
 (defn new-thread-view [opts]
   (om/build thread-view (merge {:id (uuid/make-random-squuid)
