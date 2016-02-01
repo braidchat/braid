@@ -23,6 +23,10 @@
             (map (fn [tag]
                    (om/build tag-view tag)) tags)))))))
 
+(defn- unseen? [message thread]
+  (> (:created-at message)
+     (thread :last-open-at)) )
+
 (defn thread-view [thread owner opts]
   (let [scroll-to-bottom
         (fn [owner thread]
@@ -42,6 +46,7 @@
       om/IRender
       (render [_]
         (dom/div #js {:className "thread"}
+          (println (thread :last-open-at) (map :created-at (thread :messages)))
           (dom/div #js {:className "card"}
             (dom/div #js {:className "head"}
               (when (store/open-thread? (thread :id))
@@ -65,7 +70,14 @@
                                                       (:user-id prev-message))
                                                 (> (* 2 60 1000) ; 2 minutes
                                                    (- (:created-at message)
-                                                      (or (:created-at prev-message) 0))))}}))))))
+                                                      (or (:created-at prev-message) 0))))
+                                              :unseen?
+                                              (unseen? message thread)
+                                              :first-unseen?
+                                              (and
+                                                (unseen? message thread)
+                                                (not (unseen? prev-message thread)))
+                                              }}))))))
             (om/build new-message-view {:thread-id (thread :id)
                                         :placeholder (if (thread :new?)
                                                        "Start a conversation..."

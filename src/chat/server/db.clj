@@ -382,6 +382,12 @@
          (into ()
                (map (comp (fn [t]
                             (update-in t [:tag-ids] (partial filter visible-tags)))
+                          (fn [t]
+                            (assoc t :last-open-at (->> (t :messages)
+                                                        (filter (fn [m] (= (m :user-id) user-id)))
+                                                        (map :created-at)
+                                                        (map (fn [t] (.getTime t)))
+                                                        (apply max))))
                           db->thread
                           first))))))
 

@@ -162,7 +162,10 @@
     om/IRender
     (render [_]
       (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))]
-        (dom/div #js {:className (str "message " (when (:collapse? opts) "collapse"))}
+        (dom/div #js {:className (str "message"
+                                      " " (when (:collapse? opts) "collapse")
+                                      " " (if (:unseen? opts) "unseen" "seen")
+                                      " " (when (:first-unseen? opts) "first-unseen"))}
           (dom/img #js {:className "avatar"
                         :src (sender :avatar)
                         :style #js {:backgroundColor (id->color (sender :id))}})
