@@ -387,6 +387,7 @@
                                                         (filter (fn [m] (= (m :user-id) user-id)))
                                                         (map :created-at)
                                                         (map (fn [t] (.getTime t)))
+                                                        (cons 0)
                                                         (apply max))))
                           db->thread
                           first))))))
