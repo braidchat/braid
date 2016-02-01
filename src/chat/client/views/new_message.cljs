@@ -14,6 +14,7 @@
 
 (defn fuzzy-matches?
   [s m]
+  ; TODO: make this fuzzier? something like interleave with .* & re-match?
   (letfn [(normalize [s]
             (-> (.toLowerCase s) (string/replace #"\s" "")))]
     (not= -1 (.indexOf (normalize s) (normalize m)))))
@@ -134,10 +135,7 @@
                           (> x z) z
                           (< x a) a
                           :else x))
-            results (let [engine-results (map (fn [e] (e text (config :thread-id))) engines)]
-                      (if (every? nil? engine-results)
-                         nil
-                        (apply concat engine-results)))
+            results (seq (mapcat (fn [e] (e text (config :thread-id))) engines))
             highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
