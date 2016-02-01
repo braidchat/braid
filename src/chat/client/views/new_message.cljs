@@ -1,11 +1,13 @@
 (ns chat.client.views.new-message
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om]
             [om.dom :as dom]
+            [cljs.core.async :as async :refer [<! put! chan alts!]]
             [clojure.string :as string]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.emoji :as emoji]
-            [chat.client.views.helpers :refer [id->color]])
+            [chat.client.views.helpers :refer [id->color debounce]])
   (:import [goog.events KeyCodes]))
 
 
@@ -48,6 +50,17 @@
 ;                text to replace message with
 
 
+(defn emoji-view [emoji owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/div #js {:className "emoji-match"}
+        (emoji/shortcode->html emoji)
+        (dom/div #js {:className "name"}
+          emoji)
+        (dom/div #js {:className "extra"}
+          "...")))))
+
 (def engines
   [
    ; ... :emoji  -> autocomplete emoji
@@ -57,7 +70,6 @@
          (->> emoji/unicode
               (filter (fn [[k v]]
                         (simple-matches? k query)))
-              (take 10)
               (map (fn [[k v]]
                      {:action
                       (fn [thread-id])
@@ -66,12 +78,7 @@
                         (string/replace text pattern (str k " ")))
                       :html
                       (fn []
-                        (dom/div #js {:className "emoji-match"}
-                          (emoji/shortcode->html k)
-                          (dom/div #js {:className "name"}
-                            k)
-                          (dom/div #js {:className "extra"}
-                            "...")))}))))))
+                        (om/build emoji-view k {:react-key k}))}))))))
 
    ; ... @<user>  -> autocompletes user name
    (fn [text thread-id]
@@ -128,15 +135,33 @@
     (init-state [_]
       {:text ""
        :force-close? false
-       :highlighted-result-index -1})
+       :highlighted-result-index -1
+       :results nil
+       :kill-chan (chan)
+       :autocomplete-chan (chan)
+       })
+    om/IWillMount
+    (will-mount [_]
+      (let [autocomplete (debounce (om/get-state owner :autocomplete-chan) 200)
+            kill-chan (om/get-state owner :kill-chan)]
+        (go (loop []
+              (let [[v ch] (alts! [autocomplete kill-chan])]
+                (when (= ch autocomplete)
+                  (om/set-state! owner :results
+                                 (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
+                  (recur)))))))
+    om/IWillUnmount
+    (will-unmount [_]
+      (put! (om/get-state owner :kill-chan) (js/Date.)))
+    om/IWillUpdate
+    (will-update [_ next-props next-state]
+      (let [next-text (next-state :text)
+            prev-text (om/get-render-state owner :text)]
+        (when (not= next-text prev-text)
+          (put! (om/get-state owner :autocomplete-chan) next-text))))
     om/IRenderState
-    (render-state [_ {:keys [text force-close? highlighted-result-index] :as state}]
-      (let [constrain (fn [x a z]
-                        (cond
-                          (> x z) z
-                          (< x a) a
-                          :else x))
-            results (seq (mapcat (fn [e] (e text (config :thread-id))) engines))
+    (render-state [_ {:keys [results text force-close? highlighted-result-index] :as state}]
+      (let [constrain (fn [x a z] (Math/min z (Math/max a x)))
             highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
@@ -217,7 +242,8 @@
                                      (highlight-clear!))))})
 
             (when autocomplete-open?
-              (dom/div #js {:className "autocomplete"}
+              (dom/div #js {:className "autocomplete"
+                            :onWheel (fn [e] (.log js/console "wheel" e))}
                 (if (seq results)
                   (apply dom/div nil
                     (map-indexed
