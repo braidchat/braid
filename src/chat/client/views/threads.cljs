@@ -42,7 +42,8 @@
         (scroll-to-bottom owner thread))
       om/IRender
       (render [_]
-        (let [private? (and
+        (let [new? (thread :new?)
+              private? (and
                          (not (thread :new?))
                          (empty? (thread :tag-ids))
                          (seq (thread :mentioned-ids)))
@@ -51,14 +52,24 @@
                        (empty? (thread :tag-ids))
                        (empty? (thread :mentioned-ids)))]
           (dom/div #js {:className (str "thread"
+                                        " " (when new? "new")
                                         " " (when private? "private")
                                         " " (when limbo? "limbo"))}
+
+            (when limbo?
+              (dom/div #js {:className "notice"}
+                "No one can see this conversation yet. Mention a @user or #tag in a reply."))
+
+            (when private?
+              (dom/div #js {:className "notice"}
+                "This is a private conversation."
+                (dom/br nil)
+                "Only @mentioned users can see it."))
+
             (dom/div #js {:className "card"}
+
               (dom/div #js {:className "head"}
-                (when limbo?
-                  (dom/div #js {:className "instructions"}
-                    (dom/div nil
-                      "No one can see this message yet. Mention a @user or #tag in a reply.")))
+
                 (when (store/open-thread? (thread :id))
                   (dom/div #js {:className "close"
                                 :onClick (fn [_]
