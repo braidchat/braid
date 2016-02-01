@@ -47,6 +47,7 @@ Set up the database schema (first time only):
 
 Seed some data (first time only):
 ```clojure
+(require 'chat.server.seed)
 (chat.server.seed/seed!)
 ```
 
