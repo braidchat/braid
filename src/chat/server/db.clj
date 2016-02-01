@@ -368,6 +368,14 @@
        (map first)
        set))
 
+(defn thread-add-last-open-at [thread user-id]
+  (assoc thread :last-open-at (->> (thread :messages)
+                                   (filter (fn [m] (= (m :user-id) user-id)))
+                                   (map :created-at)
+                                   (map (fn [t] (.getTime t)))
+                                   (cons 0)
+                                   (apply max))))
+
 (defn get-open-threads-for-user
   [user-id]
   (let [visible-tags (get-user-visible-tag-ids user-id)]
@@ -382,13 +390,7 @@
          (into ()
                (map (comp (fn [t]
                             (update-in t [:tag-ids] (partial filter visible-tags)))
-                          (fn [t]
-                            (assoc t :last-open-at (->> (t :messages)
-                                                        (filter (fn [m] (= (m :user-id) user-id)))
-                                                        (map :created-at)
-                                                        (map (fn [t] (.getTime t)))
-                                                        (cons 0)
-                                                        (apply max))))
+                          (fn [t] (thread-add-last-open-at t user-id))
                           db->thread
                           first))))))
 
