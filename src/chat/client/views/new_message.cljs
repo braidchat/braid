@@ -244,8 +244,7 @@
                                      (highlight-clear!))))})
 
             (when autocomplete-open?
-              (dom/div #js {:className "autocomplete"
-                            :onWheel (fn [e] (.log js/console "wheel" e))}
+              (dom/div #js {:className "autocomplete"}
                 (if (seq results)
                   (apply dom/div nil
                     (map-indexed
