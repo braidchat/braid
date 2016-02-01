@@ -205,15 +205,6 @@ body {
   }
 }
 
-.instructions {
-  position: absolute;
-  top: @pad;
-  right: @pad + @top-bar-height + @pad;
-  line-height: @top-bar-height;
-  color: @grey-text;
-  height: @top-bar-height;
-}
-
 .threads {
   position: absolute;
   top: @top-bar-height + @pad + @pad;
@@ -333,6 +324,31 @@ body {
       height: 5px;
       background: #5f7997;
       position: absolute;
+    }
+  }
+
+  &.limbo {
+    .head .instructions {
+      position: absolute;
+      width: @card-width;
+      top: -100%;
+      margin-top: -2 * @pad;
+      box-sizing: border-box;
+      box-shadow: 0 1px 2px 0 #ccc;
+
+      div {
+        display: block;
+        padding: @pad;
+        background: #ffe4e4;
+        color: #CA1414;
+        &:before {
+          content: "\f071";
+          font-family: "fontawesome";
+          float: left;
+          font-size: @avatar-size;
+          margin-right: 0.5rem;
+        }
+      }
     }
   }
 

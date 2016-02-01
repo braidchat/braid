@@ -42,10 +42,23 @@
         (scroll-to-bottom owner thread))
       om/IRender
       (render [_]
-        (let [private? (and (not (thread :new?)) (empty? (thread :tag-ids))) ]
-          (dom/div #js {:className (str "thread" (when private? " private"))}
+        (let [private? (and
+                         (not (thread :new?))
+                         (empty? (thread :tag-ids))
+                         (seq (thread :mentioned-ids)))
+              limbo? (and
+                       (not (thread :new?))
+                       (empty? (thread :tag-ids))
+                       (empty? (thread :mentioned-ids)))]
+          (dom/div #js {:className (str "thread"
+                                        " " (when private? "private")
+                                        " " (when limbo? "limbo"))}
             (dom/div #js {:className "card"}
               (dom/div #js {:className "head"}
+                (when limbo?
+                  (dom/div #js {:className "instructions"}
+                    (dom/div nil
+                      "No one can see this message yet. Mention a @user or #tag in a reply.")))
                 (when (store/open-thread? (thread :id))
                   (dom/div #js {:className "close"
                                 :onClick (fn [_]
