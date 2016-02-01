@@ -329,11 +329,12 @@ body {
     .head {
       .private-notification {
         text-align: center;
-        h2 {
-          font-size: 1em;
-          font-variant: small-caps;
-          display: inline;
-          margin-right: 0.5em;
+        .title {
+          margin: 0.5em;
+          .emojione {
+            height: 4ex;
+            width: 4.1ex;
+          }
         }
         p {
           color: gray;
@@ -351,6 +352,7 @@ body {
             cursor: default;
             p {
               line-height: 1.2em;
+              font-size: 0.8em;
             }
           }
           display: inline-block;

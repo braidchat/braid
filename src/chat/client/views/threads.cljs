@@ -6,6 +6,7 @@
             [chat.client.views.new-message :refer [new-message-view]]
             [chat.client.views.pills :refer [tag-view user-view]]
             [cljs-uuid-utils.core :as uuid]
+            [chat.client.emoji :as emoji]
             [chat.client.views.message :refer [message-view]])
   (:import [goog.events KeyCodes]))
 
@@ -47,7 +48,8 @@
             (dom/div #js {:className "head"}
               (when private?
                 (dom/div #js {:className "private-notification"}
-                  (dom/h2 nil "Private Thread")
+                  (dom/span #js {:className "title"}
+                    (emoji/shortcode->html ":see_no_evil:"))
                   (dom/div #js {:className "help"}
                     (dom/div #js {:className "title" :title "Help"})
                     (dom/div #js {:className "modal"}
