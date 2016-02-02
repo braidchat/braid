@@ -97,11 +97,13 @@
                                             (not (unseen? prev-message thread))))
                                         {:key :id
                                          :opts {:collapse?
-                                                (and (= (:user-id message)
-                                                        (:user-id prev-message))
+                                                (and
+                                                  (= (:user-id message)
+                                                     (:user-id prev-message))
                                                   (> (* 2 60 1000) ; 2 minutes
                                                      (- (:created-at message)
-                                                        (or (:created-at prev-message) 0))))}}))))))
+                                                        (or (:created-at prev-message) 0)))
+                                                  (not (unseen? message thread)))}}))))))
               (om/build new-message-view {:thread-id (thread :id)
                                           :placeholder (if (thread :new?)
                                                          "Start a conversation..."
