@@ -88,12 +88,16 @@
   (->> (get-in @app-state [:users])
        vals
        (filter (fn [u] (= nickname (u :nickname))))
+       ; nicknames are unique, so take the first
        first))
 
 (defn valid-user-id? [user-id]
   (some? (get-in @app-state [:users user-id])))
 
 ; threads and messages
+
+(defn update-thread-last-open-at [thread-id]
+  (transact! [:threads thread-id :last-open-at] (constantly js/Date.)))
 
 (defn set-open-threads! [threads]
   (transact! [:threads] (constantly (key-by-id threads)))
@@ -103,15 +107,16 @@
   (when-not (get-in @app-state [:threads thread-id])
     (transact! [:threads thread-id] (constantly {:id thread-id
                                                  :messages []
-                                                 :tag-ids #{}})))
+                                                 :tag-ids #{}
+                                                 :mentioned-ids #{}} )))
   (transact! [:user :open-thread-ids] #(conj % thread-id)))
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
   (transact! [:threads (message :thread-id) :messages] #(conj % message))
-
-  (transact! [:threads (message :thread-id) :tags] #(apply conj % (message :mentioned-tag-ids)))
-  (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj % (message :mentioned-user-ids))))
+  (update-thread-last-open-at (message :thread-id))
+  (transact! [:threads (message :thread-id) :tag-ids] #(apply conj (set %) (message :mentioned-tag-ids)))
+  (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj (set %) (message :mentioned-user-ids))))
 
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here
@@ -171,11 +176,15 @@
 (defn tag-in-open-group? [tag-id]
   (= (get-in @app-state [:tags tag-id :group-id]) (@app-state :open-group-id)))
 
-(defn name->tag [tag-name]
-  (->> (@app-state :tags)
-      vals
-      (filter (fn [t] (= tag-name (t :name))))
-      first))
+(defn name->open-tag-id
+  "Lookup tag by name in the open group"
+  [tag-name]
+  (let [open-group (@app-state :open-group-id)]
+    (->> (@app-state :tags)
+         vals
+         (filter (fn [t] (and (= open-group (t :group-id)) (= tag-name (t :name)))))
+         first
+         :id)))
 
 (defn get-tag [tag-id]
   (get-in @app-state [:tags tag-id]))

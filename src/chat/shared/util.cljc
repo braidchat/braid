@@ -10,13 +10,13 @@
 ;it gets wrapped in slashes.  Closed as wontfix :(
 (def sigiled-nickname-re
   "as nickname-re, but with the @sigil before it and capturing the name"
-  #"@([^ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]{1,30})")
+  #"(?:\s|^)@([^ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]{1,30})(?=\s|$)")
 
 (def tag-name-re
   #"(?:[^ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~]{1,50})")
 
 (def sigiled-tag-name-re
-  #"#([^ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~]{1,50})")
+  #"(?:\s|^)#([^ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~]{1,50})(?=\s|$)")
 
 
 (defn valid-nickname?
