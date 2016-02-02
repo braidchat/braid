@@ -16,7 +16,8 @@
                                        (let [target-classes (.. e -target -classList)
                                              this-elt (om/get-node owner "threads-div")]
                                          ; TODO: check if threads-div needs to scroll?
-                                         (when (and (or (.contains target-classes "thread") (.contains target-classes "threads"))
+                                         (when (and (or (.contains target-classes "thread")
+                                                        (.contains target-classes "threads"))
                                                  (= 0 (.-deltaX e) (.-deltaZ e)))
                                            (set! (.-scrollLeft this-elt) (- (.-scrollLeft this-elt) (.-deltaY e))))))}
           (concat

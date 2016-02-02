@@ -50,7 +50,16 @@
                   :done-empty "No Results"))))
 
 
-          (apply dom/div #js {:className "threads"}
+          (apply dom/div #js {:className "threads"
+                              :ref "threads-div"
+                              :onWheel (fn [e]
+                                         (let [target-classes (.. e -target -classList)
+                                               this-elt (om/get-node owner "threads-div")]
+                                           ; TODO: check if threads-div needs to scroll?
+                                           (when (and (or (.contains target-classes "thread")
+                                                          (.contains target-classes "threads"))
+                                                   (= 0 (.-deltaX e) (.-deltaZ e)))
+                                             (set! (.-scrollLeft this-elt) (- (.-scrollLeft this-elt) (.-deltaY e))))))}
             (concat
               [(new-thread-view {:tag-ids [tag-id]})]
               (map (fn [t] (om/build thread-view t {:key :id}))
