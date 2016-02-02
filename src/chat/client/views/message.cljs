@@ -172,9 +172,12 @@
         (dom/div #js {:className (str "message " (when (:collapse? opts) "collapse"))}
           (dom/img #js {:className "avatar"
                         :src (sender :avatar)
-                        :style #js {:backgroundColor (id->color (sender :id))}})
+                        :style #js {:backgroundColor (id->color (sender :id))}
+                        :onClick (fn [_] (store/set-page! {:type :user :id (sender :id)}))})
           (dom/div #js {:className "info"}
-            (dom/span #js {:className "nickname"} (sender :nickname))
+            (dom/span #js {:className "nickname"
+                           :onClick (fn [_] (store/set-page! {:type :user :id (sender :id)}))}
+              (sender :nickname))
             (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
           (apply dom/div #js {:className "content"}
             (format-message (message :content))))))))
