@@ -172,7 +172,7 @@
         (dom/div #js {:className (str "message"
                                       " " (when (:collapse? opts) "collapse")
                                       " " (if (:unseen? message) "unseen" "seen")
-                                      " " (when (:first-unseen? opts) "first-unseen"))}
+                                      " " (when (:first-unseen? message) "first-unseen"))}
           (dom/img #js {:className "avatar"
                         :src (sender :avatar)
                         :style #js {:backgroundColor (id->color (sender :id))}})
