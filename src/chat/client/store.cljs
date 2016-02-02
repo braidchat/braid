@@ -88,6 +88,7 @@
   (->> (get-in @app-state [:users])
        vals
        (filter (fn [u] (= nickname (u :nickname))))
+       ; nicknames are unique, so take the first
        first))
 
 (defn valid-user-id? [user-id]
@@ -171,11 +172,15 @@
 (defn tag-in-open-group? [tag-id]
   (= (get-in @app-state [:tags tag-id :group-id]) (@app-state :open-group-id)))
 
-(defn name->tag [tag-name]
-  (->> (@app-state :tags)
-      vals
-      (filter (fn [t] (= tag-name (t :name))))
-      first))
+(defn name->open-tag-id
+  "Lookup tag by name in the open group"
+  [tag-name]
+  (let [open-group (@app-state :open-group-id)]
+    (->> (@app-state :tags)
+         vals
+         (filter (fn [t] (and (= open-group (t :group-id)) (= tag-name (t :name)))))
+         first
+         :id)))
 
 (defn get-tag [tag-id]
   (get-in @app-state [:tags tag-id]))
