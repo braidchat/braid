@@ -103,15 +103,15 @@
   (when-not (get-in @app-state [:threads thread-id])
     (transact! [:threads thread-id] (constantly {:id thread-id
                                                  :messages []
-                                                 :tag-ids #{}})))
+                                                 :tag-ids #{}
+                                                 :mentioned-ids #{}} )))
   (transact! [:user :open-thread-ids] #(conj % thread-id)))
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
   (transact! [:threads (message :thread-id) :messages] #(conj % message))
-
-  (transact! [:threads (message :thread-id) :tags] #(apply conj % (message :mentioned-tag-ids)))
-  (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj % (message :mentioned-user-ids))))
+  (transact! [:threads (message :thread-id) :tag-ids] #(apply conj (set %) (message :mentioned-tag-ids)))
+  (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj (set %) (message :mentioned-user-ids))))
 
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here
