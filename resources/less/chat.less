@@ -217,7 +217,7 @@ body {
   display: flex;
   -webkit-align-items: flex-end;
   align-items: flex-end;
-  overflow: scroll;
+  overflow-x: scroll;
 }
 
 .thread {
@@ -275,7 +275,8 @@ body {
     }
 
     .messages {
-      overflow: scroll;
+      position: relative;
+      overflow-y: scroll;
       padding: 0 @pad;
     }
     .message.new {
@@ -356,6 +357,7 @@ body {
     margin: 0 0 @pad;
 
     > .avatar {
+      cursor: pointer;
       width: @avatar-size;
       height: @avatar-size;
       display: inline-block;
@@ -370,6 +372,7 @@ body {
       white-space: nowrap;
       .nickname {
         font-weight: bold;
+        cursor: pointer;
       }
       .time {
         margin-left: 0.25rem;
@@ -453,6 +456,7 @@ body {
         }
       }
       .autocomplete {
+        z-index: 1000;
         box-shadow: 0 1px 4px 0 #ccc;
         background: white;
         max-height: 20em;

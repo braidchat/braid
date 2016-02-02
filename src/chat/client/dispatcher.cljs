@@ -8,18 +8,14 @@
             [chat.shared.util :as util]))
 
 (defn- extract-tag-ids [text]
-  (let [mentioned-names (->> (re-seq #"(?:^|\s)#(\S+)" text)
-                             (map second))
-        name->id (reduce (fn [m [id {:keys [name]}]] (assoc m name id))
-                         {}
-                         (@store/app-state :tags))]
+  (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
+                             (map second))]
     (->> mentioned-names
-         (map name->id)
-         (filter store/tag-in-open-group?)
+         (map store/name->open-tag-id)
          (remove nil?))))
 
 (defn- extract-user-ids [text]
-  (let [mentioned-names (->> (re-seq #"(?:^|\s)@(\S+)" text)
+  (let [mentioned-names (->> (re-seq util/sigiled-nickname-re text)
                              (map second))
         nick->id (reduce (fn [m [id {:keys [nickname]}]] (assoc m nickname id))
                          {}
@@ -33,19 +29,21 @@
   [content]
   (-> content
       (string/replace util/sigiled-nickname-re
-                      (fn [[_ nick]]
-                        (str "@" (if-let [user-id (:id (store/nickname->user nick))]
+                      (fn [[m nick]]
+                        ; sometimes need leading whitespace, because javascript regex doesn't have lookbehind
+                        (str (second (re-matches #"^(\s).*" m))
+                             "@"
+                             (if-let [user-id (:id (store/nickname->user nick))]
                                    (if (store/user-in-open-group? user-id)
                                      user-id
                                      nick)
                                    nick))))
       (string/replace util/sigiled-tag-name-re
-                      (fn [[_ tag-name]]
-                        (str "#" (if-let [tag-id (:id (store/name->tag tag-name))]
-                                   (if (store/tag-in-open-group? tag-id)
-                                     tag-id
-                                     tag-name)
-                                   tag-name))))))
+                      (fn [[m tag-name]]
+                        ; sometimes need leading whitespace, because javascript regex doesn't have lookbehind
+                        (str (second (re-matches #"^(\s).*" m))
+                             "#" (or (store/name->open-tag-id tag-name)
+                                      tag-name))))))
 
 (defmulti dispatch! (fn [event data] event))
 
