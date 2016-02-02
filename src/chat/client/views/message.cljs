@@ -171,7 +171,7 @@
       (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))]
         (dom/div #js {:className (str "message"
                                       " " (when (:collapse? opts) "collapse")
-                                      " " (if (:unseen? opts) "unseen" "seen")
+                                      " " (if (:unseen? message) "unseen" "seen")
                                       " " (when (:first-unseen? opts) "first-unseen"))}
           (dom/img #js {:className "avatar"
                         :src (sender :avatar)

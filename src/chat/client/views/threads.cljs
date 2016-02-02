@@ -88,7 +88,9 @@
                        (partition 2 1)
                        (map (fn [[prev-message message]]
                               (om/build message-view
-                                        message
+                                        (assoc message
+                                          :unseen?
+                                          (unseen? message thread))
                                         {:key :id
                                          :opts {:collapse?
                                                 (and (= (:user-id message)
@@ -96,8 +98,6 @@
                                                   (> (* 2 60 1000) ; 2 minutes
                                                      (- (:created-at message)
                                                         (or (:created-at prev-message) 0))))
-                                                :unseen?
-                                                (unseen? message thread)
                                                 :first-unseen?
                                                 (and
                                                   (unseen? message thread)

@@ -95,6 +95,9 @@
 
 ; threads and messages
 
+(defn update-thread-last-open-at [thread-id]
+  (transact! [:threads thread-id :last-open-at] (constantly js/Date.)))
+
 (defn set-open-threads! [threads]
   (transact! [:threads] (constantly (key-by-id threads)))
   (transact! [:user :open-thread-ids] (constantly (set (map :id threads)))))
@@ -110,6 +113,7 @@
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
   (transact! [:threads (message :thread-id) :messages] #(conj % message))
+  (update-thread-last-open-at (message :thread-id))
   (transact! [:threads (message :thread-id) :tag-ids] #(apply conj (set %) (message :mentioned-tag-ids)))
   (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj (set %) (message :mentioned-user-ids))))
 
