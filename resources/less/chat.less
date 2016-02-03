@@ -421,6 +421,26 @@ body {
       }
     }
 
+    // rename unseen -> new; new -> compose
+    /*
+    &.first-unseen:before {
+      content: "";
+      display: block;
+      height: @pad/2;
+      border-top: 1px solid red;
+      margin-top: -@pad/2;
+    }
+    */
+
+    &.seen {
+      transition: opacity 0.5s linear;
+      opacity: 0.6;
+    }
+
+    &.unseen {
+    }
+
+
     &.new {
       padding-left: @pad + 2em;
       padding-top: @pad;

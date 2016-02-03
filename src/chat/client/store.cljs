@@ -96,6 +96,9 @@
 
 ; threads and messages
 
+(defn update-thread-last-open-at [thread-id]
+  (transact! [:threads thread-id :last-open-at] (constantly js/Date.)))
+
 (defn set-open-threads! [threads]
   (transact! [:threads] (constantly (key-by-id threads)))
   (transact! [:user :open-thread-ids] (constantly (set (map :id threads)))))
@@ -104,15 +107,16 @@
   (when-not (get-in @app-state [:threads thread-id])
     (transact! [:threads thread-id] (constantly {:id thread-id
                                                  :messages []
-                                                 :tag-ids #{}})))
+                                                 :tag-ids #{}
+                                                 :mentioned-ids #{}} )))
   (transact! [:user :open-thread-ids] #(conj % thread-id)))
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
   (transact! [:threads (message :thread-id) :messages] #(conj % message))
-
-  (transact! [:threads (message :thread-id) :tags] #(apply conj % (message :mentioned-tag-ids)))
-  (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj % (message :mentioned-user-ids))))
+  (update-thread-last-open-at (message :thread-id))
+  (transact! [:threads (message :thread-id) :tag-ids] #(apply conj (set %) (message :mentioned-tag-ids)))
+  (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj (set %) (message :mentioned-user-ids))))
 
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here

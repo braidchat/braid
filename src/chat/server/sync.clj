@@ -56,8 +56,9 @@
         thread (db/with-conn (db/get-thread thread-id))]
     (doseq [uid user-ids-to-send-to]
       (let [user-tags (db/with-conn (db/get-user-visible-tag-ids uid))
-            filtered-thread (update-in thread [:tag-ids] (partial filter user-tags))]
-        (chsk-send! uid [:chat/thread filtered-thread])))))
+            filtered-thread (update-in thread [:tag-ids] (partial filter user-tags))
+            thread-with-last-opens (db/with-conn (db/thread-add-last-open-at filtered-thread uid))]
+        (chsk-send! uid [:chat/thread thread-with-last-opens])))))
 
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
