@@ -385,7 +385,7 @@
                               (filter (fn [m] (= (m :user-id) user-id)))
                               (map :created-at)
                               (map (fn [t] (.getTime t))))]
-  (assoc thread :last-open-at (apply max (concat user-hides-at user-messages-at)))))
+  (assoc thread :last-open-at (apply max (concat [0] user-hides-at user-messages-at)))))
 
 (defn get-open-threads-for-user
   [user-id]
