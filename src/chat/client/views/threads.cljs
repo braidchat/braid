@@ -28,6 +28,10 @@
   (> (:created-at message)
      (thread :last-open-at)) )
 
+(defn upload [file on-uploaded]
+  (println "uploading " file)
+  (on-uploaded (.-name file)))
+
 (defn thread-view [thread owner opts]
   (let [scroll-to-bottom
         (fn [owner thread]
@@ -35,6 +39,9 @@
             (when-let [messages (om/get-node owner "messages")]
               (set! (.-scrollTop messages) (.-scrollHeight messages)))))]
     (reify
+      om/IInitState
+      (init-state [_]
+        {:dragging? false})
       om/IDidMount
       (did-mount [_]
         (scroll-to-bottom owner thread))
@@ -44,8 +51,8 @@
       om/IDidUpdate
       (did-update [_ _ _]
         (scroll-to-bottom owner thread))
-      om/IRender
-      (render [_]
+      om/IRenderState
+      (render-state [_ {:keys [dragging?] :as state}]
         (let [new? (thread :new?)
               private? (and
                          (not (thread :new?))
@@ -58,7 +65,19 @@
           (dom/div #js {:className (str "thread"
                                         " " (when new? "new")
                                         " " (when private? "private")
-                                        " " (when limbo? "limbo"))}
+                                        " " (when limbo? "limbo")
+                                        " " (when dragging? "dragging"))
+                        :onDragOver (fn [e]  (.stopPropagation e) (.preventDefault e)
+                                      (om/set-state! owner :dragging? true))
+                        :onDragLeave (fn [e] (om/set-state! owner :dragging? false))
+                        :onDrop (fn [e] (.preventDefault e)
+                                  (om/set-state! owner :dragging? false)
+                                  (let [file-list (.. e -dataTransfer -files)]
+                                    (when (< 0 (.-length file-list))
+                                      (upload (aget file-list 0)
+                                              (fn [url] (dispatch! :new-message
+                                                                   {:content url
+                                                                    :thread-id (thread :id)}))))))}
 
             (when limbo?
               (dom/div #js {:className "notice"}
