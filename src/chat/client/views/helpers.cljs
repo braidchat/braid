@@ -6,6 +6,15 @@
             [cljs-time.core :as t]
             [chat.client.store :as store]))
 
+; TODO: clojure 1.8 should implement these
+(defn starts-with? [s prefix]
+  ; not using .startsWith because it's only supported in ES6
+  (= 0 (.indexOf s prefix)))
+(defn ends-with? [s suffix]
+  (let [pos (- (count s) (count suffix))
+        idx (.indexOf s suffix)]
+    (and (not= -1 idx) (= idx pos))))
+
 (defn id->color [id]
   ; normalized is approximately evenly distributed between 0 and 1
   (let [normalized (-> id

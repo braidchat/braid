@@ -5,9 +5,8 @@
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [id->color]]
             [chat.client.emoji :as emoji]
-            [chat.client.views.helpers :as helpers]
-            [chat.client.views.pills :refer [tag-view user-view]]
-            ))
+            [chat.client.views.helpers :as helpers :refer [starts-with? ends-with?]]
+            [chat.client.views.pills :refer [tag-view user-view]]))
 
 (def replacements
   {:urls
@@ -62,11 +61,6 @@
         (re-replace (type-info :pattern) text (type-info :replace)))
       text-or-node)))
 
-; TODO: clojure 1.8 should implement this
-(defn starts-with? [s prefix]
-  ; not using .startsWith because it's only supported in ES6
-  (= 0 (.indexOf s prefix)))
-
 (defn make-delimited-processor
   "Make a new transducer to process the stream of words"
   [{:keys [delimiter result-fn]}]
@@ -85,7 +79,7 @@
              ; start
              (and (= @state ::start) (starts-with? input delimiter))
              (cond
-               (and (not= input delimiter) (.endsWith input delimiter))
+               (and (not= input delimiter) (ends-with? input delimiter))
                (xf result (result-fn (.slice input (count delimiter) (- (.-length input) (count delimiter)))))
 
                (and (not= input delimiter) (not= 0 (.lastIndexOf input delimiter)))
@@ -100,7 +94,7 @@
                    result))
 
              ; end
-             (and (= @state ::in-code) (.endsWith input delimiter))
+             (and (= @state ::in-code) (ends-with? input delimiter))
              (let [code (conj @in-code (.slice input 0 (- (.-length input) (count delimiter))))]
                (vreset! state ::start)
                (vreset! in-code [])
