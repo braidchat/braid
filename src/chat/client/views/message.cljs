@@ -62,6 +62,11 @@
         (re-replace (type-info :pattern) text (type-info :replace)))
       text-or-node)))
 
+; TODO: clojure 1.8 should implement this
+(defn starts-with? [s prefix]
+  ; not using .startsWith because it's only supported in ES6
+  (= 0 (.indexOf s prefix)))
+
 (defn make-delimited-processor
   "Make a new transducer to process the stream of words"
   [{:keys [delimiter result-fn]}]
@@ -78,7 +83,7 @@
            (cond
              ; TODO: handle starting code block with delimiter not at beginning of word
              ; start
-             (and (= @state ::start) (.startsWith input delimiter))
+             (and (= @state ::start) (starts-with? input delimiter))
              (cond
                (and (not= input delimiter) (.endsWith input delimiter))
                (xf result (result-fn (.slice input (count delimiter) (- (.-length input) (count delimiter)))))
