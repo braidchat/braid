@@ -12,7 +12,13 @@
   {:urls
    {:pattern #"(http(?:s)?://\S+(?:\w|\d|/))"
     :replace (fn [match]
-               (dom/a #js {:href match :target "_blank"} match))}
+               (dom/a #js {:href match :target "_blank"}
+                 ; TODO: could do something smarter with checking MIME types or
+                 ; something, but trying to sniff every link seems like it
+                 ; could get kind of hairy...
+                 (if (some (partial ends-with? match) [".png" ".jpg" ".jpeg" ".gif"])
+                   (dom/img #js {:src match :alt match :className "embedded-image"})
+                   match)))}
    :users
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
