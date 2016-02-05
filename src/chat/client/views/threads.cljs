@@ -38,7 +38,8 @@
     (reify
       om/IInitState
       (init-state [_]
-        {:dragging? false})
+        {:dragging? false
+         :uploading? false})
       om/IDidMount
       (did-mount [_]
         (scroll-to-bottom owner thread))
@@ -74,9 +75,12 @@
                                       (let [file (aget file-list 0)]
                                         (if (> (.-size file) (* 10 1024 1024))
                                           (store/display-error! "File to big to upload, sorry")
-                                          (s3/upload file (fn [url] (dispatch! :new-message
-                                                                               {:content url
-                                                                                :thread-id (thread :id)}))))))))}
+                                          (do (om/set-state! owner :uploading? true)
+                                              (s3/upload file (fn [url]
+                                                                (om/set-state! owner :uploading? false)
+                                                                (dispatch! :new-message
+                                                                                   {:content url
+                                                                                    :thread-id (thread :id)})))))))))}
 
             (when limbo?
               (dom/div #js {:className "notice"}
@@ -122,6 +126,8 @@
                                                      (- (:created-at message)
                                                         (or (:created-at prev-message) 0)))
                                                   (not (unseen? message thread)))}}))))))
+              (when (state :uploading?)
+                (dom/div #js {:className "uploading-indicator"} "\uf110"))
               (om/build new-message-view {:thread-id (thread :id)
                                           :placeholder (if (thread :new?)
                                                          "Start a conversation..."
