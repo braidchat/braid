@@ -11,7 +11,8 @@
             [environ.core :refer [env]]
             [chat.shared.util :refer [valid-nickname?]]
             [chat.server.db :as db]
-            [chat.server.invite :as invites]))
+            [chat.server.invite :as invites]
+            [chat.server.s3 :as s3]))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8" }
@@ -63,6 +64,18 @@
     {:status 200 :session nil}))
 
 (defroutes api-routes
+  (GET "/s3-policy" req
+    (if (some? (db/with-conn (db/user-by-id (get-in req [:session :user-id]))))
+      (if-let [policy (s3/generate-policy)]
+        {:status 200
+         :headers {"Content-Type" "application/edn"}
+         :body (pr-str policy)}
+        {:status 500
+         :headers {"Content-Type" "application/edn"}
+         :body (pr-str {:error "No S3 secret for upload"})})
+      {:status 403
+       :headers {"Content-Type" "application/edn"}
+       :body (pr-str {:error "Unauthorized"}) }))
   (POST "/auth" req
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
