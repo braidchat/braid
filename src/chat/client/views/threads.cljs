@@ -29,6 +29,8 @@
   (> (:created-at message)
      (thread :last-open-at)) )
 
+(def max-file-size (* 10 1024 1024))
+
 (defn thread-view [thread owner opts]
   (let [scroll-to-bottom
         (fn [owner thread]
@@ -59,12 +61,26 @@
               limbo? (and
                        (not (thread :new?))
                        (empty? (thread :tag-ids))
-                       (empty? (thread :mentioned-ids)))]
+                       (empty? (thread :mentioned-ids)))
+              maybe-upload-file (fn [file]
+                                  (if (> (.-size file) max-file-size)
+                                    (store/display-error! "File to big to upload, sorry")
+                                    (do (om/set-state! owner :uploading? true)
+                                        (s3/upload file (fn [url]
+                                                          (om/set-state! owner :uploading? false)
+                                                          (dispatch! :new-message
+                                                                     {:content url
+                                                                      :thread-id (thread :id)}))))))]
           (dom/div #js {:className (str "thread"
                                         " " (when new? "new")
                                         " " (when private? "private")
                                         " " (when limbo? "limbo")
                                         " " (when dragging? "dragging"))
+                        :onPaste (fn [e]
+                                   (let [pasted-files (.. e -clipboardData -files)]
+                                     (when (< 0 (.-length pasted-files))
+                                       (.preventDefault e)
+                                       (maybe-upload-file (aget pasted-files 0)))))
                         :onDragOver (fn [e]  (.stopPropagation e) (.preventDefault e)
                                       (om/set-state! owner :dragging? true))
                         :onDragLeave (fn [e] (om/set-state! owner :dragging? false))
@@ -72,15 +88,7 @@
                                   (om/set-state! owner :dragging? false)
                                   (let [file-list (.. e -dataTransfer -files)]
                                     (when (< 0 (.-length file-list))
-                                      (let [file (aget file-list 0)]
-                                        (if (> (.-size file) (* 10 1024 1024))
-                                          (store/display-error! "File to big to upload, sorry")
-                                          (do (om/set-state! owner :uploading? true)
-                                              (s3/upload file (fn [url]
-                                                                (om/set-state! owner :uploading? false)
-                                                                (dispatch! :new-message
-                                                                                   {:content url
-                                                                                    :thread-id (thread :id)})))))))))}
+                                      (maybe-upload-file (aget file-list 0)))))}
 
             (when limbo?
               (dom/div #js {:className "notice"}
