@@ -21,7 +21,7 @@
         (fn [e] (on-error {:error (.getResponseText xhr)}))))
     (.send xhr url (.toUpperCase (name method)) data)))
 
-(defn s3-upload [file on-complete]
+(defn upload [file on-complete]
   (edn-xhr
     {:method :get
      :url (let [path (.. js/window -location -pathname)]
@@ -34,12 +34,12 @@
      :on-complete
      (fn [{:keys [bucket auth]}]
        (let [file-name (str (uuid/make-random-squuid) "." (last (split (.-type file) #"/")))
-             file-url (str "http://" bucket "/" file-name)]
+             file-url (str "https://s3.amazonaws.com/" bucket "/uploads/" file-name)]
          (ajax-xhr {:method "POST"
                     :url (str "https://s3.amazonaws.com/" bucket)
                     :data (doto (js/FormData.)
-                            (.append "key" "${filename}")
-                            (.append "AWSAccessKeyId" "AKIAJYNGF5GRIEBUF4QQ")
+                            (.append "key" "uploads/${filename}")
+                            (.append "AWSAccessKeyId" (:key auth))
                             (.append "acl" "public-read")
                             (.append "policy" (:policy auth))
                             (.append "signature" (:signature auth))

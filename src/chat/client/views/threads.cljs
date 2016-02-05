@@ -7,7 +7,8 @@
             [chat.client.views.pills :refer [tag-view user-view]]
             [cljs-uuid-utils.core :as uuid]
             [chat.client.emoji :as emoji]
-            [chat.client.views.message :refer [message-view]])
+            [chat.client.views.message :refer [message-view]]
+            [chat.client.s3 :as s3])
   (:import [goog.events KeyCodes]))
 
 
@@ -27,10 +28,6 @@
 (defn- unseen? [message thread]
   (> (:created-at message)
      (thread :last-open-at)) )
-
-(defn upload [file on-uploaded]
-  (println "uploading " file)
-  (on-uploaded (.-name file)))
 
 (defn thread-view [thread owner opts]
   (let [scroll-to-bottom
@@ -74,7 +71,7 @@
                                   (om/set-state! owner :dragging? false)
                                   (let [file-list (.. e -dataTransfer -files)]
                                     (when (< 0 (.-length file-list))
-                                      (upload (aget file-list 0)
+                                      (s3/upload (aget file-list 0)
                                               (fn [url] (dispatch! :new-message
                                                                    {:content url
                                                                     :thread-id (thread :id)}))))))}
