@@ -71,10 +71,12 @@
                                   (om/set-state! owner :dragging? false)
                                   (let [file-list (.. e -dataTransfer -files)]
                                     (when (< 0 (.-length file-list))
-                                      (s3/upload (aget file-list 0)
-                                              (fn [url] (dispatch! :new-message
-                                                                   {:content url
-                                                                    :thread-id (thread :id)}))))))}
+                                      (let [file (aget file-list 0)]
+                                        (if (> (.-size file) (* 10 1024 1024))
+                                          (store/display-error! "File to big to upload, sorry")
+                                          (s3/upload file (fn [url] (dispatch! :new-message
+                                                                               {:content url
+                                                                                :thread-id (thread :id)}))))))))}
 
             (when limbo?
               (dom/div #js {:className "notice"}
