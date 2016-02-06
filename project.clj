@@ -55,7 +55,7 @@
   :min-lein-version "2.5.0"
 
   :profiles {:dev {:dependencies [[com.datomic/datomic-free "0.9.5201" :exclusions [joda-time com.amazonaws/aws-java-sdk]]
-                                  [figwheel-sidecar "0.4.0"]]}
+                                  [figwheel-sidecar "0.5.0-6"]]}
              :prod {:dependencies [[com.datomic/datomic-pro "0.9.5201" :exclusions [joda-time com.amazonaws/aws-java-sdk]]
                                    [org.postgresql/postgresql "9.3-1103-jdbc4"]
                                    [org.clojure/tools.nrepl "0.2.10"]]}
