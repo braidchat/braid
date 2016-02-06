@@ -6,7 +6,8 @@
             [cljs.core.async :as async :refer [<! put! chan]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.helpers :refer [debounce]]))
+            [chat.client.views.helpers :refer [debounce]]
+            [chat.client.routes :as routes]))
 
 (defn search-bar-view [data owner]
   (reify
@@ -21,9 +22,10 @@
                 (store/set-search-results! {})
                 (if (string/blank? query)
                   (do
-                    (store/set-page! {:type :inbox}))
+                    (routes/go-to! (routes/inbox-page-path {:group-id (routes/current-group)})))
                   (do
-                    (store/set-page! {:type :search :search-query query})
+                    (routes/go-to! (routes/search-page-path {:group-id (routes/current-group)
+                                                             :query query}))
                     ; consider moving this dispatch! into search-page-view
                     (dispatch! :search-history [query (@store/app-state :open-group-id)]))))))))
     om/IRenderState

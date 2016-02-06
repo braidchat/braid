@@ -59,23 +59,18 @@ body {
   background: #222;
   padding: @pad;
 
-  .group, .plus {
+  .option {
     width: @top-bar-height;
     height: @top-bar-height;
     border-radius: @pad / 3;
-    cursor: pointer;
-  }
 
-  .group, .plus {
+    display: block;
+    text-decoration: none;
+
     line-height: @top-bar-height;
     text-align: center;
     font-size: 1.5em;
-  }
 
-  .group {
-    margin: 0 0 @pad 0;
-    color: #222;
-    position: relative;
 
     &.active:before {
       @w: @pad / 3;
@@ -89,6 +84,13 @@ body {
     }
 
   }
+
+  .group {
+    margin: 0 0 @pad 0;
+    color: #222;
+    position: relative;
+  }
+
   .plus {
     position: absolute;
     bottom: @pad;
@@ -174,6 +176,7 @@ body {
   color: white;
   vertical-align: middle;
   cursor: pointer;
+  text-decoration: none;
   &.on {
     color: white !important;
   }
@@ -396,7 +399,7 @@ body {
     position: relative;
     margin: 0 0 @pad;
 
-    > .avatar {
+    .avatar {
       cursor: pointer;
       width: @avatar-size;
       height: @avatar-size;
@@ -412,7 +415,8 @@ body {
       white-space: nowrap;
       .nickname {
         font-weight: bold;
-        cursor: pointer;
+        text-decoration: none;
+        color: #000;
       }
       .time {
         margin-left: 0.25rem;
@@ -623,9 +627,14 @@ body {
     .help, .users, .tags {
       display: inline-block;
       margin-right: @pad;
+      .title {
+        text-decoration: none;
+        color: @grey-text;
+      }
       &:hover {
-        color: #000;
-        cursor: pointer;
+        .title {
+          color: #000;
+        }
         .modal {
           display: block;
           padding: @pad;
@@ -657,7 +666,6 @@ body {
       vertical-align: middle;
       margin-left: @pad;
       border-radius: 20%;
-      cursor: pointer;
     }
   }
 }
