@@ -19,7 +19,7 @@
    :body (pr-str clj-body)})
 
 (defroutes site-routes
-  (GET "/" []
+  (GET "/*" []
     (-> "public/index.html"
         clojure.java.io/resource
         slurp))

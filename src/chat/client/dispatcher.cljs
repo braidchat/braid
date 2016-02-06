@@ -5,7 +5,8 @@
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
             [cljs-utils.core :refer [edn-xhr]]
-            [chat.shared.util :as util]))
+            [chat.shared.util :as util]
+            [chat.client.router :as router]))
 
 (defn- extract-tag-ids [text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
@@ -161,8 +162,7 @@
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
   (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
-  (store/set-page! {:type :inbox})
-  (store/set-open-group! (:id (first (data :user-groups))))
+  (router/dispatch-current-path!)
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))

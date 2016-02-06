@@ -6,7 +6,8 @@
             [chat.client.sync :as sync]
             [chat.client.views :as views]
             [chat.client.clj-highlighter :as highlighter]
-            [chat.client.dispatcher :as dispatcher]))
+            [chat.client.dispatcher :as dispatcher]
+            [chat.client.router :as router]))
 
 (enable-console-print!)
 
@@ -18,3 +19,5 @@
 (highlighter/install-highlighter)
 (om/root views/app-view store/app-state
            {:target (. js/document (getElementById "app"))})
+
+(router/init)
