@@ -8,7 +8,8 @@
             [chat.server.search :as search]
             [chat.server.invite :as invites]
             [clojure.set :refer [difference intersection]]
-            [chat.shared.util :refer [valid-nickname? valid-tag-name?]]))
+            [chat.shared.util :refer [valid-nickname? valid-tag-name?]]
+            [chat.shared.checksum :as checksum]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -72,6 +73,7 @@
 (defmethod event-msg-handler :chsk/uidport-open
   [{:as ev-msg :keys [event id ring-req]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
+    (chsk-send! user-id [:chat/version-check checksum/current-client-checksum])
     (broadcast-user-change user-id [:user/connected user-id])))
 
 (defmethod event-msg-handler :chsk/uidport-close
