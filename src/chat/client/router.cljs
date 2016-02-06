@@ -30,4 +30,3 @@
 
 (defn dispatch-current-path! []
   (secretary/dispatch! (.getPath (.parse Uri js/window.location))))
-

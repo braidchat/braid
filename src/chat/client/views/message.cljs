@@ -6,7 +6,8 @@
             [chat.client.views.helpers :refer [id->color]]
             [chat.client.emoji :as emoji]
             [chat.client.views.helpers :as helpers :refer [starts-with? ends-with?]]
-            [chat.client.views.pills :refer [tag-view user-view]]))
+            [chat.client.views.pills :refer [tag-view user-view]]
+            [chat.client.routes :as routes]))
 
 (def replacements
   {:urls
@@ -173,18 +174,20 @@
         ((aget PR "prettyPrint"))))
     om/IRender
     (render [_]
-      (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))]
+      (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))
+            sender-path (routes/user-page-path {:group-id (routes/current-group)
+                                                :user-id (sender :id)})]
         (dom/div #js {:className (str "message"
                                       " " (when (:collapse? opts) "collapse")
                                       " " (if (:unseen? message) "unseen" "seen")
                                       " " (when (:first-unseen? message) "first-unseen"))}
-          (dom/img #js {:className "avatar"
-                        :src (sender :avatar)
-                        :style #js {:backgroundColor (id->color (sender :id))}
-                        :onClick (fn [_] (store/set-page! {:type :user :id (sender :id)}))})
+          (dom/a #js {:href sender-path}
+            (dom/img #js {:className "avatar"
+                          :src (sender :avatar)
+                          :style #js {:backgroundColor (id->color (sender :id))}}))
           (dom/div #js {:className "info"}
-            (dom/span #js {:className "nickname"
-                           :onClick (fn [_] (store/set-page! {:type :user :id (sender :id)}))}
+            (dom/a #js {:className "nickname"
+                        :href sender-path}
               (sender :nickname))
             (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
           (apply dom/div #js {:className "content"}

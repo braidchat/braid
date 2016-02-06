@@ -44,13 +44,10 @@
 
 ; page
 
-(defn set-page! [page]
-  (transact! [:page] (constantly page)))
-
 (defn set-group-and-page! [group-id page-id]
   (swap! app-state (fn [s] (assoc s
                              :open-group-id group-id
-                             :page {:type page-id}
+                             :page page-id
                              ))))
 ; session
 

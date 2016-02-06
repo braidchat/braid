@@ -4,7 +4,8 @@
             [chat.client.store :as store]
             [chat.client.views.search-bar :refer [search-bar-view]]
             [chat.client.views.pills :refer [tag-view user-view]]
-            [chat.client.views.helpers :refer [id->color]]))
+            [chat.client.views.helpers :refer [id->color]]
+            [chat.client.routes :as routes]))
 
 (defn header-view [data owner]
   (reify
@@ -27,9 +28,10 @@
                             (om/build user-view user))))))))
 
         (dom/div #js {:className "tags"}
-          (dom/div #js {:className "title"
-                        :title "Tags"
-                        :onClick (fn [e] (store/set-page! {:type :channels}))})
+          (dom/a #js {:className "title"
+                      :title "Tags"
+                      :href (routes/page-path {:group-id (routes/current-group)
+                                               :page-id "channels"})})
           (dom/div #js {:className "modal"}
             (apply dom/div nil
               (->> (@store/app-state :tags)
@@ -52,8 +54,8 @@
         (om/build search-bar-view (data :page))
 
         (let [user-id (get-in @store/app-state [:session :user-id])]
-          (dom/img #js {:className "avatar"
-                        :style #js {:backgroundColor (id->color user-id)}
-                        :onClick (fn [e]
-                                   (store/set-page! {:type :me}))
-                        :src (get-in @store/app-state [:users user-id :avatar])}))))))
+          (dom/a #js {:href (routes/page-path {:group-id (routes/current-group)
+                                               :page-id "me"})}
+            (dom/img #js {:className "avatar"
+                          :style #js {:backgroundColor (id->color user-id)}
+                          :src (get-in @store/app-state [:users user-id :avatar])})))))))
