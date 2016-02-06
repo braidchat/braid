@@ -1,3 +1,3 @@
 (ns chat.shared.checksum)
 
-(def current-client-checksum "fe251cfc5c9a397abffc7e3e5ccf258f")
+(def current-client-checksum "99ad3ca980c346edceaee4d400d7f471")
