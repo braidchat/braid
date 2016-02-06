@@ -7,7 +7,8 @@
             [chat.client.views.pills :refer [tag-view user-view]]
             [cljs-uuid-utils.core :as uuid]
             [chat.client.emoji :as emoji]
-            [chat.client.views.message :refer [message-view]])
+            [chat.client.views.message :refer [message-view]]
+            [chat.client.s3 :as s3])
   (:import [goog.events KeyCodes]))
 
 
@@ -28,6 +29,8 @@
   (> (:created-at message)
      (thread :last-open-at)) )
 
+(def max-file-size (* 10 1024 1024))
+
 (defn thread-view [thread owner opts]
   (let [scroll-to-bottom
         (fn [owner thread]
@@ -35,6 +38,10 @@
             (when-let [messages (om/get-node owner "messages")]
               (set! (.-scrollTop messages) (.-scrollHeight messages)))))]
     (reify
+      om/IInitState
+      (init-state [_]
+        {:dragging? false
+         :uploading? false})
       om/IDidMount
       (did-mount [_]
         (scroll-to-bottom owner thread))
@@ -44,8 +51,8 @@
       om/IDidUpdate
       (did-update [_ _ _]
         (scroll-to-bottom owner thread))
-      om/IRender
-      (render [_]
+      om/IRenderState
+      (render-state [_ {:keys [dragging?] :as state}]
         (let [new? (thread :new?)
               private? (and
                          (not (thread :new?))
@@ -54,11 +61,34 @@
               limbo? (and
                        (not (thread :new?))
                        (empty? (thread :tag-ids))
-                       (empty? (thread :mentioned-ids)))]
+                       (empty? (thread :mentioned-ids)))
+              maybe-upload-file (fn [file]
+                                  (if (> (.-size file) max-file-size)
+                                    (store/display-error! "File to big to upload, sorry")
+                                    (do (om/set-state! owner :uploading? true)
+                                        (s3/upload file (fn [url]
+                                                          (om/set-state! owner :uploading? false)
+                                                          (dispatch! :new-message
+                                                                     {:content url
+                                                                      :thread-id (thread :id)}))))))]
           (dom/div #js {:className (str "thread"
                                         " " (when new? "new")
                                         " " (when private? "private")
-                                        " " (when limbo? "limbo"))}
+                                        " " (when limbo? "limbo")
+                                        " " (when dragging? "dragging"))
+                        :onPaste (fn [e]
+                                   (let [pasted-files (.. e -clipboardData -files)]
+                                     (when (< 0 (.-length pasted-files))
+                                       (.preventDefault e)
+                                       (maybe-upload-file (aget pasted-files 0)))))
+                        :onDragOver (fn [e]  (.stopPropagation e) (.preventDefault e)
+                                      (om/set-state! owner :dragging? true))
+                        :onDragLeave (fn [e] (om/set-state! owner :dragging? false))
+                        :onDrop (fn [e] (.preventDefault e)
+                                  (om/set-state! owner :dragging? false)
+                                  (let [file-list (.. e -dataTransfer -files)]
+                                    (when (< 0 (.-length file-list))
+                                      (maybe-upload-file (aget file-list 0)))))}
 
             (when limbo?
               (dom/div #js {:className "notice"}
@@ -103,6 +133,8 @@
                                                   (> (* 2 60 1000) ; 2 minutes
                                                      (- (:created-at message)
                                                         (or (:created-at prev-message) 0))))}}))))))
+              (when (state :uploading?)
+                (dom/div #js {:className "uploading-indicator"} "\uf110"))
               (om/build new-message-view {:thread-id (thread :id)
                                           :placeholder (if (thread :new?)
                                                          "Start a conversation..."

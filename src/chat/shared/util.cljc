@@ -28,3 +28,9 @@
   "Checks if a tag name is valid, but not if already taken"
   [tag]
   (re-matches tag-name-re tag))
+
+(defn reversed
+  "Given a function f, return a function that passes arguments to f in the reversed order"
+  [f]
+  (fn [& args]
+    (apply f (reverse args))))

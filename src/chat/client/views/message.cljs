@@ -5,15 +5,20 @@
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [id->color]]
             [chat.client.emoji :as emoji]
-            [chat.client.views.helpers :as helpers]
-            [chat.client.views.pills :refer [tag-view user-view]]
-            ))
+            [chat.client.views.helpers :as helpers :refer [starts-with? ends-with?]]
+            [chat.client.views.pills :refer [tag-view user-view]]))
 
 (def replacements
   {:urls
    {:pattern #"(http(?:s)?://\S+(?:\w|\d|/))"
     :replace (fn [match]
-               (dom/a #js {:href match :target "_blank"} match))}
+               (dom/a #js {:href match :target "_blank"}
+                 ; TODO: could do something smarter with checking MIME types or
+                 ; something, but trying to sniff every link seems like it
+                 ; could get kind of hairy...
+                 (if (some (partial ends-with? match) [".png" ".jpg" ".jpeg" ".gif"])
+                   (dom/img #js {:src match :alt match :className "embedded-image"})
+                   match)))}
    :users
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
@@ -78,9 +83,9 @@
            (cond
              ; TODO: handle starting code block with delimiter not at beginning of word
              ; start
-             (and (= @state ::start) (.startsWith input delimiter))
+             (and (= @state ::start) (starts-with? input delimiter))
              (cond
-               (and (not= input delimiter) (.endsWith input delimiter))
+               (and (not= input delimiter) (ends-with? input delimiter))
                (xf result (result-fn (.slice input (count delimiter) (- (.-length input) (count delimiter)))))
 
                (and (not= input delimiter) (not= 0 (.lastIndexOf input delimiter)))
@@ -95,7 +100,7 @@
                    result))
 
              ; end
-             (and (= @state ::in-code) (.endsWith input delimiter))
+             (and (= @state ::in-code) (ends-with? input delimiter))
              (let [code (conj @in-code (.slice input 0 (- (.-length input) (count delimiter))))]
                (vreset! state ::start)
                (vreset! in-code [])
