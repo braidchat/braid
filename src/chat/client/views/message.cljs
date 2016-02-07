@@ -181,9 +181,9 @@
                                       " " (when (:collapse? opts) "collapse")
                                       " " (if (:unseen? message) "unseen" "seen")
                                       " " (when (:first-unseen? message) "first-unseen"))}
-          (dom/a #js {:href sender-path}
-            (dom/img #js {:className "avatar"
-                          :src (sender :avatar)
+          (dom/a #js {:href sender-path
+                      :className "avatar"}
+            (dom/img #js {:src (sender :avatar)
                           :style #js {:backgroundColor (id->color (sender :id))}}))
           (dom/div #js {:className "info"}
             (dom/a #js {:className "nickname"
