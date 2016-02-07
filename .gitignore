@@ -9,3 +9,4 @@ profiles.clj
 .lein-failures
 .DS_Store
 Session.vim
+figwheel_server.log
