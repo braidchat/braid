@@ -25,7 +25,7 @@
                                         last)
                                    thread)))
                 (mapcat (fn [thread]
-                          (seq (flatten (concat (->> (thread :tag-ids)
+                          (set (flatten (concat (->> (thread :tag-ids)
                                                      (map (fn [tag-id]
                                                             (get-in @store/app-state [:tags tag-id :group-id]))))
                                                 (->> (thread :mentioned-ids)
