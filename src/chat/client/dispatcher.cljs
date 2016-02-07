@@ -5,7 +5,6 @@
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
             [cljs-utils.core :refer [edn-xhr]]
-            [chat.shared.checksum :as checksum]
             [chat.shared.util :as util]
             [chat.client.router :as router]))
 
@@ -177,7 +176,7 @@
 
 (defmethod sync/event-handler :chat/version-check
   [[_ server-checksum]]
-  (when (not= server-checksum checksum/current-client-checksum)
+  (when (not= (aget js/window "checksum") server-checksum)
     (store/display-error! "Client out of date - please refresh")))
 
 (defmethod sync/event-handler :chat/create-tag

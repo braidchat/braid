@@ -17,7 +17,6 @@ set -e
 
 git fetch
 git checkout origin/master
-./generate_cljs_checksum.sh
 
 PROJECT_NAME="chat"
 SERVER="chat"
