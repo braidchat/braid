@@ -30,7 +30,7 @@
                                                                       (get-in @store/app-state [:tags tag-id :group-id]))))) (group :id))))
                                count)]
                      (when (< 0 cnt)
-                       (dom/span #js {:className "count"} cnt)))))
+                       (dom/span #js {:className "badge"} cnt)))))
                (vals (data :groups))))
 
         (dom/a #js {:className (str "option plus "
