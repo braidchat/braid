@@ -5,7 +5,6 @@
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
             [cljs-utils.core :refer [edn-xhr]]
-            [chat.shared.checksum :as checksum]
             [chat.shared.util :as util]
             [chat.client.router :as router]))
 
@@ -154,6 +153,10 @@
             :on-complete (fn [data]
                            (store/clear-session!))}))
 
+(defn check-client-version [server-checksum]
+  (when (not= (aget js/window "checksum") server-checksum)
+    (store/display-error! "Client out of date - please refresh")))
+
 ; Websocket Events
 
 (defmethod sync/event-handler :chat/thread
@@ -162,6 +165,7 @@
 
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
+  (check-client-version (data :version-checksum))
   (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
   (router/dispatch-current-path!)
   (store/add-users! (data :users))
@@ -174,11 +178,6 @@
 (defmethod sync/event-handler :socket/connected
   [[_ _]]
   (sync/chsk-send! [:session/start nil]))
-
-(defmethod sync/event-handler :chat/version-check
-  [[_ server-checksum]]
-  (when (not= server-checksum checksum/current-client-checksum)
-    (store/display-error! "Client out of date - please refresh")))
 
 (defmethod sync/event-handler :chat/create-tag
   [[_ data]]
