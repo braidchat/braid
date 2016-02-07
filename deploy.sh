@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-git checkout -- src/chat/shared/checksum.cljc
-
 set +e
 if ! git diff-files --quiet --ignore-submodules ; then
   echo "Uncommited changes; stash or commit before deploying"
