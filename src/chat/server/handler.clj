@@ -12,6 +12,7 @@
             [chat.shared.util :refer [valid-nickname?]]
             [chat.server.db :as db]
             [chat.server.invite :as invites]
+            [chat.server.digest :as digest]
             [chat.server.s3 :as s3]))
 
 (defn edn-response [clj-body]
@@ -20,9 +21,15 @@
 
 (defroutes site-routes
   (GET "/*" []
-    (-> "public/index.html"
-        clojure.java.io/resource
-        slurp))
+    (let [replacements {"{{algo}}" "sha256"
+                        "{{css}}" (digest/from-file "/css/out/chat.css")
+                        "{{prettify}}" (digest/from-file "/js/prettify.js")
+                        "{{js}}" (digest/from-file "/js/out/chat.js")}
+          html (-> "public/index.html"
+                   clojure.java.io/resource
+                   slurp)]
+      (string/replace html #"\{\{\w*\}\}" replacements)))
+
   (GET "/accept" [invite tok]
     (if (and invite tok)
       (if-let [invite (db/with-conn (db/get-invite (java.util.UUID/fromString invite)))]
