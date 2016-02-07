@@ -4,7 +4,6 @@
 (ra/start-figwheel!
 
   {:figwheel-options {:css-dirs ["resources/public/css"]
-                      :reload-clj-files {:clj false :cljc false}
                       :server-port 3559}
    :build-ids ["dev"]
    :all-builds

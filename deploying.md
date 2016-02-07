@@ -1,21 +1,3 @@
-# client checksum updating
-
-put the following script in `.git/hooks/pre-commit` and make it executable:
-
-```bash
-#!/bin/sh
-
-CHECKSUM_FILE="src/chat/shared/checksum.cljc"
-CLIENT_SUM=$(find "src/chat/client" -type f -exec md5 -q {} + | sort | md5 -q)
-cat > $CHECKSUM_FILE <<EOM
-(ns chat.shared.checksum)
-
-(def current-client-checksum "$CLIENT_SUM")
-EOM
-
-git add $CHECKSUM_FILE
-```
-
 # deploying
 
 `./deploy.sh`
