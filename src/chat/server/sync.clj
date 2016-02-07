@@ -239,9 +239,6 @@
       (timbre/warnf "User %s attempted to decline nonexistant invitaiton %s"
                     user-id (?data :id)))))
 
-(def checksum
-  (digest/from-file "/js/out/chat.js"))
-
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
@@ -249,7 +246,7 @@
       (chsk-send! user-id [:session/init-data
                            (db/with-conn
                              {:user-id user-id
-                              :version-checksum checksum
+                              :version-checksum (digest/from-file "/js/out/chat.js")
                               :user-nickname (db/get-nickname user-id)
                               :user-groups (db/get-groups-for-user user-id)
                               :user-threads (db/get-open-threads-for-user user-id)
