@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-git checkout -- src/chat/shared/checksum.cljc
-
 set +e
 if ! git diff-files --quiet --ignore-submodules ; then
   echo "Uncommited changes; stash or commit before deploying"
@@ -17,7 +15,6 @@ set -e
 
 git fetch
 git checkout origin/master
-./generate_cljs_checksum.sh
 
 PROJECT_NAME="chat"
 SERVER="chat"
