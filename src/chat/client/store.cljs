@@ -16,7 +16,8 @@
          :user {:open-thread-ids #{}
                 :subscribed-tag-ids #{}
                 :user-id nil
-                :nickname nil}}))
+                :nickname nil}
+         :new-thread-id nil}))
 
 (defn- key-by-id [coll]
   (reduce (fn [memo x]
@@ -97,6 +98,17 @@
   (some? (get-in @app-state [:users user-id])))
 
 ; threads and messages
+
+(defn set-new-thread!
+  "Hacky way of tracking if a thread has just been created, so we can focus the reply text box"
+  [thread-id]
+  (transact! [:new-thread-id] (constantly thread-id)))
+
+(defn get-new-thread []
+  (@app-state :new-thread-id))
+
+(defn clear-new-thread! []
+  (transact! [:new-thread-id] (constantly nil)))
 
 (defn update-thread-last-open-at [thread-id]
   (transact! [:threads thread-id :last-open-at] (constantly js/Date.)))
