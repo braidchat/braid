@@ -23,10 +23,11 @@
                                                                    href
                                                                    (when-let [parent (.-parentNode e)]
                                                                      (recur parent)))) (.-target e))]
-                                                (let [path (.getPath (.parse Uri href))]
-                                                  (when (secretary/locate-route path)
-                                                    (. h (setToken path))
-                                                    (.preventDefault e))))))))
+                                                (when (.hasSameDomainAs (.parse Uri href) (.parse Uri js/window.location))
+                                                  (let [path (.getPath (.parse Uri href))]
+                                                    (when (secretary/locate-route path)
+                                                      (. h (setToken path))
+                                                      (.preventDefault e)))))))))
 
 (defn dispatch-current-path! []
   (secretary/dispatch! (.getPath (.parse Uri js/window.location))))
