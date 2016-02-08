@@ -2,6 +2,7 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [clojure.string :as string]
+            [clojure.set :refer [intersection]]
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [id->color]]
             [chat.client.routes :as routes]))
@@ -25,12 +26,18 @@
                                         last)
                                    thread)))
                 (mapcat (fn [thread]
-                          (seq (flatten (concat (->> (thread :tag-ids)
-                                                     (map (fn [tag-id]
-                                                            (get-in @store/app-state [:tags tag-id :group-id]))))
-                                                (->> (thread :mentioned-ids)
-                                                     (map (fn [user-id]
-                                                            (get-in @store/app-state [:users user-id :group-ids])))))))))
+                          (let [group-ids-from-tags (->> (thread :tag-ids)
+                                                         (map (fn [tag-id]
+                                                                (get-in @store/app-state [:tags tag-id :group-id]))))]
+                            (if (seq group-ids-from-tags)
+                              group-ids-from-tags
+                              (let [group-ids-from-users (->> (thread :messages)
+                                                              (map :user-id)
+                                                              set
+                                                              (map (fn [user-id]
+                                                                     (set (get-in @store/app-state [:users user-id :group-ids]))))
+                                                              (apply intersection))]
+                                group-ids-from-users)))))
                 frequencies)]
           (apply dom/div #js {:className "groups"}
             (map (fn [group]
