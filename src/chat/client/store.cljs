@@ -9,7 +9,7 @@
          :groups {}
          :page {:type :inbox}
          :session nil
-         :error-msg nil
+         :errors []
          :invitations []
          :notifications {:window-visible? true
                          :unread-count 0}
@@ -37,11 +37,11 @@
 
 ; error
 
-(defn display-error! [msg]
-  (transact! [:error-msg] (constantly msg)))
+(defn display-error! [err-key msg]
+  (transact! [:errors] #(conj % [err-key msg])))
 
-(defn clear-error! []
-  (transact! [:error-msg] (constantly nil)))
+(defn clear-error! [err-key]
+  (transact! [:errors] #(into [] (remove (fn [[k _]] (= k err-key))) %)))
 
 ; page
 

@@ -33,8 +33,8 @@
     (do
       (debugf "Channel socket state change: %s" ?data)
       (if (not (:open? ?data))
-        (store/display-error! "Disconnected")
-        (store/clear-error!))))
+        (store/display-error! :disconnected "Disconnected")
+        (store/clear-error! :disconnected))))
   (event-handler [:socket/connected ?data]))
 
 (defmethod event-msg-handler :chsk/recv
