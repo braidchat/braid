@@ -51,11 +51,12 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "main"}
-        (when-let [err (data :error-msg)]
-          (dom/div #js {:className "error-banner"}
-            err
-            (dom/span #js {:className "close"
-                           :onClick (fn [_] (store/clear-error!))} "×")))
+        (apply dom/div #js {:className "error-banners"}
+          (for [[err-key err] (data :errors)]
+            (dom/div #js {:className "error-banner"}
+              err
+              (dom/span #js {:className "close"
+                             :onClick (fn [_] (store/clear-error! err-key))} "×"))))
 
         (om/build groups-nav-view data)
 

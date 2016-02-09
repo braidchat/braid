@@ -64,7 +64,7 @@
                        (empty? (thread :mentioned-ids)))
               maybe-upload-file (fn [file]
                                   (if (> (.-size file) max-file-size)
-                                    (store/display-error! "File to big to upload, sorry")
+                                    (store/display-error! :upload-fail "File to big to upload, sorry")
                                     (do (om/set-state! owner :uploading? true)
                                         (s3/upload file (fn [url]
                                                           (om/set-state! owner :uploading? false)

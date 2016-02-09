@@ -9,14 +9,15 @@
          :groups {}
          :page {:type :inbox}
          :session nil
-         :error-msg nil
+         :errors []
          :invitations []
          :notifications {:window-visible? true
                          :unread-count 0}
          :user {:open-thread-ids #{}
                 :subscribed-tag-ids #{}
                 :user-id nil
-                :nickname nil}}))
+                :nickname nil}
+         :new-thread-id nil}))
 
 (defn- key-by-id [coll]
   (reduce (fn [memo x]
@@ -36,11 +37,11 @@
 
 ; error
 
-(defn display-error! [msg]
-  (transact! [:error-msg] (constantly msg)))
+(defn display-error! [err-key msg]
+  (transact! [:errors] #(conj % [err-key msg])))
 
-(defn clear-error! []
-  (transact! [:error-msg] (constantly nil)))
+(defn clear-error! [err-key]
+  (transact! [:errors] #(into [] (remove (fn [[k _]] (= k err-key))) %)))
 
 ; page
 
@@ -97,6 +98,17 @@
   (some? (get-in @app-state [:users user-id])))
 
 ; threads and messages
+
+(defn set-new-thread!
+  "Hacky way of tracking if a thread has just been created, so we can focus the reply text box"
+  [thread-id]
+  (transact! [:new-thread-id] (constantly thread-id)))
+
+(defn get-new-thread []
+  (@app-state :new-thread-id))
+
+(defn clear-new-thread! []
+  (transact! [:new-thread-id] (constantly nil)))
 
 (defn update-thread-last-open-at [thread-id]
   (transact! [:threads thread-id :last-open-at] (constantly js/Date.)))

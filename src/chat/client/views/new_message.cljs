@@ -150,6 +150,11 @@
                   (om/set-state! owner :results
                                  (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
                   (recur)))))))
+    om/IDidMount
+    (did-mount [_]
+      (when (= (config :thread-id) (store/get-new-thread))
+        (store/clear-new-thread!)
+        (.focus (om/get-node owner "message-text"))))
     om/IWillUnmount
     (will-unmount [_]
       (put! (om/get-state owner :kill-chan) (js/Date.)))
@@ -186,6 +191,7 @@
                                        :highlighted-result-index -1}))))
             send-message!
             (fn []
+              (store/set-new-thread! (config :thread-id))
               (dispatch! :new-message {:thread-id (config :thread-id)
                                        :content text
                                        :mentioned-user-ids (config :mentioned-user-ids)

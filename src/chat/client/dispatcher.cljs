@@ -75,7 +75,7 @@
         (if-let [msg (:error reply)]
           (do
             (store/remove-tag! (tag :id))
-            (store/display-error! msg))
+            (store/display-error! (str :bad-tag (tag :id)) msg))
           (dispatch! :subscribe-to-tag (tag :id)))))))
 
 (defmethod dispatch! :unsubscribe-from-tag [_ tag-id]
@@ -94,7 +94,7 @@
       (fn [reply]
         (when-let [msg (reply :error)]
           (.error js/console msg)
-          (store/display-error! msg)
+          (store/display-error! (str :bad-group (group :id)) msg)
           (store/remove-group! group))))
     (store/add-group! group)))
 
@@ -155,7 +155,7 @@
 
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
-    (store/display-error! "Client out of date - please refresh")))
+    (store/display-error! :client-out-of-date "Client out of date - please refresh")))
 
 ; Websocket Events
 
