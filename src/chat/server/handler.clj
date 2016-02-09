@@ -114,7 +114,9 @@
   (->
     (routes
       (wrap-defaults
-        (routes sync-routes api-routes)
+        (routes
+          api-routes
+          sync-routes)
         (-> api-defaults
             (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
             (assoc-in [:session :store] session-store)))
