@@ -143,7 +143,6 @@
   (transact! [:user :open-thread-ids] #(conj % (thread :id))))
 
 (defn hide-thread! [thread-id]
-  (transact! [:threads] #(dissoc % thread-id))
   (transact! [:user :open-thread-ids] #(disj % thread-id)))
 
 (defn id->thread [thread-id]

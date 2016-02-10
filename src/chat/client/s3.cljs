@@ -24,10 +24,7 @@
 (defn upload [file on-complete]
   (edn-xhr
     {:method :get
-     :url (let [path (.. js/window -location -pathname)]
-            (str path
-                 (when-not (ends-with? path "/") "/")
-              "s3-policy"))
+     :url "/s3-policy"
      :on-error (fn [err]
                  (.error js/console "Error getting s3 authorization: "
                          (pr-str (:error err))))

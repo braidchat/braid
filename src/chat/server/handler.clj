@@ -20,6 +20,13 @@
    :body (pr-str clj-body)})
 
 (defroutes site-routes
+  (GET "/accept" [invite tok]
+    (if (and invite tok)
+      (if-let [invite (db/with-conn (db/get-invite (java.util.UUID/fromString invite)))]
+        {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
+        {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
+      {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
+
   (GET "/*" []
     (let [replacements {"{{algo}}" "sha256"
                         "{{css}}" (digest/from-file "/css/out/chat.css")
@@ -30,12 +37,6 @@
                    slurp)]
       (string/replace html #"\{\{\w*\}\}" replacements)))
 
-  (GET "/accept" [invite tok]
-    (if (and invite tok)
-      (if-let [invite (db/with-conn (db/get-invite (java.util.UUID/fromString invite)))]
-        {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
-        {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
-      {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
   (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
@@ -113,7 +114,9 @@
   (->
     (routes
       (wrap-defaults
-        (routes sync-routes api-routes)
+        (routes
+          api-routes
+          sync-routes)
         (-> api-defaults
             (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
             (assoc-in [:session :store] session-store)))
