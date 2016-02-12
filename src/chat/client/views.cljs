@@ -7,6 +7,7 @@
             [chat.client.views.header :refer [header-view]]
             [chat.client.views.pages.search :refer [search-page-view]]
             [chat.client.views.pages.inbox :refer [inbox-page-view]]
+            [chat.client.views.pages.recent :refer [recent-page-view]]
             [chat.client.views.pages.channel :refer [channel-page-view]]
             [chat.client.views.pages.channels :refer [channels-page-view]]
             [chat.client.views.pages.user :refer [user-page-view]]
@@ -64,6 +65,7 @@
 
         (case (get-in data [:page :type])
           :inbox (om/build inbox-page-view data)
+          :recent (om/build recent-page-view data)
           :search (om/build search-page-view data)
           :channel (om/build channel-page-view data {:react-key (get-in data [:page :id])})
           :user (om/build user-page-view data)

@@ -1,7 +1,9 @@
 (ns chat.client.routes
   (:require [secretary.core :as secretary :refer-macros [defroute]]
             [chat.client.store :as store]
-            [chat.client.router :as router]))
+            [chat.client.router :as router])
+  (:import [goog.history Html5History]
+           [goog Uri]))
 
 (defn go-to! [path]
   (router/go-to path))
@@ -14,6 +16,9 @@
 
 (defroute inbox-page-path "/:group-id/inbox" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :inbox}))
+
+(defroute recent-page-path "/:group-id/recent" [group-id]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :recent}))
 
 (defroute user-page-path "/:group-id/user/:user-id" [group-id user-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :user
@@ -34,3 +39,5 @@
 (defn current-group []
   (get-in @store/app-state [:open-group-id]))
 
+(defn current-path? [path]
+  (= path (.getPath (.parse Uri js/window.location))))
