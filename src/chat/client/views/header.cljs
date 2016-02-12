@@ -13,11 +13,21 @@
     (render [_]
       (dom/div #js {:className "header"}
 
+        (dom/div #js {:className "inbox shortcut"}
+          (dom/a #js {:href (routes/inbox-page-path {:group-id (routes/current-group)})
+                      :className "title"
+                      :title "Inbox"}))
+
+        (dom/div #js {:className "recent shortcut"}
+          (dom/a #js {:href (routes/recent-page-path {:group-id (routes/current-group)})
+                      :className "title"
+                      :title "Recent"}))
+
         (let [users (->> (store/users-in-open-group)
                          (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id)))))
               users-online (->> users
                                 (filter (fn [user] (= :online (user :status)))))]
-          (dom/div #js {:className "users"}
+          (dom/div #js {:className "users shortcut"}
             (dom/div #js {:className "title" :title "Users"}
               (count users-online))
             (apply dom/div #js {:className "modal"}
@@ -27,7 +37,7 @@
                           (dom/div nil
                             (om/build user-view user))))))))
 
-        (dom/div #js {:className "tags"}
+        (dom/div #js {:className "tags shortcut"}
           (dom/a #js {:className "title"
                       :title "Tags"
                       :href (routes/page-path {:group-id (routes/current-group)
@@ -43,7 +53,7 @@
                    (map (fn [tag]
                           (dom/div nil (om/build tag-view tag))))))))
 
-        (dom/div #js {:className "help"}
+        (dom/div #js {:className "help shortcut"}
           (dom/div #js {:className "title" :title "Help"})
           (dom/div #js {:className "modal"}
             (dom/p nil "Conversations must be tagged to be seen by other people.")

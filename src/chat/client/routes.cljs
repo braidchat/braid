@@ -15,6 +15,9 @@
 (defroute inbox-page-path "/:group-id/inbox" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :inbox}))
 
+(defroute recent-page-path "/:group-id/recent" [group-id]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :recent}))
+
 (defroute user-page-path "/:group-id/user/:user-id" [group-id user-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :user
                                                    :id (UUID. user-id nil)}))
