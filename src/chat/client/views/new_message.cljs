@@ -191,12 +191,6 @@
             (fn []
               (om/update-state! owner :highlighted-result-index
                                 #(mod (dec %) (count results))))
-            highlight-clear!
-            (fn []
-              (om/set-state! owner :highlighted-result-index 0))
-            close-autocomplete!
-            (fn []
-              (highlight-clear!))
             reset-state!
             (fn []
               (om/update-state! owner
@@ -216,8 +210,7 @@
             choose-result!
             (fn [result]
               ((result :action) (config :thread-id))
-              (om/set-state! owner :text ((result :message-transform) text))
-              (close-autocomplete!))
+              (om/set-state! owner :text ((result :message-transform) text)))
             autocomplete-open? (and (not force-close?) (not (nil? results)))]
           (dom/div #js {:className "message new"}
             (dom/textarea #js {:placeholder (config :placeholder)
@@ -243,7 +236,6 @@
                                        (if-let [result (nth results highlighted-result-index nil)]
                                          (choose-result! result)
                                          (do
-                                           (close-autocomplete!)
                                            (om/set-state! owner :force-close? true))))
                                      ; ENTER otherwise -> send message
                                      (not e.shiftKey)
@@ -252,8 +244,7 @@
                                        (send-message!)))
 
                                    KeyCodes.ESC (do
-                                                  (om/set-state! owner :force-close? true)
-                                                  (close-autocomplete!))
+                                                  (om/set-state! owner :force-close? true))
 
                                    KeyCodes.UP (when autocomplete-open?
                                                  (.preventDefault e)
