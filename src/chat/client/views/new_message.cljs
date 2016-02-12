@@ -173,7 +173,7 @@
     om/IWillUpdate
     (will-update [_ next-props next-state]
       (let [next-text (next-state :text)
-              prev-text (om/get-render-state owner :text)]
+            prev-text (om/get-render-state owner :text)]
           (when (not= next-text prev-text)
             (put! (next-state :autocomplete-chan) next-text))))
 
