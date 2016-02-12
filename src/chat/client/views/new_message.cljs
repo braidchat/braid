@@ -146,7 +146,7 @@
 
     om/IWillMount
     (will-mount [_]
-      (let [autocomplete (debounce (om/get-state owner :autocomplete-chan) 200)
+      (let [autocomplete (debounce (om/get-state owner :autocomplete-chan) 100)
             kill-chan (om/get-state owner :kill-chan)]
         (go (loop []
               (let [[v ch] (alts! [autocomplete kill-chan])]
