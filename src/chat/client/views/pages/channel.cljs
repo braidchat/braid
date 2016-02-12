@@ -21,13 +21,16 @@
                      (not (contains? page :thread-ids)) :searching
                      (seq (page :thread-ids)) :done-results
                      :else :done-empty)
-            inbox-threads (->> (data :threads)
+            known-threads (->> (data :threads)
                                vals
                                (filter (fn [t] (contains? (set (t :tag-ids)) tag-id))))
+
+            inbox-thread-ids (get-in @store/app-state [:user :open-thread-ids])
             threads (->> (page :thread-ids)
                          (select-keys (data :threads))
                          vals
-                         (into (set inbox-threads))
+                         (into (set known-threads))
+                         (map (fn [t] (assoc t :open? (contains? inbox-thread-ids (t :id)))))
                          ; sort-by last reply, newest first
                          (sort-by
                            (comp (partial apply max)
