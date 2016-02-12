@@ -127,8 +127,11 @@
                             (:name (store/id->group (tag :group-id))))))}))))))
    ])
 
+(defn- auto-resize [el]
+  (set! (.. el -style -height) "auto")
+  (set! (.. el -style -height)
+        (str (min 300 (.-scrollHeight el)) "px")))
 
-; TODO: autocomplete mentions
 (defn new-message-view [config owner]
   (reify
     om/IInitState
@@ -140,6 +143,7 @@
        :kill-chan (chan)
        :autocomplete-chan (chan)
        })
+
     om/IWillMount
     (will-mount [_]
       (let [autocomplete (debounce (om/get-state owner :autocomplete-chan) 200)
@@ -150,20 +154,31 @@
                   (om/set-state! owner :results
                                  (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
                   (recur)))))))
+
     om/IDidMount
     (did-mount [_]
       (when (= (config :thread-id) (store/get-new-thread))
         (store/clear-new-thread!)
-        (.focus (om/get-node owner "message-text"))))
+        (.focus (om/get-node owner "message-text")))
+      (let [textarea (om/get-node owner "message-text")]
+        (auto-resize textarea)
+        (.. js/window (addEventListener "resize" (fn [_] (auto-resize textarea))))))
+
     om/IWillUnmount
     (will-unmount [_]
       (put! (om/get-state owner :kill-chan) (js/Date.)))
+
     om/IWillUpdate
     (will-update [_ next-props next-state]
       (let [next-text (next-state :text)
               prev-text (om/get-render-state owner :text)]
           (when (not= next-text prev-text)
             (put! (next-state :autocomplete-chan) next-text))))
+
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (auto-resize (om/get-node owner "message-text")))
+
     om/IRenderState
     (render-state [_ {:keys [results text force-close? highlighted-result-index] :as state}]
       (let [constrain (fn [x a z] (Math/min z (Math/max a x)))
@@ -213,7 +228,8 @@
                                                                (fn [s]
                                                                  (assoc s
                                                                    :text text
-                                                                   :force-close? false)))))
+                                                                   :force-close? false))))
+                                           (auto-resize (.. e -target)))
                                :onKeyDown
                                (fn [e]
                                  (condp = e.keyCode
