@@ -3,9 +3,8 @@
             [chat.client.store :as store]
             [chat.client.router :as router]))
 
-(defroute index-path "/" {}
-
-  )
+(defn go-to! [path]
+  (router/go-to path))
 
 (defroute page-path "/:group-id/:page-id" [group-id page-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type (keyword page-id)}))
@@ -28,9 +27,10 @@
   (store/set-group-and-page! (UUID. group-id nil) {:type :search
                                                    :search-query query}))
 
+(defroute index-path "/" {}
+  (when-let [group-id (-> (@store/app-state :groups) vals first :id)]
+    (go-to! (inbox-page-path {:group-id group-id}))))
+
 (defn current-group []
   (get-in @store/app-state [:open-group-id]))
-
-(defn go-to! [path]
-  (router/go-to path))
 

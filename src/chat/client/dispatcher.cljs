@@ -167,13 +167,13 @@
   [[_ data]]
   (check-client-version (data :version-checksum))
   (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
-  (router/dispatch-current-path!)
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))
   (store/set-user-joined-groups! (data :user-groups))
   (store/set-invitations! (data :invitations))
-  (store/set-open-threads! (data :user-threads)))
+  (store/set-open-threads! (data :user-threads))
+  (router/dispatch-current-path!))
 
 (defmethod sync/event-handler :socket/connected
   [[_ _]]
