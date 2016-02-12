@@ -30,9 +30,13 @@
         (let [users (->> (store/users-in-open-group)
                          (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id)))))
               users-online (->> users
-                                (filter (fn [user] (= :online (user :status)))))]
-          (dom/div #js {:className "users shortcut"}
-            (dom/div #js {:className "title" :title "Users"}
+                                (filter (fn [user] (= :online (user :status)))))
+              path (routes/users-page-path {:group-id (routes/current-group)})]
+          (dom/div #js {:className (str "users shortcut "
+                                        (when (routes/current-path? path) "active"))}
+            (dom/a #js {:href path
+                        :className "title"
+                        :title "Users"}
               (count users-online))
             (apply dom/div #js {:className "modal"}
               (dom/h2 nil "Online")
@@ -59,13 +63,17 @@
                      (map (fn [tag]
                             (dom/div nil (om/build tag-view tag)))))))))
 
-        (dom/div #js {:className "help shortcut"}
-          (dom/div #js {:className "title" :title "Help"})
-          (dom/div #js {:className "modal"}
-            (dom/p nil "Conversations must be tagged to be seen by other people.")
-            (dom/p nil "Tag a conversation by mentioning a tag in a message: ex. #general")
-            (dom/p nil "You can also mention users to add them to a conversation: ex. @raf")
-            (dom/p nil "Add emoji by using :shortcodes: (they autocomplete).")))
+        (let [path (routes/help-page-path {:group-id (routes/current-group)})]
+          (dom/div #js {:className (str "help shortcut "
+                                        (when (routes/current-path? path) "active"))}
+            (dom/a #js {:href path
+                        :className "title"
+                        :title "Help"})
+            (dom/div #js {:className "modal"}
+              (dom/p nil "Conversations must be tagged to be seen by other people.")
+              (dom/p nil "Tag a conversation by mentioning a tag in a message: ex. #general")
+              (dom/p nil "You can also mention users to add them to a conversation: ex. @raf")
+              (dom/p nil "Add emoji by using :shortcodes: (they autocomplete)."))))
 
         (om/build search-bar-view (data :page))
 

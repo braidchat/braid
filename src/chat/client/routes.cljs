@@ -20,6 +20,9 @@
 (defroute recent-page-path "/:group-id/recent" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :recent}))
 
+(defroute users-page-path "/:group-id/users" [group-id ]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :users}))
+
 (defroute user-page-path "/:group-id/user/:user-id" [group-id user-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :user
                                                    :id (UUID. user-id nil)}))
@@ -27,6 +30,9 @@
 (defroute tag-page-path "/:group-id/tag/:tag-id" [group-id tag-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :channel
                                                    :id (UUID. tag-id nil)}))
+
+(defroute help-page-path "/:group-id/help" [group-id]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :help}))
 
 (defroute search-page-path "/:group-id/search/:query" [group-id query]
   (store/set-group-and-page! (UUID. group-id nil) {:type :search
