@@ -637,10 +637,12 @@ body {
         text-decoration: none;
         color: @grey-text;
       }
-      &:hover {
+      &.active, &:hover {
         .title {
           color: #000;
         }
+      }
+      &:hover {
         .modal {
           display: block;
           padding: @pad;

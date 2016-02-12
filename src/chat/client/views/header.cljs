@@ -13,15 +13,19 @@
     (render [_]
       (dom/div #js {:className "header"}
 
-        (dom/div #js {:className "inbox shortcut"}
-          (dom/a #js {:href (routes/inbox-page-path {:group-id (routes/current-group)})
-                      :className "title"
-                      :title "Inbox"}))
+        (let [path (routes/inbox-page-path {:group-id (routes/current-group)})]
+          (dom/div #js {:className (str "inbox shortcut "
+                                        (when (routes/current-path? path) "active"))}
+            (dom/a #js {:href path
+                        :className "title"
+                        :title "Inbox"})))
 
-        (dom/div #js {:className "recent shortcut"}
-          (dom/a #js {:href (routes/recent-page-path {:group-id (routes/current-group)})
-                      :className "title"
-                      :title "Recent"}))
+        (let [path (routes/recent-page-path {:group-id (routes/current-group)})]
+          (dom/div #js {:className (str "recent shortcut "
+                                        (when (routes/current-path? path) "active"))}
+            (dom/a #js {:href path
+                        :className "title"
+                        :title "Recent"})))
 
         (let [users (->> (store/users-in-open-group)
                          (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id)))))
@@ -37,21 +41,23 @@
                           (dom/div nil
                             (om/build user-view user))))))))
 
-        (dom/div #js {:className "tags shortcut"}
-          (dom/a #js {:className "title"
-                      :title "Tags"
-                      :href (routes/page-path {:group-id (routes/current-group)
-                                               :page-id "channels"})})
-          (dom/div #js {:className "modal"}
-            (apply dom/div nil
-              (->> (@store/app-state :tags)
-                   vals
-                   (filter (fn [t] (= (@store/app-state :open-group-id) (t :group-id))))
-                   (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
-                   (sort-by :threads-count)
-                   reverse
-                   (map (fn [tag]
-                          (dom/div nil (om/build tag-view tag))))))))
+        (let [path (routes/page-path {:group-id (routes/current-group)
+                                      :page-id "channels"})]
+          (dom/div #js {:className (str "tags shortcut "
+                                        (when (routes/current-path? path) "active"))}
+            (dom/a #js {:href path
+                        :className "title"
+                        :title "Tags"})
+            (dom/div #js {:className "modal"}
+              (apply dom/div nil
+                (->> (@store/app-state :tags)
+                     vals
+                     (filter (fn [t] (= (@store/app-state :open-group-id) (t :group-id))))
+                     (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
+                     (sort-by :threads-count)
+                     reverse
+                     (map (fn [tag]
+                            (dom/div nil (om/build tag-view tag)))))))))
 
         (dom/div #js {:className "help shortcut"}
           (dom/div #js {:className "title" :title "Help"})
@@ -63,9 +69,11 @@
 
         (om/build search-bar-view (data :page))
 
-        (let [user-id (get-in @store/app-state [:session :user-id])]
-          (dom/a #js {:href (routes/page-path {:group-id (routes/current-group)
-                                               :page-id "me"})}
+        (let [user-id (get-in @store/app-state [:session :user-id])
+              path (routes/page-path {:group-id (routes/current-group)
+                                      :page-id "me"})]
+          (dom/a #js {:href path
+                      :className (when (routes/current-path? path) "active")}
             (dom/img #js {:className "avatar"
                           :style #js {:backgroundColor (id->color user-id)}
                           :src (get-in @store/app-state [:users user-id :avatar])})))))))

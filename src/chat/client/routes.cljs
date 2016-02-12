@@ -1,7 +1,9 @@
 (ns chat.client.routes
   (:require [secretary.core :as secretary :refer-macros [defroute]]
             [chat.client.store :as store]
-            [chat.client.router :as router]))
+            [chat.client.router :as router])
+  (:import [goog.history Html5History]
+           [goog Uri]))
 
 (defn go-to! [path]
   (router/go-to path))
@@ -37,3 +39,5 @@
 (defn current-group []
   (get-in @store/app-state [:open-group-id]))
 
+(defn current-path? [path]
+  (= path (.getPath (.parse Uri js/window.location))))
