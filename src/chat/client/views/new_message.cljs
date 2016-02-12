@@ -181,15 +181,14 @@
 
     om/IRenderState
     (render-state [_ {:keys [results text force-close? highlighted-result-index] :as state}]
-      (let [constrain (fn [x a z] (Math/min z (Math/max a x)))
-            highlight-next!
+      (let [highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
-                                #(constrain (inc %) 0 (dec (count results)))))
+                                #(mod (inc %) (count results))))
             highlight-prev!
             (fn []
               (om/update-state! owner :highlighted-result-index
-                                #(constrain (dec %) 0 (dec (count results)))))
+                                #(mod (dec %) (count results))))
             highlight-clear!
             (fn []
               (om/set-state! owner :highlighted-result-index -1))
