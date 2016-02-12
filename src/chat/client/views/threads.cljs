@@ -76,6 +76,12 @@
                                         " " (when private? "private")
                                         " " (when limbo? "limbo")
                                         " " (when dragging? "dragging"))
+                        :onKeyUp (fn [e]
+                                   (when (and (= KeyCodes.X (.-keyCode e))
+                                           (.-ctrlKey e))
+                                     (.preventDefault e)
+                                     (.stopPropagation e)
+                                     (dispatch! :hide-thread {:thread-id (thread :id)})))
                         :onPaste (fn [e]
                                    (let [pasted-files (.. e -clipboardData -files)]
                                      (when (< 0 (.-length pasted-files))
