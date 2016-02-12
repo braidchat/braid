@@ -138,7 +138,7 @@
     (init-state [_]
       {:text ""
        :force-close? false
-       :highlighted-result-index -1
+       :highlighted-result-index 0
        :results nil
        :kill-chan (chan)
        :autocomplete-chan (chan)
@@ -151,8 +151,10 @@
         (go (loop []
               (let [[v ch] (alts! [autocomplete kill-chan])]
                 (when (= ch autocomplete)
-                  (om/set-state! owner :results
-                                 (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
+                  (om/update-state! owner
+                                    #(assoc %
+                                       :results (seq (mapcat (fn [e] (e v (config :thread-id))) engines))
+                                       :highlighted-result-index 0))
                   (recur)))))))
 
     om/IDidMount
@@ -191,7 +193,7 @@
                                 #(mod (dec %) (count results))))
             highlight-clear!
             (fn []
-              (om/set-state! owner :highlighted-result-index -1))
+              (om/set-state! owner :highlighted-result-index 0))
             close-autocomplete!
             (fn []
               (highlight-clear!))
@@ -202,7 +204,7 @@
                                (merge s
                                       {:text ""
                                        :force-close? false
-                                       :highlighted-result-index -1}))))
+                                       :highlighted-result-index 0}))))
             send-message!
             (fn []
               (store/set-new-thread! (config :thread-id))
@@ -260,9 +262,7 @@
                                    KeyCodes.DOWN (when autocomplete-open?
                                                    (.preventDefault e)
                                                    (highlight-next!))
-                                   (when (KeyCodes.isTextModifyingKeyEvent e)
-                                     ; don't clear if a modifier key alone was pressed
-                                     (highlight-clear!))))})
+                                   nil))})
 
             (when autocomplete-open?
               (dom/div #js {:className "autocomplete"}
