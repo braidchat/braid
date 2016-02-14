@@ -127,60 +127,70 @@
                             (:name (store/id->group (tag :group-id))))))}))))))
    ])
 
+(defn- auto-resize [el]
+  (set! (.. el -style -height) "auto")
+  (set! (.. el -style -height)
+        (str (min 300 (.-scrollHeight el)) "px")))
 
-; TODO: autocomplete mentions
 (defn new-message-view [config owner]
   (reify
     om/IInitState
     (init-state [_]
       {:text ""
        :force-close? false
-       :highlighted-result-index -1
+       :highlighted-result-index 0
        :results nil
        :kill-chan (chan)
        :autocomplete-chan (chan)
        })
+
     om/IWillMount
     (will-mount [_]
-      (let [autocomplete (debounce (om/get-state owner :autocomplete-chan) 200)
+      (let [autocomplete (debounce (om/get-state owner :autocomplete-chan) 100)
             kill-chan (om/get-state owner :kill-chan)]
         (go (loop []
               (let [[v ch] (alts! [autocomplete kill-chan])]
                 (when (= ch autocomplete)
-                  (om/set-state! owner :results
-                                 (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
+                  (om/update-state! owner
+                                    #(assoc %
+                                       :results (seq (mapcat (fn [e] (e v (config :thread-id))) engines))
+                                       :highlighted-result-index 0))
                   (recur)))))))
+
     om/IDidMount
     (did-mount [_]
       (when (= (config :thread-id) (store/get-new-thread))
         (store/clear-new-thread!)
-        (.focus (om/get-node owner "message-text"))))
+        (.focus (om/get-node owner "message-text")))
+      (let [textarea (om/get-node owner "message-text")]
+        (auto-resize textarea)
+        (.. js/window (addEventListener "resize" (fn [_] (auto-resize textarea))))))
+
     om/IWillUnmount
     (will-unmount [_]
       (put! (om/get-state owner :kill-chan) (js/Date.)))
+
     om/IWillUpdate
     (will-update [_ next-props next-state]
       (let [next-text (next-state :text)
-              prev-text (om/get-render-state owner :text)]
+            prev-text (om/get-render-state owner :text)]
           (when (not= next-text prev-text)
             (put! (next-state :autocomplete-chan) next-text))))
+
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (auto-resize (om/get-node owner "message-text")))
+
     om/IRenderState
     (render-state [_ {:keys [results text force-close? highlighted-result-index] :as state}]
-      (let [constrain (fn [x a z] (Math/min z (Math/max a x)))
-            highlight-next!
+      (let [highlight-next!
             (fn []
               (om/update-state! owner :highlighted-result-index
-                                #(constrain (inc %) 0 (dec (count results)))))
+                                #(mod (inc %) (count results))))
             highlight-prev!
             (fn []
               (om/update-state! owner :highlighted-result-index
-                                #(constrain (dec %) 0 (dec (count results)))))
-            highlight-clear!
-            (fn []
-              (om/set-state! owner :highlighted-result-index -1))
-            close-autocomplete!
-            (fn []
-              (highlight-clear!))
+                                #(mod (dec %) (count results))))
             reset-state!
             (fn []
               (om/update-state! owner
@@ -188,7 +198,7 @@
                                (merge s
                                       {:text ""
                                        :force-close? false
-                                       :highlighted-result-index -1}))))
+                                       :highlighted-result-index 0}))))
             send-message!
             (fn []
               (store/set-new-thread! (config :thread-id))
@@ -200,8 +210,7 @@
             choose-result!
             (fn [result]
               ((result :action) (config :thread-id))
-              (om/set-state! owner :text ((result :message-transform) text))
-              (close-autocomplete!))
+              (om/set-state! owner :text ((result :message-transform) text)))
             autocomplete-open? (and (not force-close?) (not (nil? results)))]
           (dom/div #js {:className "message new"}
             (dom/textarea #js {:placeholder (config :placeholder)
@@ -213,7 +222,8 @@
                                                                (fn [s]
                                                                  (assoc s
                                                                    :text text
-                                                                   :force-close? false)))))
+                                                                   :force-close? false))))
+                                           (auto-resize (.. e -target)))
                                :onKeyDown
                                (fn [e]
                                  (condp = e.keyCode
@@ -226,7 +236,6 @@
                                        (if-let [result (nth results highlighted-result-index nil)]
                                          (choose-result! result)
                                          (do
-                                           (close-autocomplete!)
                                            (om/set-state! owner :force-close? true))))
                                      ; ENTER otherwise -> send message
                                      (not e.shiftKey)
@@ -235,8 +244,7 @@
                                        (send-message!)))
 
                                    KeyCodes.ESC (do
-                                                  (om/set-state! owner :force-close? true)
-                                                  (close-autocomplete!))
+                                                  (om/set-state! owner :force-close? true))
 
                                    KeyCodes.UP (when autocomplete-open?
                                                  (.preventDefault e)
@@ -245,9 +253,7 @@
                                    KeyCodes.DOWN (when autocomplete-open?
                                                    (.preventDefault e)
                                                    (highlight-next!))
-                                   (when (KeyCodes.isTextModifyingKeyEvent e)
-                                     ; don't clear if a modifier key alone was pressed
-                                     (highlight-clear!))))})
+                                   nil))})
 
             (when autocomplete-open?
               (dom/div #js {:className "autocomplete"}

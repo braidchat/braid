@@ -314,7 +314,10 @@ body {
     .message.new {
       -webkit-flex-shrink: 0;
       flex-shrink: 0;
-      min-height: 3.5em;
+      padding-bottom: @pad;
+      textarea {
+        min-height: 3.5em;
+      }
     }
 
   }
@@ -627,22 +630,32 @@ body {
       }
     }
 
-    .help, .users, .tags {
+    .shortcut {
       display: inline-block;
       margin-right: @pad;
       .title {
         text-decoration: none;
         color: @grey-text;
       }
-      &:hover {
+      &.active, &:hover {
         .title {
           color: #000;
         }
+      }
+      &:hover {
         .modal {
           display: block;
           padding: @pad;
         }
       }
+    }
+    .inbox .title:after {
+      font-family: "fontawesome";
+      content: "\f01c";
+    }
+    .recent .title:after {
+      font-family: "fontawesome";
+      content: "\f1da";
     }
     .help .title:after {
       font-family: "fontawesome";

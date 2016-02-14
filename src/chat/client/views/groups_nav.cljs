@@ -28,7 +28,8 @@
                 (mapcat (fn [thread]
                           (let [group-ids-from-tags (->> (thread :tag-ids)
                                                          (map (fn [tag-id]
-                                                                (get-in @store/app-state [:tags tag-id :group-id]))))]
+                                                                (get-in @store/app-state [:tags tag-id :group-id])))
+                                                         set)]
                             (if (seq group-ids-from-tags)
                               group-ids-from-tags
                               (let [group-ids-from-users (->> (thread :messages)
