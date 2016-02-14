@@ -197,8 +197,9 @@
 
 (defn email-taken?
   [email]
-  (-> (d/q '[:find ?e :in $ ?email :where [?e :user/email ?email]] (d/db *conn*) email)
-      first
+  (-> (d/q '[:find ?e .
+             :in $ ?email
+             :where [?e :user/email ?email]] (d/db *conn*) email)
       some?))
 
 (defn create-user!
