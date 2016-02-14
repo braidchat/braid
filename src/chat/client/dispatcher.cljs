@@ -50,14 +50,15 @@
 
 (defmethod dispatch! :new-message [_ data]
   (when-not (string/blank? (data :content))
-    (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
-                                        :content (identify-mentions (data :content))
-                                        :thread-id (data :thread-id)
+    (let [message (schema/make-message
+                    {:user-id (get-in @store/app-state [:session :user-id])
+                     :content (identify-mentions (data :content))
+                     :thread-id (data :thread-id)
 
-                                        :mentioned-tag-ids (concat (data :mentioned-tag-ids)
-                                                                   (extract-tag-ids (data :content)))
-                                        :mentioned-user-ids (concat (data :mentioned-user-ids)
-                                                                    (extract-user-ids (data :content)))})]
+                     :mentioned-tag-ids (concat (data :mentioned-tag-ids)
+                                                (extract-tag-ids (data :content)))
+                     :mentioned-user-ids (concat (data :mentioned-user-ids)
+                                                 (extract-user-ids (data :content)))})]
       (store/add-message! message)
       (sync/chsk-send! [:chat/new-message message]))))
 
