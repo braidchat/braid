@@ -264,7 +264,6 @@ body {
   -webkit-flex-direction: column;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
 
   &:before { // switch to after to align at top
     content: "";
@@ -369,6 +368,17 @@ body {
   &.dragging {
     background-color: gray;
     border: 5px dashed black;
+  }
+
+  .card {
+    -webkit-transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s;
+  }
+
+  &.focused {
+    .card {
+      box-shadow: 0 10px 10px 10px #ccc;
+    }
   }
 
   &.limbo {

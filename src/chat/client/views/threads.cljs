@@ -41,7 +41,8 @@
       om/IInitState
       (init-state [_]
         {:dragging? false
-         :uploading? false})
+         :uploading? false
+         :focused? false})
       om/IDidMount
       (did-mount [_]
         (scroll-to-bottom owner thread))
@@ -52,7 +53,7 @@
       (did-update [_ _ _]
         (scroll-to-bottom owner thread))
       om/IRenderState
-      (render-state [_ {:keys [dragging?] :as state}]
+      (render-state [_ {:keys [dragging? focused?] :as state}]
         (let [new? (thread :new?)
               private? (and
                          (not (thread :new?))
@@ -75,7 +76,11 @@
                                         " " (when new? "new")
                                         " " (when private? "private")
                                         " " (when limbo? "limbo")
+                                        " " (when focused? "focused")
                                         " " (when dragging? "dragging"))
+                        ; TODO: set focused thread id in store, so we can use for other things
+                        :onFocus (fn [e] (om/set-state! owner :focused? true))
+                        :onBlur (fn [e] (om/set-state! owner :focused? false))
                         :onKeyUp (fn [e]
                                    (when (and (= KeyCodes.X (.-keyCode e))
                                            (.-ctrlKey e))
