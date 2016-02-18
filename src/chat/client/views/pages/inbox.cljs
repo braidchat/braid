@@ -2,6 +2,7 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [chat.client.store :as store]
+            [chat.client.views.helpers.events :refer [scroll-threads-handler]]
             [chat.client.views.threads :refer [thread-view new-thread-view]]))
 
 (defn inbox-page-view [data owner]
@@ -12,14 +13,7 @@
         (dom/div #js {:className "title"} "Inbox")
         (apply dom/div #js {:className "threads"
                             :ref "threads-div"
-                            :onWheel (fn [e]
-                                       (let [target-classes (.. e -target -classList)
-                                             this-elt (om/get-node owner "threads-div")]
-                                         ; TODO: check if threads-div needs to scroll?
-                                         (when (and (or (.contains target-classes "thread")
-                                                        (.contains target-classes "threads"))
-                                                 (= 0 (.-deltaX e) (.-deltaZ e)))
-                                           (set! (.-scrollLeft this-elt) (- (.-scrollLeft this-elt) (.-deltaY e))))))}
+                            :onWheel (scroll-threads-handler owner)}
           (concat
             [(new-thread-view {})]
             (map (fn [t] (om/build thread-view t {:key :id}))
