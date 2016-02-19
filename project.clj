@@ -25,8 +25,9 @@
                  [org.clojars.leanpixel/om-fields "1.8.6"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  ;shared
+                 [org.clojure/tools.reader "1.0.0-alpha3"]
                  [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
-                 [com.taoensso/sente "1.7.0"]]
+                 [com.taoensso/sente "1.7.0" :exclusions [org.clojure/tools.reader]]]
 
   :main chat.server.handler
   :plugins [[lein-environ "1.0.0"]
