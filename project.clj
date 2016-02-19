@@ -10,7 +10,7 @@
                  [fogus/ring-edn "0.3.0"]
                  [compojure "1.4.0"]
                  [environ "1.0.0"]
-                 [com.taoensso/timbre "4.1.4"]
+                 [com.taoensso/timbre "4.2.1" :exclusions [org.clojure/tools.reader]]
                  [crypto-password "0.1.3"]
                  [joda-time "2.8.2"]
                  [instaparse "1.4.1"]
