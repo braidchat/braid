@@ -27,7 +27,7 @@
 
 (defn- unseen? [message thread]
   (> (:created-at message)
-     (thread :last-open-at)) )
+     (thread :last-open-at)))
 
 (def max-file-size (* 10 1024 1024))
 
@@ -80,7 +80,8 @@
                                         " " (when dragging? "dragging"))
                         ; TODO: set focused thread id in store, so we can use for other things
                         :onFocus (fn [e] (om/set-state! owner :focused? true))
-                        :onBlur (fn [e] (om/set-state! owner :focused? false))
+                        :onBlur (fn [e] (om/set-state! owner :focused? false)
+                                  (dispatch! :mark-thread-read (thread :id)))
                         :onKeyUp (fn [e]
                                    (when (and (= KeyCodes.X (.-keyCode e))
                                            (.-ctrlKey e))

@@ -388,6 +388,20 @@
                               (map (fn [t] (.getTime t))))]
   (assoc thread :last-open-at (apply max (concat [0] user-hides-at user-messages-at)))))
 
+(defn update-thread-last-open [thread-id user-id]
+  (when (seq (d/q '[:find ?t
+                    :in $ ?user-id ?thread-id
+                    :where
+                    [?u :user/id ?user-id]
+                    [?t :thread/id ?thread-id]
+                    [?u :user/open-thread ?t]]
+                  (d/db *conn*) user-id thread-id))
+    ; TODO: should find a better way of handling this...
+    (d/transact *conn*
+      [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
+    (d/transact *conn*
+      [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
+
 (defn get-open-threads-for-user
   [user-id]
   (let [visible-tags (get-user-visible-tag-ids user-id)]
