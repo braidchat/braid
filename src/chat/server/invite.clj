@@ -180,5 +180,6 @@
                           (img-format/as-stream ext))]
     (s3/put-object creds (env :aws-domain) (str "avatars/" avatar-filename) resized-image
                    {:content-type (f :content-type)})
-    (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename) (s3/grant :all-users :read))
+    (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename)
+                          (s3/grant :all-users :read))
     (str "https://s3.amazonaws.com/" (env :aws-domain) "/avatars/" avatar-filename)))
