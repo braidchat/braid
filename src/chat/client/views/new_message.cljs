@@ -10,10 +10,6 @@
             [chat.client.views.helpers :refer [id->color debounce]])
   (:import [goog.events KeyCodes]))
 
-
-(defn tee [x]
-  (println x) x)
-
 (defn fuzzy-matches?
   [s m]
   ; TODO: make this fuzzier? something like interleave with .* & re-match?
