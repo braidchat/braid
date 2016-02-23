@@ -14,7 +14,8 @@
             [chat.client.views.pages.user :refer [user-page-view]]
             [chat.client.views.pages.help :refer [help-page-view]]
             [chat.client.views.pages.group-explore :refer [group-explore-view]]
-            [chat.client.views.pages.me :refer [me-page-view]]))
+            [chat.client.views.pages.me :refer [me-page-view]]
+            [chat.client.views.pages.tour :refer [tour-view]]))
 
 (defn login-view [data owner]
   (reify
@@ -76,7 +77,8 @@
           :user (om/build user-page-view data)
           :channels (om/build channels-page-view data)
           :me (om/build me-page-view data)
-          :group-explore (om/build group-explore-view data))))))
+          :group-explore (om/build group-explore-view data)
+          :tour (om/build tour-view data))))))
 
 (defn app-view [data owner]
   (reify

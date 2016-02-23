@@ -746,3 +746,54 @@ body {
     }
   }
 }
+
+.page.tour {
+  background-color: rgba(0,0,0,0.2);
+  .tour-msg {
+    background-color: white;
+    border-radius: 1rem;
+    font-size: 1em;
+    padding: 0.5em;
+    position: absolute;
+    &.center {
+      transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+      left: 50%;
+      top: 50%;
+    }
+    &.left {
+      left: @pad;
+    }
+    &.top {
+      top: @pad;
+    }
+    &.arrow {
+      &:before {
+        content: "";
+        display: block;
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-color: transparent;
+        border-width: 15px;
+        border-style: solid;
+      }
+    }
+    &.arrow-left {
+      &:before {
+        right: 100%;
+        top: 50%;
+        margin-top: -15px;
+        border-right-color: white;
+      }
+    }
+    &.arrow-bottom {
+      &:before {
+        top: 100%;
+        border-right-color: white;
+        left: 50%;
+        margin-top: -15px;
+      }
+    }
+  }
+}

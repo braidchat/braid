@@ -34,6 +34,9 @@
 (defroute help-page-path "/:group-id/help" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :help}))
 
+(defroute help-page-path "/:group-id/tour" [group-id]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :tour}))
+
 (defroute search-page-path "/:group-id/search/:query" [group-id query]
   (store/set-group-and-page! (UUID. group-id nil) {:type :search
                                                    :search-query query}))
