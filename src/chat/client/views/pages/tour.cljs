@@ -5,6 +5,30 @@
             [chat.client.routes :as routes]
             [chat.client.views.threads :refer [thread-view new-thread-view]]))
 
+(declare state->next state->prev)
+
+(defn advance-state!
+  [owner]
+  (when-let [next-state (state->next (om/get-state owner :tour-state))]
+    (om/set-state! owner :tour-state next-state)))
+
+(defn retreat-state!
+  [owner]
+  (when-let [prev-state (state->prev (om/get-state owner :tour-state))]
+    (om/set-state! owner :tour-state prev-state)))
+
+(defn next-button
+  [owner]
+  (dom/button #js {:onClick (fn [_] (advance-state! owner))
+                   :className "forward"}
+    "Next"))
+
+(defn prev-button
+  [owner]
+  (dom/button #js {:onClick (fn [_] (retreat-state! owner))
+                   :className "back"}
+    "Back"))
+
 ; tutorial view. show:
 ; - groups on the side:
 ;  - show how clicking on group selects which one you're in
@@ -32,31 +56,8 @@
 ;  - user page
 ;  - tag/channel page
 
-(declare state->next state->prev)
-
-(defn advance-state!
-  [owner]
-  (when-let [next-state (state->next (om/get-state owner :tour-state))]
-    (om/set-state! owner :tour-state next-state)))
-
-(defn retreat-state!
-  [owner]
-  (when-let [prev-state (state->prev (om/get-state owner :tour-state))]
-    (om/set-state! owner :tour-state prev-state)))
-
-(defn next-button
-  [owner]
-  (dom/button #js {:onClick (fn [_] (advance-state! owner))
-                   :className "forward"}
-    "Next"))
-
-(defn prev-button
-  [owner]
-  (dom/button #js {:onClick (fn [_] (retreat-state! owner))
-                   :className "back"}
-    "Back"))
-
 (def tour-states
+  "The states and corresponding view functions for each step in the tour"
   [
    [:initial
     (fn [owner]
@@ -66,18 +67,22 @@
           "you might be used to")
         (dom/p nil "Let's have a quick tour of how this works")
         (next-button owner)))]
+
    [:sidebar
     (fn [owner]
       (dom/div #js {:className "tour-msg left top arrow arrow-left"}
         (dom/p nil "This sidebar shows the groups you are in")
+        (dom/p nil "When you're in more than one group, you can click on "
+          "the tiles here to switch between which one you're looking at")
         (prev-button owner)
         (next-button owner)))]
+
    [:end
     (fn [owner]
       (dom/div #js {:className "tour-msg center"}
         (dom/h1 nil "Ready to Go!")
         (dom/p nil "Now you are ready to start using Braid in earnest")
-        (dom/p nil "Click"
+        (dom/p nil "Click "
           (dom/a #js {:href (routes/inbox-page-path {:group-id (routes/current-group)})}
             "here")
           " to go to your inbox and start chatting in earnest!")
@@ -85,10 +90,16 @@
         ))]
    ])
 
-(def state->next (->> tour-states (map first) (partition 2 1)
-                      (into {} (map vec))))
-(def state->prev (into {} (map (fn [[a b]] [b a])) state->next))
-(def state->view (into {} tour-states))
+(def state->next
+  "Map of current-state to next-state. (e.g. {:initial :sidebar, :sidebar :end})"
+  (->> tour-states (map first) (partition 2 1) (into {} (map vec))))
+(def state->prev
+  "Inverse of state->next, to go from current state to previous state"
+  (into {} (map (fn [[a b]] [b a])) state->next))
+
+(def state->view
+  "Map of state to view function"
+  (into {} tour-states))
 
 (defn tour-view [data owner]
   (reify
