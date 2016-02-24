@@ -25,6 +25,7 @@
                                   (if (store/is-subscribed-to-tag? (tag :id))
                                     " on"
                                     " off"))
+                  :tabIndex -1
                   :style #js {:backgroundColor (id->color (tag :id))
                               :color (id->color (tag :id))
                               :borderColor (id->color (tag :id))}
@@ -40,6 +41,7 @@
         (dom/a #js {:className (str "user pill" (case (user :status)
                                                   :online " on"
                                                   " off"))
+                    :tabIndex -1
                     :style #js {:backgroundColor (id->color (user :id))
                                 :color (id->color (user :id))
                                 :borderColor (id->color (user :id))}

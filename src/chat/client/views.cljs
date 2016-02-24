@@ -25,7 +25,16 @@
        :error false})
     om/IRenderState
     (render-state [_ state]
-      (dom/div #js {:className "login"}
+      (dom/form #js {:className "login"
+                     :onSubmit (fn [e]
+                                 (.preventDefault e)
+                                 (dispatch! :auth
+                                            {:email (state :email)
+                                             :password (state :password)
+                                             :on-error
+                                             (fn []
+                                               (om/set-state! owner :error true))})
+                                 )}
         (when (state :error)
           (dom/div #js {:className "error"}
             "Bad credentials, please try again"))
@@ -39,15 +48,7 @@
                :type "password"
                :value (state :password)
                :onChange (fn [e] (om/set-state! owner :password (.. e -target -value)))})
-        (dom/button
-          #js {:onClick (fn [e]
-                          (dispatch! :auth
-                                     {:email (state :email)
-                                      :password (state :password)
-                                      :on-error
-                                      (fn []
-                                        (om/set-state! owner :error true))}))}
-          "Let's do this!")))))
+        (dom/button nil "Let's do this!")))))
 
 (defn main-view [data owner]
   (reify

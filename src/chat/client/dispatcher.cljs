@@ -123,6 +123,11 @@
     (fn [reply]
       (when-let [results (:threads reply)]
           (store/set-channel-results! results)))))
+
+(defmethod dispatch! :mark-thread-read [_ thread-id]
+  (store/update-thread-last-open-at thread-id)
+  (sync/chsk-send! [:chat/mark-thread-read thread-id]))
+
 (defmethod dispatch! :invite [_ data]
   (let [invite (schema/make-invitation data)]
     (sync/chsk-send! [:chat/invite-to-group invite])))

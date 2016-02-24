@@ -140,7 +140,13 @@
 
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (db/with-conn (db/user-hide-thread! (get-in ring-req [:session :user-id]) ?data)))
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn (db/user-hide-thread! user-id ?data))))
+
+(defmethod event-msg-handler :chat/mark-thread-read
+  [{:as ev-msg :keys [ring-req ?data]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn (db/update-thread-last-open ?data user-id))))
 
 (defmethod event-msg-handler :chat/create-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

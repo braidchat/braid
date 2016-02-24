@@ -5,7 +5,9 @@
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [aws.sdk.s3 :as s3]
-            [taoensso.carmine :as car])
+            [taoensso.carmine :as car]
+            [image-resizer.core :as img]
+            [image-resizer.format :as img-format])
   (:import java.security.SecureRandom
            javax.crypto.Mac
            javax.crypto.spec.SecretKeySpec
@@ -160,6 +162,8 @@
     (hmac hmac-secret
           (str (params :now) (params :token) (params :invite_id) (params :email)))))
 
+(def avatar-size [128 128])
+
 (defn upload-avatar
   [f]
   ; TODO: resize avatar to something reasonable
@@ -170,8 +174,12 @@
               "image/png" "png"
               ; TODO
               (last (string/split (f :filename) #"\.")))
-        avatar-filename (str (java.util.UUID/randomUUID) "." ext)]
-    (s3/put-object creds (env :aws-domain) (str "avatars/" avatar-filename) (f :tempfile)
+        avatar-filename (str (java.util.UUID/randomUUID) "." ext)
+        [h w] avatar-size
+        resized-image (-> f :tempfile (img/resize-and-crop h w)
+                          (img-format/as-stream ext))]
+    (s3/put-object creds (env :aws-domain) (str "avatars/" avatar-filename) resized-image
                    {:content-type (f :content-type)})
-    (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename) (s3/grant :all-users :read))
+    (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename)
+                          (s3/grant :all-users :read))
     (str "https://s3.amazonaws.com/" (env :aws-domain) "/avatars/" avatar-filename)))
