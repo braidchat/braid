@@ -3,7 +3,10 @@
             [om.dom :as dom]
             [chat.client.store :as store]
             [chat.client.routes :as routes]
-            [chat.client.views.threads :refer [thread-view new-thread-view]]))
+            [chat.client.views.threads :refer [thread-view new-thread-view]]
+            [chat.shared.util :refer [if?]]))
+
+(def ->seq (if? sequential? identity vector))
 
 (declare state->next state->prev)
 
@@ -77,6 +80,17 @@
         (prev-button owner)
         (next-button owner)))]
 
+   [:new-message
+    (fn [owner]
+      [(dom/div #js {:className "threads"}
+         (new-thread-view {}))
+
+       (dom/div #js {:className "tour-msg new-adjacent"}
+         (dom/p nil "Let's start a new thread")
+         (dom/p nil "Type some text (e.g. \"Hello Braid!\") in the adjacent box"
+           " and hit return")
+         (prev-button owner))])]
+
    [:end
     (fn [owner]
       (dom/div #js {:className "tour-msg center"}
@@ -108,6 +122,6 @@
       {:tour-state :initial})
     om/IRenderState
     (render-state [_ {:keys [tour-state] :as state}]
-      (dom/div #js {:className "page tour"}
+      (apply dom/div #js {:className "page tour"}
         (dom/div #js {:className "title"} "Braid Tour")
-        ((state->view tour-state) owner)))))
+        (->seq ((state->view tour-state) owner))))))

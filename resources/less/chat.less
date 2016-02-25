@@ -751,7 +751,7 @@ body {
   background-color: rgba(0,0,0,0.2);
   .tour-msg {
     background-color: white;
-    max-width: 20%;
+    max-width: 25em;
     border-radius: 1rem;
     font-size: 1em;
     padding: 0.5em;
@@ -767,6 +767,17 @@ body {
     }
     &.top {
       top: @pad;
+    }
+    &.bottom {
+      bottom: @pad;
+    }
+    &.middle {
+      top: 50%;
+    }
+    /* lol, hacks */
+    &.new-adjacent {
+      left: @card-width + 2*@pad;
+      bottom: 2*@pad;
     }
     &.arrow {
       &:before {
