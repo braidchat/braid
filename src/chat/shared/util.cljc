@@ -34,3 +34,9 @@
   [f]
   (fn [& args]
     (apply f (reverse args))))
+
+(defn if?
+  "Given a predicate function, then function and else function, return a fn
+  that returns (then x) if (pred x) returns true and (else x) otherwise"
+  [pred t e]
+  (fn [x] (if (pred x) (t x) (e x))))
