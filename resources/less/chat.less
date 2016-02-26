@@ -747,6 +747,19 @@ body {
   }
 }
 
+.arrow() {
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-width: 15px;
+    border-style: solid;
+  }
+}
+
 .page.tour {
   background-color: rgba(0,0,0,0.2);
   .tour-msg {
@@ -768,30 +781,27 @@ body {
     &.top {
       top: @pad;
     }
+    &.topbar {
+      top: 4*@pad;
+      right: @pad*3;
+    }
     &.bottom {
       bottom: @pad;
     }
     &.middle {
       top: 50%;
     }
+    &.right {
+      right: 2*@pad;
+    }
     /* lol, hacks */
     &.new-adjacent {
       left: @card-width + 2*@pad;
       bottom: 2*@pad;
     }
-    &.arrow {
-      &:before {
-        content: "";
-        display: block;
-        position: absolute;
-        width: 0;
-        height: 0;
-        border-color: transparent;
-        border-width: 15px;
-        border-style: solid;
-      }
-    }
+
     &.arrow-left {
+      .arrow();
       &:before {
         right: 100%;
         top: 50%;
@@ -799,12 +809,13 @@ body {
         border-right-color: white;
       }
     }
-    &.arrow-bottom {
+    &.arrow-up {
+      margin-top: 15px;
+      .arrow();
       &:before {
-        top: 100%;
-        border-right-color: white;
-        left: 50%;
-        margin-top: -15px;
+        bottom: 100%;
+        left: 15px;
+        border-bottom-color: white;
       }
     }
   }

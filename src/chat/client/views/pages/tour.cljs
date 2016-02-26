@@ -9,6 +9,21 @@
 
 (def ->seq (if? sequential? identity vector))
 
+(defn element-offset
+  [el]
+  (loop [el el
+         x 0 y 0]
+    (if (and (some? el) (not (js/isNaN (.-offsetLeft el)))
+          (not (js/isNaN (.-offsetTop el))))
+      (recur (.-offsetParent el)
+             (+ x (.-offsetLeft el)
+                (- (.-scrollLeft el))
+                (.-clientLeft el))
+             (+ y (.-offsetTop el)
+                (- (.-scrollTop el))
+                (.-clientTop el)))
+      {:top y :left x})))
+
 (declare state->next state->prev)
 
 (defn advance-state!
@@ -41,6 +56,17 @@
 ; tutorial view. show:
 ; - groups on the side:
 ;  - show how clicking on group selects which one you're in
+; - top bar:
+;  - inbox
+;  - recent
+;  - users
+;  - tags
+;  - help
+;  - search
+;  - me/settings
+; - other pages
+;  - user page
+;  - tag/channel page
 ; - new message box:
 ;  - explain how tagging works
 ;   - tag
@@ -53,17 +79,6 @@
 ;   - "private" threads
 ;   - threads with tags
 ;  - explain how threads can be closed & get re-opened?
-; - top bar:
-;  - inbox
-;  - recent
-;  - users
-;  - tags
-;  - help
-;  - search
-;  - me/settings
-; - other pages
-;  - user page
-;  - tag/channel page
 
 (def tour-states
   "The states and corresponding view functions for each step in the tour. The
@@ -85,12 +100,78 @@
 
    [:sidebar
     (fn [owner]
-      (dom/div #js {:className "tour-msg left top arrow arrow-left"}
+      (dom/div #js {:className "tour-msg left top arrow-left"}
         (dom/p nil "This sidebar shows the groups you are in")
         (dom/p nil "When you're in more than one group, you can click on "
           "the tiles here to switch between which one you're looking at")
         (prev-button owner)
         (next-button owner)))]
+
+   [:inbox-button
+    (fn [owner]
+      (let [inbox-btn (.querySelector js/document ".inbox.shortcut")
+            {:keys [top left]} (element-offset inbox-btn)]
+        (dom/div #js {:className "tour-msg arrow-up"
+                      :style #js {:top (str (+ top 30) "px")
+                                  :left (str (- left 90) "px")}}
+          (dom/p nil "This is the inbox button")
+          (prev-button owner)
+          (next-button owner))))]
+
+   [:recent-button
+    (fn [owner]
+      (let [inbox-btn (.querySelector js/document ".recent.shortcut")
+            {:keys [top left]} (element-offset inbox-btn)]
+        (dom/div #js {:className "tour-msg arrow-up"
+                      :style #js {:top (str (+ top 30) "px")
+                                  :left (str (- left 90) "px")}}
+          (dom/p nil "This is the recent button")
+          (prev-button owner)
+          (next-button owner))))]
+
+   [:people-button
+    (fn [owner]
+      (let [inbox-btn (.querySelector js/document ".users.shortcut")
+            {:keys [top left]} (element-offset inbox-btn)]
+        (dom/div #js {:className "tour-msg arrow-up"
+                      :style #js {:top (str (+ top 30) "px")
+                                  :left (str (- left 90) "px")}}
+          (dom/p nil "This is the users button")
+          (prev-button owner)
+          (next-button owner))))]
+
+   [:tags-button
+    (fn [owner]
+      (let [inbox-btn (.querySelector js/document ".tags.shortcut")
+            {:keys [top left]} (element-offset inbox-btn)]
+        (dom/div #js {:className "tour-msg arrow-up"
+                      :style #js {:top (str (+ top 30) "px")
+                                  :left (str (- left 90) "px")}}
+          (dom/p nil "This is the tags button")
+          (prev-button owner)
+          (next-button owner))))]
+
+   [:history-search
+    (fn [owner]
+      (let [inbox-btn (.querySelector js/document ".search-bar")
+            {:keys [top left]} (element-offset inbox-btn)]
+        (dom/div #js {:className "tour-msg arrow-up"
+                      :style #js {:top (str (+ top 30) "px")
+                                  :left (str (- left 90) "px")}}
+          (dom/p nil "This is the history search field")
+          (prev-button owner)
+          (next-button owner))))]
+
+   [:me-button
+    (fn [owner]
+      (let [inbox-btn (.querySelector js/document ".header .avatar")
+            {:keys [top left]} (element-offset inbox-btn)]
+        (dom/div #js {:className "tour-msg arrow-up"
+                      :style #js {:top (str (+ top 30) "px")
+                                  :left (str (- left 90) "px")}}
+          (dom/p nil "This is will take you to your user profile page")
+          (prev-button owner)
+          (next-button owner))))]
 
    [:new-message
     (fn [owner]
@@ -98,7 +179,7 @@
         [(dom/div #js {:className "threads"}
            (new-thread-view {:id thread-id}))
 
-         (dom/div #js {:className "tour-msg new-adjacent"}
+         (dom/div #js {:className "tour-msg new-adjacent arrow-left"}
            (dom/p nil "Let's start a new thread that other people here will be able to see")
            (dom/p nil "Type some text (e.g. \"Hello Braid!\") in the adjacent box"
              " and hit return")
@@ -113,9 +194,10 @@
             thread (get-in (om/get-props owner) [:threads thread-id])]
         [(dom/div #js {:className "threads"}
            (om/build thread-view thread))
-         (dom/div #js {:className "tour-msg new-adjacent"}
+         (dom/div #js {:className "tour-msg new-adjacent arrow-left"}
            (dom/p nil "Now let's mention a user")
-           (dom/p nil "Start typing \"@\" and select a user you want to mention, then hit enter")
+           (dom/p nil "Start typing \"@\" and select a user you want to mention,"
+            " then hit enter")
            (dom/p nil "(maybe the person who invited you!)"))]))
     (fn [owner next-props next-state]
       (let [thread (get-in next-props [:threads (next-state :new-thread-id)])]
