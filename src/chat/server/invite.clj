@@ -8,30 +8,14 @@
             [taoensso.carmine :as car]
             [image-resizer.core :as img]
             [image-resizer.format :as img-format]
-            [chat.server.cache :refer [cache-set! cache-get cache-del!]])
-  (:import java.security.SecureRandom
-           javax.crypto.Mac
-           javax.crypto.spec.SecretKeySpec
-           [org.apache.commons.codec.binary Base64]))
+            [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]])
+  (:import javax.crypto.Mac
+           javax.crypto.spec.SecretKeySpec))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
   (println "WARNING: No :hmac-secret set, using an insecure default."))
 
 (def hmac-secret (or (env :hmac-secret) "secret"))
-
-
-(defn random-nonce
-  "url-safe random nonce"
-  [size]
-  (let [rand-bytes (let [seed (byte-array size)]
-                     (.nextBytes (SecureRandom. ) seed)
-                     seed)]
-    (-> rand-bytes
-        Base64/encodeBase64
-        String.
-        (string/replace "+" "-")
-        (string/replace "/" "_")
-        (string/replace "=" ""))))
 
 (defn hmac
   [hmac-key data]

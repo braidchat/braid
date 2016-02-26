@@ -1,6 +1,22 @@
 (ns chat.server.cache
-  (:require [environ.core :refer [env]]
-            [taoensso.carmine :as car]))
+  (:require [clojure.string :as string]
+            [environ.core :refer [env]]
+            [taoensso.carmine :as car])
+  (:import java.security.SecureRandom
+           [org.apache.commons.codec.binary Base64]))
+
+(defn random-nonce
+  "url-safe random nonce"
+  [size]
+  (let [rand-bytes (let [seed (byte-array size)]
+                     (.nextBytes (SecureRandom. ) seed)
+                     seed)]
+    (-> rand-bytes
+        Base64/encodeBase64
+        String.
+        (string/replace "+" "-")
+        (string/replace "/" "_")
+        (string/replace "=" ""))))
 
 ; same as conf in handler, but w/e
 (def redis-conn {:pool {}
