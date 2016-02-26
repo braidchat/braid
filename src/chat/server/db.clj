@@ -1,6 +1,7 @@
 (ns chat.server.db
   (:require [datomic.api :as d]
             [environ.core :refer [env]]
+            [clojure.edn :as edn]
             [clojure.string :as string]
             [crypto.password.scrypt :as password]
             [chat.server.schema :refer [schema]]))
@@ -96,10 +97,10 @@
 
 (defn- db->extension
   [ext]
-  {:id (ext :extension/id)
+  {:id (:extension/id ext)
    :group-id (get-in ext [:extension/group :group/id])
-   :config (ext :extension/config)
-   :token (ext :extension/token)})
+   :config (edn/read-string (:extension/config ext))
+   :token (:extension/token ext)})
 
 (def extension-pull-pattern
   [:extension/id
@@ -629,9 +630,18 @@
          (map db->thread)
          (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))))
 
+(defn create-extension!
+  [{:keys [id group-id config]}]
+  (-> {:extension/group [:group/id group-id]
+       :extension/id id
+       :extension/config (pr-str config)}
+      create-entity!
+      db->extension))
+
 (defn extension-by-id
   [extension-id]
-  (db->extension (d/pull (d/db *conn*) extension-pull-pattern)))
+  (-> (d/pull (d/db *conn*) extension-pull-pattern [:extension/id extension-id])
+      db->extension))
 
 (defn save-extension-token!
   [extension-id token]
