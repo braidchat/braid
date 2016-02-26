@@ -94,6 +94,19 @@
    :tag-ids (map :tag/id (thread :thread/tag))
    :mentioned-ids (map :user/id (thread :thread/mentioned))})
 
+(defn- db->extension
+  [ext]
+  {:id (ext :extension/id)
+   :group-id (get-in ext [:extension/group :group/id])
+   :config (ext :extension/config)
+   :token (ext :extension/token)})
+
+(def extension-pull-pattern
+  [:extension/id
+   {:extension/group [:group/id]}
+   :extension/config
+   :extension/token])
+
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
   [& body]
@@ -615,3 +628,11 @@
     (->> (d/pull-many (d/db *conn*) thread-pull-pattern thread-eids)
          (map db->thread)
          (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))))
+
+(defn extension-by-id
+  [extension-id]
+  (db->extension (d/pull (d/db *conn*) extension-pull-pattern)))
+
+(defn save-extension-token!
+  [extension-id token]
+  (d/transact *conn* [[:db/add [:extension/id extension-id] :extension/token token]]))

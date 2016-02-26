@@ -3,6 +3,34 @@
             [datomic.api :as d]
             [clojure.string :as string]))
 
+(defn migrate-2016-02-26
+  "Add extension schema"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [{:db/ident :extension/id
+        :db/valueType :db.type/uuid
+        :db/cardinality :db.cardinality/one
+        :db/unique :db.unique/identity
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :extension/group
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :extension/token
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :extension/config
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       ])))
+
 (defn migrate-2016-01-14
   "All users must have a nickname"
   []
