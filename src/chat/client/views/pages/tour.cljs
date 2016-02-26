@@ -1,6 +1,7 @@
 (ns chat.client.views.pages.tour
   (:require [om.core :as om]
             [om.dom :as dom]
+            [cljs-uuid-utils.core :as uuid]
             [chat.client.store :as store]
             [chat.client.routes :as routes]
             [chat.client.views.threads :refer [thread-view new-thread-view]]
@@ -19,6 +20,11 @@
   [owner]
   (when-let [prev-state (state->prev (om/get-state owner :tour-state))]
     (om/set-state! owner :tour-state prev-state)))
+
+(defn reset-tour!
+  [owner]
+  (om/set-state! owner :tour-state :initial)
+  (om/set-state! owner :new-thread-id (uuid/make-random-squuid)))
 
 (defn next-button
   [owner]
@@ -60,7 +66,13 @@
 ;  - tag/channel page
 
 (def tour-states
-  "The states and corresponding view functions for each step in the tour"
+  "The states and corresponding view functions for each step in the tour. The
+  states are specificied as a vector where the first value is a keyword
+  indicating the name of the state, the second is a function which takes one
+  argument (the container owner), and optionally a third argument which is a
+  state transition function, which is called in will-update (useful if you want
+  the state to change based on something happening, instead of just a button
+  press)"
   [
    [:initial
     (fn [owner]
@@ -82,26 +94,67 @@
 
    [:new-message
     (fn [owner]
-      [(dom/div #js {:className "threads"}
-         (new-thread-view {}))
+      (let [thread-id (om/get-state owner :new-thread-id)]
+        [(dom/div #js {:className "threads"}
+           (new-thread-view {:id thread-id}))
 
-       (dom/div #js {:className "tour-msg new-adjacent"}
-         (dom/p nil "Let's start a new thread")
-         (dom/p nil "Type some text (e.g. \"Hello Braid!\") in the adjacent box"
-           " and hit return")
-         (prev-button owner))])]
+         (dom/div #js {:className "tour-msg new-adjacent"}
+           (dom/p nil "Let's start a new thread that other people here will be able to see")
+           (dom/p nil "Type some text (e.g. \"Hello Braid!\") in the adjacent box"
+             " and hit return")
+           (prev-button owner))]))
+    (fn [owner next-props next-state]
+      (when (contains? (next-props :threads) (next-state :new-thread-id))
+        (advance-state! owner)))]
+
+   [:mention-user
+    (fn [owner]
+      (let [thread-id (om/get-state owner :new-thread-id)
+            thread (get-in (om/get-props owner) [:threads thread-id])]
+        [(dom/div #js {:className "threads"}
+           (om/build thread-view thread))
+         (dom/div #js {:className "tour-msg new-adjacent"}
+           (dom/p nil "Now let's mention a user")
+           (dom/p nil "Start typing \"@\" and select a user you want to mention, then hit enter")
+           (dom/p nil "(maybe the person who invited you!)"))]))
+    (fn [owner next-props next-state]
+      (let [thread (get-in next-props [:threads (next-state :new-thread-id)])]
+        (when-not (empty? (thread :mentioned-ids))
+          (advance-state! owner))))]
+
+   [:tag-thread
+    (fn [owner]
+      (let [thread-id (om/get-state owner :new-thread-id)
+            thread (get-in (om/get-props owner) [:threads thread-id])]
+        [(dom/div #js {:className "threads"}
+           (om/build thread-view thread))
+         (dom/div #js {:className "tour-msg new-adjacent"}
+           (dom/p nil "Let's make this thread we've started publicly viewable to the group")
+           (dom/p nil "We do this by adding a tag:")
+           (dom/p nil "Starting type \"#\", find a tag in the autocomplete, and hit enter")
+           (dom/p nil "(something like \"general\" or \"watercooler\" is "
+             " probably a good place for this)")
+           )]))
+    (fn [owner next-props next-state]
+      (let [thread (get-in next-props [:threads (next-state :new-thread-id)])]
+        (when-not (empty? (thread :tag-ids))
+          (advance-state! owner))))]
 
    [:end
     (fn [owner]
-      (dom/div #js {:className "tour-msg center"}
-        (dom/h1 nil "Ready to Go!")
-        (dom/p nil "Now you are ready to start using Braid in earnest")
-        (dom/p nil "Click "
-          (dom/a #js {:href (routes/inbox-page-path {:group-id (routes/current-group)})}
-            "here")
-          " to go to your inbox and start chatting in earnest!")
-        (prev-button owner)
-        ))]
+      (let [thread-id (om/get-state owner :new-thread-id)
+            thread (get-in (om/get-props owner) [:threads thread-id])]
+        [(dom/div #js {:className "threads"}
+           (om/build thread-view thread))
+         (dom/div #js {:className "tour-msg center"}
+           (dom/h1 nil "Ready to Go!")
+           (dom/p nil "Now you are ready to start using Braid in earnest")
+           (dom/p nil "Click "
+             (dom/a #js {:href (routes/inbox-page-path {:group-id (routes/current-group)})}
+               "here")
+             " to go to your inbox and start chatting in earnest!")
+           (dom/button #js {:onClick (fn [_] (reset-tour! owner))}
+             "Restart the tour"))]))]
    ])
 
 (def state->next
@@ -113,13 +166,24 @@
 
 (def state->view
   "Map of state to view function"
-  (into {} tour-states))
+  (into {} (map (fn [[st v]] [st v])) tour-states))
+
+(def state->update-fn
+  "Map of state name to update-fn (to be called in will-update)"
+  (into {} (comp (remove (fn [[_ up]] (nil? up)))
+                 (map (fn [[st _ up]] [st up])))
+        tour-states))
 
 (defn tour-view [data owner]
   (reify
     om/IInitState
     (init-state [_]
-      {:tour-state :initial})
+      {:tour-state :initial
+       :new-thread-id (uuid/make-random-squuid)})
+    om/IWillUpdate
+    (will-update [_ next-props next-state]
+      (when-let [f (state->update-fn (next-state :tour-state))]
+        (f owner next-props next-state)))
     om/IRenderState
     (render-state [_ {:keys [tour-state] :as state}]
       (apply dom/div #js {:className "page tour"}
