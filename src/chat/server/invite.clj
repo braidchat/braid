@@ -7,7 +7,8 @@
             [aws.sdk.s3 :as s3]
             [taoensso.carmine :as car]
             [image-resizer.core :as img]
-            [image-resizer.format :as img-format])
+            [image-resizer.format :as img-format]
+            [chat.server.cache :refer [cache-set! cache-get cache-del!]])
   (:import java.security.SecureRandom
            javax.crypto.Mac
            javax.crypto.spec.SecretKeySpec
@@ -18,30 +19,6 @@
 
 (def hmac-secret (or (env :hmac-secret) "secret"))
 
-; same as conf in handler, but w/e
-(def redis-conn {:pool {}
-                 :spec {:host "127.0.0.1"
-                        :port 6379}})
-
-(def prod? (= (env :environment) "prod"))
-(def dev-cache
-  "Cache used in place of redis when running in dev/demo mode"
-  (atom {}))
-
-(defn cache-set! [k v]
-  (if prod?
-    (car/wcar redis-conn (car/set k v))
-    (swap! dev-cache assoc k v)))
-
-(defn cache-get [k]
-  (if prod?
-    (car/wcar redis-conn (car/get k))
-    (@dev-cache k)))
-
-(defn cache-del! [k]
-  (if prod?
-    (car/wcar redis-conn (car/del k))
-    (swap! dev-cache dissoc k)))
 
 (defn random-nonce
   "url-safe random nonce"
