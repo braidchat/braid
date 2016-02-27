@@ -1,41 +1,76 @@
 (ns chat.server.extensions.asana
   (:require [clojure.edn :as edn]
+            [clojure.data.json :as json]
+            [org.httpkit.client :as http :refer [url-encode]]
             [taoensso.carmine :as car]
+            [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [chat.server.db :as db]
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]])
-  (:import org.apache.commons.codec.binary.Base64
-           (com.asana Client OAuthApp)
-           (com.asana.models Project Task)))
+  (:import org.apache.commons.codec.binary.Base64))
 
-(def redirect-uri (str (env :site-url) "/extension-oauth"))
+(defn str->b64
+  [s]
+  (-> s .getBytes Base64/encodeBase64 String.))
+
+(defn b64->str
+  [b64]
+  (-> b64 .getBytes Base64/decodeBase64 String.))
+
+(def redirect-uri (str "https://chat.leanpixel.com" #_(env :site-url) "/extension/oauth"))
+(def webhook-uri (str (env :site-url) "/extension/webhook"))
 (def client-id (env :asana-client-id))
 (def client-secret (env :asana-client-secret))
+
+(def token-url "https://app.asana.com/-/oauth_token")
+(def authorization-url "https://app.asana.com/-/oauth_authorize")
+(def api-url "https://app.asana.com/api/1.0")
 
 (defn auth-url
   [extension-id]
   (let [nonce (random-nonce 20)
         info (-> {:extension-id extension-id
                   :nonce nonce}
-                 pr-str
-                 (.getBytes)
-                 (Base64/encodeBase64)
-                 String.)]
+                 pr-str str->b64)]
     (cache-set! (str extension-id) nonce)
-    (.. (Client/oauth (OAuthApp. client-id client-secret redirect-uri))
-        -dispatcher
-        -app
-        (getAuthorizationUrl info))))
+    (str authorization-url
+         "?client_id=" (url-encode client-id)
+         "&redirect_uri=" (url-encode redirect-uri)
+         "&response_type=" "code"
+         "&state=" (url-encode info))))
 
 (defn exchange-token
   [state code]
-  (let [{ext-id :extension-id sent-nonce :nonce} (-> state .getBytes
-                                                     Base64/decodeBase64 String.
-                                                     edn/read-string)]
+  (let [{ext-id :extension-id sent-nonce :nonce} (-> state b64->str edn/read-string)]
     (when-let [stored-nonce (cache-get (str ext-id))]
+      (cache-del! (str ext-id))
       (when (= stored-nonce sent-nonce)
-        (let [dispatcher (.. (Client/oauth (OAuthApp. client-id client-secret
-                                                      redirect-uri))
-                             -dispatcher -app)
-              token (.fetchToken dispatcher code)]
-          (db/with-conn (db/save-extension-token! ext-id token)))))))
+        (let [resp @(http/post token-url
+                      {:form-params {"grant_type" "authorization_code"
+                                     "client_id" client-id
+                                     "client_secret" client-secret
+                                     "redirect_uri" redirect-uri
+                                     "code" code}})]
+          (if (= 200 (:status resp))
+            (let [{:strs [access_token refresh_token]} (json/read-str (:body resp))]
+              (db/with-conn
+                (db/save-extension-token! ext-id {:access-token access_token
+                                                  :refresh-token refresh_token})))
+            (timbre/warnf "Bad response when exchanging token %s" (:body resp))))))))
+
+(defn register-webhook
+  [extension-id]
+  (let [ext (db/with-conn (db/extension-by-id extension-id))
+        project-name (get-in ext [:config :project-name])]
+    (http/post (str api-url "/webhooks")
+               {:oauth-token (:token ext)
+                :form-params {"resource" nil
+                              "target" webhook-uri}})
+    ))
+
+(defn handle-webhook
+  [extension-id event-req]
+  (if-let [secret (get-in event-req [:headers "X-Hook-Secret"])]
+    {:status 200 :headers {"X-Hook-Secret" secret}}
+    (do (println "webhook" event-req)
+        {:status 200})))

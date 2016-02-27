@@ -100,13 +100,15 @@
   {:id (:extension/id ext)
    :group-id (get-in ext [:extension/group :group/id])
    :config (edn/read-string (:extension/config ext))
-   :token (:extension/token ext)})
+   :token (:extension/token ext)
+   :refresh-token (:extension/refresh-token ext)})
 
 (def extension-pull-pattern
   [:extension/id
-   {:extension/group [:group/id]}
    :extension/config
-   :extension/token])
+   :extension/token
+   :extension/refresh-token
+   {:extension/group [:group/id]}])
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -644,5 +646,15 @@
       db->extension))
 
 (defn save-extension-token!
-  [extension-id token]
-  (d/transact *conn* [[:db/add [:extension/id extension-id] :extension/token token]]))
+  [extension-id {:keys [access-token refresh-token]}]
+  (d/transact *conn* [[:db/add [:extension/id extension-id]
+                       :extension/token access-token]
+                      [:db/add [:extension/id extension-id]
+                       :extension/refresh-token refresh-token]]))
+
+(defn group-extensions
+  [group-id]
+  (->> (d/pull (d/db *conn*) [{:extension/_group extension-pull-pattern}]
+               [:group/id group-id])
+       :extension/_group
+       (map db->extension)))

@@ -181,6 +181,11 @@
  :db/cardinality :db.cardinality/one
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
+{:db/ident :extension/refresh-token
+ :db/valueType :db.type/string
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
 {:db/ident :extension/config
  :db/valueType :db.type/string
  :db/cardinality :db.cardinality/one
