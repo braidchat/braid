@@ -22,6 +22,8 @@
 (def client-id (env :asana-client-id))
 (def client-secret (env :asana-client-secret))
 
+
+;; Authentication flow
 (def token-url "https://app.asana.com/-/oauth_token")
 (def authorization-url "https://app.asana.com/-/oauth_authorize")
 (def api-url "https://app.asana.com/api/1.0")
@@ -58,6 +60,23 @@
                                                   :refresh-token refresh_token})))
             (timbre/warnf "Bad response when exchanging token %s" (:body resp))))))))
 
+(defn refresh-token
+  [ext]
+  (let [refresh-token (:refresh-token ext)]
+    (let [resp @(http/post token-url
+                           {:form-params {"grant_type" "refresh_token"
+                                          "client_id" client-id
+                                          "client_secret" client-secret
+                                          "redirect_uri" redirect-uri
+                                          "refresh_token" refresh-token}})]
+      (if (= 200 (:status resp))
+        (let [{:strs [access_token refresh_token]} (json/read-str (:body resp))]
+          (db/with-conn
+            (db/save-extension-token! (ext :id) {:access-token access_token
+                                                 :refresh-token refresh_token})))
+        (timbre/warnf "Bad response when exchanging token %s" (:body resp))))))
+
+;; Webhooks
 (defn register-webhook
   [extension-id]
   (let [ext (db/with-conn (db/extension-by-id extension-id))
@@ -74,3 +93,22 @@
     {:status 200 :headers {"X-Hook-Secret" secret}}
     (do (println "webhook" event-req)
         {:status 200})))
+
+;; Fetching information
+(defn fetch-asana-info
+  [extension-id path]
+  (let [ext (db/with-conn (db/extension-by-id extension-id))]
+    (let [resp @(http/get (str api-url path)
+                  {:oauth-token (ext :token)})]
+      (if (= 200 (:status resp))
+        (-> resp :body json/read-str)
+        (timbre/warnf "token expired %s" (:body resp))))))
+
+(defn available-workspaces
+  [extension-id]
+  (-> (fetch-asana-info extension-id "/users/me")
+      (get-in ["data" "workspaces"])))
+
+(defn workspace-projects
+  [extension-id workspace-id]
+  (fetch-asana-info extension-id (str "/workspaces/" workspace-id "/projects")))
