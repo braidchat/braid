@@ -647,14 +647,14 @@
 
 (defn save-extension-token!
   [extension-id {:keys [access-token refresh-token]}]
-  (d/transact *conn* [[:db/add [:extension/id extension-id]
-                       :extension/token access-token]
-                      [:db/add [:extension/id extension-id]
-                       :extension/refresh-token refresh-token]]))
+  @(d/transact *conn* [[:db/add [:extension/id extension-id]
+                        :extension/token access-token]
+                       [:db/add [:extension/id extension-id]
+                        :extension/refresh-token refresh-token]]))
 
 (defn update-extension-config
   [extension-id config]
-  (d/transact *conn* [[:db/add [:extension/id extension-id]
+  @(d/transact *conn* [[:db/add [:extension/id extension-id]
                        :extension/config (pr-str config)]]))
 
 (defn group-extensions
