@@ -652,6 +652,11 @@
                       [:db/add [:extension/id extension-id]
                        :extension/refresh-token refresh-token]]))
 
+(defn update-extension-config
+  [extension-id config]
+  (d/transact *conn* [[:db/add [:extension/id extension-id]
+                       :extension/config (pr-str config)]]))
+
 (defn group-extensions
   [group-id]
   (->> (d/pull (d/db *conn*) [{:extension/_group extension-pull-pattern}]
