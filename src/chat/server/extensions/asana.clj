@@ -17,11 +17,10 @@
   [b64]
   (-> b64 .getBytes Base64/decodeBase64 String.))
 
-(def redirect-uri (str "https://chat.leanpixel.com" #_(env :site-url) "/extension/oauth"))
+(def redirect-uri (str (env :site-url) "/extension/oauth"))
 (def webhook-uri (str (env :site-url) "/extension/webhook"))
 (def client-id (env :asana-client-id))
 (def client-secret (env :asana-client-secret))
-
 
 ;; Authentication flow
 (def token-url "https://app.asana.com/-/oauth_token")
