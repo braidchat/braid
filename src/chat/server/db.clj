@@ -99,6 +99,7 @@
   [ext]
   {:id (:extension/id ext)
    :group-id (get-in ext [:extension/group :group/id])
+   :threads (map :thread/id (:extension/watched-threads ext))
    :config (edn/read-string (:extension/config ext))
    :token (:extension/token ext)
    :refresh-token (:extension/refresh-token ext)})
@@ -108,7 +109,8 @@
    :extension/config
    :extension/token
    :extension/refresh-token
-   {:extension/group [:group/id]}])
+   {:extension/group [:group/id]}
+   {:extension/watched-threads [:thread/id]}])
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -656,6 +658,12 @@
   [extension-id config]
   @(d/transact *conn* [[:db/add [:extension/id extension-id]
                        :extension/config (pr-str config)]]))
+
+(defn extension-subscribe
+  [extension-id thread-id]
+  @(d/transact *conn* [[:db/add [:extension/id extension-id]
+                        :extension/watched-threads [:thread/id thread-id]]]))
+
 
 (defn group-extensions
   [group-id]

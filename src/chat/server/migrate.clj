@@ -34,6 +34,11 @@
         :db/cardinality :db.cardinality/one
         :db/id #db/id [:db.part/db]
         :db.install/_attribute :db.part/db}
+       {:db/ident :extension/watched-threads
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/many
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
        ])))
 
 (defn migrate-2016-01-14
