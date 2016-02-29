@@ -1,4 +1,5 @@
-(ns chat.server.extensions)
+(ns chat.server.extensions
+  (:require [environ.core :refer [env]]))
 
 (def redirect-uri (str (env :site-url) "/extension/oauth"))
 (def webhook-uri (str (env :site-url) "/extension/webhook"))

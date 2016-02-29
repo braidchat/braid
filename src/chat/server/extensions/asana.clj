@@ -99,7 +99,7 @@
                               "target" webhook-uri}})
     ))
 
-(defmulti handle-webhook
+(defmethod handle-webhook :asana
   [extension event-req]
   (if-let [secret (get-in event-req [:headers "X-Hook-Secret"])]
     {:status 200 :headers {"X-Hook-Secret" secret}}
