@@ -8,16 +8,8 @@
             [chat.server.db :as db]
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
             [chat.server.extensions :refer [redirect-uri webhook-uri
-                                            handle-thread-change handle-webhook]])
-  (:import org.apache.commons.codec.binary.Base64))
-
-(defn str->b64
-  [s]
-  (-> s .getBytes Base64/encodeBase64 String.))
-
-(defn b64->str
-  [b64]
-  (-> b64 .getBytes Base64/decodeBase64 String.))
+                                            handle-thread-change handle-webhook handle-oauth-token
+                                            str->b64 b64->str]]))
 
 (def client-id (env :asana-client-id))
 (def client-secret (env :asana-client-secret))
@@ -51,8 +43,9 @@
          "&response_type=" "code"
          "&state=" (url-encode info))))
 
-(defn exchange-token
-  [state code]
+; TODO: can probably factory pretty much all of this except the URL out
+(defmethod handle-oauth-token :asana
+  [_ state code]
   (let [{ext-id :extension-id sent-nonce :nonce} (-> state b64->str edn/read-string)]
     (when-let [stored-nonce (cache-get (str ext-id))]
       (cache-del! (str ext-id))
@@ -90,14 +83,12 @@
 
 ;; Webhooks
 (defn register-webhook
-  [extension-id]
-  (let [ext (db/with-conn (db/extension-by-id extension-id))
-        project-name (get-in ext [:config :project-name])]
+  [extension-id resource-id]
+  (let [ext (db/with-conn (db/extension-by-id extension-id))]
     (http/post (str api-url "/webhooks")
                {:oauth-token (:token ext)
-                :form-params {"resource" nil
-                              "target" webhook-uri}})
-    ))
+                :form-params {"resource" project-ident
+                              "target" (str webhook-uri "/" (:id ext))}})))
 
 (defmethod handle-webhook :asana
   [extension event-req]
@@ -132,3 +123,12 @@
 (defn workspace-projects
   [extension-id workspace-id]
   (fetch-asana-info extension-id (str "/workspaces/" workspace-id "/projects")))
+
+;; configuring
+(defn select-project
+  [extension-id project-id]
+  (db/with-conn
+    (let [ext (db/extension-by-id extension-id)]
+      (db/update-extension-config (ext :id) (assoc (ext :config)
+                                                   :project-id project-id))))
+  (register-webhook extension-id project-id))
