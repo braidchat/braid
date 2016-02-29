@@ -9,7 +9,7 @@
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
             [chat.server.extensions :refer [redirect-uri webhook-uri
                                             handle-thread-change handle-webhook handle-oauth-token
-                                            str->b64 b64->str]]))
+                                            extension-config str->b64 b64->str edn-response]]))
 
 (def client-id (env :asana-client-id))
 (def client-secret (env :asana-client-secret))
@@ -87,7 +87,7 @@
   (let [ext (db/with-conn (db/extension-by-id extension-id))]
     (http/post (str api-url "/webhooks")
                {:oauth-token (:token ext)
-                :form-params {"resource" project-ident
+                :form-params {"resource" resource-id
                               "target" (str webhook-uri "/" (:id ext))}})))
 
 (defmethod handle-webhook :asana
@@ -105,30 +105,53 @@
 
 ;; Fetching information
 (defn fetch-asana-info
-  [extension-id path]
-  (let [ext (db/with-conn (db/extension-by-id extension-id))]
-    (let [resp @(http/get (str api-url path)
-                  {:oauth-token (ext :token)})]
+  [ext-id path]
+  (let [ext (db/with-conn (db/extension-by-id ext-id))
+        resp @(http/get (str api-url path)
+                        {:oauth-token (ext :token)})]
       (if (= 200 (:status resp))
         (-> resp :body json/read-str)
         (do (timbre/warnf "token expired %s" (:body resp))
-            (when (refresh-token ext)
-              (fetch-asana-info extension-id path)))))))
+            (if (refresh-token ext)
+              (fetch-asana-info ext-id path)
+              (timbre/warnf "Failed to refresh token"))))))
 
 (defn available-workspaces
-  [extension-id]
-  (-> (fetch-asana-info extension-id "/users/me")
+  [ext-id]
+  (-> (fetch-asana-info ext-id "/users/me")
       (get-in ["data" "workspaces"])))
 
 (defn workspace-projects
-  [extension-id workspace-id]
-  (fetch-asana-info extension-id (str "/workspaces/" workspace-id "/projects")))
+  [ext-id workspace-id]
+  (-> (fetch-asana-info ext-id (str "/workspaces/" workspace-id "/projects"))
+      (get "data")))
 
 ;; configuring
+(defn projects
+  [ext]
+  (if (ext :token)
+    (edn-response
+      {:ok true
+       :workspaces
+       (doall
+         (map (fn [{:strs [id name]}]
+                {:id id
+                 :name name
+                 :projects (workspace-projects (ext :id) id)})
+              (available-workspaces (ext :id))))})
+    (edn-response {:error "no asana token"} 400)))
+
 (defn select-project
-  [extension-id project-id]
+  [ext project-id]
   (db/with-conn
-    (let [ext (db/extension-by-id extension-id)]
-      (db/update-extension-config (ext :id) (assoc (ext :config)
-                                                   :project-id project-id))))
-  (register-webhook extension-id project-id))
+    (db/update-extension-config (ext :id) (assoc (ext :config)
+                                                 :project-id project-id)))
+  (register-webhook (ext :id) project-id)
+  (edn-response {:ok true}))
+
+(defmethod extension-config :asana
+  [ext [method args]]
+  (case method
+    :select-project (select-project ext (first args))
+    :get-projects (projects ext)))
+

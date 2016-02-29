@@ -3,9 +3,11 @@
   (:require [org.httpkit.server :refer [run-server]]
             [compojure.route :refer [resources]]
             [compojure.core :refer [GET POST routes defroutes context]]
-            [ring.middleware.defaults :refer [wrap-defaults api-defaults secure-site-defaults site-defaults]]
+            [ring.middleware.defaults :refer [wrap-defaults api-defaults
+                                              secure-site-defaults site-defaults]]
             [ring.middleware.edn :refer [wrap-edn-params]]
             [clojure.string :as string]
+            [clojure.edn :as edn]
             [clojure.tools.nrepl.server :as nrepl]
             [chat.server.sync :as sync :refer [sync-routes]]
             [environ.core :refer [env]]
@@ -13,7 +15,10 @@
             [chat.server.db :as db]
             [chat.server.invite :as invites]
             [chat.server.digest :as digest]
-            [chat.server.s3 :as s3]))
+            [chat.server.s3 :as s3]
+            [chat.server.extensions :as ext :refer [b64->str]]
+            ; just requiring to register multimethods
+            chat.server.extensions.asana))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8" }
@@ -71,6 +76,23 @@
   (POST "/logout" req
     {:status 200 :session nil}))
 
+(defroutes extension-routes
+  (context "/extension" _
+    (GET "/oauth" [state code]
+      (let [{ext-id :extension-id} (-> state b64->str edn/read-string)
+            ext (db/with-conn (db/extension-by-id ext-id))]
+        (if ext
+          (ext/handle-oauth-token ext state code)
+          {:status 400 :body "No such extension"})))
+    (POST "/webhook/:ext" [ext :as req]
+      (if-let [ext (db/with-conn (db/extension-by-id ext))]
+        (ext/handle-webhook ext req)
+        {:status 400 :body "No such extension"}))
+    (POST "/config" [extension-id data]
+      (if-let [ext (db/with-conn (db/extension-by-id extension-id))]
+        (ext/extension-config ext data)
+        {:status 400 :body "No such extension"}))))
+
 (defroutes api-routes
   (GET "/s3-policy" req
     (if (some? (db/with-conn (db/user-by-id (get-in req [:session :user-id]))))
@@ -116,7 +138,8 @@
       (wrap-defaults
         (routes
           api-routes
-          sync-routes)
+          sync-routes
+          extension-routes)
         (-> api-defaults
             (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
             (assoc-in [:session :store] session-store)))

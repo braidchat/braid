@@ -10,9 +10,15 @@
   [b64]
   (-> b64 .getBytes Base64/decodeBase64 String.))
 
-(def redirect-uri (str (env :site-url) "/extension/oauth"))
+(defn edn-response [clj-body & [status]]
+  {:headers {"Content-Type" "application/edn; charset=utf-8" }
+   :body (pr-str clj-body)
+   :status (or status 200)})
+
+(def redirect-uri (str "https://chat.leanpixel.com" #_(env :site-url) "/extension/oauth"))
 (def webhook-uri (str (env :site-url) "/extension/webhook"))
 
 (defmulti handle-oauth-token (fn [ext state code] (get-in ext [:config :type])))
 (defmulti handle-thread-change (fn [ext thread-id] (get-in ext [:config :type])))
 (defmulti handle-webhook (fn [ext event-req] (get-in ext [:config :type])))
+(defmulti extension-config (fn [ext data] (get-in ext [:config :type])))
