@@ -664,6 +664,13 @@
   @(d/transact *conn* [[:db/add [:extension/id extension-id]
                         :extension/watched-threads [:thread/id thread-id]]]))
 
+(defn watched-by
+  "Get the extensions that are watching the given thread"
+  [thread-id]
+  (->> (d/pull (d/db *conn*) [{:extension/_watched-threads extension-pull-pattern}]
+          [:thread/id thread-id])
+       :extension/_watched-threads
+       (map db->extension)))
 
 (defn group-extensions
   [group-id]
