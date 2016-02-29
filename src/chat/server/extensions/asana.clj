@@ -6,7 +6,9 @@
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [chat.server.db :as db]
-            [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]])
+            [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
+            [chat.server.extensions :refer [redirect-uri webhook-uri
+                                            handle-thread-change handle-webhook]])
   (:import org.apache.commons.codec.binary.Base64))
 
 (defn str->b64
@@ -17,10 +19,19 @@
   [b64]
   (-> b64 .getBytes Base64/decodeBase64 String.))
 
-(def redirect-uri (str (env :site-url) "/extension/oauth"))
-(def webhook-uri (str (env :site-url) "/extension/webhook"))
 (def client-id (env :asana-client-id))
 (def client-secret (env :asana-client-secret))
+
+;; Setup
+
+(defn create-asana-extension
+  [{:keys [id group-id tag-id]}]
+  (db/with-conn
+    (db/create-extension! {:id id
+                           :group-id group-id
+                           :config {:type :asana
+                                    :tag-id tag-id}})))
+
 
 ;; Authentication flow
 (def token-url "https://app.asana.com/-/oauth_token")
@@ -88,12 +99,18 @@
                               "target" webhook-uri}})
     ))
 
-(defn handle-webhook
-  [extension-id event-req]
+(defmulti handle-webhook
+  [extension event-req]
   (if-let [secret (get-in event-req [:headers "X-Hook-Secret"])]
     {:status 200 :headers {"X-Hook-Secret" secret}}
     (do (println "webhook" event-req)
         {:status 200})))
+
+;; watched thread notification
+
+(defmethod handle-thread-change :asana
+  [extension thread-id]
+  (println "ext" extension "Thread changed" thread-id))
 
 ;; Fetching information
 (defn fetch-asana-info
