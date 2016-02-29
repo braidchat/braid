@@ -38,7 +38,7 @@
       (db/extension-subscribe (ext :id) thread-2-id)
       (is (= #{thread-1-id thread-2-id} (set (:threads (db/extension-by-id (:id ext)))))))
     (testing "can see which extensions are subscribed to a given thread"
-      (is (= [(db/extension-by-id (ext :id))] (db/watched-by thread-1-id)))
+      (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-1-id)))
       (let [ext2 (asana/create-asana-extension {:id (db/uuid)
                                                 :group-id (group :id)
                                                 :tag-id (tag-1 :id)})]
@@ -46,6 +46,6 @@
 
         (is (= [(db/extension-by-id (ext :id))
                 (db/extension-by-id (ext2 :id))]
-               (db/watched-by thread-1-id)))
+               (db/extensions-watching thread-1-id)))
 
-        (is (= [(db/extension-by-id (ext :id))] (db/watched-by thread-2-id)))))))
+        (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-2-id)))))))
