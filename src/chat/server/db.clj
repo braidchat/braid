@@ -171,9 +171,12 @@
                                      mentioned-tag-ids)
         ; subscribe and open thread for users mentioned
         txs-for-user-mentions (mapcat (fn [user-id]
-                                        [[:db/add [:thread/id thread-id] :thread/mentioned [:user/id user-id]]
-                                         [:db/add [:user/id user-id] :user/subscribed-thread  [:thread/id thread-id]]
-                                         [:db/add [:user/id user-id] :user/open-thread  [:thread/id thread-id]]])
+                                        [[:db/add [:thread/id thread-id]
+                                          :thread/mentioned [:user/id user-id]]
+                                         [:db/add [:user/id user-id]
+                                          :user/subscribed-thread  [:thread/id thread-id]]
+                                         [:db/add [:user/id user-id]
+                                          :user/open-thread  [:thread/id thread-id]]])
                                       mentioned-user-ids)
         ; open thread for users already subscribed to thread
         txs-for-tag-subscribers (map (fn [user-id]
@@ -660,8 +663,21 @@
   @(d/transact *conn* [[:db/add [:extension/id extension-id]
                        :extension/config (pr-str config)]]))
 
+(defn thread-visible-to-extension?
+  [thread-id ext-id]
+  (seq (d/q '[:find ?group
+              :in $ ?thread-id ?ext-id
+              :where
+              [?thread :thread/id ?thread-id]
+              [?ext :extension/id ?ext-id]
+              [?thread :thread/tag ?tag]
+              [?tag :tag/group ?group]
+              [?ext :extension/group ?group]]
+            (d/db *conn*) thread-id ext-id)))
+
 (defn extension-subscribe
   [extension-id thread-id]
+  (assert (thread-visible-to-extension? thread-id extension-id))
   @(d/transact *conn* [[:db/add [:extension/id extension-id]
                         :extension/watched-threads [:thread/id thread-id]]]))
 
