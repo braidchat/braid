@@ -159,14 +159,15 @@
 
   (let [; for users subscribed to mentioned tags, open and subscribe them to the thread
         txs-for-tag-mentions (mapcat (fn [tag-id]
-                                       (mapcat (fn [user-id]
-                                                 [[:db/add [:thread/id thread-id]
-                                                   :thread/tag [:tag/id tag-id]]
-                                                  [:db/add [:user/id user-id]
-                                                   :user/subscribed-thread [:thread/id thread-id]]
-                                                  [:db/add [:user/id user-id]
-                                                   :user/open-thread [:thread/id thread-id]]])
-                                               (get-users-subscribed-to-tag tag-id)))
+                                       (into
+                                         [[:db/add [:thread/id thread-id]
+                                           :thread/tag [:tag/id tag-id]]]
+                                         (mapcat (fn [user-id]
+                                                   [[:db/add [:user/id user-id]
+                                                     :user/subscribed-thread [:thread/id thread-id]]
+                                                    [:db/add [:user/id user-id]
+                                                     :user/open-thread [:thread/id thread-id]]])
+                                                 (get-users-subscribed-to-tag tag-id))))
                                      mentioned-tag-ids)
         ; subscribe and open thread for users mentioned
         txs-for-user-mentions (mapcat (fn [user-id]
