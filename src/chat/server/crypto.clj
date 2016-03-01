@@ -24,3 +24,7 @@
         (rest a)
         (rest b)
         (and match (= (first a) (first b)))))))
+
+(defn hmac-verify
+  [{:keys [secret mac data]}]
+  (constant-comp mac (hmac secret data)))
