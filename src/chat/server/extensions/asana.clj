@@ -85,11 +85,17 @@
 ;; Webhooks
 (defn register-webhook
   [extension-id resource-id]
-  (let [ext (db/with-conn (db/extension-by-id extension-id))]
-    (http/post (str api-url "/webhooks")
-               {:oauth-token (:token ext)
-                :form-params {"resource" resource-id
-                              "target" (str webhook-uri "/" (:id ext))}})))
+  (let [ext (db/with-conn (db/extension-by-id extension-id))
+        resp @(http/post (str api-url "/webhooks")
+                         {:oauth-token (:token ext)
+                          :form-params {"resource" resource-id
+                                        "target" (str webhook-uri "/" (:id ext))}})]
+    (if (<= 200 (:status resp) 299)
+      resp
+      (do (timbre/warnf "token expired")
+          (if (refresh-token extension-id)
+            (register-webhook extension-id resource-id)
+            (timbre/warnf "Failed to refresh token"))))))
 
 (defmethod handle-webhook :asana
   [extension event-req]
