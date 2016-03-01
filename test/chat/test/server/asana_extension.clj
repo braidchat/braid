@@ -65,7 +65,10 @@
                                            :group-id (group :id)
                                            :tag-id (tag-1 :id)})]
     (is (= 400 (:status (ext/handle-webhook ext {:headers {} :body ""}))))
-    (is (= 200 (:status (ext/handle-webhook ext {:headers {"x-hook-secret" "foobar"} :body ""}))))
+    (let [handshake-resp (ext/handle-webhook ext {:headers {"x-hook-secret" "foobar"}
+                                                  :body ""})]
+      (is (= 200 (:status handshake-resp)))
+      (is (= "foobar" (get-in handshake-resp [:headers "X-Hook-Secret"]))))
     (let [ext' (db/extension-by-id (ext :id))]
       (is (= "foobar" (get-in ext' [:config :webhook-secret])))
       (is (= 400 (:status (ext/handle-webhook ext' {:body "{\"foo\": \"bar\"}"
