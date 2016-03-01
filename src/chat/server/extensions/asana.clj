@@ -105,14 +105,15 @@
           (db/set-extension-config! (extension :id) :webhook-secret secret))
       {:status 200 :headers {"X-Hook-Secret" secret}})
     (if-let [signature (get-in event-req [:headers "x-hook-signature"])]
-      (let [body (str (:body event-req))]
+      (let [body (:body event-req)
+            body (if (string? body) body (slurp body))]
         (timbre/debugf "webhook %s" event-req)
           (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
                             :data body
                             :mac signature})
             (do
               (timbre/debugf "webhook signature okay")
-              (let [data (json/read-str (:body event-req))
+              (let [data (json/read-str body)
                     new-issues (->> (data "events")
                                     (filter (fn [e] (and (= "task" (e "type"))
                                                          (= "added" (e "action"))))))]
