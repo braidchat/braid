@@ -92,10 +92,15 @@
 
 (defmethod handle-webhook :asana
   [extension event-req]
-  (if-let [secret (get-in event-req [:headers "X-Hook-Secret"])]
-    {:status 200 :headers {"X-Hook-Secret" secret}}
-    (do (println "webhook" event-req)
-        {:status 200})))
+  (if-let [secret (get-in event-req [:headers "x-hook-secret"])]
+    (do (println "webhook handshake")
+        (db/with-conn
+          (db/set-extension-config! (extension :id) :webhook-secret secret))
+      {:status 200 :headers {"X-Hook-Secret" secret}})
+    (let [signature (get-in event-req [:headers "x-hook-signature"])]
+      (println "webhook" event-req)
+      ; verify signature
+      {:status 200})))
 
 ;; watched thread notification
 
