@@ -93,11 +93,11 @@
           (ext/handle-oauth-token ext state code)
           {:status 400 :body "No such extension"})))
     (POST "/webhook/:ext" [ext :as req]
-      (if-let [ext (db/with-conn (db/extension-by-id ext))]
+      (if-let [ext (db/with-conn (db/extension-by-id (java.util.UUID/fromString ext)))]
         (ext/handle-webhook ext req)
         {:status 400 :body "No such extension"}))
     (POST "/config" [extension-id data]
-      (if-let [ext (db/with-conn (db/extension-by-id extension-id))]
+      (if-let [ext (db/with-conn (db/extension-by-id (java.util.UUID/fromString extension-id)))]
         (ext/extension-config ext data)
         {:status 400 :body "No such extension"}))))
 
