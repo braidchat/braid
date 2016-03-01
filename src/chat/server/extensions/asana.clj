@@ -9,7 +9,8 @@
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
             [chat.server.extensions :refer [redirect-uri webhook-uri
                                             handle-thread-change handle-webhook handle-oauth-token
-                                            extension-config str->b64 b64->str edn-response]]))
+                                            extension-config str->b64 b64->str edn-response]]
+            [chat.server.crypto :refer [hmac-verify]]))
 
 (def client-id (env :asana-client-id))
 (def client-secret (env :asana-client-secret))
@@ -97,10 +98,15 @@
         (db/with-conn
           (db/set-extension-config! (extension :id) :webhook-secret secret))
       {:status 200 :headers {"X-Hook-Secret" secret}})
-    (let [signature (get-in event-req [:headers "x-hook-signature"])]
-      (println "webhook" event-req)
-      ; verify signature
-      {:status 200})))
+    (if-let [signature (get-in event-req [:headers "x-hook-signature"])]
+      (do (timbre/debugf "webhook %s" event-req)
+          (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
+                            :data (str (:body event-req))
+                            :mac signature})
+            (do (timbre/debugf "webhook signature okay") {:status 200})
+            {:status 400 :body "bad hmac"}))
+      (do (timbre/warnf "missing signature on webhook %s" event-req)
+          {:status 400 :body "missing signature"}))))
 
 ;; watched thread notification
 

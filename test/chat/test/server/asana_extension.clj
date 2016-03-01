@@ -1,7 +1,9 @@
 (ns chat.test.server.asana-extension
   (:require [clojure.test :refer :all]
             [chat.server.db :as db]
-            [chat.server.extensions.asana :as asana]))
+            [chat.server.extensions :as ext]
+            [chat.server.extensions.asana :as asana]
+            [chat.server.crypto :as crypto]))
 
 (use-fixtures :each
               (fn [t]
@@ -49,3 +51,29 @@
                (db/extensions-watching thread-1-id)))
 
         (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-2-id)))))))
+
+(deftest webhook-events
+  (let [group (db/create-group! {:id (db/uuid) :name "g1"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
+        user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        thread-1-id (db/uuid)
+        thread-2-id (db/uuid)
+        ext (asana/create-asana-extension {:id (db/uuid)
+                                           :group-id (group :id)
+                                           :tag-id (tag-1 :id)})]
+    (is (= 400 (:status (ext/handle-webhook ext {:headers {} :body ""}))))
+    (is (= 200 (:status (ext/handle-webhook ext {:headers {"x-hook-secret" "foobar"} :body ""}))))
+    (let [ext' (db/extension-by-id (ext :id))]
+      (is (= "foobar" (get-in ext' [:config :webhook-secret])))
+      (is (= 400 (:status (ext/handle-webhook ext' {:body "{\"foo\": \"bar\"}"
+                                                    :headers {}}))))
+      (let [msg "{\"foo\": \"bar\"}"]
+        (is (= 200
+               (:status
+                 (ext/handle-webhook
+                   ext'
+                   {:body msg
+                    :headers {"x-hook-signature" (crypto/hmac "foobar" msg)}}))))))))
