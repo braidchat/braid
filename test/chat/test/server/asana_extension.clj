@@ -73,6 +73,8 @@
       (is (= "foobar" (get-in ext' [:config :webhook-secret])))
       (is (= 400 (:status (ext/handle-webhook ext' {:body "{\"foo\": \"bar\"}"
                                                     :headers {}}))))
+      (is (= 400 (:status (ext/handle-webhook ext' {:body "{\"foo\": \"bar\"}"
+                                                    :headers {"x-hook-signature" "zzzzz"}}))))
       (let [msg "{\"foo\": \"bar\"}"]
         (is (= 200
                (:status

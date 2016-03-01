@@ -103,7 +103,9 @@
           (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
                             :data (str (:body event-req))
                             :mac signature})
-            (do (timbre/debugf "webhook signature okay") {:status 200})
+            (let [data (json/read-str (:body event-req))]
+              (timbre/debugf "webhook signature okay")
+              {:status 200})
             {:status 400 :body "bad hmac"}))
       (do (timbre/warnf "missing signature on webhook %s" event-req)
           {:status 400 :body "missing signature"}))))
