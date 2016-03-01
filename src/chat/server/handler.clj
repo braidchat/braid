@@ -3,9 +3,11 @@
   (:require [org.httpkit.server :refer [run-server]]
             [compojure.route :refer [resources]]
             [compojure.core :refer [GET POST routes defroutes context]]
-            [ring.middleware.defaults :refer [wrap-defaults api-defaults secure-site-defaults site-defaults]]
+            [ring.middleware.defaults :refer [wrap-defaults api-defaults
+                                              secure-site-defaults site-defaults]]
             [ring.middleware.edn :refer [wrap-edn-params]]
             [clojure.string :as string]
+            [clojure.edn :as edn]
             [clojure.tools.nrepl.server :as nrepl]
             [chat.server.sync :as sync :refer [sync-routes]]
             [environ.core :refer [env]]
@@ -13,7 +15,10 @@
             [chat.server.db :as db]
             [chat.server.invite :as invites]
             [chat.server.digest :as digest]
-            [chat.server.s3 :as s3]))
+            [chat.server.s3 :as s3]
+            [chat.server.extensions :as ext :refer [b64->str]]
+            ; just requiring to register multimethods
+            chat.server.extensions.asana))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8" }
@@ -41,13 +46,21 @@
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
         (string/blank? password) (assoc fail :body "Must provide a password")
-        (not (invites/verify-hmac hmac (str now token invite_id email))) (assoc fail :body "Invalid HMAC")
+
+        (not (invites/verify-hmac hmac (str now token invite_id email)))
+        (assoc fail :body "Invalid HMAC")
+
         (string/blank? invite_id) (assoc fail :body "Invalid invitation ID")
-        (not (valid-nickname? nickname)) (assoc fail :body "Nickname must be 1-30 characters without whitespace")
-        (db/with-conn (db/nickname-taken? nickname)) (assoc fail :body "nickname taken")
+
+        (not (valid-nickname? nickname))
+        (assoc fail :body "Nickname must be 1-30 characters without whitespace")
+
+        (db/with-conn (db/nickname-taken? nickname))
+        (assoc fail :body "nickname taken")
 
         ; TODO: be smarter about this
-        (not (#{"image/jpeg" "image/png"} (:content-type avatar))) (assoc fail :body "Invalid image")
+        (not (#{"image/jpeg" "image/png"} (:content-type avatar)))
+        (assoc fail :body "Invalid image")
 
         :else
         (let [invite (db/with-conn (db/get-invite (java.util.UUID/fromString invite_id)))]
@@ -70,6 +83,23 @@
 
   (POST "/logout" req
     {:status 200 :session nil}))
+
+(defroutes extension-routes
+  (context "/extension" _
+    (GET "/oauth" [state code]
+      (let [{ext-id :extension-id} (-> state b64->str edn/read-string)
+            ext (db/with-conn (db/extension-by-id ext-id))]
+        (if ext
+          (ext/handle-oauth-token ext state code)
+          {:status 400 :body "No such extension"})))
+    (POST "/webhook/:ext" [ext :as req]
+      (if-let [ext (db/with-conn (db/extension-by-id (java.util.UUID/fromString ext)))]
+        (ext/handle-webhook ext req)
+        {:status 400 :body "No such extension"}))
+    (POST "/config" [extension-id data]
+      (if-let [ext (db/with-conn (db/extension-by-id (java.util.UUID/fromString extension-id)))]
+        (ext/extension-config ext data)
+        {:status 400 :body "No such extension"}))))
 
 (defroutes api-routes
   (GET "/s3-policy" req
@@ -116,7 +146,8 @@
       (wrap-defaults
         (routes
           api-routes
-          sync-routes)
+          sync-routes
+          extension-routes)
         (-> api-defaults
             (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
             (assoc-in [:session :store] session-store)))
