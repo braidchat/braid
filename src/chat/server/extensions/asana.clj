@@ -85,11 +85,17 @@
 ;; Webhooks
 (defn register-webhook
   [extension-id resource-id]
-  (let [ext (db/with-conn (db/extension-by-id extension-id))]
-    (http/post (str api-url "/webhooks")
-               {:oauth-token (:token ext)
-                :form-params {"resource" resource-id
-                              "target" (str webhook-uri "/" (:id ext))}})))
+  (let [ext (db/with-conn (db/extension-by-id extension-id))
+        resp @(http/post (str api-url "/webhooks")
+                         {:oauth-token (:token ext)
+                          :form-params {"resource" resource-id
+                                        "target" (str webhook-uri "/" (:id ext))}})]
+    (if (<= 200 (:status resp) 299)
+      resp
+      (do (timbre/warnf "token expired")
+          (if (refresh-token extension-id)
+            (register-webhook extension-id resource-id)
+            (timbre/warnf "Failed to refresh token"))))))
 
 (defmethod handle-webhook :asana
   [extension event-req]
@@ -99,14 +105,15 @@
           (db/set-extension-config! (extension :id) :webhook-secret secret))
       {:status 200 :headers {"X-Hook-Secret" secret}})
     (if-let [signature (get-in event-req [:headers "x-hook-signature"])]
-      (let [body (str (:body event-req))]
+      (let [body (:body event-req)
+            body (if (string? body) body (slurp body))]
         (timbre/debugf "webhook %s" event-req)
           (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
                             :data body
                             :mac signature})
             (do
               (timbre/debugf "webhook signature okay")
-              (let [data (json/read-str (:body event-req))
+              (let [data (json/read-str body)
                     new-issues (->> (data "events")
                                     (filter (fn [e] (and (= "task" (e "type"))
                                                          (= "added" (e "action"))))))]
