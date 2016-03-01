@@ -90,7 +90,10 @@
       (let [{ext-id :extension-id} (-> state b64->str edn/read-string)
             ext (db/with-conn (db/extension-by-id ext-id))]
         (if ext
-          (ext/handle-oauth-token ext state code)
+          (do (ext/handle-oauth-token ext state code)
+              {:status 302
+               :headers {"Location" (str "/" (ext :group-id))}
+               :body ""})
           {:status 400 :body "No such extension"})))
     (POST "/webhook/:ext" [ext :as req]
       (if-let [ext (db/with-conn (db/extension-by-id (java.util.UUID/fromString ext)))]
