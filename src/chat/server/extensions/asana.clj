@@ -99,9 +99,10 @@
           (db/set-extension-config! (extension :id) :webhook-secret secret))
       {:status 200 :headers {"X-Hook-Secret" secret}})
     (if-let [signature (get-in event-req [:headers "x-hook-signature"])]
-      (do (timbre/debugf "webhook %s" event-req)
+      (let [body (str (:body event-req))]
+        (timbre/debugf "webhook %s" event-req)
           (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
-                            :data (str (:body event-req))
+                            :data body
                             :mac signature})
             (do
               (timbre/debugf "webhook signature okay")
@@ -113,7 +114,8 @@
                 (timbre/debugf "event data: %s" data)
                 (timbre/debugf "new issues %s" new-issues)
                 {:status 200}))
-            {:status 400 :body "bad hmac"}))
+            (do (timbre/debugf "bad hmac")
+                {:status 400 :body "bad hmac"})))
       (do (timbre/warnf "missing signature on webhook %s" event-req)
           {:status 400 :body "missing signature"}))))
 
