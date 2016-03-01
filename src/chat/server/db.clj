@@ -658,10 +658,15 @@
                        [:db/add [:extension/id extension-id]
                         :extension/refresh-token refresh-token]]))
 
-(defn update-extension-config
+(defn update-extension-config!
   [extension-id config]
   @(d/transact *conn* [[:db/add [:extension/id extension-id]
                        :extension/config (pr-str config)]]))
+
+(defn set-extension-config!
+  [extension-id k v]
+  (let [ext (extension-by-id extension-id)]
+    (update-extension-config! extension-id (assoc (:config ext) k v))))
 
 (defn thread-visible-to-extension?
   [thread-id ext-id]

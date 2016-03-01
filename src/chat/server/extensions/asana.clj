@@ -144,8 +144,7 @@
 (defn select-project
   [ext project-id]
   (db/with-conn
-    (db/update-extension-config (ext :id) (assoc (ext :config)
-                                                 :project-id project-id)))
+    (db/set-extension-config! (ext :id) :project-id project-id))
   (register-webhook (ext :id) project-id)
   (edn-response {:ok true}))
 
