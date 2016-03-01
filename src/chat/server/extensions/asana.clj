@@ -103,9 +103,16 @@
           (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
                             :data (str (:body event-req))
                             :mac signature})
-            (let [data (json/read-str (:body event-req))]
+            (do
               (timbre/debugf "webhook signature okay")
-              {:status 200})
+              (let [data (json/read-str (:body event-req))
+                    new-issues (->> (data "events")
+                                    (filter (fn [e] (and (= "task" (e "type"))
+                                                         (= "added" (e "action"))))))]
+                ; TODO: start a new thread for the issue & watch the thread
+                (timbre/debugf "event data: %s" data)
+                (timbre/debugf "new issues %s" new-issues)
+                {:status 200}))
             {:status 400 :body "bad hmac"}))
       (do (timbre/warnf "missing signature on webhook %s" event-req)
           {:status 400 :body "missing signature"}))))
@@ -114,7 +121,9 @@
 
 (defmethod handle-thread-change :asana
   [extension thread-id]
-  (println "ext" extension "Thread changed" thread-id))
+  (timbre/debugf "Thread changed %s for extension %s" thread-id extension)
+  ; TODO: add comment to thread
+  )
 
 ;; Fetching information
 (defn fetch-asana-info
