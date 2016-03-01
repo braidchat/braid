@@ -114,7 +114,7 @@
                 (timbre/debugf "event data: %s" data)
                 (timbre/debugf "new issues %s" new-issues)
                 {:status 200}))
-            (do (timbre/debugf "bad hmac")
+            (do (timbre/debugf "bad hmac %s for %s" signature body)
                 {:status 400 :body "bad hmac"})))
       (do (timbre/warnf "missing signature on webhook %s" event-req)
           {:status 400 :body "missing signature"}))))
