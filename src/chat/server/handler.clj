@@ -46,13 +46,21 @@
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
         (string/blank? password) (assoc fail :body "Must provide a password")
-        (not (invites/verify-hmac hmac (str now token invite_id email))) (assoc fail :body "Invalid HMAC")
+
+        (not (invites/verify-hmac hmac (str now token invite_id email)))
+        (assoc fail :body "Invalid HMAC")
+
         (string/blank? invite_id) (assoc fail :body "Invalid invitation ID")
-        (not (valid-nickname? nickname)) (assoc fail :body "Nickname must be 1-30 characters without whitespace")
-        (db/with-conn (db/nickname-taken? nickname)) (assoc fail :body "nickname taken")
+
+        (not (valid-nickname? nickname))
+        (assoc fail :body "Nickname must be 1-30 characters without whitespace")
+
+        (db/with-conn (db/nickname-taken? nickname))
+        (assoc fail :body "nickname taken")
 
         ; TODO: be smarter about this
-        (not (#{"image/jpeg" "image/png"} (:content-type avatar))) (assoc fail :body "Invalid image")
+        (not (#{"image/jpeg" "image/png"} (:content-type avatar)))
+        (assoc fail :body "Invalid image")
 
         :else
         (let [invite (db/with-conn (db/get-invite (java.util.UUID/fromString invite_id)))]
