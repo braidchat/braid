@@ -6,10 +6,12 @@
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [chat.server.db :as db]
-            [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
+            [chat.server.cache :refer [cache-set! cache-get cache-del!
+                                       random-nonce]]
             [chat.server.extensions :refer [redirect-uri webhook-uri
-                                            handle-thread-change handle-webhook handle-oauth-token
-                                            extension-config str->b64 b64->str edn-response]]
+                                            handle-thread-change handle-webhook
+                                            handle-oauth-token extension-config
+                                            str->b64 b64->str edn-response]]
             [chat.server.crypto :refer [hmac-verify]]))
 
 (def client-id (env :asana-client-id))
@@ -58,7 +60,8 @@
                                      "redirect_uri" redirect-uri
                                      "code" code}})]
           (if (= 200 (:status resp))
-            (let [{:strs [access_token refresh_token]} (json/read-str (:body resp))]
+            (let [{:strs [access_token refresh_token]} (-> resp :body
+                                                           json/read-str)]
               (db/with-conn
                 (db/save-extension-token! ext-id {:access-token access_token
                                                   :refresh-token refresh_token})))
@@ -76,9 +79,10 @@
       (if (= 200 (:status resp))
         (let [{:strs [access_token refresh_token]} (json/read-str (:body resp))]
           (db/with-conn
-            (db/save-extension-token! (ext :id) {:access-token access_token
-                                                 :refresh-token (or refresh_token
-                                                                    refresh-tok)})))
+            (db/save-extension-token! (ext :id)
+                                      {:access-token access_token
+                                       :refresh-token (or refresh_token
+                                                          refresh-tok)})))
         (do (timbre/warnf "Bad response when exchanging token %s" (:body resp))
             nil)))))
 
