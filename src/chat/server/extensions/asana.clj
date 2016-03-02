@@ -95,10 +95,19 @@
                 :form-params {"resource" resource-id
                               "target" (str webhook-uri "/" (:id ext))}})))
 
+(defn update-threads-from-event
+  [extension event]
+  ; TODO: start a new thread for the issue & watch the thread
+  ; TODO: handle changed issue to add a new message to the thread
+  (let [new-issues (->> (data "events")
+                        (filter #(and (= "task" (% "type"))
+                                   (= "added" (% "action")))))]
+    ))
+
 (defmethod handle-webhook :asana
   [extension event-req]
   (if-let [secret (get-in event-req [:headers "x-hook-secret"])]
-    (do (timbre/debugf "webhook handshake")
+    (do (timbre/debugf "webhook handshake for %s" (extension :id))
         (db/with-conn
           (db/set-extension-config! (extension :id) :webhook-secret secret))
       {:status 200 :headers {"X-Hook-Secret" secret}})
@@ -110,16 +119,11 @@
         (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
                           :data body
                           :mac signature})
-          (do
-            (timbre/debugf "webhook signature okay")
-            (let [data (json/read-str (:body event-req))
-                  new-issues (->> (data "events")
-                                  (filter #(and (= "task" (% "type"))
-                                             (= "added" (% "action")))))]
-              ; TODO: start a new thread for the issue & watch the thread
-              (timbre/debugf "event data: %s" data)
-              (timbre/debugf "new issues %s" new-issues)
-              {:status 200}))
+          (let [data (json/read-str (:body event-req))]
+            (timbre/debugf "event data: %s" data)
+            (timbre/debugf "new issues %s" new-issues)
+            (update-threads-from-event data)
+            {:status 200})
           (do (timbre/debugf "bad hmac")
               {:status 400 :body "bad hmac"})))
       (do (timbre/warnf "missing signature on webhook %s" event-req)
