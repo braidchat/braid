@@ -72,10 +72,11 @@
                        ext
                        {:body msg
                         :headers {"x-hook-signature" (crypto/hmac "foobar" msg)}}))))
-    (let [handshake-resp (ext/handle-webhook ext {:headers {"x-hook-secret" "foobar"}
-                                                  :body ""})]
-      (is (= 200 (:status handshake-resp)))
-      (is (= "foobar" (get-in handshake-resp [:headers "X-Hook-Secret"])))))
+      (let [handshake-resp (ext/handle-webhook ext
+                                               {:headers {"x-hook-secret" "foobar"}
+                                                :body ""})]
+        (is (= 200 (:status handshake-resp)))
+        (is (= "foobar" (get-in handshake-resp [:headers "X-Hook-Secret"])))))
 
     (testing "can use the secret to compute signature"
       (let [ext' (db/extension-by-id (ext :id))]
