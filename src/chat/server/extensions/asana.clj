@@ -97,11 +97,17 @@
 
 (defn update-threads-from-event
   [extension event]
-  ; TODO: start a new thread for the issue & watch the thread
-  ; TODO: handle changed issue to add a new message to the thread
-  (let [new-issues (->> (data "events")
-                        (filter #(and (= "task" (% "type"))
-                                   (= "added" (% "action")))))]
+  (let [new-issues (into []
+                         (filter #(and (= "task" (% "type"))
+                                    (= "added" (% "action"))))
+                         (data "events"))
+        changed-issues (into []
+                             (filter #(and (= "task" (% "type"))
+                                        (= "changed" (% "action"))))
+                             (data "events"))]
+    ; TODO: start a new thread for the issue & watch the thread
+    ; TODO: handle changed issue to add a new message to the thread
+
     ))
 
 (defmethod handle-webhook :asana
