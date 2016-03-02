@@ -98,7 +98,7 @@
 (defmethod handle-webhook :asana
   [extension event-req]
   (if-let [secret (get-in event-req [:headers "x-hook-secret"])]
-    (do (println "webhook handshake")
+    (do (timbre/debugf "webhook handshake")
         (db/with-conn
           (db/set-extension-config! (extension :id) :webhook-secret secret))
       {:status 200 :headers {"X-Hook-Secret" secret}})
