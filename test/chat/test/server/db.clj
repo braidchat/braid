@@ -337,3 +337,36 @@
       (is (= #{(tag-1 :id)}
              (set (:tag-ids (first u2-threads))))))))
 
+(deftest extension-permissions
+  (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
+        group-2 (db/create-group! {:id (db/uuid) :name "g2"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-2 :id)})
+        user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        thread-1-id (db/uuid)
+        thread-2-id (db/uuid)
+        ext-1 (db/create-extension! {:id (db/uuid)
+                                     :group-id (group-1 :id)
+                                     :config {:type :asana :tag-id (tag-1 :id)}})
+        ext-2 (db/create-extension! {:id (db/uuid)
+                                     :group-id (group-2 :id)
+                                     :config {:type :asana :tag-id (tag-2 :id)}})]
+
+    (testing "extensions can only see threads in the group they are in"
+      (is (not (db/thread-visible-to-extension? thread-1-id (ext-1 :id))))
+
+      (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
+                           :user-id (user-1 :id) :created-at (java.util.Date.)
+                           :mentioned-tag-ids [(tag-1 :id)]})
+      (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
+                           :user-id (user-1 :id) :created-at (java.util.Date.)
+                           :mentioned-tag-ids [(tag-2 :id)]})
+
+      (is (db/thread-visible-to-extension? thread-1-id (ext-1 :id)))
+      (is (not (db/thread-visible-to-extension? thread-2-id (ext-1 :id))))
+      (is (db/thread-visible-to-extension? thread-2-id (ext-2 :id)))
+
+      )))

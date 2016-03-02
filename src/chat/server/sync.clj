@@ -9,7 +9,10 @@
             [chat.server.invite :as invites]
             [chat.server.digest :as digest]
             [clojure.set :refer [difference intersection]]
-            [chat.shared.util :refer [valid-nickname? valid-tag-name?]]))
+            [chat.shared.util :refer [valid-nickname? valid-tag-name?]]
+            [chat.server.extensions :refer [handle-thread-change]]
+            ; just requiring to register multimethods
+            chat.server.extensions.asana))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -44,6 +47,13 @@
   ; Do nothing, just avoid unhandled event message
   )
 
+(defn notify-extensions
+  "Notify extensions about a thread changing if they're interested"
+  [thread-id]
+  (let [exts (db/with-conn (db/extensions-watching thread-id))]
+    (doseq [ext exts]
+      (handle-thread-change ext thread-id))))
+
 (defn broadcast-thread
   "broadcasts thread to all subscribed users, except those in ids-to-skip"
   [thread-id ids-to-skip]
@@ -59,7 +69,8 @@
       (let [user-tags (db/with-conn (db/get-user-visible-tag-ids uid))
             filtered-thread (update-in thread [:tag-ids] (partial filter user-tags))
             thread-with-last-opens (db/with-conn (db/thread-add-last-open-at filtered-thread uid))]
-        (chsk-send! uid [:chat/thread thread-with-last-opens])))))
+        (chsk-send! uid [:chat/thread thread-with-last-opens])))
+    (notify-extensions thread-id)))
 
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
