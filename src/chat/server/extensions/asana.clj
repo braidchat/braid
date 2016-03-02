@@ -105,21 +105,23 @@
     (if-let [signature (get-in event-req [:headers "x-hook-signature"])]
       (let [body (str (:body event-req))]
         (timbre/debugf "webhook %s" event-req)
-          (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
-                            :data body
-                            :mac signature})
-            (do
-              (timbre/debugf "webhook signature okay")
-              (let [data (json/read-str (:body event-req))
-                    new-issues (->> (data "events")
-                                    (filter (fn [e] (and (= "task" (e "type"))
-                                                         (= "added" (e "action"))))))]
-                ; TODO: start a new thread for the issue & watch the thread
-                (timbre/debugf "event data: %s" data)
-                (timbre/debugf "new issues %s" new-issues)
-                {:status 200}))
-            (do (timbre/debugf "bad hmac")
-                {:status 400 :body "bad hmac"})))
+        (assert (some? (get-in extension [:config :webhook-secret]))
+          "Extension must have a webhook secret before it can recieve data")
+        (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
+                          :data body
+                          :mac signature})
+          (do
+            (timbre/debugf "webhook signature okay")
+            (let [data (json/read-str (:body event-req))
+                  new-issues (->> (data "events")
+                                  (filter #(and (= "task" (% "type"))
+                                             (= "added" (% "action")))))]
+              ; TODO: start a new thread for the issue & watch the thread
+              (timbre/debugf "event data: %s" data)
+              (timbre/debugf "new issues %s" new-issues)
+              {:status 200}))
+          (do (timbre/debugf "bad hmac")
+              {:status 400 :body "bad hmac"})))
       (do (timbre/warnf "missing signature on webhook %s" event-req)
           {:status 400 :body "missing signature"}))))
 
