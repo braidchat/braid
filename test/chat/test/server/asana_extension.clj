@@ -64,21 +64,31 @@
         ext (asana/create-asana-extension {:id (db/uuid)
                                            :group-id (group :id)
                                            :tag-id (tag-1 :id)})]
-    (is (= 400 (:status (ext/handle-webhook ext {:headers {} :body ""}))))
-    (let [handshake-resp (ext/handle-webhook ext {:headers {"x-hook-secret" "foobar"}
-                                                  :body ""})]
-      (is (= 200 (:status handshake-resp)))
-      (is (= "foobar" (get-in handshake-resp [:headers "X-Hook-Secret"]))))
-    (let [ext' (db/extension-by-id (ext :id))]
-      (is (= "foobar" (get-in ext' [:config :webhook-secret])))
-      (is (= 400 (:status (ext/handle-webhook ext' {:body "{\"foo\": \"bar\"}"
-                                                    :headers {}}))))
-      (is (= 400 (:status (ext/handle-webhook ext' {:body "{\"foo\": \"bar\"}"
-                                                    :headers {"x-hook-signature" "zzzzz"}}))))
+    (testing "gets an x-hook-secret on first request"
+      (is (= 400 (:status (ext/handle-webhook ext {:headers {} :body ""}))))
       (let [msg "{\"foo\": \"bar\"}"]
-        (is (= 200
-               (:status
-                 (ext/handle-webhook
-                   ext'
-                   {:body msg
-                    :headers {"x-hook-signature" (crypto/hmac "foobar" msg)}}))))))))
+        (is (thrown? AssertionError
+                     (ext/handle-webhook
+                       ext
+                       {:body msg
+                        :headers {"x-hook-signature" (crypto/hmac "foobar" msg)}}))))
+      (let [handshake-resp (ext/handle-webhook ext
+                                               {:headers {"x-hook-secret" "foobar"}
+                                                :body ""})]
+        (is (= 200 (:status handshake-resp)))
+        (is (= "foobar" (get-in handshake-resp [:headers "X-Hook-Secret"])))))
+
+    (testing "can use the secret to compute signature"
+      (let [ext' (db/extension-by-id (ext :id))]
+        (is (= "foobar" (get-in ext' [:config :webhook-secret])))
+        (is (= 400 (:status (ext/handle-webhook ext' {:body "{\"foo\": \"bar\"}"
+                                                      :headers {}}))))
+        (is (= 400 (:status (ext/handle-webhook ext' {:body "{\"foo\": \"bar\"}"
+                                                      :headers {"x-hook-signature" "zzzzz"}}))))
+        (let [msg "{\"foo\": \"bar\"}"]
+          (is (= 200
+                 (:status
+                   (ext/handle-webhook
+                     ext'
+                     {:body msg
+                      :headers {"x-hook-signature" (crypto/hmac "foobar" msg)}})))))))))

@@ -6,10 +6,12 @@
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [chat.server.db :as db]
-            [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
+            [chat.server.cache :refer [cache-set! cache-get cache-del!
+                                       random-nonce]]
             [chat.server.extensions :refer [redirect-uri webhook-uri
-                                            handle-thread-change handle-webhook handle-oauth-token
-                                            extension-config str->b64 b64->str edn-response]]
+                                            handle-thread-change handle-webhook
+                                            handle-oauth-token extension-config
+                                            str->b64 b64->str edn-response]]
             [chat.server.crypto :refer [hmac-verify]]))
 
 (def client-id (env :asana-client-id))
@@ -58,7 +60,8 @@
                                      "redirect_uri" redirect-uri
                                      "code" code}})]
           (if (= 200 (:status resp))
-            (let [{:strs [access_token refresh_token]} (json/read-str (:body resp))]
+            (let [{:strs [access_token refresh_token]} (-> resp :body
+                                                           json/read-str)]
               (db/with-conn
                 (db/save-extension-token! ext-id {:access-token access_token
                                                   :refresh-token refresh_token})))
@@ -76,53 +79,59 @@
       (if (= 200 (:status resp))
         (let [{:strs [access_token refresh_token]} (json/read-str (:body resp))]
           (db/with-conn
-            (db/save-extension-token! (ext :id) {:access-token access_token
-                                                 :refresh-token (or refresh_token
-                                                                    refresh-tok)})))
+            (db/save-extension-token! (ext :id)
+                                      {:access-token access_token
+                                       :refresh-token (or refresh_token
+                                                          refresh-tok)})))
         (do (timbre/warnf "Bad response when exchanging token %s" (:body resp))
             nil)))))
 
 ;; Webhooks
 (defn register-webhook
   [extension-id resource-id]
-  (let [ext (db/with-conn (db/extension-by-id extension-id))
-        resp @(http/post (str api-url "/webhooks")
-                         {:oauth-token (:token ext)
-                          :form-params {"resource" resource-id
-                                        "target" (str webhook-uri "/" (:id ext))}})]
-    (if (<= 200 (:status resp) 299)
-      resp
-      (do (timbre/warnf "token expired")
-          (if (refresh-token extension-id)
-            (register-webhook extension-id resource-id)
-            (timbre/warnf "Failed to refresh token"))))))
+  (let [ext (db/with-conn (db/extension-by-id extension-id))]
+    (http/post (str api-url "/webhooks")
+               {:oauth-token (:token ext)
+                :form-params {"resource" resource-id
+                              "target" (str webhook-uri "/" (:id ext))}})))
+
+(defn update-threads-from-event
+  [extension event]
+  (let [new-issues (into []
+                         (filter #(and (= "task" (% "type"))
+                                    (= "added" (% "action"))))
+                         (data "events"))
+        changed-issues (into []
+                             (filter #(and (= "task" (% "type"))
+                                        (= "changed" (% "action"))))
+                             (data "events"))]
+    ; TODO: start a new thread for the issue & watch the thread
+    ; TODO: handle changed issue to add a new message to the thread
+
+    ))
 
 (defmethod handle-webhook :asana
   [extension event-req]
   (if-let [secret (get-in event-req [:headers "x-hook-secret"])]
-    (do (println "webhook handshake")
+    (do (timbre/debugf "webhook handshake for %s" (extension :id))
         (db/with-conn
           (db/set-extension-config! (extension :id) :webhook-secret secret))
       {:status 200 :headers {"X-Hook-Secret" secret}})
     (if-let [signature (get-in event-req [:headers "x-hook-signature"])]
-      (let [body (:body event-req)
-            body (if (string? body) body (slurp body))]
+      (let [body (str (:body event-req))]
         (timbre/debugf "webhook %s" event-req)
-          (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
-                            :data body
-                            :mac signature})
-            (do
-              (timbre/debugf "webhook signature okay")
-              (let [data (json/read-str body)
-                    new-issues (->> (data "events")
-                                    (filter (fn [e] (and (= "task" (e "type"))
-                                                         (= "added" (e "action"))))))]
-                ; TODO: start a new thread for the issue & watch the thread
-                (timbre/debugf "event data: %s" data)
-                (timbre/debugf "new issues %s" new-issues)
-                {:status 200}))
-            (do (timbre/debugf "bad hmac %s for %s" signature body)
-                {:status 400 :body "bad hmac"})))
+        (assert (some? (get-in extension [:config :webhook-secret]))
+          "Extension must have a webhook secret before it can recieve data")
+        (if (hmac-verify {:secret (get-in extension [:config :webhook-secret])
+                          :data body
+                          :mac signature})
+          (let [data (json/read-str (:body event-req))]
+            (timbre/debugf "event data: %s" data)
+            (timbre/debugf "new issues %s" new-issues)
+            (update-threads-from-event data)
+            {:status 200})
+          (do (timbre/debugf "bad hmac")
+              {:status 400 :body "bad hmac"})))
       (do (timbre/warnf "missing signature on webhook %s" event-req)
           {:status 400 :body "missing signature"}))))
 
