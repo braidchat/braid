@@ -141,20 +141,20 @@
             task (fetch-asana-info (extension :id) (str "/tasks/" resource))
             issue->thread (get-in extension [:config :issue->thread] {})]
         (if-let [task-data (get task "data")]
-          (timbre/warnf "adding thread for task %s" task-data)
-          (db/with-conn
-            (db/create-message! {:thread-id thread-id
-                                 :id (db/uuid)
-                                 :content (format "New issues from %s:\n%s"
-                                                  (get-in task-data ["followers" 0])
-                                                  (get task-data "name"))
-                                 :user-id nil ; TODO: who is this?
-                                 :created-at (java.util.Date.)
-                                 :mentioned-user-ids ()
-                                 :mentioned-tag-ids ()})
-            (db/set-extension-config!
-              extension
-              :issue->thread (assoc issue->thread resource thread-id)))
+          (do (timbre/debugf "adding thread for task %s" task-data)
+              (db/with-conn
+                (db/create-message! {:thread-id thread-id
+                                     :id (db/uuid)
+                                     :content (format "New issues from %s:\n%s"
+                                                      (get-in task-data ["followers" 0])
+                                                      (get task-data "name"))
+                                     :user-id nil ; TODO: who is this?
+                                     :created-at (java.util.Date.)
+                                     :mentioned-user-ids ()
+                                     :mentioned-tag-ids ()})
+                (db/set-extension-config!
+                  extension
+                  :issue->thread (assoc issue->thread resource thread-id))))
           (timbre/warnf "No such task %s" resource))))
     ; TODO: handle changed issue to add a new message to the thread
     (doseq [{:strs [resource parent] :as story} new-comments]
