@@ -86,6 +86,34 @@
         (do (timbre/warnf "Bad response when exchanging token %s" (:body resp))
             nil)))))
 
+;; Fetching information
+(defn fetch-asana-info
+  [ext-id path]
+  (let [ext (db/with-conn (db/extension-by-id ext-id))
+        resp @(http/get (str api-url path)
+                        {:oauth-token (ext :token)})]
+      (condp = (:status resp)
+        200
+        (-> resp :body json/read-str)
+
+        401
+        (do (timbre/warnf "token expired %s %s" (:status resp) (:body resp))
+            (if (refresh-token ext)
+              (fetch-asana-info ext-id path)
+              (timbre/warnf "Failed to refresh token")))
+
+        (timbre/warnf "Asana api request failed: %s %s" (:status resp) (:body resp)))))
+
+(defn available-workspaces
+  [ext-id]
+  (-> (fetch-asana-info ext-id "/users/me")
+      (get-in ["data" "workspaces"])))
+
+(defn workspace-projects
+  [ext-id workspace-id]
+  (-> (fetch-asana-info ext-id (str "/workspaces/" workspace-id "/projects"))
+      (get "data")))
+
 ;; Webhooks
 (defn register-webhook
   [extension-id resource-id]
@@ -96,19 +124,43 @@
                               "target" (str webhook-uri "/" (:id ext))}})))
 
 (defn update-threads-from-event
-  [extension event]
-  (let [new-issues (into []
+  [extension data]
+  (let [extant-issues (set (keys (get-in extension [:config :issue->thread] {})))
+        new-issues (into []
                          (filter #(and (= "task" (% "type"))
-                                    (= "added" (% "action"))))
+                                       (= "added" (% "action"))))
                          (data "events"))
-        changed-issues (into []
-                             (filter #(and (= "task" (% "type"))
-                                        (= "changed" (% "action"))))
-                             (data "events"))]
+        new-comments (into []
+                           (filter #(and (= "task" (% "story"))
+                                         (= "changed" (% "added"))
+                                         (extant-issues (% "parent"))))
+                           (data "events"))]
     ; TODO: start a new thread for the issue & watch the thread
+    (doseq [{:strs [resource] :as issue} new-issues]
+      (let [thread-id (db/uuid)
+            task (fetch-asana-info (extension :id) (str "/tasks/" resource))
+            issue->thread (get-in extension [:config :issue->thread] {})]
+        (if-let [task-data (get task "data")]
+          (timbre/warnf "adding thread for task %s" task-data)
+          (db/with-conn
+            (db/create-message! {:thread-id thread-id
+                                 :id (db/uuid)
+                                 :content (format "New issues from %s:\n%s"
+                                                  (get-in task-data ["followers" 0])
+                                                  (get task-data "name"))
+                                 :user-id nil ; TODO: who is this?
+                                 :created-at (java.util.Date.)
+                                 :mentioned-user-ids ()
+                                 :mentioned-tag-ids ()})
+            (db/set-extension-config!
+              extension
+              :issue->thread (assoc issue->thread resource thread-id)))
+          (timbre/warnf "No such task %s" resource))))
     ; TODO: handle changed issue to add a new message to the thread
-
-    ))
+    (doseq [{:strs [resource parent] :as story} new-comments]
+      (if-let [thread-id (get-in extension [:config :issue->thread parent])]
+        (do (timbre/debugf "new comment %s" story))
+        (timbre/warnf "No existing thread for resource %s" resource)))))
 
 (defmethod handle-webhook :asana
   [extension event-req]
@@ -127,7 +179,6 @@
                           :mac signature})
           (let [data (json/read-str (:body event-req))]
             (timbre/debugf "event data: %s" data)
-            (timbre/debugf "new issues %s" new-issues)
             (update-threads-from-event data)
             {:status 200})
           (do (timbre/debugf "bad hmac")
@@ -142,29 +193,6 @@
   (timbre/debugf "Thread changed %s for extension %s" thread-id extension)
   ; TODO: add comment to thread
   )
-
-;; Fetching information
-(defn fetch-asana-info
-  [ext-id path]
-  (let [ext (db/with-conn (db/extension-by-id ext-id))
-        resp @(http/get (str api-url path)
-                        {:oauth-token (ext :token)})]
-      (if (= 200 (:status resp))
-        (-> resp :body json/read-str)
-        (do (timbre/warnf "token expired %s" (:body resp))
-            (if (refresh-token ext)
-              (fetch-asana-info ext-id path)
-              (timbre/warnf "Failed to refresh token"))))))
-
-(defn available-workspaces
-  [ext-id]
-  (-> (fetch-asana-info ext-id "/users/me")
-      (get-in ["data" "workspaces"])))
-
-(defn workspace-projects
-  [ext-id workspace-id]
-  (-> (fetch-asana-info ext-id (str "/workspaces/" workspace-id "/projects"))
-      (get "data")))
 
 ;; configuring
 (defn projects
