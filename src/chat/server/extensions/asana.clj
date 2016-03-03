@@ -20,12 +20,21 @@
 ;; Setup
 
 (defn create-asana-extension
-  [{:keys [id group-id tag-id]}]
+  [{:keys [id group-id user-name tag-id]}]
+  ; TODO: verify user name is valid
   (db/with-conn
-    (db/create-extension! {:id id
-                           :group-id group-id
-                           :config {:type :asana
-                                    :tag-id tag-id}})))
+    (let [user-id (db/uuid)]
+      ; TODO: need a reasonable way to create this extension-only user
+      (db/create-user! {:id user-id
+                        :email (random-nonce 50)
+                        :password (random-nonce 50)
+                        :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+                        :nickname user-name})
+      (db/create-extension! {:id id
+                             :group-id group-id
+                             :user-id user-id
+                             :config {:type :asana
+                                      :tag-id tag-id}}))))
 
 
 ;; Authentication flow
@@ -179,7 +188,7 @@
                           :mac signature})
           (let [data (json/read-str (:body event-req))]
             (timbre/debugf "event data: %s" data)
-            (update-threads-from-event data)
+            (update-threads-from-event extension data)
             {:status 200})
           (do (timbre/debugf "bad hmac")
               {:status 400 :body "bad hmac"})))

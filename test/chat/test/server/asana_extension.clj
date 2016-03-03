@@ -22,6 +22,7 @@
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)
         ext (asana/create-asana-extension {:id (db/uuid)
+                                           :user-name "asana bot"
                                            :group-id (group :id)
                                            :tag-id (tag-1 :id)})]
     (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
@@ -42,6 +43,7 @@
     (testing "can see which extensions are subscribed to a given thread"
       (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-1-id)))
       (let [ext2 (asana/create-asana-extension {:id (db/uuid)
+                                                :user-name "asana bot 2"
                                                 :group-id (group :id)
                                                 :tag-id (tag-1 :id)})]
         (db/extension-subscribe (ext2 :id) thread-1-id)
@@ -62,6 +64,7 @@
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)
         ext (asana/create-asana-extension {:id (db/uuid)
+                                           :user-name "asana bot"
                                            :group-id (group :id)
                                            :tag-id (tag-1 :id)})]
     (testing "gets an x-hook-secret on first request"

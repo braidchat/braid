@@ -196,4 +196,9 @@
  :db/cardinality :db.cardinality/many
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
+{:db/ident :extension/user
+ :db/valueType :db.type/ref
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
 ])
