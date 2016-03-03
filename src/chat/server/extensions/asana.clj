@@ -30,6 +30,7 @@
                         :password (random-nonce 50)
                         :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
                         :nickname user-name})
+      (db/user-add-to-group! user-id group-id)
       (db/create-extension! {:id id
                              :group-id group-id
                              :user-id user-id
@@ -157,7 +158,7 @@
                                      :content (format "New issues from %s:\n%s"
                                                       (get-in task-data ["followers" 0])
                                                       (get task-data "name"))
-                                     :user-id nil ; TODO: who is this?
+                                     :user-id (extension :user-id)
                                      :created-at (java.util.Date.)
                                      :mentioned-user-ids ()
                                      :mentioned-tag-ids ()})
