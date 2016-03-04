@@ -98,21 +98,25 @@
 
 ;; Fetching information
 (defn fetch-asana-info
-  [ext-id path]
-  (let [ext (db/with-conn (db/extension-by-id ext-id))
-        resp @(http/get (str api-url path)
-                        {:oauth-token (ext :token)})]
-      (condp = (:status resp)
-        200
-        (-> resp :body json/read-str)
+  ([ext-id path] (fetch-asana-info ext-id :get path {}))
+  ([ext-id method path] (fetch-asana-info ext-id method path {}))
+  ([ext-id method path opts]
+   (let [ext (db/with-conn (db/extension-by-id ext-id))
+         resp @(http/request (merge {:method method
+                                     :url (str api-url path)
+                                     :oauth-token (ext :token)}
+                                    opts))]
+     (condp = (:status resp)
+       200
+       (-> resp :body json/read-str)
 
-        401
-        (do (timbre/warnf "token expired %s %s" (:status resp) (:body resp))
-            (if (refresh-token ext)
-              (fetch-asana-info ext-id path)
-              (timbre/warnf "Failed to refresh token")))
+       401
+       (do (timbre/warnf "token expired %s %s" (:status resp) (:body resp))
+           (if (refresh-token ext)
+             (fetch-asana-info ext-id path)
+             (timbre/warnf "Failed to refresh token")))
 
-        (timbre/warnf "Asana api request failed: %s %s" (:status resp) (:body resp)))))
+       (timbre/warnf "Asana api request failed: %s %s" (:status resp) (:body resp))))))
 
 (defn available-workspaces
   [ext-id]
@@ -127,11 +131,9 @@
 ;; Webhooks
 (defn register-webhook
   [extension-id resource-id]
-  (let [ext (db/with-conn (db/extension-by-id extension-id))]
-    (http/post (str api-url "/webhooks")
-               {:oauth-token (:token ext)
-                :form-params {"resource" resource-id
-                              "target" (str webhook-uri "/" (:id ext))}})))
+  (fetch-asana-info extension-id :post "/webhooks"
+                    {:form-params {"resource" resource-id
+                                   "target" (str webhook-uri "/" (:id ext))}}))
 
 (defn update-threads-from-event
   [extension data]
