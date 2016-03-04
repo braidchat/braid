@@ -95,22 +95,24 @@
    :tag-ids (map :tag/id (thread :thread/tag))
    :mentioned-ids (map :user/id (thread :thread/mentioned))})
 
-(defn- db->extension
-  [ext]
-  {:id (:extension/id ext)
-   :group-id (get-in ext [:extension/group :group/id])
-   :threads (map :thread/id (:extension/watched-threads ext))
-   :config (edn/read-string (:extension/config ext))
-   :token (:extension/token ext)
-   :refresh-token (:extension/refresh-token ext)})
-
 (def extension-pull-pattern
   [:extension/id
    :extension/config
    :extension/token
    :extension/refresh-token
+   {:extension/user [:user/id]}
    {:extension/group [:group/id]}
    {:extension/watched-threads [:thread/id]}])
+
+(defn- db->extension
+  [ext]
+  {:id (:extension/id ext)
+   :group-id (get-in ext [:extension/group :group/id])
+   :user-id (get-in ext [:extension/user :user/id])
+   :threads (map :thread/id (:extension/watched-threads ext))
+   :config (edn/read-string (:extension/config ext))
+   :token (:extension/token ext)
+   :refresh-token (:extension/refresh-token ext)})
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -639,12 +641,17 @@
          (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))))
 
 (defn create-extension!
-  [{:keys [id group-id config]}]
+  [{:keys [id group-id user-id config]}]
   (-> {:extension/group [:group/id group-id]
+       :extension/user [:user/id user-id]
        :extension/id id
        :extension/config (pr-str config)}
       create-entity!
       db->extension))
+
+(defn retract-extension!
+  [extension-id]
+  @(d/transact *conn* [[:db.fn/retractEntity [:extension/id extension-id]]]))
 
 (defn extension-by-id
   [extension-id]

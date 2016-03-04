@@ -22,6 +22,7 @@
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)
         ext (asana/create-asana-extension {:id (db/uuid)
+                                           :user-name "asana bot"
                                            :group-id (group :id)
                                            :tag-id (tag-1 :id)})]
     (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
@@ -42,6 +43,7 @@
     (testing "can see which extensions are subscribed to a given thread"
       (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-1-id)))
       (let [ext2 (asana/create-asana-extension {:id (db/uuid)
+                                                :user-name "asana bot 2"
                                                 :group-id (group :id)
                                                 :tag-id (tag-1 :id)})]
         (db/extension-subscribe (ext2 :id) thread-1-id)
@@ -50,7 +52,10 @@
                 (db/extension-by-id (ext2 :id))]
                (db/extensions-watching thread-1-id)))
 
-        (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-2-id)))))))
+        (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-2-id)))))
+    (testing "can destroy extensions"
+      (asana/destroy-asana-extension (ext :id))
+      (is (empty? (db/extensions-watching thread-2-id))))))
 
 (deftest webhook-events
   (let [group (db/create-group! {:id (db/uuid) :name "g1"})
@@ -62,6 +67,7 @@
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)
         ext (asana/create-asana-extension {:id (db/uuid)
+                                           :user-name "asana bot"
                                            :group-id (group :id)
                                            :tag-id (tag-1 :id)})]
     (testing "gets an x-hook-secret on first request"
