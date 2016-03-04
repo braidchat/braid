@@ -8,7 +8,7 @@
   []
   (db/with-conn
     (d/transact db/*conn*
-                [{:db/ident :extension/group
+                [{:db/ident :extension/user
                  :db/valueType :db.type/ref
                  :db/cardinality :db.cardinality/one
                  :db/id #db/id [:db.part/db]
