@@ -132,7 +132,7 @@
               :name "Lean Pixel"}
         group (db/create-group! data)]
     (testing "can create a group"
-      (is (= group (assoc data :users nil))))
+      (is (= group data)))
     (testing "can add a user to the group"
       (let [user (db/create-user! {:id (db/uuid)
                                    :email "foo@bar.com"

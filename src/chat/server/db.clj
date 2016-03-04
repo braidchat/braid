@@ -47,8 +47,7 @@
 
 (defn- db->group [e]
   {:id (:group/id e)
-   :name (:group/name e)
-   :users (:group/user e)})
+   :name (:group/name e)})
 
 (defn- db->invitation [e]
   {:id (:invite/id e)
