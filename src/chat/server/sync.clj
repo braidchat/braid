@@ -97,25 +97,24 @@
     (every?
       true?
       (concat
-        [(or
-           (boolean (db/user-can-see-thread? user-id (?data :thread-id)))
+        [(or (boolean (db/user-can-see-thread? user-id (?data :thread-id)))
              (do (timbre/warnf "User %s attempted to add message to disallowed thread %s"
                                user-id (?data :thread-id))
-               false))]
+                 false))]
         (map
           (fn [tag-id]
             (or (boolean (db/user-in-tag-group? user-id tag-id))
-                            (do
-                              (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id
-                                            tag-id)
-                              false)))
+                (do
+                  (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id
+                                tag-id)
+                  false)))
           (?data :mentioned-tag-ids))
         (map
           (fn [mentioned-id]
             (or (boolean (db/user-visible-to-user? user-id mentioned-id))
                 (do (timbre/warnf "User %s attempted to mention disallowed user %s"
                                   user-id mentioned-id)
-                                false)))
+                    false)))
           (?data :mentioned-user-ids))))))
 
 
