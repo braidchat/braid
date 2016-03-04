@@ -93,30 +93,31 @@
 
 
 (defn- user-can-message? [user-id ?data]
-  (every? true?
-          [
-           (if (db/with-conn (db/user-can-see-thread? user-id (?data :thread-id)))
-             true
+  (db/with-conn
+    (every?
+      true?
+      (concat
+        [(or
+           (boolean (db/user-can-see-thread? user-id (?data :thread-id)))
              (do (timbre/warnf "User %s attempted to add message to disallowed thread %s"
                                user-id (?data :thread-id))
-                 false))
-           (every? true?
-                   (map (fn [tag-id]
-                          (if (db/with-conn (db/user-in-tag-group? user-id tag-id))
-                            true
+               false))]
+        (map
+          (fn [tag-id]
+            (or (boolean (db/user-in-tag-group? user-id tag-id))
                             (do
                               (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id
                                             tag-id)
                               false)))
-                        (?data :mentioned-tag-ids)))
-           (every? true?
-                   (map (fn [mentioned-id]
-                          (if (db/with-conn (db/user-visible-to-user? user-id mentioned-id))
-                            true
-                            (do (timbre/warnf "User %s attempted to mention disallowed user %s" user-id mentioned-id)
+          (?data :mentioned-tag-ids))
+        (map
+          (fn [mentioned-id]
+            (or (boolean (db/user-visible-to-user? user-id mentioned-id))
+                (do (timbre/warnf "User %s attempted to mention disallowed user %s"
+                                  user-id mentioned-id)
                                 false)))
-                        (?data :mentioned-user-ids)))
-           ]))
+          (?data :mentioned-user-ids))))))
+
 
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
