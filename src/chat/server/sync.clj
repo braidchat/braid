@@ -10,9 +10,7 @@
             [chat.server.digest :as digest]
             [clojure.set :refer [difference intersection]]
             [chat.shared.util :refer [valid-nickname? valid-tag-name?]]
-            [chat.server.extensions :refer [handle-thread-change]]
-            ; just requiring to register multimethods
-            chat.server.extensions.asana))
+            [chat.server.extensions :refer [handle-thread-change]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
