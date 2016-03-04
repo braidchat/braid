@@ -47,13 +47,6 @@
   ; Do nothing, just avoid unhandled event message
   )
 
-(defn notify-extensions
-  "Notify extensions about a thread changing if they're interested"
-  [thread-id]
-  (let [exts (db/with-conn (db/extensions-watching thread-id))]
-    (doseq [ext exts]
-      (handle-thread-change ext thread-id))))
-
 (defn broadcast-thread
   "broadcasts thread to all subscribed users, except those in ids-to-skip"
   [thread-id ids-to-skip]
@@ -69,8 +62,7 @@
       (let [user-tags (db/with-conn (db/get-user-visible-tag-ids uid))
             filtered-thread (update-in thread [:tag-ids] (partial filter user-tags))
             thread-with-last-opens (db/with-conn (db/thread-add-last-open-at filtered-thread uid))]
-        (chsk-send! uid [:chat/thread thread-with-last-opens])))
-    (notify-extensions thread-id)))
+        (chsk-send! uid [:chat/thread thread-with-last-opens])))))
 
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
@@ -117,15 +109,23 @@
                     false)))
           (?data :mentioned-user-ids))))))
 
+(defn notify-extensions
+  "Notify extensions about a thread changing if they're interested"
+  [msg]
+  (let [exts (db/with-conn (db/extensions-watching (msg :thread-id)))]
+    (doseq [ext exts]
+      (handle-thread-change ext msg))))
 
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (when (user-can-message? user-id ?data)
-      (do (db/with-conn (db/create-message! (-> ?data
-                                                (update-in [:content] #(apply str (take 5000 %)))
-                                                (assoc :created-at (java.util.Date.)))))
-        (broadcast-thread (?data :thread-id) [])))))
+      (db/with-conn (db/create-message!
+                      (-> ?data
+                          (update-in [:content] #(apply str (take 5000 %)))
+                          (assoc :created-at (java.util.Date.)))))
+      (broadcast-thread (?data :thread-id) [])
+      (notify-extensions ?data))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

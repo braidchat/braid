@@ -169,7 +169,7 @@
     (doseq [{:strs [resource] :as issue} new-issues]
       (let [thread-id (db/uuid)
             task (fetch-asana-info (extension :id) (str "/tasks/" resource))
-            issue->thread (get-in extension [:config :issue->thread] {})]
+            thread->issue (get-in extension [:config :thread->issue] {})]
         (if-let [task-data (get task "data")]
           (do (timbre/debugf "adding thread for task %s" task-data)
               (db/with-conn
@@ -184,14 +184,16 @@
                                      :mentioned-tag-ids ()})
                 (db/set-extension-config!
                   extension
-                  :issue->thread (assoc issue->thread resource thread-id)))
+                  :thread->issue (assoc thread->issue thread-id resource)))
               (sync/broadcast-thread thread-id ()))
           (timbre/warnf "No such task %s" resource))))
     ; TODO: handle changed issue to add a new message to the thread
-    (doseq [{:strs [resource parent] :as story} new-comments]
-      (if-let [thread-id (get-in extension [:config :issue->thread parent])]
-        (do (timbre/debugf "new comment %s" story))
-        (timbre/warnf "No existing thread for resource %s" resource)))))
+    (let [issue->thread (-> (get-in extension [:config :thread->issue] {})
+                            (into {} (map (fn [t i] [i t]))))]
+      (doseq [{:strs [resource parent] :as story} new-comments]
+        (if-let [thread-id (issue->thread parent)]
+          (do (timbre/debugf "new comment %s" story))
+          (timbre/warnf "No existing thread for resource %s" resource))))))
 
 (defmethod handle-webhook :asana
   [extension event-req]
@@ -219,11 +221,20 @@
 
 ;; watched thread notification
 
+(def comment-format-str
+  ; TODO: make this configurable?
+  "Comment via Braid Chat from %s:\n%s")
+
 (defmethod handle-thread-change :asana
-  [extension thread-id]
-  (timbre/debugf "Thread changed %s for extension %s" thread-id extension)
-  ; TODO: add comment to thread
-  )
+  [extension msg]
+  (timbre/debugf "New message %s for extension %s" msg extension)
+  (if-let [issue (get-in ext [:config :thread->issue (msg :thread-id)])]
+    (let [sender (db/with-conn (db/user-by-id (msg :user-id)))]
+      (fetch-asana-info
+        (extension :id) :post (str "/tasks/" issue "/stories")
+        {:form-params {"text" (format comment-format-str (sender :nickname)
+                                      (msg :content))}}))
+    (timbre/warnf "No such issue for thread %s" (msg :thread-id))))
 
 ;; configuring
 (defn projects
