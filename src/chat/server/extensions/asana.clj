@@ -28,6 +28,7 @@
       (db/create-user! {:id user-id
                         :email (random-nonce 50)
                         :password (random-nonce 50)
+                        ; TODO: ability to set avatar/reasonable default avatar
                         :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
                         :nickname user-name})
       (db/user-add-to-group! user-id group-id)
@@ -37,6 +38,15 @@
                              :config {:type :asana
                                       :tag-id tag-id}}))))
 
+(declare unregister-webhook)
+
+(defn destroy-asana-extension
+  [id]
+  (db/with-conn
+    (when-let [webhook-id (-> (db/extension-by-id id)
+                              (get-in [:config :webhook-id]))]
+      (unregister-webhook webhook-id))
+    (db/retract-extension! id)))
 
 ;; Authentication flow
 (def token-url "https://app.asana.com/-/oauth_token")
@@ -131,9 +141,12 @@
 ;; Webhooks
 (defn register-webhook
   [extension-id resource-id]
-  (fetch-asana-info extension-id :post "/webhooks"
-                    {:form-params {"resource" resource-id
-                                   "target" (str webhook-uri "/" extension-id)}}))
+  (let [{:strs [data]}
+        (fetch-asana-info extension-id :post "/webhooks"
+                          {:form-params {"resource" resource-id
+                                         "target" (str webhook-uri "/" extension-id)}})]
+    (db/with-conn
+      (db/set-extension-config! extension-id :webhook-id (data "id")))))
 
 (defn unregister-webhook
   [extension-id webhook-id]

@@ -649,6 +649,10 @@
       create-entity!
       db->extension))
 
+(defn retract-extension!
+  [extension-id]
+  @(d/transact *conn* [[:db.fn/retractEntity [:extension/id extension-id]]]))
+
 (defn extension-by-id
   [extension-id]
   (-> (d/pull (d/db *conn*) extension-pull-pattern [:extension/id extension-id])

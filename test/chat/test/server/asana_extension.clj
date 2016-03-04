@@ -52,7 +52,10 @@
                 (db/extension-by-id (ext2 :id))]
                (db/extensions-watching thread-1-id)))
 
-        (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-2-id)))))))
+        (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-2-id)))))
+    (testing "can destroy extensions"
+      (asana/destroy-asana-extension (ext :id))
+      (is (empty? (db/extensions-watching thread-2-id))))))
 
 (deftest webhook-events
   (let [group (db/create-group! {:id (db/uuid) :name "g1"})
