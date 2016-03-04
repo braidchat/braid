@@ -135,6 +135,10 @@
                     {:form-params {"resource" resource-id
                                    "target" (str webhook-uri "/" (:id ext))}}))
 
+(defn unregister-webhook
+  [extension-id webhook-id]
+  (fetch-asana-info extension-id :delete (str "/webhooks/" webhook-id)))
+
 (defn update-threads-from-event
   [extension data]
   (let [extant-issues (set (keys (get-in extension [:config :issue->thread] {})))
