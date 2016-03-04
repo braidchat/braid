@@ -133,7 +133,7 @@
   [extension-id resource-id]
   (fetch-asana-info extension-id :post "/webhooks"
                     {:form-params {"resource" resource-id
-                                   "target" (str webhook-uri "/" (:id ext))}}))
+                                   "target" (str webhook-uri "/" extension-id)}}))
 
 (defn unregister-webhook
   [extension-id webhook-id]
