@@ -12,7 +12,8 @@
                                             handle-thread-change handle-webhook
                                             handle-oauth-token extension-config
                                             str->b64 b64->str edn-response]]
-            [chat.server.crypto :refer [hmac-verify]]))
+            [chat.server.crypto :refer [hmac-verify]]
+            [chat.server.sync :as sync]))
 
 (def client-id (env :asana-client-id))
 (def client-secret (env :asana-client-secret))
@@ -183,7 +184,8 @@
                                      :mentioned-tag-ids ()})
                 (db/set-extension-config!
                   extension
-                  :issue->thread (assoc issue->thread resource thread-id))))
+                  :issue->thread (assoc issue->thread resource thread-id)))
+              (sync/broadcast-thread thread-id ()))
           (timbre/warnf "No such task %s" resource))))
     ; TODO: handle changed issue to add a new message to the thread
     (doseq [{:strs [resource parent] :as story} new-comments]
