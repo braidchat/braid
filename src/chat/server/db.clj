@@ -98,6 +98,7 @@
 (def extension-pull-pattern
   [:extension/id
    :extension/config
+   :extension/type
    :extension/token
    :extension/refresh-token
    {:extension/user [:user/id]}
@@ -107,6 +108,7 @@
 (defn- db->extension
   [ext]
   {:id (:extension/id ext)
+   :type (:extension/type ext)
    :group-id (get-in ext [:extension/group :group/id])
    :user-id (get-in ext [:extension/user :user/id])
    :threads (map :thread/id (:extension/watched-threads ext))
@@ -641,9 +643,10 @@
          (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))))
 
 (defn create-extension!
-  [{:keys [id group-id user-id config]}]
+  [{:keys [id type group-id user-id config]}]
   (-> {:extension/group [:group/id group-id]
        :extension/user [:user/id user-id]
+       :extension/type type
        :extension/id id
        :extension/config (pr-str config)}
       create-entity!

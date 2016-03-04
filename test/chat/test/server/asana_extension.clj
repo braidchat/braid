@@ -34,7 +34,8 @@
     (testing "created extension has expected attributes"
       (is (nil? (:token ext)))
       (is (= (group :id) (:group-id ext)))
-      (is (= :asana (get-in ext [:config :type]))))
+      (is (= :asana (ext :type)))
+      (is (= (tag-1 :id) (get-in ext [:config :tag-id]))))
     (testing "can subscribe to threads"
       (db/extension-subscribe (ext :id) thread-1-id)
       (is (= #{thread-1-id} (set (:threads (db/extension-by-id (:id ext))))))

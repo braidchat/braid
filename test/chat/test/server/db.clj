@@ -349,10 +349,12 @@
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)
         ext-1 (db/create-extension! {:id (db/uuid)
+                                     :type :asana
                                      :user-id (user-1 :id)
                                      :group-id (group-1 :id)
                                      :config {:type :asana :tag-id (tag-1 :id)}})
         ext-2 (db/create-extension! {:id (db/uuid)
+                                     :type :asana
                                      :user-id (user-1 :id)
                                      :group-id (group-2 :id)
                                      :config {:type :asana :tag-id (tag-2 :id)}})]

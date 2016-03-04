@@ -186,6 +186,11 @@
  :db/cardinality :db.cardinality/one
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
+{:db/ident :extension/type
+ :db/valueType :db.type/keyword
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
 {:db/ident :extension/config
  :db/valueType :db.type/string
  :db/cardinality :db.cardinality/one

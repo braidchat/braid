@@ -40,9 +40,9 @@
       (db/user-add-to-group! user-id group-id)
       (db/create-extension! {:id id
                              :group-id group-id
+                             :type :asana
                              :user-id user-id
-                             :config {:type :asana
-                                      :tag-id tag-id}}))))
+                             :config {:tag-id tag-id}}))))
 
 (declare unregister-webhook)
 
