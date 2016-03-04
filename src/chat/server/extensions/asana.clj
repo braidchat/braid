@@ -214,7 +214,7 @@
             (timbre/debugf "event data: %s" data)
             (update-threads-from-event extension data)
             {:status 200})
-          (do (timbre/debugf "bad hmac")
+          (do (timbre/debugf "bad hmac %s for %s" signature body)
               {:status 400 :body "bad hmac"})))
       (do (timbre/warnf "missing signature on webhook %s" event-req)
           {:status 400 :body "missing signature"}))))
@@ -228,7 +228,7 @@
 (defmethod handle-thread-change :asana
   [extension msg]
   (timbre/debugf "New message %s for extension %s" msg extension)
-  (if-let [issue (get-in ext [:config :thread->issue (msg :thread-id)])]
+  (if-let [issue (get-in extension [:config :thread->issue (msg :thread-id)])]
     (let [sender (db/with-conn (db/user-by-id (msg :user-id)))]
       (fetch-asana-info
         (extension :id) :post (str "/tasks/" issue "/stories")
