@@ -45,10 +45,6 @@
    :thread-id (:thread/id (:message/thread e))
    :created-at (:message/created-at e)})
 
-(defn- db->group [e]
-  {:id (:group/id e)
-   :name (:group/name e)})
-
 (defn- db->invitation [e]
   {:id (:invite/id e)
    :inviter-id (get-in e [:invite/from :user/id])
@@ -114,6 +110,17 @@
    :config (edn/read-string (:extension/config ext))
    :token (:extension/token ext)
    :refresh-token (:extension/refresh-token ext)})
+
+(def group-pull-pattern
+  [:group/id
+   :group/name
+   {:extension/_group [:extension/id :extension/type]}])
+
+(defn- db->group [e]
+  {:id (:group/id e)
+   :name (:group/name e)
+   :extensions (map (fn [{:keys [id type]}] {:id id :type type})
+                    (:extension/_group e))})
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -355,11 +362,16 @@
 
 (defn get-group
   [group-id]
-  (-> (d/pull (d/db *conn*) [:group/id :group/name] [:group/id group-id])
+  (-> (d/pull (d/db *conn*) group-pull-pattern [:group/id group-id])
       db->group))
 
 (defn get-groups-for-user [user-id]
-  (->> (d/q '[:find (pull ?g [:group/id :group/name])
+  ; XXX: duplicating group-pull-pattern here, because interpolating variables
+  ; into datomic :find queries doesn't work well
+  (->> (d/q '[:find (pull ?g [:group/id
+                              :group/name
+                              {:extension/_group
+                               [:extension/id :extension/type]}])
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]
