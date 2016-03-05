@@ -123,8 +123,9 @@
                                      :oauth-token (ext :token)}
                                     opts))]
      (condp = (:status resp)
-       200
-       (-> resp :body json/read-str)
+       200 (-> resp :body json/read-str)
+
+       201 (-> resp :body json/read-str)
 
        401
        (do (timbre/warnf "token expired %s %s" (:status resp) (:body resp))
