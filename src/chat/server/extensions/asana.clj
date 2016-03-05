@@ -51,7 +51,7 @@
   (db/with-conn
     (when-let [webhook-id (-> (db/extension-by-id id)
                               (get-in [:config :webhook-id]))]
-      (unregister-webhook webhook-id))
+      (unregister-webhook id webhook-id))
     (db/retract-extension! id)))
 
 ;; Authentication flow
