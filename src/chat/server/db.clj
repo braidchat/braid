@@ -119,7 +119,8 @@
 (defn- db->group [e]
   {:id (:group/id e)
    :name (:group/name e)
-   :extensions (map (fn [{:keys [id type]}] {:id id :type type})
+   :extensions (map (fn [x] {:id (:extension/id x)
+                             :type (:extension/type x)})
                     (:extension/_group e))})
 
 (defmacro with-conn

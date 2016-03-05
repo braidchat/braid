@@ -24,7 +24,8 @@
         ext (asana/create-asana-extension {:id (db/uuid)
                                            :user-name "asana bot"
                                            :group-id (group :id)
-                                           :tag-id (tag-1 :id)})]
+                                           :tag-id (tag-1 :id)})
+        ext2-id (db/uuid)]
     (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
                          :user-id (user-1 :id) :created-at (java.util.Date.)
                          :mentioned-tag-ids [(tag-1 :id)]})
@@ -43,7 +44,7 @@
       (is (= #{thread-1-id thread-2-id} (set (:threads (db/extension-by-id (:id ext)))))))
     (testing "can see which extensions are subscribed to a given thread"
       (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-1-id)))
-      (let [ext2 (asana/create-asana-extension {:id (db/uuid)
+      (let [ext2 (asana/create-asana-extension {:id ext2-id
                                                 :user-name "asana bot 2"
                                                 :group-id (group :id)
                                                 :tag-id (tag-1 :id)})]
@@ -54,6 +55,12 @@
                (db/extensions-watching thread-1-id)))
 
         (is (= [(db/extension-by-id (ext :id))] (db/extensions-watching thread-2-id)))))
+    (testing "can see the extensions a group has"
+      (db/user-add-to-group! (user-1 :id) (group :id))
+      (is (= (assoc group :extensions [{:id (ext :id) :type :asana}
+                                       {:id ext2-id :type :asana}])
+             (db/get-group (group :id))
+             (first (db/get-groups-for-user (user-1 :id))))))
     (testing "can destroy extensions"
       (asana/destroy-asana-extension (ext :id))
       (is (empty? (db/extensions-watching thread-2-id))))))
