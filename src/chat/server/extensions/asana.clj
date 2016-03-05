@@ -1,6 +1,7 @@
 (ns chat.server.extensions.asana
   (:require [clojure.edn :as edn]
             [clojure.data.json :as json]
+            [clojure.string :as string]
             [org.httpkit.client :as http :refer [url-encode]]
             [taoensso.carmine :as car]
             [taoensso.timbre :as timbre]
@@ -196,26 +197,30 @@
                 (db/extension-subscribe (extension :id) thread-id))
               (sync/broadcast-thread thread-id ()))
           (timbre/warnf "No such task %s" resource))))
-    ; TODO: handle changed issue to add a new message to the thread
+
     (timbre/debugf "%s new comments" (count new-comments))
     (let [issue->thread (->> (get-in extension [:config :thread->issue] {})
-                             (into {} (map (fn [[t i]] [i t]))))]
+                             (into {} (map (fn [[t i]] [i t]))))
+          comment-prefix (apply str (take-while (partial not= \%) comment-format-str))]
       (doseq [{:strs [resource parent] :as story} new-comments]
         (if-let [thread-id (issue->thread parent)]
           (let [story-data (-> (fetch-asana-info (extension :id) (str "/stories/" resource))
                                (get "data"))]
-            (timbre/debugf "new comment %s" story story-data)
-            (db/with-conn
-              (db/create-message! {:thread-id thread-id
-                                   :id (db/uuid)
-                                   :content (format issue-comment-format
-                                              (get-in story-data ["created_by" "name"])
-                                              (story-data "text"))
-                                   :user-id (extension :user-id)
-                                   :created-at (java.util.Date.)
-                                   :mentioned-user-ids ()
-                                   :mentioned-tag-ids ()}))
-            (sync/broadcast-thread thread-id ()))
+            (when-not (or (string/blank? (story-data "text"))
+                          (.startsWith (story-data "text") comment-prefix))
+              (timbre/debugf "new comment %s" story story-data)
+              ; TODO: check to make sure comment wasn't one we sent
+              (db/with-conn
+                (db/create-message! {:thread-id thread-id
+                                     :id (db/uuid)
+                                     :content (format issue-comment-format
+                                                (get-in story-data ["created_by" "name"])
+                                                (story-data "text"))
+                                     :user-id (extension :user-id)
+                                     :created-at (java.util.Date.)
+                                     :mentioned-user-ids ()
+                                     :mentioned-tag-ids ()}))
+              (sync/broadcast-thread thread-id ())))
           (timbre/warnf "No existing thread for resource %s" resource))))))
 
 (defmethod handle-webhook :asana
