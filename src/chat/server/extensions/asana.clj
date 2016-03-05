@@ -131,7 +131,7 @@
        401
        (do (timbre/warnf "token expired %s %s" (:status resp) (:body resp))
            (if (refresh-token ext)
-             (fetch-asana-info ext-id path)
+             (fetch-asana-info ext-id method path opts)
              (timbre/warnf "Failed to refresh token")))
 
        (timbre/warnf "Asana api request failed: %s %s" (:status resp) (:body resp))))))
