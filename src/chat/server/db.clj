@@ -45,11 +45,6 @@
    :thread-id (:thread/id (:message/thread e))
    :created-at (:message/created-at e)})
 
-(defn- db->group [e]
-  {:id (:group/id e)
-   :name (:group/name e)
-   :users (:group/user e)})
-
 (defn- db->invitation [e]
   {:id (:invite/id e)
    :inviter-id (get-in e [:invite/from :user/id])
@@ -95,22 +90,38 @@
    :tag-ids (map :tag/id (thread :thread/tag))
    :mentioned-ids (map :user/id (thread :thread/mentioned))})
 
+(def extension-pull-pattern
+  [:extension/id
+   :extension/config
+   :extension/type
+   :extension/token
+   :extension/refresh-token
+   {:extension/user [:user/id]}
+   {:extension/group [:group/id]}
+   {:extension/watched-threads [:thread/id]}])
+
 (defn- db->extension
   [ext]
   {:id (:extension/id ext)
+   :type (:extension/type ext)
    :group-id (get-in ext [:extension/group :group/id])
+   :user-id (get-in ext [:extension/user :user/id])
    :threads (map :thread/id (:extension/watched-threads ext))
    :config (edn/read-string (:extension/config ext))
    :token (:extension/token ext)
    :refresh-token (:extension/refresh-token ext)})
 
-(def extension-pull-pattern
-  [:extension/id
-   :extension/config
-   :extension/token
-   :extension/refresh-token
-   {:extension/group [:group/id]}
-   {:extension/watched-threads [:thread/id]}])
+(def group-pull-pattern
+  [:group/id
+   :group/name
+   {:extension/_group [:extension/id :extension/type]}])
+
+(defn- db->group [e]
+  {:id (:group/id e)
+   :name (:group/name e)
+   :extensions (map (fn [x] {:id (:extension/id x)
+                             :type (:extension/type x)})
+                    (:extension/_group e))})
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -352,11 +363,16 @@
 
 (defn get-group
   [group-id]
-  (-> (d/pull (d/db *conn*) [:group/id :group/name] [:group/id group-id])
+  (-> (d/pull (d/db *conn*) group-pull-pattern [:group/id group-id])
       db->group))
 
 (defn get-groups-for-user [user-id]
-  (->> (d/q '[:find (pull ?g [:group/id :group/name])
+  ; XXX: duplicating group-pull-pattern here, because interpolating variables
+  ; into datomic :find queries doesn't work well
+  (->> (d/q '[:find (pull ?g [:group/id
+                              :group/name
+                              {:extension/_group
+                               [:extension/id :extension/type]}])
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]
@@ -639,12 +655,18 @@
          (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))))
 
 (defn create-extension!
-  [{:keys [id group-id config]}]
+  [{:keys [id type group-id user-id config]}]
   (-> {:extension/group [:group/id group-id]
+       :extension/user [:user/id user-id]
+       :extension/type type
        :extension/id id
        :extension/config (pr-str config)}
       create-entity!
       db->extension))
+
+(defn retract-extension!
+  [extension-id]
+  @(d/transact *conn* [[:db.fn/retractEntity [:extension/id extension-id]]]))
 
 (defn extension-by-id
   [extension-id]
