@@ -267,10 +267,11 @@
                     :in $ ?email
                     :where
                     [?e :user/id ?id]
-                    [?e :user/email ?email]
+                    [?e :user/email ?stored-email]
+                    [(.toLowerCase ^String ?stored-email) ?email]
                     [?e :user/password-token ?password-token]]
                   (d/db *conn*)
-                  email)]
+                  (.toLowerCase email))]
          (when (and user-id (password/check password password-token))
            user-id))))
 
