@@ -275,6 +275,11 @@
          (when (and user-id (password/check password password-token))
            user-id))))
 
+(defn set-user-password!
+  [user-id password]
+  @(d/transact *conn* [[:db/add [:user/id user-id]
+                        :user/password-token (password/encrypt password)]]))
+
 (defn user-by-id
   [id]
   (some-> (d/pull (d/db *conn*) user-pull-pattern [:user/id id])
