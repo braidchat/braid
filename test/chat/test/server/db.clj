@@ -116,13 +116,19 @@
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
-                     :email "foo@bar.com"
+                     :email "fOo@bar.com"
                      :password "foobar"
                      :avatar ""}
         _ (db/create-user! user-1-data)]
 
     (testing "returns user-id when email+password matches"
       (is (= (:id user-1-data) (db/authenticate-user (user-1-data :email) (user-1-data :password)))))
+
+    (testing "email is case-insensitive"
+      (is (= (:id user-1-data)
+             (db/authenticate-user "Foo@bar.com" (user-1-data :password))
+             (db/authenticate-user "foo@bar.com" (user-1-data :password))
+             (db/authenticate-user "FOO@BAR.COM" (user-1-data :password)))))
 
     (testing "returns nil when email+password wrong"
       (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
