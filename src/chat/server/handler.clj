@@ -122,7 +122,37 @@
                        (when (and email password)
                          (db/with-conn (db/authenticate-user email password))))]
       {:status 200 :session (assoc (req :session) :user-id user-id)}
-      {:status 401})))
+      {:status 401 :body (pr-str {:error true})}))
+  (POST "/request-reset" [email]
+    (when-let [user (db/with-conn (db/user-with-email email))]
+      (invites/request-reset (assoc user :email email)))
+    {:status 200 :body (pr-str {:ok true})})
+  (GET "/reset" [user token]
+    (if-let [u (and (invites/verify-reset-token user token)
+                 (db/with-conn (db/user-by-id (java.util.UUID/fromString user))))]
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body (invites/reset-page u token)}
+      {:status 401}))
+  (POST "/reset" [new_password token user_id now hmac :as req]
+    (let [user-id (java.util.UUID/fromString user_id)
+          fail {:status 400 :headers {"Content-Type" "text/plain"}}]
+      (cond
+        (string/blank? new_password) (assoc fail :body "Must provide a password")
+
+        (not (invites/verify-hmac hmac (str now token user-id)))
+        (assoc fail :body "Invalid HMAC")
+
+        :else
+        (if-let [user (db/with-conn (db/user-by-id user-id))]
+          (if-let [err (:error (invites/verify-reset-nonce user token))]
+            (assoc fail :body err)
+            (do (db/with-conn (db/set-user-password! (user :id) new_password))
+                {:status 301
+                 :headers {"Location" "/"}
+                 :session (assoc (req :session) :user-id (user :id))
+                 :body ""}))
+          (assoc fail :body "Invalid user"))))))
 
 (defroutes resource-routes
   (resources "/"))

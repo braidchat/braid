@@ -119,3 +119,67 @@
     (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename)
                           (s3/grant :all-users :read))
     (str "https://s3.amazonaws.com/" (env :aws-domain) "/avatars/" avatar-filename)))
+
+(defn request-reset
+  [user]
+  (let [secret (random-nonce 20)]
+    (cache-set! (str (user :id)) secret)
+    (http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
+               {:basic-auth ["api" (env :mailgun-password)]
+                :form-params {:to (user :email)
+                              :from (str "noreply@" (env :mailgun-domain))
+                              :subject "Password reset requested"
+                              :text (str "A password reset was requested on "
+                                         (env :site-url) " for " (user :email) "\n\n"
+                                         "If this was you, follow this link to reset your password "
+                                         (env :site-url) "/reset?user=" (user :id) "&token=" secret
+                                         "\n\n"
+                                         "If this wasn't you, just ignore this email")
+                              :html (str "<html><body>"
+                                         "<p>"
+                                         "A password reset was requested on "
+                                         (env :site-url) " for " (user :email)
+                                         "</p>"
+                                         "<p>"
+                                         "If this was you, <a href=\""
+                                         (env :site-url) "/reset?user=" (user :id) "&token=" secret
+                                         "\"> click here</a> to reset your password "
+                                         "</p>"
+                                         "<p>"
+                                         "If this wasn't you, just ignore this email"
+                                         "</p>"
+                                         "</body></html>")}})))
+
+(defn verify-reset-nonce
+  "Verify that the given nonce is valid for the reset request"
+  [user nonce]
+  (if-let [stored-nonce (cache-get (str (user :id)))]
+    (if (constant-comp stored-nonce nonce)
+      (do (cache-del! (str (user :id)))
+          {:success true})
+      {:error "Invalid token"})
+    (do (timbre/warnf "Expired nonce %s for user %s" nonce user)
+        {:error "Expired token"})))
+
+(defn reset-page
+  [user token]
+  (let [now (.getTime (java.util.Date.))
+        form-hmac (hmac hmac-secret (str now token (user :id)))]
+    (str "<!DOCTYPE html>"
+         "<html>"
+         "  <head>"
+         "   <title>Reset Password</title>"
+         "   <link href=\"/css/out/chat.css\" rel=\"stylesheet\" type=\"text/css\"></style>"
+         "  </head>"
+         "  <body>"
+         "  <form action=\"/reset\" method=\"POST\">"
+         "    <input type=\"hidden\" name=\"csrf-token\" value=\"" *anti-forgery-token* "\">"
+         "    <input type=\"hidden\" name=\"user_id\" value=\"" (user :id) "\">"
+         "    <input type=\"hidden\" name=\"now\" value=\"" now "\">"
+         "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"
+         "    <input type=\"hidden\" name=\"hmac\" value=\"" form-hmac "\">"
+         "    <label>New Password: <input type=\"password\" name=\"new_password\"></label>"
+         "    <input type=\"submit\" value=\"Set New Password\">"
+         "  </form>"
+         "  </body>"
+         "</html>")))

@@ -152,6 +152,11 @@
             :on-complete (fn [data]
                            (sync/reconnect!))}))
 
+(defmethod dispatch! :request-reset [_ email]
+  (edn-xhr {:url "/request-reset"
+            :method :post
+            :data {:email email}}))
+
 (defmethod dispatch! :logout [_ _]
   (edn-xhr {:url "/logout"
             :method :post
