@@ -128,7 +128,7 @@
       (invites/request-reset (assoc user :email email)))
     {:status 200 :body (pr-str {:ok true})})
   (GET "/reset" [user token]
-    (if-let [u (and (invites/verify-reset-token user token)
+    (if-let [u (and (invites/verify-reset-nonce user token)
                  (db/with-conn (db/user-by-id (java.util.UUID/fromString user))))]
       {:status 200
        :headers {"Content-Type" "text/html"}
