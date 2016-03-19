@@ -17,6 +17,7 @@
                  [com.taoensso/carmine "2.11.1"]
                  [clj-aws-s3 "0.3.10" :exclusions [joda-time]]
                  [image-resizer "0.1.9"]
+                 [clojurewerkz/quartzite "2.0.0"]
                  ;client
                  [org.clojure/clojurescript "1.7.145"]
                  [org.omcljs/om "0.8.8"]

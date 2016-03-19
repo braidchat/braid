@@ -6,6 +6,7 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults
                                               secure-site-defaults site-defaults]]
             [ring.middleware.edn :refer [wrap-edn-params]]
+            [clojurewerkz.quartzite.scheduler :as qs]
             [clojure.string :as string]
             [clojure.edn :as edn]
             [clojure.tools.nrepl.server :as nrepl]
@@ -18,7 +19,8 @@
             [chat.server.s3 :as s3]
             [chat.server.extensions :as ext :refer [b64->str]]
             ; just requiring to register multimethods
-            chat.server.extensions.asana))
+            chat.server.extensions.asana
+            [chat.server.email-digest :as email-digest]))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8" }
@@ -195,6 +197,8 @@
               {:read-token (fn [req] (-> req :params :csrf-token))}))))
     wrap-edn-params))
 
+
+;; server
 (defonce server (atom nil))
 
 (defn stop-server!
@@ -207,12 +211,25 @@
   (stop-server!)
   (reset! server (run-server #'app {:port port})))
 
+;; scheduler
+(defonce scheduler (qs/initialize))
+
+(defn start-scheduler!
+  []
+  (qs/start scheduler))
+
+(defn stop-scheduler!
+  []
+  (qs/shutdown scheduler))
+
+;; main
 (defn -main  [& args]
   (let [port (Integer/parseInt (first args))
         repl-port (Integer/parseInt (second args))]
     (start-server! port)
     (chat.server.sync/start-router!)
     (nrepl/start-server :port repl-port)
-    (println "starting on port " port)))
-
-
+    (println "starting on port " port)
+    (let [sch (qs/initialize)]
+      (println "starting quartz scheduler")
+      (qs/start sch))))
