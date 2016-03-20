@@ -174,7 +174,9 @@
         ((aget PR "prettyPrint"))))
     om/IRender
     (render [_]
-      (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))
+      (let [sender (if-let [cur (helpers/user-cursor (message :user-id))]
+                     (om/observe owner cur)
+                     {:nickname "???"})
             sender-path (routes/user-page-path {:group-id (routes/current-group)
                                                 :user-id (sender :id)})]
         (dom/div #js {:className (str "message"
