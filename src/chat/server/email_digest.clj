@@ -1,7 +1,8 @@
 (ns chat.server.email-digest
   (:require [clojurewerkz.quartzite
              [triggers :as t]
-             [jobs :as j :refer [defjob]]]
+             [jobs :as j :refer [defjob]]
+             [scheduler :as qs]]
             [clojurewerkz.quartzite.schedule.cron :as cron]
             [clj-time
              [core :as time]
@@ -28,6 +29,10 @@
 
 (defn daily-update-users
   "Find all users that want daily digest updates"
+  [])
+
+(defn weekly-update-users
+  "Find all users that want weekly digest updates"
   [])
 
 ; sending
@@ -83,3 +88,9 @@
     (t/with-schedule
       (cron/schedule
         (cron/weekly-on-day-and-hour-and-minute 0 2 30)))))
+
+(defn add-jobs
+  [scheduler]
+  (-> scheduler
+      (qs/schedule (daily-digest-job) (daily-digest-trigger))
+      (qs/schedule (weekly-digest-job) (weekly-digest-trigger))))
