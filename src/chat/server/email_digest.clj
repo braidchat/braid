@@ -26,6 +26,10 @@
   (db/with-conn
     (doall (filter thread-unseen? (db/get-open-threads-for-user user-id)))))
 
+(defn daily-update-users
+  "Find all users that want daily digest updates"
+  [])
+
 ; sending
 
 (defn send-message
@@ -38,24 +42,44 @@
                             :text text
                             :html html}}))
 
-; Scheduling
+;; Scheduling
 
-(defjob SendEmailsJob
+; daily digest
+(defjob DailyDigestJob
   [ctx]
-  (timbre/debugf "Starting email job")
-  )
+  (timbre/debugf "Starting daily email job"))
 
-(defn email-job
+(defn daily-digest-job
   []
   (j/build
-    (j/of-type SendEmailsJob)
-    (j/with-identity (j/key "jobs.email-send.1"))))
+    (j/of-type DailyDigestJob)
+    (j/with-identity (j/key "jobs.daily-email.1"))))
 
-(defn email-trigger
+(defn daily-digest-trigger
   []
   (t/build
-    (t/with-identity (t/key "triggers.email-send"))
+    (t/with-identity (t/key "triggers.daily-email"))
     (t/start-now)
     (t/with-schedule
       (cron/schedule
         (cron/daily-at-hour-and-minute 3 0)))))
+
+; weekly digest
+(defjob WeeklyDigestJob
+  [ctx]
+  (timbre/debugf "Starting weekly email job"))
+
+(defn weekly-digest-job
+  []
+  (j/build
+    (j/of-type WeeklyDigestJob)
+    (j/with-identity (j/key "jobs.weekly-email.1"))))
+
+(defn weekly-digest-trigger
+  []
+  (t/build
+    (t/with-identity (t/key "triggers.weekly-email"))
+    (t/start-now)
+    (t/with-schedule
+      (cron/schedule
+        (cron/weekly-on-day-and-hour-and-minute 0 2 30)))))
