@@ -380,3 +380,36 @@
       (is (db/thread-visible-to-extension? thread-2-id (ext-2 :id)))
 
       )))
+
+(deftest user-preferences
+  (testing "Can set and retrieve preferences"
+    (let [u (db/create-user! {:id (db/uuid)
+                              :email "foo@bar.com"
+                              :password "foobar"
+                              :avatar ""})]
+      (is (empty? (db/get-user-preferences (:id u))))
+      (db/user-set-preference! (:id u) :email-frequency :weekly)
+      (is (= {:email-frequency :weekly}
+             (db/get-user-preferences (:id u))))
+      (testing "can search by preferences"
+        (let [u1 (:id (db/create-user! {:id (db/uuid)
+                                        :email "foo@baz.com"
+                                        :password "foobar"
+                                        :avatar ""
+                                        :nickname "zzz"}))
+              u2 (:id (db/create-user! {:id (db/uuid)
+                                        :email "bar@bar.com"
+                                        :password "foobar"
+                                        :avatar ""}))
+              u3 (:id (db/create-user! {:id (db/uuid)
+                                        :email "baz@bar.com"
+                                        :password "foobar"
+                                        :avatar ""}))]
+          (db/user-set-preference! u1 :email-frequency :daily)
+          (db/user-set-preference! u1 :favourite-color "blue")
+          (db/user-set-preference! u2 :email-frequency :weekly)
+          (db/user-set-preference! u2 :favourite-color "blue")
+          (is (= [u2 (u :id)] (db/user-search-preferences :email-frequency :weekly)))
+          (is (= [u1] (db/user-search-preferences :email-frequency :daily)))
+          (is (= [u1 u2] (db/user-search-preferences :favourite-color "blue")))
+          )))))
