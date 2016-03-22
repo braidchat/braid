@@ -145,6 +145,8 @@
       ((fnil edn/read-string "{}"))))
 
 (defn user-set-preference!
+  "Set a key to a value for the user's preferences.  This will throw if
+  permissions are changed in between reading & setting"
   [user-id k v]
   (let [old-prefs (-> (d/pull (d/db *conn*) [:user/preferences] [:user/id user-id])
                   :user/preferences)
@@ -155,7 +157,7 @@
                          :user/preferences old-prefs new-prefs]])))
 
 (defn user-search-preferences
-  "Find all users that have the a given value for a given key set in their preferences"
+  "Find the ids of users that have the a given value for a given key set in their preferences"
   [k v]
   (d/q '[:find [?user-id ...]
          :in $ ?kv
