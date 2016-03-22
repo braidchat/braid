@@ -21,7 +21,7 @@
             chat.server.extensions.asana))
 
 (defn edn-response [clj-body]
-  {:headers {"Content-Type" "application/edn; charset=utf-8" }
+  {:headers {"Content-Type" "application/edn; charset=utf-8"}
    :body (pr-str clj-body)})
 
 (defroutes site-routes
@@ -116,7 +116,7 @@
          :body (pr-str {:error "No S3 secret for upload"})})
       {:status 403
        :headers {"Content-Type" "application/edn"}
-       :body (pr-str {:error "Unauthorized"}) }))
+       :body (pr-str {:error "Unauthorized"})}))
   (POST "/auth" req
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
