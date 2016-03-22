@@ -4,9 +4,15 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
-            [cljs-utils.core :refer [edn-xhr]]
+            [cljs-utils.xhr :as xhr]
             [chat.shared.util :as util]
             [chat.client.router :as router]))
+
+(defn edn-xhr
+  [args]
+  (xhr/request (assoc args
+                 :content-type "application/edn"
+                 :accept "application/edn")))
 
 (defn- extract-tag-ids [text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
