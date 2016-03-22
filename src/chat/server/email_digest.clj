@@ -8,6 +8,8 @@
              [core :as time]
              [coerce :refer [to-date-time]]]
             [environ.core :refer [env]]
+            [clostache.parser :refer [render-resource]]
+            [inliner.core :refer [inline-css]]
             [org.httpkit.client :as http]
             [taoensso.timbre :as timbre]
             [chat.server.db :as db]))
@@ -48,9 +50,11 @@
 
 ; build a message from a thread
 
-(defn render-thread
-  [thread]
-  )
+(defn create-message
+  [threads]
+  {:html  (inline-css (render-resource "templates/email_digest.html.mustache"
+                                       {:threads threads}))
+   :text (render-resource "templates/email_digest.txt.mustache" {:threads threads})})
 
 ; sending
 
@@ -74,9 +78,8 @@
         cutoff (time/minus (time/now) (time/days 1))]
     (doseq [uid user-ids]
       (when-let [threads (seq (updates-for-user-since uid cutoff))]
-        (let [user (db/with-conn (db/user-by-id uid))
-              msg nil]
-          )))))
+        (let [email (db/with-conn (db/user-email uid))]
+          (send-message email (create-message threads)))))))
 
 (defn daily-digest-job
   []
@@ -96,7 +99,13 @@
 ; weekly digest
 (defjob WeeklyDigestJob
   [ctx]
-  (timbre/debugf "Starting weekly email job"))
+  (timbre/debugf "Starting weekly email job")
+  (let [user-ids (daily-update-users)
+        cutoff (time/minus (time/now) (time/days 7))]
+    (doseq [uid user-ids]
+      (when-let [threads (seq (updates-for-user-since uid cutoff))]
+        (let [email (db/with-conn (db/user-email uid))]
+          (send-message email (create-message threads)))))))
 
 (defn weekly-digest-job
   []

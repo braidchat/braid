@@ -321,6 +321,10 @@
   (some-> (d/pull (d/db *conn*) user-pull-pattern [:user/email email])
           db->user))
 
+(defn user-email
+  [user-id]
+  (:user/email (d/pull (d/db *conn*) [:user/email] [:user/id user-id])))
+
 (defn create-invitation!
   [{:keys [id inviter-id invitee-email group-id]}]
   (-> {:invite/id id
