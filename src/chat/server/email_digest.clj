@@ -22,10 +22,19 @@
             (time/before? last-open (to-date-time created-at)))
           (thread :messages))))
 
-(defn updates-for-user
-  [user-id]
-  (db/with-conn
-    (doall (filter thread-unseen? (db/get-open-threads-for-user user-id)))))
+(defn last-message-after?
+  [cutoff thread]
+  (some (fn [{:keys [created-at]}]
+          (time/after? (to-date-time created-at) cutoff))
+        (thread :messages)))
+
+(defn updates-for-user-since
+  [user-id cutoff]
+  (into ()
+        (comp (filter thread-unseen?)
+              (filter (partial last-message-after? cutoff)))
+        (db/with-conn
+          (db/get-open-threads-for-user user-id))))
 
 (defn daily-update-users
   "Find all ids for users that want daily digest updates"
@@ -60,7 +69,14 @@
 ; daily digest
 (defjob DailyDigestJob
   [ctx]
-  (timbre/debugf "Starting daily email job"))
+  (timbre/debugf "Starting daily email job")
+  (let [user-ids (daily-update-users)
+        cutoff (time/minus (time/now) (time/days 1))]
+    (doseq [uid user-ids]
+      (when-let [threads (seq (updates-for-user-since uid cutoff))]
+        (let [user (db/with-conn (db/user-by-id uid))
+              msg nil]
+          )))))
 
 (defn daily-digest-job
   []
