@@ -1,11 +1,12 @@
 (ns chat.client.s3
   (:require [cljs-uuid-utils.core :as uuid]
             [clojure.string :refer [split]]
-            [cljs-utils.core :refer [edn-xhr]]
+            [cljs-utils.xhr :refer [request]]
             [goog.events :as events]
             [chat.client.views.helpers :refer [ends-with?]])
   (:import [goog.net XhrIo EventType]))
 
+; TODO: should be able to use `request` instead of this - content type problem
 (defn- ajax-xhr
   "Send an xhr request"
   [{:keys [method url data on-complete on-error on-progress]}]
@@ -22,8 +23,10 @@
     (.send xhr url (.toUpperCase (name method)) data)))
 
 (defn upload [file on-complete]
-  (edn-xhr
+  (request
     {:method :get
+     :content-type "application/edn"
+     :accept "application/edn"
      :url "/s3-policy"
      :on-error (fn [err]
                  (.error js/console "Error getting s3 authorization: "
