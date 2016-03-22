@@ -230,6 +230,5 @@
     (chat.server.sync/start-router!)
     (nrepl/start-server :port repl-port)
     (println "starting on port " port)
-    (let [sch (qs/initialize)]
-      (println "starting quartz scheduler")
-      (qs/start sch))))
+    (println "starting quartz scheduler")
+    (start-scheduler!)))
