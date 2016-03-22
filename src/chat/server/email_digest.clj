@@ -28,12 +28,20 @@
     (doall (filter thread-unseen? (db/get-open-threads-for-user user-id)))))
 
 (defn daily-update-users
-  "Find all users that want daily digest updates"
-  [])
+  "Find all ids for users that want daily digest updates"
+  []
+  (db/user-search-preferences :email-frequency :daily))
 
 (defn weekly-update-users
-  "Find all users that want weekly digest updates"
-  [])
+  "Find all ids for users that want weekly digest updates"
+  []
+  (db/user-search-preferences :email-frequency :weekly))
+
+; build a message from a thread
+
+(defn render-thread
+  [thread]
+  )
 
 ; sending
 
