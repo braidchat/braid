@@ -6,7 +6,7 @@
   (doto (MessageDigest/getInstance "SHA-256") (.update bs)))
 
 (defn sha256 [msg]
-  (-> msg .getBytes sha256-digest .digest ))
+  (-> msg .getBytes sha256-digest .digest))
 
 (defn from-file
   [f]
