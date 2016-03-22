@@ -149,7 +149,7 @@
   permissions are changed in between reading & setting"
   [user-id k v]
   (let [old-prefs (-> (d/pull (d/db *conn*) [:user/preferences] [:user/id user-id])
-                  :user/preferences)
+                      :user/preferences)
         new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
                       (assoc k v)
                       pr-str)]
