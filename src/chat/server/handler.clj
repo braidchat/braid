@@ -212,15 +212,18 @@
   (reset! server (run-server #'app {:port port})))
 
 ;; scheduler
-(defonce scheduler (qs/initialize))
+(defonce scheduler (atom nil))
 
 (defn start-scheduler!
   []
-  (qs/start scheduler))
+  (stop-scheduler!)
+  (reset! scheduler (qs/initialize))
+  (qs/start @scheduler))
 
 (defn stop-scheduler!
   []
-  (qs/shutdown scheduler))
+  (when-let [s @scheduler]
+    (qs/shutdown s)))
 
 ;; main
 (defn -main  [& args]

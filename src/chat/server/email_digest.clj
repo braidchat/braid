@@ -53,12 +53,12 @@
 (defn daily-update-users
   "Find all ids for users that want daily digest updates"
   []
-  (db/user-search-preferences :email-frequency :daily))
+  (db/with-conn (db/user-search-preferences :email-frequency :daily)))
 
 (defn weekly-update-users
   "Find all ids for users that want weekly digest updates"
   []
-  (db/user-search-preferences :email-frequency :weekly))
+  (db/with-conn (db/user-search-preferences :email-frequency :weekly)))
 
 ; build a message from a thread
 
@@ -132,10 +132,9 @@
     (t/start-now)
     (t/with-schedule
       (cron/schedule
-        (cron/weekly-on-day-and-hour-and-minute 0 2 30)))))
+        (cron/weekly-on-day-and-hour-and-minute 1 2 30)))))
 
 (defn add-jobs
   [scheduler]
-  (-> scheduler
-      (qs/schedule (daily-digest-job) (daily-digest-trigger))
-      (qs/schedule (weekly-digest-job) (weekly-digest-trigger))))
+  (qs/schedule scheduler (daily-digest-job) (daily-digest-trigger))
+  (qs/schedule scheduler (weekly-digest-job) (weekly-digest-trigger)))
