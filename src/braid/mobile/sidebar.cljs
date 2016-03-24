@@ -81,7 +81,7 @@
                position (get-position)]
            [:div.sidebar (cond
                            @dragging?
-                           {:style {:transform (str "translateX(" @position "px)")}}
+                           {:style {:transform (str "translate3d(" @position "px, 0, 0)")}}
                            @open?
                            {:class "open"}
                            :else

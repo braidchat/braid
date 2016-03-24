@@ -25,9 +25,9 @@
           [:&.open :&.closed
            {:transition "transform 0.25s ease-in-out"}]
           [:&.closed
-           {:transform "translateX(0px)"}]
+           {:transform "translate3d(0,0,0)"}]
           [:&.open
-           {:transform (str "translateX(" w ")")}]
+           {:transform (str "translate3d(" w ",0,0)")}]
           [:.content
            [:.group
             {:display "block"}

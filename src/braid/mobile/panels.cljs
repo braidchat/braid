@@ -85,7 +85,7 @@
        (fn [panel-items panel-view]
          (let [x (get-pos-x)
                dragging? (get-dragging?)]
-           [:div.panels {:style {:transform (str "translateX(" @x "px)")
+           [:div.panels {:style {:transform (str "translate3d(" @x "px,0,0)")
                                  :transition (when-not @dragging?
                                                "transform 0.25s ease-in-out")}}
             (doall
