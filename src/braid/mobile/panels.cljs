@@ -1,6 +1,5 @@
 (ns braid.mobile.panels
   (:require [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch]]
             [reagent.ratom :include-macros true :refer-macros [reaction]]))
 
 (defn panels-view [panel-items panel-view]
