@@ -29,7 +29,7 @@
                                   (-> x
                                       (min xmax)
                                       (max xmin)))
-                          max-n (dec (count panel-items))
+                          max-n (dec (@state :panel-count))
                           new-n (bound (+ pos-n delta-n) 0 max-n)
                           snap-x (- (* w new-n))]
 
@@ -43,6 +43,9 @@
                               :pos-x (+ (@state :pos-x-start)
                                         (- (@state :touch-x)
                                            (@state :touch-x-start)))))
+
+        set-panel-count! (fn [panel-count]
+                           (swap! state assoc :panel-count panel-count))
 
         get-dragging? (fn []
                         (reaction (@state :dragging?)))
@@ -63,15 +66,16 @@
                      (let [x (.-clientX (aget (.-changedTouches e) 0))
                            dragging? (get-dragging?)]
                        (when @dragging?
-                         (drag-end!))))
-        ]
+                         (drag-end!))))]
     (r/create-class
-      {
-       :component-did-mount
+      {:component-did-mount
        (fn []
          (.addEventListener js/document "touchstart" touch-start!)
          (.addEventListener js/document "touchmove" touch-move!)
          (.addEventListener js/document "touchend" touch-end!))
+       :component-will-update
+       (fn [this _]
+         (set-panel-count! (count (first (r/children this)))))
        :component-will-unmount
        (fn []
          (.removeEventListener js/document "touchstart" touch-start!)
