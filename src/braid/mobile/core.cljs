@@ -24,7 +24,6 @@
   (let [threads (subscribe [:active-group-inbox-threads])
         group (subscribe [:active-group])]
     (fn []
-      ; TODO Why is this being rendered when sidebar is dragged?
       [:div.inbox.page
        [:div.threads
         [panels-view @threads thread-view]]])))
