@@ -32,11 +32,17 @@
 
 (defn updates-for-user-since
   [user-id cutoff]
-  (into ()
-        (comp (filter thread-unseen?)
-              (filter (partial last-message-after? cutoff)))
-        (db/with-conn
-          (db/get-open-threads-for-user user-id))))
+  (db/with-conn
+    (let [id->nick (into {} (map (juxt :id :nickname))
+                         (db/fetch-users-for-user user-id))]
+      (into ()
+            (comp (filter thread-unseen?)
+                  (filter (partial last-message-after? cutoff))
+                  (map (fn [t]
+                         (map (fn [m]
+                                (assoc m :sender (-> (m :user-id) id->nick)))
+                              (t :messages)))))
+            (db/get-open-threads-for-user user-id)))))
 
 (defn daily-update-users
   "Find all ids for users that want daily digest updates"
