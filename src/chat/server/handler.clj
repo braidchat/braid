@@ -214,16 +214,16 @@
 ;; scheduler
 (defonce scheduler (atom nil))
 
+(defn stop-scheduler!
+  []
+  (when-let [s @scheduler]
+    (qs/shutdown s)))
+
 (defn start-scheduler!
   []
   (stop-scheduler!)
   (reset! scheduler (qs/initialize))
   (qs/start @scheduler))
-
-(defn stop-scheduler!
-  []
-  (when-let [s @scheduler]
-    (qs/shutdown s)))
 
 ;; main
 (defn -main  [& args]
