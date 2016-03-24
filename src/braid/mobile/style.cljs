@@ -48,8 +48,7 @@
          :right 0
          :bottom 0
          :background "red"
-         :overflow-x "scroll"
-         :overflow-y "hidden"
+         :overflow "hidden"
          :z-index 50
          }]
 
