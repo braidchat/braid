@@ -28,11 +28,15 @@
                  ;shared
                  [org.clojure/tools.reader "1.0.0-alpha3"]
                  [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
-                 [com.taoensso/sente "1.8.1" :exclusions [org.clojure/tools.reader]]]
+                 [com.taoensso/sente "1.8.1" :exclusions [org.clojure/tools.reader]]
+
+                 ;mobile
+                 [reagent "0.5.1"]]
 
   :main chat.server.handler
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3"]
+            [lein-figwheel "0.5.1"]
             [jamesnvc/lein-lesscss "1.4.0"]]
 
   :repl-options {:timeout 120000}
@@ -50,7 +54,16 @@
                            :output-to "resources/public/js/out/chat.js"
                            :output-dir "resources/public/js/out"
                            :optimizations :advanced
-                           :pretty-print false }}]}
+                           :pretty-print false }}
+
+               {:id "mobile-dev"
+                :figwheel true
+                :source-paths ["src/braid/mobile"]
+                :compiler {:main braid.mobile.core
+                           :asset-path "/mobile/js/out"
+                           :output-to "resources/public/mobile/js/out/braid.js"
+                           :output-dir "resources/public/mobile/js/out"
+                           :verbose true}}]}
 
   :min-lein-version "2.5.0"
 
