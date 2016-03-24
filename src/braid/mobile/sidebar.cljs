@@ -36,8 +36,7 @@
                                 (let [x (.-clientX (aget (.-touches e) 0))
                                       sidebar-open? (subscribe [:sidebar-open?])]
                                   (when @sidebar-dragging?
-                                    (dispatch [:sidebar-set-position! x]))))
-                              false)
+                                    (dispatch [:sidebar-set-position! x])))))
 
            (.addEventListener js/document "touchend"
                               (fn [e]
@@ -50,8 +49,7 @@
                                         (dispatch [:sidebar-open!]))
                                       (if (> x fudge-x)
                                         (dispatch [:sidebar-open!])
-                                        (dispatch [:sidebar-close!]))))))
-                              false)))
+                                        (dispatch [:sidebar-close!])))))))))
        :component-will-unmount
        (fn []
          ; TODO remove listeners
