@@ -36,16 +36,14 @@
        ^{:key (group :id)}
        [:a.group {:on-click
                   (fn [e]
-                    (dispatch [:set-active-group-id! (group :id)])
-                    (dispatch [:sidebar-close!]))}
+                    (dispatch [:set-active-group-id! (group :id)]))}
         [:img]
         [:div.name (group :name)]])]))
 
 (defn main-view []
   [:div.main
    [sidebar-view
-    [:div
-     [groups-view]]]
+    [:div [groups-view]]]
    [inbox-view]])
 
 (defn login-view []
@@ -67,3 +65,4 @@
 (defn init []
   (r/render [app-view] (.-body js/document)))
 
+(init)
