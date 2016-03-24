@@ -52,15 +52,17 @@
                       (let [x (.-clientX (aget (.-changedTouches e) 0))
                             dragging? (get-dragging?)
                             open? (get-open?)]
-                        (when @dragging?
-                          (.stopPropagation e)
-                          (if @open?
-                            (if (< x open-width)
-                              (close!)
-                              (open!))
-                            (if (> x fudge-x)
-                              (open!)
-                              (close!))))))]
+                        (if (not @dragging?)
+                          (close!)
+                          (do
+                            (.stopPropagation e)
+                            (if @open?
+                              (if (< x open-width)
+                                (close!)
+                                (open!))
+                              (if (> x fudge-x)
+                                (open!)
+                                (close!)))))))]
     (r/create-class
       {:component-did-mount
        (fn []
