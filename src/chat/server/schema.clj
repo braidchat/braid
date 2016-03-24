@@ -163,4 +163,47 @@
  :db/cardinality :db.cardinality/one
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
+
+; extensions
+{:db/ident :extension/id
+ :db/valueType :db.type/uuid
+ :db/cardinality :db.cardinality/one
+ :db/unique :db.unique/identity
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
+{:db/ident :extension/group
+ :db/valueType :db.type/ref
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
+{:db/ident :extension/token
+ :db/valueType :db.type/string
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
+{:db/ident :extension/refresh-token
+ :db/valueType :db.type/string
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
+{:db/ident :extension/type
+ :db/valueType :db.type/keyword
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
+{:db/ident :extension/config
+ :db/valueType :db.type/string
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
+{:db/ident :extension/watched-threads
+ :db/valueType :db.type/ref
+ :db/cardinality :db.cardinality/many
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
+{:db/ident :extension/user
+ :db/valueType :db.type/ref
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
 ])

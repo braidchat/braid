@@ -116,13 +116,19 @@
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
-                     :email "foo@bar.com"
+                     :email "fOo@bar.com"
                      :password "foobar"
                      :avatar ""}
         _ (db/create-user! user-1-data)]
 
     (testing "returns user-id when email+password matches"
       (is (= (:id user-1-data) (db/authenticate-user (user-1-data :email) (user-1-data :password)))))
+
+    (testing "email is case-insensitive"
+      (is (= (:id user-1-data)
+             (db/authenticate-user "Foo@bar.com" (user-1-data :password))
+             (db/authenticate-user "foo@bar.com" (user-1-data :password))
+             (db/authenticate-user "FOO@BAR.COM" (user-1-data :password)))))
 
     (testing "returns nil when email+password wrong"
       (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
@@ -132,7 +138,7 @@
               :name "Lean Pixel"}
         group (db/create-group! data)]
     (testing "can create a group"
-      (is (= group (assoc data :users nil))))
+      (is (= group (assoc data :extensions ()))))
     (testing "can add a user to the group"
       (let [user (db/create-user! {:id (db/uuid)
                                    :email "foo@bar.com"
@@ -141,7 +147,7 @@
         (is (= #{} (db/get-groups-for-user (user :id))))
         (is (= #{} (db/get-users-in-group (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
-        (is (= #{data} (db/get-groups-for-user (user :id))))
+        (is (= #{(assoc data :extensions ())} (db/get-groups-for-user (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))
                     (db/get-users-in-group (group :id))))))))))
@@ -337,3 +343,40 @@
       (is (= #{(tag-1 :id)}
              (set (:tag-ids (first u2-threads))))))))
 
+(deftest extension-permissions
+  (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
+        group-2 (db/create-group! {:id (db/uuid) :name "g2"})
+        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-2 :id)})
+        user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        thread-1-id (db/uuid)
+        thread-2-id (db/uuid)
+        ext-1 (db/create-extension! {:id (db/uuid)
+                                     :type :asana
+                                     :user-id (user-1 :id)
+                                     :group-id (group-1 :id)
+                                     :config {:type :asana :tag-id (tag-1 :id)}})
+        ext-2 (db/create-extension! {:id (db/uuid)
+                                     :type :asana
+                                     :user-id (user-1 :id)
+                                     :group-id (group-2 :id)
+                                     :config {:type :asana :tag-id (tag-2 :id)}})]
+
+    (testing "extensions can only see threads in the group they are in"
+      (is (not (db/thread-visible-to-extension? thread-1-id (ext-1 :id))))
+
+      (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
+                           :user-id (user-1 :id) :created-at (java.util.Date.)
+                           :mentioned-tag-ids [(tag-1 :id)]})
+      (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
+                           :user-id (user-1 :id) :created-at (java.util.Date.)
+                           :mentioned-tag-ids [(tag-2 :id)]})
+
+      (is (db/thread-visible-to-extension? thread-1-id (ext-1 :id)))
+      (is (not (db/thread-visible-to-extension? thread-2-id (ext-1 :id))))
+      (is (db/thread-visible-to-extension? thread-2-id (ext-2 :id)))
+
+      )))

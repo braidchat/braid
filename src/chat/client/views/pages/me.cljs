@@ -73,8 +73,8 @@
         (dom/div #js {:className "content"}
 
           (dom/h2 nil "Log Out")
-          (dom/div #js {:className "logout"
-                        :onClick (fn [_] (dispatch! :logout nil))} "Log Out")
+          (dom/button #js {:className "logout"
+                           :onClick (fn [_] (dispatch! :logout nil))} "Log Out")
 
           (dom/h2 nil "Update Nickname")
           (om/build nickname-view (data :session))

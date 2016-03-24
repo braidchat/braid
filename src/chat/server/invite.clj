@@ -5,84 +5,22 @@
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [aws.sdk.s3 :as s3]
-            [taoensso.carmine :as car])
-  (:import java.security.SecureRandom
-           javax.crypto.Mac
-           javax.crypto.spec.SecretKeySpec
-           [org.apache.commons.codec.binary Base64]))
+            [taoensso.carmine :as car]
+            [image-resizer.core :as img]
+            [image-resizer.format :as img-format]
+            [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
+            [chat.server.crypto :refer [hmac constant-comp]]))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
   (println "WARNING: No :hmac-secret set, using an insecure default."))
 
 (def hmac-secret (or (env :hmac-secret) "secret"))
 
-; same as conf in handler, but w/e
-(def redis-conn {:pool {}
-                 :spec {:host "127.0.0.1"
-                        :port 6379}})
-
-(def prod? (= (env :environment) "prod"))
-(def dev-cache
-  "Cache used in place of redis when running in dev/demo mode"
-  (atom {}))
-
-(defn cache-set! [k v]
-  (if prod?
-    (car/wcar redis-conn (car/set k v))
-    (swap! dev-cache assoc k v)))
-
-(defn cache-get [k]
-  (if prod?
-    (car/wcar redis-conn (car/get k))
-    (@dev-cache k)))
-
-(defn cache-del! [k]
-  (if prod?
-    (car/wcar redis-conn (car/del k))
-    (swap! dev-cache dissoc k)))
-
-(defn random-nonce
-  "url-safe random nonce"
-  [size]
-  (let [rand-bytes (let [seed (byte-array size)]
-                     (.nextBytes (SecureRandom. ) seed)
-                     seed)]
-    (-> rand-bytes
-        Base64/encodeBase64
-        String.
-        (string/replace "+" "-")
-        (string/replace "/" "_")
-        (string/replace "=" ""))))
-
-(defn hmac
-  [hmac-key data]
-  (let [key-bytes (.getBytes hmac-key "UTF-8")
-        data-bytes (.getBytes data "UTF-8")
-        algo "HmacSHA256"]
-    (->>
-      (doto (Mac/getInstance algo)
-        (.init (SecretKeySpec. key-bytes algo)))
-      (#(.doFinal % data-bytes))
-      (map (partial format "%02x"))
-      (apply str))))
-
-(defn constant-comp
-  "Compare two strings in constant time"
-  [a b]
-  (loop [a a b b match (= (count a) (count b))]
-    (if (and (empty? a) (empty? b))
-      match
-      (recur
-        (rest a)
-        (rest b)
-        (and match (= (first a) (first b)))))))
-
 (defn verify-hmac
   [mac data]
   (constant-comp
     mac
     (hmac hmac-secret data)))
-
 
 (defn make-invite-link
   [invite]
@@ -160,6 +98,8 @@
     (hmac hmac-secret
           (str (params :now) (params :token) (params :invite_id) (params :email)))))
 
+(def avatar-size [128 128])
+
 (defn upload-avatar
   [f]
   ; TODO: resize avatar to something reasonable
@@ -170,8 +110,76 @@
               "image/png" "png"
               ; TODO
               (last (string/split (f :filename) #"\.")))
-        avatar-filename (str (java.util.UUID/randomUUID) "." ext)]
-    (s3/put-object creds (env :aws-domain) (str "avatars/" avatar-filename) (f :tempfile)
+        avatar-filename (str (java.util.UUID/randomUUID) "." ext)
+        [h w] avatar-size
+        resized-image (-> f :tempfile (img/resize-and-crop h w)
+                          (img-format/as-stream ext))]
+    (s3/put-object creds (env :aws-domain) (str "avatars/" avatar-filename) resized-image
                    {:content-type (f :content-type)})
-    (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename) (s3/grant :all-users :read))
+    (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename)
+                          (s3/grant :all-users :read))
     (str "https://s3.amazonaws.com/" (env :aws-domain) "/avatars/" avatar-filename)))
+
+(defn request-reset
+  [user]
+  (let [secret (random-nonce 20)]
+    (cache-set! (str (user :id)) secret)
+    (http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
+               {:basic-auth ["api" (env :mailgun-password)]
+                :form-params {:to (user :email)
+                              :from (str "noreply@" (env :mailgun-domain))
+                              :subject "Password reset requested"
+                              :text (str "A password reset was requested on "
+                                         (env :site-url) " for " (user :email) "\n\n"
+                                         "If this was you, follow this link to reset your password "
+                                         (env :site-url) "/reset?user=" (user :id) "&token=" secret
+                                         "\n\n"
+                                         "If this wasn't you, just ignore this email")
+                              :html (str "<html><body>"
+                                         "<p>"
+                                         "A password reset was requested on "
+                                         (env :site-url) " for " (user :email)
+                                         "</p>"
+                                         "<p>"
+                                         "If this was you, <a href=\""
+                                         (env :site-url) "/reset?user=" (user :id) "&token=" secret
+                                         "\"> click here</a> to reset your password "
+                                         "</p>"
+                                         "<p>"
+                                         "If this wasn't you, just ignore this email"
+                                         "</p>"
+                                         "</body></html>")}})))
+
+(defn verify-reset-nonce
+  "Verify that the given nonce is valid for the reset request"
+  [user nonce]
+  (if-let [stored-nonce (cache-get (str (user :id)))]
+    (if (constant-comp stored-nonce nonce)
+      (do (cache-del! (str (user :id)))
+          {:success true})
+      {:error "Invalid token"})
+    (do (timbre/warnf "Expired nonce %s for user %s" nonce user)
+        {:error "Expired token"})))
+
+(defn reset-page
+  [user token]
+  (let [now (.getTime (java.util.Date.))
+        form-hmac (hmac hmac-secret (str now token (user :id)))]
+    (str "<!DOCTYPE html>"
+         "<html>"
+         "  <head>"
+         "   <title>Reset Password</title>"
+         "   <link href=\"/css/out/chat.css\" rel=\"stylesheet\" type=\"text/css\"></style>"
+         "  </head>"
+         "  <body>"
+         "  <form action=\"/reset\" method=\"POST\">"
+         "    <input type=\"hidden\" name=\"csrf-token\" value=\"" *anti-forgery-token* "\">"
+         "    <input type=\"hidden\" name=\"user_id\" value=\"" (user :id) "\">"
+         "    <input type=\"hidden\" name=\"now\" value=\"" now "\">"
+         "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"
+         "    <input type=\"hidden\" name=\"hmac\" value=\"" form-hmac "\">"
+         "    <label>New Password: <input type=\"password\" name=\"new_password\"></label>"
+         "    <input type=\"submit\" value=\"Set New Password\">"
+         "  </form>"
+         "  </body>"
+         "</html>")))

@@ -13,7 +13,7 @@
   {:urls
    {:pattern #"(http(?:s)?://\S+(?:\w|\d|/))"
     :replace (fn [match]
-               (dom/a #js {:href match :target "_blank"}
+               (dom/a #js {:href match :target "_blank" :tabIndex -1}
                  ; TODO: could do something smarter with checking MIME types or
                  ; something, but trying to sniff every link seems like it
                  ; could get kind of hairy...
@@ -174,7 +174,9 @@
         ((aget PR "prettyPrint"))))
     om/IRender
     (render [_]
-      (let [sender (om/observe owner (helpers/user-cursor (message :user-id)))
+      (let [sender (if-let [cur (helpers/user-cursor (message :user-id))]
+                     (om/observe owner cur)
+                     {:nickname "???"})
             sender-path (routes/user-page-path {:group-id (routes/current-group)
                                                 :user-id (sender :id)})]
         (dom/div #js {:className (str "message"
@@ -182,11 +184,13 @@
                                       " " (if (:unseen? message) "unseen" "seen")
                                       " " (when (:first-unseen? message) "first-unseen"))}
           (dom/a #js {:href sender-path
+                      :tabIndex -1
                       :className "avatar"}
             (dom/img #js {:src (sender :avatar)
                           :style #js {:backgroundColor (id->color (sender :id))}}))
           (dom/div #js {:className "info"}
             (dom/a #js {:className "nickname"
+                        :tabIndex -1
                         :href sender-path}
               (sender :nickname))
             (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))

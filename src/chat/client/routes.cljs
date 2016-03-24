@@ -31,6 +31,9 @@
   (store/set-group-and-page! (UUID. group-id nil) {:type :channel
                                                    :id (UUID. tag-id nil)}))
 
+(defroute extensions-page-path "/:group-id/extensions" [group-id]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :extensions}))
+
 (defroute help-page-path "/:group-id/help" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :help}))
 

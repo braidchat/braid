@@ -12,6 +12,7 @@
             [chat.client.views.pages.channels :refer [channels-page-view]]
             [chat.client.views.pages.users :refer [users-page-view]]
             [chat.client.views.pages.user :refer [user-page-view]]
+            [chat.client.views.pages.extensions :refer [extensions-page-view]]
             [chat.client.views.pages.help :refer [help-page-view]]
             [chat.client.views.pages.group-explore :refer [group-explore-view]]
             [chat.client.views.pages.me :refer [me-page-view]]))
@@ -25,10 +26,25 @@
        :error false})
     om/IRenderState
     (render-state [_ state]
-      (dom/div #js {:className "login"}
+      (dom/form #js {:className "login"
+                     :onSubmit (fn [e]
+                                 (.preventDefault e)
+                                 (dispatch! :auth
+                                            {:email (state :email)
+                                             :password (state :password)
+                                             :on-error
+                                             (fn []
+                                               (om/set-state! owner :error true))}))}
         (when (state :error)
           (dom/div #js {:className "error"}
-            "Bad credentials, please try again"))
+            (dom/p nil "Bad credentials, please try again")
+            (dom/p nil
+              (dom/a #js {:href "#"
+                          :onClick (fn [e]
+                                     (.preventDefault e)
+                                     (dispatch! :request-reset (state :email)))}
+                (str "Request a password reset to be sent to "
+                     (state :email))))))
         (dom/input
           #js {:placeholder "Email"
                :type "text"
@@ -39,15 +55,7 @@
                :type "password"
                :value (state :password)
                :onChange (fn [e] (om/set-state! owner :password (.. e -target -value)))})
-        (dom/button
-          #js {:onClick (fn [e]
-                          (dispatch! :auth
-                                     {:email (state :email)
-                                      :password (state :password)
-                                      :on-error
-                                      (fn []
-                                        (om/set-state! owner :error true))}))}
-          "Let's do this!")))))
+        (dom/button nil "Let's do this!")))))
 
 (defn main-view [data owner]
   (reify
@@ -75,7 +83,8 @@
           :user (om/build user-page-view data)
           :channels (om/build channels-page-view data)
           :me (om/build me-page-view data)
-          :group-explore (om/build group-explore-view data))))))
+          :group-explore (om/build group-explore-view data)
+          :extensions (om/build extensions-page-view data))))))
 
 (defn app-view [data owner]
   (reify

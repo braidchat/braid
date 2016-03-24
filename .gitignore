@@ -10,3 +10,5 @@ profiles.clj
 .DS_Store
 Session.vim
 figwheel_server.log
+/.idea
+*.iml

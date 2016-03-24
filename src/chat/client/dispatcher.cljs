@@ -4,9 +4,15 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
-            [cljs-utils.core :refer [edn-xhr]]
+            [cljs-utils.xhr :as xhr]
             [chat.shared.util :as util]
             [chat.client.router :as router]))
+
+(defn edn-xhr
+  [args]
+  (xhr/request (assoc args
+                 :content-type "application/edn"
+                 :accept "application/edn")))
 
 (defn- extract-tag-ids [text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
@@ -50,14 +56,15 @@
 
 (defmethod dispatch! :new-message [_ data]
   (when-not (string/blank? (data :content))
-    (let [message (schema/make-message {:user-id (get-in @store/app-state [:session :user-id])
-                                        :content (identify-mentions (data :content))
-                                        :thread-id (data :thread-id)
+    (let [message (schema/make-message
+                    {:user-id (get-in @store/app-state [:session :user-id])
+                     :content (identify-mentions (data :content))
+                     :thread-id (data :thread-id)
 
-                                        :mentioned-tag-ids (concat (data :mentioned-tag-ids)
-                                                                   (extract-tag-ids (data :content)))
-                                        :mentioned-user-ids (concat (data :mentioned-user-ids)
-                                                                    (extract-user-ids (data :content)))})]
+                     :mentioned-tag-ids (concat (data :mentioned-tag-ids)
+                                                (extract-tag-ids (data :content)))
+                     :mentioned-user-ids (concat (data :mentioned-user-ids)
+                                                 (extract-user-ids (data :content)))})]
       (store/add-message! message)
       (sync/chsk-send! [:chat/new-message message]))))
 
@@ -122,6 +129,11 @@
     (fn [reply]
       (when-let [results (:threads reply)]
           (store/set-channel-results! results)))))
+
+(defmethod dispatch! :mark-thread-read [_ thread-id]
+  (store/update-thread-last-open-at thread-id)
+  (sync/chsk-send! [:chat/mark-thread-read thread-id]))
+
 (defmethod dispatch! :invite [_ data]
   (let [invite (schema/make-invitation data)]
     (sync/chsk-send! [:chat/invite-to-group invite])))
@@ -145,6 +157,11 @@
                           (cb)))
             :on-complete (fn [data]
                            (sync/reconnect!))}))
+
+(defmethod dispatch! :request-reset [_ email]
+  (edn-xhr {:url "/request-reset"
+            :method :post
+            :data {:email email}}))
 
 (defmethod dispatch! :logout [_ _]
   (edn-xhr {:url "/logout"

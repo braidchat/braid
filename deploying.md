@@ -208,6 +208,44 @@ server {
 
 then symlink it into sites-enabled, delete the symlink to `default` in sites-enabled and `sudo service nginx reload`
 
+## backups
+
+Backing up the underlying PostgreSQL store:
+
+Create a pgbackup user with the appropriate permissions:
+
+```
+$ sudo useradd pgbackup -m
+$ sudo -u postgres createuser pgbackup
+$ sudo -u postgres psql datomic -c 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO pgbackup;'
+$ sudo -u postgres psql datomic -c 'GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO pgbackup;'
+```
+
+Install python and the `boto` library to run the backup script.
+On Ubuntu, you can install with apt: `sudo apt-get install python-boto`.
+If your server doesn't have an OS package, you can install pip and use pip to install boto.
+
+Upload `glacier_backup.py` to the pgbackup user's home directory.
+Create access keys in the AWS management console Glacier and update the credentials in `glacier_backup.py`.
+If using the Amazon-recommended method of creating a limited user account, be sure to give the account at least Glacier write permissions.
+Create a Glacier vault and update the vault name and region name variables in `glacier_backup.py`.
+
+Create a file in `/etc/cron.daily/datomic_backup` with the following content:
+
+```
+#!/bin/bash
+
+set -euo pipefail
+backup_file="/tmp/datomic_backup_$(date -Isec).sql.gz"
+sudo -u pgbackup bash -c "pg_dump datomic | gzip > \"${backup_file}\""
+sudo -u pgbackup ~pgbackup/glacier_backup.py "${backup_file}"
+rm "${backup_file}"
+```
+
+(Note that if using Ubuntu, the file name cannot contain any period characters or it won't be run by cron).
+
+Be sure to make the file executable `sudo chmod +x /etc/cron.daily/datomic_backup`.
+
 ## Annoying stuff
 
 May need to also `sudo apt-get install haveged` to make sure there's enough

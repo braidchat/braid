@@ -9,7 +9,8 @@
             [chat.server.invite :as invites]
             [chat.server.digest :as digest]
             [clojure.set :refer [difference intersection]]
-            [chat.shared.util :refer [valid-nickname? valid-tag-name?]]))
+            [chat.shared.util :refer [valid-nickname? valid-tag-name?]]
+            [chat.server.extensions :refer [handle-thread-change]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -82,39 +83,47 @@
 
 
 (defn- user-can-message? [user-id ?data]
-  (every? true?
-          [
-           (if (db/with-conn (db/user-can-see-thread? user-id (?data :thread-id)))
-             true
+  (db/with-conn
+    (every?
+      true?
+      (concat
+        [(or (boolean (db/user-can-see-thread? user-id (?data :thread-id)))
              (do (timbre/warnf "User %s attempted to add message to disallowed thread %s"
                                user-id (?data :thread-id))
-                 false))
-           (every? true?
-                   (map (fn [tag-id]
-                          (if (db/with-conn (db/user-in-tag-group? user-id tag-id))
-                            true
-                            (do
-                              (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id
-                                            tag-id)
-                              false)))
-                        (?data :mentioned-tag-ids)))
-           (every? true?
-                   (map (fn [mentioned-id]
-                          (if (db/with-conn (db/user-visible-to-user? user-id mentioned-id))
-                            true
-                            (do (timbre/warnf "User %s attempted to mention disallowed user %s" user-id mentioned-id)
-                                false)))
-                        (?data :mentioned-user-ids)))
-           ]))
+                 false))]
+        (map
+          (fn [tag-id]
+            (or (boolean (db/user-in-tag-group? user-id tag-id))
+                (do
+                  (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id
+                                tag-id)
+                  false)))
+          (?data :mentioned-tag-ids))
+        (map
+          (fn [mentioned-id]
+            (or (boolean (db/user-visible-to-user? user-id mentioned-id))
+                (do (timbre/warnf "User %s attempted to mention disallowed user %s"
+                                  user-id mentioned-id)
+                    false)))
+          (?data :mentioned-user-ids))))))
+
+(defn notify-extensions
+  "Notify extensions about a thread changing if they're interested"
+  [msg]
+  (let [exts (db/with-conn (db/extensions-watching (msg :thread-id)))]
+    (doseq [ext exts]
+      (handle-thread-change ext msg))))
 
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (when (user-can-message? user-id ?data)
-      (do (db/with-conn (db/create-message! (-> ?data
-                                                (update-in [:content] #(apply str (take 5000 %)))
-                                                (assoc :created-at (java.util.Date.)))))
-        (broadcast-thread (?data :thread-id) [])))))
+      (db/with-conn (db/create-message!
+                      (-> ?data
+                          (update-in [:content] #(apply str (take 5000 %)))
+                          (assoc :created-at (java.util.Date.)))))
+      (broadcast-thread (?data :thread-id) [])
+      (notify-extensions ?data))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -140,7 +149,13 @@
 
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (db/with-conn (db/user-hide-thread! (get-in ring-req [:session :user-id]) ?data)))
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn (db/user-hide-thread! user-id ?data))))
+
+(defmethod event-msg-handler :chat/mark-thread-read
+  [{:as ev-msg :keys [ring-req ?data]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn (db/update-thread-last-open ?data user-id))))
 
 (defmethod event-msg-handler :chat/create-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
