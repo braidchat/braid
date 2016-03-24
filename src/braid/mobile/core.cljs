@@ -10,11 +10,22 @@
 
 (defn message-view [message]
   [:div.message
-   (:content message)])
+   [:img.avatar]
+   [:div.name "username"]
+   [:div.time "4:35 PM"]
+   [:div.content (:content message)]])
+
+(defn tag-view [tag-id]
+  (let [tag (subscribe [:get-tag tag-id])]
+    [:div.tag (@tag :name)]))
 
 (defn thread-view [thread]
   [:div.thread
-   [:div.close "X"]
+   [:div.tags
+    (for [tag-id (thread :tag-ids)]
+      [tag-view tag-id])
+    [:a.tag-add "+"]]
+   [:div.close "×"]
    (for [message (:messages thread)]
      ^{:key (message :id)}
      [message-view message])
