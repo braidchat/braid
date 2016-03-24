@@ -31,7 +31,8 @@
                  [com.taoensso/sente "1.8.1" :exclusions [org.clojure/tools.reader]]
 
                  ;mobile
-                 [reagent "0.5.1"]]
+                 [re-frame "0.7.0"]
+                 [garden "1.3.2"]]
 
   :main chat.server.handler
   :plugins [[lein-environ "1.0.0"]
