@@ -19,16 +19,17 @@
      [message-view message])
    [:textarea {:value "asd"}]])
 
-(defn threads-view [threads]
-  [:div.threads
-   (for [thread threads]
-     ^{:key (thread :id)}
-     [thread-view thread])])
-
 (defn inbox-view []
-  (let [threads (subscribe [:threads])]
-    [:div.inbox.page
-     [threads-view @threads]]))
+  (let [threads (subscribe [:active-group-inbox-threads])
+        group (subscribe [:active-group])]
+    (fn []
+      ; TODO Why is this being rendered when sidebar is dragged?
+      [:div.inbox.page
+       [:div.threads
+        (doall
+          (for [thread @threads]
+            ^{:key (thread :id)}
+            [thread-view thread]))]])))
 
 (defn main-view []
   [:div.main

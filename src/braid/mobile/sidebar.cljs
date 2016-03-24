@@ -7,7 +7,10 @@
     [:div.groups
      (for [group @groups]
        ^{:key (group :id)}
-       [:a.group
+       [:a.group {:on-click
+                  (fn [e]
+                    (dispatch [:set-active-group-id! (group :id)])
+                    (dispatch [:sidebar-close!]))}
         [:img]
         [:div.name (group :name)]])]))
 
@@ -25,7 +28,7 @@
                                 (let [x (.-clientX (aget (.-touches e) 0))
                                       sidebar-open? (subscribe [:sidebar-open?])]
                                   (when (or (and (not @sidebar-open?) (< x fudge-x))
-                                            (and @sidebar-open? (< x (+ fudge-x open-width))))
+                                            (and @sidebar-open? (< (- open-width fudge-x) x (+ open-width fudge-x))))
                                     (dispatch [:sidebar-drag-start! x])))))
 
            (.addEventListener js/document "touchmove"

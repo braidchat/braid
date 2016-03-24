@@ -31,8 +31,6 @@
         (assoc-in [:views :sidebar :dragging?] true)
         (assoc-in [:views :sidebar :position] x))))
 
-; sidebar - position
-
 (rf/register-sub :sidebar-position
   (fn [state _]
     (reaction (get-in @state [:views :sidebar :position]))))
@@ -40,7 +38,6 @@
 (rf/register-handler :sidebar-set-position!
   (fn [state [_ x]]
     (assoc-in state [:views :sidebar :position] x)))
-
 
 ; login
 
@@ -54,7 +51,7 @@
                   :name "Bar"}
                3 {:id 3
                   :name "Baz"}}
-      :current-group-id 1
+      :active-group-id 1
       :threads {4 {:id 4
                    :group-id 1
                    :messages [{:id 400 :content "foo"}
@@ -62,14 +59,14 @@
                               {:id 402 :content "baz"}]}
                 5 {:id 5
                    :group-id 1
-                   :messages [{:id 501 :content "foo"}
-                              {:id 502 :content "bar"}
-                              {:id 503 :content "baz"}]}
+                   :messages [{:id 501 :content "aaa"}
+                              {:id 502 :content "bbb"}
+                              {:id 503 :content "ccc"}]}
                 6 {:id 6
                    :group-id 2
-                   :messages [{:id 504 :content "foo"}
-                              {:id 505 :content "bar"}
-                              {:id 506 :content "baz"}]}})))
+                   :messages [{:id 504 :content "xoo"}
+                              {:id 505 :content "xar"}
+                              {:id 506 :content "xaz"}]}})))
 
 (rf/register-sub :logged-in?
   (fn [state _]
@@ -79,6 +76,20 @@
   (fn [state _]
     (reaction (vals (:groups @state)))))
 
-(rf/register-sub :threads
+; current group
+
+(rf/register-sub :active-group
   (fn [state _]
-    (reaction (vals (:threads @state)))))
+    (let [group-id (reaction (:active-group-id @state))]
+      (reaction (get-in @state [:groups @group-id])))))
+
+(rf/register-sub :active-group-inbox-threads
+  (fn [state _]
+    (let [group-id (reaction (:active-group-id @state))
+          threads (reaction (vals (:threads @state)))]
+      (reaction (filter (fn [t] (= @group-id (t :group-id)))
+                        @threads)))))
+
+(rf/register-handler :set-active-group-id!
+  (fn [state [_ group-id]]
+    (assoc state :active-group-id group-id)))
