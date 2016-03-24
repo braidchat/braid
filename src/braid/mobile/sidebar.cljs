@@ -2,19 +2,7 @@
   (:require [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch]]))
 
-(defn groups-view []
-  (let [groups (subscribe [:groups])]
-    [:div.groups
-     (for [group @groups]
-       ^{:key (group :id)}
-       [:a.group {:on-click
-                  (fn [e]
-                    (dispatch [:set-active-group-id! (group :id)])
-                    (dispatch [:sidebar-close!]))}
-        [:img]
-        [:div.name (group :name)]])]))
-
-(defn sidebar-view []
+(defn sidebar-view [content-view]
   (let [sidebar-position (subscribe [:sidebar-position])
         sidebar-open? (subscribe [:sidebar-open?])
         sidebar-dragging? (subscribe [:sidebar-dragging?])
@@ -62,7 +50,7 @@
          (.removeEventListener js/document "touchmove" touch-move!  true)
          (.removeEventListener js/document "touchend" touch-end! true))
        :reagent-render
-       (fn []
+       (fn [content-view]
          [:div.sidebar
           (cond
             @sidebar-dragging?
@@ -72,4 +60,4 @@
             :else
             {:class "closed"})
           [:div.content
-           [groups-view]]])})))
+           content-view]])})))

@@ -29,9 +29,23 @@
        [:div.threads
         [panels-view @threads thread-view]]])))
 
+(defn groups-view []
+  (let [groups (subscribe [:groups])]
+    [:div.groups
+     (for [group @groups]
+       ^{:key (group :id)}
+       [:a.group {:on-click
+                  (fn [e]
+                    (dispatch [:set-active-group-id! (group :id)])
+                    (dispatch [:sidebar-close!]))}
+        [:img]
+        [:div.name (group :name)]])]))
+
 (defn main-view []
   [:div.main
-   [sidebar-view]
+   [sidebar-view
+    [:div
+     [groups-view]]]
    [inbox-view]])
 
 (defn login-view []
