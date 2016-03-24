@@ -2,13 +2,47 @@
   (:require [re-frame.core :as rf]
             [reagent.ratom :include-macros true :refer-macros [reaction]]))
 
-(rf/register-handler :open-sidebar!
-  (fn [state _]
-    (assoc-in state [:views :sidebar :open?] true)))
 
-(rf/register-handler :close-sidebar!
+; sidebar open / close / dragging
+
+(rf/register-sub :sidebar-dragging?
   (fn [state _]
-    (assoc-in state [:views :sidebar :open?] false)))
+    (reaction (get-in @state [:views :sidebar :dragging?]))))
+
+(rf/register-sub :sidebar-open?
+  (fn [state _]
+    (reaction (get-in @state [:views :sidebar :open?]))))
+
+(rf/register-handler :sidebar-open!
+  (fn [state _]
+    (-> state
+        (assoc-in [:views :sidebar :open?] true)
+        (assoc-in [:views :sidebar :dragging?] false))))
+
+(rf/register-handler :sidebar-close!
+  (fn [state _]
+    (-> state
+        (assoc-in [:views :sidebar :open?] false)
+        (assoc-in [:views :sidebar :dragging?] false))))
+
+(rf/register-handler :sidebar-drag-start!
+  (fn [state [_ x]]
+    (-> state
+        (assoc-in [:views :sidebar :dragging?] true)
+        (assoc-in [:views :sidebar :position] x))))
+
+; sidebar - position
+
+(rf/register-sub :sidebar-position
+  (fn [state _]
+    (reaction (get-in @state [:views :sidebar :position]))))
+
+(rf/register-handler :sidebar-set-position!
+  (fn [state [_ x]]
+    (assoc-in state [:views :sidebar :position] x)))
+
+
+; login
 
 (rf/register-handler :log-in!
   (fn [state _]
@@ -48,7 +82,3 @@
 (rf/register-sub :threads
   (fn [state _]
     (reaction (vals (:threads @state)))))
-
-(rf/register-sub :sidebar-open?
-  (fn [state _]
-    (reaction (get-in @state [:views :sidebar :open?]))))

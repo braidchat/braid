@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch]]
             [braid.mobile.state]
-            [braid.mobile.style :refer [styles]]))
+            [braid.mobile.style :refer [styles]]
+            [braid.mobile.sidebar :refer [sidebar-view]]))
 
 (enable-console-print!)
 
@@ -29,28 +30,8 @@
     [:div.inbox.page
      [threads-view @threads]]))
 
-(defn groups-view []
-  (let [groups (subscribe [:groups])]
-    [:div.groups
-     (for [group @groups]
-       ^{:key (group :id)}
-       [:a.group
-        [:img]
-        [:div.name (group :name)]])]))
-
-(defn sidebar-view []
-  (let [open? (subscribe [:sidebar-open?])]
-    (fn []
-      [:div.sidebar {:class (if @open? "open" "closed")
-                     :on-click (fn [_]
-                                 (dispatch [:close-sidebar!]))}
-       [groups-view]])))
-
 (defn main-view []
   [:div.main
-   [:div.hamburger
-    {:on-click (fn [_]
-                 (dispatch [:open-sidebar!]))} "="]
    [sidebar-view]
    [inbox-view]])
 
@@ -73,4 +54,3 @@
 (defn init []
   (r/render [app-view] (.-body js/document)))
 
-(r/render [app-view] (.-body js/document))

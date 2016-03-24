@@ -10,28 +10,36 @@
 (def styles
   (css [:body]
 
-       [:.sidebar
-        {:background "black"
-         :position "absolute"
-         :top 0
-         :bottom 0
-         :width "60%"
-         :transition "left 0.25s ease-in-out"}
-        [:&.closed
-         {:left "-60%"}]
-        [:&.open
-         {:left 0}]
-        [:.group
-         {:display "block"}
-         [:img
-          {:width "2rem"
-           :height "2rem"
-           :background "white"
-           :border-radius "10px"
-          :vertical-align "middle"}]
-         [:.name
-          {:display "inline-block"
-           :color "white"}]]]
+       (let [w "100px"]
+         [:.sidebar
+          {:background "black"
+           :position "absolute"
+           :top 0
+           :bottom 0
+           :padding-left "100vw"
+           :margin-left "-100vw"
+           :left "-100px"
+           :width w
+           :z-index 100
+           }
+          [:&.open :&.closed
+           {:transition "transform 0.25s ease-in-out"}]
+          [:&.closed
+           {:transform "translateX(0px)"}]
+          [:&.open
+           {:transform (str "translateX(" w ")")}]
+          [:.content
+           [:.group
+            {:display "block"}
+            [:img
+             {:width "2rem"
+              :height "2rem"
+              :background "white"
+              :border-radius "10px"
+              :vertical-align "middle"}]
+            [:.name
+             {:display "inline-block"
+              :color "white"}]]]])
 
        [:.page
         {:position "absolute"
@@ -39,9 +47,10 @@
          :left 0
          :right 0
          :bottom 0
-         :background "grey"
+         :background "red"
          :overflow-x "scroll"
          :overflow-y "hidden"
+         :z-index 50
          }]
 
        (let [thread-margin 4 ;vw
@@ -52,7 +61,7 @@
            :min-width "300vw"
            :padding-left (vw thread-margin)}
           [:.thread
-           {:background "white"
+           {:background "red"
             :width (vw (- 100 thread-margin thread-margin thread-peek))
             :height "100vh"
             :margin-right (vw thread-margin)
