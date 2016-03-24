@@ -3,7 +3,8 @@
             [re-frame.core :refer [subscribe dispatch]]
             [braid.mobile.state]
             [braid.mobile.style :refer [styles]]
-            [braid.mobile.sidebar :refer [sidebar-view]]))
+            [braid.mobile.sidebar :refer [sidebar-view]]
+            [braid.mobile.panels :refer [panels-view]]))
 
 (enable-console-print!)
 
@@ -26,10 +27,7 @@
       ; TODO Why is this being rendered when sidebar is dragged?
       [:div.inbox.page
        [:div.threads
-        (doall
-          (for [thread @threads]
-            ^{:key (thread :id)}
-            [thread-view thread]))]])))
+        [panels-view @threads thread-view]]])))
 
 (defn main-view []
   [:div.main

@@ -3,7 +3,7 @@
             [reagent.ratom :include-macros true :refer-macros [reaction]]))
 
 
-; sidebar open / close / dragging
+; sidebar-view open / close / dragging
 
 (rf/register-sub :sidebar-dragging?
   (fn [state _]

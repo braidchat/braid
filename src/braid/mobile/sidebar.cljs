@@ -17,43 +17,50 @@
 (defn sidebar-view []
   (let [sidebar-position (subscribe [:sidebar-position])
         sidebar-open? (subscribe [:sidebar-open?])
-        sidebar-dragging? (subscribe [:sidebar-dragging?])]
+        sidebar-dragging? (subscribe [:sidebar-dragging?])
+
+        open-width 100 ; TODO grab this dynamically from .content width
+        fudge-x 50
+
+        touch-start!  (fn [e]
+                        (let [x (.-clientX (aget (.-touches e) 0))
+                              sidebar-open? (subscribe [:sidebar-open?])]
+                          (when (or (and (not @sidebar-open?) (< x fudge-x))
+                                    (and @sidebar-open? (< (- open-width fudge-x) x (+ open-width fudge-x))))
+                            (.stopPropagation e)
+                            (dispatch [:sidebar-drag-start! x]))))
+
+        touch-move! (fn [e]
+                      (let [x (.-clientX (aget (.-touches e) 0))
+                            sidebar-dragging? (subscribe [:sidebar-dragging?])]
+                        (when @sidebar-dragging?
+                          (.stopPropagation e))
+                        (dispatch [:sidebar-set-position! x])))
+
+        touch-end!  (fn [e]
+                      (let [x (.-clientX (aget (.-changedTouches e) 0))
+                            sidebar-dragging? (subscribe [:sidebar-dragging?])]
+                        (when @sidebar-dragging?
+                          (.stopPropagation e)
+                          (if @sidebar-open?
+                            (if (< x open-width)
+                              (dispatch [:sidebar-close!])
+                              (dispatch [:sidebar-open!]))
+                            (if (> x fudge-x)
+                              (dispatch [:sidebar-open!])
+                              (dispatch [:sidebar-close!]))))))
+        ]
     (r/create-class
       {:component-did-mount
        (fn []
-         (let [open-width 100 ; TODO grab this dynamically from .content width
-               fudge-x 50]
-           (.addEventListener js/document "touchstart"
-                              (fn [e]
-                                (let [x (.-clientX (aget (.-touches e) 0))
-                                      sidebar-open? (subscribe [:sidebar-open?])]
-                                  (when (or (and (not @sidebar-open?) (< x fudge-x))
-                                            (and @sidebar-open? (< (- open-width fudge-x) x (+ open-width fudge-x))))
-                                    (dispatch [:sidebar-drag-start! x])))))
-
-           (.addEventListener js/document "touchmove"
-                              (fn [e]
-                                (let [x (.-clientX (aget (.-touches e) 0))
-                                      sidebar-open? (subscribe [:sidebar-open?])]
-                                  (when @sidebar-dragging?
-                                    (dispatch [:sidebar-set-position! x])))))
-
-           (.addEventListener js/document "touchend"
-                              (fn [e]
-                                (let [x (.-clientX (aget (.-changedTouches e) 0))
-                                      sidebar-dragging? (subscribe [:sidebar-dragging?])]
-                                  (when @sidebar-dragging?
-                                    (if @sidebar-open?
-                                      (if (< x open-width)
-                                        (dispatch [:sidebar-close!])
-                                        (dispatch [:sidebar-open!]))
-                                      (if (> x fudge-x)
-                                        (dispatch [:sidebar-open!])
-                                        (dispatch [:sidebar-close!])))))))))
+         (.addEventListener js/document "touchstart" touch-start! true)
+         (.addEventListener js/document "touchmove" touch-move!  true)
+         (.addEventListener js/document "touchend" touch-end! true))
        :component-will-unmount
        (fn []
-         ; TODO remove listeners
-         )
+         (.removeEventListener js/document "touchstart" touch-start! true)
+         (.removeEventListener js/document "touchmove" touch-move!  true)
+         (.removeEventListener js/document "touchend" touch-end! true))
        :reagent-render
        (fn []
          [:div.sidebar
