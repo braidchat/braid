@@ -1,6 +1,29 @@
 (ns braid.mobile.sidebar
   (:require [reagent.core :as r]
-            [reagent.ratom :include-macros true :refer-macros [reaction]]))
+            [reagent.ratom :include-macros true :refer-macros [reaction]]
+            [garden.core :refer [css]]))
+
+(def style-view
+  (fn []
+    [:style
+     (css
+       (let [w "25vw"]
+         [:.sidebar
+          {:background "black"
+           :position "absolute"
+           :top 0
+           :bottom 0
+           :padding-left "100vw"
+           :margin-left "-100vw"
+           :width "25vw"
+           :right "100vw"
+           :z-index 100}
+          [:&.open :&.closed
+           {:transition "transform 0.25s ease-in-out"}]
+          [:&.closed
+           {:transform "translate3d(0,0,0)"}]
+          [:&.open
+           {:transform (str "translate3d(" w ",0,0)")}]]))]))
 
 (defn sidebar-view [content-view]
   (let [state (r/atom {})
@@ -86,4 +109,5 @@
                            {:class "open"}
                            :else
                            {:class "closed"})
-            [:div.content content-view]]))})))
+            [:div.content content-view]
+            [style-view]]))})))
