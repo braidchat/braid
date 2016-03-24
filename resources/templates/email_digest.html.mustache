@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Braid Email Digest</title>
+    <style>
+    </style>
+  </head>
+  <body>
+    <h1>Braid Updates</h1>
+    <table>
+      <thead></thead>
+      <tbody>
+        <tr>
+          <td align="center">
+            <div class="header">
+              <p>Some things that happened on Braid while you were away</p>
+            </div>
+            <div class="threads">
+              {{#threads}}
+              <div class="thread">
+                <div class="messages">
+                  {{#messages}}
+                  <div class="message">
+                    <img src="{{sender-avatar}}">
+                    <div class="info">
+                      <span class="nickname">{{sender}}</span>
+                      <span class="time">{{created-at}}</span>
+                    </div>
+                    <div class="content">{{content}}</div>
+                  </div>
+                  {{/messages}}
+                </div>
+              </div>
+              {{/threads}}
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
