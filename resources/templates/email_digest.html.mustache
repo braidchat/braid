@@ -12,17 +12,24 @@
       <tbody>
         <tr>
           <td align="center">
+            <div class="header">
+              <p>Some things that happened on Braid while you were away</p>
+            </div>
             <div class="threads">
               {{#threads}}
               <div class="thread">
-                <ul class="messages">
+                <div class="messages">
                   {{#messages}}
-                  <li>
-                    <span class="sender">{{sender}}</span>
-                    <span class="content">{{content}}</span>
-                  </li>
+                  <div class="message">
+                    <img src="{{sender-avatar}}">
+                    <div class="info">
+                      <span class="nickname">{{sender}}</span>
+                      <span class="time">{{created-at}}</span>
+                    </div>
+                    <div class="content">{{content}}</div>
+                  </div>
                   {{/messages}}
-                </ul>
+                </div>
               </div>
               {{/threads}}
             </div>

@@ -33,15 +33,21 @@
 (defn updates-for-user-since
   [user-id cutoff]
   (db/with-conn
-    (let [id->nick (into {} (map (juxt :id :nickname))
-                         (db/fetch-users-for-user user-id))]
+    (let [users (db/fetch-users-for-user user-id)
+          id->nick (into {} (map (juxt :id :nickname)) users)
+          id->avatar (into {} (map (juxt :id :avatar)) users)]
       (into ()
-            (comp (filter thread-unseen?)
-                  (filter (partial last-message-after? cutoff))
-                  (map (fn [t]
-                         (map (fn [m]
-                                (assoc m :sender (-> (m :user-id) id->nick)))
-                              (t :messages)))))
+            (comp
+              (filter thread-unseen?)
+              (filter (partial last-message-after? cutoff))
+              (map
+                (fn [t]
+                  (update t :messages
+                          (partial map
+                                   (fn [{sender-id :user-id :as m}]
+                                     (-> m
+                                         (assoc :sender (id->nick sender-id))
+                                         (assoc :sender-avatar (id->avatar sender-id)))))))))
             (db/get-open-threads-for-user user-id)))))
 
 (defn daily-update-users
