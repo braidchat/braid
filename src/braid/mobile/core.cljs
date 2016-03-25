@@ -10,10 +10,18 @@
 
 (defn message-view [message]
   [:div.message
-   [:img.avatar]
-   [:div.name "username"]
-   [:div.time "4:35 PM"]
+   [:a.avatar
+    [:img]]
+   [:div.info
+    [:div.nickname "username"]
+    [:div.time "4:35 PM"]]
    [:div.content (:content message)]])
+
+(defn new-message-view []
+  (fn []
+    [:div.new.message
+     [:textarea {:value "asd"
+                 :on-change (fn [e])}]]))
 
 (defn tag-view [tag-id]
   (let [tag (subscribe [:get-tag tag-id])]
@@ -21,19 +29,21 @@
 
 (defn thread-view [thread]
   [:div.thread
-   [:div.tags
+   [:div.card
+    [:div.head
+     [:div.tags
+      (doall
+        (for [tag-id (thread :tag-ids)]
+          ^{:key tag-id}
+          [tag-view tag-id]))
+      [:a.add "+"]]
+     [:div.close "×"]]]
+   [:div.messages
     (doall
-      (for [tag-id (thread :tag-ids)]
-        ^{:key tag-id}
-        [tag-view tag-id]))
-    [:a.tag-add "+"]]
-   [:div.close "×"]
-   (doall
-     (for [message (:messages thread)]
-       ^{:key (message :id)}
-       [message-view message]))
-   [:textarea {:value "asd"
-               :on-change (fn [e])}]])
+      (for [message (:messages thread)]
+        ^{:key (message :id)}
+        [message-view message]))]
+   [new-message-view] ])
 
 (defn inbox-view []
   (let [threads (subscribe [:active-group-inbox-threads])]

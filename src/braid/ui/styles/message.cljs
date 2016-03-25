@@ -34,11 +34,13 @@
      :overflow "hidden"
      :white-space "nowrap"}
      [:.nickname
-      {:font-weight "bold"
+      {:display "inline"
+       :font-weight "bold"
        :text-decoration "none"
        :color "#000"}]
      [:.time
-      {:margin-left "0.25rem"
+      {:display "inline"
+       :margin-left "0.25rem"
        :color "#ccc"}]]
 
    [:.content
