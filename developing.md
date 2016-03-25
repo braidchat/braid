@@ -71,6 +71,12 @@ In a seperate terminal session:
 lein run -m clojure.main script/figwheel.clj
 ```
 
+for working on the mobile client:
+
+```bash
+lein run figwheel mobile-dev
+```
+
 ## LessCSS
 
 In a seperate terminal session:
