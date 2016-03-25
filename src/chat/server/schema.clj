@@ -47,6 +47,12 @@
   :db/cardinality :db.cardinality/many
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
+ ; user - preferences
+ {:db/ident :user/preferences
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
  ; message
  {:db/ident :message/id
