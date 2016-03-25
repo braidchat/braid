@@ -59,7 +59,8 @@
 
                {:id "mobile-dev"
                 :figwheel true
-                :source-paths ["src/braid/mobile"]
+                :source-paths ["src/braid/mobile"
+                               "src/braid/ui"]
                 :compiler {:main braid.mobile.core
                            :asset-path "/mobile/js/out"
                            :output-to "resources/public/mobile/js/out/braid.js"

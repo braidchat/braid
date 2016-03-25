@@ -3,6 +3,7 @@
             [garden.stylesheet :refer [at-import]]
             [garden.arithmetic :as m]
             [garden.units :refer [rem vw vh]]
+            [braid.ui.styles.body]
             [braid.ui.styles.message]))
 
 (defn tee [x]
@@ -117,6 +118,7 @@
              :overflow-y "scroll"
              :padding [[0 pad]]}]]]
 
+         braid.ui.styles.body/body
          braid.ui.styles.message/message
          braid.ui.styles.message/new-message
          )))

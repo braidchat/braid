@@ -1,10 +1,9 @@
 (ns chat.client.views
   (:require [om.core :as om]
             [om.dom :as dom]
-            [garden.core :refer [css]]
-            [braid.ui.styles.message]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
+            [chat.client.views.style :refer [style-view]]
             [chat.client.views.groups-nav :refer [groups-nav-view]]
             [chat.client.views.header :refer [header-view]]
             [chat.client.views.pages.search :refer [search-page-view]]
@@ -87,16 +86,6 @@
           :me (om/build me-page-view data)
           :group-explore (om/build group-explore-view data)
           :extensions (om/build extensions-page-view data))))))
-
-(defn style-view [_ _]
-  (reify
-    om/IRender
-    (render [_]
-      (dom/style #js {:type "text/css"
-                      :dangerouslySetInnerHTML
-                      #js {:__html (css
-                                     braid.ui.styles.message/message
-                                     braid.ui.styles.message/new-message)}}))))
 
 (defn app-view [data owner]
   (reify
