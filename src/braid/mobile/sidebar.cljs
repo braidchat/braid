@@ -4,7 +4,7 @@
             [garden.core :refer [css]]))
 
 (def easing-fn
-  "cubic-bezier(.43, 0, .58, 1)")
+  "cubic-bezier(.42, 0, .58, 1)")
 
 (def style-view
   (fn []
