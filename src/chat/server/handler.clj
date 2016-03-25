@@ -234,4 +234,6 @@
     (nrepl/start-server :port repl-port)
     (println "starting on port " port)
     (println "starting quartz scheduler")
-    (start-scheduler!)))
+    (start-scheduler!)
+    (println "scheduling email digest jobs")
+    (email-digest/add-jobs @scheduler)))
