@@ -47,8 +47,7 @@
        [:a.group {:on-click
                   (fn [e]
                     (dispatch [:set-active-group-id! (group :id)]))}
-        [:img]
-        [:div.name (group :name)]])]))
+        [:img]])]))
 
 (defn main-view []
   [:div.main

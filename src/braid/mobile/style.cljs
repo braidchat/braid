@@ -18,7 +18,8 @@
           :box-sizing "border-box"}
          [:.group
           {:display "block"
-           :width "100%"}
+           :width "100%"
+           :margin-bottom "1rem"}
           [:img
            {:width "100%"
             :padding-bottom "100%"
