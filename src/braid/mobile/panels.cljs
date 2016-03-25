@@ -1,6 +1,24 @@
 (ns braid.mobile.panels
   (:require [reagent.core :as r]
-            [reagent.ratom :include-macros true :refer-macros [reaction]]))
+            [reagent.ratom :include-macros true :refer-macros [reaction]]
+            [garden.core :refer [css]]))
+
+(def easing-fn
+  "cubic-bezier(.43, 0, .58, 1)")
+
+(def style-view
+  (fn []
+    [:style
+     (css
+       [:.panels
+        {:height "100vh"
+         :display "flex"
+         :flex-flow "row"}
+        [:.panel
+         {:width "100vw"
+          :height "100vh"
+          :display "inline-block"
+          :vertical-align "top" }]])]))
 
 (defn panels-view [panel-items panel-view]
   (let [state (r/atom {:pos-x 0})
@@ -87,7 +105,8 @@
                dragging? (get-dragging?)]
            [:div.panels {:style {:transform (str "translate3d(" @x "px,0,0)")
                                  :transition (when-not @dragging?
-                                               "transform 0.25s ease-in-out")}}
+                                               (str "transform" " 0.25s " easing-fn))}}
+            [style-view]
             (doall
               (for [panel-item panel-items]
                 ^{:key (:id panel-item)}

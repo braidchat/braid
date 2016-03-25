@@ -37,18 +37,11 @@
          :bottom 0
          :overflow "hidden"
          :z-index 50
+         :background "#CCC"
          }]
 
-       (let [thread-margin 4 ;vw
-             ]
-         [:.panels
-          {:height "100vh"
-           :min-width "300vw"}
-          [:.panel
-           {:width (vw (- 100 thread-margin thread-margin))
-            :height "100vh"
-            :margin-right (vw thread-margin)
-            :margin-left (vw thread-margin)
-            :display "inline-block"
-            :vertical-align "top"
-            }]])))
+       [:.threads
+        [:.thread
+         {:width "100vw"
+          :height "100vh"
+          :background "white" }]]))
