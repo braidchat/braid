@@ -3,6 +3,9 @@
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [garden.core :refer [css]]))
 
+(def easing-fn
+  "cubic-bezier(.43, 0, .58, 1)")
+
 (def style-view
   (fn []
     [:style
@@ -19,7 +22,7 @@
            :right "100vw"
            :z-index 100}
           [:&.open :&.closed
-           {:transition "transform 0.25s ease-in-out"}]
+           {:transition (str "transform" " 0.25s " easing-fn)}]
           [:&.closed
            {:transform "translate3d(0,0,0)"}]
           [:&.open
