@@ -22,32 +22,38 @@
 (defn thread-view [thread]
   [:div.thread
    [:div.tags
-    (for [tag-id (thread :tag-ids)]
-      [tag-view tag-id])
+    (doall
+      (for [tag-id (thread :tag-ids)]
+        ^{:key tag-id}
+        [tag-view tag-id]))
     [:a.tag-add "+"]]
    [:div.close "×"]
-   (for [message (:messages thread)]
-     ^{:key (message :id)}
-     [message-view message])
-   [:textarea {:value "asd"}]])
+   (doall
+     (for [message (:messages thread)]
+       ^{:key (message :id)}
+       [message-view message]))
+   [:textarea {:value "asd"
+               :on-change (fn [e])}]])
 
 (defn inbox-view []
-  (let [threads (subscribe [:active-group-inbox-threads])
-        group (subscribe [:active-group])]
+  (let [threads (subscribe [:active-group-inbox-threads])]
     (fn []
       [:div.inbox.page
        [:div.threads
         [panels-view @threads thread-view]]])))
 
 (defn groups-view []
-  (let [groups (subscribe [:groups])]
+  (let [groups (subscribe [:groups])
+        active-group (subscribe [:active-group])]
     [:div.groups
-     (for [group @groups]
-       ^{:key (group :id)}
-       [:a.group {:on-click
-                  (fn [e]
-                    (dispatch [:set-active-group-id! (group :id)]))}
-        [:img]])]))
+     (doall
+       (for [group @groups]
+         ^{:key (group :id)}
+         [:a.group {:class (when (= group @active-group) "active")
+                    :on-click
+                    (fn [e]
+                      (dispatch [:set-active-group-id! (group :id)]))}
+          [:img]]))]))
 
 (defn main-view []
   [:div.main
@@ -66,7 +72,8 @@
   (let [logged-in? (subscribe [:logged-in?])]
     (fn []
       [:div.app
-       [:style styles]
+       [:style {:type "text/css"
+                :dangerouslySetInnerHTML {:__html styles}}]
        (if @logged-in?
          [main-view]
          [login-view])])))

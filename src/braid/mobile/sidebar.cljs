@@ -18,7 +18,7 @@
            :bottom 0
            :padding-left "100vw"
            :margin-left "-100vw"
-           :width "25vw"
+           :width w
            :right "100vw"
            :z-index 100}
           [:&.open :&.closed
