@@ -3,6 +3,7 @@
             [om.dom :as dom]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
+            [chat.client.views.style :refer [style-view]]
             [chat.client.views.groups-nav :refer [groups-nav-view]]
             [chat.client.views.header :refer [header-view]]
             [chat.client.views.pages.search :refer [search-page-view]]
@@ -91,6 +92,7 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "app"}
+        (om/build style-view {})
         (if (data :session)
           (om/build main-view data)
           (om/build login-view data))))))
