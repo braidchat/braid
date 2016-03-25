@@ -43,17 +43,21 @@
         [panels-view @threads thread-view]]])))
 
 (defn groups-view []
-  (let [groups (subscribe [:groups])
+  (let [groups (subscribe [:groups-with-unread])
         active-group (subscribe [:active-group])]
     [:div.groups
      (doall
        (for [group @groups]
          ^{:key (group :id)}
-         [:a.group {:class (when (= group @active-group) "active")
+         [:a.group {:class (when (= (group :id)
+                                    (@active-group :id))
+                             "active")
                     :on-click
                     (fn [e]
                       (dispatch [:set-active-group-id! (group :id)]))}
-          [:img]]))]))
+          [:img]
+          (when (not= 0 (:unread-count group))
+            [:div.badge (:unread-count group)])]))]))
 
 (defn main-view []
   [:div.main

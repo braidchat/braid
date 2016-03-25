@@ -38,9 +38,18 @@
                 :background "white"
                 :border-radius "0.5rem"
                 :vertical-align "middle"}]
-              [:.name
-               {:display "inline-block"
-                :color "white"}]])]]
+              [:.badge
+               {:font-size "0.8rem"
+                :padding "0 0.5em"
+                :border-radius "0.5em"
+                :display "inline-block"
+                :line-height "1.75em"
+                :background "#B53737"
+                :color "white"
+                :border-color "#B53737"
+                :position "absolute"
+                :bottom "-0.5rem"
+                :right "-0.5rem"}]])]]
 
          [:.page
           {:position "absolute"

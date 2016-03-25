@@ -14,10 +14,17 @@
   (fn [state _]
     (reaction (boolean (:user @state)))))
 
-(rf/register-sub :groups
+(rf/register-sub :groups-with-unread
   (fn [state _]
-    (reaction (vals (:groups @state)))))
-
+    (let [groups (reaction (vals (:groups @state)))
+          threads-by-group-id (->> (:threads @state)
+                                   vals
+                                   (group-by :group-id))]
+      ; TODO not actually unread-count
+      (reaction (->> @groups
+                     (map (fn [g]
+                            (assoc g :unread-count
+                              (count (threads-by-group-id (g :id)))))))))))
 ; current group
 
 (rf/register-sub :active-group
