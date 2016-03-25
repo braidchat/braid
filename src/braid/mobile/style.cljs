@@ -36,7 +36,10 @@
 (def styles
   (let [pad (vw 5)
         pads "5vw"]
-    (css [:.sidebar
+    (css  [:body
+           {:touch-action "none"}]
+
+         [:.sidebar
           {:background "red"}
           [:.content
            {:width "100%"
