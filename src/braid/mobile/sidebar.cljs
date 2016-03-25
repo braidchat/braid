@@ -62,8 +62,7 @@
         touch-start!  (fn [e]
                         (let [x (.-clientX (aget (.-touches e) 0))
                               open? (get-open?)]
-                          (when (or (and (not @open?) (< x fudge-x))
-                                    (and @open? (< (- open-width fudge-x) x (+ open-width fudge-x))))
+                          (when (and (not @open?) (< x fudge-x))
                             (.stopPropagation e)
                             (drag-start! x))))
 
