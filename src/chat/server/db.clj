@@ -138,6 +138,36 @@
     (->> (d/resolve-tempid db-after tempids new-id)
          (d/entity db-after))))
 
+(defn get-user-preferences
+  [user-id]
+  (->> (d/pull (d/db *conn*) [:user/preferences] [:user/id user-id])
+      :user/preferences
+      ((fnil edn/read-string "{}"))))
+
+(defn user-set-preference!
+  "Set a key to a value for the user's preferences.  This will throw if
+  permissions are changed in between reading & setting"
+  [user-id k v]
+  (let [old-prefs (-> (d/pull (d/db *conn*) [:user/preferences] [:user/id user-id])
+                      :user/preferences)
+        new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
+                      (assoc k v)
+                      pr-str)]
+    (d/transact *conn* [[:db.fn/cas [:user/id user-id]
+                         :user/preferences old-prefs new-prefs]])))
+
+(defn user-search-preferences
+  "Find the ids of users that have the a given value for a given key set in their preferences"
+  [k v]
+  (d/q '[:find [?user-id ...]
+         :in $ ?kv
+         :where
+         [(.contains ^String ?pref ^String ?kv)]
+         [?u :user/preferences ?pref]
+         [?u :user/id ?user-id]]
+       (d/db *conn*)
+       (str (pr-str k) " " (pr-str v))))
+
 (defn get-users-subscribed-to-thread
   [thread-id]
   (d/q '[:find [?user-id ...]
@@ -290,6 +320,10 @@
   [email]
   (some-> (d/pull (d/db *conn*) user-pull-pattern [:user/email email])
           db->user))
+
+(defn user-email
+  [user-id]
+  (:user/email (d/pull (d/db *conn*) [:user/email] [:user/id user-id])))
 
 (defn create-invitation!
   [{:keys [id inviter-id invitee-email group-id]}]

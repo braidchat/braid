@@ -3,6 +3,17 @@
             [datomic.api :as d]
             [clojure.string :as string]))
 
+(defn migrate-2016-03-21
+  "Add user preferences"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [{:db/ident :user/preferences
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])))
+
 (defn migrate-2016-03-04
   "Add extension type as attribute"
   []
