@@ -46,29 +46,31 @@
                    slurp)]
       (string/replace html #"\{\{\w*\}\}" replacements)))
 
-  ; TODO: verify that this is a group that you are allowed to join without an invite
   (POST "/public-register/:group-id" [group-id email :as req]
-    (if (string/blank? email)
-      {:status 400 :body "Invalid email"}
-      (let [group-id (java.util.UUID/fromString group-id)
-            id (db/uuid)
-            avatar (identicons/id->identicon-data-url id)
-            ; XXX: copied from chat.shared.util/nickname-rd
-            disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
-            nick (-> (first (string/split email #"@"))
-                     (string/replace disallowed-chars ""))
-            u (db/with-conn (db/create-user! {:id id
-                                              :email email
-                                              :password (random-nonce 50)
-                                              :avatar avatar
-                                              :nickname nick}))]
-        (db/with-conn
-          (db/user-add-to-group! id group-id)
-          (db/user-subscribe-to-group-tags! id group-id))
-        (sync/broadcast-user-change id [:chat/new-user u])
-        {:status 302 :headers {"Location" "/"}
-         :session (assoc (req :session) :user-id id)
-         :body ""})))
+    (let [group-id (java.util.UUID/fromString group-id)
+          group-settings (db/with-conn (db/group-settings group-id))]
+      (if-not (get group-settings :public?)
+        {:status 400 :body "No such group or the group is private"}
+        (if (string/blank? email)
+          {:status 400 :body "Invalid email"}
+          (let [id (db/uuid)
+                avatar (identicons/id->identicon-data-url id)
+                ; XXX: copied from chat.shared.util/nickname-rd
+                disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
+                nick (-> (first (string/split email #"@"))
+                         (string/replace disallowed-chars ""))
+                u (db/with-conn (db/create-user! {:id id
+                                                  :email email
+                                                  :password (random-nonce 50)
+                                                  :avatar avatar
+                                                  :nickname nick}))]
+            (db/with-conn
+              (db/user-add-to-group! id group-id)
+              (db/user-subscribe-to-group-tags! id group-id))
+            (sync/broadcast-user-change id [:chat/new-user u])
+            {:status 302 :headers {"Location" "/"}
+             :session (assoc (req :session) :user-id id)
+             :body ""})))))
 
   (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
