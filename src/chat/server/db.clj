@@ -762,3 +762,22 @@
                [:group/id group-id])
        :extension/_group
        (map db->extension)))
+
+(defn group-settings
+  [group-id]
+  (->> (d/pull (d/db *conn*) [:group/settings] [:group/id group-id])
+       :group/settings
+       ((fnil edn/read-string "{}"))))
+
+(defn group-set!
+  "Set a key to a value for the group's settings  This will throw if
+  permissions are changed in between reading & setting"
+  [group-id k v]
+  (let [old-prefs (-> (d/pull (d/db *conn*) [:group/settings] [:group/id group-id])
+                      :group/settings)
+        new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
+                      (assoc k v)
+                      pr-str)]
+    (d/transact *conn* [[:db.fn/cas [:group/id group-id]
+                         :group/settings old-prefs new-prefs]])))
+
