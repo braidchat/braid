@@ -13,6 +13,7 @@
             [chat.server.sync :as sync :refer [sync-routes]]
             [environ.core :refer [env]]
             [chat.shared.util :refer [valid-nickname?]]
+            [chat.server.cache :refer [random-nonce]]
             [chat.server.db :as db]
             [chat.server.invite :as invites]
             [chat.server.digest :as digest]
@@ -20,7 +21,8 @@
             [chat.server.extensions :as ext :refer [b64->str]]
             ; just requiring to register multimethods
             chat.server.extensions.asana
-            [chat.server.email-digest :as email-digest]))
+            [chat.server.email-digest :as email-digest]
+            [chat.server.identicons :as identicons]))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
@@ -43,6 +45,30 @@
                    clojure.java.io/resource
                    slurp)]
       (string/replace html #"\{\{\w*\}\}" replacements)))
+
+  ; TODO: verify that this is a group that you are allowed to join without an invite
+  (POST "/public-register/:group-id" [group-id email :as req]
+    (if (string/blank? email)
+      {:status 400 :body "Invalid email"}
+      (let [group-id (java.util.UUID/fromString group-id)
+            id (db/uuid)
+            avatar (identicons/id->identicon-data-url id)
+            ; XXX: copied from chat.shared.util/nickname-rd
+            disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
+            nick (-> (first (string/split email #"@"))
+                     (string/replace disallowed-chars ""))
+            u (db/with-conn (db/create-user! {:id id
+                                              :email email
+                                              :password (random-nonce 50)
+                                              :avatar avatar
+                                              :nickname nick}))]
+        (db/with-conn
+          (db/user-add-to-group! id group-id)
+          (db/user-subscribe-to-group-tags! id group-id))
+        (sync/broadcast-user-change id [:chat/new-user u])
+        {:status 302 :headers {"Location" "/"}
+         :session (assoc (req :session) :user-id id)
+         :body ""})))
 
   (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
@@ -78,7 +104,7 @@
                 (db/user-add-to-group! (user :id) (invite :group-id))
                 (db/user-subscribe-to-group-tags! (user :id) (invite :group-id))
                 (db/retract-invitation! (invite :id)))
-              (sync/broadcast-user-change (user :id) [:chat/new-user (dissoc user :email)])
+              (sync/broadcast-user-change (user :id) [:chat/new-user user])
               {:status 302 :headers {"Location" "/"}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))))))
