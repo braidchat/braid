@@ -8,6 +8,9 @@
    {:position "relative"
     :margin [[0 0 pad]]}
 
+   [:&.failed-to-send
+    {:background-color "rgba(239, 72, 72, 0.53)"}]
+
    [:&.collapse
     {:margin-top (m/- pad)}
      [:.avatar :.info

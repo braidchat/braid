@@ -66,7 +66,23 @@
                      :mentioned-user-ids (concat (data :mentioned-user-ids)
                                                  (extract-user-ids (data :content)))})]
       (store/add-message! message)
-      (sync/chsk-send! [:chat/new-message message]))))
+      (sync/chsk-send!
+        [:chat/new-message message]
+        2000
+        (fn [reply]
+          (when (not= :braid/ok reply)
+            (store/display-error! (str :failed-to-send (message :id)) "Message failed to send!")
+            (store/set-message-failed! message)))))))
+
+(defmethod dispatch! :resend-message [_ message]
+  (store/clear-message-failed! message)
+  (sync/chsk-send!
+    [:chat/new-message message]
+    2000
+    (fn [reply]
+      (when (not= :braid/ok reply)
+        (store/display-error! (str :failed-to-send (message :id)) "Message failed to send!")
+        (store/set-message-failed! message)))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])

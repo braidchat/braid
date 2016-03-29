@@ -5,6 +5,7 @@
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [id->color]]
             [chat.client.emoji :as emoji]
+            [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.helpers :as helpers :refer [starts-with? ends-with?]]
             [chat.client.views.pills :refer [tag-view user-view]]
             [chat.client.routes :as routes]))
@@ -182,7 +183,13 @@
         (dom/div #js {:className (str "message"
                                       " " (when (:collapse? opts) "collapse")
                                       " " (if (:unseen? message) "unseen" "seen")
-                                      " " (when (:first-unseen? message) "first-unseen"))}
+                                      " " (when (:first-unseen? message) "first-unseen")
+                                      " " (when (:failed? message) "failed-to-send"))}
+          (when (:failed? message)
+            (dom/div #js {:className "error"}
+              (dom/span nil "Message failed to send")
+              (dom/button #js {:onClick (fn [_] (dispatch! :resend-message message))}
+                "Resend")))
           (dom/a #js {:href sender-path
                       :tabIndex -1
                       :className "avatar"}
