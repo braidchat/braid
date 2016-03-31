@@ -132,6 +132,18 @@
   (transact! [:threads (message :thread-id) :tag-ids] #(apply conj (set %) (message :mentioned-tag-ids)))
   (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj (set %) (message :mentioned-user-ids))))
 
+(defn set-message-failed! [message]
+  (transact! [:threads (message :thread-id) :messages]
+    (partial map (fn [msg] (if (= (message :id) (msg :id))
+                             (assoc msg :failed? true)
+                             msg)))))
+
+(defn clear-message-failed! [message]
+  (transact! [:threads (message :thread-id) :messages]
+    (partial map (fn [msg] (if (= (message :id) (msg :id))
+                             (dissoc msg :failed?)
+                             msg)))))
+
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here
   (when-not (get-in @app-state [:notifications :window-visible?])

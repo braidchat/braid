@@ -211,11 +211,16 @@
             (fn [result]
               ((result :action) (config :thread-id))
               (om/set-state! owner :text ((result :message-transform) text)))
-            autocomplete-open? (and (not force-close?) (not (nil? results)))]
+            autocomplete-open? (and (not force-close?) (not (nil? results)))
+            errors-cursor (->> (om/root-cursor store/app-state) :errors
+                               om/ref-cursor (om/observe owner))
+            connected? (not-any? (fn [[k _]] (= :disconnected k))
+                                 errors-cursor)]
           (dom/div #js {:className "message new"}
             (dom/textarea #js {:placeholder (config :placeholder)
                                :ref "message-text"
                                :value (state :text)
+                               :disabled (not connected?)
                                :onChange (fn [e]
                                            (let [text (.slice (.. e -target -value) 0 5000)]
                                              (om/update-state! owner

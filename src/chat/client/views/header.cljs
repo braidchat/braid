@@ -63,6 +63,16 @@
                      (map (fn [tag]
                             (dom/div nil (om/build tag-view tag)))))))))
 
+        (comment
+          (let [path (routes/extensions-page-path {:group-id (routes/current-group)})]
+            (dom/div #js {:className (str "extensions shortcut "
+                                          (when (routes/current-path? path) "active"))}
+              (dom/a #js {:href path
+                          :className "title"
+                          :title "Extensions"})
+              (dom/div #js {:className "modal"}
+                (dom/div nil "extensions")))))
+
         (let [path (routes/help-page-path {:group-id (routes/current-group)})]
           (dom/div #js {:className (str "help shortcut "
                                         (when (routes/current-path? path) "active"))}

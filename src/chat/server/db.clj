@@ -45,11 +45,6 @@
    :thread-id (:thread/id (:message/thread e))
    :created-at (:message/created-at e)})
 
-(defn- db->group [e]
-  {:id (:group/id e)
-   :name (:group/name e)
-   :users (:group/user e)})
-
 (defn- db->invitation [e]
   {:id (:invite/id e)
    :inviter-id (get-in e [:invite/from :user/id])
@@ -95,22 +90,38 @@
    :tag-ids (map :tag/id (thread :thread/tag))
    :mentioned-ids (map :user/id (thread :thread/mentioned))})
 
+(def extension-pull-pattern
+  [:extension/id
+   :extension/config
+   :extension/type
+   :extension/token
+   :extension/refresh-token
+   {:extension/user [:user/id]}
+   {:extension/group [:group/id]}
+   {:extension/watched-threads [:thread/id]}])
+
 (defn- db->extension
   [ext]
   {:id (:extension/id ext)
+   :type (:extension/type ext)
    :group-id (get-in ext [:extension/group :group/id])
+   :user-id (get-in ext [:extension/user :user/id])
    :threads (map :thread/id (:extension/watched-threads ext))
    :config (edn/read-string (:extension/config ext))
    :token (:extension/token ext)
    :refresh-token (:extension/refresh-token ext)})
 
-(def extension-pull-pattern
-  [:extension/id
-   :extension/config
-   :extension/token
-   :extension/refresh-token
-   {:extension/group [:group/id]}
-   {:extension/watched-threads [:thread/id]}])
+(def group-pull-pattern
+  [:group/id
+   :group/name
+   {:extension/_group [:extension/id :extension/type]}])
+
+(defn- db->group [e]
+  {:id (:group/id e)
+   :name (:group/name e)
+   :extensions (map (fn [x] {:id (:extension/id x)
+                             :type (:extension/type x)})
+                    (:extension/_group e))})
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
@@ -126,6 +137,36 @@
                                                 [(assoc attrs :db/id new-id)])]
     (->> (d/resolve-tempid db-after tempids new-id)
          (d/entity db-after))))
+
+(defn get-user-preferences
+  [user-id]
+  (->> (d/pull (d/db *conn*) [:user/preferences] [:user/id user-id])
+      :user/preferences
+      ((fnil edn/read-string "{}"))))
+
+(defn user-set-preference!
+  "Set a key to a value for the user's preferences.  This will throw if
+  permissions are changed in between reading & setting"
+  [user-id k v]
+  (let [old-prefs (-> (d/pull (d/db *conn*) [:user/preferences] [:user/id user-id])
+                      :user/preferences)
+        new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
+                      (assoc k v)
+                      pr-str)]
+    (d/transact *conn* [[:db.fn/cas [:user/id user-id]
+                         :user/preferences old-prefs new-prefs]])))
+
+(defn user-search-preferences
+  "Find the ids of users that have the a given value for a given key set in their preferences"
+  [k v]
+  (d/q '[:find [?user-id ...]
+         :in $ ?kv
+         :where
+         [(.contains ^String ?pref ^String ?kv)]
+         [?u :user/preferences ?pref]
+         [?u :user/id ?user-id]]
+       (d/db *conn*)
+       (str (pr-str k) " " (pr-str v))))
 
 (defn get-users-subscribed-to-thread
   [thread-id]
@@ -256,12 +297,18 @@
                     :in $ ?email
                     :where
                     [?e :user/id ?id]
-                    [?e :user/email ?email]
+                    [?e :user/email ?stored-email]
+                    [(.toLowerCase ^String ?stored-email) ?email]
                     [?e :user/password-token ?password-token]]
                   (d/db *conn*)
-                  email)]
+                  (.toLowerCase email))]
          (when (and user-id (password/check password password-token))
            user-id))))
+
+(defn set-user-password!
+  [user-id password]
+  @(d/transact *conn* [[:db/add [:user/id user-id]
+                        :user/password-token (password/encrypt password)]]))
 
 (defn user-by-id
   [id]
@@ -273,6 +320,10 @@
   [email]
   (some-> (d/pull (d/db *conn*) user-pull-pattern [:user/email email])
           db->user))
+
+(defn user-email
+  [user-id]
+  (:user/email (d/pull (d/db *conn*) [:user/email] [:user/id user-id])))
 
 (defn create-invitation!
   [{:keys [id inviter-id invitee-email group-id]}]
@@ -352,11 +403,16 @@
 
 (defn get-group
   [group-id]
-  (-> (d/pull (d/db *conn*) [:group/id :group/name] [:group/id group-id])
+  (-> (d/pull (d/db *conn*) group-pull-pattern [:group/id group-id])
       db->group))
 
 (defn get-groups-for-user [user-id]
-  (->> (d/q '[:find (pull ?g [:group/id :group/name])
+  ; XXX: duplicating group-pull-pattern here, because interpolating variables
+  ; into datomic :find queries doesn't work well
+  (->> (d/q '[:find (pull ?g [:group/id
+                              :group/name
+                              {:extension/_group
+                               [:extension/id :extension/type]}])
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]
@@ -639,12 +695,18 @@
          (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))))
 
 (defn create-extension!
-  [{:keys [id group-id config]}]
+  [{:keys [id type group-id user-id config]}]
   (-> {:extension/group [:group/id group-id]
+       :extension/user [:user/id user-id]
+       :extension/type type
        :extension/id id
        :extension/config (pr-str config)}
       create-entity!
       db->extension))
+
+(defn retract-extension!
+  [extension-id]
+  @(d/transact *conn* [[:db.fn/retractEntity [:extension/id extension-id]]]))
 
 (defn extension-by-id
   [extension-id]
@@ -700,3 +762,22 @@
                [:group/id group-id])
        :extension/_group
        (map db->extension)))
+
+(defn group-settings
+  [group-id]
+  (->> (d/pull (d/db *conn*) [:group/settings] [:group/id group-id])
+       :group/settings
+       ((fnil edn/read-string "{}"))))
+
+(defn group-set!
+  "Set a key to a value for the group's settings  This will throw if
+  permissions are changed in between reading & setting"
+  [group-id k v]
+  (let [old-prefs (-> (d/pull (d/db *conn*) [:group/settings] [:group/id group-id])
+                      :group/settings)
+        new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
+                      (assoc k v)
+                      pr-str)]
+    (d/transact *conn* [[:db.fn/cas [:group/id group-id]
+                         :group/settings old-prefs new-prefs]])))
+

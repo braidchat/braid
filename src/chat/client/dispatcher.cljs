@@ -4,9 +4,15 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
-            [cljs-utils.core :refer [edn-xhr]]
+            [cljs-utils.xhr :as xhr]
             [chat.shared.util :as util]
             [chat.client.router :as router]))
+
+(defn edn-xhr
+  [args]
+  (xhr/request (assoc args
+                 :content-type "application/edn"
+                 :accept "application/edn")))
 
 (defn- extract-tag-ids [text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
@@ -60,7 +66,23 @@
                      :mentioned-user-ids (concat (data :mentioned-user-ids)
                                                  (extract-user-ids (data :content)))})]
       (store/add-message! message)
-      (sync/chsk-send! [:chat/new-message message]))))
+      (sync/chsk-send!
+        [:chat/new-message message]
+        2000
+        (fn [reply]
+          (when (not= :braid/ok reply)
+            (store/display-error! (str :failed-to-send (message :id)) "Message failed to send!")
+            (store/set-message-failed! message)))))))
+
+(defmethod dispatch! :resend-message [_ message]
+  (store/clear-message-failed! message)
+  (sync/chsk-send!
+    [:chat/new-message message]
+    2000
+    (fn [reply]
+      (when (not= :braid/ok reply)
+        (store/display-error! (str :failed-to-send (message :id)) "Message failed to send!")
+        (store/set-message-failed! message)))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
@@ -151,6 +173,11 @@
                           (cb)))
             :on-complete (fn [data]
                            (sync/reconnect!))}))
+
+(defmethod dispatch! :request-reset [_ email]
+  (edn-xhr {:url "/request-reset"
+            :method :post
+            :data {:email email}}))
 
 (defmethod dispatch! :logout [_ _]
   (edn-xhr {:url "/logout"

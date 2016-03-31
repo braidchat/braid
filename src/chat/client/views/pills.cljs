@@ -37,15 +37,18 @@
   (reify
     om/IRender
     (render [_]
-      (let [user (om/observe owner (user-cursor (user :id)))]
-        (dom/a #js {:className (str "user pill" (case (user :status)
-                                                  :online " on"
-                                                  " off"))
-                    :tabIndex -1
-                    :style #js {:backgroundColor (id->color (user :id))
-                                :color (id->color (user :id))
-                                :borderColor (id->color (user :id))}
-                    :href (routes/user-page-path {:group-id (routes/current-group)
-                                                  :user-id (user :id)})}
-          (dom/span #js {:className "name"} (str "@" (user :nickname)))
-          #_(dom/div #js {:className (str "status " ((fnil name "") (user :status)))}))))))
+      (if-let [cur (user-cursor (user :id))]
+        (let [user (om/observe owner cur)]
+          (dom/a #js {:className (str "user pill" (case (user :status)
+                                                    :online " on"
+                                                    " off"))
+                      :tabIndex -1
+                      :style #js {:backgroundColor (id->color (user :id))
+                                  :color (id->color (user :id))
+                                  :borderColor (id->color (user :id))}
+                      :href (routes/user-page-path {:group-id (routes/current-group)
+                                                    :user-id (user :id)})}
+            (dom/span #js {:className "name"} (str "@" (user :nickname)))
+            #_(dom/div #js {:className (str "status " ((fnil name "") (user :status)))})))
+        (dom/a #js {:className "user pill" :tabIndex -1 :href "#"}
+          (dom/span #js {:className "name"} "????"))))))

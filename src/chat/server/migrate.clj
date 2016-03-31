@@ -3,6 +3,50 @@
             [datomic.api :as d]
             [clojure.string :as string]))
 
+(defn migrate-2016-03-28
+  "Add group settings"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+                [{:db/ident :group/settings
+                  :db/valueType :db.type/string
+                  :db/cardinality :db.cardinality/one
+                  :db/id #db/id [:db.part/db]
+                  :db.install/_attribute :db.part/db}])))
+
+(defn migrate-2016-03-21
+  "Add user preferences"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [{:db/ident :user/preferences
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])))
+
+(defn migrate-2016-03-04
+  "Add extension type as attribute"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+                [{:db/ident :extension/type
+                 :db/valueType :db.type/keyword
+                 :db/cardinality :db.cardinality/one
+                 :db/id #db/id [:db.part/db]
+                 :db.install/_attribute :db.part/db}])))
+
+(defn migrate-2016-03-02
+  "Add extension user"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+                [{:db/ident :extension/user
+                 :db/valueType :db.type/ref
+                 :db/cardinality :db.cardinality/one
+                 :db/id #db/id [:db.part/db]
+                 :db.install/_attribute :db.part/db}])))
+
 (defn migrate-2016-02-26
   "Add extension schema"
   []

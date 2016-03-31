@@ -116,13 +116,19 @@
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
-                     :email "foo@bar.com"
+                     :email "fOo@bar.com"
                      :password "foobar"
                      :avatar ""}
         _ (db/create-user! user-1-data)]
 
     (testing "returns user-id when email+password matches"
       (is (= (:id user-1-data) (db/authenticate-user (user-1-data :email) (user-1-data :password)))))
+
+    (testing "email is case-insensitive"
+      (is (= (:id user-1-data)
+             (db/authenticate-user "Foo@bar.com" (user-1-data :password))
+             (db/authenticate-user "foo@bar.com" (user-1-data :password))
+             (db/authenticate-user "FOO@BAR.COM" (user-1-data :password)))))
 
     (testing "returns nil when email+password wrong"
       (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
@@ -132,7 +138,7 @@
               :name "Lean Pixel"}
         group (db/create-group! data)]
     (testing "can create a group"
-      (is (= group (assoc data :users nil))))
+      (is (= group (assoc data :extensions ()))))
     (testing "can add a user to the group"
       (let [user (db/create-user! {:id (db/uuid)
                                    :email "foo@bar.com"
@@ -141,7 +147,7 @@
         (is (= #{} (db/get-groups-for-user (user :id))))
         (is (= #{} (db/get-users-in-group (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
-        (is (= #{data} (db/get-groups-for-user (user :id))))
+        (is (= #{(assoc data :extensions ())} (db/get-groups-for-user (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))
                     (db/get-users-in-group (group :id))))))))))
@@ -349,9 +355,13 @@
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)
         ext-1 (db/create-extension! {:id (db/uuid)
+                                     :type :asana
+                                     :user-id (user-1 :id)
                                      :group-id (group-1 :id)
                                      :config {:type :asana :tag-id (tag-1 :id)}})
         ext-2 (db/create-extension! {:id (db/uuid)
+                                     :type :asana
+                                     :user-id (user-1 :id)
                                      :group-id (group-2 :id)
                                      :config {:type :asana :tag-id (tag-2 :id)}})]
 
@@ -370,3 +380,35 @@
       (is (db/thread-visible-to-extension? thread-2-id (ext-2 :id)))
 
       )))
+
+(deftest user-preferences
+  (testing "Can set and retrieve preferences"
+    (let [u (db/create-user! {:id (db/uuid)
+                              :email "foo@bar.com"
+                              :password "foobar"
+                              :avatar ""})]
+      (is (empty? (db/get-user-preferences (:id u))))
+      (db/user-set-preference! (:id u) :email-frequency :weekly)
+      (is (= {:email-frequency :weekly}
+             (db/get-user-preferences (:id u))))
+      (testing "can search by preferences"
+        (let [u1 (:id (db/create-user! {:id (db/uuid)
+                                        :email "foo@baz.com"
+                                        :password "foobar"
+                                        :avatar ""
+                                        :nickname "zzz"}))
+              u2 (:id (db/create-user! {:id (db/uuid)
+                                        :email "bar@bar.com"
+                                        :password "foobar"
+                                        :avatar ""}))
+              u3 (:id (db/create-user! {:id (db/uuid)
+                                        :email "baz@bar.com"
+                                        :password "foobar"
+                                        :avatar ""}))]
+          (db/user-set-preference! u1 :email-frequency :daily)
+          (db/user-set-preference! u1 :favourite-color "blue")
+          (db/user-set-preference! u2 :email-frequency :weekly)
+          (db/user-set-preference! u2 :favourite-color "blue")
+          (is (= #{u2 (u :id)} (set (db/user-search-preferences :email-frequency :weekly))))
+          (is (= [u1] (db/user-search-preferences :email-frequency :daily)))
+          (is (= #{u1 u2} (set (db/user-search-preferences :favourite-color "blue")))))))))

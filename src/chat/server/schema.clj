@@ -47,6 +47,12 @@
   :db/cardinality :db.cardinality/many
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
+ ; user - preferences
+ {:db/ident :user/preferences
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
  ; message
  {:db/ident :message/id
@@ -135,6 +141,11 @@
  :db/cardinality :db.cardinality/many
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
+{:db/ident :group/settings
+ :db/valueType :db.type/string
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
 
 ; invitations
 {:db/ident :invite/id
@@ -186,6 +197,11 @@
  :db/cardinality :db.cardinality/one
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
+{:db/ident :extension/type
+ :db/valueType :db.type/keyword
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
 {:db/ident :extension/config
  :db/valueType :db.type/string
  :db/cardinality :db.cardinality/one
@@ -194,6 +210,11 @@
 {:db/ident :extension/watched-threads
  :db/valueType :db.type/ref
  :db/cardinality :db.cardinality/many
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
+{:db/ident :extension/user
+ :db/valueType :db.type/ref
+ :db/cardinality :db.cardinality/one
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
 ])
