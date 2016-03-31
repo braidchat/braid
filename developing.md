@@ -8,7 +8,7 @@ To get Braid running locally, you will need to have 4 terminal sessions open:
 
 ## datomic
 
-Download Datomic Free 0.9.5201 from [https://my.datomic.com/downloads/free]()
+Download Datomic Free 0.9.5201 from [https://my.datomic.com/downloads/free](https://my.datomic.com/downloads/free)
 
 Unzip the download
 
@@ -61,12 +61,20 @@ Run the websocket server:
 (chat.server.sync/start-router!)
 ```
 
+Before opening the website, please run figwheel and lesscss first. See below on how to do that.
+
 ## Figwheel - JS and CSS compiling and hot-reload
 
 In a seperate terminal session:
 
 ```bash
 lein run -m clojure.main script/figwheel.clj
+```
+
+for working on the mobile client:
+
+```bash
+lein run figwheel mobile-dev
 ```
 
 ## LessCSS

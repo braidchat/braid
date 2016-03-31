@@ -6,22 +6,26 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults
                                               secure-site-defaults site-defaults]]
             [ring.middleware.edn :refer [wrap-edn-params]]
+            [clojurewerkz.quartzite.scheduler :as qs]
             [clojure.string :as string]
             [clojure.edn :as edn]
             [clojure.tools.nrepl.server :as nrepl]
             [chat.server.sync :as sync :refer [sync-routes]]
             [environ.core :refer [env]]
             [chat.shared.util :refer [valid-nickname?]]
+            [chat.server.cache :refer [random-nonce]]
             [chat.server.db :as db]
             [chat.server.invite :as invites]
             [chat.server.digest :as digest]
             [chat.server.s3 :as s3]
             [chat.server.extensions :as ext :refer [b64->str]]
             ; just requiring to register multimethods
-            chat.server.extensions.asana))
+            chat.server.extensions.asana
+            [chat.server.email-digest :as email-digest]
+            [chat.server.identicons :as identicons]))
 
 (defn edn-response [clj-body]
-  {:headers {"Content-Type" "application/edn; charset=utf-8" }
+  {:headers {"Content-Type" "application/edn; charset=utf-8"}
    :body (pr-str clj-body)})
 
 (defroutes site-routes
@@ -41,6 +45,32 @@
                    clojure.java.io/resource
                    slurp)]
       (string/replace html #"\{\{\w*\}\}" replacements)))
+
+  (POST "/public-register/:group-id" [group-id email :as req]
+    (let [group-id (java.util.UUID/fromString group-id)
+          group-settings (db/with-conn (db/group-settings group-id))]
+      (if-not (get group-settings :public?)
+        {:status 400 :body "No such group or the group is private"}
+        (if (string/blank? email)
+          {:status 400 :body "Invalid email"}
+          (let [id (db/uuid)
+                avatar (identicons/id->identicon-data-url id)
+                ; XXX: copied from chat.shared.util/nickname-rd
+                disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
+                nick (-> (first (string/split email #"@"))
+                         (string/replace disallowed-chars ""))
+                u (db/with-conn (db/create-user! {:id id
+                                                  :email email
+                                                  :password (random-nonce 50)
+                                                  :avatar avatar
+                                                  :nickname nick}))]
+            (db/with-conn
+              (db/user-add-to-group! id group-id)
+              (db/user-subscribe-to-group-tags! id group-id))
+            (sync/broadcast-user-change id [:chat/new-user u])
+            {:status 302 :headers {"Location" "/"}
+             :session (assoc (req :session) :user-id id)
+             :body ""})))))
 
   (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
@@ -76,7 +106,7 @@
                 (db/user-add-to-group! (user :id) (invite :group-id))
                 (db/user-subscribe-to-group-tags! (user :id) (invite :group-id))
                 (db/retract-invitation! (invite :id)))
-              (sync/broadcast-user-change (user :id) [:chat/new-user (dissoc user :email)])
+              (sync/broadcast-user-change (user :id) [:chat/new-user user])
               {:status 302 :headers {"Location" "/"}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))))))
@@ -116,13 +146,43 @@
          :body (pr-str {:error "No S3 secret for upload"})})
       {:status 403
        :headers {"Content-Type" "application/edn"}
-       :body (pr-str {:error "Unauthorized"}) }))
+       :body (pr-str {:error "Unauthorized"})}))
   (POST "/auth" req
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
                          (db/with-conn (db/authenticate-user email password))))]
       {:status 200 :session (assoc (req :session) :user-id user-id)}
-      {:status 401})))
+      {:status 401 :body (pr-str {:error true})}))
+  (POST "/request-reset" [email]
+    (when-let [user (db/with-conn (db/user-with-email email))]
+      (invites/request-reset (assoc user :email email)))
+    {:status 200 :body (pr-str {:ok true})})
+  (GET "/reset" [user token]
+    (if-let [u (and (invites/verify-reset-nonce user token)
+                 (db/with-conn (db/user-by-id (java.util.UUID/fromString user))))]
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body (invites/reset-page u token)}
+      {:status 401}))
+  (POST "/reset" [new_password token user_id now hmac :as req]
+    (let [user-id (java.util.UUID/fromString user_id)
+          fail {:status 400 :headers {"Content-Type" "text/plain"}}]
+      (cond
+        (string/blank? new_password) (assoc fail :body "Must provide a password")
+
+        (not (invites/verify-hmac hmac (str now token user-id)))
+        (assoc fail :body "Invalid HMAC")
+
+        :else
+        (if-let [user (db/with-conn (db/user-by-id user-id))]
+          (if-let [err (:error (invites/verify-reset-nonce user token))]
+            (assoc fail :body err)
+            (do (db/with-conn (db/set-user-password! (user :id) new_password))
+                {:status 301
+                 :headers {"Location" "/"}
+                 :session (assoc (req :session) :user-id (user :id))
+                 :body ""}))
+          (assoc fail :body "Invalid user"))))))
 
 (defroutes resource-routes
   (resources "/"))
@@ -165,6 +225,8 @@
               {:read-token (fn [req] (-> req :params :csrf-token))}))))
     wrap-edn-params))
 
+
+;; server
 (defonce server (atom nil))
 
 (defn stop-server!
@@ -177,12 +239,29 @@
   (stop-server!)
   (reset! server (run-server #'app {:port port})))
 
+;; scheduler
+(defonce scheduler (atom nil))
+
+(defn stop-scheduler!
+  []
+  (when-let [s @scheduler]
+    (qs/shutdown s)))
+
+(defn start-scheduler!
+  []
+  (stop-scheduler!)
+  (reset! scheduler (qs/initialize))
+  (qs/start @scheduler))
+
+;; main
 (defn -main  [& args]
   (let [port (Integer/parseInt (first args))
         repl-port (Integer/parseInt (second args))]
     (start-server! port)
     (chat.server.sync/start-router!)
     (nrepl/start-server :port repl-port)
-    (println "starting on port " port)))
-
-
+    (println "starting on port " port)
+    (println "starting quartz scheduler")
+    (start-scheduler!)
+    (println "scheduling email digest jobs")
+    (email-digest/add-jobs @scheduler)))

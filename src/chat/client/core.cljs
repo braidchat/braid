@@ -1,7 +1,6 @@
 (ns chat.client.core
   (:require [om.core :as om]
             [om.dom :as dom]
-            [cljs-utils.core :refer [edn-xhr]]
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.views :as views]
