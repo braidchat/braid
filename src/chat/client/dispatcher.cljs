@@ -186,6 +186,9 @@
             :on-complete (fn [data]
                            (store/clear-session!))}))
 
+(defmethod dispatch! :clear-inbox [_ _]
+  (store/current-group-close-open-threads!))
+
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
     (store/display-error! :client-out-of-date "Client out of date - please refresh")))

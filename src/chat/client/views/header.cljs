@@ -5,13 +5,23 @@
             [chat.client.views.search-bar :refer [search-bar-view]]
             [chat.client.views.pills :refer [tag-view user-view]]
             [chat.client.views.helpers :refer [id->color]]
-            [chat.client.routes :as routes]))
+            [chat.client.routes :as routes]
+            [chat.client.dispatcher :refer [dispatch!]]))
+
+(defn clear-inbox-button [_ owner]
+  (reify
+    om/IRender
+    (render [_]
+      (dom/button #js {:onClick (fn [_]
+                              (dispatch! :clear-inbox))} "Clear Inbox"))))
 
 (defn header-view [data owner]
   (reify
     om/IRender
     (render [_]
       (dom/div #js {:className "header"}
+
+        (om/build clear-inbox-button {})
 
         (let [path (routes/inbox-page-path {:group-id (routes/current-group)})]
           (dom/div #js {:className (str "inbox shortcut "

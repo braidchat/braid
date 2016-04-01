@@ -278,3 +278,21 @@
 (defn remove-invite! [invite]
   (transact! [:invitations] (partial remove (partial = invite))))
 
+; inbox
+(defn close-open-threads! [group-id]
+  (let [open-thread-ids (-> (@app-state :threads)
+                            (select-keys (get-in @app-state [:user :open-thread-ids]))
+                             vals
+                             (->> (filter (fn [thread]
+                                    (or (empty? (thread :tag-ids))
+                                        (contains?
+                                          (into #{} (map group-for-tag) (thread :tag-ids))
+                                          group-id))))
+                                  (map :id)))]
+    (doseq [id open-thread-ids]
+      (hide-thread! id))))
+
+(defn current-group-close-open-threads! []
+  (let [group-id (@app-state :open-group-id)]
+    (close-open-threads! group-id)))
+
