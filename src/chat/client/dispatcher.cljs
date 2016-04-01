@@ -187,11 +187,14 @@
                            (store/clear-session!))}))
 
 (defmethod dispatch! :clear-inbox [_ _]
-  (store/current-group-close-open-threads!))
+  (let [open-thread-ids (store/open-threads @store/app-state)]
+    (doseq [id open-thread-ids]
+      (dispatch! :hide-thread {:thread-id id}))))
 
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
     (store/display-error! :client-out-of-date "Client out of date - please refresh")))
+
 
 ; Websocket Events
 

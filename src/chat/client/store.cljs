@@ -292,8 +292,3 @@
                                       current-group-id))))))]
       open-threads))
 
-(defn current-group-close-open-threads! []
-  (let [open-thread-ids (map :id (open-threads @app-state))]
-    (doseq [id open-thread-ids]
-      (hide-thread! id))))
-
