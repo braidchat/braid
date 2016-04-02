@@ -7,14 +7,13 @@
             [braid.ui.styles.message]
             [braid.ui.styles.misc]
             [braid.ui.styles.imports]
+            [braid.ui.styles.thread]
             [braid.ui.styles.mixins :as mixins]))
 
-(defn tee [x]
-  (println x) x)
-
 (def styles
-  (let [pad (vw 5)
-        pads "5vw"]
+  (let [pad (rem 1) ; (vw 5)
+        pads "1rem" ; "5vw"
+        ]
     (css {:auto-prefix #{:transition
                          :flex-direction
                          :flex-shrink
@@ -100,5 +99,4 @@
          (braid.ui.styles.thread/messages pad)
 
          braid.ui.styles.body/body
-         braid.ui.styles.message/message
-         (braid.ui.styles.message/new-message-mobile pad))))
+         braid.ui.styles.message/message)))

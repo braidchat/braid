@@ -48,7 +48,8 @@
 
   :cljsbuild {:builds
               [{:id "release"
-                :source-paths ["src/chat/client" "src/chat/shared"]
+                :source-paths ["src/chat/client"
+                               "src/chat/shared"]
                 :compiler {:main chat.client.core
                            :asset-path "/js/out"
                            :output-to "resources/public/js/out/chat.js"
@@ -59,7 +60,8 @@
                {:id "mobile-dev"
                 :figwheel true
                 :source-paths ["src/braid/mobile"
-                               "src/braid/ui"]
+                               "src/braid/ui"
+                               "src/retouch"]
                 :compiler {:main braid.mobile.core
                            :asset-path "/mobile/js/out"
                            :output-to "resources/public/mobile/js/out/braid.js"

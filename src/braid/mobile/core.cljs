@@ -3,8 +3,7 @@
             [re-frame.core :refer [subscribe dispatch]]
             [braid.mobile.state]
             [braid.mobile.style :refer [styles]]
-            [braid.mobile.sidebar :refer [sidebar-view]]
-            [braid.mobile.panels :refer [panels-view]]))
+            [retouch.core :refer [drawer-view swipe-view]]))
 
 (enable-console-print!)
 
@@ -50,7 +49,7 @@
     (fn []
       [:div.inbox.page
        [:div.threads
-        [panels-view @threads thread-view]]])))
+        [swipe-view @threads thread-view]]])))
 
 (defn groups-view []
   (let [groups (subscribe [:groups-with-unread])
@@ -71,7 +70,7 @@
 
 (defn main-view []
   [:div.main
-   [sidebar-view
+   [drawer-view
     [:div [groups-view]]]
    [inbox-view]])
 
