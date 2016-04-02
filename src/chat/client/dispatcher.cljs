@@ -85,6 +85,7 @@
         (store/set-message-failed! message)))))
 
 (defmethod dispatch! :hide-thread [_ data]
+  (println "hide-thread" data)
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
@@ -187,7 +188,7 @@
                            (store/clear-session!))}))
 
 (defmethod dispatch! :clear-inbox [_ _]
-  (let [open-thread-ids (store/open-threads @store/app-state)]
+  (let [open-thread-ids (map :id (store/open-threads @store/app-state))]
     (doseq [id open-thread-ids]
       (dispatch! :hide-thread {:thread-id id}))))
 
