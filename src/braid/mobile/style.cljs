@@ -8,6 +8,7 @@
             [braid.ui.styles.misc]
             [braid.ui.styles.imports]
             [braid.ui.styles.thread]
+            [braid.ui.styles.sidebar]
             [braid.ui.styles.mixins :as mixins]))
 
 (def styles
@@ -60,18 +61,10 @@
                 :border-radius "0.5rem"
                 :vertical-align "middle"}]
 
+              braid.ui.styles.sidebar/badge
+
               [:.badge
-               {:font-size "0.8rem"
-                :padding "0 0.5em"
-                :border-radius "0.5em"
-                :display "inline-block"
-                :line-height "1.75em"
-                :background "#B53737"
-                :color "white"
-                :border-color "#B53737"
-                :position "absolute"
-                :bottom "-0.5rem"
-                :right "-0.5rem"}]])]]
+               {:font-size "0.8rem"}]])]]
 
          braid.ui.styles.misc/tag
 

@@ -4,6 +4,18 @@
             [braid.ui.styles.mixins :as mixins]
             [braid.ui.styles.vars :as vars]))
 
+(def badge
+  [:.badge
+   mixins/pill-box
+   [:&
+    {:font-size (rem 0.6)
+     :background "#B53737 !important"
+     :color "white"
+     :border-color "#B53737 !important"
+     :position "absolute"
+     :bottom (rem -0.5)
+     :right (rem -0.5)}]])
+
 (def sidebar
   [:.sidebar
    {:background "#222"
@@ -47,12 +59,4 @@
      [:&:hover
       {:background "#555"}]]
 
-    [:.badge
-     mixins/pill-box
-     {:font-size (rem 0.6)
-      :background "#B53737"
-      :color "white"
-      :border-color "#B53737"
-      :position "absolute"
-      :bottom (rem -0.5)
-      :right (rem -0.5)}]]])
+    badge]])
