@@ -40,16 +40,12 @@
   :main chat.server.handler
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3"]
-            [lein-figwheel "0.5.1"]
-            [jamesnvc/lein-lesscss "1.4.0"]]
+            [lein-figwheel "0.5.1"]]
 
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
-  ["resources/public/js/out"
-   ;"resources/public/css/out" ; need to fix lein-lesscss to create the director if it doesn't exist
-   ]
-  :lesscss-paths ["resources/less"]
-  :lesscss-output-path "resources/public/css/out"
+  ["resources/public/js/out"]
+
   :cljsbuild {:builds
               [{:id "release"
                 :source-paths ["src/chat/client" "src/chat/shared"]
@@ -82,5 +78,4 @@
              :test [:dev]
              :uberjar [:prod
                        {:aot :all
-                        :hooks [leiningen.cljsbuild
-                                leiningen.hooks.lesscss]}]})
+                        :hooks [leiningen.cljsbuild]}]})

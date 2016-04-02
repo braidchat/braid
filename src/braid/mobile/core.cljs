@@ -82,12 +82,15 @@
    [:button {:on-click (fn [_] (dispatch [:log-in!]))}
     "Let's Do This!"]])
 
+(defn style-view []
+  [:style {:type "text/css"
+           :dangerouslySetInnerHTML {:__html styles}}])
+
 (defn app-view []
   (let [logged-in? (subscribe [:logged-in?])]
     (fn []
       [:div.app
-       [:style {:type "text/css"
-                :dangerouslySetInnerHTML {:__html styles}}]
+       [style-view]
        (if @logged-in?
          [main-view]
          [login-view])])))

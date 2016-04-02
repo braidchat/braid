@@ -55,4 +55,4 @@
 
         (dom/a #js {:className (str "option plus "
                                     (when (= (get-in @store/app-state [:page :type]) :group-explore) "active"))
-                    :href (routes/other-path {:page-id "group-explore"})} "")))))
+                    :href (routes/other-path {:page-id "group-explore"})})))))
