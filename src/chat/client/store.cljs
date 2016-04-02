@@ -278,3 +278,17 @@
 (defn remove-invite! [invite]
   (transact! [:invitations] (partial remove (partial = invite))))
 
+; inbox
+
+(defn open-threads [state]
+  (let [current-group-id (state :open-group-id)
+        open-threads (-> (state :threads)
+                        (select-keys (get-in @app-state [:user :open-thread-ids]))
+                         vals
+                         (->> (filter (fn [thread]
+                                (or (empty? (thread :tag-ids))
+                                    (contains?
+                                      (into #{} (map group-for-tag) (thread :tag-ids))
+                                      current-group-id))))))]
+      open-threads))
+
