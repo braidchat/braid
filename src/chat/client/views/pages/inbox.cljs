@@ -23,19 +23,13 @@
           (concat
             [(new-thread-view {})]
             (map (fn [t] (om/build thread-view t {:key :id}))
-                 (let [group-id (data :open-group-id)
-                       user-id (get-in @store/app-state [:session :user-id])]
+                 (let [user-id (get-in @store/app-state [:session :user-id])]
                    ; sort by last message sent by logged-in user, most recent first
-                   (->> (select-keys (data :threads) (get-in data [:user :open-thread-ids]))
-                        vals
-                        (filter (fn [thread]
-                                  (or (empty? (thread :tag-ids))
-                                      (contains?
-                                        (into #{} (map store/group-for-tag) (thread :tag-ids))
-                                        group-id))))
-                        (sort-by
-                          (comp (partial apply max)
-                                (partial map :created-at)
-                                (partial filter (fn [m] (= (m :user-id) user-id)))
-                                :messages))
-                        reverse)))))))))
+                   (-> data
+                       store/open-threads
+                       (->> (sort-by
+                              (comp (partial apply max)
+                                    (partial map :created-at)
+                                    (partial filter (fn [m] (= (m :user-id) user-id)))
+                                    :messages))
+                            reverse))))))))))
