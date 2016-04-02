@@ -88,12 +88,15 @@
           :group-explore (om/build group-explore-view data)
           :extensions (om/build extensions-page-view data))))))
 
+(def react-style-view
+  (reagent->react style-view))
+
 (defn app-view [data owner]
   (reify
     om/IRender
     (render [_]
       (dom/div #js {:className "app"}
-        (reagent->react style-view)
+        react-style-view
         (if (data :session)
           (om/build main-view data)
           (om/build login-view data))))))

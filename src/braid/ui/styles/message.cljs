@@ -14,8 +14,7 @@
       {:display "none"}]]
 
     [:&.seen
-     {:transition "opacity 0.5s linear"
-      :-webkit-transition "opacity 0.5s linear"
+     {:transition [["opacity" "0.5s" "linear"]]
       :opacity 0.6}]
 
     [:&.unseen {}]
@@ -55,8 +54,7 @@
      [:.embedded-image
       {:max-width "100px"
        :max-height "100px"
-       :transition "max-width 0.5s, max-height 0.5s"
-       :-webkit-transition "max-width 0.5s, max-height 0.5s"}
+       :transition "max-width 0.5s, max-height 0.5s"}
        [:&:hover
         {:max-width "3000px"
          :max-height "3000px"}]]]
@@ -84,55 +82,3 @@
        {:text-overflow "initial"
         :overflow-x "scroll"}]]])
 
-(def new-message
-  [:.message.new
-   {:padding-left (m/+ pad (rem 2))
-    :padding-top pad
-    :padding-right pad
-    :margin-bottom 0}
-
-    [:textarea
-     {:width "100%"
-      :border "none"
-      :resize "vertical"
-      :box-sizing "border-box"}
-
-      [:&:focus
-       {:outline "none"}]]
-
-    [:.autocomplete
-     {:z-index 1000
-      :box-shadow "0 1px 4px 0 #ccc"
-      :background "white"
-      :max-height "20em"
-      :overflow "scroll"
-      :width card-width
-      ; will be an issue when text area expands
-      :position "absolute"
-      :bottom (m/* pad 3)}
-
-      [:.result
-       {:padding "0.25em 0.5em"}
-       [:.emojione :.avatar :.color-block
-        {:display "block"
-         :width "2em"
-         :height "2em"
-         :float "left"
-         :margin "0.25em 0.5em 0.25em 0"}]
-
-       [:.color-block
-        {:width "1em"}]
-
-       [:.name
-        {:height "1em"
-         :white-space "nowrap"}]
-
-       [:.extra
-        {:color "#ccc"}]
-
-       [:&:hover
-        {:background "#eee"}]
-
-       [:&.highlight
-        [:.name
-         {:font-weight "bold"}]]]]])
