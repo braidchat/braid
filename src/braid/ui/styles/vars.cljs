@@ -10,7 +10,7 @@
 
 (def top-bar-height (rem 2))
 
-(def groups-nav-width
+(def sidebar-width
   (m/+ top-bar-height (m/* pad 2)))
 
 (def grey-text "#888")

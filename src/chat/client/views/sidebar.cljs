@@ -1,4 +1,4 @@
-(ns chat.client.views.groups-nav
+(ns chat.client.views.sidebar
   (:require [om.core :as om]
             [om.dom :as dom]
             [clojure.string :as string]
@@ -11,11 +11,11 @@
   (> (:created-at message)
      (thread :last-open-at)))
 
-(defn groups-nav-view [data owner]
+(defn sidebar-view [data owner]
   (reify
     om/IRender
     (render [_]
-      (dom/div #js {:className "groups-nav"}
+      (dom/div #js {:className "sidebar"}
         (let [group-new-activity
               (->>
                 (select-keys (data :threads) (get-in data [:user :open-thread-ids]))

@@ -4,6 +4,7 @@
             [braid.ui.styles.thread]
             [braid.ui.styles.header]
             [braid.ui.styles.body]
+            [braid.ui.styles.sidebar]
             [braid.ui.styles.imports]
             [braid.ui.styles.misc]
             [braid.ui.styles.animations]
@@ -27,7 +28,7 @@
                  braid.ui.styles.body/body
                  braid.ui.styles.message/message
                  braid.ui.styles.misc/layout
-                 braid.ui.styles.misc/groups-nav
+                 braid.ui.styles.sidebar/sidebar
                  braid.ui.styles.misc/emojione
                  braid.ui.styles.misc/error-banners
                  braid.ui.styles.misc/page
