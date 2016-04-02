@@ -14,12 +14,16 @@
 (defn tee [x]
   (println x) x)
 
+
 (defn fuzzy-matches?
-  [s m]
+  [s m] ; string query
   ; TODO: make this fuzzier? something like interleave with .* & re-match?
-  (letfn [(normalize [s]
-            (-> (.toLowerCase s) (string/replace #"\s" "")))]
-    (not= -1 (.indexOf (normalize s) (normalize m)))))
+  (let [normalize (fn [s]
+                     (-> (.toLowerCase s)
+                         (string/replace #"\s" "")))
+        includes? (fn [string sub]
+                    (not= -1 (.indexOf string sub)))]
+    (includes? (normalize s) (normalize m))))
 
 (defn simple-matches?
   [m s]
