@@ -85,7 +85,6 @@
         (store/set-message-failed! message)))))
 
 (defmethod dispatch! :hide-thread [_ data]
-  (println "hide-thread" data)
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
