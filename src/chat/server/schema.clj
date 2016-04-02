@@ -141,6 +141,11 @@
  :db/cardinality :db.cardinality/many
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
+{:db/ident :group/settings
+ :db/valueType :db.type/string
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
 
 ; invitations
 {:db/ident :invite/id

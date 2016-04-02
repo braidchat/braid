@@ -66,7 +66,23 @@
                      :mentioned-user-ids (concat (data :mentioned-user-ids)
                                                  (extract-user-ids (data :content)))})]
       (store/add-message! message)
-      (sync/chsk-send! [:chat/new-message message]))))
+      (sync/chsk-send!
+        [:chat/new-message message]
+        2000
+        (fn [reply]
+          (when (not= :braid/ok reply)
+            (store/display-error! (str :failed-to-send (message :id)) "Message failed to send!")
+            (store/set-message-failed! message)))))))
+
+(defmethod dispatch! :resend-message [_ message]
+  (store/clear-message-failed! message)
+  (sync/chsk-send!
+    [:chat/new-message message]
+    2000
+    (fn [reply]
+      (when (not= :braid/ok reply)
+        (store/display-error! (str :failed-to-send (message :id)) "Message failed to send!")
+        (store/set-message-failed! message)))))
 
 (defmethod dispatch! :hide-thread [_ data]
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
@@ -170,9 +186,15 @@
             :on-complete (fn [data]
                            (store/clear-session!))}))
 
+(defmethod dispatch! :clear-inbox [_ _]
+  (let [open-thread-ids (map :id (store/open-threads @store/app-state))]
+    (doseq [id open-thread-ids]
+      (dispatch! :hide-thread {:thread-id id}))))
+
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
     (store/display-error! :client-out-of-date "Client out of date - please refresh")))
+
 
 ; Websocket Events
 

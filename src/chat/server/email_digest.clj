@@ -112,7 +112,7 @@
 (defjob WeeklyDigestJob
   [ctx]
   (timbre/debugf "Starting weekly email job")
-  (let [user-ids (daily-update-users)
+  (let [user-ids (weekly-update-users)
         cutoff (time/minus (time/now) (time/days 7))]
     (doseq [uid user-ids]
       (when-let [threads (seq (updates-for-user-since uid cutoff))]
