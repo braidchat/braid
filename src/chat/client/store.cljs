@@ -4,6 +4,7 @@
 (defonce app-state
   (atom {:open-group-id nil
          :threads {}
+         :pagination-remaining 0
          :users {}
          :tags {}
          :groups {}
@@ -162,6 +163,12 @@
 
 (defn open-thread? [thread-id]
   (contains? (set (get-in @app-state [:user :open-thread-ids])) thread-id))
+
+(defn set-pagination-remaining! [threads-count]
+  (transact! [:pagination-remaining] (constantly threads-count)))
+
+(defn pagination-remaining []
+  (get @app-state :pagination-remaining 0))
 
 ; channels page
 

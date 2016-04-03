@@ -138,13 +138,14 @@
       (when-let [results (:threads reply)]
           (store/set-search-results! results)))))
 
-(defmethod dispatch! :threads-for-tag [_ tag-id]
+(defmethod dispatch! :threads-for-tag [_ {:keys [tag-id]}]
   (sync/chsk-send!
-    [:chat/threads-for-tag tag-id]
+    [:chat/threads-for-tag {:tag-id tag-id :offset 0 :limit 50}]
     2500
     (fn [reply]
       (when-let [results (:threads reply)]
-          (store/set-channel-results! results)))))
+          (store/set-channel-results! results)
+          (store/set-pagination-remaining! (:remaining reply))))))
 
 (defmethod dispatch! :mark-thread-read [_ thread-id]
   (store/update-thread-last-open-at thread-id)
