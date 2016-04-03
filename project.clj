@@ -28,6 +28,7 @@
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [org.clojars.leanpixel/om-fields "1.9.0"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
+                 [clj-fuzzy "0.3.1"]
                  ;shared
                  [org.clojure/tools.reader "1.0.0-alpha3"]
                  [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
