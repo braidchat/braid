@@ -7,28 +7,23 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.emoji :as emoji]
-            [chat.client.views.helpers :refer [id->color debounce]])
+            [chat.client.views.helpers :refer [id->color debounce]]
+            [clj-fuzzy.metrics :as fuzzy])
   (:import [goog.events KeyCodes]))
 
+(defn- normalize [s]
+  (-> (.toLowerCase s)
+     (string/replace #"\s" "")))
 
-(defn tee [x]
-  (println x) x)
-
-
-(defn fuzzy-matches?
-  [s m] ; string query
-  ; TODO: make this fuzzier? something like interleave with .* & re-match?
-  (let [normalize (fn [s]
-                     (-> (.toLowerCase s)
-                         (string/replace #"\s" "")))
-        includes? (fn [string sub]
-                    (not= -1 (.indexOf string sub)))]
-    (includes? (normalize s) (normalize m))))
-
-(defn simple-matches?
+(defn- simple-matches?
   [m s]
   (not= -1 (.indexOf m s)))
 
+(defn- fuzzy-matches? [m s]
+  (let [m (normalize m)
+        s (normalize s)]
+    (or (simple-matches? m s)
+        (< (fuzzy/levenshtein m s) 2))))
 
 ; fn that returns results that will be shown if pattern matches
 ;    inputs:
@@ -73,7 +68,7 @@
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
               (filter (fn [[k v]]
-                        (simple-matches? k query)))
+                        (fuzzy-matches? k (str ":" query ":"))))
               (map (fn [[k v]]
                      {:action
                       (fn [thread-id])
