@@ -3,7 +3,6 @@
             [om.dom :as dom]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.views.group-invite :refer [group-invite-view]]
             [chat.client.views.pills :refer [user-view]]
             [chat.shared.util :refer [valid-tag-name? valid-nickname?]])
   (:import [goog.events KeyCodes]))
@@ -79,14 +78,6 @@
           (dom/h2 nil "Update Nickname")
           (om/build nickname-view (data :session))
 
-          (dom/h2 nil "Send Invites")
-          (apply dom/div nil
-            (map
-              (fn [group]
-                (dom/div #js {}
-                  (dom/div nil (group :name))
-                  (om/build group-invite-view (group :id))))
-              (vals (data :groups))))
 
           (dom/h2 nil "Received Invites")
           (when (seq (data :invitations))
