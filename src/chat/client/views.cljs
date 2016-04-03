@@ -3,8 +3,9 @@
             [om.dom :as dom]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
+            [chat.client.reagent-adapter :refer [reagent->react]]
             [chat.client.views.style :refer [style-view]]
-            [chat.client.views.groups-nav :refer [groups-nav-view]]
+            [chat.client.views.sidebar :refer [sidebar-view]]
             [chat.client.views.header :refer [header-view]]
             [chat.client.views.pages.search :refer [search-page-view]]
             [chat.client.views.pages.inbox :refer [inbox-page-view]]
@@ -70,7 +71,7 @@
               (dom/span #js {:className "close"
                              :onClick (fn [_] (store/clear-error! err-key))} "×"))))
 
-        (om/build groups-nav-view data)
+        (om/build sidebar-view data)
 
         (om/build header-view data)
 
@@ -87,12 +88,15 @@
           :group-explore (om/build group-explore-view data)
           :extensions (om/build extensions-page-view data))))))
 
+(def react-style-view
+  (reagent->react style-view))
+
 (defn app-view [data owner]
   (reify
     om/IRender
     (render [_]
       (dom/div #js {:className "app"}
-        (om/build style-view {})
+        react-style-view
         (if (data :session)
           (om/build main-view data)
           (om/build login-view data))))))

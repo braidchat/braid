@@ -28,6 +28,7 @@
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [org.clojars.leanpixel/om-fields "1.9.0"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
+                 [clj-fuzzy "0.3.1"]
                  ;shared
                  [org.clojure/tools.reader "1.0.0-alpha3"]
                  [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
@@ -40,19 +41,16 @@
   :main chat.server.handler
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3"]
-            [lein-figwheel "0.5.1"]
-            [jamesnvc/lein-lesscss "1.4.0"]]
+            [lein-figwheel "0.5.1"]]
 
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
-  ["resources/public/js/out"
-   ;"resources/public/css/out" ; need to fix lein-lesscss to create the director if it doesn't exist
-   ]
-  :lesscss-paths ["resources/less"]
-  :lesscss-output-path "resources/public/css/out"
+  ["resources/public/js/out"]
+
   :cljsbuild {:builds
               [{:id "release"
-                :source-paths ["src/chat/client" "src/chat/shared"]
+                :source-paths ["src/chat/client"
+                               "src/chat/shared"]
                 :compiler {:main chat.client.core
                            :asset-path "/js/out"
                            :output-to "resources/public/js/out/chat.js"
@@ -63,7 +61,8 @@
                {:id "mobile-dev"
                 :figwheel true
                 :source-paths ["src/braid/mobile"
-                               "src/braid/ui"]
+                               "src/braid/ui"
+                               "src/retouch"]
                 :compiler {:main braid.mobile.core
                            :asset-path "/mobile/js/out"
                            :output-to "resources/public/mobile/js/out/braid.js"
@@ -82,5 +81,4 @@
              :test [:dev]
              :uberjar [:prod
                        {:aot :all
-                        :hooks [leiningen.cljsbuild
-                                leiningen.hooks.lesscss]}]})
+                        :hooks [leiningen.cljsbuild]}]})

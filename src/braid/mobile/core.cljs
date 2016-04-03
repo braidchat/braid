@@ -3,8 +3,7 @@
             [re-frame.core :refer [subscribe dispatch]]
             [braid.mobile.state]
             [braid.mobile.style :refer [styles]]
-            [braid.mobile.sidebar :refer [sidebar-view]]
-            [braid.mobile.panels :refer [panels-view]]))
+            [retouch.core :refer [drawer-view swipe-view]]))
 
 (enable-console-print!)
 
@@ -50,7 +49,7 @@
     (fn []
       [:div.inbox.page
        [:div.threads
-        [panels-view @threads thread-view]]])))
+        [swipe-view @threads thread-view]]])))
 
 (defn groups-view []
   (let [groups (subscribe [:groups-with-unread])
@@ -71,26 +70,62 @@
 
 (defn main-view []
   [:div.main
-   [sidebar-view
+   [drawer-view
     [:div [groups-view]]]
    [inbox-view]])
 
-(defn login-view []
-  [:div.login
-   [:input {:placeholder "email"}]
-   [:input {:placeholder "password"}]
-   [:button {:on-click (fn [_] (dispatch [:log-in!]))}
-    "Let's Do This!"]])
+(defn login-flow-view []
+  (let [data (r/atom {})]
+    (fn []
+      [:div.login-flow
+       (if-not (@data :method)
+         [:div.content.welcome
+          [:div.logo "[LOGO]"]
+          [:button.login
+           {:on-click (fn [_]
+                        (swap! data assoc :method :login))}
+           "Log In"]
+          [:button.register
+           {:on-click (fn [_]
+                        (swap! data assoc :method :register))}
+           "Register"]]
+         (case (@data :method)
+           :login
+           (if-not (@data :email)
+             [:div.content.login.email
+              "Email"
+              [:input.email {:placeholder "you@awesome.com"
+                             :key "email"}]
+              [:button.next {:on-click (fn [e]
+                                         (swap! data assoc :email (.. e -target -value)))}]]
+             [:div.content.login.password
+              "Password"
+              [:input.password {:placeholder "••••••"
+                                :type "password"
+                                :key "password"}]
+              [:button.next {:on-click (fn [e]
+                                         (swap! data assoc :email (.. e -target -value))
+                                         (dispatch [:log-in!]))}]])
+           :register
+           (if-not (@data :email)
+             [:div.content.register.email
+              [:input.email {:placeholder "you@awesome.com"}]
+              [:button.next {:on-click (fn [e]
+                                         (swap! data assoc :email (.. e -target -value))
+                                         (dispatch [:log-in!]))}]])))])))
+
+(defn style-view []
+  [:style {:type "text/css"
+           :dangerouslySetInnerHTML {:__html styles}}])
 
 (defn app-view []
   (let [logged-in? (subscribe [:logged-in?])]
     (fn []
       [:div.app
-       [:style {:type "text/css"
-                :dangerouslySetInnerHTML {:__html styles}}]
+       [style-view]
        (if @logged-in?
          [main-view]
-         [login-view])])))
+         [login-flow-view])])))
 
 (defn init []
   (r/render [app-view] (.-body js/document)))

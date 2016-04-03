@@ -1,10 +1,8 @@
-(ns braid.mobile.panels
+(ns retouch.views.swipe
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [garden.core :refer [css]]))
-
-(def easing-fn
-  "cubic-bezier(.42, 0, .58, 1)")
+            [garden.core :refer [css]]
+            [retouch.common :refer [easing-fn]]))
 
 (def style-view
   (fn []
@@ -20,7 +18,7 @@
           :display "inline-block"
           :vertical-align "top" }]])]))
 
-(defn panels-view [panel-items panel-view]
+(defn swipe-view [panel-items panel-view]
   (let [state (r/atom {:pos-x 0})
 
         px->vw (fn [px]
