@@ -67,7 +67,7 @@ Don't navigate to the website just yet.
 In a seperate terminal session:
 
 ```bash
-lein run figwheel desktop-dev
+lein figwheel desktop-dev
 ```
 
 ## ...and you're good!
@@ -89,7 +89,7 @@ Note: currently in dev mode (the default profile), you cannot invite users or up
 for working on the mobile client:
 
 ```bash
-lein run figwheel mobile-dev
+lein figwheel mobile-dev
 ```
 
 open:
