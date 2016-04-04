@@ -200,6 +200,7 @@
                         :tabIndex -1
                         :href sender-path}
               (sender :nickname))
-            (dom/span #js {:className "time"} (helpers/format-date (message :created-at))))
+            (dom/span #js {:className "time"
+                           :title (message :created-at)} (helpers/format-date (message :created-at))))
           (apply dom/div #js {:className "content"}
             (format-message (message :content))))))))
