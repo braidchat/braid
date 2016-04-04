@@ -71,9 +71,9 @@
                 :compiler {:main chat.client.core
                            :asset-path "/js/desktop/out"
                            :output-to "resources/public/js/desktop/out/braid.js"
-                           :output-dir "resources/public/js/desktop/out"
+                           :output-dir "resources/public/js/desktop/out_prod"
                            :optimizations :advanced
-                           :pretty-print false }}
+                           :pretty-print false}}
 
                {:id "mobile-dev"
                 :figwheel true
