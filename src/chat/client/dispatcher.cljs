@@ -139,7 +139,7 @@
           (store/set-search-results! results)))))
 
 (defmethod dispatch! :threads-for-tag [_ {:keys [tag-id offset limit on-complete]
-                                          :or {offset 0 limit 50}}]
+                                          :or {offset 0 limit 25}}]
   (sync/chsk-send!
     [:chat/threads-for-tag {:tag-id tag-id :offset offset :limit limit}]
     2500
