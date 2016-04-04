@@ -177,6 +177,7 @@
           (if-let [err (:error (invites/verify-reset-nonce user token))]
             (assoc fail :body err)
             (do (db/with-conn (db/set-user-password! (user :id) new_password))
+                (invites/invalidate-reset-nonce! user)
                 {:status 301
                  :headers {"Location" "/"}
                  :session (assoc (req :session) :user-id (user :id))
