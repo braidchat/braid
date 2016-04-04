@@ -18,13 +18,13 @@
 
 ; current group
 
-(register-sub :active-group state/get-active-group)
+(rf/register-sub :active-group state/get-active-group)
 
-(register-handler :set-active-group-id! state/set-active-group-id!)
+(rf/register-handler :set-active-group-id! state/set-active-group-id!)
 
 (rf/register-sub :active-group-inbox-threads
   (fn [state _]
-    (let [group-id (reaction (:active-group-id @state))
+    (let [group-id (reaction (:open-group-id @state))
           threads (reaction (vals (:threads @state)))]
       (reaction (filter (fn [t] (= @group-id (t :group-id)))
                         @threads)))))

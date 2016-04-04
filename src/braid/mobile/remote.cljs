@@ -18,19 +18,41 @@
           555 {:id 555
                :name "braid"
                :group-id 1}}
-   :active-group-id 1
+   :open-group-id 1
    :threads {4 {:id 4
                 :group-id 1
                 :tag-ids [444 555]
                 :messages [{:id 400
                             :content "Alright! it's time to test some messages out."
-                            :user-id 44 }
+                            :user-id 44}
                            {:id 401
                             :content "Reply to this please."
                             :user-id 44}
                            {:id 402
                             :content "OK"
-                            :user-id 55}]}
+                            :user-id 55}
+                           {:id 403
+                            :content "And now for some junk to pad the message length:"
+                            :user-id 44}
+                           {:id 404
+                            :content "1"
+                            :user-id 44}
+                           {:id 405
+                            :content "2"
+                            :user-id 44}
+                           {:id 406
+                            :content "3"
+                            :user-id 55}
+                           {:id 407
+                            :content "4"
+                            :user-id 44}
+                           {:id 408
+                            :content "5"
+                            :user-id 55}
+                           {:id 409
+                            :content "6"
+                            :user-id 44}
+                           ]}
              5 {:id 5
                 :group-id 1
                 :tag-ids [444]
