@@ -156,12 +156,13 @@
       (invites/request-reset (assoc user :email email)))
     {:status 200 :body (pr-str {:ok true})})
   (GET "/reset" [user token]
-    (if-let [u (and (invites/verify-reset-nonce user token)
-                 (db/with-conn (db/user-by-id (java.util.UUID/fromString user))))]
-      {:status 200
-       :headers {"Content-Type" "text/html"}
-       :body (invites/reset-page u token)}
-      {:status 401}))
+    (let [user-id (java.util.UUID/fromString user)]
+      (if-let [u (and (invites/verify-reset-nonce {:id user-id} token)
+                   (db/with-conn (db/user-by-id (java.util.UUID/fromString user))))]
+        {:status 200
+         :headers {"Content-Type" "text/html"}
+         :body (invites/reset-page u token)}
+        {:status 401})))
   (POST "/reset" [new_password token user_id now hmac :as req]
     (let [user-id (java.util.UUID/fromString user_id)
           fail {:status 400 :headers {"Content-Type" "text/plain"}}]
