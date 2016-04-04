@@ -38,7 +38,7 @@
 
   (GET "/*" []
     (let [replacements {"{{algo}}" "sha256"
-                        "{{js}}" (str (digest/from-file "/js/desktop/out/braid.js"))}
+                        "{{js}}" (str (digest/from-file "public/js/desktop/out/braid.js"))}
           html (-> "public/desktop.html"
                    clojure.java.io/resource
                    slurp)]

@@ -1,4 +1,5 @@
 (ns chat.server.digest
+  (:require [clojure.java.io :as io])
   (:import [java.security MessageDigest]
            [org.apache.commons.codec.binary Base64]))
 
@@ -10,7 +11,7 @@
 
 (defn from-file
   [f]
-  (let [file (clojure.java.io/file (str "resources/public" f))]
+  (let [file (io/file (io/resource f))]
     (when (.exists file)
       (-> file
           slurp
