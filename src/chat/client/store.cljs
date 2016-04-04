@@ -1,23 +1,24 @@
 (ns chat.client.store
-  (:require [cljs-utils.core :refer [flip]]))
+  (:require [cljs-utils.core :refer [flip]]
+            [reagent.core :as r]))
 
 (defonce app-state
-  (atom {:open-group-id nil
-         :threads {}
-         :users {}
-         :tags {}
-         :groups {}
-         :page {:type :inbox}
-         :session nil
-         :errors []
-         :invitations []
-         :notifications {:window-visible? true
-                         :unread-count 0}
-         :user {:open-thread-ids #{}
-                :subscribed-tag-ids #{}
-                :user-id nil
-                :nickname nil}
-         :new-thread-id nil}))
+  (r/atom {:open-group-id nil
+           :threads {}
+           :users {}
+           :tags {}
+           :groups {}
+           :page {:type :inbox}
+           :session nil
+           :errors []
+           :invitations []
+           :notifications {:window-visible? true
+                           :unread-count 0}
+           :user {:open-thread-ids #{}
+                  :subscribed-tag-ids #{}
+                  :user-id nil
+                  :nickname nil}
+           :new-thread-id nil}))
 
 (defn- key-by-id [coll]
   (reduce (fn [memo x]

@@ -11,7 +11,8 @@
      :figwheel true
      :source-paths ["src/chat/client"
                     "src/chat/shared"
-                    "src/braid/ui"]
+                    "src/braid/ui"
+                    "src/braid/common"]
      :compiler {:main 'chat.client.core
                 :asset-path "/js/out"
                 :output-to "resources/public/js/out/chat.js"

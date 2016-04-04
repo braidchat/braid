@@ -5,7 +5,7 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [reagent->react]]
             [chat.client.views.style :refer [style-view]]
-            [chat.client.views.sidebar :refer [sidebar-view]]
+            [braid.ui.views.sidebar :refer [sidebar-view]]
             [chat.client.views.header :refer [header-view]]
             [chat.client.views.pages.search :refer [search-page-view]]
             [chat.client.views.pages.inbox :refer [inbox-page-view]]
@@ -59,6 +59,9 @@
                :onChange (fn [e] (om/set-state! owner :password (.. e -target -value)))})
         (dom/button nil "Let's do this!")))))
 
+(def react-sidebar-view
+  (reagent->react sidebar-view))
+
 (defn main-view [data owner]
   (reify
     om/IRender
@@ -71,7 +74,7 @@
               (dom/span #js {:className "close"
                              :onClick (fn [_] (store/clear-error! err-key))} "×"))))
 
-        (om/build sidebar-view data)
+         react-sidebar-view
 
         (om/build header-view data)
 
