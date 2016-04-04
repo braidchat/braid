@@ -3,22 +3,24 @@
             [reagent.core :as r]))
 
 (defonce app-state
-  (r/atom {:open-group-id nil
-           :threads {}
-           :users {}
-           :tags {}
-           :groups {}
-           :page {:type :inbox}
-           :session nil
-           :errors []
-           :invitations []
-           :notifications {:window-visible? true
-                           :unread-count 0}
-           :user {:open-thread-ids #{}
-                  :subscribed-tag-ids #{}
-                  :user-id nil
-                  :nickname nil}
-           :new-thread-id nil}))
+  (r/atom
+    {:open-group-id nil
+     :threads {}
+     :pagination-remaining 0
+     :users {}
+     :tags {}
+     :groups {}
+     :page {:type :inbox}
+     :session nil
+     :errors []
+     :invitations []
+     :notifications {:window-visible? true
+                     :unread-count 0}
+     :user {:open-thread-ids #{}
+            :subscribed-tag-ids #{}
+            :user-id nil
+            :nickname nil}
+     :new-thread-id nil}))
 
 (defn- key-by-id [coll]
   (reduce (fn [memo x]
@@ -164,11 +166,21 @@
 (defn open-thread? [thread-id]
   (contains? (set (get-in @app-state [:user :open-thread-ids])) thread-id))
 
+(defn set-pagination-remaining! [threads-count]
+  (transact! [:pagination-remaining] (constantly threads-count)))
+
+(defn pagination-remaining []
+  (get @app-state :pagination-remaining 0))
+
 ; channels page
 
 (defn set-channel-results! [threads]
   (transact! [:threads] #(merge % (key-by-id threads)))
   (transact! [:page :thread-ids] (constantly (map :id threads))))
+
+(defn add-channel-results! [threads]
+  (transact! [:threads] #(merge % (key-by-id threads)))
+  (transact! [:page :thread-ids] #(concat % (map :id threads))))
 
 ; search threads
 
