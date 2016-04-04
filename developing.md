@@ -60,14 +60,14 @@ Run the websocket server:
 (chat.server.sync/start-router!)
 ```
 
-Before opening the website, run figwheel first. See below on how to do that.
+Don't navigate to the website just yet.
 
-## Figwheel - JS and CSS compiling and hot-reload
+## Figwheel - JS compiling and hot-reload
 
 In a seperate terminal session:
 
 ```bash
-lein run -m clojure.main script/figwheel.clj
+lein run figwheel desktop-dev
 ```
 
 for working on the mobile client:

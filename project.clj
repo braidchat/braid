@@ -45,16 +45,33 @@
 
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
-  ["resources/public/js/out"]
+  ["resources/public/js"]
+
+  :figwheel-options {:server-port 3559}
 
   :cljsbuild {:builds
-              [{:id "release"
+              [
+               {:id "desktop-dev"
+                :figwheel true
                 :source-paths ["src/chat/client"
-                               "src/chat/shared"]
+                               "src/chat/shared"
+                               "src/braid/ui"
+                               "src/braid/common"]
                 :compiler {:main chat.client.core
-                           :asset-path "/js/out"
-                           :output-to "resources/public/js/out/chat.js"
-                           :output-dir "resources/public/js/out"
+                           :asset-path "/js/desktop/out"
+                           :output-to "resources/public/js/desktop/out/braid.js"
+                           :output-dir "resources/public/js/desktop/out"
+                           :verbose true}}
+
+               {:id "desktop-release"
+                :source-paths ["src/chat/client"
+                               "src/chat/shared"
+                               "src/braid/ui"
+                               "src/braid/common"]
+                :compiler {:main chat.client.core
+                           :asset-path "/desktop/out"
+                           :output-to "resources/public/js/desktop/out/braid.js"
+                           :output-dir "resources/public/js/desktop/out"
                            :optimizations :advanced
                            :pretty-print false }}
 
@@ -64,9 +81,9 @@
                                "src/braid/ui"
                                "src/retouch"]
                 :compiler {:main braid.mobile.core
-                           :asset-path "/mobile/js/out"
-                           :output-to "resources/public/mobile/js/out/braid.js"
-                           :output-dir "resources/public/mobile/js/out"
+                           :asset-path "/js/mobile/out"
+                           :output-to "resources/public/js/mobile/out/braid.js"
+                           :output-dir "resources/public/js/mobile/out"
                            :verbose true}}]}
 
   :min-lein-version "2.5.0"
