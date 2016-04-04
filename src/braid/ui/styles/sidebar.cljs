@@ -53,7 +53,7 @@
       :color "#222"
       :font-family "fontawesome"}
 
-     [:&:before
+     [:&:after
       (mixins/fontawesome \uf067)]
 
      [:&:hover
