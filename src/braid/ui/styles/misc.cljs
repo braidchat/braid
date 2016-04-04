@@ -181,7 +181,7 @@
   [:.threads
    mixins/flex
    {:position "absolute"
-    :top (+ vars/top-bar-height vars/pad vars/pad)
+    :top (m/+ vars/top-bar-height vars/pad vars/pad)
     :right 0
     :bottom vars/pad
     :left 0

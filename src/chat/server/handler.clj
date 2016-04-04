@@ -38,13 +38,11 @@
 
   (GET "/*" []
     (let [replacements {"{{algo}}" "sha256"
-                        "{{css}}" (digest/from-file "/css/out/chat.css")
-                        "{{prettify}}" (digest/from-file "/js/prettify.js")
-                        "{{js}}" (digest/from-file "/js/out/chat.js")}
-          html (-> "public/index.html"
+                        "{{js}}" (str (digest/from-file "/js/desktop/out/braid.js"))}
+          html (-> "public/desktop.html"
                    clojure.java.io/resource
                    slurp)]
-      (string/replace html #"\{\{\w*\}\}" replacements)))
+        (string/replace html #"\{\{\w*\}\}" replacements)))
 
   (POST "/public-register/:group-id" [group-id email :as req]
     (let [group-id (java.util.UUID/fromString group-id)

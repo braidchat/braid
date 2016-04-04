@@ -10,9 +10,10 @@
 
 (defn from-file
   [f]
-  (-> (str "public" f)
-      clojure.java.io/resource
-      slurp
-      sha256
-      Base64/encodeBase64
-      String.))
+  (let [file (clojure.java.io/file (str "resources/public" f))]
+    (when (.exists file)
+      (-> file
+          slurp
+          sha256
+          Base64/encodeBase64
+          String.))))
