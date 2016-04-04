@@ -8,6 +8,7 @@
                  [http-kit "2.1.19"]
                  [ring/ring-defaults "0.2.0"]
                  [fogus/ring-edn "0.3.0"]
+                 [ring-cors "0.1.7"]
                  [compojure "1.5.0"]
                  [environ "1.0.2"]
                  [com.taoensso/timbre "4.3.1" :exclusions [org.clojure/tools.reader]]

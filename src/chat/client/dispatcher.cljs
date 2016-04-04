@@ -170,7 +170,7 @@
   (store/remove-invite! invite))
 
 (defmethod dispatch! :auth [_ data]
-  (edn-xhr {:url "/auth"
+  (edn-xhr {:url (str "//" (aget js/window "api_path") "/auth")
             :method :post
             :data {:email (data :email)
                    :password (data :password)

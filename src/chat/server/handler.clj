@@ -6,6 +6,7 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults
                                               secure-site-defaults site-defaults]]
             [ring.middleware.edn :refer [wrap-edn-params]]
+            [ring.middleware.cors :refer [wrap-cors]]
             [clojurewerkz.quartzite.scheduler :as qs]
             [clojure.string :as string]
             [clojure.edn :as edn]
@@ -28,21 +29,31 @@
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
    :body (pr-str clj-body)})
 
-(defroutes site-routes
+(defn get-html [client]
+  (let [replacements {"{{algo}}" "sha256"
+                      "{{js}}" (str (digest/from-file (str "/js/" client "/out/braid.js")))
+                      ; TODO don't hardcode this
+                      "{{api_path}}" "localhost:5557"}
+        html (-> (str "public/" client ".html")
+                 clojure.java.io/resource
+                 slurp)]
+    (string/replace html #"\{\{\w*\}\}" replacements)))
+
+(defroutes desktop-client-routes
+  (GET "/*" []
+    (get-html "desktop")))
+
+(defroutes mobile-client-routes
+  (GET "/*" []
+    (get-html "mobile")))
+
+(defroutes api-server-routes
   (GET "/accept" [invite tok]
     (if (and invite tok)
       (if-let [invite (db/with-conn (db/get-invite (java.util.UUID/fromString invite)))]
         {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
         {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
-
-  (GET "/*" []
-    (let [replacements {"{{algo}}" "sha256"
-                        "{{js}}" (str (digest/from-file "/js/desktop/out/braid.js"))}
-          html (-> "public/desktop.html"
-                   clojure.java.io/resource
-                   slurp)]
-        (string/replace html #"\{\{\w*\}\}" replacements)))
 
   (POST "/public-register/:group-id" [group-id email :as req]
     (let [group-id (java.util.UUID/fromString group-id)
@@ -201,7 +212,30 @@
       (def session-store
         (memory-store)))))
 
-(def app
+(def middleware-defaults
+  (-> site-defaults ; ssl stuff will be handled by nginx
+      (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
+      (assoc-in [:session :store] session-store)
+      (assoc-in [:security :anti-forgery]
+        {:read-token (fn [req] (-> req :params :csrf-token))})))
+
+(def mobile-client-app
+  (routes
+    (wrap-defaults
+      (routes
+        resource-routes
+        mobile-client-routes)
+      middleware-defaults)))
+
+(def desktop-client-app
+  (routes
+    (wrap-defaults
+      (routes
+        resource-routes
+        desktop-client-routes)
+      middleware-defaults)))
+
+(def api-server-app
   (->
     (routes
       (wrap-defaults
@@ -212,30 +246,47 @@
         (-> api-defaults
             (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
             (assoc-in [:session :store] session-store)))
-      (wrap-defaults
-        (routes
-          resource-routes
-          site-routes)
-        (-> site-defaults ; ssl stuff will be handled by nginx
-            (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
-            (assoc-in [:session :store] session-store)
-            (assoc-in [:security :anti-forgery]
-              {:read-token (fn [req] (-> req :params :csrf-token))}))))
-    wrap-edn-params))
-
+      (-> (routes
+             resource-routes
+             api-server-routes)
+          (wrap-defaults middleware-defaults)
+          ))
+    wrap-edn-params
+    (wrap-cors :access-control-allow-origin [#".*"]
+               :access-control-allow-headers ["Origin" "X-Requested-With"
+                                              "Content-Type" "Accept"]
+               :access-control-allow-methods [:get :put :post :delete])
+    ))
 
 ;; server
-(defonce server (atom nil))
+(defonce servers (atom {:api nil
+                        :mobile nil
+                        :desktop nil}))
 
 (defn stop-server!
-  []
-  (when-let [stop-fn @server]
+  [type]
+  (when-let [stop-fn (@servers type)]
     (stop-fn :timeout 100)))
 
 (defn start-server!
-  [port]
-  (stop-server!)
-  (reset! server (run-server #'app {:port port})))
+  [type port]
+  (stop-server! type)
+  (let [app (case type
+              :api #'api-server-app
+              :desktop #'desktop-client-app
+              :mobile #'mobile-client-app)]
+    (swap! servers assoc type (run-server app {:port port}))))
+
+(defn start-servers! [port]
+  (let [desktop-port port
+        mobile-port (+ 1 port)
+        api-port (+ 2 port)]
+    (println "starting desktop client on port " desktop-port)
+    (start-server! :desktop desktop-port)
+    (println "starting mobile client on port " mobile-port)
+    (start-server! :mobile mobile-port)
+    (println "starting api on port " api-port)
+    (start-server! :api api-port)))
 
 ;; scheduler
 (defonce scheduler (atom nil))
@@ -255,10 +306,9 @@
 (defn -main  [& args]
   (let [port (Integer/parseInt (first args))
         repl-port (Integer/parseInt (second args))]
-    (start-server! port)
+    (start-servers! port)
     (chat.server.sync/start-router!)
     (nrepl/start-server :port repl-port)
-    (println "starting on port " port)
     (println "starting quartz scheduler")
     (start-scheduler!)
     (println "scheduling email digest jobs")
