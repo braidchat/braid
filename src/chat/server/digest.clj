@@ -11,10 +11,9 @@
 
 (defn from-file
   [f]
-  (let [file (io/file (io/resource f))]
-    (when (.exists file)
-      (-> file
-          slurp
-          sha256
-          Base64/encodeBase64
-          String.))))
+  (when-let [file (io/resource f)]
+    (-> file
+        slurp
+        sha256
+        Base64/encodeBase64
+        String.)))
