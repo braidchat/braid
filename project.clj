@@ -69,7 +69,7 @@
                                "src/braid/ui"
                                "src/braid/common"]
                 :compiler {:main chat.client.core
-                           :asset-path "/desktop/out"
+                           :asset-path "/js/desktop/out"
                            :output-to "resources/public/js/desktop/out/braid.js"
                            :output-dir "resources/public/js/desktop/out"
                            :optimizations :advanced
@@ -98,4 +98,4 @@
              :test [:dev]
              :uberjar [:prod
                        {:aot :all
-                        :hooks [leiningen.cljsbuild]}]})
+                        :prep-tasks ["compile" ["cljsbuild" "once" "desktop-release"]]}]})
