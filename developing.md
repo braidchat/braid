@@ -70,12 +70,6 @@ In a seperate terminal session:
 lein run figwheel desktop-dev
 ```
 
-for working on the mobile client:
-
-```bash
-lein run figwheel mobile-dev
-```
-
 ## ...and you're good!
 
 Open your browser to: `http://localhost:5555`
@@ -89,6 +83,18 @@ If you edit a cljs file in the repo, it should auto-update the page in the brows
 Note: currently in dev mode (the default profile), you cannot invite users or upload avatars. We're working on it.
 
 # Issues and Extras
+
+## mobile dev
+
+for working on the mobile client:
+
+```bash
+lein run figwheel mobile-dev
+```
+
+open:
+`http://localhost:3449/mobile.html`
+
 
 ## better clojurescript repl
 
