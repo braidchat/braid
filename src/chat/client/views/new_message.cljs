@@ -54,7 +54,7 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "emoji-match"}
-        (emoji/shortcode->html emoji)
+        (emoji/shortcode->html (string/replace emoji #"[\(\)]" ":"))
         (dom/div #js {:className "name"}
           emoji)
         (dom/div #js {:className "extra"}
@@ -64,11 +64,11 @@
   [
    ; ... :emoji  -> autocomplete emoji
    (fn [text thread-id]
-     (let [pattern #"\B:(\S{2,})$"]
+     (let [pattern #"\B[:(](\S{2,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
               (filter (fn [[k v]]
-                        (fuzzy-matches? k (str ":" query ":"))))
+                        (simple-matches? k (str query))))
               (map (fn [[k v]]
                      {:action
                       (fn [thread-id])
@@ -77,7 +77,10 @@
                         (string/replace text pattern (str k " ")))
                       :html
                       (fn []
-                        (om/build emoji-view k {:react-key k}))}))))))
+                        (om/build emoji-view (if (= "(" (first text))
+                                                 (str "(" (apply str (rest (butlast k))) ")")
+                                                  k)
+                                  {:react-key k}))}))))))
 
    ; ... @<user>  -> autocompletes user name
    (fn [text thread-id]
