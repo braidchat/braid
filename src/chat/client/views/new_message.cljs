@@ -68,7 +68,7 @@
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
               (filter (fn [[k v]]
-                        (simple-matches? k (str query))))
+                        (simple-matches? k query)))
               (map (fn [[k v]]
                      {:action
                       (fn [thread-id])
