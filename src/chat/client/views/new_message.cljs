@@ -77,9 +77,11 @@
                         (string/replace text pattern (str k " ")))
                       :html
                       (fn []
-                        (om/build emoji-view (if (= "(" (first text))
-                                                 (str "(" (apply str (rest (butlast k))) ")")
-                                                  k)
+                        (om/build emoji-view (let [show-brackets? (= "(" (first text))
+                                                   emoji-name (apply str (-> k rest butlast))]
+                                               (if (true? show-brackets?)
+                                                 (str "(" emoji-name ")")
+                                                 k))
                                   {:react-key k}))}))))))
 
    ; ... @<user>  -> autocompletes user name
