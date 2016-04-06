@@ -24,7 +24,6 @@
 (defn- get-html [client]
   (let [replacements {"{{algo}}" "sha256"
                       "{{js}}" (str (digest/from-file (str "/js/" client "/out/braid.js")))
-                      ; TODO don't hardcode this
                       "{{api_domain}}" (or (:api-domain env) (str "localhost:" @api-port))}
         html (-> (str "public/" client ".html")
                  clojure.java.io/resource

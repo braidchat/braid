@@ -1,5 +1,5 @@
 (ns chat.client.xhr
-  (:require [ajax.core :refer [ajax-request]]
+  (:require [ajax.core :refer [ajax-request json-request-format json-response-format]]
             [ajax.edn :refer [edn-request-format edn-response-format]]))
 
 (defn edn-xhr
@@ -19,6 +19,8 @@
 (defn ajax-xhr
   [args]
   (ajax-request (assoc args
+                  :format (json-request-format)
+                  :response-format (json-response-format {:keywords? true})
                   :handler (let [on-error-fn (or (args :on-error) identity)
                                  on-complete-fn (or (args :on-complete) identity)]
                              (fn [[ok? data]]
