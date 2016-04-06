@@ -4,6 +4,7 @@
     [clojure.edn :as edn]
     [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :refer [resources]]
+    [clostache.parser :as clostache]
     [chat.shared.util :refer [valid-nickname?]]
     [chat.server.digest :as digest]
     [chat.server.db :as db]
@@ -22,13 +23,11 @@
    :body (pr-str clj-body)})
 
 (defn- get-html [client]
-  (let [replacements {"{{algo}}" "sha256"
-                      "{{js}}" (str (digest/from-file (str "/js/" client "/out/braid.js")))
-                      "{{api_domain}}" (or (:api-domain env) (str "localhost:" @api-port))}
-        html (-> (str "public/" client ".html")
-                 clojure.java.io/resource
-                 slurp)]
-    (string/replace html #"\{\{\w*\}\}" replacements)))
+  (clostache/render-resource
+    (str "public/" client ".html")
+    {:algo "sha256"
+     :js (str (digest/from-file (str "public/js/" client "/out/braid.js")))
+     :api_domain (or (:api-domain env) (str "localhost:" @api-port))}))
 
 (defroutes desktop-client-routes
   (GET "/*" []

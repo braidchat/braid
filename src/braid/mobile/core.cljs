@@ -65,7 +65,7 @@
       [:div.login-flow
        (if-not (@data :method)
          [:div.content.welcome
-          [:div.logo "[LOGO]"]
+          [:img.logo {:src "/images/braid.svg"}]
           [:button.login
            {:on-click (fn [_]
                         (swap! data assoc :method :login))}
@@ -80,6 +80,7 @@
              [:div.content.login.email
               "Email"
               [:input.email {:placeholder "you@awesome.com"
+                             :type "email"
                              :key "email"}]
               [:button.next {:on-click (fn [e]
                                          (swap! data assoc :email (.. e -target -value)))}]]

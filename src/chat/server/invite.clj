@@ -1,6 +1,5 @@
 (ns chat.server.invite
   (:require [org.httpkit.client :as http]
-            [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [clojure.string :as string]
             [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
@@ -77,7 +76,6 @@
          "  <body>"
          "  <p>Upload an avatar for " (invite :invitee-email) "</p>"
          "  <form action=\"/register\" method=\"POST\" enctype=\"multipart/form-data\">"
-         "    <input type=\"hidden\" name=\"csrf-token\" value=\"" *anti-forgery-token* "\">"
          "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"
          "    <input type=\"hidden\" name=\"invite_id\" value=\"" (invite :id) "\">"
          "    <input type=\"hidden\" name=\"email\" value=\"" (invite :invitee-email) "\">"
@@ -155,11 +153,14 @@
   [user nonce]
   (if-let [stored-nonce (cache-get (str (user :id)))]
     (if (constant-comp stored-nonce nonce)
-      (do (cache-del! (str (user :id)))
-          {:success true})
+      (do {:success true})
       {:error "Invalid token"})
     (do (timbre/warnf "Expired nonce %s for user %s" nonce user)
         {:error "Expired token"})))
+
+(defn invalidate-reset-nonce!
+ [user]
+ (cache-del! (str (user :id))))
 
 (defn reset-page
   [user token]
@@ -173,7 +174,6 @@
          "  </head>"
          "  <body>"
          "  <form action=\"/reset\" method=\"POST\">"
-         "    <input type=\"hidden\" name=\"csrf-token\" value=\"" *anti-forgery-token* "\">"
          "    <input type=\"hidden\" name=\"user_id\" value=\"" (user :id) "\">"
          "    <input type=\"hidden\" name=\"now\" value=\"" now "\">"
          "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"

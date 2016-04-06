@@ -52,7 +52,6 @@
           [:.logo
            {:width "100%"
             :height (vw 50)
-            :background "white"
             ; TODO use flexbox to make this equal to top margin
             :margin-bottom (vw 25)}]
 

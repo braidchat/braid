@@ -20,8 +20,7 @@
             [environ.core :refer [env]]
             ; just requiring to register multimethods
             chat.server.extensions.asana
-            [chat.server.email-digest :as email-digest]
-            ))
+            [chat.server.email-digest :as email-digest]))
 
 (if (= (env :environment) "prod")
   (do
