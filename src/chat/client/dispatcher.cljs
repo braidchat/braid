@@ -129,8 +129,8 @@
     [:chat/search query]
     2500
     (fn [reply]
-      (when-let [results (:threads reply)]
-          (store/set-search-results! results)))))
+      (when (seq (:thread-ids reply))
+        (store/set-search-results! reply)))))
 
 (defmethod dispatch! :threads-for-tag [_ {:keys [tag-id offset limit on-complete]
                                           :or {offset 0 limit 25}}]
