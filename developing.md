@@ -52,7 +52,7 @@ Seed some data (first time only):
 
 Run the web server:
 ```clojure
-(chat.server.handler/start-server! 5555)
+(chat.server.handler/start-servers! 5555)
 ```
 
 Run the websocket server:

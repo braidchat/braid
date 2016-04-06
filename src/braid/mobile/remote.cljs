@@ -1,26 +1,34 @@
-(ns braid.mobile.remote)
+(ns braid.mobile.remote
+  (:require [cljs-uuid-utils.core :as uuid]))
+
+(defn key-by-id [arr]
+  (reduce (fn [memo i] (assoc memo (:id i) i)) {} arr))
 
 (def fake-response
+  (let [group-1-id (uuid/make-random-squuid)
+        group-2-id (uuid/make-random-squuid)
+        group-3-id (uuid/make-random-squuid)]
   {:user {}
-   :groups {1 {:id 1
+   :groups (key-by-id
+             [{:id group-1-id
                :name "Foo"}
-            2 {:id 2
+              {:id group-2-id
                :name "Bar"}
-            3 {:id 3
-               :name "Baz"}}
+              {:id group-3-id
+               :name "Baz"}])
    :users {44 {:id 44
                :name "therealbatman"}
            55 {:id 55
                :name "brucewayne"}}
    :tags {444 {:id 444
                :name "watercooler"
-               :group-id 1}
+               :group-id group-1-id}
           555 {:id 555
                :name "braid"
-               :group-id 1}}
-   :open-group-id 1
+               :group-id group-2-id}}
+   :open-group-id group-1-id
    :threads {4 {:id 4
-                :group-id 1
+                :group-id group-1-id
                 :tag-ids [444 555]
                 :messages [{:id 400
                             :content "Alright! it's time to test some messages out."
@@ -54,7 +62,7 @@
                             :user-id 44}
                            ]}
              5 {:id 5
-                :group-id 1
+                :group-id group-1-id
                 :tag-ids [444]
                 :messages [{:id 501
                             :content "aaa"
@@ -66,7 +74,7 @@
                             :content "ccc"
                             :user-id 55}]}
              6 {:id 6
-                :group-id 2
+                :group-id group-2-id
                 :messages [{:id 504
                             :content "xoo"
                             :user-id 44}
@@ -75,4 +83,4 @@
                             :user-id 55}
                            {:id 506
                             :content "xaz"
-                            :user-id 55}]}}})
+                            :user-id 55}]}}}))

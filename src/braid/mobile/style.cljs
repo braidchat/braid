@@ -52,7 +52,6 @@
           [:.logo
            {:width "100%"
             :height (vw 50)
-            :background "white"
             ; TODO use flexbox to make this equal to top margin
             :margin-bottom (vw 25)}]
 
@@ -95,7 +94,7 @@
            [:&::-webkit-input-placeholder
             {:color "rgba(255,255,255,0.5)"}]]]
 
-         [:.sidebar
+         [:.drawer
 
           [:.content
            {:width "100%"
@@ -105,9 +104,12 @@
            (let [icon-w "15vw"]
              [:.group
               {:display "block"
-               :width "100%"
+               :height icon-w
+               :width icon-w
                :margin-bottom "1rem"
-               :position "relative"}
+               :position "relative"
+               :border-radius "0.5rem"
+               }
 
               [:&.active:before
                (let [w "2vw"]
