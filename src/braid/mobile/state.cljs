@@ -14,7 +14,10 @@
   (fn [state _]
     (reaction (boolean (:user @state)))))
 
-(rf/register-sub :groups-with-unread state/get-groups-with-unread)
+(rf/register-sub :groups state/get-groups)
+
+(rf/register-sub :group-unread-count state/get-group-unread-count)
+
 
 ; current group
 
