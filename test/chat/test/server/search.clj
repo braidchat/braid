@@ -84,15 +84,15 @@
                          :mentioned-tag-ids [(tag-2 :id)]})
 
     (testing "user can search by text and see threads"
-      (is (= #{thread-1-id}
+      (is (= [thread-1-id]
              (search/search-threads-as (user-1 :id) ["hello" group-1-id])
              (search/search-threads-as (user-1 :id) ["HELLO" group-1-id])))
-      (is (= #{thread-1-id thread-2-id}
+      (is (= [thread-1-id thread-2-id]
              (search/search-threads-as (user-1 :id) ["world" group-1-id])))
-      (is (= #{} (search/search-threads-as (user-1 :id) ["something" group-1-id]))))
+      (is (= () (search/search-threads-as (user-1 :id) ["something" group-1-id]))))
 
     (testing "can search by tag name"
-      (is (= #{thread-1-id thread-2-id}
+      (is (= [thread-1-id thread-2-id]
              (search/search-threads-as (user-1 :id) ["#tag1" group-1-id])))
-      (is (= #{thread-2-id}
+      (is (= [thread-2-id]
              (search/search-threads-as (user-1 :id) ["#tag3 world" group-1-id]))))))
