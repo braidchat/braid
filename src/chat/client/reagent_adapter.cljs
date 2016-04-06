@@ -5,11 +5,9 @@
             [braid.common.state :as state]))
 
 (defn reagent->react [component]
-  (let [ReactComponent (js/React.createFactory
-                         (r/reactify-component
-                           component))]
-    (ReactComponent.)))
-
+  (js/React.createFactory
+    (r/reactify-component
+      component)))
 
 (defonce subscriptions (atom {}))
 

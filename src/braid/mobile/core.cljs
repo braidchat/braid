@@ -3,6 +3,7 @@
             [re-frame.core :refer [subscribe dispatch]]
             [braid.mobile.state]
             [braid.mobile.style :refer [styles]]
+            [braid.ui.views.sidebar]
             [retouch.core :refer [drawer-view swipe-view]]))
 
 (enable-console-print!)
@@ -51,27 +52,11 @@
        [:div.threads
         [swipe-view @threads thread-view]]])))
 
-(defn groups-view []
-  (let [groups (subscribe [:groups-with-unread])
-        active-group (subscribe [:active-group])]
-    [:div.groups
-     (doall
-       (for [group @groups]
-         ^{:key (group :id)}
-         [:a.group {:class (when (= (group :id)
-                                    (@active-group :id))
-                             "active")
-                    :on-click
-                    (fn [e]
-                      (dispatch [:set-active-group-id! (group :id)]))}
-          [:img]
-          (when (not= 0 (:unread-count group))
-            [:div.badge (:unread-count group)])]))]))
-
 (defn main-view []
   [:div.main
    [drawer-view
-    [:div [groups-view]]]
+    [:div.sidebar
+     [braid.ui.views.sidebar/groups-view {:subscribe subscribe}]]]
    [inbox-view]])
 
 (defn login-flow-view []
