@@ -1,7 +1,7 @@
 (ns braid.common.state
   (:require
     [reagent.ratom :include-macros true :refer-macros [reaction]]
-    [clojure.set :refer [intersection]]))
+    [clojure.set :refer [union intersection]]))
 
 (defn set-active-group-id!
   [state [_ group-id]]
@@ -12,43 +12,52 @@
   (let [group-id (reaction (:open-group-id @state))]
     (reaction (get-in @state [:groups @group-id]))))
 
-(defn- unseen? [message thread]
-  (> (:created-at message)
+(defn get-groups
+  [state _]
+  (reaction (vals (:groups @state))))
+
+(defn- thread-unseen?
+  [thread]
+  (> (->> (thread :messages)
+          (map :created-at)
+          (apply max))
      (thread :last-open-at)))
 
-(defn get-groups-with-unread
-  [state _]
-  (let [groups (reaction (vals (:groups @state)))
-        group-id->unread-count
-        (->>
-          (select-keys (@state :threads)
-                       (get-in @state [:user :open-thread-ids]))
-          vals
-          (filter (fn [thread]
-                    (unseen? (->> (thread :messages)
-                                  (sort-by :created-at)
-                                  last)
-                             thread)))
-          (mapcat (fn [thread]
-                    (let [group-ids-from-tags
-                          (->> (thread :tag-ids)
-                               (map (fn [tag-id]
-                                      (get-in @state [:tags tag-id :group-id])))
-                               set)]
-                      (if (seq group-ids-from-tags)
-                        group-ids-from-tags
-                        (let [group-ids-from-users
-                              (->> (thread :messages)
-                                   (map :user-id)
-                                   set
-                                   (map (fn [user-id]
-                                          (set (get-in @state [:users user-id :group-ids]))))
-                                   (apply intersection))]
-                          group-ids-from-users)))))
-          frequencies)]
-    (reaction (map (fn [group]
-                     (assoc group :unread-count (group-id->unread-count (group :id))))
-                   @groups))))
+(defn get-group-unread-count
+  [state [_ group-id]]
+  (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
+        threads (reaction (@state :threads))
+        tags (reaction (@state :tags))
+        users (reaction (@state :users))
+        group-ids->user-ids (reaction (->> @users
+                                           vals
+                                           (mapcat (fn [u]
+                                                     (map
+                                                       (fn [gid]
+                                                         {:id (u :id) :group-id gid})
+                                                       (u :group-ids))))
+                                           (group-by :group-id)
+                                           (map (fn [[k vs]]
+                                                  [k (map (fn [v] (v :id)) vs)]))
+                                           (into {})))
+        group-user-ids (set (@group-ids->user-ids group-id))
+        thread-in-group? (fn [thread]
+                           (if (seq (thread :tag-ids))
+                             (= group-id (:group-id (@tags (first (thread :tag-ids)))))
+                             (let [user-ids-from-messages (->> (thread :messages)
+                                                               (map :user-id)
+                                                               set)
+                                   user-ids-from-refs (set (thread :user-ids))
+                                   user-ids (union user-ids-from-messages
+                                                   user-ids-from-refs)]
+                               (< 0 (count (intersection group-user-ids user-ids))))))
+        unseen-threads (reaction
+                         (->>
+                           (select-keys @threads @open-thread-ids)
+                           vals
+                           (filter thread-unseen?)
+                           (filter thread-in-group?)))]
+    (reaction (count @unseen-threads))))
 
 (defn get-page
   [state _]
