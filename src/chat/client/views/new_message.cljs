@@ -79,7 +79,7 @@
                       (fn []
                         (om/build emoji-view (let [show-brackets? (= "(" (first text))
                                                    emoji-name (apply str (-> k rest butlast))]
-                                               (if (true? show-brackets?)
+                                               (if show-brackets?
                                                  (str "(" emoji-name ")")
                                                  k))
                                   {:react-key k}))}))))))
