@@ -11,6 +11,7 @@
             [clojure.string :as string]
             [clojure.edn :as edn]
             [clojure.tools.nrepl.server :as nrepl]
+            [clostache.parser :as clostache]
             [chat.server.sync :as sync :refer [sync-routes]]
             [environ.core :refer [env]]
             [chat.shared.util :refer [valid-nickname?]]
@@ -30,14 +31,11 @@
    :body (pr-str clj-body)})
 
 (defn get-html [client]
-  (let [replacements {"{{algo}}" "sha256"
-                      "{{js}}" (str (digest/from-file (str "/js/" client "/out/braid.js")))
+  (let [replacements {:algo "sha256"
+                      :js (str (digest/from-file (str "/js/" client "/out/braid.js")))
                       ; TODO don't hardcode this
-                      "{{api_path}}" "localhost:5557"}
-        html (-> (str "public/" client ".html")
-                 clojure.java.io/resource
-                 slurp)]
-    (string/replace html #"\{\{\w*\}\}" replacements)))
+                      :api_domain "localhost:5557"}]
+    (clostache/render-resource (str "public/" client ".html") replacements)))
 
 (defroutes desktop-client-routes
   (GET "/*" []
