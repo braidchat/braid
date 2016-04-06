@@ -63,7 +63,7 @@
                               :ref "threads-div"
                               :onScroll (fn [e]
                                           (let [div (.. e -target)]
-                                            (when (and (not loading?)
+                                            (when (and (= status :done-results)
                                                     (> (store/pagination-remaining) 0)
                                                     (> 100 (- (.-scrollWidth div)
                                                               (+ (.-scrollLeft div) (.-offsetWidth div)))))

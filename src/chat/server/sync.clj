@@ -264,12 +264,14 @@
       (chsk-send! user-id [:session/init-data
                            (db/with-conn
                              {:user-id user-id
-                              :version-checksum (digest/from-file "/js/desktop/out/braid.js")
+                              :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
                               :user-nickname (db/get-nickname user-id)
                               :user-groups (db/get-groups-for-user user-id)
                               :user-threads (db/get-open-threads-for-user user-id)
                               :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
-                              :users (into () (map #(assoc % :status (if (connected (% :id)) :online :offline)))
+                              :users (into ()
+                                           (map #(assoc % :status
+                                                   (if (connected (% :id)) :online :offline)))
                                            (db/fetch-users-for-user user-id))
                               :invitations (db/fetch-invitations-for-user user-id)
                               :tags (db/fetch-tags-for-user user-id)})]))))
