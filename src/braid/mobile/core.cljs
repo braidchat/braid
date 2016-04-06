@@ -80,7 +80,7 @@
       [:div.login-flow
        (if-not (@data :method)
          [:div.content.welcome
-          [:div.logo "[LOGO]"]
+          [:img.logo {:src "/images/braid.svg"}]
           [:button.login
            {:on-click (fn [_]
                         (swap! data assoc :method :login))}
