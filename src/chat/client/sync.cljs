@@ -10,11 +10,9 @@
 (defn make-socket! []
   (let [{:keys [chsk ch-recv send-fn state]}
         (sente/make-channel-socket! "/chsk"
-                                    {:type :auto
-                                     :chsk-url-fn (constantly
-                                                    (str "ws://"
-                                                         (aget js/window "api_path")
-                                                         "/chsk"))})]
+                                    {:chsk-url-fn
+                                     (constantly
+                                       (str "ws://" (aget js/window "api_domain") "/chsk"))})]
     (def chsk       chsk)
     (def ch-chsk    ch-recv)
     (def chsk-send! send-fn)

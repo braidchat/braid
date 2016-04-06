@@ -4,15 +4,9 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
-            [cljs-utils.xhr :as xhr]
             [chat.shared.util :as util]
-            [chat.client.router :as router]))
-
-(defn edn-xhr
-  [args]
-  (xhr/request (assoc args
-                 :content-type "application/edn"
-                 :accept "application/edn")))
+            [chat.client.router :as router]
+            [chat.client.xhr :refer [edn-xhr]]))
 
 (defn- extract-tag-ids [text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
@@ -170,26 +164,26 @@
   (store/remove-invite! invite))
 
 (defmethod dispatch! :auth [_ data]
-  (edn-xhr {:url (str "//" (aget js/window "api_path") "/auth")
+  (edn-xhr {:uri "/auth"
             :method :post
-            :data {:email (data :email)
-                   :password (data :password)
-                   :csrf-token (:csrf-token @sync/chsk-state)}
-            :on-error (fn [e]
-                        (when-let [cb (data :on-error)]
-                          (cb)))
+            :params {:email (data :email)
+                     :password (data :password)
+                     :csrf-token (:csrf-token @sync/chsk-state)}
             :on-complete (fn [data]
-                           (sync/reconnect!))}))
+                           (sync/reconnect!))
+            :on-error (fn [data]
+                        (when-let [cb (data :on-error)]
+                          (cb)))}))
 
 (defmethod dispatch! :request-reset [_ email]
-  (edn-xhr {:url "/request-reset"
+  (edn-xhr {:uri "/request-reset"
             :method :post
-            :data {:email email}}))
+            :params {:email email}}))
 
 (defmethod dispatch! :logout [_ _]
-  (edn-xhr {:url "/logout"
+  (edn-xhr {:uri "/logout"
             :method :post
-            :data {:csrf-token (:csrf-token @sync/chsk-state)}
+            :params {:csrf-token (:csrf-token @sync/chsk-state)}
             :on-complete (fn [data]
                            (store/clear-session!))}))
 
@@ -201,7 +195,6 @@
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
     (store/display-error! :client-out-of-date "Client out of date - please refresh")))
-
 
 ; Websocket Events
 
