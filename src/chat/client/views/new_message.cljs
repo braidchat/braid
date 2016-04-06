@@ -7,24 +7,23 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.emoji :as emoji]
-            [chat.client.views.helpers :refer [id->color debounce]])
+            [chat.client.views.helpers :refer [id->color debounce]]
+            [clj-fuzzy.metrics :as fuzzy])
   (:import [goog.events KeyCodes]))
 
+(defn- normalize [s]
+  (-> (.toLowerCase s)
+     (string/replace #"\s" "")))
 
-(defn tee [x]
-  (println x) x)
-
-(defn fuzzy-matches?
-  [s m]
-  ; TODO: make this fuzzier? something like interleave with .* & re-match?
-  (letfn [(normalize [s]
-            (-> (.toLowerCase s) (string/replace #"\s" "")))]
-    (not= -1 (.indexOf (normalize s) (normalize m)))))
-
-(defn simple-matches?
+(defn- simple-matches?
   [m s]
   (not= -1 (.indexOf m s)))
 
+(defn- fuzzy-matches? [m s]
+  (let [m (normalize m)
+        s (normalize s)]
+    (or (simple-matches? m s)
+        (< (fuzzy/levenshtein m s) 2))))
 
 ; fn that returns results that will be shown if pattern matches
 ;    inputs:
@@ -55,7 +54,7 @@
     om/IRender
     (render [_]
       (dom/div #js {:className "emoji-match"}
-        (emoji/shortcode->html emoji)
+        (emoji/shortcode->html (string/replace emoji #"[\(\)]" ":"))
         (dom/div #js {:className "name"}
           emoji)
         (dom/div #js {:className "extra"}
@@ -65,7 +64,7 @@
   [
    ; ... :emoji  -> autocomplete emoji
    (fn [text thread-id]
-     (let [pattern #"\B:(\S{2,})$"]
+     (let [pattern #"\B[:(](\S{2,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
               (filter (fn [[k v]]
@@ -78,7 +77,12 @@
                         (string/replace text pattern (str k " ")))
                       :html
                       (fn []
-                        (om/build emoji-view k {:react-key k}))}))))))
+                        (om/build emoji-view (let [show-brackets? (= "(" (first text))
+                                                   emoji-name (apply str (-> k rest butlast))]
+                                               (if show-brackets?
+                                                 (str "(" emoji-name ")")
+                                                 k))
+                                  {:react-key k}))}))))))
 
    ; ... @<user>  -> autocompletes user name
    (fn [text thread-id]

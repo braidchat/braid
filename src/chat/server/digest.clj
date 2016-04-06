@@ -1,4 +1,5 @@
 (ns chat.server.digest
+  (:require [clojure.java.io :as io])
   (:import [java.security MessageDigest]
            [org.apache.commons.codec.binary Base64]))
 
@@ -10,9 +11,9 @@
 
 (defn from-file
   [f]
-  (-> (str "public" f)
-      clojure.java.io/resource
-      slurp
-      sha256
-      Base64/encodeBase64
-      String.))
+  (when-let [file (io/resource f)]
+    (-> file
+        slurp
+        sha256
+        Base64/encodeBase64
+        String.)))

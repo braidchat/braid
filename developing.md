@@ -1,10 +1,9 @@
 # Dev
 
-To get Braid running locally, you will need to have 4 terminal sessions open:
+To get Braid running locally, you will need to have 3 terminal sessions open:
 1 - Datomic transactor
 2 - Braid REPL and server
 3 - Figwheel (JS + CSS compile and Hot Reload)
-4 - Less CSS Compiler
 
 ## datomic
 
@@ -61,28 +60,14 @@ Run the websocket server:
 (chat.server.sync/start-router!)
 ```
 
-Before opening the website, please run figwheel and lesscss first. See below on how to do that.
+Don't navigate to the website just yet.
 
-## Figwheel - JS and CSS compiling and hot-reload
-
-In a seperate terminal session:
-
-```bash
-lein run -m clojure.main script/figwheel.clj
-```
-
-for working on the mobile client:
-
-```bash
-lein run figwheel mobile-dev
-```
-
-## LessCSS
+## Figwheel - JS compiling and hot-reload
 
 In a seperate terminal session:
 
 ```bash
-lein lesscss auto
+lein figwheel desktop-dev
 ```
 
 ## ...and you're good!
@@ -98,6 +83,18 @@ If you edit a cljs file in the repo, it should auto-update the page in the brows
 Note: currently in dev mode (the default profile), you cannot invite users or upload avatars. We're working on it.
 
 # Issues and Extras
+
+## mobile dev
+
+for working on the mobile client:
+
+```bash
+lein figwheel mobile-dev
+```
+
+open:
+`http://localhost:3449/mobile.html`
+
 
 ## better clojurescript repl
 

@@ -134,7 +134,7 @@ add a supervisor entry for the chat app, something like this:
 
 ```
 [program:chat]
-command=java -server -Xmx1g -jar /www/deploys/chat/chat.jar 5555 3081
+command=java -server -Xmx1g -Dfile.encoding=UTF8 -jar /www/deploys/chat/chat.jar 5555 3081
 environment=ENVIRONMENT="prod",TESTER_PASSWORD="test user password",DB_URL="datomic:sql://chat_prod?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic"
 autostart=true
 autorestart=true

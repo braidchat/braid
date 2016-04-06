@@ -38,13 +38,11 @@
 
   (GET "/*" []
     (let [replacements {"{{algo}}" "sha256"
-                        "{{css}}" (digest/from-file "/css/out/chat.css")
-                        "{{prettify}}" (digest/from-file "/js/prettify.js")
-                        "{{js}}" (digest/from-file "/js/out/chat.js")}
-          html (-> "public/index.html"
+                        "{{js}}" (str (digest/from-file "public/js/desktop/out/braid.js"))}
+          html (-> "public/desktop.html"
                    clojure.java.io/resource
                    slurp)]
-      (string/replace html #"\{\{\w*\}\}" replacements)))
+        (string/replace html #"\{\{\w*\}\}" replacements)))
 
   (POST "/public-register/:group-id" [group-id email :as req]
     (let [group-id (java.util.UUID/fromString group-id)
@@ -158,12 +156,13 @@
       (invites/request-reset (assoc user :email email)))
     {:status 200 :body (pr-str {:ok true})})
   (GET "/reset" [user token]
-    (if-let [u (and (invites/verify-reset-nonce user token)
-                 (db/with-conn (db/user-by-id (java.util.UUID/fromString user))))]
-      {:status 200
-       :headers {"Content-Type" "text/html"}
-       :body (invites/reset-page u token)}
-      {:status 401}))
+    (let [user-id (java.util.UUID/fromString user)]
+      (if-let [u (and (invites/verify-reset-nonce {:id user-id} token)
+                   (db/with-conn (db/user-by-id (java.util.UUID/fromString user))))]
+        {:status 200
+         :headers {"Content-Type" "text/html"}
+         :body (invites/reset-page u token)}
+        {:status 401})))
   (POST "/reset" [new_password token user_id now hmac :as req]
     (let [user-id (java.util.UUID/fromString user_id)
           fail {:status 400 :headers {"Content-Type" "text/plain"}}]
@@ -178,6 +177,7 @@
           (if-let [err (:error (invites/verify-reset-nonce user token))]
             (assoc fail :body err)
             (do (db/with-conn (db/set-user-password! (user :id) new_password))
+                (invites/invalidate-reset-nonce! user)
                 {:status 301
                  :headers {"Location" "/"}
                  :session (assoc (req :session) :user-id (user :id))

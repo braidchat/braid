@@ -10,14 +10,18 @@
   (reify
     om/IDidMount
     (did-mount [_]
-      (dispatch! :threads-for-tag (get-in data [:page :id])))
-    om/IRender
-    (render [_]
+      (dispatch! :threads-for-tag {:tag-id (get-in data [:page :id])}))
+    om/IInitState
+    (init-state [_]
+      {:loading? false})
+    om/IRenderState
+    (render-state [_ {:keys [loading?]}]
       (let [page (data :page)
             tag-id (page :id)
             tag (get-in data [:tags tag-id])
             user-id (get-in data [:session :user-id])
             status (cond
+                     loading? :loading
                      (not (contains? page :thread-ids)) :searching
                      (seq (page :thread-ids)) :done-results
                      :else :done-empty)
@@ -49,12 +53,27 @@
               (dom/div nil
                 (case status
                   :searching "Searching..."
-                  :done-results "Done!"
+                  :loading "Loading more..."
+                  :done-results (str "Done! Displaying " (count threads)
+                                     " out of " (+ (count threads) (store/pagination-remaining)))
                   :done-empty "No Results"))))
 
 
           (apply dom/div #js {:className "threads"
                               :ref "threads-div"
+                              :onScroll (fn [e]
+                                          (let [div (.. e -target)]
+                                            (when (and (= status :done-results)
+                                                    (> (store/pagination-remaining) 0)
+                                                    (> 100 (- (.-scrollWidth div)
+                                                              (+ (.-scrollLeft div) (.-offsetWidth div)))))
+                                              (om/set-state! owner :loading? true)
+                                              (dispatch! :threads-for-tag
+                                                         {:tag-id (get-in data [:page :id])
+                                                          :offset (count threads)
+                                                          :on-complete
+                                                          (fn []
+                                                            (om/set-state! owner :loading? false))}))))
                               :onWheel (fn [e]
                                          (let [target-classes (.. e -target -classList)
                                                this-elt (om/get-node owner "threads-div")]
