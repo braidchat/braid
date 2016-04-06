@@ -14,8 +14,9 @@
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
-      (sente/make-channel-socket! sente-web-server-adapter {:user-id-fn (fn [ob]
-                                                                          (get-in ob [:session :user-id]))})]
+      (sente/make-channel-socket! sente-web-server-adapter
+                                  {:user-id-fn (fn [ob]
+                                                 (get-in ob [:session :user-id]))})]
   (def ring-ajax-post                ajax-post-fn)
   (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
   (def ch-chsk                       ch-recv)
