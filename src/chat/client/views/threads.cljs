@@ -85,6 +85,8 @@
                         :onKeyUp (fn [e]
                                    (when (and (= KeyCodes.X (.-keyCode e))
                                            (.-ctrlKey e))
+                                   (when (or (and (= KeyCodes.X (.-keyCode e))
+                                           (.-ctrlKey e)) (= KeyCodes.ESC (.-keyCode e)))
                                      (.preventDefault e)
                                      (.stopPropagation e)
                                      (dispatch! :hide-thread {:thread-id (thread :id)})))
