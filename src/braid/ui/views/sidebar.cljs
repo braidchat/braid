@@ -3,8 +3,15 @@
             [chat.client.views.helpers :refer [id->color]]
             [chat.client.routes :as routes]))
 
-(defn groups-view [{:keys [subscribe]}]
-  (let [groups (subscribe [:groups-with-unread])
+(defn badge-view [{:keys [subscribe]} group-id]
+  (let [cnt (subscribe [:group-unread-count group-id])]
+    (fn []
+      (if (and @cnt (> @cnt 0))
+        [:div.badge @cnt]
+        [:div]))))
+
+(defn groups-view [{:keys [subscribe] :as props}]
+  (let [groups (subscribe [:groups])
         active-group (subscribe [:active-group])]
     (fn []
       [:div.groups
@@ -18,8 +25,7 @@
              :href (routes/page-path {:group-id (group :id)
                                       :page-id "inbox"})}
             (string/join "" (take 2 (group :name)))
-            (when-let [cnt (group :unread-count)]
-              [:div.badge cnt])]))])))
+            [badge-view props (group :id)]]))])))
 
 (defn new-group-view [{:keys [subscribe]}]
  (let [page (subscribe [:page])]
