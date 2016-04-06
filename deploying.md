@@ -147,11 +147,13 @@ startretries=3
 
 When seeding, you may want to include RAFAL_PASSWORD and JAMES_PASSWORD in the environment for the first time you run seed, or just manually connect a repl and create it by hand instead of muddling things.
 
-## setting up nginx
+## Webserver
 
-assuming the appropriate DNS entries are pointing to the server
+assuming the appropriate DNS entries are pointing to the server (the example
+below assumes the main site is `braid.chat`, mobile is `m.braid.chat`, api is
+`api.braid.chat` and `www.braid.chat` redirects to `braid.chat`.
 
-upload the SSL .crt and .key files to /etc/nginx/certs
+### Configuring nginx
 
 create an ngnix config in sites-available looking something like this:
 
@@ -344,6 +346,28 @@ server {
 ```
 
 then symlink it into sites-enabled, delete the symlink to `default` in sites-enabled and `sudo service nginx reload`
+
+### SSL
+
+Using [letsencrypt](https://letsencrypt.org/):
+
+Install letsencrypt on the server as instructed on the site to `/opt/`
+
+Generate the certificate:
+
+```bash
+$ /opt/letsencrypt/letsencrypt-auto certonly -a webroot --webroot-path=/usr/share/nginx/html -d braid.chat -d www.braid -d m.braid.chat -d api.braid.chat
+```
+
+Set up a cron job to autorenew the certificate (letsencrypt certs only last for
+60 days).
+
+Edit the root cron with `sudo crontab -e` and add the following lines:
+
+```
+30 2 * * 1 /opt/letsencrypt/letsencrypt-auto renew >> /var/log/le-renew.log
+35 2 * * 1 /usr/sbin/service nginx reload
+```
 
 ## backups
 
