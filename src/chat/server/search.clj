@@ -42,38 +42,48 @@
      :tags tag-query}))
 
 (defn search-threads-as
+  "Return the ids of all threads, visible to the user, in the given group,
+  matching the provided query.
+  The query can speficy tags by prefixing them with an octothope; for example,
+  the query 'foo #bar' will find any threads tagged with 'bar' containing the
+  text 'foo'"
   [user-id [query group-id]]
   ; TODO: pagination?
-  ; TODO: consistent order for results
   (let [{:keys [text tags]} (parse-query query)
         search-db (d/db db/*conn*)
         tag-search (when (seq tags)
-                     (set (d/q '[:find [?t-id ...]
+                     (set (d/q '[:find ?t-id (max ?time)
                                  :in $ [?tag-name ...] ?g-id
                                  :where
                                  ; TODO: be more flexible/allow partial match?
+                                 [?g :group/id ?g-id]
+                                 [?tag :tag/group ?g]
                                  [?tag :tag/name ?tag-name]
                                  [?t :thread/tag ?tag]
                                  [?t :thread/id ?t-id]
-                                 [?tag :tag/group ?g]
-                                 [?g :group/id ?g-id]]
+                                 [?m :message/thread ?t]
+                                 [?m :message/created-at ?time]]
                                search-db
                                tags
                                group-id)))
         text-search (when-not (string/blank? text)
-                      (set (d/q '[:find [?t-id ...]
+                      (set (d/q '[:find ?t-id (max ?time)
                                   :in $ ?txt ?g-id
                                   :where
-                                  [(fulltext $ :message/content ?txt) [[?m]]]
-                                  [?m :message/thread ?t]
+                                  [?g :group/id ?g-id]
+                                  [?tag :tag/group ?g]
                                   [?t :thread/id ?t-id]
                                   [?t :thread/tag ?tag]
-                                  [?tag :tag/group ?g]
-                                  [?g :group/id ?g-id]]
+                                  [?m :message/thread ?t]
+                                  [?m :message/created-at ?time]
+                                  [(fulltext $ :message/content ?txt) [[?m]]]]
                                 search-db
                                 text
                                 group-id)))]
     (->> (if (every? some? [text-search tag-search])
            (intersection text-search tag-search)
            (first (remove nil? [text-search tag-search])))
-         (into #{} (filter (partial db/user-can-see-thread? user-id))))))
+         (filter (partial db/user-can-see-thread? user-id))
+         ; sorting the ids so we can have a consistent order of results
+         (sort-by second)
+         (map first))))

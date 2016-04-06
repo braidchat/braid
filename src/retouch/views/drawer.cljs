@@ -1,17 +1,15 @@
-(ns braid.mobile.sidebar
+(ns retouch.views.drawer
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [garden.core :refer [css]]))
-
-(def easing-fn
-  "cubic-bezier(.42, 0, .58, 1)")
+            [garden.core :refer [css]]
+            [retouch.common :refer [easing-fn]]))
 
 (def style-view
   (fn []
     [:style
      (css
        (let [w "25vw"]
-         [:.sidebar
+         [:.drawer
           {:background "black"
            :position "absolute"
            :top 0
@@ -28,7 +26,7 @@
           [:&.open
            {:transform (str "translate3d(" w ",0,0)")}]]))]))
 
-(defn sidebar-view [content-view]
+(defn drawer-view [content-view]
   (let [state (r/atom {})
 
         get-position (fn []
@@ -104,12 +102,13 @@
          (let [dragging? (get-dragging?)
                open? (get-open?)
                position (get-position)]
-           [:div.sidebar (cond
-                           @dragging?
-                           {:style {:transform (str "translate3d(" @position "px, 0, 0)")}}
-                           @open?
-                           {:class "open"}
-                           :else
-                           {:class "closed"})
+           [:div.drawer
+            (cond
+              @dragging?
+              {:style {:transform (str "translate3d(" @position "px, 0, 0)")}}
+              @open?
+              {:class "open"}
+              :else
+              {:class "closed"})
             [:div.content content-view]
             [style-view]]))})))

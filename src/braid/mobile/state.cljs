@@ -2,7 +2,7 @@
   (:require [re-frame.core :as rf]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.mobile.remote :refer [fake-response]]
-            ))
+            [braid.common.state :as state]))
 
 ; login
 
@@ -14,34 +14,24 @@
   (fn [state _]
     (reaction (boolean (:user @state)))))
 
-(rf/register-sub :groups-with-unread
-  (fn [state _]
-    (let [groups (reaction (vals (:groups @state)))
-          threads-by-group-id (->> (:threads @state)
-                                   vals
-                                   (group-by :group-id))]
-      ; TODO not actually unread-count
-      (reaction (->> @groups
-                     (map (fn [g]
-                            (assoc g :unread-count
-                              (count (threads-by-group-id (g :id)))))))))))
+(rf/register-sub :groups state/get-groups)
+
+(rf/register-sub :group-unread-count state/get-group-unread-count)
+
+
 ; current group
 
-(rf/register-sub :active-group
-  (fn [state _]
-    (let [group-id (reaction (:active-group-id @state))]
-      (reaction (get-in @state [:groups @group-id])))))
+(rf/register-sub :active-group state/get-active-group)
+
+(rf/register-handler :set-active-group-id! state/set-active-group-id!)
 
 (rf/register-sub :active-group-inbox-threads
   (fn [state _]
-    (let [group-id (reaction (:active-group-id @state))
+    (let [group-id (reaction (:open-group-id @state))
           threads (reaction (vals (:threads @state)))]
       (reaction (filter (fn [t] (= @group-id (t :group-id)))
                         @threads)))))
 
-(rf/register-handler :set-active-group-id!
-  (fn [state [_ group-id]]
-    (assoc state :active-group-id group-id)))
 
 ; tag
 

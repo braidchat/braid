@@ -209,11 +209,12 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (let [user-tags (db/with-conn (db/get-user-visible-tag-ids user-id))
           filter-tags (fn [t] (update-in t [:tag-ids] (partial filter user-tags)))
-          threads (db/with-conn (->> (db/threads-with-tag user-id ?data 0 50)
-                                     (map filter-tags)
-                                     doall))]
+          offset (get ?data :offset 0)
+          limit (get ?data :limit 50)
+          threads (db/with-conn (-> (db/threads-with-tag user-id (?data :tag-id) offset limit)
+                                     (update :threads (comp doall (partial map filter-tags)))))]
       (when ?reply-fn
-        (?reply-fn {:threads threads})))))
+        (?reply-fn threads)))))
 
 (defmethod event-msg-handler :chat/invite-to-group
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -263,12 +264,14 @@
       (chsk-send! user-id [:session/init-data
                            (db/with-conn
                              {:user-id user-id
-                              :version-checksum (digest/from-file "/js/out/chat.js")
+                              :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
                               :user-nickname (db/get-nickname user-id)
                               :user-groups (db/get-groups-for-user user-id)
                               :user-threads (db/get-open-threads-for-user user-id)
                               :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
-                              :users (into () (map #(assoc % :status (if (connected (% :id)) :online :offline)))
+                              :users (into ()
+                                           (map #(assoc % :status
+                                                   (if (connected (% :id)) :online :offline)))
                                            (db/fetch-users-for-user user-id))
                               :invitations (db/fetch-invitations-for-user user-id)
                               :tags (db/fetch-tags-for-user user-id)})]))))

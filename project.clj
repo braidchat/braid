@@ -5,9 +5,10 @@
                  [org.clojure/clojure "1.7.0"]
                  [javax.servlet/servlet-api "2.5"]
                  [commons-codec "1.10"]
-                 [http-kit "2.1.19"]
+                 [http-kit "2.2.0-alpha1"]
                  [ring/ring-defaults "0.2.0"]
                  [fogus/ring-edn "0.3.0"]
+                 [ring-cors "0.1.7"]
                  [compojure "1.5.0"]
                  [environ "1.0.2"]
                  [com.taoensso/timbre "4.3.1" :exclusions [org.clojure/tools.reader]]
@@ -24,10 +25,12 @@
                  [org.clojure/clojurescript "1.8.34"]
                  [org.omcljs/om "0.9.0"]
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]
+                 [cljs-ajax "0.5.4"]
                  [secretary "1.2.3"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [org.clojars.leanpixel/om-fields "1.9.0"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
+                 [clj-fuzzy "0.3.1"]
                  ;shared
                  [org.clojure/tools.reader "1.0.0-alpha3"]
                  [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
@@ -40,34 +43,49 @@
   :main chat.server.handler
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3"]
-            [lein-figwheel "0.5.1"]
-            [jamesnvc/lein-lesscss "1.4.0"]]
+            [lein-figwheel "0.5.1"]]
 
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
-  ["resources/public/js/out"
-   ;"resources/public/css/out" ; need to fix lein-lesscss to create the director if it doesn't exist
-   ]
-  :lesscss-paths ["resources/less"]
-  :lesscss-output-path "resources/public/css/out"
+  ["resources/public/js"]
+
+  :figwheel-options {:server-port 3559}
+
   :cljsbuild {:builds
-              [{:id "release"
-                :source-paths ["src/chat/client" "src/chat/shared"]
+              [
+               {:id "desktop-dev"
+                :figwheel true
+                :source-paths ["src/chat/client"
+                               "src/chat/shared"
+                               "src/braid/ui"
+                               "src/braid/common"]
                 :compiler {:main chat.client.core
-                           :asset-path "/js/out"
-                           :output-to "resources/public/js/out/chat.js"
-                           :output-dir "resources/public/js/out"
+                           :asset-path "/js/desktop/out"
+                           :output-to "resources/public/js/desktop/out/braid.js"
+                           :output-dir "resources/public/js/desktop/out"
+                           :verbose true}}
+
+               {:id "desktop-release"
+                :source-paths ["src/chat/client"
+                               "src/chat/shared"
+                               "src/braid/ui"
+                               "src/braid/common"]
+                :compiler {:main chat.client.core
+                           :asset-path "/js/desktop/out"
+                           :output-to "resources/public/js/desktop/out/braid.js"
+                           :output-dir "resources/public/js/desktop/out_prod"
                            :optimizations :advanced
-                           :pretty-print false }}
+                           :pretty-print false}}
 
                {:id "mobile-dev"
                 :figwheel true
                 :source-paths ["src/braid/mobile"
-                               "src/braid/ui"]
+                               "src/braid/ui"
+                               "src/retouch"]
                 :compiler {:main braid.mobile.core
-                           :asset-path "/mobile/js/out"
-                           :output-to "resources/public/mobile/js/out/braid.js"
-                           :output-dir "resources/public/mobile/js/out"
+                           :asset-path "/js/mobile/out"
+                           :output-to "resources/public/js/mobile/out/braid.js"
+                           :output-dir "resources/public/js/mobile/out"
                            :verbose true}}]}
 
   :min-lein-version "2.5.0"
@@ -82,5 +100,4 @@
              :test [:dev]
              :uberjar [:prod
                        {:aot :all
-                        :hooks [leiningen.cljsbuild
-                                leiningen.hooks.lesscss]}]})
+                        :prep-tasks ["compile" ["cljsbuild" "once" "desktop-release"]]}]})

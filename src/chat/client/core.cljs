@@ -1,6 +1,5 @@
 (ns chat.client.core
   (:require [om.core :as om]
-            [om.dom :as dom]
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.views :as views]
@@ -13,6 +12,7 @@
 (defn ^:export init []
   (.addEventListener js/document "visibilitychange"
                 (fn [e] (store/set-window-visibility! (= "visible" (.-visibilityState js/document)))))
+  (sync/make-socket!)
   (sync/start-router!))
 
 (highlighter/install-highlighter)

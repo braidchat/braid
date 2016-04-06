@@ -675,24 +675,27 @@
          set)))
 
 (defn threads-with-tag
+  "Find threads with a given tag that the user is allowed to see, ordered by most recent message.
+  Paginates results, dropping `skip` threads and returning `limit`.
+  Returns the threads and a count of how many threads remain."
   [user-id tag-id skip limit]
-  (let [thread-eids (->> (d/q '[:find ?thread (max ?time)
-                                :in $ ?tag-id
-                                :where
-                                [?tag :tag/id ?tag-id]
-                                [?thread :thread/tag ?tag]
-                                [?msg :message/thread ?thread]
-                                [?msg :message/created-at ?time]]
-                              (d/db *conn*)
-                              tag-id)
-                         (sort-by second)
-                         reverse
+  (let [all-thread-eids (d/q '[:find ?thread (max ?time)
+                               :in $ ?tag-id
+                               :where
+                               [?tag :tag/id ?tag-id]
+                               [?thread :thread/tag ?tag]
+                               [?msg :message/thread ?thread]
+                               [?msg :message/created-at ?time]]
+                              (d/db *conn*) tag-id)
+        thread-eids (->> all-thread-eids
+                         (sort-by second #(compare %2 %1))
                          (drop skip)
                          (take limit)
                          (map first))]
-    (->> (d/pull-many (d/db *conn*) thread-pull-pattern thread-eids)
-         (map db->thread)
-         (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))))
+    {:threads (->> (d/pull-many (d/db *conn*) thread-pull-pattern thread-eids)
+                   (map db->thread)
+                   (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))
+     :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
 (defn create-extension!
   [{:keys [id type group-id user-id config]}]
