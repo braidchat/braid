@@ -18,8 +18,16 @@
            :className "title"
            :title "Inbox"}]]))
 
+(defn recent-page-button-view []
+  (let [path (routes/recent-page-path {:group-id (routes/current-group)})]
+    [:div.recent.shortcut {:className (when (routes/current-path? path) "active")}
+      [:a {:href path
+           :className "title"
+           :title "Recent"}]]))
+
 (defn header-view [props]
   [:div.header
     "Header"
     [clear-inbox-button-view props]
-    [inbox-page-button-view]])
+    [inbox-page-button-view]
+    [recent-page-button-view]])

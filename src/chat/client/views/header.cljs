@@ -14,13 +14,6 @@
     (render [_]
       (dom/div #js {:className "header"}
 
-        (let [path (routes/recent-page-path {:group-id (routes/current-group)})]
-          (dom/div #js {:className (str "recent shortcut "
-                                        (when (routes/current-path? path) "active"))}
-            (dom/a #js {:href path
-                        :className "title"
-                        :title "Recent"})))
-
         (let [users (->> (store/users-in-open-group)
                          (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id)))))
               users-online (->> users
