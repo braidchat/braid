@@ -14,14 +14,6 @@
     (render [_]
       (dom/div #js {:className "header"}
 
-
-        (let [path (routes/inbox-page-path {:group-id (routes/current-group)})]
-          (dom/div #js {:className (str "inbox shortcut "
-                                        (when (routes/current-path? path) "active"))}
-            (dom/a #js {:href path
-                        :className "title"
-                        :title "Inbox"})))
-
         (let [path (routes/recent-page-path {:group-id (routes/current-group)})]
           (dom/div #js {:className (str "recent shortcut "
                                         (when (routes/current-path? path) "active"))}
