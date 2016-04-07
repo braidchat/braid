@@ -45,7 +45,7 @@
        :margin-left "0.25rem"
        :color "#ccc"}]]
 
-   [:.content
+   ["> .content"
     {:white-space "pre-wrap"
      :word-break "break-word"
      :display "inline-block"

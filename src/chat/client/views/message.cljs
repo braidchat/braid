@@ -4,6 +4,8 @@
             [clojure.string :as string]
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [id->color]]
+            [chat.client.reagent-adapter :refer [reagent->react subscribe]]
+            [braid.ui.views.embed :refer [embed-view]]
             [chat.client.emoji :as emoji]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.helpers :as helpers :refer [starts-with? ends-with?]]
@@ -146,6 +148,8 @@
                              :result-fn (partial dom/strong #js {:className "starred"})}))
 
 
+(def EmbedView
+  (reagent->react embed-view))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
@@ -203,4 +207,10 @@
             (dom/span #js {:className "time"
                            :title (message :created-at)} (helpers/format-date (message :created-at))))
           (apply dom/div #js {:className "content"}
-            (format-message (message :content))))))))
+            (format-message (message :content)))
+
+          (EmbedView. #js {:url "https://www.youtube.com/watch?v=J9FImc2LOr8"})
+          (EmbedView. #js {:url "http://imgur.com/gallery/nRwhbNa"})
+          (EmbedView. #js {:url "http://thenext36.ca"}))))))
+
+
