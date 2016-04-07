@@ -135,7 +135,7 @@ add a supervisor entry for the chat app, something like this:
 ```
 [program:chat]
 command=java -server -Xmx1g -Dfile.encoding=UTF8 -jar /www/deploys/chat/chat.jar 5555 3081
-environment=ENVIRONMENT="prod",TESTER_PASSWORD="test user password",DB_URL="datomic:sql://chat_prod?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic",API_DOMAIN="api.mydomain.com"
+environment=ENVIRONMENT="prod",TESTER_PASSWORD="test user password",DB_URL="datomic:sql://chat_prod?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic",TIMBRE_LEVER=":debug",MALIGUN_PASSWORD="XXX",MAILGUN_DOMAIN="chat.leanpixel.com",AWS_DOMAIN="chat.leanpixel.com",AWS_ACCESS_KEY="XXX",AWS_SECRET_KEY="...",S3_UPLOAD_KEY="XXX",S#_UPLOAD_SECRET="XXX",ASANA_CLIENT_ID="XXX",ASANA_CLIENT_SECRET="XXX",API_DOMAIN="api.mydomain.com"
 autostart=true
 autorestart=true
 startsecs=10
@@ -185,17 +185,19 @@ map $http_upgrade $connection_upgrade {
 server {
   listen 80;
   server_name api.braid.chat m.braid.chat braid.chat;
+  # for letsencrypt verification
   location /.well-known {
     default_type "text/plain";
     root /usr/share/nginx/html;
   }
   location / {
-    return 301 https://$server_name$request_uri;
+    return 301 https://$host$request_uri;
   }
 }
 server {
   listen 80;
   server_name www.braid.chat;
+  # for letsencrypt verification
   location /.well-known {
     default_type "text/plain";
     root /usr/share/nginx/html;
@@ -357,6 +359,13 @@ Generate the certificate:
 
 ```bash
 $ /opt/letsencrypt/letsencrypt-auto certonly -a webroot --webroot-path=/usr/share/nginx/html -d braid.chat -d www.braid -d m.braid.chat -d api.braid.chat
+```
+
+Generate a strong Diffe-Hellman group - we want to avoid using comment groups
+that attackers may have precomputed.
+
+```bash
+$ sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
 ```
 
 Set up a cron job to autorenew the certificate (letsencrypt certs only last for
