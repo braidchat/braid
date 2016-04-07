@@ -86,7 +86,18 @@
                            :asset-path "/js/mobile/out"
                            :output-to "resources/public/js/mobile/out/braid.js"
                            :output-dir "resources/public/js/mobile/out"
-                           :verbose true}}]}
+                           :verbose true}}
+
+               {:id "mobile-release"
+                :source-paths ["src/braid/mobile"
+                               "src/braid/ui"
+                               "src/retouch"]
+                :compiler {:main braid.mobile.core
+                           :asset-path "/js/mobile/out"
+                           :output-to "resources/public/js/mobile/out/braid.js"
+                           :output-dir "resources/public/js/mobile/out_prod"
+                           :optimizations :advanced
+                           :pretty-print false}}]}
 
   :min-lein-version "2.5.0"
 
@@ -100,4 +111,4 @@
              :test [:dev]
              :uberjar [:prod
                        {:aot :all
-                        :prep-tasks ["compile" ["cljsbuild" "once" "desktop-release"]]}]})
+                        :prep-tasks ["compile" ["cljsbuild" "once" "desktop-release" "mobile-release"]]}]})
