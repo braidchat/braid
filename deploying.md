@@ -185,6 +185,7 @@ map $http_upgrade $connection_upgrade {
 server {
   listen 80;
   server_name api.braid.chat m.braid.chat braid.chat;
+  # for letsencrypt verification
   location /.well-known {
     default_type "text/plain";
     root /usr/share/nginx/html;
@@ -196,6 +197,7 @@ server {
 server {
   listen 80;
   server_name www.braid.chat;
+  # for letsencrypt verification
   location /.well-known {
     default_type "text/plain";
     root /usr/share/nginx/html;
