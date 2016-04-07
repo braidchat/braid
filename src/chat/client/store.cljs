@@ -114,7 +114,7 @@
   (transact! [:new-thread-id] (constantly nil)))
 
 (defn update-thread-last-open-at [thread-id]
-  (transact! [:threads thread-id :last-open-at] (constantly js/Date.)))
+  (transact! [:threads thread-id :last-open-at] (constantly (js/Date.))))
 
 (defn set-open-threads! [threads]
   (transact! [:threads] (constantly (key-by-id threads)))

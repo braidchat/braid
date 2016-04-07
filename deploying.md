@@ -135,7 +135,7 @@ add a supervisor entry for the chat app, something like this:
 ```
 [program:chat]
 command=java -server -Xmx1g -Dfile.encoding=UTF8 -jar /www/deploys/chat/chat.jar 5555 3081
-environment=ENVIRONMENT="prod",TESTER_PASSWORD="test user password",DB_URL="datomic:sql://chat_prod?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic"
+environment=ENVIRONMENT="prod",TESTER_PASSWORD="test user password",DB_URL="datomic:sql://chat_prod?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic",TIMBRE_LEVER=":debug",MALIGUN_PASSWORD="XXX",MAILGUN_DOMAIN="chat.leanpixel.com",AWS_DOMAIN="chat.leanpixel.com",AWS_ACCESS_KEY="XXX",AWS_SECRET_KEY="...",S3_UPLOAD_KEY="XXX",S#_UPLOAD_SECRET="XXX",ASANA_CLIENT_ID="XXX",ASANA_CLIENT_SECRET="XXX",API_DOMAIN="api.mydomain.com"
 autostart=true
 autorestart=true
 startsecs=10
@@ -147,50 +147,114 @@ startretries=3
 
 When seeding, you may want to include RAFAL_PASSWORD and JAMES_PASSWORD in the environment for the first time you run seed, or just manually connect a repl and create it by hand instead of muddling things.
 
-## setting up nginx
+## Webserver
 
-assuming the appropriate DNS entries are pointing to the server
+assuming the appropriate DNS entries are pointing to the server (the example
+below assumes the main site is `braid.chat`, mobile is `m.braid.chat`, api is
+`api.braid.chat` and `www.braid.chat` redirects to `braid.chat`.
 
-upload the SSL .crt and .key files to /etc/nginx/certs
+### Configuring nginx
 
 create an ngnix config in sites-available looking something like this:
 
 ```
-upstream chat_backend {
+upstream braid_desktop {
   server 127.0.0.1:5555;
   keepalive 32;
 }
 
-server {
-  listen 80;
-  server_name chat.leanpixel.com;
-  return 301 https://chat.leanpixel.com$request_uri;
+upstream braid_mobile {
+  server 127.0.0.1:5556;
+  keepalive 32;
 }
 
-# need this for websocket connection upgrade
+upstream braid_api {
+  server 127.0.0.1:5557;
+  keepalive 32;
+}
+
+
 map $http_upgrade $connection_upgrade {
   default upgrade;
   ''      close;
 }
 
+## braid.chat
+
+# http redirects
 server {
-  listen 443;
-  server_name chat.leanpixel.com;
+  listen 80;
+  server_name api.braid.chat m.braid.chat braid.chat;
+  # for letsencrypt verification
+  location /.well-known {
+    default_type "text/plain";
+    root /usr/share/nginx/html;
+  }
+  location / {
+    return 301 https://$server_name$request_uri;
+  }
+}
+server {
+  listen 80;
+  server_name www.braid.chat;
+  # for letsencrypt verification
+  location /.well-known {
+    default_type "text/plain";
+    root /usr/share/nginx/html;
+  }
+  location / {
+    return 301 https://braid.chat$request_uri;
+  }
+}
+
+# redirect www to bare domain
+server {
+  listen 443 ssl;
+  listen [::]:443 ssl;
+  server_name www.braid.chat;
 
   ssl on;
-  ssl_certificate /etc/nginx/certs/leanpixel.com.crt;
-  ssl_certificate_key /etc/nginx/certs/leanpixel.com.key;
-  ssl_session_timeout 5m;
-  ssl_session_cache shared:CHAT-SSL:10m;
+  ssl_certificate /etc/letsencrypt/live/braid.chat/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/braid.chat/privkey.pem;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
   ssl_prefer_server_ciphers on;
-  ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
-  ssl_ciphers "EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA2    56 EECDH+aRSA+RC4 EECDH EDH+aRSA RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS";
+  ssl_dhparam /etc/ssl/certs/dhparam.pem;
+  ssl_ciphers 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS';
+  ssl_session_timeout 1d;
+  ssl_session_cache shared:BRAID-SSL:50m;
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_trusted_certificate /etc/letsencrypt/live/braid.chat/chain.pem;
+  add_header Strict-Transport-Security max-age=15768000;
+
+  return 301 https://braid.chat$request_uri;
+}
+
+# bare domain/desktop site
+server {
+  listen 443 ssl;
+  listen [::]:443 ssl;
+  server_name braid.chat;
+
+  ssl on;
+  ssl_certificate /etc/letsencrypt/live/braid.chat/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/braid.chat/privkey.pem;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_prefer_server_ciphers on;
+  ssl_dhparam /etc/ssl/certs/dhparam.pem;
+  ssl_ciphers 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS';
+  ssl_session_timeout 1d;
+  ssl_session_cache shared:BRAID-SSL:50m;
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_trusted_certificate /etc/letsencrypt/live/braid.chat/chain.pem;
+  add_header Strict-Transport-Security max-age=15768000;
 
   access_log /var/log/nginx/chat.access.log;
   error_log /var/log/nginx/chat.error.log;
 
   location / {
-    proxy_pass http://chat_backend;
+    proxy_pass http://braid_desktop;
     proxy_redirect off;
     proxy_http_version 1.1;
     proxy_set_header Connection "";
@@ -202,11 +266,117 @@ server {
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection $connection_upgrade;
   }
+}
 
+# mobile site
+server {
+  listen 443 ssl;
+  listen [::]:443 ssl;
+
+  server_name m.braid.chat;
+
+  ssl on;
+  ssl_certificate /etc/letsencrypt/live/braid.chat/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/braid.chat/privkey.pem;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_prefer_server_ciphers on;
+  ssl_dhparam /etc/ssl/certs/dhparam.pem;
+  ssl_ciphers 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS';
+  ssl_session_timeout 1d;
+  ssl_session_cache shared:BRAID-SSL:50m;
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_trusted_certificate /etc/letsencrypt/live/braid.chat/chain.pem;
+  add_header Strict-Transport-Security max-age=15768000;
+
+  access_log /var/log/nginx/chat.access.log;
+  error_log /var/log/nginx/chat.error.log;
+
+  location / {
+    proxy_pass http://braid_mobile;
+    proxy_redirect off;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header        Host            $host;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    # set upgrade headers for websockets
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+  }
+}
+
+# api backend
+server {
+  listen 443 ssl;
+  listen [::]:443 ssl;
+
+  server_name api.braid.chat;
+
+  ssl on;
+  ssl_certificate /etc/letsencrypt/live/braid.chat/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/braid.chat/privkey.pem;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_prefer_server_ciphers on;
+  ssl_dhparam /etc/ssl/certs/dhparam.pem;
+  ssl_ciphers 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS';
+  ssl_session_timeout 1d;
+  ssl_session_cache shared:BRAID-SSL:50m;
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_trusted_certificate /etc/letsencrypt/live/braid.chat/chain.pem;
+  add_header Strict-Transport-Security max-age=15768000;
+
+  access_log /var/log/nginx/chat.access.log;
+  error_log /var/log/nginx/chat.error.log;
+
+  location / {
+    proxy_pass http://braid_api;
+    proxy_redirect off;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header        Host            $host;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    # set upgrade headers for websockets
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+  }
 }
 ```
 
 then symlink it into sites-enabled, delete the symlink to `default` in sites-enabled and `sudo service nginx reload`
+
+### SSL
+
+Using [letsencrypt](https://letsencrypt.org/):
+
+Install letsencrypt on the server as instructed on the site to `/opt/`
+
+Generate the certificate:
+
+```bash
+$ /opt/letsencrypt/letsencrypt-auto certonly -a webroot --webroot-path=/usr/share/nginx/html -d braid.chat -d www.braid -d m.braid.chat -d api.braid.chat
+```
+
+Generate a strong Diffe-Hellman group - we want to avoid using comment groups
+that attackers may have precomputed.
+
+```bash
+$ sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+```
+
+Set up a cron job to autorenew the certificate (letsencrypt certs only last for
+60 days).
+
+Edit the root cron with `sudo crontab -e` and add the following lines:
+
+```
+30 2 * * 1 /opt/letsencrypt/letsencrypt-auto renew >> /var/log/le-renew.log
+35 2 * * 1 /usr/sbin/service nginx reload
+```
 
 ## backups
 

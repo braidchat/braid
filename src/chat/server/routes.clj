@@ -26,7 +26,7 @@
   (clostache/render-resource
     (str "public/" client ".html")
     {:algo "sha256"
-     :js (str (digest/from-file (str "/js/" client "/out/braid.js")))
+     :js (str (digest/from-file (str "public/js/" client "/out/braid.js")))
      :api_domain (or (:api-domain env) (str "localhost:" @api-port))}))
 
 (defroutes desktop-client-routes

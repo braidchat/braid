@@ -80,6 +80,7 @@
              [:div.content.login.email
               "Email"
               [:input.email {:placeholder "you@awesome.com"
+                             :type "email"
                              :key "email"}]
               [:button.next {:on-click (fn [e]
                                          (swap! data assoc :email (.. e -target -value)))}]]
