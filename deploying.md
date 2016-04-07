@@ -361,6 +361,13 @@ Generate the certificate:
 $ /opt/letsencrypt/letsencrypt-auto certonly -a webroot --webroot-path=/usr/share/nginx/html -d braid.chat -d www.braid -d m.braid.chat -d api.braid.chat
 ```
 
+Generate a strong Diffe-Hellman group - we want to avoid using comment groups
+that attackers may have precomputed.
+
+```bash
+$ sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+```
+
 Set up a cron job to autorenew the certificate (letsencrypt certs only last for
 60 days).
 
