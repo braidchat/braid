@@ -5,11 +5,9 @@
             [braid.common.state :as state]))
 
 (defn reagent->react [component]
-  (let [ReactComponent (js/React.createFactory
-                         (r/reactify-component
-                           component))]
-    (ReactComponent.)))
-
+  (js/React.createFactory
+    (r/reactify-component
+      component)))
 
 (defonce subscriptions (atom {}))
 
@@ -17,8 +15,12 @@
   (swap! subscriptions assoc key-v handler-fn))
 
 (register-sub
-  :groups-with-unread
-  state/get-groups-with-unread)
+  :group-unread-count
+  state/get-group-unread-count)
+
+(register-sub
+  :groups
+  state/get-groups)
 
 (register-sub
   :active-group

@@ -7,12 +7,20 @@
 (defn debugf [s & args]
   (js/console.log (apply gstring/format s args)))
 
-(let [{:keys [chsk ch-recv send-fn state]}
-      (sente/make-channel-socket! "/chsk" {:type :auto})]
-  (def chsk       chsk)
-  (def ch-chsk    ch-recv)
-  (def chsk-send! send-fn)
-  (def chsk-state state))
+(defn make-socket! []
+  (let [domain (aget js/window "api_domain")
+        proto (if (= 0 (.indexOf domain "localhost:"))
+                "ws"
+                "wss")
+        {:keys [chsk ch-recv send-fn state]}
+        (sente/make-channel-socket! "/chsk"
+                                    {:chsk-url-fn
+                                     (constantly
+                                       (str proto "://" domain "/chsk"))})]
+    (def chsk       chsk)
+    (def ch-chsk    ch-recv)
+    (def chsk-send! send-fn)
+    (def chsk-state state)))
 
 (defmulti event-handler (fn [[id _]] id))
 

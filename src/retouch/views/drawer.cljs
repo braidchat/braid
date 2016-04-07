@@ -9,7 +9,7 @@
     [:style
      (css
        (let [w "25vw"]
-         [:.sidebar
+         [:.drawer
           {:background "black"
            :position "absolute"
            :top 0
@@ -102,12 +102,13 @@
          (let [dragging? (get-dragging?)
                open? (get-open?)
                position (get-position)]
-           [:div.sidebar (cond
-                           @dragging?
-                           {:style {:transform (str "translate3d(" @position "px, 0, 0)")}}
-                           @open?
-                           {:class "open"}
-                           :else
-                           {:class "closed"})
+           [:div.drawer
+            (cond
+              @dragging?
+              {:style {:transform (str "translate3d(" @position "px, 0, 0)")}}
+              @open?
+              {:class "open"}
+              :else
+              {:class "closed"})
             [:div.content content-view]
             [style-view]]))})))

@@ -1,33 +1,15 @@
 (ns chat.client.s3
   (:require [cljs-uuid-utils.core :as uuid]
             [clojure.string :refer [split]]
-            [cljs-utils.xhr :refer [request]]
             [goog.events :as events]
+            [chat.client.xhr :refer [edn-xhr ajax-xhr]]
             [chat.client.views.helpers :refer [ends-with?]])
   (:import [goog.net XhrIo EventType]))
 
-; TODO: should be able to use `request` instead of this - content type problem
-(defn- ajax-xhr
-  "Send an xhr request"
-  [{:keys [method url data on-complete on-error on-progress]}]
-  (let [xhr (XhrIo.)]
-    (when on-progress
-      (events/listen xhr EventType.PROGRESS ; xhrio does not support progress yet
-        (fn [e]  (on-progress e))))
-    (when on-complete
-      (events/listen xhr EventType.SUCCESS
-        (fn [e] (on-complete (.getResponseText xhr)))))
-    (when on-error
-      (events/listen xhr EventType.ERROR
-        (fn [e] (on-error {:error (.getResponseText xhr)}))))
-    (.send xhr url (.toUpperCase (name method)) data)))
-
 (defn upload [file on-complete]
-  (request
+  (edn-xhr
     {:method :get
-     :content-type "application/edn"
-     :accept "application/edn"
-     :url "/s3-policy"
+     :uri "/s3-policy"
      :on-error (fn [err]
                  (.error js/console "Error getting s3 authorization: "
                          (pr-str (:error err))))
@@ -35,9 +17,9 @@
      (fn [{:keys [bucket auth]}]
        (let [file-name (str (uuid/make-random-squuid) "." (last (split (.-type file) #"/")))
              file-url (str "https://s3.amazonaws.com/" bucket "/uploads/" file-name)]
-         (ajax-xhr {:method "POST"
-                    :url (str "https://s3.amazonaws.com/" bucket)
-                    :data (doto (js/FormData.)
+         (ajax-xhr {:method :post
+                    :uri (str "https://s3.amazonaws.com/" bucket)
+                    :body (doto (js/FormData.)
                             (.append "key" "uploads/${filename}")
                             (.append "AWSAccessKeyId" (:key auth))
                             (.append "acl" "public-read")
