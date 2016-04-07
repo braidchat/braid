@@ -64,6 +64,24 @@
           [:div "hello"])]])))
 
 
+(defn tags-pane-view [{:keys [subscribe]}]
+  (let [path (routes/page-path {:group-id (routes/current-group)
+                                :page-id "channels"})
+        tags (subscribe [:tags])
+        group-subscribed-tags (subscribe [:group-subscribed-tags])]
+    [:div.tags.shortcut {:className (when (routes/current-path? path) "active")}
+      [:a {:href path
+           :className "title"
+           :title "Tags"}]
+      [:div.modal
+        [:div
+          (let [sorted-tags (->> @group-subscribed-tags
+                                (sort-by :threads-count)
+                                 reverse)]
+            (for [tag sorted-tags]
+              ;TODO: build tag divs (e.g. om/build tag-view tag)
+              [:div (tag :name)]))]]]))
+
 
 (defn header-view [props]
   [:div.header
@@ -72,4 +90,5 @@
     [inbox-page-button-view]
     [recent-page-button-view]
     [help-page-pane-view]
-    [users-online-pane-view props]])
+    [users-online-pane-view props]
+    [tags-pane-view props]])

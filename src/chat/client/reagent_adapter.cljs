@@ -42,6 +42,14 @@
   :user-id
   state/get-user-id)
 
+(register-sub
+  :tags
+  state/get-all-tags)
+
+(register-sub
+  :group-subscribed-tags
+  state/get-group-subscribed-tags)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]

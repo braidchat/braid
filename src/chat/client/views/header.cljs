@@ -14,24 +14,6 @@
     (render [_]
       (dom/div #js {:className "header"}
 
-        (let [path (routes/page-path {:group-id (routes/current-group)
-                                      :page-id "channels"})]
-          (dom/div #js {:className (str "tags shortcut "
-                                        (when (routes/current-path? path) "active"))}
-            (dom/a #js {:href path
-                        :className "title"
-                        :title "Tags"})
-            (dom/div #js {:className "modal"}
-              (apply dom/div nil
-                (->> (@store/app-state :tags)
-                     vals
-                     (filter (fn [t] (= (@store/app-state :open-group-id) (t :group-id))))
-                     (filter (fn [t] (store/is-subscribed-to-tag? (t :id))))
-                     (sort-by :threads-count)
-                     reverse
-                     (map (fn [tag]
-                            (dom/div nil (om/build tag-view tag)))))))))
-
         (comment
           (let [path (routes/extensions-page-path {:group-id (routes/current-group)})]
             (dom/div #js {:className (str "extensions shortcut "

@@ -92,3 +92,18 @@
 (defn get-user-id
   [state _]
   (reaction (get-in @state [:session :user-id])))
+
+(defn get-all-tags
+  [state _]
+  (reaction (vals (get-in @state [:tags]))))
+
+(defn- -is-subscribed-to-tag?
+  [state tag-id]
+  (contains? (get-in state [:user :subscribed-tag-ids]) tag-id))
+
+(defn get-group-subscribed-tags
+  [state [_ group-id]]
+  (reaction
+    (->> (vals (get-in @state [:tags]))
+      (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id))))
+      (filter (fn [tag] (-is-subscribed-to-tag? @state (tag :id)))))))
