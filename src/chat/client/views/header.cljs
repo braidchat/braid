@@ -60,18 +60,6 @@
               (dom/div #js {:className "modal"}
                 (dom/div nil "extensions")))))
 
-        (let [path (routes/help-page-path {:group-id (routes/current-group)})]
-          (dom/div #js {:className (str "help shortcut "
-                                        (when (routes/current-path? path) "active"))}
-            (dom/a #js {:href path
-                        :className "title"
-                        :title "Help"})
-            (dom/div #js {:className "modal"}
-              (dom/p nil "Conversations must be tagged to be seen by other people.")
-              (dom/p nil "Tag a conversation by mentioning a tag in a message: ex. #general")
-              (dom/p nil "You can also mention users to add them to a conversation: ex. @raf")
-              (dom/p nil "Add emoji by using :shortcodes: (they autocomplete)."))))
-
         (om/build search-bar-view (data :page))
 
         (let [user-id (get-in @store/app-state [:session :user-id])

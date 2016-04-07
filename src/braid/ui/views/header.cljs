@@ -25,6 +25,17 @@
            :className "title"
            :title "Recent"}]]))
 
+(defn help-page-pane-view []
+  (let [path (routes/help-page-path {:group-id (routes/current-group)})]
+    [:div.help.shortcut {:className (when (routes/current-path? path) "active")}
+      [:a {:href path
+           :className "title"
+           :title "Help"}]
+      [:div.modal
+        [:p "Conversations must be tagged to be seen by other people."]
+        [:p "Tag a conversation by mentioning a tag in a message: ex. #general"]
+        [:p "You can also mention users to add them to a conversation: ex. @raf"]
+        [:p "Add emoji by using :shortcodes: (they autocomplete)."]]]))
 (defn header-view [props]
   [:div.header
     "Header"
