@@ -191,7 +191,7 @@ server {
     root /usr/share/nginx/html;
   }
   location / {
-    return 301 https://$server_name$request_uri;
+    return 301 https://$host$request_uri;
   }
 }
 server {
