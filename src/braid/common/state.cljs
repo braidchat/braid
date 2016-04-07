@@ -79,3 +79,16 @@
                                       (into #{} (map group-for-tag (thread :tag-ids)))
                                       @current-group-id))))))]
       (reaction open-threads)))
+
+
+(defn- users-in-group
+  [group-id state]
+  (filter (fn [u] (contains? (set (u :group-ids)) group-id)) (vals (state :users))))
+
+(defn get-users-in-open-group
+  [state _]
+  (reaction (users-in-group (@state :open-group-id) @state)))
+
+(defn get-user-id
+  [state _]
+  (reaction (get-in @state [:session :user-id])))

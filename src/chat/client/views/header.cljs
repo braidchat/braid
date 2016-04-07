@@ -14,24 +14,6 @@
     (render [_]
       (dom/div #js {:className "header"}
 
-        (let [users (->> (store/users-in-open-group)
-                         (remove (fn [user] (= (get-in @store/app-state [:session :user-id]) (user :id)))))
-              users-online (->> users
-                                (filter (fn [user] (= :online (user :status)))))
-              path (routes/users-page-path {:group-id (routes/current-group)})]
-          (dom/div #js {:className (str "users shortcut "
-                                        (when (routes/current-path? path) "active"))}
-            (dom/a #js {:href path
-                        :className "title"
-                        :title "Users"}
-              (count users-online))
-            (apply dom/div #js {:className "modal"}
-              (dom/h2 nil "Online")
-              (->> users-online
-                   (map (fn [user]
-                          (dom/div nil
-                            (om/build user-view user))))))))
-
         (let [path (routes/page-path {:group-id (routes/current-group)
                                       :page-id "channels"})]
           (dom/div #js {:className (str "tags shortcut "

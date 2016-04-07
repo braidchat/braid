@@ -34,6 +34,14 @@
   :open-threads
   state/get-open-threads)
 
+(register-sub
+  :users-in-open-group
+  state/get-users-in-open-group)
+
+(register-sub
+  :user-id
+  state/get-user-id)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]
