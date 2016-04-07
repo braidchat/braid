@@ -30,6 +30,10 @@
   :page
   state/get-page)
 
+(register-sub
+  :open-threads
+  state/get-open-threads)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]

@@ -6,7 +6,8 @@
             [chat.client.reagent-adapter :refer [reagent->react subscribe]]
             [chat.client.views.style :refer [style-view]]
             [braid.ui.views.sidebar :refer [sidebar-view]]
-            [chat.client.views.header :refer [header-view]]
+            [braid.ui.views.header :refer [header-view]]
+            [chat.client.views.header]
             [chat.client.views.pages.search :refer [search-page-view]]
             [chat.client.views.pages.inbox :refer [inbox-page-view]]
             [chat.client.views.pages.recent :refer [recent-page-view]]
@@ -62,6 +63,9 @@
 (def SidebarView
   (reagent->react sidebar-view))
 
+(def HeaderView
+  (reagent->react header-view))
+
 (defn main-view [data owner]
   (reify
     om/IRender
@@ -76,7 +80,9 @@
 
          (SidebarView. #js {:subscribe subscribe})
 
-        (om/build header-view data)
+        (HeaderView. #js {:subscribe subscribe})
+
+        ;(om/build chat.client.views.header/header-view data)
 
         (case (get-in data [:page :type])
           :inbox (om/build inbox-page-view data)

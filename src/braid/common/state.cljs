@@ -62,3 +62,20 @@
 (defn get-page
   [state _]
   (reaction (@state :page)))
+
+(defn get-open-threads
+  [state _]
+  (let [current-group-id (reaction (@state :open-group-id))
+        open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
+        group-for-tag (fn [tag-id]
+                        (get-in @state [:tags tag-id :group-id]))
+        threads (reaction (@state :threads))
+        open-threads (-> @threads
+                         (select-keys @open-thread-ids)
+                         vals
+                         #_(->> (filter (fn [thread]
+                                (or (empty? (thread :tag-ids))
+                                    (contains?
+                                      (into #{} (map group-for-tag (thread :tag-ids)))
+                                      @current-group-id))))))]
+      (reaction open-threads)))
