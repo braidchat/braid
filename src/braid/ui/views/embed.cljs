@@ -57,11 +57,6 @@
          (let [url (:url (r/props this))]
            (fetch-content! url)))
 
-       :component-did-update
-       (fn [this]
-         (let [url (:url (r/props this))]
-           (fetch-content! url)))
-
        :reagent-render
        (fn []
          [:div.embed
