@@ -198,12 +198,23 @@
   [{:keys [event id ?data ring-req ?reply-fn send-fn] :as ev-msg}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn
-      (let [user-tags (db/with-conn (db/get-user-visible-tag-ids user-id))
+      (let [user-tags (db/get-user-visible-tag-ids user-id)
             filter-tags (fn [t] (update-in t [:tag-ids] (partial filter user-tags)))
             thread-ids (search/search-threads-as user-id ?data)
             threads (map (comp filter-tags db/get-thread) (take 25 thread-ids))]
         (when ?reply-fn
           (?reply-fn {:threads threads :thread-ids thread-ids}))))))
+
+(defmethod event-msg-handler :chat/load-threads
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn
+      (let [user-tags (db/get-user-visible-tag-ids user-id)
+            filter-tags (fn [t] (update-in t [:tag-ids] (partial filter user-tags)))
+            thread-ids (filter (partial db/user-can-see-thread? user-id) ?data)
+            threads (map filter-tags (db/get-threads thread-ids))]
+        (when ?reply-fn
+          (?reply-fn {:threads threads}))))))
 
 (defmethod event-msg-handler :chat/threads-for-tag
   [{:keys [event id ?data ring-req ?reply-fn send-fn] :as ev-msg}]
