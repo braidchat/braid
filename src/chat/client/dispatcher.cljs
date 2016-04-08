@@ -127,7 +127,7 @@
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
     [:chat/search query]
-    5000
+    15000
     (fn [reply]
       (when (seq (:thread-ids reply))
         (store/set-search-results! reply)))))
