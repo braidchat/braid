@@ -1,5 +1,6 @@
 (ns braid.ui.styles.message
   (:require [braid.ui.styles.vars :refer [avatar-size pad card-width]]
+            [braid.ui.styles.mixins :as mixins]
             [garden.arithmetic :as m]
             [garden.units :refer [rem]]))
 
@@ -45,7 +46,7 @@
        :margin-left "0.25rem"
        :color "#ccc"}]]
 
-   [:.content
+   ["> .content"
     {:white-space "pre-wrap"
      :word-break "break-word"
      :display "inline-block"
@@ -54,13 +55,35 @@
      :box-sizing "border-box"
      :line-height "1.25em"}
 
-     [:.embedded-image
-      {:max-width "100px"
-       :max-height "100px"
-       :transition "max-width 0.5s, max-height 0.5s"}
-       [:&:hover
-        {:max-width "3000px"
-         :max-height "3000px"}]]]
+    [:a
+     {:text-decoration "none"
+      :color "white"
+      :padding "0.2em 0.25em 0.25em"
+      :border-radius "0.25em"
+      :background "#607DE1"
+      :outline "none"}
+
+     [:&:hover
+      {:background "#4D69C9"}]
+
+     [:&:active
+      {:background "##2B3D79"}]
+
+     [:&:visited
+      {:background "#9B81DB"}
+
+      [:&:hover
+       {:background "#735EA7"}]
+
+      [:&:active
+       {:background "#463670"}]]
+
+     [:&:before
+      (mixins/fontawesome \uf0c1)
+      {:display "inline"
+       :margin-right "0.25em"
+       :vertical-align "middle"
+       :font-size "0.8em"}]]]
 
     [:.prettyprint
      {:background-color "#e2f5ff"
