@@ -8,8 +8,8 @@
     @(http/request {:url "https://api.embedly.com/1/extract"
                     :query-params {"key" (env :embedly-key)
                                    "url" url
-                                   "maxwidth" 500
-                                   "maxheight" 400
+                                   "maxwidth" 275
+                                   "maxheight" 275
                                    "format" "json"
                                    "secure" true}})
     :body

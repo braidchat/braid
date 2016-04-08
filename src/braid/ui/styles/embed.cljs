@@ -71,4 +71,9 @@
 
     [:&:hover
      [:&:before
-      {:opacity 1.0}]]]])
+      {:opacity 1.0}]]]
+
+   [:.image
+
+    [:img
+     {:width "100%"}]]])

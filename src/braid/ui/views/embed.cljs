@@ -34,6 +34,13 @@
             :style {:background-color
                     (arr->rgb (get-in img [:colors 0 :color]))}}])])
 
+(defn- image-embed-view [content]
+  [:div.image
+   (let [img (get-in content [:images 0])]
+     [:img {:src (img :url)
+            :style {:background-color
+                    (arr->rgb (get-in img [:colors 0 :color]))}}])])
+
 (defn embed-view []
   (let [content (r/atom {})
         set-content! (fn [response]
@@ -64,6 +71,8 @@
              (cond
                (= "video" (get-in @content [:media :type]))
                [video-embed-view @content]
+               (= "photo" (get-in @content [:media :type]))
+               [image-embed-view @content]
                :else
                [website-embed-view @content])]
             [:div.content.loading])])})))
