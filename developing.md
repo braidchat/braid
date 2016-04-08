@@ -166,6 +166,8 @@ In the project folder, create a profile
         :aws-secret-key "my_aws_secret"
         :s3-upload-key "key-for-uploading"
         :s3-upload-secret "secret-for-uploading"
+        ; for link info extraction
+        :embedly-key "embedly api key"
         }}}
 ```
 
