@@ -74,6 +74,20 @@
       {:opacity 1.0}]]]
 
    [:.image
+    {:position "relative"}
 
     [:img
-     {:width "100%"}]]])
+     {:width "100%"}]
+
+    [:&:hover:before
+     (mixins/fontawesome \uf14c)
+     (let [font-size (rem 3)]
+       {:font-size font-size
+        :position "absolute"
+        :top "50%"
+        :left 0
+        :right 0
+        :text-align "center"
+        :color "white"
+        :display "block"
+        :margin-top (m/* -0.5 font-size)})]]])
