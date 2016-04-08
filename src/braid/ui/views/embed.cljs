@@ -3,7 +3,9 @@
             [chat.client.xhr :refer [edn-xhr]]))
 
 (defn- arr->rgb [arr]
-  (str "rgb(" (arr 0) "," (arr 1) "," (arr 2) ")"))
+  (if arr
+    (str "rgb(" (arr 0) "," (arr 1) "," (arr 2) ")")
+    "rgb(150, 150, 150)"))
 
 (defn- website-embed-view [content]
   [:div.content.loaded.website
