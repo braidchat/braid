@@ -8,17 +8,17 @@
 (defn- website-embed-view [content]
   (let [img (get-in content [:images 0])]
     [:div.content.loaded.website
-     [:img {:src (img :url)
-            :style {:background-color
-                    (arr->rgb (get-in img [:colors 0 :color]))}}]
-     [:div.title (:title content)]
+     [:img.image {:src (img :url)
+                  :style {:background-color
+                          (arr->rgb (get-in img [:colors 0 :color]))}}]
 
-     [:div.favicon {:style {:background-color
-                            (arr->rgb (get-in content [:favicon_colors 0 :color]))
-                            :background-image
-                            (str "url(" (:favicon_url content) ")")}}]
-
-     [:div.provider (:provider_name content)]]))
+     [:div.about
+      [:div.provider
+       [:div.favicon {:style {:background-image
+                              (str "url(" (:favicon_url content) ")")}}]
+       [:div.name (:provider_name content)]]
+      [:div.title (:title content)]
+      [:div.url (:url content)]]]))
 
 (defn- video-overlay-view [content]
   [:div.content
