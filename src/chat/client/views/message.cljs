@@ -206,11 +206,11 @@
               (sender :nickname))
             (dom/span #js {:className "time"
                            :title (message :created-at)} (helpers/format-date (message :created-at))))
+
           (apply dom/div #js {:className "content"}
             (format-message (message :content)))
 
-          (EmbedView. #js {:url "https://www.youtube.com/watch?v=J9FImc2LOr8"})
-          (EmbedView. #js {:url "http://imgur.com/gallery/nRwhbNa"})
-          (EmbedView. #js {:url "http://thenext36.ca"}))))))
+          (when-let [url "http://thenext36.ca"] ;TODO extract the url from message
+            (EmbedView. #js {:url url})))))))
 
 
