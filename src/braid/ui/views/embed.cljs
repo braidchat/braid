@@ -6,19 +6,19 @@
   (str "rgb(" (arr 0) "," (arr 1) "," (arr 2) ")"))
 
 (defn- website-embed-view [content]
-  (let [img (get-in content [:images 0])]
-    [:div.content.loaded.website
+  [:div.content.loaded.website
+   (if-let [img (get-in content [:images 0])]
      [:img.image {:src (img :url)
                   :style {:background-color
                           (arr->rgb (get-in img [:colors 0 :color]))}}]
-
-     [:div.about
-      [:div.provider
-       [:div.favicon {:style {:background-image
-                              (str "url(" (:favicon_url content) ")")}}]
-       [:div.name (:provider_name content)]]
-      [:div.title (:title content)]
-      [:div.url (:url content)]]]))
+     [:img.image {:src (:favicon_url content)}])
+   [:div.about
+    [:div.provider
+     [:div.favicon {:style {:background-image
+                            (str "url(" (:favicon_url content) ")")}}]
+     [:div.name (:provider_name content)]]
+    [:div.title (:title content)]
+    [:div.url (:url content)]]])
 
 (defn- video-overlay-view [content]
   [:div.content
@@ -29,14 +29,14 @@
 
 (defn- video-embed-view [content]
   [:div.video
-   (let [img (get-in content [:images 0])]
+   (when-let [img (get-in content [:images 0])]
      [:img {:src (img :url)
             :style {:background-color
                     (arr->rgb (get-in img [:colors 0 :color]))}}])])
 
 (defn- image-embed-view [content]
   [:div.image
-   (let [img (get-in content [:images 0])]
+   (when-let [img (get-in content [:images 0])]
      [:img {:src (img :url)
             :style {:background-color
                     (arr->rgb (get-in img [:colors 0 :color]))}}])])
@@ -68,6 +68,8 @@
                [video-embed-view @content]
                (= "photo" (get-in @content [:media :type]))
                [image-embed-view @content]
+               (@content :url)
+               [website-embed-view @content]
                :else
-               [website-embed-view @content])]
+               nil)]
             [:div.content.loading])])})))
