@@ -55,7 +55,7 @@
      :box-sizing "border-box"
      :line-height "1.25em"}
 
-    [:a
+    [:a.external
      {:text-decoration "none"
       :color "white"
       :padding "0.2em 0.25em 0.25em"

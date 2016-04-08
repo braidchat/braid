@@ -31,7 +31,8 @@
   {:urls
    {:pattern url-re
     :replace (fn [match]
-               (dom/a #js {:href match
+               (dom/a #js {:className "external"
+                           :href match
                            :title match
                            :target "_blank"
                            :tabIndex -1}
