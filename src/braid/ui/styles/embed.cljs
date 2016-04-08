@@ -6,7 +6,9 @@
 
 (defn embed [pad]
   [:.embed
-   {:margin [[pad (m/* -1 pad)]]}
+   {:margin [[0 (m/* -1 pad)]]
+    :padding [[pad 0]]
+    :overflow "hidden"}
 
    [:.content
     {:cursor "pointer"}]
