@@ -94,5 +94,5 @@
     (testing "can search by tag name"
       (is (= [thread-1-id thread-2-id]
              (search/search-threads-as (user-1 :id) ["#tag1" group-1-id])))
-      (is (= {thread-2-id}
+      (is (= [thread-2-id]
              (search/search-threads-as (user-1 :id) ["#tag3 world" group-1-id]))))))
