@@ -12,17 +12,13 @@
             [chat.client.views.pills :refer [tag-view user-view]]
             [chat.client.routes :as routes]))
 
+(def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
+
 (def replacements
   {:urls
-   {:pattern #"(http(?:s)?://\S+(?:\w|\d|/))"
+   {:pattern url-re
     :replace (fn [match]
-               (dom/a #js {:href match :target "_blank" :tabIndex -1}
-                 ; TODO: could do something smarter with checking MIME types or
-                 ; something, but trying to sniff every link seems like it
-                 ; could get kind of hairy...
-                 (if (some (partial ends-with? match) [".png" ".jpg" ".jpeg" ".gif"])
-                   (dom/img #js {:src match :alt match :className "embedded-image"})
-                   match)))}
+               (dom/a #js {:href match :target "_blank" :tabIndex -1} match))}
    :users
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
@@ -151,6 +147,11 @@
 (def EmbedView
   (reagent->react embed-view))
 
+(defn extract-urls
+  "Given some text, returns a sequence of URLs contained in the text"
+  [text]
+  (map first (re-seq url-re text)))
+
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
   links"
@@ -210,7 +211,7 @@
           (apply dom/div #js {:className "content"}
             (format-message (message :content)))
 
-          (when-let [url "http://thenext36.ca"] ;TODO extract the url from message
+          (when-let [url (first (extract-urls (message :content)))]
             (EmbedView. #js {:url url})))))))
 
 

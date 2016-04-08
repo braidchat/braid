@@ -54,13 +54,9 @@
      :box-sizing "border-box"
      :line-height "1.25em"}
 
-     [:.embedded-image
-      {:max-width "100px"
-       :max-height "100px"
-       :transition "max-width 0.5s, max-height 0.5s"}
-       [:&:hover
-        {:max-width "3000px"
-         :max-height "3000px"}]]]
+    [:a
+     {}]
+    ]
 
     [:.prettyprint
      {:background-color "#e2f5ff"
