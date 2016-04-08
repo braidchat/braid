@@ -14,11 +14,28 @@
 
 (def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
 
+(defn abridged-url
+  "Given a full url, returns 'domain.com/*.png' where"
+  [url]
+  (let [char-limit 30
+        [domain path] (rest (re-find #"http(?:s)?://([^/]+)(.*)" url))]
+    (let [url-and-path (str domain path)]
+      (if (> char-limit (count url-and-path))
+        url-and-path
+        (let [gap "/..."
+              path-char-limit (- char-limit (count domain) (count gap))
+              abridged-path (apply str (take-last path-char-limit path))]
+          (str domain gap abridged-path))))))
+
 (def replacements
   {:urls
    {:pattern url-re
     :replace (fn [match]
-               (dom/a #js {:href match :target "_blank" :tabIndex -1} match))}
+               (dom/a #js {:href match
+                           :title match
+                           :target "_blank"
+                           :tabIndex -1}
+                 (abridged-url match)))}
    :users
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
