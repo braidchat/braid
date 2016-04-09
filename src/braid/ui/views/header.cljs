@@ -1,7 +1,8 @@
 (ns braid.ui.views.header
   (:require [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.routes :as routes]
-            [chat.client.views.pills :refer [tag-view user-view]]
+            [chat.client.views.helpers :refer [id->color]]
+            [braid.ui.views.pills :refer [tag-pill-view]]
             [om.core :as om]))
 
 (defn clear-inbox-button-view [{:keys [subscribe]}]
@@ -54,7 +55,7 @@
     (fn []
       [:div.users.shortcut {:className (when (routes/current-path? path) "active")}
         [:a {:href path
-             :className "title"
+             :class "title"
              :title "Users"}
           (count users-online)]
        [:div.modal
@@ -70,25 +71,42 @@
         tags (subscribe [:tags])
         group-subscribed-tags (subscribe [:group-subscribed-tags])]
     [:div.tags.shortcut {:className (when (routes/current-path? path) "active")}
-      [:a {:href path
-           :className "title"
-           :title "Tags"}]
+      [:a.title {:href path
+                 :title "Tags"}]
       [:div.modal
-        [:div
           (let [sorted-tags (->> @group-subscribed-tags
                                 (sort-by :threads-count)
                                  reverse)]
             (for [tag sorted-tags]
-              ;TODO: build tag divs (e.g. om/build tag-view tag)
-              [:div (tag :name)]))]]]))
+              [tag-pill-view tag subscribe]))]]))
 
+(defn current-user-button-view [{:keys [subscribe]}]
+  (let [user-id (subscribe [:user-id])
+        user-avatar-url (subscribe [:user-avatar-url])
+        path (routes/page-path {:group-id (routes/current-group)
+                                :page-id "me"})]
+    (fn []
+      [:a {:href path
+           :className (when (routes/current-path? path) "active")}
+        [:img.avatar {:style {:backgroundColor (id->color @user-id)}
+                      :src @user-avatar-url}]])))
+
+(defn extensions-page-button-view []
+  (let [path (routes/extensions-page-path {:group-id (routes/current-group)})]
+    [:div.extensions.shortcut {:className (when (routes/current-path? path) "active")}
+      [:a {:href path
+           :className "title"
+           :title "Extensions"}]
+      [:div.modal
+        [:div "extensions"]]]))
 
 (defn header-view [props]
   [:div.header
-    "Header"
     [clear-inbox-button-view props]
     [inbox-page-button-view]
     [recent-page-button-view]
     [help-page-pane-view]
     [users-online-pane-view props]
-    [tags-pane-view props]])
+    [tags-pane-view props]
+    [current-user-button-view props]
+    #_[extensions-page-button-view]])

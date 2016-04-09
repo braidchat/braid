@@ -50,6 +50,15 @@
   :group-subscribed-tags
   state/get-group-subscribed-tags)
 
+(register-sub
+  :user-subscribed-to-tag
+  state/get-user-subscribed-to-tag)
+
+(register-sub
+  :user-avatar-url
+  state/get-user-avatar-url)
+
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]
