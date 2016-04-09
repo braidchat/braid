@@ -113,11 +113,11 @@
       (filter (fn [tag] @(get-user-subscribed-to-tag @state [nil (tag :id)]))))))
 
 (defn get-user-avatar-url
-  [state user_id]
+  [state user-id]
   (reaction (get-in @state [:users user-id :avatar])))
 
 (defn get-user-status
-  [state user_id]
+  [state user-id]
   (reaction (get-in @state [:users user-id :status])))
 
 (defn get-search-query
