@@ -85,6 +85,10 @@
   [group-id state]
   (filter (fn [u] (contains? (set (u :group-ids)) group-id)) (vals (state :users))))
 
+(defn get-open-group-id
+  [state _]
+  (reaction (get-in @state [:open-group-id])))
+
 (defn get-users-in-open-group
   [state _]
   (reaction (users-in-group (@state :open-group-id) @state)))
@@ -115,3 +119,8 @@
 (defn get-user-status
   [state user_id]
   (reaction (get-in @state [:users user-id :status])))
+
+(defn get-search-query
+  [state _]
+  (reaction (get-in @state [:page :search-query])))
+

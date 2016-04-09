@@ -3,6 +3,7 @@
             [chat.client.routes :as routes]
             [chat.client.views.helpers :refer [id->color]]
             [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
+            [braid.ui.views.search-bar :refer [search-bar-view]]
             [om.core :as om]))
 
 (defn clear-inbox-button-view [{:keys [subscribe]}]
@@ -107,5 +108,6 @@
     [help-page-pane-view]
     [users-online-pane-view props]
     [tags-pane-view props]
+    [search-bar-view props]
     [current-user-button-view props]
     #_[extensions-page-button-view]])

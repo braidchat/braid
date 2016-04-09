@@ -62,6 +62,14 @@
   :user-status
   state/get-user-status)
 
+(register-sub
+  :open-group-id
+  state/get-open-group-id)
+
+(register-sub
+  :search-query
+  state/get-search-query)
+
 
 (defn subscribe [v]
   (let [key-v (first v)
