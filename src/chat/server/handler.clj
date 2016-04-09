@@ -67,6 +67,7 @@
         desktop-client-routes)
       (wrap-defaults static-site-defaults)))
 
+; XXX: Review use of CSRF
 (def api-server-app
   (-> (routes
         (-> extension-routes
@@ -81,6 +82,7 @@
                                )))
         (-> api-public-routes
             (wrap-defaults (-> site-defaults
+                               (assoc-in [:security :anti-forgery] false)
                                assoc-cookie-conf)))
         (-> sync-routes
             (wrap-defaults (-> api-defaults
