@@ -23,8 +23,8 @@
 (defn user-pill-view
   [user subscribe]
   (let [user-status (subscribe [:user-status (user :id)])
-        path (routes/tag-page-path {:group-id (routes/current-group)
-                                    :tag-id (user :id)})]
+        path (routes/user-page-path {:group-id (routes/current-group)
+                                     :user-id (user :id)})]
     (fn []
       [:a.user.pill {:className (case @user-status
                                               :online " on"
@@ -37,5 +37,5 @@
         [:span.name (str "@" (user :nickname))]
         #_[:div {:className (str "status " ((fnil name "") (user :status)))}]]
         [:a.user.pill {:tabIndex -1
-                       :href "#"}
+                       :href path}
           [:span.name (str "@" (user :nickname))]])))
