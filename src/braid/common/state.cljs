@@ -111,3 +111,7 @@
 (defn get-user-avatar-url
   [state user_id]
   (reaction (get-in @state [:users user-id :avatar])))
+
+(defn get-user-status
+  [state user_id]
+  (reaction (get-in @state [:users user-id :status])))

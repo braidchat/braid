@@ -61,7 +61,6 @@
        [:div.modal
         [:h2 "Online"]
         (for [user users-online]
-          ;TODO: build online user divs (e.g. om/build user-view user)
           [user-pill-view user subscribe])]])))
 
 

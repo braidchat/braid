@@ -24,7 +24,7 @@
   [user subscribe]
   (let [user-status (subscribe [:user-status (user :id)])
         path (routes/tag-page-path {:group-id (routes/current-group)
-                                    :tag-id (tag :id)})]
+                                    :tag-id (user :id)})]
     (fn []
       [:a.user.pill {:className (case @user-status
                                               :online " on"

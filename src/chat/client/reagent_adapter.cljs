@@ -58,6 +58,10 @@
   :user-avatar-url
   state/get-user-avatar-url)
 
+(register-sub
+  :user-status
+  state/get-user-status)
+
 
 (defn subscribe [v]
   (let [key-v (first v)
