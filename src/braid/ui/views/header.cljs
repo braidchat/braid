@@ -2,7 +2,7 @@
   (:require [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.routes :as routes]
             [chat.client.views.helpers :refer [id->color]]
-            [braid.ui.views.pills :refer [tag-pill-view]]
+            [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [om.core :as om]))
 
 (defn clear-inbox-button-view [{:keys [subscribe]}]
@@ -62,7 +62,7 @@
         [:h2 "Online"]
         (for [user users-online]
           ;TODO: build online user divs (e.g. om/build user-view user)
-          [:div "hello"])]])))
+          [user-pill-view user subscribe])]])))
 
 
 (defn tags-pane-view [{:keys [subscribe]}]
