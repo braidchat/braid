@@ -38,4 +38,4 @@
         #_[:div {:className (str "status " ((fnil name "") (user :status)))}]]
         [:a.user.pill {:tabIndex -1
                        :href "#"}
-          [:span.name "????"]])))
+          [:span.name (str "@" (user :nickname))]])))
