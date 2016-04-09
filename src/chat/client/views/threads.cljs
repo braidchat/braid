@@ -83,8 +83,9 @@
                         :onBlur (fn [e] (om/set-state! owner :focused? false)
                                   (dispatch! :mark-thread-read (thread :id)))
                         :onKeyUp (fn [e]
-                                   (when (and (= KeyCodes.X (.-keyCode e))
-                                           (.-ctrlKey e))
+                                   (when (or (and (= KeyCodes.X (.-keyCode e))
+                                               (.-ctrlKey e))
+                                             (= KeyCodes.ESC (.-keyCode e)))
                                      (.preventDefault e)
                                      (.stopPropagation e)
                                      (dispatch! :hide-thread {:thread-id (thread :id)})))
