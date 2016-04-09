@@ -110,4 +110,4 @@
     [tags-pane-view props]
     [search-bar-view props]
     [current-user-button-view props]
-    #_[extensions-page-button-view]])
+    #_[extensions-page-button-view]]) ;Extensions page button temporarily not rendered

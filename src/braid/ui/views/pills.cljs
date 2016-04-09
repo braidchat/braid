@@ -27,15 +27,12 @@
                                      :user-id (user :id)})]
     (fn []
       [:a.user.pill {:className (case @user-status
-                                              :online " on"
-                                                      " off")
+                                            :online " on"
+                                                    " off")
                      :tabIndex -1
                      :style {:backgroundColor (id->color (user :id))
                              :color (id->color (user :id))
                              :borderColor (id->color (user :id))}
                      :href path}
         [:span.name (str "@" (user :nickname))]
-        #_[:div {:className (str "status " ((fnil name "") (user :status)))}]]
-        [:a.user.pill {:tabIndex -1
-                       :href path}
-          [:span.name (str "@" (user :nickname))]])))
+        [:div {:className (str "status " ((fnil name "") (user :status)))}]])))
