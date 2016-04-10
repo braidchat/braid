@@ -7,7 +7,6 @@
             [chat.client.views.style :refer [style-view]]
             [braid.ui.views.sidebar :refer [sidebar-view]]
             [braid.ui.views.header :refer [header-view]]
-            [chat.client.views.header]
             [chat.client.views.pages.search :refer [search-page-view]]
             [chat.client.views.pages.inbox :refer [inbox-page-view]]
             [chat.client.views.pages.recent :refer [recent-page-view]]
