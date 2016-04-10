@@ -3,8 +3,7 @@
             [chat.client.routes :as routes]
             [chat.client.views.helpers :refer [id->color]]
             [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
-            [braid.ui.views.search-bar :refer [search-bar-view]]
-            [om.core :as om]))
+            [braid.ui.views.search-bar :refer [search-bar-view]]))
 
 (defn clear-inbox-button-view [{:keys [subscribe]}]
   (let [open-threads (subscribe [:open-threads])]
