@@ -88,7 +88,7 @@
 
 (defn current-user-button-view [{:keys [subscribe]}]
   (let [user-id (subscribe [:user-id])
-        user-avatar-url (subscribe [:user-avatar-url])
+        user-avatar-url (subscribe [:user-avatar-url @user-id])
         open-group-id (subscribe [:open-group-id])]
     (fn []
       (let [path (routes/page-path {:group-id @open-group-id
