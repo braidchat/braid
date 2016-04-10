@@ -19,27 +19,24 @@
     (fn []
       (let [path (routes/inbox-page-path {:group-id @open-group-id})]
         [:div.inbox.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a {:href path
-               :class "title"
-               :title "Inbox"}]]))))
+          [:a.title {:href path
+                     :title "Inbox"}]]))))
 
 (defn recent-page-button-view [{:keys [subscribe]}]
   (let [open-group-id (subscribe [:open-group-id])]
     (fn []
       (let [path (routes/recent-page-path {:group-id @open-group-id})]
         [:div.recent.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a {:href path
-               :class "title"
-               :title "Recent"}]]))))
+          [:a.title {:href path
+                     :title "Recent"}]]))))
 
 (defn help-page-pane-view [{:keys [subscribe]}]
   (let [open-group-id (subscribe [:open-group-id])]
     (fn []
       (let [path (routes/help-page-path {:group-id @open-group-id})]
         [:div.help.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a {:href path
-               :class "title"
-               :title "Help"}]
+          [:a.title {:href path
+                     :title "Help"}]
           [:div.modal
             [:p "Conversations must be tagged to be seen by other people."]
             [:p "Tag a conversation by mentioning a tag in a message: ex. #general"]
@@ -61,14 +58,13 @@
                                            (user :status)))))
             path (routes/users-page-path {:group-id @open-group-id})]
         [:div.users.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a {:href path
-               :class "title"
-               :title "Users"}
-            (count users-online)]
-           [:div.modal
-            [:h2 "Online"]
-            (for [user users-online]
-              [user-pill-view user subscribe])]]))))
+          [:a.title {:href path
+                     :title "Users"}
+                  (count users-online)]
+                 [:div.modal
+                  [:h2 "Online"]
+                  (for [user users-online]
+                    [user-pill-view user subscribe])]]))))
 
 
 (defn tags-pane-view [{:keys [subscribe]}]
@@ -105,11 +101,10 @@
     (fn []
       (let [path (routes/extensions-page-path {:group-id @open-group-id})]
         [:div.extensions.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a {:href path
-               :class "title"
-               :title "Extensions"}]
-          [:div.modal
-            [:div "extensions"]]]))))
+          [:a.title {:href path
+                     :title "Extensions"}]
+                [:div.modal
+                  [:div "extensions"]]]))))
 
 (defn header-view [props]
   [:div.header
