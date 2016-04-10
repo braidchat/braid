@@ -161,10 +161,11 @@
 (def button
   [:.button
    mixins/pill-box
-   {:color vars/grey-text
-    :border [[(px 1 "solid" vars/grey-text)]]
-    :background "none"
-    :margin-left (em 1)}
+   [:&
+    {:color vars/grey-text
+     :border [[(px 1) "solid" vars/grey-text]]
+     :background "none"
+     :margin-left (em 1)}]
 
    [:&:hover
     {:color "#eee"
