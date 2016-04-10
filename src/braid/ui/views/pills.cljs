@@ -15,7 +15,7 @@
                       :tabIndex -1
                       :style {:background-color (id->color (tag :id))
                               :color (id->color (tag :id))
-                              :borderColor (id->color (tag :id))}
+                              :border-color (id->color (tag :id))}
                       :href path}
           [:div.name "#" (tag :name)]]))))
 
@@ -33,7 +33,7 @@
                        :tabIndex -1
                        :style {:background-color (id->color (user :id))
                                :color (id->color (user :id))
-                               :borderColor (id->color (user :id))}
+                               :border-color (id->color (user :id))}
                        :href path}
           [:span.name (str "@" (user :nickname))]
           [:div {:class (str "status " ((fnil name "") (user :status)))}]]))))
