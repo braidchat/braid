@@ -15,100 +15,101 @@
             "Clear Inbox"])])))
 
 (defn inbox-page-button-view [{:keys [subscribe]}]
-  (let [open-group-id (subscribe [:open-group-id])
-        path (routes/inbox-page-path {:group-id @open-group-id})]
+  (let [open-group-id (subscribe [:open-group-id])]
     (fn []
-      [:div.inbox.shortcut {:class (when (routes/current-path? path) "active")}
-        [:a {:href path
-             :class "title"
-             :title "Inbox"}]])))
+      (let [path (routes/inbox-page-path {:group-id @open-group-id})]
+        [:div.inbox.shortcut {:class (when (routes/current-path? path) "active")}
+          [:a {:href path
+               :class "title"
+               :title "Inbox"}]]))))
 
 (defn recent-page-button-view [{:keys [subscribe]}]
-  (let [open-group-id (subscribe [:open-group-id])
-        path (routes/recent-page-path {:group-id @open-group-id})]
+  (let [open-group-id (subscribe [:open-group-id])]
     (fn []
-      [:div.recent.shortcut {:class (when (routes/current-path? path) "active")}
-        [:a {:href path
-             :class "title"
-             :title "Recent"}]])))
+      (let [path (routes/recent-page-path {:group-id @open-group-id})]
+        [:div.recent.shortcut {:class (when (routes/current-path? path) "active")}
+          [:a {:href path
+               :class "title"
+               :title "Recent"}]]))))
 
 (defn help-page-pane-view [{:keys [subscribe]}]
-  (let [open-group-id (subscribe [:open-group-id])
-        path (routes/help-page-path {:group-id @open-group-id})]
+  (let [open-group-id (subscribe [:open-group-id])]
     (fn []
-      [:div.help.shortcut {:class (when (routes/current-path? path) "active")}
-      [:a {:href path
-           :class "title"
-           :title "Help"}]
-      [:div.modal
-        [:p "Conversations must be tagged to be seen by other people."]
-        [:p "Tag a conversation by mentioning a tag in a message: ex. #general"]
-        [:p "You can also mention users to add them to a conversation: ex. @raf"]
-        [:p "Add emoji by using :shortcodes: (they autocomplete)."]]])))
+      (let [path (routes/help-page-path {:group-id @open-group-id})]
+        [:div.help.shortcut {:class (when (routes/current-path? path) "active")}
+          [:a {:href path
+               :class "title"
+               :title "Help"}]
+          [:div.modal
+            [:p "Conversations must be tagged to be seen by other people."]
+            [:p "Tag a conversation by mentioning a tag in a message: ex. #general"]
+            [:p "You can also mention users to add them to a conversation: ex. @raf"]
+            [:p "Add emoji by using :shortcodes: (they autocomplete)."]]]))))
 
 (defn users-online-pane-view [{:keys [subscribe]}]
   (let [open-group-id (subscribe [:open-group-id])
         user-id (subscribe [:user-id])
-        users-in-open-group (subscribe [:users-in-open-group])
-        users (->> @users-in-open-group
+        users-in-open-group (subscribe [:users-in-open-group])]
+    (fn []
+      (let [users (->> @users-in-open-group
                    (remove (fn [user]
                                    (= @user-id
                                       (user :id)))))
-        users-online (->> users
-                          (filter (fn [user]
-                                    (= :online
-                                       (user :status)))))
-        path (routes/users-page-path {:group-id @open-group-id})]
-    (fn []
-      [:div.users.shortcut {:class (when (routes/current-path? path) "active")}
-        [:a {:href path
-             :class "title"
-             :title "Users"}
-          (count users-online)]
-       [:div.modal
-        [:h2 "Online"]
-        (for [user users-online]
-          [user-pill-view user subscribe])]])))
+            users-online (->> users
+                              (filter (fn [user]
+                                        (= :online
+                                           (user :status)))))
+            path (routes/users-page-path {:group-id @open-group-id})]
+        [:div.users.shortcut {:class (when (routes/current-path? path) "active")}
+          [:a {:href path
+               :class "title"
+               :title "Users"}
+            (count users-online)]
+           [:div.modal
+            [:h2 "Online"]
+            (for [user users-online]
+              [user-pill-view user subscribe])]]))))
 
 
 (defn tags-pane-view [{:keys [subscribe]}]
   (let [open-group-id (subscribe [:open-group-id])
-        path (routes/page-path {:group-id @open-group-id
-                                :page-id "channels"})
         tags (subscribe [:tags])
         group-subscribed-tags (subscribe [:group-subscribed-tags])]
     (fn []
-      [:div.tags.shortcut {:class (when (routes/current-path? path) "active")}
-        [:a.title {:href path
-                   :title "Tags"}]
-        [:div.modal
-            (let [sorted-tags (->> @group-subscribed-tags
-                                  (sort-by :threads-count)
-                                   reverse)]
-              (for [tag sorted-tags]
-                [tag-pill-view tag subscribe]))]])))
+      (let [path (routes/page-path {:group-id @open-group-id
+                                    :page-id "channels"})]
+        [:div.tags.shortcut {:class (when (routes/current-path? path) "active")}
+          [:a.title {:href path
+                     :title "Tags"}]
+          [:div.modal
+              (let [sorted-tags (->> @group-subscribed-tags
+                                    (sort-by :threads-count)
+                                     reverse)]
+                (for [tag sorted-tags]
+                  [tag-pill-view tag subscribe]))]]))))
 
 (defn current-user-button-view [{:keys [subscribe]}]
   (let [user-id (subscribe [:user-id])
         user-avatar-url (subscribe [:user-avatar-url])
-        open-group-id (subscribe [:open-group-id])
-        path (routes/page-path {:group-id @open-group-id
-                                :page-id "me"})]
+        open-group-id (subscribe [:open-group-id])]
     (fn []
-      [:a {:href path
-           :class (when (routes/current-path? path) "active")}
-        [:img.avatar {:style {:background-color (id->color @user-id)}
-                      :src @user-avatar-url}]])))
+      (let [path (routes/page-path {:group-id @open-group-id
+                                    :page-id "me"})]
+        [:a {:href path
+             :class (when (routes/current-path? path) "active")}
+          [:img.avatar {:style {:background-color (id->color @user-id)}
+                        :src @user-avatar-url}]]))))
 
 (defn extensions-page-button-view [{:keys [subscribe]}]
-  (let [path (routes/extensions-page-path {:group-id (routes/current-group)})]
+  (let [open-group-id (subscribe [:open-group-id])]
     (fn []
-      [:div.extensions.shortcut {:class (when (routes/current-path? path) "active")}
-        [:a {:href path
-             :class "title"
-             :title "Extensions"}]
-        [:div.modal
-          [:div "extensions"]]])))
+      (let [path (routes/extensions-page-path {:group-id @open-group-id})]
+        [:div.extensions.shortcut {:class (when (routes/current-path? path) "active")}
+          [:a {:href path
+               :class "title"
+               :title "Extensions"}]
+          [:div.modal
+            [:div "extensions"]]]))))
 
 (defn header-view [props]
   [:div.header
