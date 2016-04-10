@@ -30,6 +30,47 @@
   :page
   state/get-page)
 
+(register-sub
+  :open-threads
+  state/get-open-threads)
+
+(register-sub
+  :users-in-open-group
+  state/get-users-in-open-group)
+
+(register-sub
+  :user-id
+  state/get-user-id)
+
+(register-sub
+  :tags
+  state/get-all-tags)
+
+(register-sub
+  :group-subscribed-tags
+  state/get-group-subscribed-tags)
+
+(register-sub
+  :user-subscribed-to-tag
+  state/get-user-subscribed-to-tag)
+
+(register-sub
+  :user-avatar-url
+  state/get-user-avatar-url)
+
+(register-sub
+  :user-status
+  state/get-user-status)
+
+(register-sub
+  :open-group-id
+  state/get-open-group-id)
+
+(register-sub
+  :search-query
+  state/get-search-query)
+
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]
