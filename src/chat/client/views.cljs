@@ -81,8 +81,6 @@
 
         (HeaderView. #js {:subscribe subscribe})
 
-        ;(om/build chat.client.views.header/header-view data)
-
         (case (get-in data [:page :type])
           :inbox (om/build inbox-page-view data)
           :recent (om/build recent-page-view data)
