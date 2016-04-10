@@ -9,9 +9,7 @@
     (fn []
       (let [path (routes/tag-page-path {:group-id @open-group-id
                                         :tag-id (tag :id)})]
-        [:a.tag.pill {:class (if @user-subscribed-to-tag?
-                                " on"
-                                " off")
+        [:a.tag.pill {:class (if @user-subscribed-to-tag? "on" "off")
                       :tabIndex -1
                       :style {:background-color (id->color (tag :id))
                               :color (id->color (tag :id))
@@ -27,9 +25,7 @@
     (fn []
       (let [path (routes/user-page-path {:group-id @open-group-id
                                          :user-id (user :id)})]
-        [:a.user.pill {:class (case @user-status
-                                              :online " on"
-                                                      " off")
+        [:a.user.pill {:class (case @user-status :online "on" "off")
                        :tabIndex -1
                        :style {:background-color (id->color (user :id))
                                :color (id->color (user :id))
