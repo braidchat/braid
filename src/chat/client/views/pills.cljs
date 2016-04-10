@@ -1,10 +1,24 @@
 (ns chat.client.views.pills
   (:require [om.core :as om]
             [om.dom :as dom]
+            [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
+            [chat.client.reagent-adapter :refer [reagent->react subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [id->color user-cursor]]
             [chat.client.routes :as routes]))
+
+(defn tag-pill-view-temp [props]
+  [tag-pill-view (props :tag) subscribe])
+
+(defn user-pill-view-temp [props]
+  [user-pill-view (props :user) subscribe])
+
+(def TagPillView
+  (reagent->react tag-pill-view-temp))
+
+(def UserPillView
+  (reagent->react user-pill-view-temp))
 
 (defn subscribe-button [tag]
   (if (store/is-subscribed-to-tag? (tag :id))
@@ -21,34 +35,10 @@
   (reify
     om/IRender
     (render [_]
-      (dom/a #js {:className (str "tag pill"
-                                  (if (store/is-subscribed-to-tag? (tag :id))
-                                    " on"
-                                    " off"))
-                  :tabIndex -1
-                  :style #js {:backgroundColor (id->color (tag :id))
-                              :color (id->color (tag :id))
-                              :borderColor (id->color (tag :id))}
-                  :href (routes/tag-page-path {:group-id (routes/current-group)
-                                               :tag-id (tag :id)})}
-        (dom/span #js {:className "name"} "#" (tag :name))))))
+      (TagPillView. #js {:tag tag}))))
 
 (defn user-view [user owner]
   (reify
     om/IRender
     (render [_]
-      (if-let [cur (user-cursor (user :id))]
-        (let [user (om/observe owner cur)]
-          (dom/a #js {:className (str "user pill" (case (user :status)
-                                                    :online " on"
-                                                    " off"))
-                      :tabIndex -1
-                      :style #js {:backgroundColor (id->color (user :id))
-                                  :color (id->color (user :id))
-                                  :borderColor (id->color (user :id))}
-                      :href (routes/user-page-path {:group-id (routes/current-group)
-                                                    :user-id (user :id)})}
-            (dom/span #js {:className "name"} (str "@" (user :nickname)))
-            #_(dom/div #js {:className (str "status " ((fnil name "") (user :status)))})))
-        (dom/a #js {:className "user pill" :tabIndex -1 :href "#"}
-          (dom/span #js {:className "name"} "????"))))))
+      (UserPillView. #js {:user user}))))
