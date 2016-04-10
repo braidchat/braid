@@ -73,7 +73,7 @@
         open-threads (-> @threads
                          (select-keys @open-thread-ids)
                          vals
-                         #_(->> (filter (fn [thread]
+                         (->> (filter (fn [thread]
                                 (or (empty? (thread :tag-ids))
                                     (contains?
                                       (into #{} (map group-for-tag (thread :tag-ids)))
