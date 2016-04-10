@@ -12,14 +12,16 @@
         (dom/div #js {:className "title"} "Inbox")
         (apply dom/div #js {:className "threads"
                             :ref "threads-div"
-                            :onWheel (fn [e]
-                                       (let [target-classes (.. e -target -classList)
-                                             this-elt (om/get-node owner "threads-div")]
-                                         ; TODO: check if threads-div needs to scroll?
-                                         (when (and (or (.contains target-classes "thread")
-                                                        (.contains target-classes "threads"))
-                                                 (= 0 (.-deltaX e) (.-deltaZ e)))
-                                           (set! (.-scrollLeft this-elt) (- (.-scrollLeft this-elt) (.-deltaY e))))))}
+                            :onWheel ; make the mouse wheel scroll horizontally
+                            (fn [e]
+                              (let [target-classes (.. e -target -classList)
+                                    this-elt (om/get-node owner "threads-div")]
+                                ; TODO: check if threads-div needs to scroll?
+                                (when (and (or (.contains target-classes "thread")
+                                               (.contains target-classes "threads"))
+                                        (= 0 (.-deltaX e) (.-deltaZ e)))
+                                  (set! (.-scrollLeft this-elt)
+                                        (- (.-scrollLeft this-elt) (.-deltaY e))))))}
           (concat
             [(new-thread-view {})]
             (map (fn [t] (om/build thread-view t {:key :id}))

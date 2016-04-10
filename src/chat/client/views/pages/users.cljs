@@ -40,7 +40,7 @@
         (dom/div #js {:className "content"}
           (let [users-by-status (->> (group-users data)
                                      (group-by :status))]
-            (dom/div nil
+            (dom/div #js {:className "description"}
               (dom/h2 nil "Online")
               (om/build user-list-view (users-by-status :online))
 

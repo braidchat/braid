@@ -61,27 +61,30 @@
 
           (apply dom/div #js {:className "threads"
                               :ref "threads-div"
-                              :onScroll (fn [e]
-                                          (let [div (.. e -target)]
-                                            (when (and (= status :done-results)
-                                                    (> (store/pagination-remaining) 0)
-                                                    (> 100 (- (.-scrollWidth div)
-                                                              (+ (.-scrollLeft div) (.-offsetWidth div)))))
-                                              (om/set-state! owner :loading? true)
-                                              (dispatch! :threads-for-tag
-                                                         {:tag-id (get-in data [:page :id])
-                                                          :offset (count threads)
-                                                          :on-complete
-                                                          (fn []
-                                                            (om/set-state! owner :loading? false))}))))
-                              :onWheel (fn [e]
-                                         (let [target-classes (.. e -target -classList)
-                                               this-elt (om/get-node owner "threads-div")]
-                                           ; TODO: check if threads-div needs to scroll?
-                                           (when (and (or (.contains target-classes "thread")
-                                                          (.contains target-classes "threads"))
-                                                   (= 0 (.-deltaX e) (.-deltaZ e)))
-                                             (set! (.-scrollLeft this-elt) (- (.-scrollLeft this-elt) (.-deltaY e))))))}
+                              :onScroll ; page in more results as the user scrolls
+                              (fn [e]
+                                (let [div (.. e -target)]
+                                  (when (and (= status :done-results)
+                                          (> (store/pagination-remaining) 0)
+                                          (> 100 (- (.-scrollWidth div)
+                                                    (+ (.-scrollLeft div) (.-offsetWidth div)))))
+                                    (om/set-state! owner :loading? true)
+                                    (dispatch! :threads-for-tag
+                                               {:tag-id (get-in data [:page :id])
+                                                :offset (count threads)
+                                                :on-complete
+                                                (fn []
+                                                  (om/set-state! owner :loading? false))}))))
+                              :onWheel ; make the mouse wheel scroll horizontally
+                              (fn [e]
+                                (let [target-classes (.. e -target -classList)
+                                      this-elt (om/get-node owner "threads-div")]
+                                  ; TODO: check if threads-div needs to scroll?
+                                  (when (and (or (.contains target-classes "thread")
+                                                 (.contains target-classes "threads"))
+                                          (= 0 (.-deltaX e) (.-deltaZ e)))
+                                    (set! (.-scrollLeft this-elt)
+                                          (- (.-scrollLeft this-elt) (.-deltaY e))))))}
             (concat
               [(new-thread-view {:tag-ids [tag-id]})]
               (map (fn [t] (om/build thread-view t {:key :id}))

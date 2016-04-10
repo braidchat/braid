@@ -23,8 +23,7 @@
      :new-thread-id nil}))
 
 (defn- key-by-id [coll]
-  (reduce (fn [memo x]
-            (assoc memo (x :id) x)) {} coll))
+  (into {} (map (juxt :id identity)) coll))
 
 (defn- transact! [ks f]
   (swap! app-state update-in ks f))
@@ -147,6 +146,9 @@
                              (dissoc msg :failed?)
                              msg)))))
 
+(defn add-threads! [threads]
+  (transact! [:threads] #(merge % (key-by-id threads))))
+
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here
   (when-not (get-in @app-state [:notifications :window-visible?])
@@ -184,9 +186,9 @@
 
 ; search threads
 
-(defn set-search-results! [threads]
+(defn set-search-results! [{:keys [threads thread-ids]}]
   (transact! [:threads] #(merge % (key-by-id threads)))
-  (transact! [:page :thread-ids] (constantly (map :id threads))))
+  (transact! [:page :thread-ids] (constantly thread-ids)))
 
 (defn set-search-query! [query]
   (transact! [:page :search-query] (constantly query)))
