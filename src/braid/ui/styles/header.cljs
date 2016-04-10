@@ -22,6 +22,11 @@
       [:p
        {:line-height (em 1.2)}]]
 
+     [:.clear-inbox
+      [:button
+       mixins/pill-button
+       {:display "inline-block"}]]
+
      [:.shortcut
       {:display "inline-block"
        :margin-right vars/pad}

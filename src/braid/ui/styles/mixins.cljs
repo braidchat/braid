@@ -38,6 +38,25 @@
   [:&.off
    {:background-color [["white" "!important"]]}]])
 
+(def pill-button
+  [:&
+   pill-box
+   [:&
+    {:color vars/grey-text
+     :border [[(px 1) "solid" vars/grey-text]]
+     :background "none"}]
+
+   [:&:hover
+    {:color "#eee"
+     :background vars/grey-text
+     :cursor "pointer"}]
+
+   [:&:active
+    {:color "#eee"
+     :background "#666"
+     :border-color "#666"
+     :cursor "pointer"}]])
+
 (defn fontawesome [unicode]
   {:font-family "fontawesome"
    :content (str "\"" unicode "\"")})
