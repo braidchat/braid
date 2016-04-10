@@ -5,11 +5,12 @@
 
 (defn tag-pill-view
   [tag subscribe]
-  (let [path (routes/tag-page-path {:group-id (routes/current-group)
+  (let [open-group-id (subscribe [:open-group-id])
+        path (routes/tag-page-path {:group-id @open-group-id
                                     :tag-id (tag :id)})
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag (tag :id)])]
     (fn []
-      [:a.tag.pill {:className (if @user-subscribed-to-tag?
+      [:a.tag.pill {:class (if @user-subscribed-to-tag?
                               " on"
                               " off")
                     :tabIndex -1
@@ -22,11 +23,12 @@
 
 (defn user-pill-view
   [user subscribe]
-  (let [user-status (subscribe [:user-status (user :id)])
-        path (routes/user-page-path {:group-id (routes/current-group)
+  (let [open-group-id (subscribe [:open-group-id])
+        user-status (subscribe [:user-status (user :id)])
+        path (routes/user-page-path {:group-id @open-group-id
                                      :user-id (user :id)})]
     (fn []
-      [:a.user.pill {:className (case @user-status
+      [:a.user.pill {:class (case @user-status
                                             :online " on"
                                                     " off")
                      :tabIndex -1
@@ -35,4 +37,4 @@
                              :borderColor (id->color (user :id))}
                      :href path}
         [:span.name (str "@" (user :nickname))]
-        [:div {:className (str "status " ((fnil name "") (user :status)))}]])))
+        [:div {:class (str "status " ((fnil name "") (user :status)))}]])))
