@@ -127,10 +127,20 @@
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
     [:chat/search query]
-    2500
+    15000
     (fn [reply]
-      (when-let [results (:threads reply)]
-          (store/set-search-results! results)))))
+      (when (seq (:thread-ids reply))
+        (store/set-search-results! reply)))))
+
+(defmethod dispatch! :load-threads [_ {:keys [thread-ids on-complete]}]
+  (sync/chsk-send!
+    [:chat/load-threads thread-ids]
+    5000
+    (fn [reply]
+      (when-let [threads (:threads reply)]
+        (store/add-threads! threads))
+      (when on-complete
+        (on-complete)))))
 
 (defmethod dispatch! :threads-for-tag [_ {:keys [tag-id offset limit on-complete]
                                           :or {offset 0 limit 25}}]

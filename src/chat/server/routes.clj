@@ -14,6 +14,7 @@
     [chat.server.sync :as sync]
     [chat.server.extensions :as ext :refer [b64->str]]
     [chat.server.s3 :as s3]
+    [braid.api.embedly :as embedly]
     [environ.core :refer [env]]))
 
 (def api-port (atom nil))
@@ -134,6 +135,9 @@
         {:status 400 :body "No such extension"}))))
 
 (defroutes api-private-routes
+  (GET "/extract" [url]
+    (edn-response (embedly/extract url)))
+
   (GET "/s3-policy" req
     (if (some? (db/with-conn (db/user-by-id (get-in req [:session :user-id]))))
       (if-let [policy (s3/generate-policy)]

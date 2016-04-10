@@ -8,6 +8,7 @@
             [braid.ui.styles.imports]
             [braid.ui.styles.misc]
             [braid.ui.styles.animations]
+            [braid.ui.styles.embed]
             [braid.ui.styles.vars :as vars]))
 
 (def style-view
@@ -45,5 +46,7 @@
                  (braid.ui.styles.thread/new-message vars/pad)
                  (braid.ui.styles.thread/notice vars/pad)
                  (braid.ui.styles.thread/drag-and-drop vars/pad)
-                 (braid.ui.styles.header/header vars/pad))}}]))
+                 (braid.ui.styles.header/header vars/pad)
+                 (braid.ui.styles.embed/embed vars/pad)
+                 )}}]))
 

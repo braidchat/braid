@@ -135,7 +135,7 @@ add a supervisor entry for the chat app, something like this:
 ```
 [program:chat]
 command=java -server -Xmx1g -Dfile.encoding=UTF8 -jar /www/deploys/chat/chat.jar 5555 3081
-environment=ENVIRONMENT="prod",TESTER_PASSWORD="test user password",DB_URL="datomic:sql://chat_prod?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic",API_DOMAIN="api.mydomain.com"
+environment=ENVIRONMENT="prod",TESTER_PASSWORD="test user password",DB_URL="datomic:sql://chat_prod?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic",TIMBRE_LEVER=":debug",MALIGUN_PASSWORD="XXX",MAILGUN_DOMAIN="chat.leanpixel.com",AWS_DOMAIN="chat.leanpixel.com",AWS_ACCESS_KEY="XXX",AWS_SECRET_KEY="...",S3_UPLOAD_KEY="XXX",S#_UPLOAD_SECRET="XXX",ASANA_CLIENT_ID="XXX",ASANA_CLIENT_SECRET="XXX",API_DOMAIN="api.mydomain.com"
 autostart=true
 autorestart=true
 startsecs=10
@@ -147,11 +147,13 @@ startretries=3
 
 When seeding, you may want to include RAFAL_PASSWORD and JAMES_PASSWORD in the environment for the first time you run seed, or just manually connect a repl and create it by hand instead of muddling things.
 
-## setting up nginx
+## Webserver
 
-assuming the appropriate DNS entries are pointing to the server
+assuming the appropriate DNS entries are pointing to the server (the example
+below assumes the main site is `braid.chat`, mobile is `m.braid.chat`, api is
+`api.braid.chat` and `www.braid.chat` redirects to `braid.chat`.
 
-upload the SSL .crt and .key files to /etc/nginx/certs
+### Configuring nginx
 
 create an ngnix config in sites-available looking something like this:
 
@@ -183,17 +185,19 @@ map $http_upgrade $connection_upgrade {
 server {
   listen 80;
   server_name api.braid.chat m.braid.chat braid.chat;
+  # for letsencrypt verification
   location /.well-known {
     default_type "text/plain";
     root /usr/share/nginx/html;
   }
   location / {
-    return 301 https://$server_name$request_uri;
+    return 301 https://$host$request_uri;
   }
 }
 server {
   listen 80;
   server_name www.braid.chat;
+  # for letsencrypt verification
   location /.well-known {
     default_type "text/plain";
     root /usr/share/nginx/html;
@@ -344,6 +348,35 @@ server {
 ```
 
 then symlink it into sites-enabled, delete the symlink to `default` in sites-enabled and `sudo service nginx reload`
+
+### SSL
+
+Using [letsencrypt](https://letsencrypt.org/):
+
+Install letsencrypt on the server as instructed on the site to `/opt/`
+
+Generate the certificate:
+
+```bash
+$ /opt/letsencrypt/letsencrypt-auto certonly -a webroot --webroot-path=/usr/share/nginx/html -d braid.chat -d www.braid -d m.braid.chat -d api.braid.chat
+```
+
+Generate a strong Diffe-Hellman group - we want to avoid using comment groups
+that attackers may have precomputed.
+
+```bash
+$ sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+```
+
+Set up a cron job to autorenew the certificate (letsencrypt certs only last for
+60 days).
+
+Edit the root cron with `sudo crontab -e` and add the following lines:
+
+```
+30 2 * * 1 /opt/letsencrypt/letsencrypt-auto renew >> /var/log/le-renew.log
+35 2 * * 1 /usr/sbin/service nginx reload
+```
 
 ## backups
 

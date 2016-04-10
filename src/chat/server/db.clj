@@ -500,16 +500,15 @@
 
 (defn get-thread
   [thread-id]
-  (-> (d/q '[:find (pull ?thread pull-pattern)
-             :in $ ?thread-id pull-pattern
-             :where
-             [?thread :thread/id ?thread-id]]
-           (d/db *conn*)
-           thread-id
-           thread-pull-pattern)
-      first
-      first
+  (-> (d/pull (d/db *conn*) thread-pull-pattern [:thread/id thread-id])
       db->thread))
+
+(defn get-threads
+  [thread-ids]
+  (->> thread-ids
+       (map (fn [id] [:thread/id id]))
+       (d/pull-many (d/db *conn*) thread-pull-pattern)
+       (map db->thread)))
 
 (defn get-subscribed-thread-ids-for-user
   [user-id]
