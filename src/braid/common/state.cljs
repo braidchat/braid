@@ -105,14 +105,14 @@
 
 (defn get-user-subscribed-to-tag
   [state [_ tag-id]]
-  (reaction (get-in state [:user :subscribed-tag-ids]) tag-id))
+  (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))
 
 (defn get-group-subscribed-tags
   [state [_ group-id]]
   (reaction
     (->> (vals (get-in @state [:tags]))
-      (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id))))
-      (filter (fn [tag] @(get-user-subscribed-to-tag @state [nil (tag :id)]))))))
+         (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id))))
+         (filter (fn [tag] @(get-user-subscribed-to-tag state [nil (tag :id)]))))))
 
 (defn get-user-avatar-url
   [state [_ user-id]]

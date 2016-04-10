@@ -64,6 +64,7 @@
                  [:div.modal
                   [:h2 "Online"]
                   (for [user users-online]
+                    ^{:key (user :id)}
                     [user-pill-view user subscribe])]]))))
 
 
@@ -82,6 +83,7 @@
                                     (sort-by :threads-count)
                                      reverse)]
                 (for [tag sorted-tags]
+                  ^{:key (tag :id)}
                   [tag-pill-view tag subscribe]))]]))))
 
 (defn current-user-button-view [{:keys [subscribe]}]
