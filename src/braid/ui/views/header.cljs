@@ -97,7 +97,7 @@
     (fn []
       [:a {:href path
            :class (when (routes/current-path? path) "active")}
-        [:img.avatar {:style {:backgroundColor (id->color @user-id)}
+        [:img.avatar {:style {:background-color (id->color @user-id)}
                       :src @user-avatar-url}]])))
 
 (defn extensions-page-button-view [{:keys [subscribe]}]

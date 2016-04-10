@@ -14,7 +14,7 @@
                               " on"
                               " off")
                     :tabIndex -1
-                    :style {:backgroundColor (id->color (tag :id))
+                    :style {:background-color (id->color (tag :id))
                             :color (id->color (tag :id))
                             :borderColor (id->color (tag :id))}
                     :href path}
@@ -32,7 +32,7 @@
                                             :online " on"
                                                     " off")
                      :tabIndex -1
-                     :style {:backgroundColor (id->color (user :id))
+                     :style {:background-color (id->color (user :id))
                              :color (id->color (user :id))
                              :borderColor (id->color (user :id))}
                      :href path}
