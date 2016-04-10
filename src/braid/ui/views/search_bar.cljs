@@ -23,9 +23,9 @@
                 (store/set-search-results! {})
                 (if (string/blank? query)
                   (do
-                    (routes/go-to! (routes/inbox-page-path {:group-id (routes/current-group)})))
+                    (routes/go-to! (routes/inbox-page-path {:group-id @open-group-id})))
                   (do
-                    (routes/go-to! (routes/search-page-path {:group-id (routes/current-group)
+                    (routes/go-to! (routes/search-page-path {:group-id @open-group-id
                                                              :query query}))
                     (dispatch! :search-history [query @open-group-id]))))))))
        :reagent-render
