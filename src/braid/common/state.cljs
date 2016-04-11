@@ -62,3 +62,67 @@
 (defn get-page
   [state _]
   (reaction (@state :page)))
+
+(defn get-open-threads
+  [state _]
+  (let [current-group-id (reaction (@state :open-group-id))
+        open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
+        group-for-tag (fn [tag-id]
+                        (get-in @state [:tags tag-id :group-id]))
+        threads (reaction (@state :threads))
+        open-threads (-> @threads
+                         (select-keys @open-thread-ids)
+                         vals
+                         (->> (filter (fn [thread]
+                                (or (empty? (thread :tag-ids))
+                                    (contains?
+                                      (into #{} (map group-for-tag (thread :tag-ids)))
+                                      @current-group-id))))))]
+      (reaction open-threads)))
+
+(defn get-users-in-group
+  [state [_ group-id]]
+  (reaction
+    (->> (state :users)
+         vals
+         (filter (fn [u] (contains? (set (u :group-ids)) group-id))))))
+
+(defn get-open-group-id
+  [state _]
+  (reaction (get-in @state [:open-group-id])))
+
+(defn get-users-in-open-group
+  [state _]
+  (reaction @(get-users-in-group @state [nil (@state :open-group-id)])))
+
+(defn get-user-id
+  [state _]
+  (reaction (get-in @state [:session :user-id])))
+
+(defn get-all-tags
+  [state _]
+  (reaction (vals (get-in @state [:tags]))))
+
+(defn get-user-subscribed-to-tag
+  [state [_ tag-id]]
+  (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))
+
+(defn get-group-subscribed-tags
+  [state [_ group-id]]
+  (reaction
+    (->> (vals (get-in @state [:tags]))
+         (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id))))
+         (filter (fn [tag] @(get-user-subscribed-to-tag state [nil (tag :id)]))))))
+
+(defn get-user-avatar-url
+  [state [_ user-id]]
+  (reaction (get-in @state [:users user-id :avatar])))
+
+(defn get-user-status
+  [state [_ user-id]]
+  (reaction (get-in @state [:users user-id :status])))
+
+(defn get-search-query
+  [state _]
+  (reaction (get-in @state [:page :search-query])))
+

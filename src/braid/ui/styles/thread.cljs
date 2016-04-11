@@ -89,7 +89,7 @@
      :padding [[pad (m/* 2 pad) pad pad]]
      :box-sizing "border-box"}
 
-    [:tags
+    [:.tags
 
      [:.add
       mixins/pill-box]

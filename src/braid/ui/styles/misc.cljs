@@ -160,22 +160,8 @@
 
 (def button
   [:.button
-   mixins/pill-box
-   {:color vars/grey-text
-    :border [[(px 1 "solid" vars/grey-text)]]
-    :background "none"
-    :margin-left (em 1)}
-
-   [:&:hover
-    {:color "#eee"
-     :background vars/grey-text
-     :cursor "pointer"}]
-
-   [:&:active
-    {:color "#eee"
-     :background "#666"
-     :border-color "#666"
-     :cursor "pointer"}]])
+   mixins/pill-button
+   {:margin-left (em 1)}])
 
 (defn threads [pad]
   [:.threads
