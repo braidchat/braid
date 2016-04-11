@@ -38,7 +38,7 @@
         (dom/span #js {:className "count subscribers-count"}
           (tag :subscribers-count))
         (om/build tag-view tag)
-        (subscribe-button tag)))))
+        (om/build subscribe-button tag)))))
 
 (defn channels-page-view [data owner]
   (reify
