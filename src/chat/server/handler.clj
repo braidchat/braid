@@ -51,6 +51,10 @@
 
 (def static-site-defaults
   {:static {:resources "public"}
+   :params {:urlencoded true
+            :multipart  true
+            :nested     true
+            :keywordize true}
    :responses {:not-modified-responses true
                :absolute-redirects     true
                :content-types          true
