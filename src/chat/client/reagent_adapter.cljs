@@ -31,6 +31,10 @@
   state/get-page)
 
 (register-sub
+  :page-id
+  state/get-page-id)
+
+(register-sub
   :open-threads
   state/get-open-threads)
 
@@ -69,6 +73,10 @@
 (register-sub
   :search-query
   state/get-search-query)
+
+(register-sub
+  :group-for-tag
+  state/get-group-for-tag)
 
 
 (defn subscribe [v]

@@ -63,6 +63,10 @@
   [state _]
   (reaction (@state :page)))
 
+(defn get-page-id
+  [state _]
+  (reaction (get-in @state [:page :id])))
+
 (defn get-open-threads
   [state _]
   (let [current-group-id (reaction (@state :open-group-id))
@@ -125,4 +129,8 @@
 (defn get-search-query
   [state _]
   (reaction (get-in @state [:page :search-query])))
+
+(defn get-group-for-tag
+  [state [_ tag-id]]
+  (reaction (get-in @state [:tags tag-id :group-id])))
 
