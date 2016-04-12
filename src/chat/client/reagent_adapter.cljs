@@ -78,6 +78,10 @@
   :group-for-tag
   state/get-group-for-tag)
 
+(register-sub
+  :open-thread-ids
+  state/get-open-thread-ids)
+
 
 (defn subscribe [v]
   (let [key-v (first v)

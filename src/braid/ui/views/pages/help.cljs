@@ -1,6 +1,6 @@
 (ns braid.ui.views.pages.help)
 
-(defn help-page-view
+(defn help-page-view-test
   [data]
   [:div.page.help
     [:div.title "Help"]

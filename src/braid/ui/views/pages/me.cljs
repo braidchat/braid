@@ -61,7 +61,7 @@
                "Decline")]
            )]]))
 
-(defn me-page-view
+(defn me-page-view-test
   [data]
   (fn []
     [:div.page.me
@@ -72,7 +72,7 @@
                           (fn [_]
                             (dispatch! :logout nil))} "Log Out"]
         [:h2 "Update Nickname"]
-        [nickname-view (data :session)]
+        [nickname-view data]
         [:h2 "Received Invites"]
         (when (seq (data :invitations))
-          [invitations-view (data :invitations)])]]))
+          [invitations-view data])]]))

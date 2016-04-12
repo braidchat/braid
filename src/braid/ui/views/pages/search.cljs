@@ -6,7 +6,8 @@
             [chat.client.store :as store]
             [chat.client.views.threads :refer [thread-view]]))
 
-(defn search-page-view [data owner]
+(defn search-page-view
+  [data owner]
   (let [loading? (r/atom false)
         start-loading! (fn [] (swap! loading? true))
         stop-loading! (fn [] (swap! loading? false))]
@@ -73,6 +74,4 @@
             :done-empty
             [:div.content
               [:div.description
-                "No results."]])])))
-
-
+                "No results."]])]))))

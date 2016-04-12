@@ -23,6 +23,10 @@
           (apply max))
      (thread :last-open-at)))
 
+(defn get-open-thread-ids
+  [state _]
+  (reaction (get-in @state [:user :open-thread-ids])))
+
 (defn get-group-unread-count
   [state [_ group-id]]
   (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
