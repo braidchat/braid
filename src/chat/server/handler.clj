@@ -17,6 +17,7 @@
                      api-public-routes
                      resource-routes
                      extension-routes]]
+            [chat.server.conf :as conf]
             [environ.core :refer [env]]
             ; just requiring to register multimethods
             chat.server.extensions.asana
@@ -122,7 +123,7 @@
     (start-server! :desktop desktop-port)
     (println "starting mobile client on port " mobile-port)
     (start-server! :mobile mobile-port)
-    (reset! routes/api-port api-port)
+    (reset! conf/api-port api-port)
     (println "starting api on port " api-port)
     (start-server! :api api-port)))
 

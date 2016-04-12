@@ -8,7 +8,8 @@
             [image-resizer.core :as img]
             [image-resizer.format :as img-format]
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
-            [chat.server.crypto :refer [hmac constant-comp]]))
+            [chat.server.crypto :refer [hmac constant-comp]]
+            [chat.server.conf :refer [api-port]]))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
   (println "WARNING: No :hmac-secret set, using an insecure default."))
@@ -66,7 +67,8 @@
   [invite token]
   (let [now (.getTime (java.util.Date.))
         form-hmac (hmac hmac-secret
-                        (str now token (invite :id) (invite :invitee-email)))]
+                        (str now token (invite :id) (invite :invitee-email)))
+        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
     (str "<!DOCTYPE html>"
          "<html>"
          "  <head>"
@@ -75,7 +77,7 @@
          "  </head>"
          "  <body>"
          "  <p>Upload an avatar for " (invite :invitee-email) "</p>"
-         "  <form action=\"/register\" method=\"POST\" enctype=\"multipart/form-data\">"
+         "  <form action=\"//" api-domain "/register\" method=\"POST\" enctype=\"multipart/form-data\">"
          "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"
          "    <input type=\"hidden\" name=\"invite_id\" value=\"" (invite :id) "\">"
          "    <input type=\"hidden\" name=\"email\" value=\"" (invite :invitee-email) "\">"
@@ -165,7 +167,8 @@
 (defn reset-page
   [user token]
   (let [now (.getTime (java.util.Date.))
-        form-hmac (hmac hmac-secret (str now token (user :id)))]
+        form-hmac (hmac hmac-secret (str now token (user :id)))
+        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
     (str "<!DOCTYPE html>"
          "<html>"
          "  <head>"
@@ -173,7 +176,7 @@
          "   <link href=\"/css/out/chat.css\" rel=\"stylesheet\" type=\"text/css\"></style>"
          "  </head>"
          "  <body>"
-         "  <form action=\"/reset\" method=\"POST\">"
+         "  <form action=\"//" api-domain "/reset\" method=\"POST\">"
          "    <input type=\"hidden\" name=\"user_id\" value=\"" (user :id) "\">"
          "    <input type=\"hidden\" name=\"now\" value=\"" now "\">"
          "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"

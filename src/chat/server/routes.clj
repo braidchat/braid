@@ -14,10 +14,9 @@
     [chat.server.sync :as sync]
     [chat.server.extensions :as ext :refer [b64->str]]
     [chat.server.s3 :as s3]
+    [chat.server.conf :refer [api-port]]
     [braid.api.embedly :as embedly]
     [environ.core :refer [env]]))
-
-(def api-port (atom nil))
 
 (defn- edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
