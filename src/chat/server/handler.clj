@@ -70,6 +70,11 @@
 ; XXX: Review use of CSRF
 (def api-server-app
   (-> (routes
+        (-> api-public-routes
+            (wrap-defaults (-> site-defaults
+                               (assoc-in [:security :anti-forgery] false)
+                               assoc-cookie-conf)))
+
         (-> extension-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
@@ -80,10 +85,6 @@
                                assoc-cookie-conf
       ;                         assoc-csrf-conf
                                )))
-        (-> api-public-routes
-            (wrap-defaults (-> site-defaults
-                               (assoc-in [:security :anti-forgery] false)
-                               assoc-cookie-conf)))
         (-> sync-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf

@@ -31,6 +31,18 @@
      :api_domain (or (:api-domain env) (str "localhost:" @api-port))}))
 
 (defroutes desktop-client-routes
+  (GET "/group/:group-name" [group-name]
+    (if-let [group (db/with-conn (db/public-group-with-name group-name))]
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body
+       (clostache/render-resource "public/public_group_desktop.html"
+                                  {:group-name (group :name)
+                                   :group-id (group :id)
+                                   :api_domain (or (:api-domain env) (str "localhost:" @api-port))})}
+      {:status 403
+       :headers {"Content-Type" "text/plain"}
+       :body "No such public group"}))
   (GET "/*" []
     (get-html "desktop")))
 
@@ -46,31 +58,37 @@
         {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
 
-  (POST "/public-register/:group-id" [group-id email :as req]
-    (let [group-id (java.util.UUID/fromString group-id)
-          group-settings (db/with-conn (db/group-settings group-id))]
-      (if-not (get group-settings :public?)
-        {:status 400 :body "No such group or the group is private"}
-        (if (string/blank? email)
-          {:status 400 :body "Invalid email"}
-          (let [id (db/uuid)
-                avatar (identicons/id->identicon-data-url id)
-                ; XXX: copied from chat.shared.util/nickname-rd
-                disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
-                nick (-> (first (string/split email #"@"))
-                         (string/replace disallowed-chars ""))
-                u (db/with-conn (db/create-user! {:id id
-                                                  :email email
-                                                  :password (random-nonce 50)
-                                                  :avatar avatar
-                                                  :nickname nick}))]
-            (db/with-conn
-              (db/user-add-to-group! id group-id)
-              (db/user-subscribe-to-group-tags! id group-id))
-            (sync/broadcast-user-change id [:chat/new-user u])
-            {:status 302 :headers {"Location" "/"}
-             :session (assoc (req :session) :user-id id)
-             :body ""})))))
+  (POST "/public-register" [group-id email :as req]
+    ; TODO: make errors work (currently seems to just give a 404)
+    (if-not group-id
+      {:status 400 :body "Missing group id"}
+      (let [group-id (java.util.UUID/fromString group-id)
+            group-settings (db/with-conn (db/group-settings group-id))]
+        (if-not (get group-settings :public?)
+          {:status 400 :body "No such group or the group is private"}
+          (if (string/blank? email)
+            {:status 400 :body "Invalid email"}
+            (let [id (db/uuid)
+                  avatar (identicons/id->identicon-data-url id)
+                  ; XXX: copied from chat.shared.util/nickname-rd
+                  disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
+                  nick (-> (first (string/split email #"@"))
+                           (string/replace disallowed-chars ""))
+                  u (db/with-conn (db/create-user! {:id id
+                                                    :email email
+                                                    :password (random-nonce 50)
+                                                    :avatar avatar
+                                                    :nickname nick}))
+                  referer (get-in req [:headers "referer"])
+                  [proto _ referrer-domain] (string/split referer #"/")]
+              (db/with-conn
+                (db/user-add-to-group! id group-id)
+                (db/user-subscribe-to-group-tags! id group-id))
+              (sync/broadcast-user-change id [:chat/new-user u])
+              ; TODO: redirect to originating site
+              {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
+               :session (assoc (req :session) :user-id id)
+               :body ""}))))))
 
   (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
