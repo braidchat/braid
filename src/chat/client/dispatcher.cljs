@@ -181,7 +181,7 @@
                      :csrf-token (:csrf-token @sync/chsk-state)}
             :on-complete (fn [data]
                            (sync/reconnect!))
-            :on-error (fn [data]
+            :on-error (fn [_]
                         (when-let [cb (data :on-error)]
                           (cb)))}))
 

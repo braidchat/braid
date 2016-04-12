@@ -783,3 +783,11 @@
     (d/transact *conn* [[:db.fn/cas [:group/id group-id]
                          :group/settings old-prefs new-prefs]])))
 
+(defn public-group-with-name
+  [group-name]
+  (when-let [group (-> (d/pull (d/db *conn*) group-pull-pattern
+                               [:group/name group-name])
+                       db->group)]
+    (when (:public? (group-settings (group :id)))
+      group)))
+
