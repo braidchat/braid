@@ -169,11 +169,10 @@
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))
   (POST "/auth" req
-    (println "Params" req )
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
                          (db/with-conn (db/authenticate-user email password))))]
-      (do (println "AUTH!" user-id) {:status 200 :session (assoc (req :session) :user-id user-id)})
+      {:status 200 :session (assoc (req :session) :user-id user-id)}
       {:status 401 :body (pr-str {:error true})}))
   (POST "/request-reset" [email]
     (when-let [user (db/with-conn (db/user-with-email email))]
