@@ -25,6 +25,9 @@
 (def HeaderView
   (reagent->react header-view))
 
+(def LoginView
+  (reagent->react login-view))
+
 (defn main-view [data owner]
   (reify
     om/IRender
@@ -65,4 +68,4 @@
         (StyleView.)
         (if (data :session)
           (om/build main-view data)
-          (om/build login-view data))))))
+          (LoginView.))))))
