@@ -123,13 +123,15 @@
                                                        :email email
                                                        :avatar avatar-url
                                                        :nickname nickname
-                                                       :password password}))]
+                                                       :password password}))
+                  referer (get-in req [:headers "referer"] (env :site-url))
+                  [proto _ referrer-domain] (string/split referer #"/")]
               (db/with-conn
                 (db/user-add-to-group! (user :id) (invite :group-id))
                 (db/user-subscribe-to-group-tags! (user :id) (invite :group-id))
                 (db/retract-invitation! (invite :id)))
               (sync/broadcast-user-change (user :id) [:chat/new-user user])
-              {:status 302 :headers {"Location" "/"}
+              {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))))))
 
@@ -224,8 +226,7 @@
          :body (pr-str {:error "No S3 secret for upload"})})
       {:status 403
        :headers {"Content-Type" "application/edn"}
-       :body (pr-str {:error "Unauthorized"})}))
-  )
+       :body (pr-str {:error "Unauthorized"})})))
 
 (defroutes resource-routes
   (resources "/"))
