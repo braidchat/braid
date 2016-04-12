@@ -79,7 +79,7 @@
                                                     :password (random-nonce 50)
                                                     :avatar avatar
                                                     :nickname nick}))
-                  referer (get-in req [:headers "referer"])
+                  referer (get-in req [:headers "referer"] (env :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (db/with-conn
                 (db/user-add-to-group! id group-id)
