@@ -126,3 +126,21 @@
   [state _]
   (reaction (get-in @state [:page :search-query])))
 
+(defn get-tags-for-thread
+  [state [_ thread-id]]
+  (let [tag-ids (reaction (get-in @state [:threads thread-id :tag-ids]))
+        tags (reaction (map (fn [thread-id]
+                              (get-in @state [:tags thread-id])) @tag-ids))]
+    tags))
+
+(defn get-mentions-for-thread
+  [state [_ thread-id]]
+  (let [mention-ids (reaction (get-in @state [:threads thread-id :mentioned-ids]))
+        mentions (reaction (map (fn [user-id]
+                                  (get-in @state [:users user-id])) @mention-ids))]
+    mentions))
+
+(defn get-thread-open?
+  [state [_ thread-id]]
+  (reaction (contains? (set (get-in state [:user :open-thread-ids])) thread-id)))
+

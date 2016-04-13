@@ -2,7 +2,8 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [chat.client.store :as store]
-            [chat.client.views.threads :refer [thread-view new-thread-view]]))
+            [braid.ui.views.thread :refer [ThreadView]]
+            [chat.client.views.threads :refer [new-thread-view]]))
 
 (defn inbox-page-view [data owner]
   (reify
@@ -24,7 +25,8 @@
                                         (- (.-scrollLeft this-elt) (.-deltaY e))))))}
           (concat
             [(new-thread-view {})]
-            (map (fn [t] (om/build thread-view t {:key :id}))
+            (map (fn [t]
+                   (ThreadView. #js {:thread t}))
                  (let [user-id (get-in @store/app-state [:session :user-id])]
                    ; sort by last message sent by logged-in user, most recent first
                    (-> data

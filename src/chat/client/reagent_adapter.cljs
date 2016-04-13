@@ -70,6 +70,17 @@
   :search-query
   state/get-search-query)
 
+(register-sub
+  :tags-for-thread
+  state/get-tags-for-thread)
+
+(register-sub
+  :mentions-for-thread
+  state/get-mentions-for-thread)
+
+(register-sub
+  :thread-open?
+  state/get-thread-open?)
 
 (defn subscribe [v]
   (let [key-v (first v)
