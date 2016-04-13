@@ -56,7 +56,7 @@
           [new-tag-view {:group-id @group-id}]
 
           (let [subscribed-tags
-                (->> @storted-tags
+                (->> @sorted-tags
                      (filter (fn [t] (@subscribed-to-tag? (t :id)))))]
             (when (seq subscribed-tags)
               [:div
