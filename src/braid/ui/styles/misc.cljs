@@ -140,16 +140,6 @@
     [:.new-tag.error
      {:border-color "red"}]]])
 
-(def login
-  [:.login
-   mixins/floating-box
-
-   [:input
-    {:width "100%"
-     :margin [[0 0 (em 1)]]
-     :padding (em 0.25)
-     :box-sizing "border-box"}]])
-
 (def tag
   [:.tag
    mixins/pill-box])
