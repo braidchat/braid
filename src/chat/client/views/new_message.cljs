@@ -6,6 +6,7 @@
             [clojure.string :as string]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
+            [chat.client.schema :as schema]
             [chat.client.emoji :as emoji]
             [chat.client.views.helpers :refer [id->color debounce]]
             [clj-fuzzy.metrics :as fuzzy])
@@ -111,24 +112,46 @@
    (fn [text thread-id]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (->> (store/tags-in-open-group)
-              (filter (fn [t]
-                        (fuzzy-matches? (t :name) query)))
-              (map (fn [tag]
-                     {:action
-                      (fn [thread-id])
-                      :message-transform
-                      (fn [text]
-                        (string/replace text pattern (str "#" (tag :name) " ")))
-                      :html
-                      (fn []
-                        (dom/div #js {:className "tag-match"}
-                          (dom/div #js {:className "color-block"
-                                        :style #js {:backgroundColor (id->color (tag :id))}})
-                          (dom/div #js {:className "name"}
-                            (tag :name))
-                          (dom/div #js {:className "extra"}
-                            (:name (store/id->group (tag :group-id))))))}))))))
+         (let [group-tags (store/tags-in-open-group)
+               exact-match? (some #(= query (:name %)) group-tags)]
+           (->> group-tags
+                (filter (fn [t]
+                          (fuzzy-matches? (t :name) query)))
+                (map (fn [tag]
+                       {:action
+                        (fn [thread-id])
+                        :message-transform
+                        (fn [text]
+                          (string/replace text pattern (str "#" (tag :name) " ")))
+                        :html
+                        (fn []
+                          (dom/div #js {:className "tag-match"}
+                            (dom/div #js {:className "color-block"
+                                          :style #js {:backgroundColor (id->color (tag :id))}})
+                            (dom/div #js {:className "name"}
+                              (tag :name))
+                            (dom/div #js {:className "extra"}
+                              (:name (store/id->group (tag :group-id))))))}))
+                (cons (when-not (or exact-match? (string/blank? query))
+                        (let [tag (schema/make-tag {:name query
+                                                    :group-id (store/open-group-id)})]
+                          {:action
+                           (fn [thread-id]
+                             (dispatch! :create-tag [(tag :name) (tag :group-id) (tag :id)]))
+                           :message-transform
+                           (fn [text]
+                             (string/replace text pattern (str "#" (tag :name) " ")))
+                           :html
+                           (fn []
+                             (dom/div #js {:className "tag-match"}
+                               (dom/div #js {:className "color-block"
+                                             :style #js {:backgroundColor (id->color (tag :id))}})
+                               (dom/div #js {:className "name"}
+                                 (str "Create tag " (tag :name)))
+                               (dom/div #js {:className "extra"}
+                                 (:name (store/id->group (tag :group-id))))))})))
+                (remove nil?)
+                reverse)))))
    ])
 
 (defn- auto-resize [el]
