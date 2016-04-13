@@ -40,6 +40,7 @@
                  braid.ui.styles.misc/tag
                  braid.ui.styles.misc/user
                  braid.ui.styles.misc/button
+                 braid.ui.styles.misc/status
                  (braid.ui.styles.misc/threads vars/pad)
                  (braid.ui.styles.thread/thread vars/pad)
                  (braid.ui.styles.thread/head vars/pad)

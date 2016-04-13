@@ -66,6 +66,15 @@
     (render [_]
       (dom/div #js {:className "app"}
         (StyleView.)
-        (if (data :session)
-          (om/build main-view data)
-          (LoginView.))))))
+        (case (data :login-state)
+          :auth-check
+          (dom/div #js {:className "status authenticating"}
+            "Authenticating...")
+          :ws-connect
+          (dom/div #js {:className "status ws-connect"}
+            "Connecting...")
+          :login-form
+          (LoginView.)
+          :app
+          (om/build main-view data))))))
+

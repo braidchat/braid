@@ -315,6 +315,16 @@
   (some-> (d/pull (d/db *conn*) user-pull-pattern [:user/id id])
           db->user))
 
+(defn user-id-exists?
+  [id]
+  (boolean
+    (seq (d/q '[:find [?e]
+                :in $ ?id
+                :where
+                [?e :user/id ?id]]
+              (d/db *conn*)
+              id))))
+
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
   [email]
