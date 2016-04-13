@@ -1,6 +1,21 @@
 (ns braid.ui.views.pills
   (:require [chat.client.routes :as routes]
+            [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.helpers :refer [id->color user-cursor]]))
+
+(defn subscribe-button-view
+  [tag subscribe]
+  (let [user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag (tag :id)])]
+    (fn []
+      (if @user-subscribed-to-tag?
+        [:a.button {:on-click
+                    (fn [_]
+                      (dispatch! :unsubscribe-from-tag (tag :id)))}
+          "Unsubscribe"]
+        [:a.button {:on-click
+                    (fn [_]
+                      (dispatch! :subscribe-to-tag (tag :id)))}
+          "Subscribe"]))))
 
 (defn tag-pill-view
   [tag subscribe]
