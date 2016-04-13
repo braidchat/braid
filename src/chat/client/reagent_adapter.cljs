@@ -82,6 +82,10 @@
   :thread-open?
   state/get-thread-open?)
 
+(register-sub
+  :errors
+  state/get-errors)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]

@@ -144,3 +144,6 @@
   [state [_ thread-id]]
   (reaction (contains? (set (get-in state [:user :open-thread-ids])) thread-id)))
 
+(defn get-errors
+  [state _]
+  (reaction (get-in state [:errors])))

@@ -2,10 +2,11 @@
   (:require [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.routes :as routes]
             [chat.client.views.helpers :refer [id->color]]
+            [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [braid.ui.views.search-bar :refer [search-bar-view]]))
 
-(defn clear-inbox-button-view [{:keys [subscribe]}]
+(defn clear-inbox-button-view []
   (let [open-threads (subscribe [:open-threads])]
     (fn []
       [:div.clear-inbox
@@ -14,7 +15,7 @@
                                 (dispatch! :clear-inbox))}
             "Clear Inbox"])])))
 
-(defn inbox-page-button-view [{:keys [subscribe]}]
+(defn inbox-page-button-view []
   (let [open-group-id (subscribe [:open-group-id])]
     (fn []
       (let [path (routes/inbox-page-path {:group-id @open-group-id})]
@@ -22,7 +23,7 @@
           [:a.title {:href path
                      :title "Inbox"}]]))))
 
-(defn recent-page-button-view [{:keys [subscribe]}]
+(defn recent-page-button-view []
   (let [open-group-id (subscribe [:open-group-id])]
     (fn []
       (let [path (routes/recent-page-path {:group-id @open-group-id})]
@@ -30,7 +31,7 @@
           [:a.title {:href path
                      :title "Recent"}]]))))
 
-(defn help-page-pane-view [{:keys [subscribe]}]
+(defn help-page-pane-view []
   (let [open-group-id (subscribe [:open-group-id])]
     (fn []
       (let [path (routes/help-page-path {:group-id @open-group-id})]
@@ -43,7 +44,7 @@
             [:p "You can also mention users to add them to a conversation: ex. @raf"]
             [:p "Add emoji by using :shortcodes: (they autocomplete)."]]]))))
 
-(defn users-online-pane-view [{:keys [subscribe]}]
+(defn users-online-pane-view []
   (let [open-group-id (subscribe [:open-group-id])
         user-id (subscribe [:user-id])
         users-in-open-group (subscribe [:users-in-open-group])]
@@ -67,8 +68,7 @@
                     ^{:key (user :id)}
                     [user-pill-view user subscribe])]]))))
 
-
-(defn tags-pane-view [{:keys [subscribe]}]
+(defn tags-pane-view []
   (let [open-group-id (subscribe [:open-group-id])
         tags (subscribe [:tags])
         group-subscribed-tags (subscribe [:group-subscribed-tags])]
@@ -86,7 +86,7 @@
                   ^{:key (tag :id)}
                   [tag-pill-view tag subscribe]))]]))))
 
-(defn current-user-button-view [{:keys [subscribe]}]
+(defn current-user-button-view []
   (let [user-id (subscribe [:user-id])
         user-avatar-url (subscribe [:user-avatar-url @user-id])
         open-group-id (subscribe [:open-group-id])]
@@ -108,14 +108,14 @@
                 [:div.modal
                   [:div "extensions"]]]))))
 
-(defn header-view [props]
+(defn header-view []
   [:div.header
-    [clear-inbox-button-view props]
-    [inbox-page-button-view props]
-    [recent-page-button-view props]
-    [help-page-pane-view props]
-    [users-online-pane-view props]
-    [tags-pane-view props]
-    [search-bar-view props]
-    [current-user-button-view props]
+    [clear-inbox-button-view]
+    [inbox-page-button-view]
+    [recent-page-button-view]
+    [help-page-pane-view]
+    [users-online-pane-view]
+    [tags-pane-view]
+    [search-bar-view]
+    [current-user-button-view]
     #_[extensions-page-button-view]]) ;Extensions page button temporarily not rendered
