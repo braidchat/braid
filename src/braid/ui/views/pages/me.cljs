@@ -9,35 +9,36 @@
   (:import [goog.events KeyCodes]))
 
 (defn nickname-view
-  [{:keys [subscribe]}]
+  [subscribe]
   (let [format-error (r/atom false)
         error (r/atom nil)
-        set-format-error! (fn [error?] (swap! format-error error?))
-        set-error! (fn [err] (swap! error err))
-        nickname (subscribe [:nickname])]
+        set-format-error! (fn [error?] (reset! format-error error?))
+        set-error! (fn [err] (reset! error err))
+        user-id (subscribe [:user-id])
+        nickname (subscribe [:nickname @user-id])]
     (fn []
       [:div.nickname
-        (when-let [current @nickname]
-          [:div.current-name current])
-        (when-let [msg @error]
-          [:span.error msg])
+        (when @nickname
+          [:div.current-name @nickname])
+        (when @error
+          [:span.error @error])
         ; TODO: check if nickname is taken while typing
         [:input.new-name
           {:class (when @format-error "error")
            :placeholder "New Nickname"
-           :on-keyup
+           :on-key-up
              (fn [e]
                (let [text (.. e -target -value)]
                  (set-format-error! (not (valid-nickname? text)))))
-           :on-keydown
-           (fn [e]
-             (set-error! nil)
-             (let [nickname (.. e -target -value)]
-               (when (and (= KeyCodes.ENTER e.keyCode)
-                          (re-matches #"\S+" nickname))
-                 (dispatch! :set-nickname
-                            [nickname
-                              (fn [err] (set-error! err))]))))}]])))
+           :on-key-down
+             (fn [e]
+               (set-error! nil)
+               (let [nickname (.. e -target -value)]
+                 (when (and (= KeyCodes.ENTER e.keyCode)
+                            (re-matches #"\S+" nickname))
+                   (dispatch! :set-nickname
+                              [nickname
+                                (fn [err] (set-error! err))]))))}]])))
 
 (defn invitations-view
   [invites]

@@ -115,7 +115,7 @@
                                           :data data})
           :user (om/build user-page-view data)
           :channels (om/build channels-page-view data)
-          :me (MePageView. #js {:data data})
+          :me (MePageView. #js {:subscribe subscribe})
           :group-explore (GroupExplorePageView.)
           :extensions (om/build extensions-page-view data))))))
 
