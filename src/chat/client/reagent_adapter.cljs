@@ -98,6 +98,10 @@
   :users
   state/get-users)
 
+(register-sub
+  :user
+  state/get-user)
+
 
 (defn subscribe [v]
   (let [key-v (first v)

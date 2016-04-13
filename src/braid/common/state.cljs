@@ -16,6 +16,10 @@
   [state _]
   (reaction (vals (:groups @state))))
 
+(defn get-user
+  [state [_ user-id]]
+  (reaction (get-in @state [:users user-id])))
+
 (defn get-users
   [state _]
   (reaction (@state :users)))
@@ -165,3 +169,4 @@
 (defn get-invitations
   [state _]
   (reaction (get-in @state [:invitations])))
+
