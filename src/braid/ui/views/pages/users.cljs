@@ -1,10 +1,10 @@
 (ns braid.ui.views.pages.users
   (:require [om.core :as om]
             [om.dom :as dom]
+            [braid.ui.views.group-invite :refer [group-invite-view]]
             [chat.client.views.helpers :refer [id->color]]
             [chat.client.routes :as routes]
-            [chat.client.store :as store]
-            [chat.client.views.group-invite :refer [group-invite-view]]))
+            [chat.client.store :as store]))
 
 (defn- group-users [data]
   (->> (data :users)
@@ -49,4 +49,4 @@
               [user-list-view (users-by-status :offline) subscribe]])
 
           [:h2 "Invite"]
-          (om/build group-invite-view @open-group-id)]])))
+          [group-invite-view @open-group-id]]])))
