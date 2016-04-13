@@ -47,6 +47,10 @@
   state/get-user-id)
 
 (register-sub
+  :tag
+  state/get-tag)
+
+(register-sub
   :tags
   state/get-all-tags)
 
@@ -102,6 +106,13 @@
   :user
   state/get-user)
 
+(register-sub
+  :threads
+  state/get-threads)
+
+(register-sub
+  :pagination-remaining
+  state/get-pagination-remaining)
 
 (defn subscribe [v]
   (let [key-v (first v)

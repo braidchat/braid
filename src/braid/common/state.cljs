@@ -146,6 +146,10 @@
   [state _]
   (reaction (get-in @state [:page :search-query])))
 
+(defn get-tag
+  [state [_ tag-id]]
+  (reaction (get-in @state [:tags tag-id])))
+
 (defn get-group-for-tag
   [state [_ tag-id]]
   (reaction (get-in @state [:tags tag-id :group-id])))
@@ -154,13 +158,13 @@
   [state [_ group-id]]
   (let [group-for-tag (fn [tag-id]
                         (get-in @state [:tags tag-id :group-id]))]
-    (reaction  (->> (@state :threads)
+    (reaction (->> (@state :threads)
                     vals
-                    (filter (fn [thread]
-                      (or (empty? (thread :tag-ids))
-                          (contains?
-                            (into #{} (map group-for-tag) (thread :tag-ids))
-                            group-id))))))))
+                   (filter (fn [thread]
+                     (or (empty? (thread :tag-ids))
+                         (contains?
+                           (into #{} (map group-for-tag) (thread :tag-ids))
+                           group-id))))))))
 
 (defn get-nickname
   [state [_ user-id]]
@@ -169,4 +173,12 @@
 (defn get-invitations
   [state _]
   (reaction (get-in @state [:invitations])))
+
+(defn get-threads
+  [state _]
+  (reaction (@state :threads)))
+
+(defn get-pagination-remaining
+  [state _]
+  (reaction (@state :pagination-remaining)))
 

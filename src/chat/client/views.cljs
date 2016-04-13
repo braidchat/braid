@@ -9,7 +9,7 @@
             [braid.ui.views.header :refer [header-view]]
             [braid.ui.views.pages.inbox :refer [inbox-page-view-test]]
             [braid.ui.views.pages.recent :refer [recent-page-view-test]]
-            [braid.ui.views.pages.channel :refer [channel-page-view-test]]
+            [braid.ui.views.pages.tag :refer [channel-page-view-test]]
             [braid.ui.views.pages.help :refer [help-page-view-test]]
             [braid.ui.views.pages.group-explore :refer [group-explore-view-test]]
             [braid.ui.views.pages.me :refer [me-page-view-test]]
@@ -111,8 +111,7 @@
           :help (HelpPageView.)
           :users (om/build users-page-view data)
           :search (om/build search-page-view data)
-          :channel (ChannelPageView. #js {:subscribe subscribe
-                                          :data data})
+          :channel (ChannelPageView. #js {:subscribe subscribe})
           :user (om/build user-page-view data)
           :channels (om/build channels-page-view data)
           :me (MePageView. #js {:subscribe subscribe})

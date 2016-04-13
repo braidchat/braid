@@ -3,9 +3,6 @@
             [om.dom :as dom]
             [reagent.core :as r]
             [clojure.string :as string]
-            [cljs.core.async :refer [put!]]
-            [om-fields.core :refer [input]]
-            [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]])
   (:import [goog.events KeyCodes]))
 

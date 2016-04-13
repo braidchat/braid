@@ -26,13 +26,13 @@
 (def UserPillView
   (reagent->react user-pill-view-temp))
 
-(defn subscribe-button [tag owner]
+(defn subscribe-button [tag]
   (reify
     om/IRender
     (render [_]
       (SubscribeButtonView. #js {:tag tag}))))
 
-(defn tag-view [tag owner]
+(defn tag-view [tag]
   (reify
     om/IRender
     (render [_]
