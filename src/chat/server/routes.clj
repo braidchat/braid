@@ -4,6 +4,7 @@
     [clojure.edn :as edn]
     [compojure.core :refer [GET POST defroutes context]]
     [compojure.route :refer [resources]]
+    [compojure.coercions :refer [as-uuid]]
     [clostache.parser :as clostache]
     [chat.shared.util :refer [valid-nickname?]]
     [chat.server.digest :as digest]
@@ -14,9 +15,9 @@
     [chat.server.sync :as sync]
     [chat.server.extensions :as ext :refer [b64->str]]
     [chat.server.s3 :as s3]
+    [chat.server.conf :refer [api-port]]
+    [braid.api.embedly :as embedly]
     [environ.core :refer [env]]))
-
-(def api-port (atom nil))
 
 (defn- edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
@@ -30,47 +31,76 @@
      :api_domain (or (:api-domain env) (str "localhost:" @api-port))}))
 
 (defroutes desktop-client-routes
-  (GET "/*" []
-    (get-html "desktop")))
+  ; public group page
+  (GET "/group/:group-name" [group-name]
+    (if-let [group (db/with-conn (db/public-group-with-name group-name))]
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body
+       (clostache/render-resource "public/public_group_desktop.html"
+                                  {:group-name (group :name)
+                                   :group-id (group :id)
+                                   :api_domain (or (:api-domain env) (str "localhost:" @api-port))})}
+      {:status 403
+       :headers {"Content-Type" "text/plain"}
+       :body "No such public group"}))
 
-(defroutes mobile-client-routes
-  (GET "/*" []
-    (get-html "mobile")))
-
-(defroutes api-public-routes
-  (GET "/accept" [invite tok]
+  ; invite accept page
+  (GET "/accept" [invite :<< as-uuid tok]
     (if (and invite tok)
-      (if-let [invite (db/with-conn (db/get-invite (java.util.UUID/fromString invite)))]
+      (if-let [invite (db/with-conn (db/get-invite invite))]
         {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
         {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
 
-  (POST "/public-register/:group-id" [group-id email :as req]
-    (let [group-id (java.util.UUID/fromString group-id)
-          group-settings (db/with-conn (db/group-settings group-id))]
-      (if-not (get group-settings :public?)
-        {:status 400 :body "No such group or the group is private"}
-        (if (string/blank? email)
-          {:status 400 :body "Invalid email"}
-          (let [id (db/uuid)
-                avatar (identicons/id->identicon-data-url id)
-                ; XXX: copied from chat.shared.util/nickname-rd
-                disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
-                nick (-> (first (string/split email #"@"))
-                         (string/replace disallowed-chars ""))
-                u (db/with-conn (db/create-user! {:id id
-                                                  :email email
-                                                  :password (random-nonce 50)
-                                                  :avatar avatar
-                                                  :nickname nick}))]
-            (db/with-conn
-              (db/user-add-to-group! id group-id)
-              (db/user-subscribe-to-group-tags! id group-id))
-            (sync/broadcast-user-change id [:chat/new-user u])
-            {:status 302 :headers {"Location" "/"}
-             :session (assoc (req :session) :user-id id)
-             :body ""})))))
+  ; password reset page
+  (GET "/reset" [user :<< as-uuid token :as req]
+    (if-let [u (and user token
+                 (invites/verify-reset-nonce {:id user} token)
+                 (db/with-conn (db/user-by-id user)))]
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body (invites/reset-page u token)}
+      {:status 401
+       :headers {"Content-Type" "text/plain"}
+       :body "Bad user or token"}))
 
+  ; everything else
+  (GET "/*" []
+    (get-html "desktop")))
+
+(defroutes mobile-client-routes
+  ; TODO: add mobile routse for public joining & password resets
+  (GET "/*" []
+    (get-html "mobile")))
+
+(defroutes api-public-routes
+  ; check if already logged in
+  (GET "/check" req
+    (if-let [user-id (get-in req [:session :user-id])]
+      (if-let [user (db/with-conn (db/user-id-exists? user-id))]
+        {:status 200 :body ""}
+        {:status 401 :body "" :session nil})
+      {:status 401 :body "" :session nil}))
+
+  ; log in
+  (POST "/auth" req
+    (if-let [user-id (let [{:keys [email password]} (req :params)]
+                       (when (and email password)
+                         (db/with-conn (db/authenticate-user email password))))]
+      {:status 200 :session (assoc (req :session) :user-id user-id)}
+      {:status 401 :body (pr-str {:error true})}))
+  ; log out
+  (POST "/logout" req
+    {:status 200 :session nil})
+
+  ; request a password reset
+  (POST "/request-reset" [email]
+    (when-let [user (db/with-conn (db/user-with-email email))]
+      (invites/request-reset (assoc user :email email)))
+    {:status 200 :body (pr-str {:ok true})})
+
+  ; accept an email invite to join a group
   (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
@@ -100,18 +130,73 @@
                                                        :email email
                                                        :avatar avatar-url
                                                        :nickname nickname
-                                                       :password password}))]
+                                                       :password password}))
+                  referer (get-in req [:headers "referer"] (env :site-url))
+                  [proto _ referrer-domain] (string/split referer #"/")]
               (db/with-conn
                 (db/user-add-to-group! (user :id) (invite :group-id))
                 (db/user-subscribe-to-group-tags! (user :id) (invite :group-id))
                 (db/retract-invitation! (invite :id)))
               (sync/broadcast-user-change (user :id) [:chat/new-user user])
-              {:status 302 :headers {"Location" "/"}
+              {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))))))
 
-  (POST "/logout" req
-    {:status 200 :session nil}))
+
+  ; join a public group
+  (POST "/public-register" [group-id email :as req]
+    (let [bad-resp {:status 400 :headers {"Content-Type" "text/plain"}}]
+      (if-not group-id
+        (assoc bad-resp :body "Missing group id")
+        (let [group-id (java.util.UUID/fromString group-id)
+              group-settings (db/with-conn (db/group-settings group-id))]
+          (if-not (get group-settings :public?)
+            (assoc bad-resp :body "No such group or the group is private")
+            (if (string/blank? email)
+              (assoc bad-resp :body "Invalid email")
+              (let [id (db/uuid)
+                    avatar (identicons/id->identicon-data-url id)
+                    ; XXX: copied from chat.shared.util/nickname-rd
+                    disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
+                    nick (-> (first (string/split email #"@"))
+                             (string/replace disallowed-chars ""))
+                    u (db/with-conn (db/create-user! {:id id
+                                                      :email email
+                                                      :password (random-nonce 50)
+                                                      :avatar avatar
+                                                      :nickname nick}))
+                    referer (get-in req [:headers "referer"] (env :site-url))
+                    [proto _ referrer-domain] (string/split referer #"/")]
+                (db/with-conn
+                  (db/user-add-to-group! id group-id)
+                  (db/user-subscribe-to-group-tags! id group-id))
+                (sync/broadcast-user-change id [:chat/new-user u])
+                ; TODO: redirect to originating site
+                {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
+                 :session (assoc (req :session) :user-id id)
+                 :body ""})))))))
+
+  ; reset password
+  (POST "/reset" [new-password token user-id :<< as-uuid now hmac :as req]
+    (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
+      (cond
+        (string/blank? new-password) (assoc fail :body "Must provide a password")
+
+        (not (invites/verify-hmac hmac (str now token user-id)))
+        (assoc fail :body "Invalid HMAC")
+
+        :else
+        (if-let [user (db/with-conn (db/user-by-id user-id))]
+          (if-let [err (:error (invites/verify-reset-nonce user token))]
+            (assoc fail :body err)
+            (let [referer (get-in req [:headers "referer"] (env :site-url))
+                  [proto _ referrer-domain] (string/split referer #"/")]
+              (db/with-conn (db/set-user-password! (user :id) new-password))
+              {:status 301
+               :headers {"Location" (str proto "//" referrer-domain)}
+               :session (assoc (req :session) :user-id (user :id))
+               :body ""}))
+          (assoc fail :body "Invalid user"))))))
 
 (defroutes extension-routes
   (context "/extension" _
@@ -134,6 +219,9 @@
         {:status 400 :body "No such extension"}))))
 
 (defroutes api-private-routes
+  (GET "/extract" [url]
+    (edn-response (embedly/extract url)))
+
   (GET "/s3-policy" req
     (if (some? (db/with-conn (db/user-by-id (get-in req [:session :user-id]))))
       (if-let [policy (s3/generate-policy)]
@@ -145,44 +233,7 @@
          :body (pr-str {:error "No S3 secret for upload"})})
       {:status 403
        :headers {"Content-Type" "application/edn"}
-       :body (pr-str {:error "Unauthorized"})}))
-  (POST "/auth" req
-    (println "Params" req )
-    (if-let [user-id (let [{:keys [email password]} (req :params)]
-                       (when (and email password)
-                         (db/with-conn (db/authenticate-user email password))))]
-      (do (println "AUTH!" user-id) {:status 200 :session (assoc (req :session) :user-id user-id)})
-      {:status 401 :body (pr-str {:error true})}))
-  (POST "/request-reset" [email]
-    (when-let [user (db/with-conn (db/user-with-email email))]
-      (invites/request-reset (assoc user :email email)))
-    {:status 200 :body (pr-str {:ok true})})
-  (GET "/reset" [user token]
-    (if-let [u (and (invites/verify-reset-nonce user token)
-                 (db/with-conn (db/user-by-id (java.util.UUID/fromString user))))]
-      {:status 200
-       :headers {"Content-Type" "text/html"}
-       :body (invites/reset-page u token)}
-      {:status 401}))
-  (POST "/reset" [new_password token user_id now hmac :as req]
-    (let [user-id (java.util.UUID/fromString user_id)
-          fail {:status 400 :headers {"Content-Type" "text/plain"}}]
-      (cond
-        (string/blank? new_password) (assoc fail :body "Must provide a password")
-
-        (not (invites/verify-hmac hmac (str now token user-id)))
-        (assoc fail :body "Invalid HMAC")
-
-        :else
-        (if-let [user (db/with-conn (db/user-by-id user-id))]
-          (if-let [err (:error (invites/verify-reset-nonce user token))]
-            (assoc fail :body err)
-            (do (db/with-conn (db/set-user-password! (user :id) new_password))
-                {:status 301
-                 :headers {"Location" "/"}
-                 :session (assoc (req :session) :user-id (user :id))
-                 :body ""}))
-          (assoc fail :body "Invalid user"))))))
+       :body (pr-str {:error "Unauthorized"})})))
 
 (defroutes resource-routes
   (resources "/"))

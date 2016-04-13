@@ -5,14 +5,6 @@
 (def flex
   {:display #{:flex :-webkit-flex}})
 
-(def floating-box
-  {:background "white"
-   :box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
-   :width vars/card-width
-   :padding vars/pad
-   :box-sizing "border-box"
-   :position "relative"})
-
 (def pill-box
   [:&
    {:font-size (em 0.75)
@@ -38,6 +30,29 @@
   [:&.off
    {:background-color [["white" "!important"]]}]])
 
+(def pill-button
+  [:&
+   pill-box
+   [:&
+    {:color vars/grey-text
+     :border [[(px 1) "solid" vars/grey-text]]
+     :background "none"}]
+
+   [:&:hover
+    {:color "#eee"
+     :background vars/grey-text
+     :cursor "pointer"}]
+
+   [:&:active
+    {:color "#eee"
+     :background "#666"
+     :border-color "#666"
+     :cursor "pointer"}]])
+
 (defn fontawesome [unicode]
   {:font-family "fontawesome"
    :content (str "\"" unicode "\"")})
+
+(def spin
+  {:animation [["anim-spin" "1s" "infinite" "steps(8)"]]
+   :display "block"})

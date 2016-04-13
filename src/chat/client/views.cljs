@@ -2,11 +2,11 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [chat.client.store :as store]
-            [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [reagent->react subscribe]]
             [chat.client.views.style :refer [style-view]]
             [braid.ui.views.sidebar :refer [sidebar-view]]
-            [chat.client.views.header :refer [header-view]]
+            [braid.ui.views.header :refer [header-view]]
+            [braid.ui.views.login :refer [login-view]]
             [chat.client.views.pages.search :refer [search-page-view]]
             [chat.client.views.pages.inbox :refer [inbox-page-view]]
             [chat.client.views.pages.recent :refer [recent-page-view]]
@@ -19,48 +19,14 @@
             [chat.client.views.pages.group-explore :refer [group-explore-view]]
             [chat.client.views.pages.me :refer [me-page-view]]))
 
-(defn login-view [data owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:email ""
-       :password ""
-       :error false})
-    om/IRenderState
-    (render-state [_ state]
-      (dom/form #js {:className "login"
-                     :onSubmit (fn [e]
-                                 (.preventDefault e)
-                                 (dispatch! :auth
-                                            {:email (state :email)
-                                             :password (state :password)
-                                             :on-error
-                                             (fn []
-                                               (om/set-state! owner :error true))}))}
-        (when (state :error)
-          (dom/div #js {:className "error"}
-            (dom/p nil "Bad credentials, please try again")
-            (dom/p nil
-              (dom/a #js {:href "#"
-                          :onClick (fn [e]
-                                     (.preventDefault e)
-                                     (dispatch! :request-reset (state :email)))}
-                (str "Request a password reset to be sent to "
-                     (state :email))))))
-        (dom/input
-          #js {:placeholder "Email"
-               :type "text"
-               :value (state :email)
-               :onChange (fn [e] (om/set-state! owner :email (.. e -target -value)))})
-        (dom/input
-          #js {:placeholder "Password"
-               :type "password"
-               :value (state :password)
-               :onChange (fn [e] (om/set-state! owner :password (.. e -target -value)))})
-        (dom/button nil "Let's do this!")))))
-
 (def SidebarView
   (reagent->react sidebar-view))
+
+(def HeaderView
+  (reagent->react header-view))
+
+(def LoginView
+  (reagent->react login-view))
 
 (defn main-view [data owner]
   (reify
@@ -76,7 +42,7 @@
 
          (SidebarView. #js {:subscribe subscribe})
 
-        (om/build header-view data)
+        (HeaderView. #js {:subscribe subscribe})
 
         (case (get-in data [:page :type])
           :inbox (om/build inbox-page-view data)
@@ -100,6 +66,15 @@
     (render [_]
       (dom/div #js {:className "app"}
         (StyleView.)
-        (if (data :session)
-          (om/build main-view data)
-          (om/build login-view data))))))
+        (case (data :login-state)
+          :auth-check
+          (dom/div #js {:className "status authenticating"}
+            "Authenticating...")
+          :ws-connect
+          (dom/div #js {:className "status ws-connect"}
+            "Connecting...")
+          :login-form
+          (LoginView.)
+          :app
+          (om/build main-view data))))))
+

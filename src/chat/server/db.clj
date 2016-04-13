@@ -315,6 +315,16 @@
   (some-> (d/pull (d/db *conn*) user-pull-pattern [:user/id id])
           db->user))
 
+(defn user-id-exists?
+  [id]
+  (boolean
+    (seq (d/q '[:find [?e]
+                :in $ ?id
+                :where
+                [?e :user/id ?id]]
+              (d/db *conn*)
+              id))))
+
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
   [email]
@@ -500,16 +510,15 @@
 
 (defn get-thread
   [thread-id]
-  (-> (d/q '[:find (pull ?thread pull-pattern)
-             :in $ ?thread-id pull-pattern
-             :where
-             [?thread :thread/id ?thread-id]]
-           (d/db *conn*)
-           thread-id
-           thread-pull-pattern)
-      first
-      first
+  (-> (d/pull (d/db *conn*) thread-pull-pattern [:thread/id thread-id])
       db->thread))
+
+(defn get-threads
+  [thread-ids]
+  (->> thread-ids
+       (map (fn [id] [:thread/id id]))
+       (d/pull-many (d/db *conn*) thread-pull-pattern)
+       (map db->thread)))
 
 (defn get-subscribed-thread-ids-for-user
   [user-id]
@@ -783,4 +792,12 @@
                       pr-str)]
     (d/transact *conn* [[:db.fn/cas [:group/id group-id]
                          :group/settings old-prefs new-prefs]])))
+
+(defn public-group-with-name
+  [group-name]
+  (when-let [group (-> (d/pull (d/db *conn*) group-pull-pattern
+                               [:group/name group-name])
+                       db->group)]
+    (when (:public? (group-settings (group :id)))
+      group)))
 

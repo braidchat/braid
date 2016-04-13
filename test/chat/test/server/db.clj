@@ -157,9 +157,10 @@
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar "http://www.foobar.com/1.jpg"})
+        thread-1-id (db/uuid)
         message-1-data {:id (db/uuid)
                         :user-id (user-1 :id)
-                        :thread-id (db/uuid)
+                        :thread-id thread-1-id
                         :created-at (java.util.Date.)
                         :content "Hello?"}
         message-1 (db/create-message! message-1-data)
@@ -171,7 +172,29 @@
         message-2 (db/create-message! message-2-data)
         messages (fetch-messages)]
     (testing "fetch-messages returns all messages"
-      (is (= (set messages) #{message-1 message-2})))))
+      (is (= (set messages) #{message-1 message-2})))
+    (testing "Can retrieve threads"
+      (is (= (db/get-thread thread-1-id)
+             {:id thread-1-id
+              :messages (map #(dissoc % :thread-id)
+                             [message-1-data message-2-data])
+              :tag-ids () :mentioned-ids ()}))
+      (let [thread-2-id (db/uuid)
+            message-3-data {:id (db/uuid)
+                            :user-id (user-1 :id)
+                            :thread-id thread-2-id
+                            :created-at (java.util.Date.)
+                            :content "Blurrp"}
+            message-3 (db/create-message! message-3-data)]
+        (is (= (db/get-threads [thread-1-id thread-2-id])
+               [{:id thread-1-id
+                 :messages (map #(dissoc % :thread-id)
+                                [message-1-data message-2-data])
+                 :tag-ids () :mentioned-ids ()}
+                {:id thread-2-id
+                 :messages (map #(dissoc % :thread-id)
+                                [message-3-data])
+                 :tag-ids () :mentioned-ids ()}]))))))
 
 (deftest user-hide-thread
   (let [user-1 (db/create-user! {:id (db/uuid)
@@ -242,7 +265,7 @@
                          :mentioned-tag-ids [(tag-1 :id)] })
     (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
                          :user-id (user-2 :id) :created-at (java.util.Date.)
-                         :mentioned-tag-ids [(tag-2 :id)] })
+                         :mentioned-tag-ids [(tag-2 :id)]})
 
 
     (testing "user 1 can see thread 1 because they created it"

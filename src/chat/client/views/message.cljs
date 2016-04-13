@@ -4,23 +4,39 @@
             [clojure.string :as string]
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [id->color]]
+            [chat.client.reagent-adapter :refer [reagent->react subscribe]]
+            [braid.ui.views.embed :refer [embed-view]]
             [chat.client.emoji :as emoji]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.helpers :as helpers :refer [starts-with? ends-with?]]
             [chat.client.views.pills :refer [tag-view user-view]]
             [chat.client.routes :as routes]))
 
+(def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
+
+(defn abridged-url
+  "Given a full url, returns 'domain.com/*.png' where"
+  [url]
+  (let [char-limit 30
+        [domain path] (rest (re-find #"http(?:s)?://([^/]+)(.*)" url))]
+    (let [url-and-path (str domain path)]
+      (if (> char-limit (count url-and-path))
+        url-and-path
+        (let [gap "/..."
+              path-char-limit (- char-limit (count domain) (count gap))
+              abridged-path (apply str (take-last path-char-limit path))]
+          (str domain gap abridged-path))))))
+
 (def replacements
   {:urls
-   {:pattern #"(http(?:s)?://\S+(?:\w|\d|/))"
+   {:pattern url-re
     :replace (fn [match]
-               (dom/a #js {:href match :target "_blank" :tabIndex -1}
-                 ; TODO: could do something smarter with checking MIME types or
-                 ; something, but trying to sniff every link seems like it
-                 ; could get kind of hairy...
-                 (if (some (partial ends-with? match) [".png" ".jpg" ".jpeg" ".gif"])
-                   (dom/img #js {:src match :alt match :className "embedded-image"})
-                   match)))}
+               (dom/a #js {:className "external"
+                           :href match
+                           :title match
+                           :target "_blank"
+                           :tabIndex -1}
+                 (abridged-url match)))}
    :users
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
@@ -146,6 +162,13 @@
                              :result-fn (partial dom/strong #js {:className "starred"})}))
 
 
+(def EmbedView
+  (reagent->react embed-view))
+
+(defn extract-urls
+  "Given some text, returns a sequence of URLs contained in the text"
+  [text]
+  (map first (re-seq url-re text)))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
@@ -202,5 +225,11 @@
               (sender :nickname))
             (dom/span #js {:className "time"
                            :title (message :created-at)} (helpers/format-date (message :created-at))))
+
           (apply dom/div #js {:className "content"}
-            (format-message (message :content))))))))
+            (format-message (message :content)))
+
+          (when-let [url (first (extract-urls (message :content)))]
+            (EmbedView. #js {:url url})))))))
+
+

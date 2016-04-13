@@ -89,7 +89,7 @@
      :padding [[pad (m/* 2 pad) pad pad]]
      :box-sizing "border-box"}
 
-    [:tags
+    [:.tags
 
      [:.add
       mixins/pill-box]
@@ -182,8 +182,8 @@
 
    [:.uploading-indicator
     (mixins/fontawesome \uf110)
+    mixins/spin
     {:font-size (em 1.5)
-     :text-align "center"
-     :animation [["anim-spin" "1s" "infinite" "steps(8)"]]}]])
+     :text-align "center"}]])
 
 

@@ -127,10 +127,20 @@
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
     [:chat/search query]
-    2500
+    15000
     (fn [reply]
-      (when-let [results (:threads reply)]
-          (store/set-search-results! results)))))
+      (when (seq (:thread-ids reply))
+        (store/set-search-results! reply)))))
+
+(defmethod dispatch! :load-threads [_ {:keys [thread-ids on-complete]}]
+  (sync/chsk-send!
+    [:chat/load-threads thread-ids]
+    5000
+    (fn [reply]
+      (when-let [threads (:threads reply)]
+        (store/add-threads! threads))
+      (when on-complete
+        (on-complete)))))
 
 (defmethod dispatch! :threads-for-tag [_ {:keys [tag-id offset limit on-complete]
                                           :or {offset 0 limit 25}}]
@@ -163,15 +173,32 @@
   (sync/chsk-send! [:chat/invitation-decline invite])
   (store/remove-invite! invite))
 
+(defmethod dispatch! :check-auth! [_ _]
+  (edn-xhr {:uri "/check"
+            :method :get
+            :on-complete (fn [_]
+                           (dispatch! :start-socket!))
+            :on-error (fn [_]
+                        (dispatch! :set-login-state! :login-form))}))
+
+(defmethod dispatch! :set-login-state! [_ state]
+  (store/set-login-state! state))
+
+(defmethod dispatch! :start-socket! [_ _]
+  (dispatch! :set-login-state! :ws-connect)
+  (sync/make-socket!)
+  (sync/start-router!))
+
 (defmethod dispatch! :auth [_ data]
   (edn-xhr {:uri "/auth"
             :method :post
             :params {:email (data :email)
-                     :password (data :password)
-                     :csrf-token (:csrf-token @sync/chsk-state)}
-            :on-complete (fn [data]
-                           (sync/reconnect!))
-            :on-error (fn [data]
+                     :password (data :password)}
+            :on-complete (fn [_]
+                           (when-let [cb (data :on-complete)]
+                             (cb))
+                           (dispatch! :start-socket!))
+            :on-error (fn [_]
                         (when-let [cb (data :on-error)]
                           (cb)))}))
 
@@ -185,6 +212,7 @@
             :method :post
             :params {:csrf-token (:csrf-token @sync/chsk-state)}
             :on-complete (fn [data]
+                           (dispatch! :set-login-state! :login-form)
                            (store/clear-session!))}))
 
 (defmethod dispatch! :clear-inbox [_ _]
@@ -204,6 +232,7 @@
 
 (defmethod sync/event-handler :session/init-data
   [[_ data]]
+  (dispatch! :set-login-state! :app)
   (check-client-version (data :version-checksum))
   (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
   (store/add-users! (data :users))

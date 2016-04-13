@@ -17,6 +17,7 @@
                      api-public-routes
                      resource-routes
                      extension-routes]]
+            [chat.server.conf :as conf]
             [environ.core :refer [env]]
             ; just requiring to register multimethods
             chat.server.extensions.asana
@@ -50,6 +51,10 @@
 
 (def static-site-defaults
   {:static {:resources "public"}
+   :params {:urlencoded true
+            :multipart  true
+            :nested     true
+            :keywordize true}
    :responses {:not-modified-responses true
                :absolute-redirects     true
                :content-types          true
@@ -67,8 +72,14 @@
         desktop-client-routes)
       (wrap-defaults static-site-defaults)))
 
+; XXX: Review use of CSRF
 (def api-server-app
   (-> (routes
+        (-> api-public-routes
+            (wrap-defaults (-> site-defaults
+                               (assoc-in [:security :anti-forgery] false)
+                               assoc-cookie-conf)))
+
         (-> extension-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
@@ -79,9 +90,6 @@
                                assoc-cookie-conf
       ;                         assoc-csrf-conf
                                )))
-        (-> api-public-routes
-            (wrap-defaults (-> site-defaults
-                               assoc-cookie-conf)))
         (-> sync-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
@@ -119,7 +127,7 @@
     (start-server! :desktop desktop-port)
     (println "starting mobile client on port " mobile-port)
     (start-server! :mobile mobile-port)
-    (reset! routes/api-port api-port)
+    (reset! conf/api-port api-port)
     (println "starting api on port " api-port)
     (start-server! :api api-port)))
 

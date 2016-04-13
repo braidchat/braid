@@ -140,16 +140,6 @@
     [:.new-tag.error
      {:border-color "red"}]]])
 
-(def login
-  [:.login
-   mixins/floating-box
-
-   [:input
-    {:width "100%"
-     :margin [[0 0 (em 1)]]
-     :padding (em 0.25)
-     :box-sizing "border-box"}]])
-
 (def tag
   [:.tag
    mixins/pill-box])
@@ -160,22 +150,8 @@
 
 (def button
   [:.button
-   mixins/pill-box
-   {:color vars/grey-text
-    :border [[(px 1 "solid" vars/grey-text)]]
-    :background "none"
-    :margin-left (em 1)}
-
-   [:&:hover
-    {:color "#eee"
-     :background vars/grey-text
-     :cursor "pointer"}]
-
-   [:&:active
-    {:color "#eee"
-     :background "#666"
-     :border-color "#666"
-     :cursor "pointer"}]])
+   mixins/pill-button
+   {:margin-left (em 1)}])
 
 (defn threads [pad]
   [:.threads
@@ -189,3 +165,22 @@
 
     :align-items "flex-end"
     :overflow-x "scroll" }])
+
+(def status
+  [".app > .status"
+   mixins/flex
+   {:position "absolute"
+    :top 0
+    :bottom 0
+    :right 0
+    :left 0
+    :background vars/dark-bg-color
+    :color "white"
+    :justify-content "center"
+    :align-items "center"
+    :font-size "2em"}
+   [:&:before
+    (mixins/fontawesome \uf110)
+    mixins/spin
+    {:display "inline-block"
+     :margin-right (em 0.5)}]])
