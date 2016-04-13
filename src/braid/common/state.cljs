@@ -16,6 +16,10 @@
   [state _]
   (reaction (vals (:groups @state))))
 
+(defn get-users
+  [state _]
+  (reaction (@state :users)))
+
 (defn- thread-unseen?
   [thread]
   (> (->> (thread :messages)
@@ -66,6 +70,10 @@
 (defn get-page
   [state _]
   (reaction (@state :page)))
+
+(defn get-threads
+  [state _]
+  (reaction (@state :threads)))
 
 (defn get-page-id
   [state _]
@@ -138,3 +146,22 @@
   [state [_ tag-id]]
   (reaction (get-in @state [:tags tag-id :group-id])))
 
+(defn get-threads-for-group
+  [state [_ group-id]]
+  (let [group-for-tag (fn [tag-id]
+                        (get-in @state [:tags tag-id :group-id]))]
+    (reaction  (->> (@state :threads)
+                    vals
+                    (filter (fn [thread]
+                      (or (empty? (thread :tag-ids))
+                          (contains?
+                            (into #{} (map group-for-tag) (thread :tag-ids))
+                            group-id))))))))
+
+(defn get-nickname
+  [state [_ user-id]]
+  (reaction (get-in @state [:users user-id :nickname])))
+
+(defn get-invitations
+  [state _]
+  (reaction (get-in @state [:invitations])))

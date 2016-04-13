@@ -15,7 +15,7 @@
             user (om/observe owner (user-cursor user-id))]
         [:div.page.channel
           [:div.title
-            [(user-view user subscribe)]]
+            [user-view user subscribe]]
           [:div.content
             [:div.description
               [:img.avatar {:src (user :avatar)}]

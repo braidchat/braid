@@ -7,8 +7,8 @@
             [chat.client.views.helpers :refer [id->color]])
   (:import [goog.events KeyCodes]))
 
-(defn group-explore-view
-  [data]
+(defn group-explore-view-test
+  []
   (fn []
     [:div.page.group-explore
       [:div.title "Group Explore"]
@@ -19,7 +19,7 @@
         [:div.new-group
           [:label "New Group"
             [:input {:placeholder "Group Name"
-                     :onKeyDown
+                     :on-keydown
                      (fn [e]
                         (when (= KeyCodes.ENTER e.keyCode)
                           (.preventDefault e)

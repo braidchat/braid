@@ -82,6 +82,22 @@
   :open-thread-ids
   state/get-open-thread-ids)
 
+(register-sub
+  :get-threads-for-group
+  state/get-threads-for-group)
+
+(register-sub
+  :nickname
+  state/get-nickname)
+
+(register-sub
+  :invitations
+  state/get-invitations)
+
+(register-sub
+  :users
+  state/get-users)
+
 
 (defn subscribe [v]
   (let [key-v (first v)

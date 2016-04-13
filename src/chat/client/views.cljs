@@ -7,8 +7,11 @@
             [chat.client.views.style :refer [style-view]]
             [braid.ui.views.sidebar :refer [sidebar-view]]
             [braid.ui.views.header :refer [header-view]]
+            [braid.ui.views.pages.inbox :refer [inbox-page-view-test]]
+            [braid.ui.views.pages.recent :refer [recent-page-view-test]]
             [braid.ui.views.pages.channel :refer [channel-page-view-test]]
             [braid.ui.views.pages.help :refer [help-page-view-test]]
+            [braid.ui.views.pages.group-explore :refer [group-explore-view-test]]
             [braid.ui.views.pages.me :refer [me-page-view-test]]
             [chat.client.views.pages.search :refer [search-page-view]]
             [chat.client.views.pages.inbox :refer [inbox-page-view]]
@@ -68,11 +71,23 @@
 (def HeaderView
   (reagent->react header-view))
 
+(def ChannelPageView
+  (reagent->react channel-page-view-test))
+
 (def HelpPageView
   (reagent->react help-page-view-test))
 
 (def MePageView
   (reagent->react me-page-view-test))
+
+(def GroupExplorePageView
+  (reagent->react group-explore-view-test))
+
+(def InboxPageView
+  (reagent->react inbox-page-view-test))
+
+(def RecentPageView
+  (reagent->react recent-page-view-test))
 
 (defn main-view [data owner]
   (reify
@@ -91,9 +106,9 @@
         (HeaderView. #js {:subscribe subscribe})
 
         (case (get-in data [:page :type])
-          :inbox (om/build inbox-page-view data)
-          :recent (om/build recent-page-view data)
-          :help (HelpPageView. #js {:data data})
+          :inbox (InboxPageView. #js {:subscribe subscribe})
+          :recent (RecentPageView. #js {:subscribe subscribe})
+          :help (HelpPageView.)
           :users (om/build users-page-view data)
           :search (om/build search-page-view data)
           :channel (ChannelPageView. #js {:subscribe subscribe
@@ -101,7 +116,7 @@
           :user (om/build user-page-view data)
           :channels (om/build channels-page-view data)
           :me (MePageView. #js {:data data})
-          :group-explore (om/build group-explore-view data)
+          :group-explore (GroupExplorePageView.)
           :extensions (om/build extensions-page-view data))))))
 
 (def StyleView

@@ -7,7 +7,8 @@
             [chat.client.views.threads :refer [thread-view new-thread-view]]
             [chat.client.views.pills :refer [tag-view subscribe-button]]))
 
-(defn channel-page-view [data]
+(defn channel-page-view-test
+  [data subscribe]
   (let [loading? (r/atom false)
         start-loading! (fn [] (swap! loading? true))
         stop-loading! (fn [] (swap! loading? false))]
@@ -16,7 +17,8 @@
        (fn []
          (dispatch! :threads-for-tag {:tag-id (get-in data [:page :id])}))
        :reagent-render
-       (let [page (data :page)
+       (fn []
+         (let [page (data :page)
             tag-id (page :id)
             tag (get-in data [:tags tag-id])
             user-id (get-in data [:session :user-id])
@@ -28,12 +30,12 @@
             known-threads (->> (data :threads)
                                vals
                                (filter (fn [t] (contains? (set (t :tag-ids)) tag-id))))
-            inbox-thread-ids (get-in @store/app-state [:user :open-thread-ids])
+            inbox-thread-ids (subscribe [:open-thread-ids])
             threads (->> (page :thread-ids)
                          (select-keys (data :threads))
                          vals
                          (into (set known-threads))
-                         (map (fn [t] (assoc t :open? (contains? inbox-thread-ids (t :id)))))
+                         (map (fn [t] (assoc t :open? (contains? @inbox-thread-ids (t :id)))))
                          ; sort-by last reply, newest first
                          (sort-by
                            (comp (partial apply max)
@@ -84,6 +86,6 @@
                               (set! (.-scrollLeft this-elt)
                                     (- (.-scrollLeft this-elt) (.-deltaY e))))))}
               [(new-thread-view {:tag-ids [tag-id]})]
-              (map (om/build thread-view t {:key :id})
-                   threads)]])})))
+              (for [thread threads]
+                (om/build thread-view thread {:key :id}))]]))})))
 

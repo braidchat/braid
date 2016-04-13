@@ -1,31 +1,23 @@
 (ns braid.ui.views.pages.recent
-  (:require [om.core :as om]
-            [om.dom :as dom]
-            [chat.client.store :as store]
-            [chat.client.views.threads :refer [thread-view new-thread-view]]))
+  (:require [braid.ui.views.thread :refer [thread-view]]))
 
-(defn recent-page-view [data subscribe]
-  (let [group-id (data :open-group-id)
-        threads (data :threads)]
+(defn recent-page-view-test
+  [{:keys [subscribe]}]
+  (let [group-id (subscribe [:open-group-id])
+        threads (subscribe [:get-threads-for-group @group-id])
+        user-id (subscribe [:user-id])]
     (fn []
-      [:div.page.recent
-        [:div.title "Recent"]
-        [:div.threads
-          (for [thread threads]
-            (om/build thread-view thread {:key :id}))
-               (let [user-id (subscribe [:user-id])
-                     group-for-tag (subscribe [:group-for-tag])]
-                 ; sort by last message sent by logged-in user, most recent first
-                 (->> threads
-                      vals
-                      (filter (fn [thread]
-                                (or (empty? (thread :tag-ids))
-                                    (contains?
-                                      (into #{} (map group-for-tag) (thread :tag-ids))
-                                      group-id))))
-                      (sort-by
-                        (comp (partial apply max)
-                              (partial map :created-at)
-                              (partial filter (fn [m] (= (m :user-id) @user-id)))
-                              :messages))
-                      reverse))]])))
+      (let [sorted-threads (->> @threads
+                            ; sort by last message sent by logged-in user, most recent first
+                            (sort-by
+                              (comp (partial apply max)
+                                    (partial map :created-at)
+                                    (partial filter (fn [m] (= (m :user-id) @user-id)))
+                                    :messages))
+                             reverse)]
+        [:div.page.recent
+          [:div.title "Recent"]
+          [:div.threads
+            (for [thread sorted-threads]
+              ^{:key (thread :id)}
+              [thread-view thread])]]))))

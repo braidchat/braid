@@ -9,14 +9,15 @@
   (:import [goog.events KeyCodes]))
 
 (defn nickname-view
-  [data]
+  [{:keys [subscribe]}]
   (let [format-error (r/atom false)
         error (r/atom nil)
         set-format-error! (fn [error?] (swap! format-error error?))
-        set-error! (fn [err] (swap! error err))]
+        set-error! (fn [err] (swap! error err))
+        nickname (subscribe [:nickname])]
     (fn []
       [:div.nickname
-        (when-let [current (data :nickname)]
+        (when-let [current @nickname]
           [:div.current-name current])
         (when-let [msg @error]
           [:span.error msg])
@@ -62,17 +63,19 @@
            )]]))
 
 (defn me-page-view-test
-  [data]
-  (fn []
-    [:div.page.me
-      [:div.title "Me!"]
-      [:div.content
-        [:h2 "Log Out"]
-        [:button.logout {:on-click
-                          (fn [_]
-                            (dispatch! :logout nil))} "Log Out"]
-        [:h2 "Update Nickname"]
-        [nickname-view data]
-        [:h2 "Received Invites"]
-        (when (seq (data :invitations))
-          [invitations-view data])]]))
+  [{:keys [subscribe]}]
+  (let [invitations (subscribe [:invitations])]
+    (fn []
+      [:div.page.me
+        [:div.title "Me!"]
+        [:div.content
+          [:h2 "Log Out"]
+          [:button.logout {:on-click
+                            (fn [_]
+                              (dispatch! :logout nil))} "Log Out"]
+          [:h2 "Update Nickname"]
+          [nickname-view subscribe]
+          [:h2 "Received Invites"]
+          (when (seq @invitations)
+            ;TODO: render correctly
+            [invitations-view @invitations])]])))

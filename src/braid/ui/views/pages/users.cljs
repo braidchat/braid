@@ -32,19 +32,21 @@
         [user-view users subscribe])]))
 
 (defn users-page-view
-  [data subscribe]
-  (fn []
-    [:div.page.users
-      [:div.title "Users"]
-      [:div.content
-        (let [users-by-status (->> (group-users data)
-                                   (group-by :status))]
-          [:div.description
-            [:h2 "Online"]
-            [user-list-view (users-by-status :online) subscribe]
+  [{:keys [subscribe]}]
+  (let [users (subscribe [:users])
+        open-group-id (subscribe [:open-group-id])]
+    (fn []
+      [:div.page.users
+        [:div.title "Users"]
+        [:div.content
+          (let [users-by-status (->> (group-users @users)
+                                     (group-by :status))]
+            [:div.description
+              [:h2 "Online"]
+              [user-list-view (users-by-status :online) subscribe]
 
-            [:h2 "Offline"]
-            [user-list-view (users-by-status :offline) subscribe]])
+              [:h2 "Offline"]
+              [user-list-view (users-by-status :offline) subscribe]])
 
-        (dom/h2 nil "Invite")
-        (om/build group-invite-view (data :open-group-id))]]))
+          [:h2 "Invite"]
+          (om/build group-invite-view @open-group-id)]])))
