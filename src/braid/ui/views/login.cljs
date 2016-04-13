@@ -14,31 +14,44 @@
                         (swap! state assoc :password password))]
 
     (fn [_]
-      [:form.login {:on-submit (fn [e]
-                                 (.preventDefault e)
-                                 (dispatch! :auth
-                                            {:email (@state :email)
-                                             :password (@state :password)
-                                             :on-error (fn []
-                                                         (set-error!))}))}
+      [:div.login
+       [:form {:on-submit (fn [e]
+                            (.preventDefault e)
+                            (dispatch! :auth
+                                       {:email (@state :email)
+                                        :password (@state :password)
+                                        :on-error (fn []
+                                                    (set-error!))}))}
 
-       (when (@state :error)
-         [:div.error
-          [:p "Bad credentials, please try again."]
-          [:p [:a {:href "#"
-                   :on-click (fn [e]
-                               (.preventDefault e)
-                               (dispatch! :request-reset (@state :email)))}
-               "Request a password reset to be sent to " (@state :email)]]])
+        [:fieldset
+         [:label "Email"
+          [:input {:placeholder "you@example.com"
+                   :type "text"
+                   :value (@state :email)
+                   :on-change (fn [e] (set-email! (.. e -target -value)))}] ]
 
-       [:input {:placeholder "Email"
-                :type "text"
-                :value (@state :email)
-                :on-change (fn [e] (set-email! (.. e -target -value)))}]
+         [:label "Password"
+          [:input {:placeholder "••••••••"
+                   :type "password"
+                   :value (@state :password)
+                   :on-change (fn [e] (set-password! (.. e -target -value)))}] ]
 
-       [:input {:placeholder "Password"
-                :type "password"
-                :value (@state :password)
-                :on-change (fn [e] (set-password! (.. e -target -value)))}]
+         [:button.submit "Let's do this!"]
 
-       [:button "Let's do this!"]])))
+         (when (@state :error)
+           [:div.error
+            [:div.message
+             (cond
+               (not (seq (@state :email)))
+               "Please enter an email."
+               (not (seq (@state :password)))
+               "Please enter a password."
+               :else
+               "Incorrect email or password. Please try again.")]
+
+            (when (seq (@state :email))
+              [:button.reset-password
+               {:on-click (fn [e]
+                            (.preventDefault e)
+                            (dispatch! :request-reset (@state :email)))}
+               "Send me a password reset email"])])]]])))
