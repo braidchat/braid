@@ -44,7 +44,7 @@
         (dom/div #js {:className "page channel"}
           (dom/div #js {:className "title"}
             (om/build tag-view tag)
-            (subscribe-button tag))
+            (om/build subscribe-button tag))
 
           (dom/div #js {:className "content"}
             (dom/div #js {:className "description"}
