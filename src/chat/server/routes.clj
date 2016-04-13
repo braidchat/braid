@@ -75,6 +75,13 @@
     (get-html "mobile")))
 
 (defroutes api-public-routes
+  ; check if already logged in
+  (GET "/check" req
+    (if-let [user-id (get-in req [:session :user-id])]
+      (if-let [user (db/with-conn (db/user-by-id user-id))]
+        {:status 200 :body ""}
+        {:status 401 :body ""})
+      {:status 401 :body ""}))
 
   ; log in
   (POST "/auth" req

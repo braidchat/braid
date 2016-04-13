@@ -4,14 +4,12 @@
             [braid.ui.styles.mixins :as mixins]
             [braid.ui.styles.vars :as vars]))
 
-(def color "#3A4767")
-
 (def mixin-button-white
   [:&
    {:background "white"
     :border-radius (em 0.5)
     :border "none"
-    :color color
+    :color vars/dark-bg-color
     :padding [[(em 1) (em 1.5)]]
     :outline "none"
     :cursor "pointer"}
@@ -28,7 +26,7 @@
    {:justify-content "center"
     :align-items "center"
     :height "100vh"
-    :background color
+    :background vars/dark-bg-color
     :color "white"}
 
    [:&:before
@@ -38,7 +36,7 @@
      :background-repeat "no-repeat"
      :height (rem 17)
      :width (rem 17)
-     :background-position "top right"
+     :background-position "center right"
      :margin-right (rem 3)}]
 
    [:form

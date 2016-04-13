@@ -4,7 +4,8 @@
 
 (defonce app-state
   (r/atom
-    {:open-group-id nil
+    {:login-state :auth-check ; :ws-connect :login-form :app
+     :open-group-id nil
      :threads {}
      :pagination-remaining 0
      :users {}
@@ -27,6 +28,12 @@
 
 (defn- transact! [ks f]
   (swap! app-state update-in ks f))
+
+; login state
+
+(defn set-login-state!
+  [state]
+  (transact! [:login-state] (constantly state)))
 
 ; window visibility & notifications
 
