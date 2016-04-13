@@ -52,3 +52,7 @@
 (defn fontawesome [unicode]
   {:font-family "fontawesome"
    :content (str "\"" unicode "\"")})
+
+(def spin
+  {:animation [["anim-spin" "1s" "infinite" "steps(8)"]]
+   :display "block"})

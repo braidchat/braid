@@ -179,7 +179,9 @@
             :params {:email (data :email)
                      :password (data :password)
                      :csrf-token (:csrf-token @sync/chsk-state)}
-            :on-complete (fn [data]
+            :on-complete (fn [_]
+                           (when-let [cb (data :on-complete)]
+                             (cb))
                            (sync/reconnect!))
             :on-error (fn [_]
                         (when-let [cb (data :on-error)]

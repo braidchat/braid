@@ -5,23 +5,40 @@
 (defn login-view []
   (let [state (r/atom {:email ""
                        :password ""
-                       :error false})
-        set-error! (fn []
-                     (swap! state assoc :error true))
+                       :error nil
+                       :loading? false})
+        set-error! (fn [message]
+                     (swap! state assoc :error message))
         set-email! (fn [email]
                      (swap! state assoc :email email))
         set-password! (fn [password]
-                        (swap! state assoc :password password))]
+                        (swap! state assoc :password password))
+        set-loading! (fn [bool]
+                       (swap! state assoc :loading? bool))]
 
     (fn [_]
       [:div.login
        [:form {:on-submit (fn [e]
                             (.preventDefault e)
-                            (dispatch! :auth
-                                       {:email (@state :email)
-                                        :password (@state :password)
-                                        :on-error (fn []
-                                                    (set-error!))}))}
+                            (set-error! nil)
+                            (cond
+                              (not (seq (@state :email)))
+                              (set-error! "Please enter an email.")
+
+                              (not (seq (@state :password)))
+                              (set-error! "Please enter a password.")
+
+                              :else
+                              (do
+                                (set-loading! true)
+                                (dispatch! :auth
+                                           {:email (@state :email)
+                                            :password (@state :password)
+                                            :on-complete (fn []
+                                                           (set-loading! false))
+                                            :on-error (fn []
+                                                        (set-loading! false)
+                                                        (set-error! "Incorrect email or password. Please try again."))}))))}
 
         [:fieldset
          [:label "Email"
@@ -38,16 +55,12 @@
 
          [:button.submit "Let's do this!"]
 
+         (when (@state :loading?)
+           [:div.spinner])
+
          (when (@state :error)
            [:div.error
-            [:div.message
-             (cond
-               (not (seq (@state :email)))
-               "Please enter an email."
-               (not (seq (@state :password)))
-               "Please enter a password."
-               :else
-               "Incorrect email or password. Please try again.")]
+            [:div.message (@state :error)]
 
             (when (seq (@state :email))
               [:button.reset-password

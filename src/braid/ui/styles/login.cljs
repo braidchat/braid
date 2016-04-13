@@ -73,6 +73,13 @@
       (mixins/fontawesome \uf138)
       {:margin-left (em 0.5)}]]
 
+    [:.spinner
+     {:display "inline-block"}
+     [:&:before
+      (mixins/fontawesome \uf110)
+      mixins/spin
+      {:font-size (em 2)}]]
+
     [:.error
      {:display "inline-block"
       :margin-top (em 1)
