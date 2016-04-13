@@ -80,8 +80,8 @@
     (if-let [user-id (get-in req [:session :user-id])]
       (if-let [user (db/with-conn (db/user-id-exists? user-id))]
         {:status 200 :body ""}
-        {:status 401 :body ""})
-      {:status 401 :body ""}))
+        {:status 401 :body "" :session nil})
+      {:status 401 :body "" :session nil}))
 
   ; log in
   (POST "/auth" req
