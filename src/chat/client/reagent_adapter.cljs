@@ -31,6 +31,10 @@
   state/get-page)
 
 (register-sub
+  :page-id
+  state/get-page-id)
+
+(register-sub
   :open-threads
   state/get-open-threads)
 
@@ -41,6 +45,10 @@
 (register-sub
   :user-id
   state/get-user-id)
+
+(register-sub
+  :tag
+  state/get-tag)
 
 (register-sub
   :tags
@@ -90,9 +98,43 @@
   :login-state
   state/get-login-state)
 
+(register-sub
+  :group-for-tag
+  state/get-group-for-tag)
+
+(register-sub
+  :open-thread-ids
+  state/get-open-thread-ids)
+
+(register-sub
+  :get-threads-for-group
+  state/get-threads-for-group)
+
+(register-sub
+  :nickname
+  state/get-nickname)
+
+(register-sub
+  :invitations
+  state/get-invitations)
+
+(register-sub
+  :users
+  state/get-users)
+
+(register-sub
+  :user
+  state/get-user)
+
+(register-sub
+  :threads
+  state/get-threads)
+
+(register-sub
+  :pagination-remaining
+  state/get-pagination-remaining)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]
     (handler-fn store/app-state v)))
-
-
