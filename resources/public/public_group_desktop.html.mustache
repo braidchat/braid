@@ -5,11 +5,21 @@
   </head>
   <body>
     <p>Join the public group {{group-name}}</p>
-    <form action="//{{api_domain}}/public-register" method="POST">
-      <input type="hidden" name="group-id" value="{{group-id}}">
-      <input type="email" name="email" placeholder="email address">
-      <input type="submit" value="Register">
-    </form>
-    <p>If you already have an account <a href="/">Log in</a> first, then come back here</p>
+    <div id="register">
+      <p>If you aren't already a Braid user, sign up with your email here</p>
+      <form action="//{{api_domain}}/public-register" method="POST">
+        <input type="hidden" name="group-id" value="{{group-id}}">
+        <input type="email" name="email" placeholder="email address">
+        <input type="submit" value="Register">
+      </form>
+      <p>If you already have an account <a href="/">Log in</a> first, then come back here</p>
+    </div>
+    <div id="join">
+      <p id="join-text">If you're already logged in, just click here to join this group</p>
+      <form action="//{{api_domain}}/public-join" method="POST">
+        <input type="hidden" name="group-id" value="{{group-id}}">
+        <input type="submit" value="Join">
+      </form>
+    </div>
   </body>
 </html>

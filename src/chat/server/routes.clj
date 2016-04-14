@@ -32,15 +32,12 @@
 
 (defroutes desktop-client-routes
   ; public group page
-  (GET "/group/:group-name" [group-name]
+  (GET "/group/:group-name" [group-name :as req]
     (if-let [group (db/with-conn (db/public-group-with-name group-name))]
-      {:status 200
-       :headers {"Content-Type" "text/html"}
-       :body
-       (clostache/render-resource "public/public_group_desktop.html"
-                                  {:group-name (group :name)
-                                   :group-id (group :id)
-                                   :api_domain (or (:api-domain env) (str "localhost:" @api-port))})}
+      (clostache/render-resource "public/public_group_desktop.html.mustache"
+                                 {:group-name (group :name)
+                                  :group-id (group :id)
+                                  :api_domain (or (:api-domain env) (str "localhost:" @api-port))})
       {:status 403
        :headers {"Content-Type" "text/plain"}
        :body "No such public group"}))
@@ -154,27 +151,56 @@
             (assoc bad-resp :body "No such group or the group is private")
             (if (string/blank? email)
               (assoc bad-resp :body "Invalid email")
-              (let [id (db/uuid)
-                    avatar (identicons/id->identicon-data-url id)
-                    ; XXX: copied from chat.shared.util/nickname-rd
-                    disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
-                    nick (-> (first (string/split email #"@"))
-                             (string/replace disallowed-chars ""))
-                    u (db/with-conn (db/create-user! {:id id
-                                                      :email email
-                                                      :password (random-nonce 50)
-                                                      :avatar avatar
-                                                      :nickname nick}))
-                    referer (get-in req [:headers "referer"] (env :site-url))
-                    [proto _ referrer-domain] (string/split referer #"/")]
-                (db/with-conn
-                  (db/user-add-to-group! id group-id)
-                  (db/user-subscribe-to-group-tags! id group-id))
-                (sync/broadcast-user-change id [:chat/new-user u])
-                ; TODO: redirect to originating site
-                {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
-                 :session (assoc (req :session) :user-id id)
-                 :body ""})))))))
+              (if (db/with-conn (db/user-with-email email))
+                (assoc bad-resp
+                  :body (str "A user is already registered with that email.\n"
+                             "Log in and try joining"))
+                (let [id (db/uuid)
+                      avatar (identicons/id->identicon-data-url id)
+                      ; XXX: copied from chat.shared.util/nickname-rd
+                      disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
+                      nick (-> (first (string/split email #"@"))
+                               (string/replace disallowed-chars ""))
+                      u (db/with-conn (db/create-user! {:id id
+                                                        :email email
+                                                        :password (random-nonce 50)
+                                                        :avatar avatar
+                                                        :nickname nick}))
+                      referer (get-in req [:headers "referer"] (env :site-url))
+                      [proto _ referrer-domain] (string/split referer #"/")]
+                  (db/with-conn
+                    (db/user-add-to-group! id group-id)
+                    (db/user-subscribe-to-group-tags! id group-id))
+                  (sync/broadcast-user-change id [:chat/new-user u])
+                  {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
+                   :session (assoc (req :session) :user-id id)
+                   :body ""}))))))))
+
+  (POST "/public-join" [group-id :as req]
+    (let [bad-resp {:status 400 :headers {"Content-Type" "text/plain"}}]
+      (if-not group-id
+        (assoc bad-resp :body "Missing group id")
+        (let [group-id (java.util.UUID/fromString group-id)
+              group-settings (db/with-conn (db/group-settings group-id))]
+          (if-not (:public? group-settings)
+            (assoc bad-resp :body "No such group or the group is private")
+            (if-let [user-id (get-in req [:session :user-id])]
+              (do
+                (when-not (db/with-conn (db/user-in-group? user-id group-id))
+                  (db/with-conn
+                    (db/user-add-to-group! user-id group-id)
+                    (db/user-subscribe-to-group-tags! user-id group-id)
+                    (let [other-users (->> (db/get-users-in-group group-id)
+                                           (remove #(= user-id (:id %))))
+                          user (db/user-by-id user-id)]
+                      (doseq [uid other-users]
+                        (sync/broadcast-user-change uid [:chat/new-user user])))))
+                (let [referer (get-in req [:headers "referer"] (env :site-url))
+                      [proto _ referrer-domain] (string/split referer #"/")]
+                  {:status 302
+                   :headers {"Location" (str proto "//" referrer-domain "/" group-id "/inbox")}
+                   :body ""}))
+              (assoc bad-resp :body "Not logged in")))))))
 
   ; reset password
   (POST "/reset" [new-password token user-id :<< as-uuid now hmac :as req]
