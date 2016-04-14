@@ -38,7 +38,7 @@
         (dom/span #js {:className "count subscribers-count"}
           (tag :subscribers-count))
         (om/build tag-view tag)
-        (subscribe-button tag)))))
+        (om/build subscribe-button tag)))))
 
 (defn channels-page-view [data owner]
   (reify
@@ -64,7 +64,7 @@
                   (dom/h2 nil "Subscribed")
                   (apply dom/div #js {:className "tags"}
                     (map (fn [tag]
-                           (om/build tag-info-view tag))
+                           (om/build tag-info-view tag {:react-key (tag :id)}))
                          subscribed-tags)))))
 
               (let [recommended-tags
@@ -76,5 +76,5 @@
                     (dom/h2 nil "Recommended")
                     (apply dom/div #js {:className "tags"}
                       (map (fn [tag]
-                             (om/build tag-info-view tag))
+                             (om/build tag-info-view tag {:react-key (tag :id)}))
                            recommended-tags)))))))))))

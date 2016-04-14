@@ -9,6 +9,7 @@
             [braid.ui.styles.misc]
             [braid.ui.styles.animations]
             [braid.ui.styles.embed]
+            [braid.ui.styles.login]
             [braid.ui.styles.vars :as vars]))
 
 (def style-view
@@ -35,10 +36,11 @@
                  braid.ui.styles.misc/page
                  braid.ui.styles.misc/channels-page
                  braid.ui.styles.misc/me-page
-                 braid.ui.styles.misc/login
+                 braid.ui.styles.login/login
                  braid.ui.styles.misc/tag
                  braid.ui.styles.misc/user
                  braid.ui.styles.misc/button
+                 braid.ui.styles.misc/status
                  (braid.ui.styles.misc/threads vars/pad)
                  (braid.ui.styles.thread/thread vars/pad)
                  (braid.ui.styles.thread/head vars/pad)

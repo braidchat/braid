@@ -15,3 +15,4 @@
 
 (def grey-text "#888")
 
+(def dark-bg-color "#3A4767")

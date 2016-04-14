@@ -11,12 +11,13 @@
 
 (defn ^:export init []
   (.addEventListener js/document "visibilitychange"
-                (fn [e] (store/set-window-visibility! (= "visible" (.-visibilityState js/document)))))
-  (sync/make-socket!)
-  (sync/start-router!))
+                     (fn [e] (store/set-window-visibility! (= "visible" (.-visibilityState js/document)))))
 
-(highlighter/install-highlighter)
-(om/root views/app-view store/app-state
+  (highlighter/install-highlighter)
+
+  (om/root views/app-view store/app-state
            {:target (. js/document (getElementById "app"))})
 
-(router/init)
+  (router/init)
+
+  (dispatcher/dispatch! :check-auth!))

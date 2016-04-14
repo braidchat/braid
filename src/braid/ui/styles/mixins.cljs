@@ -5,14 +5,6 @@
 (def flex
   {:display #{:flex :-webkit-flex}})
 
-(def floating-box
-  {:background "white"
-   :box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
-   :width vars/card-width
-   :padding vars/pad
-   :box-sizing "border-box"
-   :position "relative"})
-
 (def pill-box
   [:&
    {:font-size (em 0.75)
@@ -60,3 +52,7 @@
 (defn fontawesome [unicode]
   {:font-family "fontawesome"
    :content (str "\"" unicode "\"")})
+
+(def spin
+  {:animation [["anim-spin" "1s" "infinite" "steps(8)"]]
+   :display "block"})
