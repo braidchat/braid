@@ -86,6 +86,10 @@
   :errors
   state/get-errors)
 
+(register-sub
+  :login-state
+  state/get-login-state)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]

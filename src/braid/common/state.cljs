@@ -147,3 +147,8 @@
 (defn get-errors
   [state _]
   (reaction (get-in state [:errors])))
+
+(defn get-login-state
+  [state _]
+  (println "state" state)
+  (reaction (get-in state [:login-state])))

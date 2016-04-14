@@ -59,7 +59,7 @@
                                "src/chat/shared"
                                "src/braid/ui"
                                "src/braid/common"]
-                :compiler {:main chat.client.core
+                :compiler {:main braid.desktop.core
                            :asset-path "/js/desktop/out"
                            :output-to "resources/public/js/desktop/out/braid.js"
                            :output-dir "resources/public/js/desktop/out"
@@ -70,7 +70,7 @@
                                "src/chat/shared"
                                "src/braid/ui"
                                "src/braid/common"]
-                :compiler {:main chat.client.core
+                :compiler {:main braid.desktop.core
                            :asset-path "/js/desktop/out"
                            :output-to "resources/public/js/desktop/out/braid.js"
                            :output-dir "resources/public/js/desktop/out_prod"
