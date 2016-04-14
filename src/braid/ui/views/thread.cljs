@@ -181,5 +181,10 @@
             [messages-view thread])
 
           (when-not new?
-            [new-message-view {}])]]))))
+            [new-message-view {:thread-id (thread :id)
+                               :placeholder (if new?
+                                              "Start a conversation..."
+                                              "Reply...")
+                               :mentioned-user-ids (thread :mentioned-ids)
+                               :mentioned-tag-ids (thread :tag-ids)}])]]))))
 

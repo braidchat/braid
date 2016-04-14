@@ -14,24 +14,18 @@
   (set! (.. el -style -height)
         (str (+ 5 (min 300 (.-scrollHeight el))) "px")))
 
-(defn textarea-view [config autocomplete-on-key-down autocomplete-on-change]
+(defn textarea-view [{:keys [text set-text! config on-key-down on-change]}]
   (let [connected? (subscribe [:connected?])
 
-        state (r/atom {:text ""})
-
-        clear-text! (fn [] (swap! state assoc :text ""))
+        clear-text! (fn [] (set-text! ""))
 
         send-message!
-        (fn []
-          (println "SEND_MESSAGE")
+        (fn [text]
           (store/set-new-thread! (config :thread-id))
           (dispatch! :new-message {:thread-id (config :thread-id)
-                                   :content (@state :text)
+                                   :content text
                                    :mentioned-user-ids (config :mentioned-user-ids)
-                                   :mentioned-tag-ids (config :mentioned-tag-ids)}))
-
-        set-text! (fn [text]
-                    (swap! state assoc :text (.slice text 0 5000)))]
+                                   :mentioned-tag-ids (config :mentioned-tag-ids)}))]
 
     (r/create-class
       {:component-did-mount
@@ -43,18 +37,18 @@
          (resize-textbox (r/dom-node c)))
 
        :reagent-render
-       (fn []
+       (fn [{:keys [text]}]
          [:textarea {:placeholder (config :placeholder)
-                     :value (@state :text)
+                     :value text
                      :disabled (not @connected?)
-                     :on-change (autocomplete-on-change
+                     :on-change (on-change
                                   {:on-change
                                    (fn [e]
                                      (set-text! (.. e -target -value))
                                      (resize-textbox (.. e -target)))})
-                     :on-key-down (autocomplete-on-key-down
+                     :on-key-down (on-key-down
                                     {:on-submit (fn [e]
-                                                  (send-message!)
+                                                  (send-message! text)
                                                   (clear-text!))})}])})))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
@@ -78,7 +72,8 @@
         kill-chan (chan)
         throttled-autocomplete-chan (debounce autocomplete-chan 100)
 
-        state (r/atom {:force-close? false
+        state (r/atom {:text ""
+                       :force-close? false
                        :highlighted-result-index 0
                        :results nil})
 
@@ -109,9 +104,10 @@
         (fn [results]
           (swap! state assoc :results results))
 
-        autocomplete-open? (fn [] (and
-                                    (not (@state :force-close?))
-                                    (not (nil? (@state :results)))))
+        autocomplete-open? (fn []
+                             (and
+                               (not (@state :force-close?))
+                               (not (nil? (@state :results)))))
 
         set-force-close! (fn []
                            (swap! state assoc :force-close? true))
@@ -119,18 +115,24 @@
         clear-force-close! (fn []
                              (swap! state assoc :force-close? false))
 
+        set-text! (fn [text]
+                    (swap! state assoc :text (.slice text 0 5000)))
+
+        update-text! (fn [f]
+                       (swap! state update-in [:text] f))
+
         choose-result!
         (fn [result]
           ((result :action) (config :thread-id))
-          ;TODO:
-          #_(set-state! :text ((result :message-transform) text)))
+          (set-force-close!)
+          (set-results! nil)
+          (update-text! (result :message-transform)))
 
         focus-textbox! (fn []
                          ;TODO
                          )
 
         handle-text-change! (fn [text]
-                              (println text)
                               (clear-force-close!)
                               (put! autocomplete-chan text))
 
@@ -146,10 +148,10 @@
                 (autocomplete-open?)
                 (do
                   (.preventDefault e)
-                  (if-let [result (nth (@state :results)
-                                       (@state :highlighted-result-index) nil)]
-                    (choose-result! result)
-                    (set-force-close!)))
+                  (when-let [result (nth (@state :results)
+                                         (@state :highlighted-result-index) nil)]
+                    (choose-result! result))
+                  (set-force-close!))
 
                 ; ENTER otherwise -> send message
                 (not e.shiftKey)
@@ -171,14 +173,13 @@
                 (.preventDefault e)
                 (highlight-next!))
 
-              nil
-              )))
+              nil)))
 
-autocomplete-on-change
-(fn [{:keys [on-change]}]
-  (fn [e]
-    (handle-text-change! (.. e -target -value))
-    (on-change e)))]
+        autocomplete-on-change
+        (fn [{:keys [on-change]}]
+          (fn [e]
+            (handle-text-change! (.. e -target -value))
+            (on-change e)))]
 
     (r/create-class
       {:component-will-mount
@@ -197,7 +198,11 @@ autocomplete-on-change
        :reagent-render
        (fn []
          [:div.autocomplete-wrapper
-          [textarea-view config autocomplete-on-key-down autocomplete-on-change]
+          [textarea-view {:text (@state :text)
+                          :config config
+                          :on-key-down autocomplete-on-key-down
+                          :on-change autocomplete-on-change
+                          :set-text! set-text!}]
           (when (autocomplete-open?)
             [autocomplete-results-view {:results
                                         (@state :results)
@@ -207,7 +212,7 @@ autocomplete-on-change
 
                                         :on-click
                                         (fn [result]
-                                          (fn []
+                                          (fn [e]
                                             (choose-result! result)
                                             (focus-textbox!)))}])])})))
 
