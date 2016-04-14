@@ -42,31 +42,12 @@
     (empty? (thread :mentioned-ids))))
 
 (defn messages-view [thread]
-  (let [scroll-to-bottom!
+  (let [messages (subscribe [:messages-for-thread (thread :id)])
+
+        scroll-to-bottom!
         (fn [component]
           (when-let [messages (r/dom-node component)]
-            (set! (.-scrollTop messages) (.-scrollHeight messages))))
-
-        sorted-messages
-        (->> (thread :messages)
-             (sort-by :created-at)
-             (cons nil)
-             (partition 2 1)
-             (map (fn [[prev-message message]]
-                    (assoc message
-                      :unseen?
-                      (unseen? message thread)
-                      :first-unseen?
-                      (and
-                        (unseen? message thread)
-                        (not (unseen? prev-message thread)))
-                      :collapse?
-                      (and
-                        (= (:user-id message)
-                           (:user-id prev-message))
-                        (> (* 2 60 1000) ; 2 minutes
-                           (- (:created-at message)
-                              (or (:created-at prev-message) 0))))))))]
+            (set! (.-scrollTop messages) (.-scrollHeight messages))))]
     (r/create-class
       {:component-did-mount scroll-to-bottom!
 
@@ -75,12 +56,32 @@
        :component-did-update scroll-to-bottom!
 
        :reagent-render
-       (fn []
+       (fn [thread]
          [:div.messages
-          (doall
-            (for [message sorted-messages]
-              ^{:key (message :id)}
-              [message-view message]))])})))
+          (let [sorted-messages
+                (->> @messages
+                     (sort-by :created-at)
+                     (cons nil)
+                     (partition 2 1)
+                     (map (fn [[prev-message message]]
+                            (assoc message
+                              :unseen?
+                              (unseen? message thread)
+                              :first-unseen?
+                              (and
+                                (unseen? message thread)
+                                (not (unseen? prev-message thread)))
+                              :collapse?
+                              (and
+                                (= (:user-id message)
+                                   (:user-id prev-message))
+                                (> (* 2 60 1000) ; 2 minutes
+                                   (- (:created-at message)
+                                      (or (:created-at prev-message) 0))))))))]
+            (doall
+              (for [message sorted-messages]
+                ^{:key (message :id)}
+                [message-view message])))])})))
 
 (defn thread-view [thread]
   (let [state (r/atom {:dragging? false
@@ -103,7 +104,7 @@
                                              {:content url
                                               :thread-id (thread :id)}))))))]
 
-    (fn []
+    (fn [thread]
       (let [{:keys [dragging? uploading? focused?]} @state
             new? (thread :new?)
             private? (thread-private? thread)
@@ -180,6 +181,10 @@
           (when-not new?
             [messages-view thread])
 
-          (when-not new?
-            [new-message-view {}])]]))))
+          [new-message-view {:thread-id (thread :id)
+                             :placeholder (if new?
+                                            "Start a conversation..."
+                                            "Reply...")
+                             :mentioned-user-ids (thread :mentioned-ids)
+                             :mentioned-tag-ids (thread :tag-ids)}]]]))))
 

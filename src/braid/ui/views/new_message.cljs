@@ -12,82 +12,68 @@
 (defn- resize-textbox [el]
   (set! (.. el -style -height) "auto")
   (set! (.. el -style -height)
-        (str (min 300 (.-scrollHeight el)) "px")))
+        (str (+ 5 (min 300 (.-scrollHeight el))) "px")))
 
-
-
-(defn textarea-view [config autocomplete-on-key-down]
+(defn textarea-view [{:keys [text set-text! config on-key-down on-change]}]
   (let [connected? (subscribe [:connected?])
 
-        state (r/atom {:text ""})
-
-        clear-text! (fn [] (swap! state assoc :text ""))
-
-        resize-textbox! (fn [] ) ; TODO
+        clear-text! (fn [] (set-text! ""))
 
         send-message!
-        (fn []
-          (println "SEND_MESSAGE")
+        (fn [text]
           (store/set-new-thread! (config :thread-id))
           (dispatch! :new-message {:thread-id (config :thread-id)
-                                   :content (@state :text)
+                                   :content text
                                    :mentioned-user-ids (config :mentioned-user-ids)
-                                   :mentioned-tag-ids (config :mentioned-tag-ids)}))
-
-        set-text! (fn [text]
-                    (swap! state assoc :text (.slice text 0 5000)))
-        ]
+                                   :mentioned-tag-ids (config :mentioned-tag-ids)}))]
 
     (r/create-class
       {:component-did-mount
        (fn [c]
-         (resize-textbox (r/dom-node c))
-         (.. js/window (addEventListener "resize" (fn [_]
-                                                    (resize-textbox c)))))
+         (resize-textbox (r/dom-node c)))
 
        :component-did-update
        (fn [c]
          (resize-textbox (r/dom-node c)))
 
        :reagent-render
-       (fn []
+       (fn [{:keys [text]}]
          [:textarea {:placeholder (config :placeholder)
-                     :value (@state :text)
+                     :value text
                      :disabled (not @connected?)
-                     :on-change (fn [e]
-                                  (set-text! (.. e -target -value))
-                                  (resize-textbox (.. e -target))
-                                  ;TODO tell autocomplete: :force-close? false
-                                  )
-                     :on-key-down (autocomplete-on-key-down
-                                    {:on-submit (fn []
-                                                  (send-message!)
+                     :on-change (on-change
+                                  {:on-change
+                                   (fn [e]
+                                     (set-text! (.. e -target -value))
+                                     (resize-textbox (.. e -target)))})
+                     :on-key-down (on-key-down
+                                    {:on-submit (fn [e]
+                                                  (send-message! text)
                                                   (clear-text!))})}])})))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
   [:div.autocomplete
    (if (seq results)
-     [:div
-      (map-indexed
-        (fn [i result]
-          [:div.result
-           {:class (when (= i highlighted-result-index) "highlight")
-            :style {:cursor "pointer"}
-            :on-click (on-click result)}
-           ((result :html))])
-        results)]
+     (doall
+       (map-indexed
+         (fn [i result]
+           [:div.result
+            {:key ((result :key))
+             :class (when (= i highlighted-result-index) "highlight")
+             :style {:cursor "pointer"}
+             :on-click (on-click result)}
+            ((result :html))])
+         results))
      [:div.result
       "No Results"])])
-
-
 
 (defn wrap-autocomplete [{:keys [config textarea-view results-view]}]
   (let [autocomplete-chan (chan)
         kill-chan (chan)
         throttled-autocomplete-chan (debounce autocomplete-chan 100)
 
-
-        state (r/atom {:force-close? false
+        state (r/atom {:text ""
+                       :force-close? false
                        :highlighted-result-index 0
                        :results nil})
 
@@ -118,22 +104,37 @@
         (fn [results]
           (swap! state assoc :results results))
 
-        autocomplete-open? (fn [] (and
-                                    (not (@state :force-close?))
-                                    (not (nil? (@state :results)))))
+        autocomplete-open? (fn []
+                             (and
+                               (not (@state :force-close?))
+                               (not (nil? (@state :results)))))
 
         set-force-close! (fn []
                            (swap! state assoc :force-close? true))
 
+        clear-force-close! (fn []
+                             (swap! state assoc :force-close? false))
+
+        set-text! (fn [text]
+                    (swap! state assoc :text (.slice text 0 5000)))
+
+        update-text! (fn [f]
+                       (swap! state update-in [:text] f))
+
         choose-result!
         (fn [result]
           ((result :action) (config :thread-id))
-          ;TODO:
-          #_(set-state! :text ((result :message-transform) text)))
+          (set-force-close!)
+          (set-results! nil)
+          (update-text! (result :message-transform)))
 
         focus-textbox! (fn []
                          ;TODO
                          )
+
+        handle-text-change! (fn [text]
+                              (clear-force-close!)
+                              (put! autocomplete-chan text))
 
         ; returns a function that can be used in a textarea's :on-key-down handler
         ; takes a callback fn, the textareas intended submit action
@@ -144,35 +145,41 @@
               KeyCodes.ENTER
               (cond
                 ; ENTER when autocomplete -> trigger chosen result's action (or exit autocomplete if no result chosen)
-                autocomplete-open?
+                (autocomplete-open?)
                 (do
                   (.preventDefault e)
-                  (if-let [result (nth (@state :results) (@state :highlighted-result-index) nil)]
-                    (choose-result! result)
-                    (set-force-close!)))
+                  (when-let [result (nth (@state :results)
+                                         (@state :highlighted-result-index) nil)]
+                    (choose-result! result))
+                  (set-force-close!))
 
                 ; ENTER otherwise -> send message
                 (not e.shiftKey)
                 (do
                   (.preventDefault e)
                   (reset-state!)
-                  (on-submit)))
+                  (on-submit e)))
 
               KeyCodes.ESC
               (set-force-close!)
 
               KeyCodes.UP
-              (when autocomplete-open?
+              (when (autocomplete-open?)
                 (.preventDefault e)
                 (highlight-prev!))
 
               KeyCodes.DOWN
-              (when autocomplete-open?
+              (when (autocomplete-open?)
                 (.preventDefault e)
                 (highlight-next!))
 
               nil)))
-        ]
+
+        autocomplete-on-change
+        (fn [{:keys [on-change]}]
+          (fn [e]
+            (handle-text-change! (.. e -target -value))
+            (on-change e)))]
 
     (r/create-class
       {:component-will-mount
@@ -191,8 +198,12 @@
        :reagent-render
        (fn []
          [:div.autocomplete-wrapper
-          [textarea-view config autocomplete-on-key-down]
-          (when autocomplete-open?
+          [textarea-view {:text (@state :text)
+                          :config config
+                          :on-key-down autocomplete-on-key-down
+                          :on-change autocomplete-on-change
+                          :set-text! set-text!}]
+          (when (autocomplete-open?)
             [autocomplete-results-view {:results
                                         (@state :results)
 
@@ -201,19 +212,13 @@
 
                                         :on-click
                                         (fn [result]
-                                          (fn []
+                                          (fn [e]
                                             (choose-result! result)
                                             (focus-textbox!)))}])])})))
 
 (defn new-message-view [config]
   [:div.message.new
-   [textarea-view config (fn [{:keys [on-submit]}]
-                           (fn [e]
-                             (condp = e.keyCode
-                               KeyCodes.ENTER
-                               (on-submit)
-                               nil)))]
-   #_[wrap-autocomplete {:config config
+   [wrap-autocomplete {:config config
                        :textarea-view textarea-view
                        :results-view autocomplete-results-view}]])
 

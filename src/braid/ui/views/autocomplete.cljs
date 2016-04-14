@@ -60,7 +60,9 @@
               (filter (fn [[k v]]
                         (simple-matches? k query)))
               (map (fn [[k v]]
-                     {:action
+                     {:key
+                      (fn [] k)
+                      :action
                       (fn [thread-id])
                       :message-transform
                       (fn [text]
@@ -81,7 +83,9 @@
               (filter (fn [u]
                         (fuzzy-matches? (u :nickname) query)))
               (map (fn [user]
-                     {:action
+                     {:key
+                      (fn [] (user :id))
+                      :action
                       (fn [thread-id])
                       :message-transform
                       (fn [text]
@@ -101,7 +105,9 @@
               (filter (fn [t]
                         (fuzzy-matches? (t :name) query)))
               (map (fn [tag]
-                     {:action
+                     {:key
+                      (fn [] (tag :id))
+                      :action
                       (fn [thread-id])
                       :message-transform
                       (fn [text]
