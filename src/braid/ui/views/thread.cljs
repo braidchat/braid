@@ -7,7 +7,8 @@
             [chat.client.s3 :as s3]
             [braid.ui.views.pills :refer [user-pill-view tag-pill-view]]
             [braid.ui.views.message :refer [message-view]]
-            [braid.ui.views.new-message :refer [new-message-view]]))
+            [braid.ui.views.new-message :refer [new-message-view]])
+  (:import [goog.events KeyCodes]))
 
 (def max-file-size (* 10 1024 1024))
 
@@ -44,7 +45,6 @@
   (let [scroll-to-bottom!
         (fn [component]
           (when-let [messages (r/dom-node component)]
-            (js/console.log messages)
             (set! (.-scrollTop messages) (.-scrollHeight messages))))
 
         sorted-messages
@@ -181,5 +181,5 @@
             [messages-view thread])
 
           (when-not new?
-            [new-message-view])]]))))
+            [new-message-view {}])]]))))
 

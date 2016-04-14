@@ -18,6 +18,7 @@
                               reverse)]
       [:div.page.inbox
         [:div.title "Inbox"]
+
         [:div.threads {:on-wheel ; make the mouse wheel scroll horizontally
                         (fn [e]
                           (let [target-classes (.. e -target -classList)
@@ -29,7 +30,9 @@
                                     (= 0 (.-deltaX e) (.-deltaZ e)))
                               (set! (.-scrollLeft this-elt)
                                     (- (.-scrollLeft this-elt) (.-deltaY e))))))}
+
           [new-thread-view]
+
           (for [thread sorted-threads]
             ^{:key (thread :id)}
             [thread-view thread])]]))))

@@ -207,3 +207,7 @@
 (defn get-user-subscribed-tag-ids
   [state _]
   (reaction (set (get-in @state [:user :subscribed-tag-ids]))))
+
+(defn get-connected?
+  [state _]
+  (reaction (not-any? (fn [[k _]] (= :disconnected k)) (@state :errors))))

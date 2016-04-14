@@ -138,6 +138,10 @@
   :user-subscribed-tag-ids
   state/get-user-subscribed-tag-ids)
 
+(register-sub
+  :connected?
+  state/get-connected?)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]
