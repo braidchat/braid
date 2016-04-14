@@ -4,18 +4,19 @@
             [reagent.core :as r]
             [braid.ui.views.thread :refer [thread-view]]
             [chat.client.dispatcher :refer [dispatch!]]
+            [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.store :as store]))
 
 (defn search-page-view
-  [{:keys [subscribe]} owner]
+  []
   (let [loading? (r/atom false)
-        start-loading! (fn [] (swap! loading? true))
-        stop-loading! (fn [] (swap! loading? false))
+        start-loading! (fn [] (reset! loading? true))
+        stop-loading! (fn [] (reset! loading? false))
         page (subscribe [:page])
         threads (subscribe [:threads])]
     (fn []
       (let [status (cond
-                     loading? :loading
+                     @loading? :loading
                      (not (contains? @page :thread-ids)) :searching
                      (seq (@page :thread-ids)) :done-results
                      :else :done-empty)]
@@ -29,7 +30,7 @@
 
             (:done-results :loading)
             (let [loaded-threads (vals (select-keys @threads (@page :thread-ids)))
-                  sorted-threads (->> threads ; sort-by last reply, newest first
+                  sorted-threads (->> @threads ; sort-by last reply, newest first
                                  (sort-by
                                    (comp (partial apply max)
                                          (partial map :created-at)
@@ -62,15 +63,17 @@
                    :on-wheel ; make the mouse wheel scroll horizontally
                    (fn [e]
                      (let [target-classes (.. e -target -classList)
-                           this-elt (om/get-node owner "threads-div")]
+                           this-elt (.. e -target)]
                        ; TODO: check if threads-div needs to scroll?
                        (when (and (or (.contains target-classes "thread")
                                       (.contains target-classes "threads"))
                                (= 0 (.-deltaX e) (.-deltaZ e)))
                          (set! (.-scrollLeft this-elt)
                                (- (.-scrollLeft this-elt) (.-deltaY e))))))}
-                  (for [thread @sorted-threads]
-                    [thread-view thread])]])
+                  (doall
+                    (for [thread @sorted-threads]
+                     ^{:key [thread :id]}
+                     [thread-view thread]))]])
 
             :done-empty
             [:div.content

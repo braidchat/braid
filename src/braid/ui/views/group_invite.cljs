@@ -13,23 +13,23 @@
         set-collapse! (fn [c?] (reset! collapsed? c?))
         set-invitee-email! (fn [message] (reset! invitee-email message))]
     (fn []
-      (if collapsed?
+      (if @collapsed?
         [:button.invite-open {:on-click
                                 (fn [_]
                                     (set-collapse! false))}
-          "invite"]
+          "Invite"]
         [:div.invite-form
-          [:input {:value invitee-email
+          [:input {:value @invitee-email
                    :type "email"
                    :placeholder "email address"
                    :on-change
                      (fn [e]
                        (set-invitee-email! (.. e -target -value)))}]
-          [:button.invite {:disabled (string/blank? invitee-email)
+          [:button.invite {:disabled (string/blank? @invitee-email)
                            :on-click
                              (fn [_]
-                               (dispatch! :invite {:group-id group-id
-                                                   :invitee-email invitee-email})
+                               (dispatch! :invite {:group-id @group-id
+                                                   :invitee-email @invitee-email})
                                (set-collapse! true)
                                (set-invitee-email! ""))}
             "invite"]

@@ -1,5 +1,6 @@
 (ns braid.ui.views.pages.tags
   (:require [reagent.core :as r]
+            [reagent.ratom :include-macros true :refer-macros [reaction]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
@@ -42,13 +43,19 @@
   []
   (let [group-id (subscribe [:open-group-id])
         tags (subscribe [:tags])
-        sorted-tags (->> @tags
+        sorted-tags (reaction (->> @tags
                          (filter (fn [t] (= @group-id (t :group-id))))
                          (sort-by :threads-count)
-                         reverse)
+                         reverse))
         subscribed-tag-ids (subscribe [:user-subscribed-tag-ids])
-        subscribed-to-tag? (fn [tag-id]
-                             (contains? @subscribed-tag-ids tag-id))]
+        subscribed-to? (fn [tag-id] (contains? (set @subscribed-tag-ids) tag-id))
+        subscribed-tags (reaction
+                          (->> @sorted-tags
+                            (filter (fn [t] (subscribed-to? (t :id))))))
+        recommended-tags (reaction
+                           (->> @sorted-tags
+                           ; TODO actually use some interesting logic here
+                             (remove (fn [t] (subscribed-to? (t :id))))))]
     (fn []
       [:div.page.channels
        [:div.title "Tags"]
@@ -56,27 +63,20 @@
        [:div.content
         [new-tag-view {:group-id @group-id}]
 
-        (let [subscribed-tags
-              (->> sorted-tags
-                   (filter (fn [t] (subscribed-to-tag? (t :id)))))]
-          (when (seq subscribed-tags)
+          (when (seq @subscribed-tags)
             [:div
              [:h2 "Subscribed"]
              [:div.tags
               (doall
-                (for [tag subscribed-tags]
+                (for [tag @subscribed-tags]
                   ^{:key (tag :id)}
-                  [tag-info-view tag]))]]))
+                  [tag-info-view tag]))]])
 
-        (let [recommended-tags
-              (->> sorted-tags
-                   ; TODO actually use some interesting logic here
-                   (remove (fn [t] (subscribed-to-tag? (t :id)))))]
-          (when (seq recommended-tags)
+          (when (seq @recommended-tags)
             [:div
              [:h2 "Recommended"]
              [:div.tags
               (doall
-                (for [tag recommended-tags]
+                (for [tag @recommended-tags]
                   ^{:key (tag :id)}
-                  [tag-info-view tag]))]]))]])))
+                  [tag-info-view tag]))]])]])))
