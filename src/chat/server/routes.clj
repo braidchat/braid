@@ -245,8 +245,12 @@
         {:status 400 :body "No such extension"}))))
 
 (defroutes api-private-routes
-  (GET "/extract" [url]
-    (edn-response (embedly/extract url)))
+  (GET "/extract" [url :as {ses :session}]
+    (if (some? (db/with-conn (db/user-by-id (:user-id ses))))
+      (edn-response (embedly/extract url))
+      {:status 403
+       :headers {"Content-Type" "application/edn"}
+       :body (pr-str {:error "Unauthorized"})}))
 
   (GET "/s3-policy" req
     (if (some? (db/with-conn (db/user-by-id (get-in req [:session :user-id]))))
