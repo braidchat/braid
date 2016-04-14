@@ -103,7 +103,7 @@
                                              {:content url
                                               :thread-id (thread :id)}))))))]
 
-    (fn []
+    (fn [thread]
       (let [{:keys [dragging? uploading? focused?]} @state
             new? (thread :new?)
             private? (thread-private? thread)
@@ -180,11 +180,10 @@
           (when-not new?
             [messages-view thread])
 
-          (when-not new?
-            [new-message-view {:thread-id (thread :id)
-                               :placeholder (if new?
-                                              "Start a conversation..."
-                                              "Reply...")
-                               :mentioned-user-ids (thread :mentioned-ids)
-                               :mentioned-tag-ids (thread :tag-ids)}])]]))))
+          [new-message-view {:thread-id (thread :id)
+                             :placeholder (if new?
+                                            "Start a conversation..."
+                                            "Reply...")
+                             :mentioned-user-ids (thread :mentioned-ids)
+                             :mentioned-tag-ids (thread :tag-ids)}]]]))))
 
