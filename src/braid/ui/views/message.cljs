@@ -215,8 +215,7 @@
               (@sender :nickname)]
              [:span.time {:title (message :created-at)} (helpers/format-date (message :created-at))]]
 
-            [:div.content
-             (format-message (message :content))]
+            (into [:div.content] (format-message (message :content)))
 
             (when-let [url (first (extract-urls (message :content)))]
               [embed-view url])]))})))
