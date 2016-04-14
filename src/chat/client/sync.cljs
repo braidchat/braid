@@ -1,11 +1,11 @@
 (ns chat.client.sync
   (:require [taoensso.sente  :as sente :refer [cb-success?]]
+            [taoensso.timbre :as timbre :refer-macros [debugf]]
             [goog.string :as gstring]
             [chat.client.store :as store]
             [goog.string.format]))
 
-(defn debugf [s & args]
-  #_(js/console.log (apply gstring/format s args)))
+(timbre/set-level! :info)
 
 (defn make-socket! []
   (let [domain (aget js/window "api_domain")
