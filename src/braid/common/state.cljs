@@ -160,6 +160,10 @@
                                   (get-in @state [:users user-id])) @mention-ids))]
     mentions))
 
+(defn get-messages-for-thread
+  [state [_ thread-id]]
+  (reaction (get-in @state [:threads thread-id :messages])))
+
 (defn get-thread-open?
   [state [_ thread-id]]
   (reaction (contains? (set (get-in state [:user :open-thread-ids])) thread-id)))

@@ -142,6 +142,10 @@
   :connected?
   state/get-connected?)
 
+(register-sub
+  :messages-for-thread
+  state/get-messages-for-thread)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]
