@@ -6,7 +6,8 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.s3 :as s3]
             [braid.ui.views.pills :refer [user-pill-view tag-pill-view]]
-            [braid.ui.views.message :refer [message-view]]))
+            [braid.ui.views.message :refer [message-view]]
+            [braid.ui.views.new-message :refer [new-message-view]]))
 
 (def max-file-size (* 10 1024 1024))
 
@@ -177,10 +178,8 @@
            [thread-tags-view thread]]
 
           (when-not new?
-            [messages-view thread])]]))))
+            [messages-view thread])
 
-(defn thread-compat-view [props]
-  [thread-view (props :thread)])
+          (when-not new?
+            [new-message-view])]]))))
 
-(def ThreadView
-  (reagent->react thread-compat-view))

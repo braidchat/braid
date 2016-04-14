@@ -1,11 +1,9 @@
 (ns braid.ui.views.message
-  (:require [om.core :as om]
-            [om.dom :as dom]
-            [reagent.core :as r]
+  (:require [reagent.core :as r]
             [clojure.string :as string]
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [id->color]]
-            [chat.client.reagent-adapter :refer [reagent->react subscribe]]
+            [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.embed :refer [embed-view]]
             [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [chat.client.emoji :as emoji]
@@ -164,9 +162,6 @@
                              :result-fn (partial [:strong.starred])}))
 
 
-(def EmbedView
-  (reagent->react embed-view))
-
 (defn extract-urls
   "Given some text, returns a sequence of URLs contained in the text"
   [text]
@@ -189,8 +184,8 @@
          (interleave (repeat " "))
          rest)))
 
-(defn message-view [message owner opts]
-  (let []
+(defn message-view [message opts]
+  (let [sender (subscribe [:user (message :user-id)])]
     (r/create-class
       {:component-did-mount
        (fn []
@@ -198,34 +193,31 @@
            ((aget PR "prettyPrint"))))
        :reagent-render
        (fn []
-         (let [sender (if-let [cur (helpers/user-cursor (message :user-id))]
-                        (om/observe owner cur)
-                        {:nickname "???"})
-               sender-path (routes/user-page-path {:group-id (routes/current-group)
-                                                   :user-id (sender :id)})]
-        [:div.message {:class (str " " (when (:collapse? opts) "collapse")
-                                   " " (if (:unseen? message) "unseen" "seen")
-                                   " " (when (:first-unseen? message) "first-unseen")
-                                   " " (when (:failed? message) "failed-to-send"))}
-          (when (:failed? message)
-            [:div.error
-              [:span "Message failed to send"]
-              [:button {:on-click
-                        (fn [_] (dispatch! :resend-message message))}
+         (let [sender-path (routes/user-page-path {:group-id (routes/current-group)
+                                                   :user-id (@sender :id)})]
+           [:div.message {:class (str " " (when (:collapse? opts) "collapse")
+                                      " " (if (:unseen? message) "unseen" "seen")
+                                      " " (when (:first-unseen? message) "first-unseen")
+                                      " " (when (:failed? message) "failed-to-send"))}
+            (when (:failed? message)
+              [:div.error
+               [:span "Message failed to send"]
+               [:button {:on-click
+                         (fn [_] (dispatch! :resend-message message))}
                 "Resend"]])
-          [:a.avatar {:href sender-path
-                      :tabIndex -1}
-            [:img {:src (sender :avatar)
-                   :style {:backgroundColor (id->color (sender :id))}}]]
-          [:div.info
-            [:a.nickname {:tabIndex -1
-                          :href sender-path}
-              (sender :nickname)]
-            [:span.time {:title (message :created-at)} (helpers/format-date (message :created-at))]]
+            [:a.avatar {:href sender-path
+                        :tabIndex -1}
+             [:img {:src (@sender :avatar)
+                    :style {:backgroundColor (id->color (@sender :id))}}]]
+            [:div.info
+             [:a.nickname {:tabIndex -1
+                           :href sender-path}
+              (@sender :nickname)]
+             [:span.time {:title (message :created-at)} (helpers/format-date (message :created-at))]]
 
-          [:div.content
-            (format-message (message :content))]
+            [:div.content
+             (format-message (message :content))]
 
-          (when-let [url (first (extract-urls (message :content)))]
-            (EmbedView. #js {:url url}))]))})))
+            (when-let [url (first (extract-urls (message :content)))]
+              [embed-view url])]))})))
 

@@ -1,8 +1,6 @@
 (ns braid.ui.views.new-message
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [om.core :as om]
-            [om.dom :as dom]
-            [reagent.core :as r]
+  (:require [reagent.core :as r]
             [cljs.core.async :as async :refer [<! put! chan alts!]]
             [clojure.string :as string]
             [chat.client.dispatcher :refer [dispatch!]]
@@ -143,7 +141,8 @@
                         ([korks f]
                            (if (keyword? korks)
                              (swap! init-state update-in [korks] f)
-                             (swap! init-state update-in korks f))))]
+                             (swap! init-state update-in korks f))))
+        get-node (fn [a] )]
     (r/create-class
       {:component-will-mount
        (fn []
@@ -160,8 +159,8 @@
        (fn []
          (when (= (config :thread-id) (store/get-new-thread))
            (store/clear-new-thread!)
-           (.focus (om/get-node owner "message-text")))
-         (let [textarea (om/get-node owner "message-text")]
+           (.focus (get-node "message-text")))
+         (let [textarea (get-node "message-text")]
            (auto-resize textarea)
            (.. js/window (addEventListener "resize" (fn [_]
                                                       (auto-resize textarea))))))
@@ -177,7 +176,7 @@
              (put! (next-state :autocomplete-chan) next-text))))
        :component-did-update
        (fn []
-         (auto-resize (om/get-node owner "message-text")))
+         (auto-resize (get-node "message-text")))
        :reagent-render
        (fn []
          (let [highlight-next!
@@ -273,7 +272,7 @@
                                            :style {:cursor "pointer"}
                                            :on-click (fn []
                                                       (choose-result! result)
-                                                      (.focus (om/get-node owner "message-text")))}
+                                                      (.focus (get-node "message-text")))}
                                ((result :html))))
                            results)]
                        [:div.result
