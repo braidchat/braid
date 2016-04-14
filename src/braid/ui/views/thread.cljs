@@ -76,7 +76,6 @@
        :reagent-render
        (fn []
          [:div.messages
-          (println sorted-messages)
           (doall
             (for [message sorted-messages]
               ^{:key (message :id)}

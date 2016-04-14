@@ -1,4 +1,4 @@
-(ns braid.ui.view.pages.user
+(ns braid.ui.views.pages.user
   (:require [om.core :as om]
             [om.dom :as dom]
             [chat.client.store :as store]

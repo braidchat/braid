@@ -12,7 +12,7 @@
             [braid.ui.styles.login]
             [braid.ui.styles.vars :as vars]))
 
-(def styles-view
+(defn styles-view []
   [:style
    {:type "text/css"
     :dangerouslySetInnerHTML

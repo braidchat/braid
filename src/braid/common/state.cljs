@@ -170,8 +170,7 @@
 
 (defn get-login-state
   [state _]
-  (println "state" state)
-  (reaction (get-in state [:login-state])))
+  (reaction (get-in @state [:login-state])))
 
 (defn get-tag
   [state [_ tag-id]]
@@ -204,3 +203,7 @@
 (defn get-pagination-remaining
   [state _]
   (reaction (@state :pagination-remaining)))
+
+(defn get-user-subscribed-tag-ids
+  [state _]
+  (reaction (set (get-in @state [:user :subscribed-tag-ids]))))

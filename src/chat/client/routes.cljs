@@ -28,7 +28,7 @@
                                                    :id (UUID. user-id nil)}))
 
 (defroute tag-page-path "/:group-id/tag/:tag-id" [group-id tag-id]
-  (store/set-group-and-page! (UUID. group-id nil) {:type :channel
+  (store/set-group-and-page! (UUID. group-id nil) {:type :tag
                                                    :id (UUID. tag-id nil)}))
 
 (defroute extensions-page-path "/:group-id/extensions" [group-id]

@@ -66,7 +66,7 @@
                   [:h2 "Online"]
                   (for [user users-online]
                     ^{:key (user :id)}
-                    [user-pill-view user subscribe])]]))))
+                    [user-pill-view user])]]))))
 
 (defn tags-pane-view []
   (let [open-group-id (subscribe [:open-group-id])
@@ -74,7 +74,7 @@
         group-subscribed-tags (subscribe [:group-subscribed-tags])]
     (fn []
       (let [path (routes/page-path {:group-id @open-group-id
-                                    :page-id "channels"})]
+                                    :page-id "tags"})]
         [:div.tags.shortcut {:class (when (routes/current-path? path) "active")}
           [:a.title {:href path
                      :title "Tags"}]
@@ -84,7 +84,7 @@
                                      reverse)]
                 (for [tag sorted-tags]
                   ^{:key (tag :id)}
-                  [tag-pill-view tag subscribe]))]]))))
+                  [tag-pill-view tag]))]]))))
 
 (defn current-user-button-view []
   (let [user-id (subscribe [:user-id])
@@ -98,7 +98,7 @@
           [:img.avatar {:style {:background-color (id->color @user-id)}
                         :src @user-avatar-url}]]))))
 
-(defn extensions-page-button-view [{:keys [subscribe]}]
+(defn extensions-page-button-view []
   (let [open-group-id (subscribe [:open-group-id])]
     (fn []
       (let [path (routes/extensions-page-path {:group-id @open-group-id})]
@@ -117,5 +117,4 @@
     [users-online-pane-view]
     [tags-pane-view]
     [search-bar-view]
-    [current-user-button-view]
-    #_[extensions-page-button-view]]) ;Extensions page button temporarily not rendered
+    [current-user-button-view]])

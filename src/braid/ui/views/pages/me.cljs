@@ -2,14 +2,14 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [reagent.core :as r]
+            [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.views.pills :refer [user-view]]
             [chat.shared.util :refer [valid-tag-name? valid-nickname?]])
   (:import [goog.events KeyCodes]))
 
 (defn nickname-view
-  [subscribe]
+  []
   (let [format-error (r/atom false)
         error (r/atom nil)
         set-format-error! (fn [error?] (reset! format-error error?))
@@ -64,19 +64,19 @@
            )]]))
 
 (defn me-page-view
-  [{:keys [subscribe]}]
+  []
   (let [invitations (subscribe [:invitations])]
     (fn []
       [:div.page.me
-        [:div.title "Me!"]
-        [:div.content
-          [:h2 "Log Out"]
-          [:button.logout {:on-click
-                            (fn [_]
-                              (dispatch! :logout nil))} "Log Out"]
-          [:h2 "Update Nickname"]
-          [nickname-view subscribe]
-          [:h2 "Received Invites"]
-          (when (seq @invitations)
-            ;TODO: render correctly
-            [invitations-view @invitations])]])))
+       [:div.title "Me!"]
+       [:div.content
+        [:h2 "Log Out"]
+        [:button.logout {:on-click
+                         (fn [_]
+                           (dispatch! :logout nil))} "Log Out"]
+        [:h2 "Update Nickname"]
+        [nickname-view]
+        [:h2 "Received Invites"]
+        (when (seq @invitations)
+          ;TODO: render correctly
+          [invitations-view @invitations])]])))

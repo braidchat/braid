@@ -1,8 +1,9 @@
 (ns braid.ui.views.pages.recent
-  (:require [braid.ui.views.thread :refer [thread-view]]))
+  (:require [chat.client.reagent-adapter :refer [subscribe]]
+            [braid.ui.views.thread :refer [thread-view]]))
 
 (defn recent-page-view
-  [{:keys [subscribe]}]
+  []
   (let [group-id (subscribe [:open-group-id])
         threads (subscribe [:get-threads-for-group @group-id])
         user-id (subscribe [:user-id])]

@@ -1,14 +1,14 @@
 (ns braid.ui.views.group-invite
-  (:require [om.core :as om]
-            [om.dom :as dom]
-            [reagent.core :as r]
+  (:require [reagent.core :as r]
             [clojure.string :as string]
+            [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]])
   (:import [goog.events KeyCodes]))
 
 (defn group-invite-view
-  [group-id]
-  (let [collapsed? (r/atom true)
+  []
+  (let [group-id (subscribe [:open-group-id])
+        collapsed? (r/atom true)
         invitee-email (r/atom "")
         set-collapse! (fn [c?] (reset! collapsed? c?))
         set-invitee-email! (fn [message] (reset! invitee-email message))]

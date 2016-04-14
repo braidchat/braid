@@ -6,10 +6,11 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [debounce]]
+            [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.routes :as routes]))
 
 (defn search-bar-view
-  [{:keys [subscribe]}]
+  []
   (let [open-group-id (subscribe [:open-group-id])
         search-query (subscribe [:search-query])
         search-chan (chan)]

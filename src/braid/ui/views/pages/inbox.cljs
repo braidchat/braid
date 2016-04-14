@@ -1,9 +1,10 @@
 (ns braid.ui.views.pages.inbox
-  (:require [braid.ui.views.thread :refer [thread-view]]
+  (:require [chat.client.reagent-adapter :refer [subscribe]]
+            [braid.ui.views.thread :refer [thread-view]]
             [braid.ui.views.new-thread :refer [new-thread-view]]))
 
 (defn inbox-page-view
-  [{:keys [subscribe]}]
+  []
   (let [user-id (subscribe [:user-id])
         open-threads (subscribe [:open-threads])]
   (fn []
