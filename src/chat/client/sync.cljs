@@ -5,6 +5,7 @@
             [chat.client.store :as store]
             [goog.string.format]))
 
+; Change to :debug to get detailed info in dev
 (timbre/set-level! :info)
 
 (defn make-socket! []
