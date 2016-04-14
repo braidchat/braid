@@ -124,10 +124,11 @@
 
     [:textarea
      {:width "100%"
+      :resize "none"
       :border "none"
-      :resize "vertical"
       :box-sizing "border-box"
-      :min-height (em 3.5)}
+      :min-height (em 3.5)
+      :box-shadow "0 0 1px 1px #ccc"}
 
       [:&:focus
        {:outline "none"}]]
