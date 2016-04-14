@@ -1,7 +1,8 @@
 (ns braid.ui.views.pages.inbox
-  (:require [braid.ui.views.thread :refer [thread-view new-thread-view]]))
+  (:require [braid.ui.views.thread :refer [thread-view]]
+            [braid.ui.views.new-thread :refer [new-thread-view]]))
 
-(defn inbox-page-view-test
+(defn inbox-page-view
   [{:keys [subscribe]}]
   (let [user-id (subscribe [:user-id])
         open-threads (subscribe [:open-threads])]

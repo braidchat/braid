@@ -7,7 +7,7 @@
             [chat.client.views.helpers :refer [id->color]])
   (:import [goog.events KeyCodes]))
 
-(defn group-explore-view-test
+(defn group-explore-page-view
   []
   (fn []
     [:div.page.group-explore

@@ -1,15 +1,14 @@
 (ns braid.ui.views.main
   (:require [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.store :as store]
-            [braid.ui.pages.inbox :refer [inbox-page-view]]
-            [braid.ui.pages.recent :refer [recent-page-view]]
-            [braid.ui.pages.help :refer [help-page-view]]
-            [braid.ui.pages.users :refer [users-page-view]]
-            [braid.ui.pages.search :refer [search-page-view]]
-            [braid.ui.pages.tag :refer [tag-page-view]]
-            [braid.ui.pages.me :refer [me-page-view]]
-            [braid.ui.pages.groups :refer [groups-page-view]]
-            [braid.ui.pages.extensions :refer [extensions-page-view]]))
+            [braid.ui.views.pages.inbox :refer [inbox-page-view]]
+            [braid.ui.views.pages.recent :refer [recent-page-view]]
+            [braid.ui.views.pages.help :refer [help-page-view]]
+            [braid.ui.views.pages.users :refer [users-page-view]]
+            [braid.ui.views.pages.search :refer [search-page-view]]
+            [braid.ui.views.pages.tag :refer [tag-page-view]]
+            [braid.ui.views.pages.me :refer [me-page-view]]
+            [braid.ui.views.pages.group-explore :refer [group-explore-page-view]]))
 
 (defn error-banner-view []
   (let [errors (subscribe [:errors])]
@@ -39,5 +38,4 @@
          :user [user-page-view]
          :tags [tags-page-view]
          :me [me-page-view]
-         :group-explore [group-explore-view]
-         :extensions [extensions-page-view])])))
+         :group-explore [group-explore-view])])))

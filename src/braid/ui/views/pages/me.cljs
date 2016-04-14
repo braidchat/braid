@@ -63,7 +63,7 @@
                "Decline")]
            )]]))
 
-(defn me-page-view-test
+(defn me-page-view
   [{:keys [subscribe]}]
   (let [invitations (subscribe [:invitations])]
     (fn []

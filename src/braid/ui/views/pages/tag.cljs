@@ -4,10 +4,11 @@
             [reagent.core :as r]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
-            [braid.ui.views.thread :refer [thread-view new-thread-view]]
+            [braid.ui.views.thread :refer [thread-view]]
+            [braid.ui.views.new-thread :refer [new-thread-view]]
             [braid.ui.views.pills :refer [tag-pill-view subscribe-button-view]]))
 
-(defn channel-page-view-test
+(defn tag-page-view
   [{:keys [subscribe]}]
   (let [loading? (r/atom false)
         start-loading! (fn [] (reset! loading? true))
@@ -93,4 +94,3 @@
                   [new-thread-view]
                   (for [thread sorted-threads]
                     [thread-view thread])]]))})))
-

@@ -38,7 +38,7 @@
         [tag-view tag]
         [subscribe-button tag]]))
 
-(defn channels-page-view
+(defn tags-page-view
   [{:keys [subscribe]}]
   (let [group-id (subscribe [:open-group-id])
           tags (subscribe [:tags])
