@@ -72,7 +72,6 @@
         desktop-client-routes)
       (wrap-defaults static-site-defaults)))
 
-; XXX: Review use of CSRF
 (def api-server-app
   (-> (routes
         (-> api-public-routes
@@ -83,17 +82,16 @@
         (-> extension-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
-      ;                         assoc-csrf-conf
                                )))
         (-> api-private-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
-      ;                         assoc-csrf-conf
+                               assoc-csrf-conf
                                )))
         (-> sync-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
-      ;                         assoc-csrf-conf
+                               assoc-csrf-conf
                                ))))
       (wrap-cors :access-control-allow-origin [#".*"]
                  :access-control-allow-credentials true
