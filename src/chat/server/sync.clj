@@ -2,6 +2,7 @@
   (:require [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer [sente-web-server-adapter]]
             [compojure.core :refer [GET POST routes defroutes context]]
+            [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [taoensso.timbre :as timbre :refer [debugf]]
             [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
             [chat.server.db :as db]
@@ -24,8 +25,12 @@
   (def connected-uids                connected-uids))
 
 (defroutes sync-routes
-  (GET  "/chsk" req (ring-ajax-get-or-ws-handshake req))
-  (POST "/chsk" req (ring-ajax-post                req)))
+  (GET  "/chsk" req
+      (-> req
+          (assoc-in [:session :ring.middleware.anti-forgery/anti-forgery-token]
+            *anti-forgery-token*)
+          ring-ajax-get-or-ws-handshake))
+  (POST "/chsk" req (ring-ajax-post req)))
 
 (defmulti event-msg-handler :id)
 

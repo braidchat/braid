@@ -46,8 +46,7 @@
 
 (defn assoc-csrf-conf [defaults]
   (-> defaults
-      (assoc-in [:security :anti-forgery]
-        {:read-token (fn [req] (-> req :params :csrf-token))})))
+      (assoc-in [:security :anti-forgery] true)))
 
 (def static-site-defaults
   {:static {:resources "public"}
