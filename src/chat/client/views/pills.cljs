@@ -38,7 +38,7 @@
     (render [_]
       (TagPillView. #js {:tag tag}))))
 
-(defn user-view [user owner]
+(defn user-view [user]
   (reify
     om/IRender
     (render [_]
