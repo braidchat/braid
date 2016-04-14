@@ -5,7 +5,7 @@
             [goog.string.format]))
 
 (defn debugf [s & args]
-  (js/console.log (apply gstring/format s args)))
+  #_(js/console.log (apply gstring/format s args)))
 
 (defn make-socket! []
   (let [domain (aget js/window "api_domain")
