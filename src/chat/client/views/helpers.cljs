@@ -24,12 +24,6 @@
                        (/ 4096))]
     (str "hsl(" (* 360 normalized) ",70%,35%)")))
 
-(defn user-cursor
-  "Get an om cursor for the given user"
-  [user-id]
-  (when (store/valid-user-id? user-id)
-    (om/ref-cursor (get-in (om/root-cursor store/app-state) [:users user-id]))))
-
 (defn format-date
   "Turn a Date object into a nicely formatted string"
   [datetime]

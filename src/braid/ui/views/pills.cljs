@@ -1,7 +1,7 @@
 (ns braid.ui.views.pills
   (:require [chat.client.routes :as routes]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.views.helpers :refer [id->color user-cursor]]
+            [chat.client.views.helpers :refer [id->color]]
             [chat.client.reagent-adapter :refer [subscribe]]))
 
 (defn subscribe-button-view

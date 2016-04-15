@@ -1,8 +1,7 @@
 (ns braid.ui.views.pages.user
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.ui.views.pills :refer [user-pill-view]]
-            [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.views.helpers :refer [user-cursor]]))
+            [chat.client.reagent-adapter :refer [subscribe]]))
 
 (defn user-page-view
   []
