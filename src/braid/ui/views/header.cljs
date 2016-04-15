@@ -47,24 +47,20 @@
 (defn users-online-pane-view []
   (let [open-group-id (subscribe [:open-group-id])
         user-id (subscribe [:user-id])
-        users-in-open-group (subscribe [:users-in-open-group])]
+        users (subscribe [:users-in-open-group :online])]
     (fn []
-      (let [users (->> @users-in-open-group
-                   (remove (fn [user]
+      (let [users (->> @users
+                       (remove (fn [user]
                                    (= @user-id
                                       (user :id)))))
-            users-online (->> users
-                              (filter (fn [user]
-                                        (= :online
-                                           (user :status)))))
             path (routes/users-page-path {:group-id @open-group-id})]
         [:div.users.shortcut {:class (when (routes/current-path? path) "active")}
           [:a.title {:href path
                      :title "Users"}
-                  (count users-online)]
+                  (count users)]
                  [:div.modal
                   [:h2 "Online"]
-                  (for [user users-online]
+                  (for [user users]
                     ^{:key (user :id)}
                     [user-pill-view user])]]))))
 
