@@ -1,5 +1,6 @@
 (ns braid.ui.views.pages.search
   (:require [reagent.core :as r]
+            [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.ui.views.thread :refer [thread-view]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]
@@ -27,13 +28,14 @@
                 "Searching..."]]
 
             (:done-results :loading)
-            (let [loaded-threads (vals (select-keys @threads (@page :thread-ids)))
-                  sorted-threads (->> @threads ; sort-by last reply, newest first
-                                 (sort-by
-                                   (comp (partial apply max)
-                                         (partial map :created-at)
-                                         :messages))
-                                   reverse)]
+            (let [loaded-threads (reaction (vals (select-keys @threads (@page :thread-ids))))
+                  sorted-threads (reaction (->> @threads ; sort-by last reply, newest first
+                                               vals
+                                                (sort-by
+                                                (comp (partial apply max)
+                                                      (partial map :created-at)
+                                                      :messages))
+                                                reverse))]
               [:div.content
                 [:div.description
                   (if (= status :loading)
@@ -70,8 +72,9 @@
                                (- (.-scrollLeft this-elt) (.-deltaY e))))))}
                   (doall
                     (for [thread @sorted-threads]
-                     ^{:key [thread :id]}
-                     [thread-view thread]))]])
+                      (do
+                        (println thread)
+                       [thread-view thread])))]])
 
             :done-empty
             [:div.content
