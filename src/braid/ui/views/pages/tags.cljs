@@ -30,14 +30,13 @@
 
 (defn- tag-info-view
   [tag]
-  (fn []
-    [:div.tag-info
-     [:span.count.threads-count
-      (tag :threads-count)]
-     [:span.count.subscribers-count
-      (tag :subscribers-count)]
-     [tag-pill-view tag]
-     [subscribe-button-view tag]]))
+  [:div.tag-info
+   [:span.count.threads-count
+    (tag :threads-count)]
+   [:span.count.subscribers-count
+    (tag :subscribers-count)]
+   [tag-pill-view tag]
+   [subscribe-button-view tag]])
 
 (defn tags-page-view
   []
