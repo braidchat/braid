@@ -1,8 +1,10 @@
 (ns braid.ui.views.autocomplete
   (:require [clj-fuzzy.metrics :as fuzzy]
             [chat.client.store :as store]
+            [chat.client.schema :as schema]
             [clojure.string :as string]
             [chat.client.views.helpers :refer [id->color debounce]]
+            [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.emoji :as emoji])
   (:import [goog.events KeyCodes]))
 
@@ -101,21 +103,41 @@
    (fn [text thread-id]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (->> (store/tags-in-open-group)
-              (filter (fn [t]
-                        (fuzzy-matches? (t :name) query)))
-              (map (fn [tag]
-                     {:key
-                      (fn [] (tag :id))
-                      :action
-                      (fn [thread-id])
-                      :message-transform
-                      (fn [text]
-                        (string/replace text pattern (str "#" (tag :name) " ")))
-                      :html
-                      (fn []
-                        [:div.tag-match
-                          [:div.color-block{:style {:backgroundColor (id->color (tag :id))}}]
-                          [:div.name (tag :name)]
-                          [:div.extra (:name (store/id->group (tag :group-id)))]])}))))))
+         (let [group-tags (store/tags-in-open-group)
+               exact-match? (some #(= query (:name %)) group-tags)]
+           (->> group-tags
+                (filter (fn [t]
+                          (fuzzy-matches? (t :name) query)))
+                (map (fn [tag]
+                       {:key
+                        (fn [] (tag :id))
+                        :action
+                        (fn [thread-id])
+                        :message-transform
+                        (fn [text]
+                          (string/replace text pattern (str "#" (tag :name) " ")))
+                        :html
+                        (fn []
+                          [:div.tag-match
+                           [:div.color-block{:style {:backgroundColor (id->color (tag :id))}}]
+                           [:div.name (tag :name)]
+                           [:div.extra (:name (store/id->group (tag :group-id)))]])}))
+                (cons (when-not (or exact-match? (string/blank? query))
+                        (let [tag (schema/make-tag {:name query
+                                                    :group-id (store/open-group-id)})]
+                          {:key (constantly (tag :id))
+                           :action
+                           (fn [thread-id]
+                             (dispatch! :create-tag [(tag :name) (tag :group-id) (tag :id)]))
+                           :message-transform
+                           (fn [text]
+                             (string/replace text pattern (str "#" (tag :name) " ")))
+                           :html
+                           (fn []
+                             [:div.tag-match
+                              [:div.color-block{:style {:backgroundColor (id->color (tag :id))}}]
+                              [:div.name (str "Create tag " (tag :name))]
+                              [:div.extra (:name (store/id->group (tag :group-id)))]])})))
+                (remove nil?)
+                reverse)))))
    ])
