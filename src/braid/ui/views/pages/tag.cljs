@@ -53,7 +53,7 @@
             [:div.page.channel
               [:div.title
                 [tag-pill-view (@tag :id)]
-                [subscribe-button-view @tag]]
+                [subscribe-button-view (@tag :id)]]
 
               [:div.content
                 [:div.description

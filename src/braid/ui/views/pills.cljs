@@ -5,17 +5,17 @@
             [chat.client.reagent-adapter :refer [subscribe]]))
 
 (defn subscribe-button-view
-  [tag]
-  (let [user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag (tag :id)])]
+  [tag-id]
+  (let [user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag tag-id])]
     (fn []
       (if @user-subscribed-to-tag?
         [:a.button {:on-click
                     (fn [_]
-                      (dispatch! :unsubscribe-from-tag (tag :id)))}
+                      (dispatch! :unsubscribe-from-tag tag-id))}
           "Unsubscribe"]
         [:a.button {:on-click
                     (fn [_]
-                      (dispatch! :subscribe-to-tag (tag :id)))}
+                      (dispatch! :subscribe-to-tag tag-id))}
           "Subscribe"]))))
 
 (defn tag-pill-view
