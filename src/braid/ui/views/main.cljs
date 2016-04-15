@@ -14,21 +14,24 @@
             [braid.ui.views.pages.me :refer [me-page-view]]
             [braid.ui.views.pages.group-explore :refer [group-explore-page-view]]))
 
-(defn main-view []
+(defn page-view []
   (let [page (subscribe [:page])]
-    (fn [_]
-      [:div.main
-       [error-banner-view]
-       [sidebar-view]
-       [header-view]
-       (case (@page :type)
-         :inbox [inbox-page-view]
-         :recent [recent-page-view]
-         :help [help-page-view]
-         :users [users-page-view]
-         :search [search-page-view]
-         :tag [tag-page-view]
-         :user [user-page-view]
-         :tags [tags-page-view]
-         :me [me-page-view]
-         :group-explore [group-explore-page-view])])))
+    (fn []
+      (case (@page :type)
+        :inbox ^{:key (gensym)} [inbox-page-view] ; HACK
+        :recent [recent-page-view]
+        :help [help-page-view]
+        :users [users-page-view]
+        :search [search-page-view]
+        :tag [tag-page-view]
+        :user [user-page-view]
+        :tags [tags-page-view]
+        :me [me-page-view]
+        :group-explore [group-explore-page-view]))))
+
+(defn main-view []
+  [:div.main
+   [error-banner-view]
+   [sidebar-view]
+   [header-view]
+   [page-view]])

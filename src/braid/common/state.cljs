@@ -84,21 +84,28 @@
   (reaction (get-in @state [:page :id])))
 
 (defn get-open-threads
-  [state _]
-  (let [current-group-id (reaction (@state :open-group-id))
+  [state [_]]
+  (let [group-id (reaction (get-in @state [:open-group-id]))
         open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
-        group-for-tag (fn [tag-id]
-                        (get-in @state [:tags tag-id :group-id]))
+        tag-id->group-id (->> (@state :tags)
+                              vals
+                              (map (fn [tag]
+                                     [(tag :id) (tag :group-id)]))
+                              (into {}))
         threads (reaction (@state :threads))
-        open-threads (-> @threads
-                         (select-keys @open-thread-ids)
-                         vals
-                         (->> (filter (fn [thread]
-                                (or (empty? (thread :tag-ids))
-                                    (contains?
-                                      (into #{} (map group-for-tag (thread :tag-ids)))
-                                      @current-group-id))))))]
-      (reaction open-threads)))
+        open-threads-kv (reaction
+                          (-> @threads
+                              (select-keys @open-thread-ids)))
+        open-threads (reaction (vals @open-threads-kv))
+        group-open-threads (reaction
+                             (->> @open-threads
+                                  (filter (fn [thread]
+                                            (or (empty? (thread :tag-ids))
+                                                (contains?
+                                                  (into #{} (map tag-id->group-id (thread :tag-ids)))
+                                                  @group-id))))))]
+
+    (reaction @group-open-threads)))
 
 (defn get-users-in-group
   [state [_ group-id]]
