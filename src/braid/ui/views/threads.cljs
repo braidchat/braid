@@ -1,4 +1,4 @@
-(ns braid.ui.views.pages.threads
+(ns braid.ui.views.threads
   (:require [reagent.core :as r]
             [braid.ui.views.thread :refer [thread-view]]
             [braid.ui.views.new-thread :refer [new-thread-view]]))
