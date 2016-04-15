@@ -112,8 +112,9 @@
   (reaction (get-in @state [:open-group-id])))
 
 (defn get-users-in-open-group
-  [state _]
-  (reaction @(get-users-in-group @state [nil (@state :open-group-id)])))
+  [state [_ status]]
+  (reaction (->> @(get-users-in-group @state [nil (@state :open-group-id)])
+                 (filter (fn [u] (= status (u :status)))))))
 
 (defn get-user-id
   [state _]
