@@ -5,7 +5,7 @@
             [cljs.core.async :as async :refer [<! put! chan alts!]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.helpers :refer [id->color debounce]]
+            [chat.client.views.helpers :refer [debounce]]
             [braid.ui.views.autocomplete :refer [engines]])
   (:import [goog.events KeyCodes]))
 

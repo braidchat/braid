@@ -188,6 +188,9 @@
     (r/create-class
       {:component-did-mount
        (fn []
+         ; TODO: use prettyPrintOne to only do the content of this node
+         ; TODO: also call on IDidUpdate?
+         ; TODO: don't call if don't have code?
          (when-let [PR (aget js/window "PR")]
            ((aget PR "prettyPrint"))))
        :reagent-render

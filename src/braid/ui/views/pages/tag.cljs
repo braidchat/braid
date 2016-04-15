@@ -1,8 +1,5 @@
 (ns braid.ui.views.pages.tag
-  (:require [om.core :as om]
-            [om.dom :as dom]
-            [reagent.core :as r]
-            [chat.client.store :as store]
+  (:require [reagent.core :as r]
             [chat.client.dispatcher :refer [dispatch!]]
             [braid.ui.views.thread :refer [thread-view]]
             [braid.ui.views.new-thread :refer [new-thread-view]]
@@ -91,6 +88,6 @@
                                           (= 0 (.-deltaX e) (.-deltaZ e)))
                                     (set! (.-scrollLeft this-elt)
                                           (- (.-scrollLeft this-elt) (.-deltaY e))))))}
-                  [new-thread-view]
+                  [new-thread-view {:tag-ids [(@tag :id)]}]
                   (for [thread sorted-threads]
                     [thread-view thread])]]))})))

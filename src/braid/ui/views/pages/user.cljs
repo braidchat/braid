@@ -1,11 +1,7 @@
 (ns braid.ui.views.pages.user
-  (:require [om.core :as om]
-            [om.dom :as dom]
-            [reagent.ratom :include-macros true :refer-macros [reaction]]
+  (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.ui.views.pills :refer [user-pill-view]]
             [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.store :as store]
-            [chat.client.views.threads :refer [thread-view new-thread-view]]
             [chat.client.views.helpers :refer [user-cursor]]))
 
 (defn user-page-view
@@ -52,11 +48,8 @@
                                    (= 0 (.-deltaX e) (.-deltaZ e)))
                              (set! (.-scrollLeft this-elt)
                                    (- (.-scrollLeft this-elt) (.-deltaY e))))))}
-              [new-thread-view]
+              [new-thread-view {:mentioned-ids [(@user :id)]}]
               (doall
                 (for [thread @sorted-threads]
                  ^{:key [thread :id]}
                  [thread-view thread]))]])))
-
-;(om/get-node owner "threads-div")
-; [new-thread-view {:mentioned-ids [user-id]}]
