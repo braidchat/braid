@@ -1,7 +1,5 @@
 (ns braid.ui.views.pages.search
-  (:require [om.core :as om]
-            [om.dom :as dom]
-            [reagent.core :as r]
+  (:require [reagent.core :as r]
             [braid.ui.views.thread :refer [thread-view]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]

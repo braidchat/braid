@@ -1,7 +1,6 @@
 (ns chat.client.views.helpers
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [om.core :as om]
-            [cljs.core.async :refer [<! put! chan alts! timeout]]
+  (:require [cljs.core.async :refer [<! put! chan alts! timeout]]
             [cljs-time.format :as f]
             [cljs-time.core :as t]
             [chat.client.store :as store]))
