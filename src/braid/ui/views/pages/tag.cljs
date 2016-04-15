@@ -2,55 +2,60 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [reagent.core :as r]
+            [reagent.ratom :include-macros true :refer-macros [reaction]]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
+            [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.thread :refer [thread-view]]
             [braid.ui.views.new-thread :refer [new-thread-view]]
             [braid.ui.views.pills :refer [tag-pill-view subscribe-button-view]]))
 
 (defn tag-page-view
-  [{:keys [subscribe]}]
+  []
   (let [loading? (r/atom false)
         start-loading! (fn [] (reset! loading? true))
         stop-loading! (fn [] (reset! loading? false))
         page-id (subscribe [:page-id])
         page (subscribe [:page])
         tag (subscribe [:tag @page-id])
+        tag-id (@page :id)
         user-id (subscribe [:user-id])
         threads (subscribe [:threads])
-        pagination-remaining (subscribe [:pagination-remaining])]
+        pagination-remaining (subscribe [:pagination-remaining])
+        inbox-thread-ids (subscribe [:open-thread-ids])
+        known-threads (reaction
+                        (->> @threads
+                               vals
+                               (filter
+                                 (fn [t] (contains? (set (t :tag-ids)) tag-id)))))
+        sorted-threads (reaction
+                         (->> (@page :thread-ids)
+                            (select-keys @threads)
+                            vals
+                            (into (set @known-threads))
+                            (map (fn [t] (assoc t :open? (contains? @inbox-thread-ids (t :id)))))
+                            ; sort-by last reply, newest first
+                            (sort-by
+                              (comp (partial apply max)
+                                    (partial map :created-at)
+                                    :messages))
+                            reverse))]
     (r/create-class
       {:component-did-mount
-         (fn []
-           (dispatch! :threads-for-tag {:tag-id @page-id}))
+       (fn []
+         (dispatch! :threads-for-tag {:tag-id @page-id}))
        :reagent-render
        (fn []
          (let
-           [tag-id (@page :id)
-            status (cond
+           [status (cond
                      loading? :loading
                      (not (contains? @page :thread-ids)) :searching
                      (seq (@page :thread-ids)) :done-results
-                     :else :done-empty)
-            known-threads (->> @threads
-                               vals
-                               (filter (fn [t] (contains? (set (t :tag-ids)) tag-id))))
-            inbox-thread-ids (subscribe [:open-thread-ids])
-            sorted-threads (->> (@page :thread-ids)
-                                (select-keys @threads)
-                                vals
-                                (into (set known-threads))
-                                (map (fn [t] (assoc t :open? (contains? @inbox-thread-ids (t :id)))))
-                                ; sort-by last reply, newest first
-                                (sort-by
-                                  (comp (partial apply max)
-                                        (partial map :created-at)
-                                        :messages))
-                                reverse)]
+                     :else :done-empty)]
             [:div.page.channel
               [:div.title
-                [tag-pill-view @tag subscribe]
-                [subscribe-button-view @tag subscribe]]
+                [tag-pill-view @tag]
+                [subscribe-button-view @tag]]
 
               [:div.content
                 [:div.description
@@ -92,5 +97,7 @@
                                     (set! (.-scrollLeft this-elt)
                                           (- (.-scrollLeft this-elt) (.-deltaY e))))))}
                   [new-thread-view]
-                  (for [thread sorted-threads]
-                    [thread-view thread])]]))})))
+                  (doall
+                    (for [thread @sorted-threads]
+                      ^{:key [thread :id]}
+                      [thread-view thread]))]]))})))
