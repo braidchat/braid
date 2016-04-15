@@ -13,7 +13,7 @@
       (doall
         (for [user users]
           ^{:key (user :id)}
-          [:li [user-pill-view user]]))])
+          [:li [user-pill-view (user :id)]]))])
 
 (defn users-page-view
   []

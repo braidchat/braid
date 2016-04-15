@@ -49,8 +49,8 @@
                                 reverse)]
             [:div.page.channel
               [:div.title
-                [tag-pill-view @tag subscribe]
-                [subscribe-button-view @tag subscribe]]
+                [tag-pill-view (@tag :id)]
+                [subscribe-button-view @tag]]
 
               [:div.content
                 [:div.description

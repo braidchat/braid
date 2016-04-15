@@ -9,7 +9,6 @@
             [chat.client.emoji :as emoji]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.helpers :as helpers :refer [starts-with? ends-with?]]
-            [chat.client.views.pills :refer [tag-view user-view]]
             [chat.client.routes :as routes]))
 
 (def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
@@ -41,13 +40,13 @@
     :replace (fn [match]
                ;TODO: Subscribe to valid user id
                (if (store/valid-user-id? (uuid match))
-                 [user-view {:id (uuid match)} subscribe]
+                 [user-pill-view (uuid match)]
                  [:span "@" match]))}
    :tags
    {:pattern #"#([-0-9a-z]+)"
     :replace (fn [match]
-               (if-let [tag (store/get-tag (uuid match))]
-                 [tag-pill-view tag subscribe]
+               (if (store/get-tag (uuid match))
+                 [tag-pill-view (uuid match)]
                  [:span "#" match]))}
    :emoji-shortcodes
    {:pattern #"(:\S*:)"

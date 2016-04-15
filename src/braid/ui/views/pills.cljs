@@ -19,33 +19,37 @@
           "Subscribe"]))))
 
 (defn tag-pill-view
-  [tag]
-  (let [open-group-id (subscribe [:open-group-id])
-        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag (tag :id)])]
+  [tag-id]
+  (let [tag (subscribe [:tag tag-id])
+        open-group-id (subscribe [:open-group-id])
+        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag tag-id])]
     (fn []
       (let [path (routes/tag-page-path {:group-id @open-group-id
-                                        :tag-id (tag :id)})]
+                                        :tag-id (@tag :id)})
+            color (id->color (@tag :id))]
         [:a.tag.pill {:class (if @user-subscribed-to-tag? "on" "off")
                       :tabIndex -1
-                      :style {:background-color (id->color (tag :id))
-                              :color (id->color (tag :id))
-                              :border-color (id->color (tag :id))}
+                      :style {:background-color color
+                              :color color
+                              :border-color color}
                       :href path}
-          [:div.name "#" (tag :name)]]))))
+          [:div.name "#" (@tag :name)]]))))
 
 
 (defn user-pill-view
-  [user]
-  (let [open-group-id (subscribe [:open-group-id])
-        user-status (subscribe [:user-status (user :id)])]
+  [user-id]
+  (let [user (subscribe [:user user-id])
+        open-group-id (subscribe [:open-group-id])
+        user-status (subscribe [:user-status user-id])]
     (fn []
       (let [path (routes/user-page-path {:group-id @open-group-id
-                                         :user-id (user :id)})]
+                                         :user-id (@user :id)})
+            color (id->color (@user :id))]
         [:a.user.pill {:class (case @user-status :online "on" "off")
                        :tabIndex -1
-                       :style {:background-color (id->color (user :id))
-                               :color (id->color (user :id))
-                               :border-color (id->color (user :id))}
+                       :style {:background-color color
+                               :color color
+                               :border-color color}
                        :href path}
-          [:span.name (str "@" (user :nickname))]
-          [:div {:class (str "status " ((fnil name "") (user :status)))}]]))))
+          [:span.name (str "@" (@user :nickname))]
+          [:div {:class (str "status " ((fnil name "") (@user :status)))}]]))))

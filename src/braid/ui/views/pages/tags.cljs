@@ -36,7 +36,7 @@
       (tag :threads-count)]
      [:span.count.subscribers-count
       (tag :subscribers-count)]
-     [tag-pill-view tag]
+     [tag-pill-view (tag :id)]
      [subscribe-button-view tag]]))
 
 (defn tags-page-view

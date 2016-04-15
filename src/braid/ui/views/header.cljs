@@ -62,7 +62,7 @@
                   [:h2 "Online"]
                   (for [user users]
                     ^{:key (user :id)}
-                    [user-pill-view user])]]))))
+                    [user-pill-view (user :id)])]]))))
 
 (defn tags-pane-view []
   (let [open-group-id (subscribe [:open-group-id])
@@ -80,7 +80,7 @@
                                      reverse)]
                 (for [tag sorted-tags]
                   ^{:key (tag :id)}
-                  [tag-pill-view tag]))]]))))
+                  [tag-pill-view (tag :id)]))]]))))
 
 (defn current-user-button-view []
   (let [user-id (subscribe [:user-id])

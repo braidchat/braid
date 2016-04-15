@@ -19,11 +19,11 @@
      (doall
        (for [user @mentions]
          ^{:key (user :id)}
-         [user-pill-view user]))
+         [user-pill-view (user :id)]))
      (doall
        (for [tag @tags]
          ^{:key (tag :id)}
-         [tag-pill-view tag]))]))
+         [tag-pill-view (tag :id)]))]))
 
 (defn- unseen? [message thread]
   (> (:created-at message)

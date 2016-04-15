@@ -34,7 +34,7 @@
                                       reverse))]
       [:div.page.channel
         [:div.title
-          [user-pill-view @user]]
+          [user-pill-view (@user :id)]]
         [:div.content
           [:div.description
             [:img.avatar {:src @user-avatar-url}]
