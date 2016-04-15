@@ -42,26 +42,25 @@
 
 (defn invitations-view
   [invites]
-  (fn []
-    [:div.pending-invites
-      [:h2 "Invites"]
-      [:ul.invites
-         (for [invite invites]
-           [:li.invite
-             "Group "
-             [:strong (invite :group-name)]
-             " from "
-             [:strong (invite :inviter-email)]
-             [:br]
-             [:button {:on-click
-                        (fn [_]
-                          (dispatch! :accept-invite invite))}
-               "Accept"]
-             (:button {:on-click
-                        (fn [_]
-                          (dispatch! :decline-invite invite))}
-               "Decline")]
-           )]]))
+  [:div.pending-invites
+    [:h2 "Invites"]
+    [:ul.invites
+       (for [invite invites]
+         [:li.invite
+           "Group "
+           [:strong (invite :group-name)]
+           " from "
+           [:strong (invite :inviter-email)]
+           [:br]
+           [:button {:on-click
+                      (fn [_]
+                        (dispatch! :accept-invite invite))}
+             "Accept"]
+           [:button {:on-click
+                      (fn [_]
+                        (dispatch! :decline-invite invite))}
+             "Decline"]]
+         )]])
 
 (defn me-page-view
   []
