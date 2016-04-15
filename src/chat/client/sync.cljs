@@ -1,22 +1,19 @@
 (ns chat.client.sync
   (:require [taoensso.sente  :as sente :refer [cb-success?]]
+            [taoensso.timbre :as timbre :refer-macros [debugf]]
             [goog.string :as gstring]
             [chat.client.store :as store]
             [goog.string.format]))
 
-(defn debugf [s & args]
-  (js/console.log (apply gstring/format s args)))
+; Change to :debug to get detailed info in dev
+(timbre/set-level! :info)
 
 (defn make-socket! []
   (let [domain (aget js/window "api_domain")
-        proto (if (= 0 (.indexOf domain "localhost:"))
-                "ws"
-                "wss")
         {:keys [chsk ch-recv send-fn state]}
         (sente/make-channel-socket! "/chsk"
-                                    {:chsk-url-fn
-                                     (constantly
-                                       (str proto "://" domain "/chsk"))})]
+                                    {:host domain
+                                     :path "/chsk"})]
     (def chsk       chsk)
     (def ch-chsk    ch-recv)
     (def chsk-send! send-fn)
