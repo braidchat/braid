@@ -22,7 +22,6 @@
 ;                 html (as returned by (dom/*) functions)
 ;         :action - fn to be triggered when result picked
 ;             inputs:
-;                 thread-id
 ;             output:
 ;                 none expected
 ;         :message-transform - fn to apply to text of message
@@ -55,7 +54,7 @@
 (def engines
   [
    ; ... :emoji  -> autocomplete emoji
-   (fn [text thread-id]
+   (fn [text _]
      (let [pattern #"\B[:(](\S{2,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
@@ -65,7 +64,7 @@
                      {:key
                       (fn [] k)
                       :action
-                      (fn [thread-id])
+                      (fn [])
                       :message-transform
                       (fn [text]
                         (string/replace text pattern (str k " ")))
@@ -78,7 +77,7 @@
                                   {:react-key k}])}))))))
 
    ; ... @<user>  -> autocompletes user name
-   (fn [text thread-id]
+   (fn [text _]
      (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> (store/users-in-open-group)
@@ -88,7 +87,7 @@
                      {:key
                       (fn [] (user :id))
                       :action
-                      (fn [thread-id])
+                      (fn [])
                       :message-transform
                       (fn [text]
                         (string/replace text pattern (str "@" (user :nickname) " ")))
@@ -100,7 +99,7 @@
                           [:div.extra "..."]])}))))))
 
    ; ... #<tag>   -> autocompletes tag
-   (fn [text thread-id]
+   (fn [text _]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (let [group-tags (store/tags-in-open-group)
@@ -112,7 +111,7 @@
                        {:key
                         (fn [] (tag :id))
                         :action
-                        (fn [thread-id])
+                        (fn [])
                         :message-transform
                         (fn [text]
                           (string/replace text pattern (str "#" (tag :name) " ")))
@@ -127,7 +126,7 @@
                                                     :group-id (store/open-group-id)})]
                           {:key (constantly (tag :id))
                            :action
-                           (fn [thread-id]
+                           (fn []
                              (dispatch! :create-tag [(tag :name) (tag :group-id) (tag :id)]))
                            :message-transform
                            (fn [text]

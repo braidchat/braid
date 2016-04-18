@@ -17,27 +17,30 @@
 (defn textarea-view [{:keys [text set-text! config on-key-down on-change]}]
   (let [connected? (subscribe [:connected?])
 
-        clear-text! (fn [] (set-text! ""))
-
         send-message!
-        (fn [text]
-          (store/set-new-thread! (config :thread-id))
+        (fn [config text]
           (dispatch! :new-message {:thread-id (config :thread-id)
                                    :content text
                                    :mentioned-user-ids (config :mentioned-user-ids)
                                    :mentioned-tag-ids (config :mentioned-tag-ids)}))]
 
     (r/create-class
-      {:component-did-mount
+      {:display-name "textarea"
+       :component-did-mount
        (fn [c]
-         (resize-textbox (r/dom-node c)))
+         (resize-textbox (r/dom-node c))
+         (let [{:keys [config]} (r/props c)]
+           (when (and (not (config :new-thread?))
+                   (= (config :thread-id) (store/get-new-thread)))
+             (store/clear-new-thread!)
+             (.focus (r/dom-node c)))))
 
        :component-did-update
        (fn [c]
          (resize-textbox (r/dom-node c)))
 
        :reagent-render
-       (fn [{:keys [text]}]
+       (fn [{:keys [text set-text! config on-key-down on-change]}]
          [:textarea {:placeholder (config :placeholder)
                      :value text
                      :disabled (not @connected?)
@@ -48,8 +51,8 @@
                                      (resize-textbox (.. e -target)))})
                      :on-key-down (on-key-down
                                     {:on-submit (fn [e]
-                                                  (send-message! text)
-                                                  (clear-text!))})}])})))
+                                                  (send-message! config text)
+                                                  (set-text! ""))})}])})))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
   [:div.autocomplete
@@ -123,7 +126,7 @@
 
         choose-result!
         (fn [result]
-          ((result :action) (config :thread-id))
+          ((result :action))
           (set-force-close!)
           (set-results! nil)
           (update-text! (result :message-transform)))
@@ -182,21 +185,24 @@
             (on-change e)))]
 
     (r/create-class
-      {:component-will-mount
-       (fn []
-         (go (loop []
-               (let [[v ch] (alts! [throttled-autocomplete-chan kill-chan])]
-                 (when (= ch throttled-autocomplete-chan)
-                   (set-results! (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
-                   (highlight-first!)
-                   (recur))))))
+      {:display-name "autocomplete"
+       :component-will-mount
+       (fn [c]
+         (let [{:keys [config]} (r/props c)]
+           (go (loop []
+                 (let [[v ch] (alts! [throttled-autocomplete-chan kill-chan])]
+                   (when (= ch throttled-autocomplete-chan)
+                     (set-results!
+                       (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
+                     (highlight-first!)
+                     (recur)))))))
 
        :component-will-unmount
        (fn []
          (put! kill-chan (js/Date.)))
 
        :reagent-render
-       (fn []
+       (fn [{:keys [config textarea-view results-view]}]
          [:div.autocomplete-wrapper
           [textarea-view {:text (@state :text)
                           :config config

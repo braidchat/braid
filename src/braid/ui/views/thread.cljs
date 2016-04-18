@@ -13,6 +13,7 @@
 (def max-file-size (* 10 1024 1024))
 
 (defn thread-tags-view [thread]
+  ; TODO: this won't work if the component gets re-rendenered, 'cause thread-id changes
   (let [tags (subscribe [:tags-for-thread (thread :id)])
         mentions (subscribe [:mentions-for-thread (thread :id)])]
     [:div.tags
@@ -42,6 +43,7 @@
     (empty? (thread :mentioned-ids))))
 
 (defn messages-view [thread]
+  ; TODO: this won't work if the component gets re-rendenered, 'cause thread-id changes
   (let [messages (subscribe [:messages-for-thread (thread :id)])
 
         scroll-to-bottom!
@@ -49,7 +51,9 @@
           (when-let [messages (r/dom-node component)]
             (set! (.-scrollTop messages) (.-scrollHeight messages))))]
     (r/create-class
-      {:component-did-mount scroll-to-bottom!
+      {:display-name "thread"
+
+       :component-did-mount scroll-to-bottom!
 
        :component-will-receive-props scroll-to-bottom!
 
@@ -91,10 +95,11 @@
         set-focused! (fn [bool] (swap! state assoc :focused? bool))
         set-dragging! (fn [bool] (swap! state assoc :dragging bool))
 
+        ; TODO: this won't work if the component gets re-rendenered, 'cause thread-id changes
         open? (subscribe [:thread-open? (thread :id)])
 
         maybe-upload-file!
-        (fn [file]
+        (fn [thread-id file]
           (if (> (.-size file) max-file-size)
             (store/display-error! :upload-fail "File to big to upload, sorry")
             (do (set-uploading! true)
@@ -102,7 +107,7 @@
                                   (set-uploading! false)
                                   (dispatch! :new-message
                                              {:content url
-                                              :thread-id (thread :id)}))))))]
+                                              :thread-id thread-id}))))))]
 
     (fn [thread]
       (let [{:keys [dragging? uploading? focused?]} @state
@@ -142,7 +147,7 @@
             (let [pasted-files (.. e -clipboardData -files)]
               (when (< 0 (.-length pasted-files))
                 (.preventDefault e)
-                (maybe-upload-file! (aget pasted-files 0)))))
+                (maybe-upload-file! (thread :id) (aget pasted-files 0)))))
 
           :on-drag-over
           (fn [e]
@@ -160,7 +165,7 @@
             (set-dragging! false)
             (let [file-list (.. e -dataTransfer -files)]
               (when (< 0 (.-length file-list))
-                (maybe-upload-file! (aget file-list 0)))))}
+                (maybe-upload-file! (thread :id) (aget file-list 0)))))}
 
          (when limbo?
            [:div.notice "No one can see this conversation yet. Mention a @user or #tag in a reply."])
@@ -182,6 +187,7 @@
             [messages-view thread])
 
           [new-message-view {:thread-id (thread :id)
+                             :new-thread? new?
                              :placeholder (if new?
                                             "Start a conversation..."
                                             "Reply...")

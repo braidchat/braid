@@ -146,6 +146,10 @@
   :messages-for-thread
   state/get-messages-for-thread)
 
+(register-sub
+  :new-thread-id
+  state/get-new-thread-id)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]
