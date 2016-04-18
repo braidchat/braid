@@ -1,5 +1,4 @@
-(ns chat.client.emoji
-  (:require [om.dom :as dom]))
+(ns chat.client.emoji)
 
 (declare unicode ascii)
 
@@ -7,17 +6,16 @@
   (let [ext :png]
     (case ext
       :png
-      (dom/img #js {:className "emojione"
-                    :alt shortcode
-                    :title shortcode
-                    :src (str "//cdn.jsdelivr.net/emojione/assets/png/" (last (unicode shortcode)) ".png")})
+      [:img {:class "emojione"
+             :alt shortcode
+             :title shortcode
+             :src (str "//cdn.jsdelivr.net/emojione/assets/png/" (last (unicode shortcode)) ".png")}]
       :svg
-      (dom/object #js {:className "emojione"
-                       :data (str "//cdn.jsdelivr.net/emojione/assets/svg/" (last (unicode shortcode)) ".svg")
-                       :type "image/svg+xml"
-                       :title shortcode
-                       :standby shortcode}))))
-
+      [:object {:class "emojione"
+                :data (str "//cdn.jsdelivr.net/emojione/assets/svg/" (last (unicode shortcode)) ".svg")
+                :type "image/svg+xml"
+                :title shortcode
+                :standby shortcode}])))
 
 (def unicode {
 ":kiss_ww:" ["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"]

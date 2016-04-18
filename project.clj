@@ -23,12 +23,10 @@
                  [de.ubercode.clostache/clostache "1.4.0"]
                  ;client
                  [org.clojure/clojurescript "1.8.34"]
-                 [org.omcljs/om "0.9.0"]
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]
                  [cljs-ajax "0.5.4"]
                  [secretary "1.2.3"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
-                 [org.clojars.leanpixel/om-fields "1.9.0"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.1"]
                  ;shared
@@ -59,7 +57,7 @@
                                "src/chat/shared"
                                "src/braid/ui"
                                "src/braid/common"]
-                :compiler {:main chat.client.core
+                :compiler {:main braid.desktop.core
                            :asset-path "/js/desktop/out"
                            :output-to "resources/public/js/desktop/out/braid.js"
                            :output-dir "resources/public/js/desktop/out"
@@ -70,7 +68,7 @@
                                "src/chat/shared"
                                "src/braid/ui"
                                "src/braid/common"]
-                :compiler {:main chat.client.core
+                :compiler {:main braid.desktop.core
                            :asset-path "/js/desktop/out"
                            :output-to "resources/public/js/desktop/out/braid.js"
                            :output-dir "resources/public/js/desktop/out_prod"

@@ -43,7 +43,7 @@
             :style {:background-color
                     (arr->rgb (get-in img [:colors 0 :color]))}}])])
 
-(defn embed-view []
+(defn embed-view [url]
   (let [content (r/atom {})
         set-content! (fn [response]
                       (reset! content response))
@@ -55,9 +55,8 @@
                                      :on-complete set-content!})))]
     (r/create-class
       {:component-did-mount
-       (fn [this]
-         (let [url (:url (r/props this))]
-           (fetch-content! url)))
+       (fn []
+         (fetch-content! url))
 
        :reagent-render
        (fn []

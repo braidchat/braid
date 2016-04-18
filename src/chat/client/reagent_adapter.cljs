@@ -31,6 +31,10 @@
   state/get-page)
 
 (register-sub
+  :page-id
+  state/get-page-id)
+
+(register-sub
   :open-threads
   state/get-open-threads)
 
@@ -41,6 +45,10 @@
 (register-sub
   :user-id
   state/get-user-id)
+
+(register-sub
+  :tag
+  state/get-tag)
 
 (register-sub
   :tags
@@ -70,10 +78,79 @@
   :search-query
   state/get-search-query)
 
+(register-sub
+  :tags-for-thread
+  state/get-tags-for-thread)
+
+(register-sub
+  :mentions-for-thread
+  state/get-mentions-for-thread)
+
+(register-sub
+  :thread-open?
+  state/get-thread-open?)
+
+(register-sub
+  :errors
+  state/get-errors)
+
+(register-sub
+  :login-state
+  state/get-login-state)
+
+(register-sub
+  :group-for-tag
+  state/get-group-for-tag)
+
+(register-sub
+  :open-thread-ids
+  state/get-open-thread-ids)
+
+(register-sub
+  :get-threads-for-group
+  state/get-threads-for-group)
+
+(register-sub
+  :nickname
+  state/get-nickname)
+
+(register-sub
+  :invitations
+  state/get-invitations)
+
+(register-sub
+  :users
+  state/get-users)
+
+(register-sub
+  :user
+  state/get-user)
+
+(register-sub
+  :threads
+  state/get-threads)
+
+(register-sub
+  :pagination-remaining
+  state/get-pagination-remaining)
+
+(register-sub
+  :user-subscribed-tag-ids
+  state/get-user-subscribed-tag-ids)
+
+(register-sub
+  :connected?
+  state/get-connected?)
+
+(register-sub
+  :messages-for-thread
+  state/get-messages-for-thread)
+
+(register-sub
+  :new-thread-id
+  state/get-new-thread-id)
 
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]
     (handler-fn store/app-state v)))
-
-
