@@ -1,5 +1,6 @@
 (ns chat.client.store
   (:require [cljs-utils.core :refer [flip]]
+            [cljs-uuid-utils.core :as uuid]
             [reagent.core :as r]))
 
 (defonce app-state
@@ -21,7 +22,7 @@
             :subscribed-tag-ids #{}
             :user-id nil
             :nickname nil}
-     :new-thread-id nil}))
+     :new-thread-id (uuid/make-random-squuid)}))
 
 (defn- key-by-id [coll]
   (into {} (map (juxt :id identity)) coll))
@@ -117,7 +118,7 @@
   (@app-state :new-thread-id))
 
 (defn clear-new-thread! []
-  (transact! [:new-thread-id] (constantly nil)))
+  (transact! [:new-thread-id] (fn [_] (uuid/make-random-squuid))))
 
 (defn update-thread-last-open-at [thread-id]
   (transact! [:threads thread-id :last-open-at] (constantly (js/Date.))))

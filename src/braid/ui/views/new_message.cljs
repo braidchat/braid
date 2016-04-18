@@ -20,7 +20,7 @@
         clear-text! (fn [] (set-text! ""))
 
         send-message!
-        (fn [text]
+        (fn [config text]
           (store/set-new-thread! (config :thread-id))
           (dispatch! :new-message {:thread-id (config :thread-id)
                                    :content text
@@ -30,14 +30,18 @@
     (r/create-class
       {:component-did-mount
        (fn [c]
-         (resize-textbox (r/dom-node c)))
+         (resize-textbox (r/dom-node c))
+         (when (and (not (config :new-thread?))
+                 (= (config :thread-id) (store/get-new-thread)))
+           (store/clear-new-thread!)
+           (.focus (r/dom-node c))))
 
        :component-did-update
        (fn [c]
          (resize-textbox (r/dom-node c)))
 
        :reagent-render
-       (fn [{:keys [text]}]
+       (fn [{:keys [config text]}]
          [:textarea {:placeholder (config :placeholder)
                      :value text
                      :disabled (not @connected?)
@@ -48,7 +52,7 @@
                                      (resize-textbox (.. e -target)))})
                      :on-key-down (on-key-down
                                     {:on-submit (fn [e]
-                                                  (send-message! text)
+                                                  (send-message! config text)
                                                   (clear-text!))})}])})))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
@@ -123,7 +127,7 @@
 
         choose-result!
         (fn [result]
-          ((result :action) (config :thread-id))
+          ((result :action))
           (set-force-close!)
           (set-results! nil)
           (update-text! (result :message-transform)))
@@ -196,7 +200,7 @@
          (put! kill-chan (js/Date.)))
 
        :reagent-render
-       (fn []
+       (fn [{:keys [config textarea-view results-view]}]
          [:div.autocomplete-wrapper
           [textarea-view {:text (@state :text)
                           :config config
@@ -217,8 +221,7 @@
                                             (focus-textbox!)))}])])})))
 
 (defn new-message-view [config]
-  [:div.message.new
-   [wrap-autocomplete {:config config
-                       :textarea-view textarea-view
-                       :results-view autocomplete-results-view}]])
+  [wrap-autocomplete {:config config
+                      :textarea-view textarea-view
+                      :results-view autocomplete-results-view}])
 

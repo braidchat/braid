@@ -182,6 +182,7 @@
             [messages-view thread])
 
           [new-message-view {:thread-id (thread :id)
+                             :new-thread? new?
                              :placeholder (if new?
                                             "Start a conversation..."
                                             "Reply...")

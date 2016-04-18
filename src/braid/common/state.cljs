@@ -223,3 +223,7 @@
 (defn get-connected?
   [state _]
   (reaction (not-any? (fn [[k _]] (= :disconnected k)) (@state :errors))))
+
+(defn get-new-thread-id
+  [state _]
+  (reaction (get @state :new-thread-id)))
