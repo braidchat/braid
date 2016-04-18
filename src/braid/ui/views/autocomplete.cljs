@@ -22,7 +22,6 @@
 ;                 html (as returned by (dom/*) functions)
 ;         :action - fn to be triggered when result picked
 ;             inputs:
-;                 thread-id
 ;             output:
 ;                 none expected
 ;         :message-transform - fn to apply to text of message
@@ -65,7 +64,7 @@
                      {:key
                       (fn [] k)
                       :action
-                      (fn [thread-id])
+                      (fn [])
                       :message-transform
                       (fn [text]
                         (string/replace text pattern (str k " ")))
@@ -88,7 +87,7 @@
                      {:key
                       (fn [] (user :id))
                       :action
-                      (fn [thread-id])
+                      (fn [])
                       :message-transform
                       (fn [text]
                         (string/replace text pattern (str "@" (user :nickname) " ")))
@@ -112,7 +111,7 @@
                        {:key
                         (fn [] (tag :id))
                         :action
-                        (fn [thread-id])
+                        (fn [])
                         :message-transform
                         (fn [text]
                           (string/replace text pattern (str "#" (tag :name) " ")))
@@ -127,7 +126,7 @@
                                                     :group-id (store/open-group-id)})]
                           {:key (constantly (tag :id))
                            :action
-                           (fn [thread-id]
+                           (fn []
                              (dispatch! :create-tag [(tag :name) (tag :group-id) (tag :id)]))
                            :message-transform
                            (fn [text]
