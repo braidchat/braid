@@ -54,7 +54,7 @@
 (def engines
   [
    ; ... :emoji  -> autocomplete emoji
-   (fn [text thread-id]
+   (fn [text _]
      (let [pattern #"\B[:(](\S{2,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
@@ -77,7 +77,7 @@
                                   {:react-key k}])}))))))
 
    ; ... @<user>  -> autocompletes user name
-   (fn [text thread-id]
+   (fn [text _]
      (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> (store/users-in-open-group)
@@ -99,7 +99,7 @@
                           [:div.extra "..."]])}))))))
 
    ; ... #<tag>   -> autocompletes tag
-   (fn [text thread-id]
+   (fn [text _]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (let [group-tags (store/tags-in-open-group)
