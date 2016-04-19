@@ -93,7 +93,7 @@
                        :focused? false})
         set-uploading! (fn [bool] (swap! state assoc :uploading? bool))
         set-focused! (fn [bool] (swap! state assoc :focused? bool))
-        set-dragging! (fn [bool] (swap! state assoc :dragging bool))
+        set-dragging! (fn [bool] (swap! state assoc :dragging? bool))
 
         ; TODO: this won't work if the component gets re-rendenered, 'cause thread-id changes
         open? (subscribe [:thread-open? (thread :id)])
