@@ -183,7 +183,8 @@
          (interleave (repeat " "))
          rest)))
 
-(defn message-view [message opts]
+(defn message-view [message]
+  ; TODO: closing over value!
   (let [sender (subscribe [:user (message :user-id)])]
     (r/create-class
       {:component-did-mount
@@ -194,10 +195,10 @@
          (when-let [PR (aget js/window "PR")]
            ((aget PR "prettyPrint"))))
        :reagent-render
-       (fn []
+       (fn [message]
          (let [sender-path (routes/user-page-path {:group-id (routes/current-group)
                                                    :user-id (@sender :id)})]
-           [:div.message {:class (str " " (when (:collapse? opts) "collapse")
+           [:div.message {:class (str " " (when (:collapse? message) "collapse")
                                       " " (if (:unseen? message) "unseen" "seen")
                                       " " (when (:first-unseen? message) "first-unseen")
                                       " " (when (:failed? message) "failed-to-send"))}
