@@ -186,6 +186,9 @@
           (when-not new?
             [messages-view thread])
 
+          (when uploading?
+            [:div.uploading-indicator "\uf110"])
+
           [new-message-view {:thread-id (thread :id)
                              :new-thread? new?
                              :placeholder (if new?
