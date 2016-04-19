@@ -151,14 +151,16 @@
 
 (def extract-code-blocks
   (make-delimited-processor {:delimiter "```"
-                             :result-fn (partial [:code.prettyprint.multiline-code.lang-clj])}))
+                             :result-fn (fn [body]
+                                          [:code.prettyprint.multiline-code.lang-clj body])}))
 (def extract-code-inline
   (make-delimited-processor {:delimiter "`"
-                             :result-fn (partial [:code.prettyprint.inline-code.lang-clj])}))
+                             :result-fn (fn [body]
+                                          [:code.prettyprint.inline-code.lang-clj body])}))
 
 (def extract-emphasized
   (make-delimited-processor {:delimiter "*"
-                             :result-fn (partial [:strong.starred])}))
+                             :result-fn (fn [body] [:strong.starred body])}))
 
 
 (defn extract-urls
