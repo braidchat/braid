@@ -52,7 +52,7 @@
   :cljsbuild {:builds
               [
                {:id "desktop-dev"
-                :figwheel true
+                :figwheel {:on-jsload "braid.desktop.core/reload"}
                 :source-paths ["src/chat/client"
                                "src/chat/shared"
                                "src/braid/ui"

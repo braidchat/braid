@@ -19,3 +19,8 @@
   (router/init)
 
   (dispatcher/dispatch! :check-auth!))
+
+(defn ^:export reload
+  "Force a re-render. For use with figwheel"
+  []
+  (r/render [app-view] (.getElementById js/document "app")))
