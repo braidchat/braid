@@ -29,6 +29,7 @@
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.1"]
+                 [reagent "0.5.1"]
                  ;shared
                  [org.clojure/tools.reader "1.0.0-alpha3"]
                  [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
