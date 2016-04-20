@@ -186,7 +186,6 @@
          rest)))
 
 (defn message-view [message]
-  ; TODO: closing over value!
   (let [sender (subscribe [:user (message :user-id)])]
     (r/create-class
       {:component-did-mount

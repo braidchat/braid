@@ -13,7 +13,8 @@
 (def max-file-size (* 10 1024 1024))
 
 (defn thread-tags-view [thread]
-  ; TODO: this won't work if the component gets re-rendenered, 'cause thread-id changes
+  ; Closing over thread-id, but the only time a thread's id changes is the new
+  ; thread box, which doesn't have tags anyway
   (let [tags (subscribe [:tags-for-thread (thread :id)])
         mentions (subscribe [:mentions-for-thread (thread :id)])]
     [:div.tags
@@ -43,7 +44,8 @@
     (empty? (thread :mentioned-ids))))
 
 (defn messages-view [thread]
-  ; TODO: this won't work if the component gets re-rendenered, 'cause thread-id changes
+  ; Closing over thread-id, but the only time a thread's id changes is the new
+  ; thread box, which doesn't have messages anyway
   (let [messages (subscribe [:messages-for-thread (thread :id)])
 
         scroll-to-bottom!
@@ -95,7 +97,8 @@
         set-focused! (fn [bool] (swap! state assoc :focused? bool))
         set-dragging! (fn [bool] (swap! state assoc :dragging? bool))
 
-        ; TODO: this won't work if the component gets re-rendenered, 'cause thread-id changes
+        ; Closing over thread-id, but the only time a thread's id changes is the new
+        ; thread box, which is always open
         open? (subscribe [:thread-open? (thread :id)])
 
         maybe-upload-file!
