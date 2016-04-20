@@ -4,7 +4,7 @@
             [compojure.core :refer [GET POST routes defroutes context]]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [taoensso.timbre :as timbre :refer [debugf]]
-            [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
+            [clojure.string :as string]
             [chat.server.db :as db]
             [chat.server.search :as search]
             [chat.server.invite :as invites]
