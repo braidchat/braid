@@ -48,7 +48,7 @@
         set-content! (fn [response]
                       (reset! content response))
         fetch-content! (fn [url]
-                         (when (seq url)
+                         (when (some? url)
                            (edn-xhr {:method :get
                                      :uri "/extract"
                                      :params {:url url}
