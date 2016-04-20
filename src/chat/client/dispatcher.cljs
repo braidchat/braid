@@ -124,6 +124,16 @@
         (on-error msg)
         (store/set-nickname! nickname)))))
 
+(defmethod dispatch! :set-password [_ [password on-success on-error]]
+  (sync/chsk-send!
+    [:user/set-password {:password password}]
+    3000
+    (fn [reply]
+      (cond
+        (reply :error) (on-error reply)
+        (= reply :chsk/timeout) (on-error {:error "Couldn't connect to server, please try again"})
+        true (on-success)))))
+
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
     [:chat/search query]

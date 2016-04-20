@@ -155,6 +155,15 @@
           (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))
       (when ?reply-fn (?reply-fn {:error "Invalid nickname"})))))
 
+(defmethod event-msg-handler :user/set-password
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (if (string/blank? (?data :password))
+      (when ?reply-fn (?reply-fn {:error "Password cannot be blank"}))
+      (do
+        (db/with-conn (db/set-user-password! user-id (?data :password)))
+        (when ?reply-fn (?reply-fn {:ok true}))))))
+
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
