@@ -180,7 +180,7 @@
 
          [:div.card
           [:div.head
-           (when (and (not new?) open?)
+           (when (and (not new?) @open?)
              [:div.close
               {:on-click (fn [_]
                            (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"])

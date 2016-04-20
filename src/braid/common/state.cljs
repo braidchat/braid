@@ -110,7 +110,7 @@
 (defn get-users-in-group
   [state [_ group-id]]
   (reaction
-    (->> (state :users)
+    (->> (@state :users)
          vals
          (filter (fn [u] (contains? (set (u :group-ids)) group-id))))))
 
@@ -120,7 +120,7 @@
 
 (defn get-users-in-open-group
   [state [_ status]]
-  (reaction (->> @(get-users-in-group @state [nil (@state :open-group-id)])
+  (reaction (->> @(get-users-in-group state [nil (@state :open-group-id)])
                  (filter (fn [u] (= status (u :status)))))))
 
 (defn get-user-id
@@ -174,11 +174,11 @@
 
 (defn get-thread-open?
   [state [_ thread-id]]
-  (reaction (contains? (set (get-in state [:user :open-thread-ids])) thread-id)))
+  (reaction (contains? (set (get-in @state [:user :open-thread-ids])) thread-id)))
 
 (defn get-errors
   [state _]
-  (reaction (get-in state [:errors])))
+  (reaction (get-in @state [:errors])))
 
 (defn get-login-state
   [state _]
