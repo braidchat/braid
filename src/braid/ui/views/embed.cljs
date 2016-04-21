@@ -51,7 +51,7 @@
                          (when (some? url)
                            (edn-xhr {:method :get
                                      :uri "/extract"
-                                     :params {:url url}
+                                     :params {:url (js/encodeURI url)}
                                      :on-complete set-content!})))]
     (r/create-class
       {:component-did-mount
