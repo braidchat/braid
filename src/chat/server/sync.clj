@@ -4,7 +4,7 @@
             [compojure.core :refer [GET POST routes defroutes context]]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [taoensso.timbre :as timbre :refer [debugf]]
-            [clojure.core.async :as async :refer [<! <!! >! >!! put! chan go go-loop]]
+            [clojure.string :as string]
             [chat.server.db :as db]
             [chat.server.search :as search]
             [chat.server.invite :as invites]
@@ -154,6 +154,15 @@
         (catch java.util.concurrent.ExecutionException _
           (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))
       (when ?reply-fn (?reply-fn {:error "Invalid nickname"})))))
+
+(defmethod event-msg-handler :user/set-password
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (if (string/blank? (?data :password))
+      (when ?reply-fn (?reply-fn {:error "Password cannot be blank"}))
+      (do
+        (db/with-conn (db/set-user-password! user-id (?data :password)))
+        (when ?reply-fn (?reply-fn {:ok true}))))))
 
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

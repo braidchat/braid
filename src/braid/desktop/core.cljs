@@ -1,8 +1,7 @@
-(ns chat.client.core
-  (:require [om.core :as om]
+(ns braid.desktop.core
+  (:require [reagent.core :as r]
             [chat.client.store :as store]
-            [chat.client.sync :as sync]
-            [chat.client.views :as views]
+            [braid.ui.views.app :refer [app-view]]
             [chat.client.clj-highlighter :as highlighter]
             [chat.client.dispatcher :as dispatcher]
             [chat.client.router :as router]))
@@ -15,9 +14,13 @@
 
   (highlighter/install-highlighter)
 
-  (om/root views/app-view store/app-state
-           {:target (. js/document (getElementById "app"))})
+  (r/render [app-view] (. js/document (getElementById "app")))
 
   (router/init)
 
   (dispatcher/dispatch! :check-auth!))
+
+(defn ^:export reload
+  "Force a re-render. For use with figwheel"
+  []
+  (r/render [app-view] (.getElementById js/document "app")))

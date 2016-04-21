@@ -43,21 +43,20 @@
             :style {:background-color
                     (arr->rgb (get-in img [:colors 0 :color]))}}])])
 
-(defn embed-view []
+(defn embed-view [url]
   (let [content (r/atom {})
         set-content! (fn [response]
                       (reset! content response))
         fetch-content! (fn [url]
-                         (when (seq url)
+                         (when (some? url)
                            (edn-xhr {:method :get
                                      :uri "/extract"
-                                     :params {:url url}
+                                     :params {:url (js/encodeURI url)}
                                      :on-complete set-content!})))]
     (r/create-class
       {:component-did-mount
-       (fn [this]
-         (let [url (:url (r/props this))]
-           (fetch-content! url)))
+       (fn []
+         (fetch-content! url))
 
        :reagent-render
        (fn []

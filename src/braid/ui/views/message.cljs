@@ -1,15 +1,14 @@
-(ns chat.client.views.message
-  (:require [om.core :as om]
-            [om.dom :as dom]
+(ns braid.ui.views.message
+  (:require [reagent.core :as r]
             [clojure.string :as string]
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [id->color]]
-            [chat.client.reagent-adapter :refer [reagent->react subscribe]]
+            [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.embed :refer [embed-view]]
+            [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [chat.client.emoji :as emoji]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.helpers :as helpers :refer [starts-with? ends-with?]]
-            [chat.client.views.pills :refer [tag-view user-view]]
             [chat.client.routes :as routes]))
 
 (def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
@@ -31,24 +30,24 @@
   {:urls
    {:pattern url-re
     :replace (fn [match]
-               (dom/a #js {:className "external"
-                           :href match
-                           :title match
-                           :target "_blank"
-                           :tabIndex -1}
-                 (abridged-url match)))}
+               [:a.external {:href match
+                             :title match
+                             :target "_blank"
+                             :tabIndex -1}
+                 (abridged-url match)])}
    :users
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
+               ;TODO: Subscribe to valid user id
                (if (store/valid-user-id? (uuid match))
-                 (om/build user-view {:id (uuid match)})
-                 (dom/span nil "@" match)))}
+                 [user-pill-view (uuid match)]
+                 [:span "@" match]))}
    :tags
    {:pattern #"#([-0-9a-z]+)"
     :replace (fn [match]
-               (if-let [tag (store/get-tag (uuid match))]
-                 (om/build tag-view tag)
-                 (dom/span nil "#" match)))}
+               (if (store/get-tag (uuid match))
+                 [tag-pill-view (uuid match)]
+                 [:span "#" match]))}
    :emoji-shortcodes
    {:pattern #"(:\S*:)"
     :replace (fn [match]
@@ -71,7 +70,7 @@
     (let [[pre _ post] (seq (.split s re 3))]
       (if (or (string/blank? pre) (re-matches #".*\s$" pre))
       ; XXX: find a way to use return a seq & use mapcat instead of this hack
-      (dom/span #js {:className "dummy"} pre (replace-fn match) post)
+      [:span.dummy pre (replace-fn match) post]
       s))
     s))
 
@@ -152,18 +151,17 @@
 
 (def extract-code-blocks
   (make-delimited-processor {:delimiter "```"
-                             :result-fn (partial dom/code #js {:className "prettyprint multiline-code lang-clj"})}))
+                             :result-fn (fn [body]
+                                          [:code.prettyprint.multiline-code.lang-clj body])}))
 (def extract-code-inline
   (make-delimited-processor {:delimiter "`"
-                             :result-fn (partial dom/code #js {:className "prettyprint inline-code lang-clj"})}))
+                             :result-fn (fn [body]
+                                          [:code.prettyprint.inline-code.lang-clj body])}))
 
 (def extract-emphasized
   (make-delimited-processor {:delimiter "*"
-                             :result-fn (partial dom/strong #js {:className "starred"})}))
+                             :result-fn (fn [body] [:strong.starred body])}))
 
-
-(def EmbedView
-  (reagent->react embed-view))
 
 (defn extract-urls
   "Given some text, returns a sequence of URLs contained in the text"
@@ -187,49 +185,42 @@
          (interleave (repeat " "))
          rest)))
 
-(defn message-view [message owner opts]
-  (reify
-    om/IDidMount
-    (did-mount [_]
-      ; TODO: use prettyPrintOne to only do the content of this node
-      ; TODO: also call on IDidUpdate?
-      ; TODO: don't call if don't have code?
-      (when-let [PR (aget js/window "PR")]
-        ((aget PR "prettyPrint"))))
-    om/IRender
-    (render [_]
-      (let [sender (if-let [cur (helpers/user-cursor (message :user-id))]
-                     (om/observe owner cur)
-                     {:nickname "???"})
-            sender-path (routes/user-page-path {:group-id (routes/current-group)
-                                                :user-id (sender :id)})]
-        (dom/div #js {:className (str "message"
-                                      " " (when (:collapse? opts) "collapse")
+(defn message-view [message]
+  (let [sender (subscribe [:user (message :user-id)])]
+    (r/create-class
+      {:component-did-mount
+       (fn []
+         ; TODO: use prettyPrintOne to only do the content of this node
+         ; TODO: also call on IDidUpdate?
+         ; TODO: don't call if don't have code?
+         (when-let [PR (aget js/window "PR")]
+           ((aget PR "prettyPrint"))))
+       :reagent-render
+       (fn [message]
+         (let [sender-path (routes/user-page-path {:group-id (routes/current-group)
+                                                   :user-id (@sender :id)})]
+           [:div.message {:class (str " " (when (:collapse? message) "collapse")
                                       " " (if (:unseen? message) "unseen" "seen")
                                       " " (when (:first-unseen? message) "first-unseen")
                                       " " (when (:failed? message) "failed-to-send"))}
-          (when (:failed? message)
-            (dom/div #js {:className "error"}
-              (dom/span nil "Message failed to send")
-              (dom/button #js {:onClick (fn [_] (dispatch! :resend-message message))}
-                "Resend")))
-          (dom/a #js {:href sender-path
-                      :tabIndex -1
-                      :className "avatar"}
-            (dom/img #js {:src (sender :avatar)
-                          :style #js {:backgroundColor (id->color (sender :id))}}))
-          (dom/div #js {:className "info"}
-            (dom/a #js {:className "nickname"
-                        :tabIndex -1
-                        :href sender-path}
-              (sender :nickname))
-            (dom/span #js {:className "time"
-                           :title (message :created-at)} (helpers/format-date (message :created-at))))
+            (when (:failed? message)
+              [:div.error
+               [:span "Message failed to send"]
+               [:button {:on-click
+                         (fn [_] (dispatch! :resend-message message))}
+                "Resend"]])
+            [:a.avatar {:href sender-path
+                        :tabIndex -1}
+             [:img {:src (@sender :avatar)
+                    :style {:backgroundColor (id->color (@sender :id))}}]]
+            [:div.info
+             [:a.nickname {:tabIndex -1
+                           :href sender-path}
+              (@sender :nickname)]
+             [:span.time {:title (message :created-at)} (helpers/format-date (message :created-at))]]
 
-          (apply dom/div #js {:className "content"}
-            (format-message (message :content)))
+            (into [:div.content] (format-message (message :content)))
 
-          (when-let [url (first (extract-urls (message :content)))]
-            (EmbedView. #js {:url url})))))))
-
+            (when-let [url (first (extract-urls (message :content)))]
+              [embed-view url])]))})))
 

@@ -1,16 +1,17 @@
 (ns braid.ui.views.sidebar
   (:require [clojure.string :as string]
             [chat.client.views.helpers :refer [id->color]]
-            [chat.client.routes :as routes]))
+            [chat.client.routes :as routes]
+            [chat.client.reagent-adapter :refer [subscribe]]))
 
-(defn badge-view [{:keys [subscribe]} group-id]
+(defn badge-view [group-id]
   (let [cnt (subscribe [:group-unread-count group-id])]
     (fn []
       (if (and @cnt (> @cnt 0))
         [:div.badge @cnt]
         [:div]))))
 
-(defn groups-view [{:keys [subscribe] :as props}]
+(defn groups-view []
   (let [groups (subscribe [:groups])
         active-group (subscribe [:active-group])]
     (fn []
@@ -25,15 +26,15 @@
              :href (routes/page-path {:group-id (group :id)
                                       :page-id "inbox"})}
             (string/join "" (take 2 (group :name)))
-            [badge-view props (group :id)]]))])))
+            [badge-view (group :id)]]))])))
 
-(defn new-group-view [{:keys [subscribe]}]
+(defn new-group-view []
  (let [page (subscribe [:page])]
    (fn []
      [:a.option.plus {:class (when (= (@page :type) :group-explore) "active")
                       :href (routes/other-path {:page-id "group-explore"})}])))
 
-(defn sidebar-view [props]
+(defn sidebar-view []
   [:div.sidebar
-   [groups-view props]
-   [new-group-view props]])
+   [groups-view]
+   [new-group-view]])

@@ -1,7 +1,6 @@
 (ns chat.client.views.helpers
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [om.core :as om]
-            [cljs.core.async :refer [<! put! chan alts! timeout]]
+  (:require [cljs.core.async :refer [<! put! chan alts! timeout]]
             [cljs-time.format :as f]
             [cljs-time.core :as t]
             [chat.client.store :as store]))
@@ -23,12 +22,6 @@
                        (js/parseInt 16)
                        (/ 4096))]
     (str "hsl(" (* 360 normalized) ",70%,35%)")))
-
-(defn user-cursor
-  "Get an om cursor for the given user"
-  [user-id]
-  (when (store/valid-user-id? user-id)
-    (om/ref-cursor (get-in (om/root-cursor store/app-state) [:users user-id]))))
 
 (defn format-date
   "Turn a Date object into a nicely formatted string"
