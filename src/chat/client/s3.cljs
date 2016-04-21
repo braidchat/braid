@@ -15,12 +15,14 @@
                          (pr-str (:error err))))
      :on-complete
      (fn [{:keys [bucket auth]}]
-       (let [file-name (str (uuid/make-random-squuid) "." (last (split (.-type file) #"/")))
-             file-url (str "https://s3.amazonaws.com/" bucket "/uploads/" file-name)]
+       (let [file-name (.-name file)
+             file-dir (uuid/make-random-squuid)
+             file-url (str "https://s3.amazonaws.com/" bucket "/uploads/" file-dir
+                           "/" (js/encodeURIComponent file-name))]
          (ajax-xhr {:method :post
                     :uri (str "https://s3.amazonaws.com/" bucket)
                     :body (doto (js/FormData.)
-                            (.append "key" "uploads/${filename}")
+                            (.append "key" (str "uploads/" file-dir "/${filename}"))
                             (.append "AWSAccessKeyId" (:key auth))
                             (.append "acl" "public-read")
                             (.append "policy" (:policy auth))
