@@ -104,7 +104,6 @@
   (let [email-freq (subscribe [:user-preference :email-frequency])]
     (fn []
       [:div
-       [:h2 "Email Digest Settings"]
        [:p "If you wish, you can recieve emails notifying you of threads that you"
         " haven't seen yet."]
        [:p (str "Currently getting emails " ((fnil name "never") @email-freq))]
