@@ -457,7 +457,7 @@
        (map first)
        set))
 
-(defn thread-add-last-open-at [thread user-id]
+(defn thread-last-open-at [thread user-id]
   (let [user-hides-at (->> (d/q
                              '[:find [?inst ...]
                                :in $ ?thread-id ?user-id
@@ -474,7 +474,10 @@
                               (filter (fn [m] (= (m :user-id) user-id)))
                               (map :created-at)
                               (map (fn [t] (.getTime t))))]
-  (assoc thread :last-open-at (apply max (concat [0] user-hides-at user-messages-at)))))
+    (apply max (concat [0] user-hides-at user-messages-at))))
+
+(defn thread-add-last-open-at [thread user-id]
+  (assoc thread :last-open-at (thread-last-open-at thread user-id)))
 
 (defn update-thread-last-open [thread-id user-id]
   (when (seq (d/q '[:find ?t
