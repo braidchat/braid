@@ -6,7 +6,9 @@
             [clojurewerkz.quartzite.schedule.cron :as cron]
             [clj-time
              [core :as time]
+             [format :as format]
              [coerce :refer [to-date-time]]]
+            [clojure.string :as string]
             [environ.core :refer [env]]
             [clostache.parser :refer [render-resource]]
             [inliner.core :refer [inline-css]]
@@ -30,24 +32,48 @@
           (time/after? (to-date-time created-at) cutoff))
         (thread :messages)))
 
+(defn str->uuid
+  [s]
+  (java.util.UUID/fromString s))
+
 (defn updates-for-user-since
   [user-id cutoff]
   (db/with-conn
     (let [users (db/fetch-users-for-user user-id)
           id->nick (into {} (map (juxt :id :nickname)) users)
-          id->avatar (into {} (map (juxt :id :avatar)) users)]
+          id->avatar (into {} (map (juxt :id :avatar)) users)
+          id->tag (into {} (map (juxt :id :name)) (db/fetch-tags-for-user user-id))
+          uuid-re #"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+          tag-re (re-pattern (str "#" uuid-re))
+          mention-re (re-pattern (str "@" uuid-re))
+          parse-tags-and-metions
+          (fn [content]
+            (-> content
+                (string/replace tag-re
+                                (comp (partial str "#") id->tag str->uuid second))
+                (string/replace mention-re
+                                (comp (partial str "@") id->nick str->uuid second))))
+          pretty-time (comp
+                        (partial format/unparse (format/formatter "h:mm MMM d"))
+                        to-date-time)]
       (into ()
             (comp
               (filter thread-unseen?)
               (filter (partial last-message-after? cutoff))
               (map
                 (fn [t]
-                  (update t :messages
-                          (partial map
-                                   (fn [{sender-id :user-id :as m}]
-                                     (-> m
-                                         (assoc :sender (id->nick sender-id))
-                                         (assoc :sender-avatar (id->avatar sender-id)))))))))
+                  (let [thread-last-open (to-date-time (db/thread-last-open-at t user-id))]
+                    (update t :messages
+                            (partial map
+                                     (fn [{sender-id :user-id :as m}]
+                                       (-> m
+                                           (update :content parse-tags-and-metions)
+                                           (assoc :unseen
+                                             (if (time/before? (to-date-time (m :created-at)) thread-last-open)
+                                               "seen" "unseen"))
+                                           (update :created-at pretty-time)
+                                           (assoc :sender (id->nick sender-id))
+                                           (assoc :sender-avatar (id->avatar sender-id))))))))))
             (db/get-open-threads-for-user user-id)))))
 
 (defn daily-update-users
@@ -62,6 +88,7 @@
 
 ; build a message from a thread
 
+; TODO: look into rendering clojurescript to string instead of making a template
 (defn create-message
   [threads]
   {:html  (inline-css (render-resource "templates/email_digest.html.mustache"
