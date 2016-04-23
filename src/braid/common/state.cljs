@@ -227,3 +227,7 @@
 (defn get-new-thread-id
   [state _]
   (reaction (get @state :new-thread-id)))
+
+(defn get-preference
+  [state [_ pref]]
+  (reaction (get-in @state [:preferences pref])))

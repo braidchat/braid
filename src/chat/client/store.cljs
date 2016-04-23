@@ -16,6 +16,7 @@
      :session nil
      :errors []
      :invitations []
+     :preferences {}
      :notifications {:window-visible? true
                      :unread-count 0}
      :user {:open-thread-ids #{}
@@ -304,6 +305,14 @@
 (defn remove-invite! [invite]
   (transact! [:invitations] (partial remove (partial = invite))))
 
+; preferences
+
+(defn add-preferences! [prefs]
+  (transact! [:preferences] #(merge % prefs)))
+
+(defn user-preferences []
+  (get @app-state :preferences))
+
 ; inbox
 
 (defn open-threads [state]
@@ -317,4 +326,5 @@
                                       (into #{} (map group-for-tag) (thread :tag-ids))
                                       current-group-id))))))]
       open-threads))
+
 

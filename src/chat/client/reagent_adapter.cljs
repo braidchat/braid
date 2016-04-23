@@ -150,6 +150,10 @@
   :new-thread-id
   state/get-new-thread-id)
 
+(register-sub
+  :user-preference
+  state/get-preference)
+
 (defn subscribe [v]
   (let [key-v (first v)
         handler-fn (get @subscriptions key-v)]

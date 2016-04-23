@@ -99,6 +99,19 @@
                    (dispatch! :decline-invite invite))}
         "Decline"]])]])
 
+(defn email-settings-view
+  []
+  (let [email-freq (subscribe [:user-preference :email-frequency])]
+    (fn []
+      [:div
+       [:h2 (str "Currently getting emails " ((fnil name "never") @email-freq))]
+       [:select {:on-change (fn [e]
+                              (let [v (keyword (.. e -target -value))]
+                                (dispatch! :set-preference [:email-frequency v])))}
+        (for [freq [:never :weekly :daily]]
+          ^{:key freq}
+          [:option {:value freq} (name freq)])]])))
+
 (defn me-page-view
   []
   (let [invitations (subscribe [:invitations])]
@@ -117,4 +130,6 @@
         [:h2 "Received Invites"]
         (when (seq @invitations)
           ;TODO: render correctly
-          [invitations-view @invitations])]])))
+          [invitations-view @invitations])
+        [:h2 "Email Digest Preferences"]
+        [email-settings-view]]])))
