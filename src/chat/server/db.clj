@@ -260,10 +260,7 @@
 
 (defn email-taken?
   [email]
-  (-> (d/q '[:find ?e .
-             :in $ ?email
-             :where [?e :user/email ?email]] (d/db *conn*) email)
-      some?))
+  (some? (d/entity (d/db *conn*) [:user/email email])))
 
 (defn create-user!
   "creates a user, returns id"
@@ -317,13 +314,7 @@
 
 (defn user-id-exists?
   [id]
-  (boolean
-    (seq (d/q '[:find [?e]
-                :in $ ?id
-                :where
-                [?e :user/id ?id]]
-              (d/db *conn*)
-              id))))
+  (some? (d/entity (d/db *conn*) [:user/id id])))
 
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
@@ -378,13 +369,13 @@
   "Are the two user ids users that can see each other? i.e. do they have at least one group in common"
   [user1-id user2-id]
   (-> (d/q '[:find ?g
-         :in $ ?u1-id ?u2-id
-         :where
-         [?u1 :user/id ?u1-id]
-         [?u2 :user/id ?u2-id]
-         [?g :group/user ?u1]
-         [?g :group/user ?u2]]
-       (d/db *conn*) user1-id user2-id)
+             :in $ ?u1-id ?u2-id
+             :where
+             [?u1 :user/id ?u1-id]
+             [?u2 :user/id ?u2-id]
+             [?g :group/user ?u1]
+             [?g :group/user ?u2]]
+           (d/db *conn*) user1-id user2-id)
       seq boolean))
 
 (defn fetch-invitations-for-user
