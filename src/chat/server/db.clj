@@ -662,11 +662,10 @@
               [?sub :user/subscribed-tag ?t]
               [?th :thread/tag ?t]]
             (d/db *conn*) user-id)
-       (reduce (fn [memo [tag-id threads-count subscribers-count]]
-                 (assoc memo tag-id
-                   {:tag/threads-count threads-count
-                    :tag/subscribers-count subscribers-count}))
-               {})))
+       (map (fn [tag-id threads-count subscribers-count]
+              [tag-id {:tag/threads-count threads-count
+                       :tag/subscribers-count subscribers-count}]))
+       (into {})))
 
 (defn fetch-tags-for-user
   "Get all tags visible to the given user"
@@ -684,7 +683,7 @@
               (d/db *conn*) user-id)
          (map (fn [[tag]]
                 (db->tag (merge tag (tag-stats (tag :tag/id))))))
-         set)))
+         (into #{}))))
 
 (defn threads-with-tag
   "Find threads with a given tag that the user is allowed to see, ordered by most recent message.
@@ -701,9 +700,9 @@
                               (d/db *conn*) tag-id)
         thread-eids (->> all-thread-eids
                          (sort-by second #(compare %2 %1))
+                         (map first)
                          (drop skip)
-                         (take limit)
-                         (map first))]
+                         (take limit))]
     {:threads (->> (d/pull-many (d/db *conn*) thread-pull-pattern thread-eids)
                    (map db->thread)
                    (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))
