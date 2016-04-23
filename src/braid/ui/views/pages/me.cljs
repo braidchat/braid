@@ -104,13 +104,19 @@
   (let [email-freq (subscribe [:user-preference :email-frequency])]
     (fn []
       [:div
-       [:h2 (str "Currently getting emails " ((fnil name "never") @email-freq))]
-       [:select {:on-change (fn [e]
+       [:h2 "Email Digest Settings"]
+       [:p "If you wish, you can recieve emails notifying you of threads that you"
+        " haven't seen yet."]
+       [:p (str "Currently getting emails " ((fnil name "never") @email-freq))]
+       [:p "Recieve emails: "]
+       [:select {:value @email-freq
+                 :on-change (fn [e]
                               (let [v (keyword (.. e -target -value))]
                                 (dispatch! :set-preference [:email-frequency v])))}
-        (for [freq [:never :weekly :daily]]
-          ^{:key freq}
-          [:option {:value freq} (name freq)])]])))
+        (doall
+          (for [freq [:never :weekly :daily]]
+            ^{:key freq}
+            [:option {:value freq} (name freq)]))]])))
 
 (defn me-page-view
   []

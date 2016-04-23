@@ -135,8 +135,8 @@
         true (on-success)))))
 
 (defmethod dispatch! :set-preference [_ [k v]]
-  ; TODO: send change
-  (store/add-preferences! {k v}))
+  (store/add-preferences! {k v})
+  (sync/chsk-send! [:user/set-preferences {k v}]))
 
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
