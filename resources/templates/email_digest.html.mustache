@@ -3,6 +3,33 @@
   <head>
     <title>Braid Email Digest</title>
     <style>
+      table {
+      }
+      .thread {
+        margin-right: 1rem;
+        min-width: 17rem;
+        box-sizing: border-box;
+        border: 1px solid gray;
+      }
+      .thread .card {
+        background: white;
+      }
+      .thread .messages {
+        padding: 0 1rem;
+      }
+      .message {
+        margin: 0 0 1rem;
+      }
+      .seen {
+        color: #666;
+      }
+      .avatar {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        float: left;
+        margin: 0.25em 0.5em 0.25em 0;
+      }
     </style>
   </head>
   <body>
@@ -18,19 +45,22 @@
             <div class="threads">
               {{#threads}}
               <div class="thread">
-                <div class="messages">
-                  {{#messages}}
-                  <div class="message">
-                    <img src="{{sender-avatar}}">
-                    <div class="info">
-                      <span class="nickname">{{sender}}</span>
-                      <span class="time">{{created-at}}</span>
+                <div class="card">
+                  <div class="messages">
+                    {{#messages}}
+                    <div class="message {{unseen}}">
+                      <img alt="{{sender}} avatar" class="avatar" src="{{sender-avatar}}">
+                      <div class="info">
+                        <span class="nickname">{{sender}}</span>
+                        <span class="time">{{created-at}}</span>
+                      </div>
+                      <div class="content">{{content}}</div>
                     </div>
-                    <div class="content">{{content}}</div>
+                    {{/messages}}
                   </div>
-                  {{/messages}}
                 </div>
               </div>
+              <hr>
               {{/threads}}
             </div>
           </td>

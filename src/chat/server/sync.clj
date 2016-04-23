@@ -164,6 +164,14 @@
         (db/with-conn (db/set-user-password! user-id (?data :password)))
         (when ?reply-fn (?reply-fn {:ok true}))))))
 
+(defmethod event-msg-handler :user/set-preferences
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (db/with-conn
+      (doseq [[k v] ?data]
+        (db/user-set-preference! user-id k v)))
+    (when ?reply-fn (?reply-fn :braid/ok))))
+
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
@@ -295,6 +303,7 @@
                               :user-groups (db/get-groups-for-user user-id)
                               :user-threads (db/get-open-threads-for-user user-id)
                               :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
+                              :user-preferences (db/get-user-preferences user-id)
                               :users (into ()
                                            (map #(assoc % :status
                                                    (if (connected (% :id)) :online :offline)))
