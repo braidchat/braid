@@ -653,7 +653,7 @@
               [?sub :user/subscribed-tag ?t]
               [?th :thread/tag ?t]]
             (d/db *conn*) user-id)
-       (map (fn [tag-id threads-count subscribers-count]
+       (map (fn [[tag-id threads-count subscribers-count]]
               [tag-id {:tag/threads-count threads-count
                        :tag/subscribers-count subscribers-count}]))
        (into {})))
