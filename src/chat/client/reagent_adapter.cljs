@@ -154,7 +154,14 @@
   :user-preference
   state/get-preference)
 
-(defn subscribe [v]
-  (let [key-v (first v)
-        handler-fn (get @subscriptions key-v)]
-    (handler-fn store/app-state v)))
+(defn subscribe
+  ([v]
+   (let [key-v (first v)
+         handler-fn (get @subscriptions key-v)]
+     (handler-fn store/app-state v)))
+  ([v dynv] ; Dynamic subscription
+   (let [key-v (first v)
+         handler-fn (get @subscriptions key-v)]
+     (let [dyn-vals (reaction (mapv deref dynv))
+           sub (reaction (handler-fn store/app-state v @dyn-vals))]
+       (reaction @@sub)))))
