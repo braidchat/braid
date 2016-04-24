@@ -17,8 +17,11 @@
   (reaction (vals (:groups @state))))
 
 (defn get-user
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id])))
+  "Get user by id. Can be sub'd directly or dynamically"
+  ([state [_ user-id]]
+   (reaction (get-in @state [:users user-id])))
+  ([state _ [user-id]]
+   (reaction (get-in @state [:users user-id]))))
 
 (defn get-users
   [state _]
@@ -147,8 +150,10 @@
   (reaction (get-in @state [:users user-id :avatar])))
 
 (defn get-user-status
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id :status])))
+  ([state [_ user-id]]
+   (reaction (get-in @state [:users user-id :status])))
+  ([state _ [user-id]]
+   (reaction (get-in @state [:users user-id :status]))))
 
 (defn get-search-query
   [state _]
