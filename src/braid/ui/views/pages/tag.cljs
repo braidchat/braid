@@ -4,7 +4,7 @@
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]
-            [braid.ui.views.thread :refer [thread-view]]
+            [braid.ui.views.threads :refer [threads-view]]
             [braid.ui.views.new-thread :refer [new-thread-view]]
             [braid.ui.views.pills :refer [tag-pill-view subscribe-button-view]]))
 
@@ -68,34 +68,4 @@
                       :done-empty "No Results")]]]
 
 
-              [:div.threads {:ref "threads-div"
-                            :on-scroll ; page in more results as the user scrolls
-                              (fn [e]
-                                (let [div (.. e -target)]
-                                  (when (and (= status :done-results)
-                                          (> @pagination-remaining 0)
-                                          (> 100 (- (.-scrollWidth div)
-                                                    (+ (.-scrollLeft div) (.-offsetWidth div)))))
-                                    (start-loading!)
-                                    (dispatch! :threads-for-tag
-                                               {:tag-id @page-id
-                                                :offset (count threads)
-                                                :on-complete
-                                                (fn []
-                                                  (stop-loading!))}))))
-                            :on-wheel ; make the mouse wheel scroll horizontally
-                              (fn [e]
-                                (let [target-classes (.. e -target -classList)
-                                      ;TODO: properly reference threads-div for scroll
-                                      this-elt (.. e -target)]
-                                  ; TODO: check if threads-div needs to scroll?
-                                  (when (and (or (.contains target-classes "thread")
-                                                 (.contains target-classes "threads"))
-                                          (= 0 (.-deltaX e) (.-deltaZ e)))
-                                    (set! (.-scrollLeft this-elt)
-                                          (- (.-scrollLeft this-elt) (.-deltaY e))))))}
-                  [new-thread-view {:tag-ids [(@tag :id)]}]
-                  (doall
-                    (for [thread @sorted-threads]
-                      ^{:key [thread :id]}
-                      [thread-view thread]))]]))})))
+              [threads-view {:tag-ids [(@tag :id)]} @sorted-threads]]))})))

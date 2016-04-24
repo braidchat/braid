@@ -19,4 +19,4 @@
 
         [:div.page.inbox
          [:div.title "Inbox"]
-         [threads-view true sorted-threads]]))))
+         [threads-view {} sorted-threads]]))))

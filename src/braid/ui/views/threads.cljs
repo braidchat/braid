@@ -3,7 +3,8 @@
             [braid.ui.views.thread :refer [thread-view]]
             [braid.ui.views.new-thread :refer [new-thread-view]]))
 
-(defn threads-view [show-new-thread? threads]
+(defn threads-view
+  [new-thread-args threads]
   (let [this-elt (r/atom nil)]
     (r/create-class
       {:component-did-mount
@@ -11,7 +12,7 @@
          (reset! this-elt (r/dom-node this)))
 
        :reagent-render
-       (fn [show-new-thread? threads]
+       (fn [new-thread-args threads]
          [:div.threads
           {:on-wheel ; make the mouse wheel scroll horizontally
            (fn [e]
@@ -23,9 +24,10 @@
                  (set! (.-scrollLeft @this-elt)
                        (- (.-scrollLeft @this-elt) (.-deltaY e))))))}
 
-          (when show-new-thread?
-            [new-thread-view])
+          (when new-thread-args
+            [new-thread-view new-thread-args])
 
-          (for [thread threads]
-            ^{:key (thread :id)}
-            [thread-view thread])])})))
+          (doall
+            (for [thread threads]
+              ^{:key (thread :id)}
+              [thread-view thread]))])})))
