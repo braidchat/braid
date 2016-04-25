@@ -1,6 +1,6 @@
 (ns braid.ui.views.pages.tag
   (:require [reagent.core :as r]
-            [reagent.ratom :include-macros true :refer-macros [reaction]]
+            [reagent.ratom :include-macros true :refer-macros [reaction run!]]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]
@@ -37,9 +37,8 @@
                                       (partial map :created-at)
                                       :messages))
                               reverse))
-        dummy (reaction (do (when-let [tag-id @page-id]
-                              (dispatch! :threads-for-tag {:tag-id tag-id}))
-                            nil))]
+        dummy (run! (when-let [tag-id @page-id]
+                      (dispatch! :threads-for-tag {:tag-id tag-id})))]
     (fn []
       (let [status (cond
                      @loading? :loading
