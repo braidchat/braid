@@ -1,5 +1,7 @@
 (ns braid.ui.views.pills
-  (:require [chat.client.routes :as routes]
+  (:require [reagent.core :as r]
+            [reagent.impl.util :refer [extract-props]]
+            [chat.client.routes :as routes]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.helpers :refer [id->color]]
             [chat.client.reagent-adapter :refer [subscribe]]))
@@ -38,18 +40,26 @@
 
 (defn user-pill-view
   [user-id]
-  (let [user (subscribe [:user user-id])
+  (let [user-id-atom (r/atom user-id)
+        user (subscribe [:user] [user-id-atom])
         open-group-id (subscribe [:open-group-id])
-        user-status (subscribe [:user-status user-id])]
-    (fn []
-      (let [path (routes/user-page-path {:group-id @open-group-id
-                                         :user-id (@user :id)})
-            color (id->color (@user :id))]
-        [:a.user.pill {:class (case @user-status :online "on" "off")
-                       :tabIndex -1
-                       :style {:background-color color
-                               :color color
-                               :border-color color}
-                       :href path}
-          [:span.name (str "@" (@user :nickname))]
-          [:div {:class (str "status " ((fnil name "") (@user :status)))}]]))))
+        user-status (subscribe [:user-status] [user-id-atom])]
+    (r/create-class
+      {:display-name "user-pill-view"
+       :component-will-receive-props
+       (fn [_ [_ new-user-id]]
+         (reset! user-id-atom new-user-id))
+
+       :reagent-render
+       (fn [user-id]
+         (let [path (routes/user-page-path {:group-id @open-group-id
+                                            :user-id user-id})
+               color (id->color user-id)]
+           [:a.user.pill {:class (case @user-status :online "on" "off")
+                          :tabIndex -1
+                          :style {:background-color color
+                                  :color color
+                                  :border-color color}
+                          :href path}
+            [:span.name (str "@" (@user :nickname))]
+            [:div {:class (str "status " ((fnil name "") (@user :status)))}]]))})))
