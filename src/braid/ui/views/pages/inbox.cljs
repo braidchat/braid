@@ -19,4 +19,5 @@
 
         [:div.page.inbox
          [:div.title "Inbox"]
-         [threads-view {} sorted-threads]]))))
+         [threads-view {:new-thread-args {}
+                        :threads sorted-threads}]]))))
