@@ -134,6 +134,10 @@
         (= reply :chsk/timeout) (on-error {:error "Couldn't connect to server, please try again"})
         true (on-success)))))
 
+(defmethod dispatch! :set-preference [_ [k v]]
+  (store/add-preferences! {k v})
+  (sync/chsk-send! [:user/set-preferences {k v}]))
+
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
     [:chat/search query]
@@ -248,6 +252,7 @@
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))
+  (store/add-preferences! (data :user-preferences))
   (store/set-user-joined-groups! (data :user-groups))
   (store/set-invitations! (data :invitations))
   (store/set-open-threads! (data :user-threads))

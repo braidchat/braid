@@ -19,4 +19,4 @@
                  reverse)]
         [:div.page.recent
           [:div.title "Recent"]
-          [threads-view false sorted-threads]]))))
+          [threads-view {:threads sorted-threads}]]))))

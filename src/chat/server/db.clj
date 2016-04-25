@@ -260,10 +260,7 @@
 
 (defn email-taken?
   [email]
-  (-> (d/q '[:find ?e .
-             :in $ ?email
-             :where [?e :user/email ?email]] (d/db *conn*) email)
-      some?))
+  (some? (d/entity (d/db *conn*) [:user/email email])))
 
 (defn create-user!
   "creates a user, returns id"
@@ -317,13 +314,7 @@
 
 (defn user-id-exists?
   [id]
-  (boolean
-    (seq (d/q '[:find [?e]
-                :in $ ?id
-                :where
-                [?e :user/id ?id]]
-              (d/db *conn*)
-              id))))
+  (some? (d/entity (d/db *conn*) [:user/id id])))
 
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
@@ -378,13 +369,13 @@
   "Are the two user ids users that can see each other? i.e. do they have at least one group in common"
   [user1-id user2-id]
   (-> (d/q '[:find ?g
-         :in $ ?u1-id ?u2-id
-         :where
-         [?u1 :user/id ?u1-id]
-         [?u2 :user/id ?u2-id]
-         [?g :group/user ?u1]
-         [?g :group/user ?u2]]
-       (d/db *conn*) user1-id user2-id)
+             :in $ ?u1-id ?u2-id
+             :where
+             [?u1 :user/id ?u1-id]
+             [?u2 :user/id ?u2-id]
+             [?g :group/user ?u1]
+             [?g :group/user ?u2]]
+           (d/db *conn*) user1-id user2-id)
       seq boolean))
 
 (defn fetch-invitations-for-user
@@ -662,11 +653,10 @@
               [?sub :user/subscribed-tag ?t]
               [?th :thread/tag ?t]]
             (d/db *conn*) user-id)
-       (reduce (fn [memo [tag-id threads-count subscribers-count]]
-                 (assoc memo tag-id
-                   {:tag/threads-count threads-count
-                    :tag/subscribers-count subscribers-count}))
-               {})))
+       (map (fn [[tag-id threads-count subscribers-count]]
+              [tag-id {:tag/threads-count threads-count
+                       :tag/subscribers-count subscribers-count}]))
+       (into {})))
 
 (defn fetch-tags-for-user
   "Get all tags visible to the given user"
@@ -684,7 +674,7 @@
               (d/db *conn*) user-id)
          (map (fn [[tag]]
                 (db->tag (merge tag (tag-stats (tag :tag/id))))))
-         set)))
+         (into #{}))))
 
 (defn threads-with-tag
   "Find threads with a given tag that the user is allowed to see, ordered by most recent message.
@@ -701,9 +691,9 @@
                               (d/db *conn*) tag-id)
         thread-eids (->> all-thread-eids
                          (sort-by second #(compare %2 %1))
+                         (map first)
                          (drop skip)
-                         (take limit)
-                         (map first))]
+                         (take limit))]
     {:threads (->> (d/pull-many (d/db *conn*) thread-pull-pattern thread-eids)
                    (map db->thread)
                    (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))

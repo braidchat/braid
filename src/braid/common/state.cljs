@@ -17,8 +17,11 @@
   (reaction (vals (:groups @state))))
 
 (defn get-user
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id])))
+  "Get user by id. Can be sub'd directly or dynamically"
+  ([state [_ user-id]]
+   (reaction (get-in @state [:users user-id])))
+  ([state _ [user-id]]
+   (reaction (get-in @state [:users user-id]))))
 
 (defn get-users
   [state _]
@@ -87,32 +90,32 @@
   [state [_]]
   (let [group-id (reaction (get-in @state [:open-group-id]))
         open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
-        tag-id->group-id (->> (@state :tags)
-                              vals
-                              (map (fn [tag]
-                                     [(tag :id) (tag :group-id)]))
-                              (into {}))
+        tag-id->group-id (reaction
+                           (->> (@state :tags)
+                                vals
+                                (map (juxt :id :group-id))
+                                (into {})))
         threads (reaction (@state :threads))
         open-threads-kv (reaction
                           (-> @threads
                               (select-keys @open-thread-ids)))
-        open-threads (reaction (vals @open-threads-kv))
-        group-open-threads (reaction
-                             (->> @open-threads
-                                  (filter (fn [thread]
-                                            (or (empty? (thread :tag-ids))
-                                                (contains?
-                                                  (into #{} (map tag-id->group-id (thread :tag-ids)))
-                                                  @group-id))))))]
-
-    (reaction @group-open-threads)))
+        open-threads (reaction (vals @open-threads-kv))]
+    (reaction
+      (doall ; avoid laziness in reactions! lead to @group-id not being deref'd, so subs didn't update
+        (filter (fn [thread]
+                  (or (empty? (thread :tag-ids))
+                      (contains?
+                        (into #{} (map @tag-id->group-id (thread :tag-ids)))
+                        @group-id)))
+                @open-threads)))))
 
 (defn get-users-in-group
   [state [_ group-id]]
   (reaction
     (->> (@state :users)
          vals
-         (filter (fn [u] (contains? (set (u :group-ids)) group-id))))))
+         (filter (fn [u] (contains? (set (u :group-ids)) group-id)))
+         doall)))
 
 (defn get-open-group-id
   [state _]
@@ -121,7 +124,8 @@
 (defn get-users-in-open-group
   [state [_ status]]
   (reaction (->> @(get-users-in-group state [nil (@state :open-group-id)])
-                 (filter (fn [u] (= status (u :status)))))))
+                 (filter (fn [u] (= status (u :status))))
+                 doall)))
 
 (defn get-user-id
   [state _]
@@ -132,23 +136,29 @@
   (reaction (vals (get-in @state [:tags]))))
 
 (defn get-user-subscribed-to-tag
-  [state [_ tag-id]]
-  (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))
+  ([state [_ tag-id]]
+   (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))
+  ([state _ [tag-id]]
+   (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id))))
 
 (defn get-group-subscribed-tags
   [state [_ group-id]]
   (reaction
-    (->> (vals (get-in @state [:tags]))
-         (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id))))
-         (filter (fn [tag] @(get-user-subscribed-to-tag state [nil (tag :id)]))))))
+    (into ()
+          (comp
+            (filter (fn [tag] @(get-user-subscribed-to-tag state [nil (tag :id)])))
+            (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id)))))
+          (vals (get-in @state [:tags])))))
 
 (defn get-user-avatar-url
   [state [_ user-id]]
   (reaction (get-in @state [:users user-id :avatar])))
 
 (defn get-user-status
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id :status])))
+  ([state [_ user-id]]
+   (reaction (get-in @state [:users user-id :status])))
+  ([state _ [user-id]]
+   (reaction (get-in @state [:users user-id :status]))))
 
 (defn get-search-query
   [state _]
@@ -157,15 +167,17 @@
 (defn get-tags-for-thread
   [state [_ thread-id]]
   (let [tag-ids (reaction (get-in @state [:threads thread-id :tag-ids]))
-        tags (reaction (map (fn [thread-id]
-                              (get-in @state [:tags thread-id])) @tag-ids))]
+        tags (reaction (doall
+                         (map (fn [thread-id]
+                                (get-in @state [:tags thread-id])) @tag-ids)))]
     tags))
 
 (defn get-mentions-for-thread
   [state [_ thread-id]]
   (let [mention-ids (reaction (get-in @state [:threads thread-id :mentioned-ids]))
-        mentions (reaction (map (fn [user-id]
-                                  (get-in @state [:users user-id])) @mention-ids))]
+        mentions (reaction (doall
+                             (map (fn [user-id]
+                                    (get-in @state [:users user-id])) @mention-ids)))]
     mentions))
 
 (defn get-messages-for-thread
@@ -185,8 +197,10 @@
   (reaction (get-in @state [:login-state])))
 
 (defn get-tag
-  [state [_ tag-id]]
-  (reaction (get-in @state [:tags tag-id])))
+  ([state [_ tag-id]]
+   (reaction (get-in @state [:tags tag-id])))
+  ([state _ [tag-id]]
+   (reaction (get-in @state [:tags tag-id]))))
 
 (defn get-group-for-tag
   [state [_ tag-id]]
@@ -202,7 +216,8 @@
                      (or (empty? (thread :tag-ids))
                          (contains?
                            (into #{} (map group-for-tag) (thread :tag-ids))
-                           group-id))))))))
+                           group-id))))
+                   doall))))
 
 (defn get-nickname
   [state [_ user-id]]
@@ -227,3 +242,7 @@
 (defn get-new-thread-id
   [state _]
   (reaction (get @state :new-thread-id)))
+
+(defn get-preference
+  [state [_ pref]]
+  (reaction (get-in @state [:preferences pref])))

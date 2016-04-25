@@ -18,7 +18,7 @@
   (let [page (subscribe [:page])]
     (fn []
       (case (@page :type)
-        :inbox ^{:key (gensym)} [inbox-page-view] ; HACK
+        :inbox [inbox-page-view]
         :recent [recent-page-view]
         :help [help-page-view]
         :users [users-page-view]
