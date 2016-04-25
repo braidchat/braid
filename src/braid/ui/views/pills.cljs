@@ -8,17 +8,24 @@
 
 (defn subscribe-button-view
   [tag-id]
-  (let [user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag tag-id])]
-    (fn []
-      (if @user-subscribed-to-tag?
-        [:a.button {:on-click
-                    (fn [_]
-                      (dispatch! :unsubscribe-from-tag tag-id))}
-          "Unsubscribe"]
-        [:a.button {:on-click
-                    (fn [_]
-                      (dispatch! :subscribe-to-tag tag-id))}
-          "Subscribe"]))))
+  (let [tag-id-atom (r/atom tag-id)
+        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag] [tag-id-atom])]
+    (r/create-class
+      {:display-name "subscribe-button-view"
+       :component-will-receive-props
+       (fn [_ [_ new-tag-id]]
+         (reset! tag-id-atom new-tag-id))
+       :reagent-render
+       (fn [tag-id]
+         (if @user-subscribed-to-tag?
+           [:a.button {:on-click
+                       (fn [_]
+                         (dispatch! :unsubscribe-from-tag tag-id))}
+            "Unsubscribe"]
+           [:a.button {:on-click
+                       (fn [_]
+                         (dispatch! :subscribe-to-tag tag-id))}
+            "Subscribe"]))})))
 
 (defn tag-pill-view
   [tag-id]
