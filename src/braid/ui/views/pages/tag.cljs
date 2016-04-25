@@ -36,50 +36,47 @@
                                 (comp (partial apply max)
                                       (partial map :created-at)
                                       :messages))
-                              reverse))]
-    (r/create-class
-      {:component-did-mount
-       (fn []
-         ; TODO: need to do this when page-id changes, not just on mount!
-         (dispatch! :threads-for-tag {:tag-id @page-id}))
-       :reagent-render
-       (fn []
-         (let [status (cond
-                        @loading? :loading
-                        (not (contains? @page :thread-ids)) :searching
-                        (seq (@page :thread-ids)) :done-results
-                        :else :done-empty)]
-           [:div.page.channel
-            [:div.title
-             [tag-pill-view (@tag :id)]
-             [subscribe-button-view (@tag :id)]]
+                              reverse))
+        dummy (reaction (do (dispatch! :threads-for-tag {:tag-id @page-id})
+                            nil))]
+    (fn []
+      (let [status (cond
+                     @loading? :loading
+                     (not (contains? @page :thread-ids)) :searching
+                     (seq (@page :thread-ids)) :done-results
+                     :else :done-empty)
+            _ @dummy]
+        [:div.page.channel
+         [:div.title
+          [tag-pill-view (@tag :id)]
+          [subscribe-button-view (@tag :id)]]
 
-            [:div.content
-             [:div.description
-              [:p "One day, a tag description will be here."]
+         [:div.content
+          [:div.description
+           [:p "One day, a tag description will be here."]
 
-              [:div
-               (case status
-                 :searching "Searching..."
-                 :loading "Loading more..."
-                 :done-results (str "Done! Displaying " (count @sorted-threads)
-                                    " out of " (+ (count @sorted-threads) @pagination-remaining))
-                 :done-empty "No Results")]]]
+           [:div
+            (case status
+              :searching "Searching..."
+              :loading "Loading more..."
+              :done-results (str "Done! Displaying " (count @sorted-threads)
+                                 " out of " (+ (count @sorted-threads) @pagination-remaining))
+              :done-empty "No Results")]]]
 
-            [threads-view
-             {:new-thread-args {:tag-ids [(@tag :id)]}
-              :threads @sorted-threads
-              :threads-opts {:on-scroll ; page in more results as the user scrolls
-                             (fn [e]
-                               (let [div (.. e -target)]
-                                 (when (and (= status :done-results)
-                                         (> @pagination-remaining 0)
-                                         (> 100 (- (.-scrollWidth div)
-                                                   (+ (.-scrollLeft div) (.-offsetWidth div)))))
-                                   (start-loading!)
-                                   (dispatch! :threads-for-tag
-                                              {:tag-id @page-id
-                                               :offset (count @sorted-threads)
-                                               :on-complete
-                                               (fn []
-                                                 (stop-loading!))}))))}}]]))})))
+         [threads-view
+          {:new-thread-args {:tag-ids [(@tag :id)]}
+           :threads @sorted-threads
+           :threads-opts {:on-scroll ; page in more results as the user scrolls
+                          (fn [e]
+                            (let [div (.. e -target)]
+                              (when (and (= status :done-results)
+                                      (> @pagination-remaining 0)
+                                      (> 100 (- (.-scrollWidth div)
+                                                (+ (.-scrollLeft div) (.-offsetWidth div)))))
+                                (start-loading!)
+                                (dispatch! :threads-for-tag
+                                           {:tag-id @page-id
+                                            :offset (count @sorted-threads)
+                                            :on-complete
+                                            (fn []
+                                              (stop-loading!))}))))}}]]))))
