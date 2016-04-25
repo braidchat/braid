@@ -135,8 +135,10 @@
   (reaction (vals (get-in @state [:tags]))))
 
 (defn get-user-subscribed-to-tag
-  [state [_ tag-id]]
-  (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))
+  ([state [_ tag-id]]
+   (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))
+  ([state _ [tag-id]]
+   (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id))))
 
 (defn get-group-subscribed-tags
   [state [_ group-id]]
@@ -190,8 +192,10 @@
   (reaction (get-in @state [:login-state])))
 
 (defn get-tag
-  [state [_ tag-id]]
-  (reaction (get-in @state [:tags tag-id])))
+  ([state [_ tag-id]]
+   (reaction (get-in @state [:tags tag-id])))
+  ([state _ [tag-id]]
+   (reaction (get-in @state [:tags tag-id]))))
 
 (defn get-group-for-tag
   [state [_ tag-id]]
