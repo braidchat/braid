@@ -37,7 +37,8 @@
                                       (partial map :created-at)
                                       :messages))
                               reverse))
-        dummy (reaction (do (dispatch! :threads-for-tag {:tag-id @page-id})
+        dummy (reaction (do (when-let [tag-id @page-id]
+                              (dispatch! :threads-for-tag {:tag-id tag-id}))
                             nil))]
     (fn []
       (let [status (cond
