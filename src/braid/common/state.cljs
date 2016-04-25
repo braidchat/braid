@@ -90,25 +90,24 @@
   [state [_]]
   (let [group-id (reaction (get-in @state [:open-group-id]))
         open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
-        tag-id->group-id (->> (@state :tags)
-                              vals
-                              (map (fn [tag]
-                                     [(tag :id) (tag :group-id)]))
-                              (into {}))
+        tag-id->group-id (reaction
+                           (->> (@state :tags)
+                                vals
+                                (map (juxt :id :group-id))
+                                (into {})))
         threads (reaction (@state :threads))
         open-threads-kv (reaction
                           (-> @threads
                               (select-keys @open-thread-ids)))
-        open-threads (reaction (vals @open-threads-kv))
-        group-open-threads (reaction
-                             (->> @open-threads
-                                  (filter (fn [thread]
-                                            (or (empty? (thread :tag-ids))
-                                                (contains?
-                                                  (into #{} (map tag-id->group-id (thread :tag-ids)))
-                                                  @group-id))))))]
-
-    (reaction @group-open-threads)))
+        open-threads (reaction (vals @open-threads-kv))]
+    (reaction
+      (doall ; avoid laziness in reactions! lead to @group-id not being deref'd, so subs didn't update
+        (filter (fn [thread]
+                  (or (empty? (thread :tag-ids))
+                      (contains?
+                        (into #{} (map @tag-id->group-id (thread :tag-ids)))
+                        @group-id)))
+                @open-threads)))))
 
 (defn get-users-in-group
   [state [_ group-id]]
