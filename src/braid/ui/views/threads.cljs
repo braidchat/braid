@@ -7,7 +7,8 @@
   [new-thread-args threads]
   (let [this-elt (r/atom nil)]
     (r/create-class
-      {:component-did-mount
+      {:display-name "threads-view"
+       :component-did-mount
        (fn [this]
          (reset! this-elt (r/dom-node this)))
 
