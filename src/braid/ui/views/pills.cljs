@@ -22,20 +22,27 @@
 
 (defn tag-pill-view
   [tag-id]
-  (let [tag (subscribe [:tag tag-id])
+  (let [tag-id-atom (r/atom tag-id)
+        tag (subscribe [:tag] [tag-id-atom])
         open-group-id (subscribe [:open-group-id])
-        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag tag-id])]
-    (fn []
-      (let [path (routes/tag-page-path {:group-id @open-group-id
-                                        :tag-id (@tag :id)})
-            color (id->color (@tag :id))]
-        [:a.tag.pill {:class (if @user-subscribed-to-tag? "on" "off")
-                      :tabIndex -1
-                      :style {:background-color color
-                              :color color
-                              :border-color color}
-                      :href path}
-          [:div.name "#" (@tag :name)]]))))
+        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag] [tag-id-atom])]
+    (r/create-class
+      {:display-name "tag-pill-view"
+       :component-will-receive-props
+       (fn [_ [_ new-tag-id]]
+         (reset! tag-id-atom new-tag-id))
+       :reagent-render
+       (fn [tag-id]
+         (let [path (routes/tag-page-path {:group-id @open-group-id
+                                           :tag-id (@tag :id)})
+               color (id->color (@tag :id))]
+           [:a.tag.pill {:class (if @user-subscribed-to-tag? "on" "off")
+                         :tabIndex -1
+                         :style {:background-color color
+                                 :color color
+                                 :border-color color}
+                         :href path}
+            [:div.name "#" (@tag :name)]]))})))
 
 
 (defn user-pill-view
