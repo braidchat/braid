@@ -114,7 +114,8 @@
   (reaction
     (->> (@state :users)
          vals
-         (filter (fn [u] (contains? (set (u :group-ids)) group-id))))))
+         (filter (fn [u] (contains? (set (u :group-ids)) group-id)))
+         doall)))
 
 (defn get-open-group-id
   [state _]
@@ -123,7 +124,8 @@
 (defn get-users-in-open-group
   [state [_ status]]
   (reaction (->> @(get-users-in-group state [nil (@state :open-group-id)])
-                 (filter (fn [u] (= status (u :status)))))))
+                 (filter (fn [u] (= status (u :status))))
+                 doall)))
 
 (defn get-user-id
   [state _]
@@ -142,9 +144,11 @@
 (defn get-group-subscribed-tags
   [state [_ group-id]]
   (reaction
-    (->> (vals (get-in @state [:tags]))
-         (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id))))
-         (filter (fn [tag] @(get-user-subscribed-to-tag state [nil (tag :id)]))))))
+    (into ()
+          (comp
+            (filter (fn [tag] @(get-user-subscribed-to-tag state [nil (tag :id)])))
+            (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id)))))
+          (vals (get-in @state [:tags])))))
 
 (defn get-user-avatar-url
   [state [_ user-id]]
@@ -163,15 +167,17 @@
 (defn get-tags-for-thread
   [state [_ thread-id]]
   (let [tag-ids (reaction (get-in @state [:threads thread-id :tag-ids]))
-        tags (reaction (map (fn [thread-id]
-                              (get-in @state [:tags thread-id])) @tag-ids))]
+        tags (reaction (doall
+                         (map (fn [thread-id]
+                                (get-in @state [:tags thread-id])) @tag-ids)))]
     tags))
 
 (defn get-mentions-for-thread
   [state [_ thread-id]]
   (let [mention-ids (reaction (get-in @state [:threads thread-id :mentioned-ids]))
-        mentions (reaction (map (fn [user-id]
-                                  (get-in @state [:users user-id])) @mention-ids))]
+        mentions (reaction (doall
+                             (map (fn [user-id]
+                                    (get-in @state [:users user-id])) @mention-ids)))]
     mentions))
 
 (defn get-messages-for-thread
@@ -210,7 +216,8 @@
                      (or (empty? (thread :tag-ids))
                          (contains?
                            (into #{} (map group-for-tag) (thread :tag-ids))
-                           group-id))))))))
+                           group-id))))
+                   doall))))
 
 (defn get-nickname
   [state [_ user-id]]
