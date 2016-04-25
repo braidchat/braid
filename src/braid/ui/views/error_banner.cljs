@@ -6,9 +6,11 @@
   (let [errors (subscribe [:errors])]
     (fn []
       [:div.error-banners
-       (for [[err-key err] @errors]
-         [:div.error-banner
-          err
-          [:span.close
-           {:on-click (fn [_] (store/clear-error! err-key))}
-           "×"]])])))
+       (doall
+         (for [[err-key err] @errors]
+           ^{:key err-key}
+           [:div.error-banner
+            err
+            [:span.close
+             {:on-click (fn [_] (store/clear-error! err-key))}
+             "×"]]))])))
