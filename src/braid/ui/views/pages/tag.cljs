@@ -22,24 +22,25 @@
         inbox-thread-ids (subscribe [:open-thread-ids])
         known-threads (reaction
                         (->> @threads
-                               vals
-                               (filter
-                                 (fn [t] (contains? (set (t :tag-ids)) (@tag :id))))))
+                             vals
+                             (filter
+                               (fn [t] (contains? (set (t :tag-ids)) (@tag :id))))))
         sorted-threads (reaction
                          (->> (@page :thread-ids)
-                            (select-keys @threads)
-                            vals
-                            (into (set @known-threads))
-                            (map (fn [t] (assoc t :open? (contains? @inbox-thread-ids (t :id)))))
-                            ; sort-by last reply, newest first
-                            (sort-by
-                              (comp (partial apply max)
-                                    (partial map :created-at)
-                                    :messages))
-                            reverse))]
+                              (select-keys @threads)
+                              vals
+                              (into (set @known-threads))
+                              (map (fn [t] (assoc t :open? (contains? @inbox-thread-ids (t :id)))))
+                              ; sort-by last reply, newest first
+                              (sort-by
+                                (comp (partial apply max)
+                                      (partial map :created-at)
+                                      :messages))
+                              reverse))]
     (r/create-class
       {:component-did-mount
        (fn []
+         ; TODO: need to do this when page-id changes, not just on mount!
          (dispatch! :threads-for-tag {:tag-id @page-id}))
        :reagent-render
        (fn []
