@@ -409,19 +409,15 @@
       db->group))
 
 (defn get-groups-for-user [user-id]
-  ; XXX: duplicating group-pull-pattern here, because interpolating variables
-  ; into datomic :find queries doesn't work well
-  (->> (d/q '[:find (pull ?g [:group/id
-                              :group/name
-                              {:extension/_group
-                               [:extension/id :extension/type]}])
+  (->> (d/q '[:find [?g ...]
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]
               [?g :group/user ?u]]
             (d/db *conn*)
             user-id)
-       (map (comp #(dissoc % :users) db->group first))
+       (d/pull-many (d/db *conn*) group-pull-pattern)
+       (map (comp #(dissoc % :users) db->group))
        set))
 
 (defn get-users-in-group [group-id]
