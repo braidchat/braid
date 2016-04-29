@@ -141,6 +141,11 @@
  :db/cardinality :db.cardinality/many
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
+{:db/ident :group/admins
+ :db/valueType :db.type/ref
+ :db/cardinality :db.cardinality/many
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
 {:db/ident :group/settings
  :db/valueType :db.type/string
  :db/cardinality :db.cardinality/one

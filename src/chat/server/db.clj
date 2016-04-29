@@ -114,6 +114,7 @@
 (def group-pull-pattern
   [:group/id
    :group/name
+   {:group/admins [:user/id]}
    {:extension/_group [:extension/id :extension/type]}])
 
 (defn- db->group [e]
@@ -600,6 +601,23 @@
 (defn user-add-to-group! [user-id group-id]
   (d/transact *conn* [[:db/add [:group/id group-id]
                        :group/user [:user/id user-id]]]))
+
+(defn user-make-group-admin! [user-id group-id]
+  (d/transact *conn* [[:db/add [:group/id group-id]
+                       :group/user [:user/id user-id]]
+                      [:db/add [:group/id group-id]
+                       :group/admins [:user/id user-id]]]))
+
+(defn user-is-group-admin?
+  [user-id group-id]
+  (some?
+    (d/q '[:find ?u .
+           :in $ ?user-id ?group-id
+           :where
+           [?g :group/id ?group-id]
+           [?u :user/id ?user-id]
+           [?g :group/admins ?u]]
+         (d/db *conn*) user-id group-id)))
 
 (defn user-subscribe-to-group-tags!
   "Subscribe the user to all current tags in the group"
