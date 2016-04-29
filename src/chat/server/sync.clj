@@ -209,7 +209,7 @@
     (db/with-conn
       (if-not (db/group-exists? (?data :name))
         (let [new-group (db/create-group! ?data)]
-          (db/user-add-to-group! user-id (new-group :id)))
+          (db/user-make-group-admin! user-id (new-group :id)))
         (do
           (timbre/warnf "User %s attempted to create group that already exsits %s"
                         user-id (?data :name))
