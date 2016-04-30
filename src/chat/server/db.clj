@@ -120,6 +120,7 @@
 (defn- db->group [e]
   {:id (:group/id e)
    :name (:group/name e)
+   :admins (into #{} (map :user/id) (:group/admins e))
    :extensions (map (fn [x] {:id (:extension/id x)
                              :type (:extension/type x)})
                     (:extension/_group e))})
