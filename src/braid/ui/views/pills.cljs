@@ -57,7 +57,7 @@
   (let [user-id-atom (r/atom user-id)
         user (subscribe [:user] [user-id-atom])
         open-group-id (subscribe [:open-group-id])
-        admin? (subscribe [:is-group-admin?] [user-id-atom open-group-id])
+        admin? (subscribe [:user-is-group-admin?] [user-id-atom open-group-id])
         user-status (subscribe [:user-status] [user-id-atom])]
     (r/create-class
       {:display-name "user-pill-view"
