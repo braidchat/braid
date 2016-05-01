@@ -16,6 +16,12 @@
   [state _]
   (reaction (vals (:groups @state))))
 
+(defn get-group-admins
+  ([state [_ group-id]]
+   (reaction (get-in @state [:groups group-id :admins])))
+  ([state _ [group-id]]
+   (reaction (get-in @state [:groups group-id :admins]))))
+
 (defn get-user
   "Get user by id. Can be sub'd directly or dynamically"
   ([state [_ user-id]]
@@ -26,6 +32,14 @@
 (defn get-users
   [state _]
   (reaction (@state :users)))
+
+(defn user-is-group-admin?
+  ([state [_ user-id group-id]]
+   (reaction (contains? (get-in @state [:groups group-id :admins])
+                        user-id)))
+  ([state _ [user-id group-id]]
+   (reaction (contains? (get-in @state [:groups group-id :admins])
+                        user-id))))
 
 (defn- thread-unseen?
   [thread]
