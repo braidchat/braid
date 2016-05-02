@@ -45,7 +45,7 @@
 (defn current-user-is-group-admin?
   "Is the current user an admin in the given group?"
   ([state [_ group-id]]
-   (is-group-admin? state nil [group-id]))
+   (current-user-is-group-admin? state nil [group-id]))
   ([state _ [group-id]]
    (reaction (->> (get-in @state [:session :user-id])
                   (contains? (get-in @state [:groups group-id :admins]))))))
