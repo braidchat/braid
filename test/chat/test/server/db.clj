@@ -136,21 +136,71 @@
 (deftest create-group
   (let [data {:id (db/uuid)
               :name "Lean Pixel"}
-        group (db/create-group! data)]
+        group (db/create-group! data)
+        user-id (db/uuid)
+        user-2-id (db/uuid)]
     (testing "can create a group"
-      (is (= group (assoc data :extensions ()))))
+      (is (= group (assoc data :extensions () :admins #{}))))
     (testing "can add a user to the group"
-      (let [user (db/create-user! {:id (db/uuid)
+      (let [user (db/create-user! {:id user-id
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar "http://www.foobar.com/1.jpg"})]
         (is (= #{} (db/get-groups-for-user (user :id))))
         (is (= #{} (db/get-users-in-group (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
-        (is (= #{(assoc data :extensions ())} (db/get-groups-for-user (user :id))))
+        (is (= #{(assoc data :extensions () :admins #{})}
+               (db/get-groups-for-user (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))
-                    (db/get-users-in-group (group :id))))))))))
+                    (db/get-users-in-group (group :id))))))))
+    (testing "groups have no admins by default"
+      (is (empty? (:admins (db/get-group (group :id))))))
+    (testing "Can add admin"
+      (db/user-make-group-admin! user-id (group :id))
+      (is (= #{user-id} (:admins (db/get-group (group :id)))))
+      (testing "and another admin"
+        (db/create-user! {:id user-2-id
+                          :email "bar@baz.com"
+                          :password "foobar"
+                          :avatar "http://www.foobar.com/1.jpg"})
+        (db/user-make-group-admin! user-2-id (group :id))
+        (is (= #{user-id user-2-id} (:admins (db/get-group (group :id)))))))
+    (testing "multiple groups, admin statuses"
+      (let [group-2 (db/create-group! {:id (db/uuid)
+                                       :name "another group"})
+            group-3 (db/create-group! {:id (db/uuid)
+                                       :name "third group"})]
+
+        (db/user-add-to-group! user-id (group-2 :id))
+        (db/user-make-group-admin! user-2-id (group-2 :id))
+
+        (db/user-make-group-admin! user-id (group-3 :id))
+        (db/user-add-to-group! user-2-id (group-3 :id))
+
+        (is (db/user-in-group? user-id (group-2 :id)))
+        (is (db/user-in-group? user-id (group-3 :id)))
+
+        (is (db/user-in-group? user-2-id (group-2 :id)))
+        (is (db/user-in-group? user-2-id (group-3 :id)))
+
+        (is (= #{(group :id) (group-2 :id) (group-3 :id)}
+               (into #{} (map :id) (db/get-groups-for-user user-id))
+               (into #{} (map :id) (db/get-groups-for-user user-2-id)))
+            "Both users are in all the groups")
+
+        (is (= #{user-2-id} (:admins (db/get-group (group-2 :id)))))
+        (is (= #{user-id} (:admins (db/get-group (group-3 :id)))))
+
+        (is (db/user-is-group-admin? user-id (group :id)))
+        (is (not (db/user-is-group-admin? user-id (group-2 :id))))
+        (is (db/user-is-group-admin? user-id (group-3 :id)))
+
+        (is (db/user-is-group-admin? user-2-id (group :id)))
+        (is (db/user-is-group-admin? user-2-id (group-2 :id)))
+        (is (not (db/user-is-group-admin? user-2-id (group-3 :id))))
+
+        ))))
 
 (deftest fetch-messages-test
   (let [user-1 (db/create-user! {:id (db/uuid)

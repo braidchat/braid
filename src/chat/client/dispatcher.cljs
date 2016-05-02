@@ -187,6 +187,10 @@
   (sync/chsk-send! [:chat/invitation-decline invite])
   (store/remove-invite! invite))
 
+(defmethod dispatch! :make-admin [_ {:keys [group-id user-id] :as args}]
+  (sync/chsk-send! [:chat/make-user-admin args])
+  (store/add-group-admin! group-id user-id))
+
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
             :method :get
@@ -297,3 +301,7 @@
 (defmethod sync/event-handler :user/disconnected
   [[_ user-id]]
   (store/update-user-status! user-id :offline))
+
+(defmethod sync/event-handler :group/new-admin
+  [[_ [group-id new-admin-id]]]
+  (store/add-group-admin! group-id new-admin-id))

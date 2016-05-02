@@ -114,11 +114,13 @@
 (def group-pull-pattern
   [:group/id
    :group/name
+   {:group/admins [:user/id]}
    {:extension/_group [:extension/id :extension/type]}])
 
 (defn- db->group [e]
   {:id (:group/id e)
    :name (:group/name e)
+   :admins (into #{} (map :user/id) (:group/admins e))
    :extensions (map (fn [x] {:id (:extension/id x)
                              :type (:extension/type x)})
                     (:extension/_group e))})
@@ -408,19 +410,15 @@
       db->group))
 
 (defn get-groups-for-user [user-id]
-  ; XXX: duplicating group-pull-pattern here, because interpolating variables
-  ; into datomic :find queries doesn't work well
-  (->> (d/q '[:find (pull ?g [:group/id
-                              :group/name
-                              {:extension/_group
-                               [:extension/id :extension/type]}])
+  (->> (d/q '[:find [?g ...]
               :in $ ?user-id
               :where
               [?u :user/id ?user-id]
               [?g :group/user ?u]]
             (d/db *conn*)
             user-id)
-       (map (comp #(dissoc % :users) db->group first))
+       (d/pull-many (d/db *conn*) group-pull-pattern)
+       (map (comp #(dissoc % :users) db->group))
        set))
 
 (defn get-users-in-group [group-id]
@@ -600,6 +598,23 @@
 (defn user-add-to-group! [user-id group-id]
   (d/transact *conn* [[:db/add [:group/id group-id]
                        :group/user [:user/id user-id]]]))
+
+(defn user-make-group-admin! [user-id group-id]
+  (d/transact *conn* [[:db/add [:group/id group-id]
+                       :group/user [:user/id user-id]]
+                      [:db/add [:group/id group-id]
+                       :group/admins [:user/id user-id]]]))
+
+(defn user-is-group-admin?
+  [user-id group-id]
+  (some?
+    (d/q '[:find ?u .
+           :in $ ?user-id ?group-id
+           :where
+           [?g :group/id ?group-id]
+           [?u :user/id ?user-id]
+           [?g :group/admins ?u]]
+         (d/db *conn*) user-id group-id)))
 
 (defn user-subscribe-to-group-tags!
   "Subscribe the user to all current tags in the group"

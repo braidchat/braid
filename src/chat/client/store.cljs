@@ -297,6 +297,9 @@
 (defn remove-group! [group]
   (transact! [:groups] (flip dissoc (group :id))))
 
+(defn add-group-admin! [group-id user-id]
+  (transact! [:groups group-id :admins] #(conj % user-id)))
+
 ; invitations
 
 (defn set-invitations! [invitations]

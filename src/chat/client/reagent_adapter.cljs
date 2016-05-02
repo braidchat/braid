@@ -23,6 +23,18 @@
   state/get-groups)
 
 (register-sub
+  :group-admins
+  state/get-group-admins)
+
+(register-sub
+  :user-is-group-admin?
+  state/user-is-group-admin?)
+
+(register-sub
+  :current-user-is-group-admin?
+  state/current-user-is-group-admin?)
+
+(register-sub
   :active-group
   state/get-active-group)
 
