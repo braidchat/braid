@@ -122,6 +122,11 @@
  :db/cardinality :db.cardinality/one
  :db/id #db/id [:db.part/db]
  :db.install/_attribute :db.part/db}
+{:db/ident :tag/description
+ :db/valueType :db.type/string
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id [:db.part/db]
+ :db.install/_attribute :db.part/db}
 
 ; groups
 {:db/ident :group/id

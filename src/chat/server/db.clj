@@ -58,6 +58,7 @@
   [e]
   {:id (:tag/id e)
    :name (:tag/name e)
+   :description (:tag/description e)
    :group-id (get-in e [:tag/group :group/id])
    :group-name (get-in e [:tag/group :group/name])
    :threads-count (get e :tag/threads-count 0)
@@ -645,6 +646,7 @@
   [group-id]
   (->> (d/q '[:find (pull ?t [:tag/id
                               :tag/name
+                              :tag/description
                               {:tag/group [:group/id :group/name]}])
               :in $ ?group-id
               :where
@@ -680,6 +682,7 @@
     (->> (d/q '[:find
                 (pull ?t [:tag/id
                           :tag/name
+                          :tag/description
                           {:tag/group [:group/id :group/name]}])
                 :in $ ?user-id
                 :where

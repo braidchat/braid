@@ -3,6 +3,17 @@
             [datomic.api :as d]
             [clojure.string :as string]))
 
+(defn migrate-2016-05-03
+  "Add tag descriptions"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [{:db/ident :tag/description
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])))
+
 (defn migrate-2016-04-29
   "Add group admins"
   []
