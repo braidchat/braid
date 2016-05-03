@@ -717,6 +717,11 @@
                    (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
+(defn set-tag-description!
+  [tag-id description]
+  (d/transact *conn* [[:db/add [:tag/id tag-id]
+                       :tag/description description]]))
+
 (defn create-extension!
   [{:keys [id type group-id user-id config]}]
   (-> {:extension/group [:group/id group-id]
