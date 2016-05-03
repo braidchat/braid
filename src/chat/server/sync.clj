@@ -214,6 +214,18 @@
       (timbre/warnf "User %s attempted to create a tag %s in a disallowed group"
                     user-id (?data :name) (?data :group-id)))))
 
+(defmethod event-msg-handler :chat/set-tag-description
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (let [{:keys [tag-id description]} ?data]
+      (when (and tag-id description)
+        (db/with-conn
+          (let [group-id (db/tag-group-id tag-id)]
+            (when (db/user-is-group-admin? user-id group-id)
+              (db/tag-set-description! tag-id description)
+              (broadcast-group-change
+                group-id [:group/tag-descrption-change [tag-id description]]))))))))
+
 (defmethod event-msg-handler :chat/create-group
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]

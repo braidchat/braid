@@ -58,6 +58,7 @@
   [e]
   {:id (:tag/id e)
    :name (:tag/name e)
+   :description (:tag/description e)
    :group-id (get-in e [:tag/group :group/id])
    :group-name (get-in e [:tag/group :group/name])
    :threads-count (get e :tag/threads-count 0)
@@ -536,6 +537,10 @@
       create-entity!
       db->tag))
 
+(defn tag-group-id [tag-id]
+  (-> (d/pull (d/db *conn*) [{:tag/group [:group/id]}] [:tag/id tag-id])
+      (get-in [:tag/group :group/id])))
+
 (defn user-in-group?
   [user-id group-id]
   (seq (d/q '[:find ?g
@@ -645,6 +650,7 @@
   [group-id]
   (->> (d/q '[:find (pull ?t [:tag/id
                               :tag/name
+                              :tag/description
                               {:tag/group [:group/id :group/name]}])
               :in $ ?group-id
               :where
@@ -680,6 +686,7 @@
     (->> (d/q '[:find
                 (pull ?t [:tag/id
                           :tag/name
+                          :tag/description
                           {:tag/group [:group/id :group/name]}])
                 :in $ ?user-id
                 :where
@@ -713,6 +720,11 @@
                    (map db->thread)
                    (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
+
+(defn tag-set-description!
+  [tag-id description]
+  (d/transact *conn* [[:db/add [:tag/id tag-id]
+                       :tag/description description]]))
 
 (defn create-extension!
   [{:keys [id type group-id user-id config]}]

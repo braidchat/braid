@@ -216,6 +216,9 @@
 (defn remove-tag! [tag-id]
   (transact! [:tags] #(dissoc % tag-id)))
 
+(defn update-tag-description! [tag-id desc]
+  (transact! [:tags tag-id :description] (constantly desc)))
+
 (defn all-tags []
   (vals (get-in @app-state [:tags])))
 
