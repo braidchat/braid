@@ -537,6 +537,10 @@
       create-entity!
       db->tag))
 
+(defn tag-group-id [tag-id]
+  (-> (d/pull (d/db *conn*) [{:tag/group [:group/id]}] [:tag/id tag-id])
+      (get-in [:tag/group :group/id])))
+
 (defn user-in-group?
   [user-id group-id]
   (seq (d/q '[:find ?g
@@ -717,7 +721,7 @@
                    (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
-(defn set-tag-description!
+(defn tag-set-description!
   [tag-id description]
   (d/transact *conn* [[:db/add [:tag/id tag-id]
                        :tag/description description]]))

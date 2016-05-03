@@ -25,7 +25,7 @@
                          :threads-count 0
                          :subscribers-count 0))))))
       (testing "set tag description"
-        (db/set-tag-description! (:id tag-data) "Some tag with stuff")
+        (db/tag-set-description! (:id tag-data) "Some tag with stuff")
         (is (= (first (db/get-group-tags (:id group)))
                (assoc tag-data
                  :description "Some tag with stuff"
