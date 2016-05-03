@@ -803,7 +803,7 @@
 
 (defn group-set!
   "Set a key to a value for the group's settings  This will throw if
-  permissions are changed in between reading & setting"
+  settings are changed in between reading & setting"
   [group-id k v]
   (let [old-prefs (-> (d/pull (d/db *conn*) [:group/settings] [:group/id group-id])
                       :group/settings)
