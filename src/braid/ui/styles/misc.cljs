@@ -68,7 +68,15 @@
      :color vars/grey-text}
 
     [:.description
-     {:width vars/card-width}
+     {:width vars/card-width
+      ; we want description to appear above the new thread, but below other threads
+      ; TODO: is there a way to make description clickable but not cover
+      ; threads that are long enough?
+      :z-index 100
+      ; opacity & position are hacks to make z-index work
+      :position "relative" ; z-index only applies if element has a position set
+      :opacity 0.99 ; need to create a new rendering context b/c threads are absolute postioned
+      }
 
      [:.avatar
       {:width (rem 4)

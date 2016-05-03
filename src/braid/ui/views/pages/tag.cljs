@@ -1,12 +1,33 @@
 (ns braid.ui.views.pages.tag
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction run!]]
+            [clojure.string :as string]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.threads :refer [threads-view]]
             [braid.ui.views.new-thread :refer [new-thread-view]]
             [braid.ui.views.pills :refer [tag-pill-view subscribe-button-view]]))
+
+(defn edit-description-view
+  [tag]
+  (let [editing? (r/atom false)
+        new-description (r/atom "")]
+    (fn [tag]
+      [:div.description-edit
+       (if @editing?
+         [:div
+          [:textarea {:placeholder "New description"
+                      :value @new-description
+                      :on-change (fn [e]
+                                   (reset! new-description (.. e -target -value)))}]
+          [:button {:on-click
+                    (fn [_]
+                      (swap! editing? not)
+                      (dispatch! :set-tag-description [(tag :id) @new-description]))}
+           "Save"]]
+         [:button {:on-click (fn [_] (println @editing?) (swap! editing? not))}
+          "Edit description"])])))
 
 (defn tag-page-view
   []
@@ -38,7 +59,9 @@
                                       :messages))
                               reverse))
         dummy (run! (when-let [tag-id @page-id]
-                      (dispatch! :threads-for-tag {:tag-id tag-id})))]
+                      (dispatch! :threads-for-tag {:tag-id tag-id})))
+        group-id (subscribe [:open-group-id])
+        admin? (subscribe [:current-user-is-group-admin?] [group-id])]
     (fn []
       (let [status (cond
                      @loading? :loading
@@ -53,7 +76,13 @@
 
          [:div.content
           [:div.description
-           [:p "One day, a tag description will be here."]
+           [:p
+            (if (string/blank? (@tag :description))
+              "One day, a tag description will be here."
+              (@tag :description))]
+
+           (when @admin?
+             [edit-description-view @tag])
 
            [:div
             (case status

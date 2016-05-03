@@ -103,6 +103,11 @@
   (sync/chsk-send! [:user/subscribe-to-tag tag-id])
   (store/subscribe-to-tag! tag-id))
 
+(defmethod dispatch! :set-tag-description [_ [tag-id desc]]
+  (store/update-tag-description! tag-id desc)
+  (sync/chsk-send!
+    [:chat/set-tag-description {:tag-id tag-id :description desc}]))
+
 (defmethod dispatch! :create-group [_ group]
   (let [group (schema/make-group group)]
     (sync/chsk-send!
@@ -305,3 +310,7 @@
 (defmethod sync/event-handler :group/new-admin
   [[_ [group-id new-admin-id]]]
   (store/add-group-admin! group-id new-admin-id))
+
+(defmethod sync/event-handler :group/tag-descrption-change
+  [[_ [tag-id new-description]]]
+  (store/update-tag-description! tag-id new-description))
