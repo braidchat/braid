@@ -14,8 +14,11 @@
     :box-sizing "border-box"
 
     :flex-direction "column"
-    :height "100%"}
+    :height "100%"
+    :z-index 101}
 
+   [:&.new
+    {:z-index 99}]
    [:&:before ; switch to :after to align at top
     {:content "\"\""
      :flex-grow 1}]

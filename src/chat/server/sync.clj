@@ -73,7 +73,18 @@
   [user-id info]
   (let [ids-to-send-to (intersection
                          (set (:any @connected-uids))
-                         (set (map :id (db/with-conn (db/fetch-users-for-user user-id)))))]
+                         (into #{} (map :id)
+                               (db/with-conn (db/fetch-users-for-user user-id))))]
+    (doseq [uid ids-to-send-to]
+      (chsk-send! uid info))))
+
+(defn broadcast-group-change
+  "Broadcast group change to clients that are in the group"
+  [group-id info]
+  (let [ids-to-send-to (intersection
+                         (set (:any @connected-uids))
+                         (into #{} (map :id)
+                               (db/with-conn (db/get-users-in-group group-id))))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
@@ -203,13 +214,25 @@
       (timbre/warnf "User %s attempted to create a tag %s in a disallowed group"
                     user-id (?data :name) (?data :group-id)))))
 
+(defmethod event-msg-handler :chat/set-tag-description
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (let [{:keys [tag-id description]} ?data]
+      (when (and tag-id description)
+        (db/with-conn
+          (let [group-id (db/tag-group-id tag-id)]
+            (when (db/user-is-group-admin? user-id group-id)
+              (db/tag-set-description! tag-id description)
+              (broadcast-group-change
+                group-id [:group/tag-descrption-change [tag-id description]]))))))))
+
 (defmethod event-msg-handler :chat/create-group
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn
       (if-not (db/group-exists? (?data :name))
         (let [new-group (db/create-group! ?data)]
-          (db/user-add-to-group! user-id (new-group :id)))
+          (db/user-make-group-admin! user-id (new-group :id)))
         (do
           (timbre/warnf "User %s attempted to create group that already exsits %s"
                         user-id (?data :name))
@@ -290,6 +313,16 @@
       (db/with-conn (db/retract-invitation! (invite :id)))
       (timbre/warnf "User %s attempted to decline nonexistant invitaiton %s"
                     user-id (?data :id)))))
+
+(defmethod event-msg-handler :chat/make-user-admin
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (let [{new-admin-id :user-id group-id :group-id} ?data]
+      (db/with-conn
+        (when (and new-admin-id group-id
+                (db/user-is-group-admin? user-id group-id))
+          (db/user-make-group-admin! new-admin-id group-id)
+          (broadcast-group-change group-id [:group/new-admin [group-id new-admin-id]]))))))
 
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

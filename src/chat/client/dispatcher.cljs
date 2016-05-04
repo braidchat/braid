@@ -103,6 +103,11 @@
   (sync/chsk-send! [:user/subscribe-to-tag tag-id])
   (store/subscribe-to-tag! tag-id))
 
+(defmethod dispatch! :set-tag-description [_ [tag-id desc]]
+  (store/update-tag-description! tag-id desc)
+  (sync/chsk-send!
+    [:chat/set-tag-description {:tag-id tag-id :description desc}]))
+
 (defmethod dispatch! :create-group [_ group]
   (let [group (schema/make-group group)]
     (sync/chsk-send!
@@ -186,6 +191,10 @@
 (defmethod dispatch! :decline-invite [_ invite]
   (sync/chsk-send! [:chat/invitation-decline invite])
   (store/remove-invite! invite))
+
+(defmethod dispatch! :make-admin [_ {:keys [group-id user-id] :as args}]
+  (sync/chsk-send! [:chat/make-user-admin args])
+  (store/add-group-admin! group-id user-id))
 
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
@@ -297,3 +306,11 @@
 (defmethod sync/event-handler :user/disconnected
   [[_ user-id]]
   (store/update-user-status! user-id :offline))
+
+(defmethod sync/event-handler :group/new-admin
+  [[_ [group-id new-admin-id]]]
+  (store/add-group-admin! group-id new-admin-id))
+
+(defmethod sync/event-handler :group/tag-descrption-change
+  [[_ [tag-id new-description]]]
+  (store/update-tag-description! tag-id new-description))

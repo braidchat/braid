@@ -57,6 +57,7 @@
   (let [user-id-atom (r/atom user-id)
         user (subscribe [:user] [user-id-atom])
         open-group-id (subscribe [:open-group-id])
+        admin? (subscribe [:user-is-group-admin?] [user-id-atom open-group-id])
         user-status (subscribe [:user-status] [user-id-atom])]
     (r/create-class
       {:display-name "user-pill-view"
@@ -69,7 +70,9 @@
          (let [path (routes/user-page-path {:group-id @open-group-id
                                             :user-id user-id})
                color (id->color user-id)]
-           [:a.user.pill {:class (case @user-status :online "on" "off")
+           [:a.user.pill {:class (str (case @user-status :online "on" "off")
+                                      (when @admin? " admin"))
+                          :title (when @admin? "admin")
                           :tabIndex -1
                           :style {:background-color color
                                   :color color

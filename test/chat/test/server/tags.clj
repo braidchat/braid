@@ -19,8 +19,20 @@
       (testing "create-tag!"
         (let [tag (db/create-tag! tag-data)]
           (testing "returns tag"
-            (is (= tag (assoc tag-data :group-name "Lean Pixel"
-                         :threads-count 0 :subscribers-count 0)))))))))
+            (is (= tag (assoc tag-data
+                         :description nil
+                         :group-name "Lean Pixel"
+                         :threads-count 0
+                         :subscribers-count 0))))))
+      (testing "set tag description"
+        (db/tag-set-description! (:id tag-data) "Some tag with stuff")
+        (is (= (first (db/get-group-tags (:id group)))
+               (assoc tag-data
+                 :description "Some tag with stuff"
+                 :group-name "Lean Pixel"
+                 :threads-count 0
+                 :subscribers-count 0)))
+        ))))
 
 (deftest user-can-subscribe-to-tags
   (let [user (db/create-user! {:id (db/uuid)

@@ -121,7 +121,11 @@
   (transact! [:new-thread-id] (fn [_] (uuid/make-random-squuid))))
 
 (defn update-thread-last-open-at [thread-id]
-  (transact! [:threads thread-id :last-open-at] (constantly (js/Date.))))
+  (let [latest-message (->> (get-in @app-state [:threads thread-id :messages])
+                            (map :created-at)
+                            (reduce max (js/Date. 0)))
+        new-last-open (js/Date. (inc (.getTime latest-message)))]
+    (transact! [:threads thread-id :last-open-at] (constantly new-last-open))))
 
 (defn set-open-threads! [threads]
   (transact! [:threads] (constantly (key-by-id threads)))
@@ -212,6 +216,9 @@
 (defn remove-tag! [tag-id]
   (transact! [:tags] #(dissoc % tag-id)))
 
+(defn update-tag-description! [tag-id desc]
+  (transact! [:tags tag-id :description] (constantly desc)))
+
 (defn all-tags []
   (vals (get-in @app-state [:tags])))
 
@@ -292,6 +299,9 @@
 
 (defn remove-group! [group]
   (transact! [:groups] (flip dissoc (group :id))))
+
+(defn add-group-admin! [group-id user-id]
+  (transact! [:groups group-id :admins] #(conj % user-id)))
 
 ; invitations
 

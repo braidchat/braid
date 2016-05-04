@@ -57,8 +57,6 @@
 
        :component-did-mount scroll-to-bottom!
 
-       :component-will-receive-props scroll-to-bottom!
-
        :component-did-update scroll-to-bottom!
 
        :reagent-render
