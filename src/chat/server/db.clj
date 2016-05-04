@@ -115,6 +115,7 @@
 (def group-pull-pattern
   [:group/id
    :group/name
+   :group/settings
    {:group/admins [:user/id]}
    {:extension/_group [:extension/id :extension/type]}])
 
@@ -122,6 +123,7 @@
   {:id (:group/id e)
    :name (:group/name e)
    :admins (into #{} (map :user/id) (:group/admins e))
+   :intro (-> e (get :group/settings "{}") edn/read-string :intro)
    :extensions (map (fn [x] {:id (:extension/id x)
                              :type (:extension/type x)})
                     (:extension/_group e))})
@@ -803,7 +805,7 @@
 
 (defn group-set!
   "Set a key to a value for the group's settings  This will throw if
-  permissions are changed in between reading & setting"
+  settings are changed in between reading & setting"
   [group-id k v]
   (let [old-prefs (-> (d/pull (d/db *conn*) [:group/settings] [:group/id group-id])
                       :group/settings)

@@ -196,6 +196,10 @@
   (sync/chsk-send! [:chat/make-user-admin args])
   (store/add-group-admin! group-id user-id))
 
+(defmethod dispatch! :set-intro [_ {:keys [group-id intro] :as args}]
+  (sync/chsk-send! [:chat/set-group-intro args])
+  (store/set-group-intro! group-id intro))
+
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
             :method :get
@@ -314,3 +318,7 @@
 (defmethod sync/event-handler :group/tag-descrption-change
   [[_ [tag-id new-description]]]
   (store/update-tag-description! tag-id new-description))
+
+(defmethod sync/event-handler :group/new-intro
+  [[_ [group-id intro]]]
+  (store/set-group-intro! group-id intro))

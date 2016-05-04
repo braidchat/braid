@@ -7,6 +7,7 @@
   []
   (let [user-id (subscribe [:user-id])
         open-threads (subscribe [:open-threads])
+        group (subscribe [:active-group])
         sorted-threads (reaction
                          (->> @open-threads
                               ; sort by last message sent by logged-in user, most recent first
@@ -19,5 +20,6 @@
     (fn []
       [:div.page.inbox
        [:div.title "Inbox"]
+       [:div.intro (:intro @group)]
        [threads-view {:new-thread-args {}
                       :threads @sorted-threads}]])))
