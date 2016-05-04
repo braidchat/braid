@@ -115,6 +115,7 @@
 (def group-pull-pattern
   [:group/id
    :group/name
+   :group/settings
    {:group/admins [:user/id]}
    {:extension/_group [:extension/id :extension/type]}])
 
@@ -122,6 +123,7 @@
   {:id (:group/id e)
    :name (:group/name e)
    :admins (into #{} (map :user/id) (:group/admins e))
+   :intro (-> e (get :group/settings "{}") edn/read-string :intro)
    :extensions (map (fn [x] {:id (:extension/id x)
                              :type (:extension/type x)})
                     (:extension/_group e))})

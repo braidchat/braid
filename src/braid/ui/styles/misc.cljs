@@ -62,6 +62,10 @@
      :color vars/grey-text
      :margin vars/pad}]
 
+   ["> .intro"
+    {:color vars/grey-text
+     :margin vars/pad}]
+
    ["> .content"
     {:overflow "scroll"
      :padding vars/pad

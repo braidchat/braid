@@ -94,6 +94,14 @@
           [:img.avatar {:style {:background-color (id->color @user-id)}
                         :src @user-avatar-url}]]))))
 
+(defn group-settings-view []
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      (let [path (routes/group-settings-path {:group-id @group-id})]
+        [:div.settings.shortcut {:class (when (routes/current-path? path) "active")}
+         [:a.title {:href path
+                    :title "Group Settings"}]]))))
+
 (defn extensions-page-button-view []
   (let [open-group-id (subscribe [:open-group-id])]
     (fn []
@@ -105,12 +113,17 @@
                   [:div "extensions"]]]))))
 
 (defn header-view []
-  [:div.header
-    [clear-inbox-button-view]
-    [inbox-page-button-view]
-    [recent-page-button-view]
-    [help-page-pane-view]
-    [users-online-pane-view]
-    [tags-pane-view]
-    [search-bar-view]
-    [current-user-button-view]])
+  (let [group-id (subscribe [:open-group-id])
+        admin? (subscribe [:current-user-is-group-admin?] [group-id])]
+    (fn []
+    [:div.header
+     [clear-inbox-button-view]
+     [inbox-page-button-view]
+     [recent-page-button-view]
+     [help-page-pane-view]
+     [users-online-pane-view]
+     [tags-pane-view]
+     (when @admin?
+       [group-settings-view])
+     [search-bar-view]
+     [current-user-button-view]])))
