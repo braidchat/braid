@@ -31,6 +31,9 @@
   (store/set-group-and-page! (UUID. group-id nil) {:type :tag
                                                    :id (UUID. tag-id nil)}))
 
+(defroute group-settings-path "/:group-id/settings" [group-id]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :settings}))
+
 (defroute extensions-page-path "/:group-id/extensions" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :extensions}))
 

@@ -303,6 +303,9 @@
 (defn add-group-admin! [group-id user-id]
   (transact! [:groups group-id :admins] #(conj % user-id)))
 
+(defn set-group-intro! [group-id intro]
+  (transact! [:groups group-id :intro] (constantly intro)))
+
 ; invitations
 
 (defn set-invitations! [invitations]

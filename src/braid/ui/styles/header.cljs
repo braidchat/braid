@@ -67,6 +67,10 @@
       [:.title:after
        (mixins/fontawesome \uf02c)]]
 
+     [:.settings
+      [:.title:after
+       (mixins/fontawesome \uf013)]]
+
      [:.extensions
       [:.title:after
        (mixins/fontawesome \uf1e6)]]
