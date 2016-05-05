@@ -29,8 +29,7 @@
 
             (:done-results :loading)
             (let [loaded-threads (reaction (vals (select-keys @threads (@page :thread-ids))))
-                  sorted-threads (reaction (->> @threads ; sort-by last reply, newest first
-                                               vals
+                  sorted-threads (reaction (->> @loaded-threads ; sort-by last reply, newest first
                                                 (sort-by
                                                 (comp (partial apply max)
                                                       (partial map :created-at)
@@ -72,9 +71,8 @@
                                (- (.-scrollLeft this-elt) (.-deltaY e))))))}
                   (doall
                     (for [thread @sorted-threads]
-                      (do
-                        (println thread)
-                       [thread-view thread])))]])
+                      ^{:key (:id thread)}
+                      [thread-view thread]))]])
 
             :done-empty
             [:div.content
