@@ -198,12 +198,13 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
       (if (valid-tag-name? (?data :name))
-        (let [new-tag (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))]
+        (let [new-tag (db/with-conn (db/create-tag! (select-keys ?data [:id :name :group-id])))
+              connected? (set (:any @connected-uids))]
           (db/with-conn
-            (doseq [uid (->> (:any @connected-uids)
-                             (filter #(db/user-in-tag-group? % (:id new-tag)))
-                             (remove (partial = user-id)))]
-              (chsk-send! uid [:chat/create-tag ?data])))
+            (doseq [u (db/get-users-in-group (:group-id new-tag))]
+              (db/user-subscribe-to-tag! (u :id) (new-tag :id))
+              (when (and (not= user-id (u :id)) (connected? (u :id)))
+                (chsk-send! (u :id) [:chat/create-tag new-tag]))))
           (when ?reply-fn
             (?reply-fn {:ok true})))
         (do (timbre/warnf "User %s attempted to create a tag %s with an invalid name"

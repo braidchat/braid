@@ -278,7 +278,7 @@
 (defmethod sync/event-handler :chat/create-tag
   [[_ data]]
   (store/add-tag! data)
-  (dispatch! :subscribe-to-tag (data :id)))
+  (store/subscribe-to-tag! (data :id)))
 
 (defmethod sync/event-handler :chat/joined-group
   [[_ data]]
