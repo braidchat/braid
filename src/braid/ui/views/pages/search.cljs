@@ -12,35 +12,43 @@
         start-loading! (fn [] (reset! loading? true))
         stop-loading! (fn [] (reset! loading? false))
         page (subscribe [:page])
-        threads (subscribe [:threads])]
-    (fn []
-      (let [status (cond
-                     @loading? :loading
-                     (not (contains? @page :thread-ids)) :searching
-                     (seq (@page :thread-ids)) :done-results
-                     :else :done-empty)]
-        [:div.page.search
-          [:div.title "Search"]
-          (case status
-            :searching
-            [:div.content
-              [:div.description
+        threads (subscribe [:threads])
+        query (subscribe [:search-query])
+        group-id (subscribe [:open-group-id])]
+    (r/create-class
+      {:display-name "search-results-page"
+       :component-did-mount
+       (fn [c]
+         (dispatch! :search-history [@query @group-id]))
+       :reagent-render
+       (fn []
+         (let [status (cond
+                        @loading? :loading
+                        (not (contains? @page :thread-ids)) :searching
+                        (seq (@page :thread-ids)) :done-results
+                        :else :done-empty)]
+           [:div.page.search
+            [:div.title (str "Search for \"" @query "\"")]
+            (case status
+              :searching
+              [:div.content
+               [:div.description
                 "Searching..."]]
 
-            (:done-results :loading)
-            (let [loaded-threads (reaction (vals (select-keys @threads (@page :thread-ids))))
-                  sorted-threads (reaction (->> @loaded-threads ; sort-by last reply, newest first
-                                                (sort-by
-                                                (comp (partial apply max)
-                                                      (partial map :created-at)
-                                                      :messages))
-                                                reverse))]
-              [:div.content
-                [:div.description
+              (:done-results :loading)
+              (let [loaded-threads (reaction (vals (select-keys @threads (@page :thread-ids))))
+                    sorted-threads (reaction (->> @loaded-threads ; sort-by last reply, newest first
+                                                  (sort-by
+                                                    (comp (partial apply max)
+                                                          (partial map :created-at)
+                                                          :messages))
+                                                  reverse))]
+                [:div.content
+                 [:div.description
                   (if (= status :loading)
                     "Loading more results..."
                     (str "Displaying " (count @loaded-threads) "/" (count (@page :thread-ids))))]
-                [:div.threads
+                 [:div.threads
                   {:ref "threads-div"
                    :on-scroll ; page in more results as the user scrolls
                    (fn [e]
@@ -74,7 +82,7 @@
                       ^{:key (:id thread)}
                       [thread-view thread]))]])
 
-            :done-empty
-            [:div.content
-              [:div.description
-                "No results."]])]))))
+              :done-empty
+              [:div.content
+               [:div.description
+                "No results."]])]))})))
