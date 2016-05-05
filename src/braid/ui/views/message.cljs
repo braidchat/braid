@@ -33,6 +33,9 @@
                [:a.external {:href match
                              :title match
                              :target "_blank"
+                             ; rel to address vuln caused by target=_blank
+                             ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+                             :rel "noopener noreferrer"
                              :tabIndex -1}
                  (abridged-url match)])}
    :users
