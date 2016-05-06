@@ -1,9 +1,11 @@
 (ns braid.ui.views.pages.tags
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
+            [clojure.string :as string]
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]
             [braid.ui.views.pills :refer [tag-pill-view subscribe-button-view]]
+            [braid.ui.views.pages.tag :refer [edit-description-view]]
             [chat.shared.util :refer [valid-tag-name?]])
   (:import [goog.events KeyCodes]))
 
@@ -29,13 +31,23 @@
 
 (defn- tag-info-view
   [tag]
-  [:div.tag-info
-   [:span.count.threads-count
-    (tag :threads-count)]
-   [:span.count.subscribers-count
-    (tag :subscribers-count)]
-   [tag-pill-view (tag :id)]
-   [subscribe-button-view (tag :id)]])
+  (let [group-id (subscribe [:open-group-id])
+        admin? (subscribe [:current-user-is-group-admin?] [group-id])]
+    (fn [tag]
+      [:div.tag-info
+       [:span.count.threads-count
+        (tag :threads-count)]
+       [:span.count.subscribers-count
+        (tag :subscribers-count)]
+       [tag-pill-view (tag :id)]
+       [subscribe-button-view (tag :id)]
+       [:div.description
+        [:p
+         (if (string/blank? (tag :description))
+           "One day, a tag description will be here."
+           (tag :description))]
+        (when @admin?
+          [edit-description-view tag]) ]])))
 
 (defn tags-page-view
   []

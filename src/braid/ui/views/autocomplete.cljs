@@ -120,7 +120,7 @@
                           [:div.tag-match
                            [:div.color-block{:style {:backgroundColor (id->color (tag :id))}}]
                            [:div.name (tag :name)]
-                           [:div.extra (:name (store/id->group (tag :group-id)))]])}))
+                           [:div.extra (tag :description)]])}))
                 (cons (when-not (or exact-match? (string/blank? query))
                         (let [tag (schema/make-tag {:name query
                                                     :group-id (store/open-group-id)})]

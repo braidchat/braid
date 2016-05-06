@@ -148,7 +148,8 @@
       :bottom (m/* pad 3)}
 
       [:.result
-       {:padding "0.25em 0.5em"}
+       {:padding "0.25em 0.5em"
+        :clear "both"}
        [:.emojione :.avatar :.color-block
         {:display "block"
          :width "2em"
@@ -164,7 +165,9 @@
          :white-space "nowrap"}]
 
        [:.extra
-        {:color "#ccc"}]
+        {:color "#ccc"
+         :overflow-y "hidden"
+         :max-height "2.5em"}]
 
        [:&:hover
         {:background "#eee"}]

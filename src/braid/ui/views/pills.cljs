@@ -48,7 +48,8 @@
                          :style {:background-color color
                                  :color color
                                  :border-color color}
-                         :href path}
+                         :href path
+                         :title (@tag :description)}
             [:div.name "#" (@tag :name)]]))})))
 
 
