@@ -148,7 +148,7 @@
     [:chat/search query]
     15000
     (fn [reply]
-      (when (seq (:thread-ids reply))
+      (when (:thread-ids reply)
         (store/set-search-results! reply)))))
 
 (defmethod dispatch! :load-threads [_ {:keys [thread-ids on-complete]}]

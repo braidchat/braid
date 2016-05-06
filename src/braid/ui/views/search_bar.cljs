@@ -18,26 +18,23 @@
       {:component-will-mount
        (fn []
          (let [search (debounce search-chan 500)]
-          (go
-            (while true
-              (let [{:keys [query]} (<! search)]
-                (store/set-search-results! {})
-                (if (string/blank? query)
-                  (do
-                    (routes/go-to! (routes/inbox-page-path {:group-id @open-group-id})))
-                  (do
-                    (routes/go-to! (routes/search-page-path {:group-id @open-group-id
-                                                             :query query}))
-                    (dispatch! :search-history [query @open-group-id]))))))))
+           (go
+             (while true
+               (let [{:keys [query]} (<! search)]
+                 (store/set-search-results! {})
+                 (if (string/blank? query)
+                   (routes/go-to! (routes/inbox-page-path {:group-id @open-group-id}))
+                   (routes/go-to! (routes/search-page-path {:group-id @open-group-id
+                                                            :query query}))))))))
        :reagent-render
        (fn []
          [:div.search-bar
-           [:input {:type "search"
-                    :placeholder "Search History"
-                    :value @search-query
-                    :on-change
-                      (fn [e]
-                        (let [query (.. e -target -value)]
-                          (store/set-search-query! query)
-                          (put! search-chan {:query query})))}]])})))
+          [:input {:type "search"
+                   :placeholder "Search History"
+                   :value @search-query
+                   :on-change
+                   (fn [e]
+                     (let [query (.. e -target -value)]
+                       (store/set-search-query! query)
+                       (put! search-chan {:query query})))}]])})))
 
