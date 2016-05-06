@@ -1,7 +1,7 @@
 (ns braid.common.state
   (:require
     [reagent.ratom :include-macros true :refer-macros [reaction]]
-    [clojure.set :refer [union intersection]]))
+    [clojure.set :refer [union intersection subset?]]))
 
 (defn set-active-group-id!
   [state [_ group-id]]
@@ -114,22 +114,27 @@
   (let [group-id (reaction (get-in @state [:open-group-id]))
         open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
         tag-id->group-id (reaction
-                           (->> (@state :tags)
-                                vals
-                                (map (juxt :id :group-id))
-                                (into {})))
+                           (into {} (map (juxt :id :group-id))
+                                 (vals (@state :tags))))
         threads (reaction (@state :threads))
-        open-threads-kv (reaction
-                          (-> @threads
-                              (select-keys @open-thread-ids)))
-        open-threads (reaction (vals @open-threads-kv))]
+        open-threads (reaction (vals (select-keys @threads @open-thread-ids)))
+        group-users (reaction
+                      (into #{}
+                            (comp
+                              (filter (fn [u] (contains? (set (u :group-ids)) @group-id)))
+                              (map :id))
+                            (vals (@state :users))))]
     (reaction
-      (doall ; avoid laziness in reactions! lead to @group-id not being deref'd, so subs didn't update
+      (doall
         (filter (fn [thread]
-                  (or (empty? (thread :tag-ids))
-                      (contains?
-                        (into #{} (map @tag-id->group-id (thread :tag-ids)))
-                        @group-id)))
+                  (and
+                    (or (empty? (thread :tag-ids))
+                        (contains?
+                          (into #{} (map @tag-id->group-id) (thread :tag-ids))
+                          @group-id))
+                    (subset?
+                      (set (thread :mentioned-ids))
+                      @group-users)))
                 @open-threads)))))
 
 (defn get-users-in-group
