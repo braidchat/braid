@@ -235,17 +235,27 @@
   (reaction (get-in @state [:tags tag-id :group-id])))
 
 (defn get-threads-for-group
-  [state [_ group-id]]
-  (let [group-for-tag (fn [tag-id]
-                        (get-in @state [:tags tag-id :group-id]))]
-    (reaction (->> (@state :threads)
+  ([state [_ group-id]] (get-threads-for-group state nil [group-id]))
+  ([state _ [group-id]]
+   (let [group-for-tag (fn [tag-id]
+                         (get-in @state [:tags tag-id :group-id]))
+         group-users (reaction
+                       (into #{}
+                             (comp
+                               (filter (fn [u] (contains? (set (u :group-ids)) group-id)))
+                               (map :id))
+                             (vals (@state :users))))]
+     (reaction (->> (@state :threads)
                     vals
-                   (filter (fn [thread]
-                     (or (empty? (thread :tag-ids))
-                         (contains?
-                           (into #{} (map group-for-tag) (thread :tag-ids))
-                           group-id))))
-                   doall))))
+                    (filter (fn [thread]
+                              (and (or (empty? (thread :tag-ids))
+                                       (contains?
+                                         (into #{} (map group-for-tag) (thread :tag-ids))
+                                         group-id))
+                                (subset?
+                                  (set (thread :mentioned-ids))
+                                  @group-users))))
+                    doall)))))
 
 (defn get-nickname
   [state [_ user-id]]
