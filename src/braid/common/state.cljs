@@ -170,7 +170,7 @@
    (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id))))
 
 (defn get-group-subscribed-tags
-  [state [_ group-id]]
+  [state _]
   (reaction
     (into ()
           (comp
