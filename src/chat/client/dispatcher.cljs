@@ -292,10 +292,6 @@
   [[_ data]]
   (store/add-users! data))
 
-(defmethod sync/event-handler :chat/new-user
-  [[_ user]]
-  (store/add-user! user))
-
 (defmethod sync/event-handler :chat/invitation-recieved
   [[_ invite]]
   (store/add-invite! invite))
@@ -311,6 +307,10 @@
 (defmethod sync/event-handler :user/disconnected
   [[_ user-id]]
   (store/update-user-status! user-id :offline))
+
+(defmethod sync/event-handler :group/new-user
+  [[_ user]]
+  (store/add-user! (assoc user :status :online)))
 
 (defmethod sync/event-handler :group/new-admin
   [[_ [group-id new-admin-id]]]
