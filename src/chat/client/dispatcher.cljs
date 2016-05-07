@@ -118,7 +118,8 @@
           (.error js/console msg)
           (store/display-error! (str :bad-group (group :id)) msg)
           (store/remove-group! group))))
-    (store/add-group! group)))
+    (store/add-group! group)
+    (store/become-group-admin! (:id group))))
 
 (defmethod dispatch! :set-nickname [_ [nickname on-error]]
   (sync/chsk-send!
