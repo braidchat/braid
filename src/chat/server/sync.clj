@@ -346,7 +346,7 @@
                               :user-groups (db/get-groups-for-user user-id)
                               :user-threads (db/get-open-threads-for-user user-id)
                               :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
-                              :user-preferences (db/get-user-preferences user-id)
+                              :user-preferences (db/user-get-preferences user-id)
                               :users (into ()
                                            (map #(assoc % :status
                                                    (if (connected (% :id)) :online :offline)))

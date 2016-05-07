@@ -464,10 +464,13 @@
                               :email "foo@bar.com"
                               :password "foobar"
                               :avatar ""})]
-      (is (empty? (db/get-user-preferences (:id u))))
+      (is (empty? (db/user-get-preferences (:id u))))
       (db/user-set-preference! (:id u) :email-frequency :weekly)
       (is (= {:email-frequency :weekly}
-             (db/get-user-preferences (:id u))))
+             (db/user-get-preferences (:id u))))
+      (is (= :weekly (db/user-get-preference (:id u) :email-frequency)))
+      (db/user-set-preference! (:id u) :email-frequency :daily)
+      (is (= :daily (db/user-get-preference (:id u) :email-frequency)))
       (testing "can search by preferences"
         (let [u1 (:id (db/create-user! {:id (db/uuid)
                                         :email "foo@baz.com"

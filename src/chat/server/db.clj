@@ -143,35 +143,64 @@
     (->> (d/resolve-tempid db-after tempids new-id)
          (d/entity db-after))))
 
-(defn get-user-preferences
+(defn user-get-preferences
   [user-id]
-  (->> (d/pull (d/db *conn*) [:user/preferences] [:user/id user-id])
-      :user/preferences
-      ((fnil edn/read-string "{}"))))
+  (->> (d/pull (d/db *conn*)
+               [{:user/preferences [:user.preference/key :user.preference/value]}]
+               [:user/id user-id])
+       :user/preferences
+       (into {}
+             (comp (map (juxt :user.preference/key :user.preference/value))
+                   (map (fn [[k v]] [k (edn/read-string v)]))))))
+
+(defn user-get-preference
+  [user-id pref]
+  (some-> (d/q '[:find ?val .
+                 :in $ ?user-id ?key
+                 :where
+                 [?u :user/id ?user-id]
+                 [?u :user/preferences ?p]
+                 [?p :user.preference/key ?key]
+                 [?p :user.preference/value ?val]]
+               (d/db *conn*) user-id pref)
+          edn/read-string))
+
+(defn user-preference-is-set?
+  "If the preference with the given key has been set for the user, return the
+  entity id, else nil"
+  [user-id pref]
+  (d/q '[:find ?p .
+         :in $ ?user-id ?key
+         :where
+         [?u :user/id ?user-id]
+         [?u :user/preferences ?p]
+         [?p :user.preference/key ?key]]
+       (d/db *conn*) user-id pref))
 
 (defn user-set-preference!
   "Set a key to a value for the user's preferences.  This will throw if
   permissions are changed in between reading & setting"
   [user-id k v]
-  (let [old-prefs (-> (d/pull (d/db *conn*) [:user/preferences] [:user/id user-id])
-                      :user/preferences)
-        new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
-                      (assoc k v)
-                      pr-str)]
-    (d/transact *conn* [[:db.fn/cas [:user/id user-id]
-                         :user/preferences old-prefs new-prefs]])))
+  (println "Setting " k " to " v)
+  (if-let [e (user-preference-is-set? user-id k)]
+    @(d/transact *conn* [[:db/add e :user.preference/value (pr-str v)]])
+    @(d/transact *conn* [{:user.preference/key k
+                         :user.preference/value (pr-str v)
+                         :user/_preferences [:user/id user-id]
+                         :db/id #db/id [:entities]}])))
 
 (defn user-search-preferences
   "Find the ids of users that have the a given value for a given key set in their preferences"
   [k v]
   (d/q '[:find [?user-id ...]
-         :in $ ?kv
+         :in $ ?k ?v
          :where
-         [(.contains ^String ?pref ^String ?kv)]
+         [?u :user/id ?user-id]
          [?u :user/preferences ?pref]
-         [?u :user/id ?user-id]]
+         [?pref :user.preference/key ?k]
+         [?pref :user.preference/value ?v]]
        (d/db *conn*)
-       (str (pr-str k) " " (pr-str v))))
+       k (pr-str v)))
 
 (defn get-users-subscribed-to-thread
   [thread-id]
