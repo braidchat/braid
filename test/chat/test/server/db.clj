@@ -471,6 +471,7 @@
       (is (= :weekly (db/user-get-preference (:id u) :email-frequency)))
       (db/user-set-preference! (:id u) :email-frequency :daily)
       (is (= :daily (db/user-get-preference (:id u) :email-frequency)))
+      (db/user-set-preference! (:id u) :email-frequency :weekly)
       (testing "can search by preferences"
         (let [u1 (:id (db/create-user! {:id (db/uuid)
                                         :email "foo@baz.com"
