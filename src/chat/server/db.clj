@@ -181,7 +181,6 @@
   "Set a key to a value for the user's preferences.  This will throw if
   permissions are changed in between reading & setting"
   [user-id k v]
-  (println "Setting " k " to " v)
   (if-let [e (user-preference-is-set? user-id k)]
     @(d/transact *conn* [[:db/add e :user.preference/value (pr-str v)]])
     @(d/transact *conn* [{:user.preference/key k
