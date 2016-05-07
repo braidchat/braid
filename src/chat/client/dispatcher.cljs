@@ -143,6 +143,14 @@
   (store/add-preferences! {k v})
   (sync/chsk-send! [:user/set-preferences {k v}]))
 
+(defmethod dispatch! :add-notification-rule [_ rule]
+  (let [current-rules (get (store/user-preferences) :notification-rules [])]
+    (dispatch! :set-preference [:notification-rules (conj current-rules rule)])))
+
+(defmethod dispatch! :remove-notification-rule [_ rule]
+  (let [current-rules (get (store/user-preferences) :notification-rules [])]
+    (dispatch! :set-preference [:notification-rules (remove (partial = rule) current-rules)])))
+
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
     [:chat/search query]

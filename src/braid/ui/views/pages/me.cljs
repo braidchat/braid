@@ -1,8 +1,12 @@
 (ns braid.ui.views.pages.me
   (:require [reagent.core :as r]
+            [reagent.ratom :refer-macros [reaction]]
             [clojure.string :as string]
+            [braid.common.notify :as notify]
+            [braid.ui.views.pills :refer [tag-pill-view]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]
+            [chat.client.store :as store]
             [chat.shared.util :refer [valid-nickname?]])
   (:import [goog.events KeyCodes]))
 
@@ -117,6 +121,114 @@
             ^{:key freq}
             [:option {:value freq} (name freq)]))]])))
 
+(defn notification-rule-view
+  [[event condition]]
+  (case event
+    [:tr
+     [:td (case event
+            :any "Any Event"
+            :mention "I am mentioned"
+            :tag "Message is tagged ")]
+     [:td (case event
+            (:any :mention)
+            (str "In "
+                 (if (= condition :any)
+                   "any group"
+                   (:name (store/id->group condition))))
+            :tag [tag-pill-view condition])]
+     [:td [:button {:on-click (fn [_]
+                                (dispatch! :remove-notification-rule
+                                           [event condition]))}
+           "-"]]]))
+
+(defn new-rule-view
+  []
+  (let [event (r/atom :any)
+        condition (r/atom :any)
+        event-tag (r/atom nil)
+        groups (subscribe [:groups])
+        all-tags (subscribe [:tags])
+        tags (reaction (group-by :group-id @all-tags))
+        default-condition (reaction (case @event
+                                      (:any :mention) :any
+                                      :tag (:id (first @all-tags))))]
+    (fn []
+      [:tr
+       [:td [:select {:value @event
+                      :on-change (fn [e]
+                                   (reset! event (keyword (.. e -target -value)))
+                                   (reset! condition @default-condition))}
+             [:option {:value :any} "Any Event"]
+             [:option {:value :mention} "I am mentioned"]
+             [:option {:value :tag} "A message is tagged with..."]]]
+       [:td
+        (case @event
+          (:any :mention)
+          [:select {:value @condition
+                    :on-change (fn [e]
+                                 (let [v (.. e -target -value)]
+                                   (if (= v "any")
+                                     (reset! condition :any)
+                                     (reset! condition (UUID. v nil)))))}
+           [:option {:value :any} "Any Group"]
+           (doall
+             (for [group @groups]
+               ^{:key (group :id)}
+               [:option {:value (group :id)} (group :name)]))]
+
+          :tag
+          [:select {:value @event-tag
+                    :on-change (fn [e]
+                                 (let [tag-id (UUID. (.. e -target -value) nil)]
+                                   (reset! condition tag-id)))}
+           (doall
+             (for [group-id (keys @tags)]
+               ^{:key group-id}
+               [:optgroup {:label (:name (store/id->group group-id))}
+                (doall
+                  (for [tag (get @tags group-id)]
+                    ^{:key (tag :id)}
+                    [:option {:value (tag :id)} (tag :name)]))]))])]
+       [:td
+        [:button {:on-click (fn [_]
+                              (dispatch! :add-notification-rule [@event @condition]))}
+         "Save"]]])))
+
+(defn notification-rules-view
+  []
+  (let [rules (subscribe [:user-preference :notification-rules])]
+    (fn []
+      [:div
+       [:table
+        [:thead
+         [:tr [:th "Notify me if"] [:th "In"] [:th ""]]]
+        [:tbody
+         (doall
+           (for [rule @rules]
+             ^{:key (hash rule)}
+             [notification-rule-view rule]))
+         [new-rule-view]]]])))
+
+(defn notification-settings-view
+  []
+  (let [notifications-enabled (r/atom (notify/enabled?))]
+    (fn []
+      [:div
+       [:p "Braid is designed to let you work asynchronously, but sometimes you "
+        "want to know right away when something happens.  You can choose events "
+        "that will trigger HTML notifications if you're online or emails if offline."]
+       [:div
+        (when-not @notifications-enabled
+          [:button
+           {:on-click
+            (fn [_] (notify/request-permission
+                      (fn [perm]
+                        (when (= perm "granted")
+                          (reset! notifications-enabled true)
+                          (notify/notify {:msg "Notifications Enabled!"})))))}
+           "Enable Desktop Notifications"])
+        [notification-rules-view]]])))
+
 (defn me-page-view
   []
   (let [invitations (subscribe [:invitations])]
@@ -137,4 +249,6 @@
           ;TODO: render correctly
           [invitations-view @invitations])
         [:h2 "Email Digest Preferences"]
-        [email-settings-view]]])))
+        [email-settings-view]
+        [:h2 "Notification Preferences"]
+        [notification-settings-view]]])))
