@@ -1,17 +1,18 @@
 (ns braid.common.notify-rules
   (:require [clojure.set :as set]
-            [schema.core :as s :include-macros true]
-            [braid.common.schema :refer [Rules NewMessage]]
-            #?@(:cljs ([chat.client.store :as store])
-                :clj ([chat.server.db :as db]))))
-
-(def rules-valid? (s/validator Rules))
-(def new-message-valid? (s/validator NewMessage))
+            [braid.common.schema :refer [new-message-valid? rules-valid?]]
+            [chat.server.db :as db]))
 
 (defn tag->group
   [tag-id]
-  #? (:clj (db/with-conn (db/tag-group-id tag-id))
-      :cljs (store/group-for-tag tag-id)))
+  (db/with-conn (db/tag-group-id tag-id)))
+
+(defn thread->tags
+  [thread-id]
+  (:tag-ids (db/with-conn (db/get-thread))))
+
+(defn thread->groups [thread-id]
+  (into #{} (map tag->group) (thread->tags thread-id)))
 
 (defn notify?
   [user-id rules new-message]
@@ -30,7 +31,7 @@
         (seq (set/intersection
                (set (new-message :mentioned-tag-ids))
                tag))
-        (let [groups (into #{} (map tag->group) (new-message :mentioned-tag-ids))]
+        (let [groups (thread->groups (new-message :thread-id))]
           (or ; ...or by anything in this group
               (seq (set/intersection groups any))
               ; ...or by a mention...
