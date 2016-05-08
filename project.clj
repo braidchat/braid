@@ -34,6 +34,7 @@
                  [org.clojure/tools.reader "1.0.0-alpha3"]
                  [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
                  [com.taoensso/sente "1.8.1" :exclusions [org.clojure/tools.reader]]
+                 [prismatic/schema "1.1.0"]
 
                  ;mobile
                  [re-frame "0.7.0"]

@@ -7,7 +7,7 @@
     (fn [opts]
       [thread-view (merge {:id @new-thread-id
                            :new? true
-                           :tag-ids []
-                           :mentioned-ids []
+                           :tag-ids (get opts :tag-ids [])
+                           :mentioned-ids (get opts :mentioned-ids [])
                            :messages []}
                           opts)])))

@@ -6,7 +6,8 @@
             [chat.client.schema :as schema]
             [chat.shared.util :as util]
             [chat.client.router :as router]
-            [chat.client.xhr :refer [edn-xhr]]))
+            [chat.client.xhr :refer [edn-xhr]]
+            [braid.common.notify :as notify]))
 
 (defn- extract-tag-ids [text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
@@ -143,6 +144,15 @@
 (defmethod dispatch! :set-preference [_ [k v]]
   (store/add-preferences! {k v})
   (sync/chsk-send! [:user/set-preferences {k v}]))
+
+(defmethod dispatch! :add-notification-rule [_ rule]
+  (let [current-rules (get (store/user-preferences) :notification-rules [])]
+    (dispatch! :set-preference [:notification-rules (conj current-rules rule)])))
+
+(defmethod dispatch! :remove-notification-rule [_ rule]
+  (let [new-rules (->> (get (store/user-preferences) :notification-rules [])
+                       (into [] (remove (partial = rule))))]
+    (dispatch! :set-preference [:notification-rules new-rules])))
 
 (defmethod dispatch! :search-history [_ query]
   (sync/chsk-send!
@@ -323,3 +333,8 @@
 (defmethod sync/event-handler :group/new-intro
   [[_ [group-id intro]]]
   (store/set-group-intro! group-id intro))
+
+(defmethod sync/event-handler :chat/notify-message
+  [[_ message]]
+  (println "Got notification " message)
+  (notify/notify {:msg (:content message)}))

@@ -1,7 +1,44 @@
 (ns chat.server.migrate
   (:require [chat.server.db :as db]
             [datomic.api :as d]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [clojure.edn :as edn]))
+
+(defn migrate-2016-05-07
+  "Change how user preferences are stored"
+  []
+  (db/with-conn
+    ; rename old prefs
+    (d/transact db/*conn* [{:db/id :user/preferences
+                                          :db/ident :user/preferences-old}])
+    ; create new entity type
+    (d/transact db/*conn*
+      [{:db/ident :user/preferences
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/many
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+
+       {:db/ident :user.preference/key
+        :db/valueType :db.type/keyword
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}
+       {:db/ident :user.preference/value
+        :db/valueType :db.type/string
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])
+
+    ; migrate to new style
+    (let [prefs (d/q '[:find (pull ?u [:user/id :user/preferences-old])
+                       :where [?u :user/id]]
+                     (d/db db/*conn*))]
+      (doseq [[p] prefs]
+        (let [u-id (:user/id p)
+              u-prefs (edn/read-string (:user/preferences-old p))]
+          (doseq [[k v] u-prefs]
+            (when k (db/user-set-preference! u-id k v))))))))
 
 (defn migrate-2016-05-03
   "Add tag descriptions"
