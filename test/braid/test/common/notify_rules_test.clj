@@ -84,5 +84,13 @@
       (db/create-message! m)
       (is (rules/notify? user-id [[:mention (:id g1)]] m))
       (is (rules/notify? user-id [[:tag (:id g1t1)]] m))
-      (is (not (rules/notify? user-id [[:tag (:id g1t2)]] m))))))
+      (is (not (rules/notify? user-id [[:tag (:id g1t2)]] m))))
+
+    (let [m1 (-> (msg)
+                (update :mentioned-tag-ids conj (:id g1t1)))
+          m2 (-> (msg) (assoc :thread-id (m1 :thread-id)))]
+      (db/create-message! m1)
+      (db/create-message! m2)
+      (is (rules/notify? (db/uuid) [[:any (:id g1)]] m2))
+      (is (not (rules/notify? (db/uuid) [[:any (:id g2)]] m2))))))
 
