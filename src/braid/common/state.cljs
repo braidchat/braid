@@ -48,7 +48,7 @@
    (current-user-is-group-admin? state nil [group-id]))
   ([state _ [group-id]]
    (reaction (->> (get-in @state [:session :user-id])
-                  (contains? (get-in @state [:groups group-id :admins]))))))
+                  (contains? (set (get-in @state [:groups group-id :admins])))))))
 
 (defn- thread-unseen?
   [thread]

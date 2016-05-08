@@ -133,9 +133,12 @@
               (db/with-conn
                 (db/user-add-to-group! (user :id) (invite :group-id))
                 (db/user-subscribe-to-group-tags! (user :id) (invite :group-id))
-                (db/retract-invitation! (invite :id)))
-              (sync/broadcast-user-change (user :id) [:chat/new-user user])
-              {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
+                (db/retract-invitation! (invite :id))
+                (sync/broadcast-group-change
+                  (invite :group-id)
+                  [:group/new-user (db/user-by-id (user :id))]))
+              {:status 302
+               :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))))))
 
@@ -170,8 +173,10 @@
                       [proto _ referrer-domain] (string/split referer #"/")]
                   (db/with-conn
                     (db/user-add-to-group! id group-id)
-                    (db/user-subscribe-to-group-tags! id group-id))
-                  (sync/broadcast-user-change id [:chat/new-user u])
+                    (db/user-subscribe-to-group-tags! id group-id)
+                    (sync/broadcast-group-change
+                      group-id
+                      [:group/new-user (db/user-by-id id)]))
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
                    :session (assoc (req :session) :user-id id)
                    :body ""}))))))))
@@ -190,11 +195,9 @@
                   (db/with-conn
                     (db/user-add-to-group! user-id group-id)
                     (db/user-subscribe-to-group-tags! user-id group-id)
-                    (let [other-users (->> (db/get-users-in-group group-id)
-                                           (remove #(= user-id (:id %))))
-                          user (db/user-by-id user-id)]
-                      (doseq [uid other-users]
-                        (sync/broadcast-user-change uid [:chat/new-user user])))))
+                    (sync/broadcast-group-change
+                      group-id
+                      [:group/new-user (db/user-by-id user-id)])))
                 (let [referer (get-in req [:headers "referer"] (env :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302

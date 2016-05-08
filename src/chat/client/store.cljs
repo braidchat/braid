@@ -300,6 +300,9 @@
 (defn remove-group! [group]
   (transact! [:groups] (flip dissoc (group :id))))
 
+(defn become-group-admin! [group-id]
+  (transact! [:groups group-id :admins] #(conj % (get-in @app-state [:session :user-id]))))
+
 (defn add-group-admin! [group-id user-id]
   (transact! [:groups group-id :admins] #(conj % user-id)))
 
