@@ -40,23 +40,26 @@
         g2t1 (db/create-tag! {:id (db/uuid) :name "group2tag1" :group-id (g2 :id)})
         g2t2 (db/create-tag! {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})
 
-        thread {:id (db/uuid)
-                :messages ()
-                :tag-ids ()
-                :mentioned-ids ()}]
+        msg {:id (db/uuid)
+             :thread-id (db/uuid)
+             :user-id (db/uuid)
+             :content ""
+             :created-at (java.util.Date.)
+             :mentioned-user-ids ()
+             :mentioned-tag-ids ()}]
 
-    (is (rules/notify? (db/uuid) [[:any :any]] thread) ":any :any always gets notified")
-    (is (not (rules/notify? (db/uuid) [[:any (:id g1)]] thread)))
+    (is (rules/notify? (db/uuid) [[:any :any]] msg) ":any :any always gets notified")
+    (is (not (rules/notify? (db/uuid) [[:any (:id g1)]] msg)))
     (is (rules/notify? (db/uuid) [[:any (:id g1)]]
-                       (update thread :tag-ids conj (:id g1t1))))
+                       (update msg :mentioned-tag-ids conj (:id g1t1))))
     (let [user-id (db/uuid)]
       (is (not (rules/notify? user-id [[:mention (:id g1)]]
-                              (-> thread
-                                  (update :mentioned-ids conj user-id)))))
+                              (-> msg
+                                  (update :mentioned-user-ids conj user-id)))))
       (is (rules/notify? user-id [[:mention :any]]
-                         (-> thread
-                             (update :mentioned-ids conj user-id))))
+                         (-> msg
+                             (update :mentioned-user-ids conj user-id))))
       (is (rules/notify? user-id [[:mention (:id g1)]]
-                         (-> thread
-                             (update :mentioned-ids conj user-id)
-                             (update :tag-ids conj (:id g1t1))))))))
+                         (-> msg
+                             (update :mentioned-user-ids conj user-id)
+                             (update :mentioned-tag-ids conj (:id g1t1))))))))
