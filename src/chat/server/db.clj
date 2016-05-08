@@ -533,8 +533,8 @@
 
 (defn get-thread
   [thread-id]
-  (-> (d/pull (d/db *conn*) thread-pull-pattern [:thread/id thread-id])
-      db->thread))
+  (some-> (d/pull (d/db *conn*) thread-pull-pattern [:thread/id thread-id])
+          db->thread))
 
 (defn get-threads
   [thread-ids]

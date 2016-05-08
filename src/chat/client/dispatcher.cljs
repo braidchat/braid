@@ -6,7 +6,8 @@
             [chat.client.schema :as schema]
             [chat.shared.util :as util]
             [chat.client.router :as router]
-            [chat.client.xhr :refer [edn-xhr]]))
+            [chat.client.xhr :refer [edn-xhr]]
+            [braid.common.notify :as notify]))
 
 (defn- extract-tag-ids [text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
@@ -332,3 +333,8 @@
 (defmethod sync/event-handler :group/new-intro
   [[_ [group-id intro]]]
   (store/set-group-intro! group-id intro))
+
+(defmethod sync/event-handler :chat/notify-message
+  [[_ message]]
+  (println "Got notification " message)
+  (notify/notify {:msg (:content message)}))

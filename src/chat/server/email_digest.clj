@@ -98,12 +98,13 @@
 ; sending
 
 (defn send-message
-  [to {:keys [text html]}]
+  [to {:keys [text html subject]
+       :or {subject "While you were away"}}]
   (http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
              {:basic-auth ["api" (env :mailgun-password)]
               :form-params {:to to
                             :from (str "noreply@" (env :mailgun-domain))
-                            :subject "While you were away"
+                            :subject subject
                             :text text
                             :html html}}))
 

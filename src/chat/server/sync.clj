@@ -11,7 +11,10 @@
             [chat.server.digest :as digest]
             [clojure.set :refer [difference intersection]]
             [chat.shared.util :refer [valid-nickname? valid-tag-name?]]
-            [chat.server.extensions :refer [handle-thread-change]]))
+            [chat.server.extensions :refer [handle-thread-change]]
+            [chat.server.email-digest :as email]
+            [braid.common.schema :refer [new-message-valid?]]
+            [braid.common.notify-rules :as notify-rules]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -131,18 +134,44 @@
     (doseq [ext exts]
       (handle-thread-change ext msg))))
 
+(defn notify-users [new-message]
+  (let [subscribed-user-ids (->>
+                              (db/with-conn
+                                (db/get-users-subscribed-to-thread
+                                  (new-message :thread-id)))
+                              (remove (partial = (:user-id new-message))))
+        online? (intersection
+                  (set subscribed-user-ids)
+                  (set (:any @connected-uids)))]
+    (db/with-conn
+      (doseq [uid subscribed-user-ids]
+        (when-let [rules (db/user-get-preference uid :notification-rules)]
+          (when (notify-rules/notify? uid rules new-message)
+            (if (online? uid)
+              (chsk-send! uid [:chat/notify-message new-message])
+              (-> (email/create-message [(db/get-thread (new-message :thread-id))])
+                  (assoc :subject "Notification from Braid")
+                  (->> (email/send-message (db/user-email uid)))))))))))
+
+
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (when (user-can-message? user-id ?data)
-      (db/with-conn (db/create-message!
-                      (-> ?data
+    (let [new-message (-> ?data
                           (update-in [:content] #(apply str (take 5000 %)))
-                          (assoc :created-at (java.util.Date.)))))
-      (broadcast-thread (?data :thread-id) [])
-      (notify-extensions ?data)
-      (when-let [cb ?reply-fn]
-        (cb :braid/ok)))))
+                          (assoc :created-at (java.util.Date.)))]
+      (if (new-message-valid? new-message)
+        (when (user-can-message? user-id new-message)
+          (db/with-conn (db/create-message! new-message))
+          (when-let [cb ?reply-fn]
+            (cb :braid/ok))
+          (broadcast-thread (new-message :thread-id) [])
+          (notify-users new-message)
+          (notify-extensions new-message))
+        (do
+          (timbre/warnf "Malformed new message: %s" (pr-str new-message))
+          (when-let [cb ?reply-fn]
+          (cb :braid/error)))))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

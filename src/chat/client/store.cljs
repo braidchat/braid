@@ -71,6 +71,9 @@
 (defn set-nickname! [nick]
   (transact! [:session :nickname] (constantly nick)))
 
+(defn current-user-id []
+  (get-in @app-state [:session :user-id]))
+
 ; users
 
 (defn add-users! [users]
@@ -301,7 +304,7 @@
   (transact! [:groups] (flip dissoc (group :id))))
 
 (defn become-group-admin! [group-id]
-  (transact! [:groups group-id :admins] #(conj % (get-in @app-state [:session :user-id]))))
+  (transact! [:groups group-id :admins] #(conj % (current-user-id))))
 
 (defn add-group-admin! [group-id user-id]
   (transact! [:groups group-id :admins] #(conj % user-id)))
