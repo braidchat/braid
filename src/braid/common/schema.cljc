@@ -9,6 +9,7 @@
    :created-at s/Inst
    :mentioned-user-ids [s/Uuid]
    :mentioned-tag-ids [s/Uuid]})
+(def new-message-valid? (s/validator NewMessage))
 
 (def ThreadMessage
   {:id s/Uuid
@@ -34,3 +35,4 @@
                  #(= :mention (first %)) MentionRule
                  #(= :tag (first %)) TagRule))
 (def Rules [Rule])
+(def rules-valid? (s/validator Rules))

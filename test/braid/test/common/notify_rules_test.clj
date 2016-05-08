@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [schema.core :as s]
             [chat.server.db :as db]
+            [braid.common.schema :refer [rules-valid?]]
             [braid.common.notify-rules :as rules]))
 
 (s/set-fn-validation! true)
@@ -15,11 +16,11 @@
 
 (deftest rules-schema
   (testing "schema can validate rules format"
-    (is (rules/rules-valid? []))
-    (is (rules/rules-valid? [[:any :any]]))
+    (is (rules-valid? []))
+    (is (rules-valid? [[:any :any]]))
     (is (thrown? clojure.lang.ExceptionInfo
-                 (rules/rules-valid? [[:any :any] []])))
-    (is (rules/rules-valid?
+                 (rules-valid? [[:any :any] []])))
+    (is (rules-valid?
           [[:any #uuid "570fce10-9312-4550-9525-460c57fd9229"]
            [:mention :any]
            [:tag #uuid "56c2653c-a1fb-4043-97ca-3060ec95d852"]
@@ -40,26 +41,48 @@
         g2t1 (db/create-tag! {:id (db/uuid) :name "group2tag1" :group-id (g2 :id)})
         g2t2 (db/create-tag! {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})
 
-        msg {:id (db/uuid)
-             :thread-id (db/uuid)
-             :user-id (db/uuid)
-             :content ""
-             :created-at (java.util.Date.)
-             :mentioned-user-ids ()
-             :mentioned-tag-ids ()}]
+        user-id (db/uuid)
+        _ (db/create-user! {:id user-id
+                            :email "foo@bar.com"
+                            :avatar "zz"
+                            :password "foobar"})
 
-    (is (rules/notify? (db/uuid) [[:any :any]] msg) ":any :any always gets notified")
-    (is (not (rules/notify? (db/uuid) [[:any (:id g1)]] msg)))
-    (is (rules/notify? (db/uuid) [[:any (:id g1)]]
-                       (update msg :mentioned-tag-ids conj (:id g1t1))))
-    (let [user-id (db/uuid)]
-      (is (not (rules/notify? user-id [[:mention (:id g1)]]
-                              (-> msg
-                                  (update :mentioned-user-ids conj user-id)))))
-      (is (rules/notify? user-id [[:mention :any]]
-                         (-> msg
-                             (update :mentioned-user-ids conj user-id))))
-      (is (rules/notify? user-id [[:mention (:id g1)]]
-                         (-> msg
-                             (update :mentioned-user-ids conj user-id)
-                             (update :mentioned-tag-ids conj (:id g1t1))))))))
+        sender (db/create-user! {:id (db/uuid)
+                                 :email "bar@bar.com"
+                                 :avatar "zz"
+                                 :password "foobar"})
+
+        msg (fn [] {:id (db/uuid)
+                    :thread-id (db/uuid)
+                    :user-id (sender :id)
+                    :content ""
+                    :created-at (java.util.Date.)
+                    :mentioned-user-ids ()
+                    :mentioned-tag-ids ()})]
+
+    (is (rules/notify? (db/uuid) [[:any :any]] (msg)) ":any :any always gets notified")
+    (let [new-msg (msg)]
+      (db/create-message! new-msg)
+      (is (not (rules/notify? (db/uuid) [[:any (:id g1)]] new-msg))))
+    (let [new-msg (update (msg) :mentioned-tag-ids conj (:id g1t1))]
+      (db/create-message! new-msg)
+      (is (rules/notify? (db/uuid) [[:any (:id g1)]]
+                         new-msg)))
+    (let [m1 (-> (msg)
+                 (update :mentioned-user-ids conj user-id))]
+      (db/create-message! m1)
+      (is (not (rules/notify? user-id [[:mention (:id g1)]] m1))))
+
+    (let [m2 (-> (msg)
+                 (update :mentioned-user-ids conj user-id))]
+      (db/create-message! m2)
+      (is (rules/notify? user-id [[:mention :any]] m2)))
+
+    (let [m (-> (msg)
+                (update :mentioned-user-ids conj user-id)
+                (update :mentioned-tag-ids conj (:id g1t1)))]
+      (db/create-message! m)
+      (is (rules/notify? user-id [[:mention (:id g1)]] m))
+      (is (rules/notify? user-id [[:tag (:id g1t1)]] m))
+      (is (not (rules/notify? user-id [[:tag (:id g1t2)]] m))))))
+
