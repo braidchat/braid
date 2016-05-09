@@ -28,6 +28,7 @@
 (defn- key-by-id [coll]
   (into {} (map (juxt :id identity)) coll))
 
+; TODO: write schema for app-state, make transact! verify
 (defn- transact! [ks f]
   (swap! app-state update-in ks f))
 
@@ -311,6 +312,9 @@
 
 (defn set-group-intro! [group-id intro]
   (transact! [:groups group-id :intro] (constantly intro)))
+
+(defn set-group-avatar! [group-id avatar]
+  (transact! [:groups group-id :avatar] (constantly avatar)))
 
 ; invitations
 

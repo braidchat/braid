@@ -177,7 +177,7 @@
          {:font-weight "bold"}]]]]])
 
 (defn drag-and-drop [pad]
-  [:.thread
+  [:.thread :.setting.avatar
 
    [:&.dragging
     {:background-color "gray"

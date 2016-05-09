@@ -112,6 +112,14 @@
        [:&:after
         (mixins/fontawesome \uf0c0)]]]])
 
+(def settings-page
+  [:.page.settings
+   [:.setting
+    [:&.avatar
+     [:.upload
+      [:.uploading-indicator
+       {:display "inline-block"}]]]]])
+
 (def me-page
   [:.page.me
 
