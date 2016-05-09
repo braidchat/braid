@@ -28,7 +28,7 @@
    :mentioned-ids [s/Uuid]})
 
 ;; Notification rules schema
-(def Rule
+(def NotifyRule
   "One rule for user notification settings"
   (s/conditional
     #(or (= :any (first %)) (= :mention (first %)))
@@ -37,5 +37,17 @@
 
     #(= :tag (first %))
     [(s/one (s/eq :tag) "rule") (s/one s/Uuid "id")]))
-(def Rules "User notification rules" [Rule])
-(def rules-valid? (s/validator Rules))
+(def NotifyRules "User notification rules" [Rule])
+(def rules-valid? (s/validator NotifyRules))
+
+(def Extension
+  {:id s/Uuid
+   :type s/Keyword})
+
+(def Group
+  {:id s/Uuid
+   :name s/Str
+   :admins [s/Uuid]
+   :intro (s/maybe s/Str)
+   :avatar (s/maybe s/Str)
+   :extensions [Extension]})
