@@ -7,7 +7,7 @@
             [chat.shared.util :as util]
             [chat.client.router :as router]
             [chat.client.xhr :refer [edn-xhr]]
-            [braid.common.notify :as notify]))
+            [braid.desktop.notify :as notify]))
 
 (defn- extract-tag-ids [text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
