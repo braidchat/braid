@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [reaction]]
             [clojure.string :as string]
-            [braid.common.notify :as notify]
+            [braid.desktop.notify :as notify]
             [braid.ui.views.pills :refer [tag-pill-view]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]
@@ -217,17 +217,20 @@
        [:p "Braid is designed to let you work asynchronously, but sometimes you "
         "want to know right away when something happens.  You can choose events "
         "that will trigger HTML notifications if you're online or emails if offline."]
-       [:div
-        (when-not @notifications-enabled
-          [:button
-           {:on-click
-            (fn [_] (notify/request-permission
-                      (fn [perm]
-                        (when (= perm "granted")
-                          (reset! notifications-enabled true)
-                          (notify/notify {:msg "Notifications Enabled!"})))))}
-           "Enable Desktop Notifications"])
-        [notification-rules-view]]])))
+       (if (notify/has-notify?)
+         [:div
+          (when-not @notifications-enabled
+            [:button
+             {:on-click
+              (fn [_] (notify/request-permission
+                        (fn [perm]
+                          (when (= perm "granted")
+                            (reset! notifications-enabled true)
+                            (notify/notify {:msg "Notifications Enabled!"})))))}
+             "Enable Desktop Notifications"])
+          [notification-rules-view]]
+         [:p "The browser you're currently using doesn't support notifications. "
+          "You can enable them here for other platforms and emails though."])])))
 
 (defn me-page-view
   []
