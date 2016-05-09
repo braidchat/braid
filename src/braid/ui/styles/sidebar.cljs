@@ -14,7 +14,8 @@
      :border-color "#B53737 !important"
      :position "absolute"
      :bottom (rem -0.5)
-     :right (rem -0.5)}]])
+     :right (rem -0.5)
+     :z-index 101}]])
 
 (def sidebar
   [:.sidebar
