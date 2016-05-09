@@ -59,4 +59,15 @@
      [:&:hover
       {:background "#555"}]]
 
+    [:.title
+     {:z-index 100
+      :position "relative"
+      :opacity 0.99}]
+
+    [:img.avatar
+     {:width vars/top-bar-height
+      :height vars/top-bar-height
+      :z-index 99
+      :position "absolute"
+      :top 0 :left 0}]
     badge]])
