@@ -43,7 +43,7 @@
         [:fieldset
          [:label "Email"
           [:input {:placeholder "you@example.com"
-                   :type "text"
+                   :type "email"
                    :value (@state :email)
                    :on-change (fn [e] (set-email! (.. e -target -value)))}] ]
 
