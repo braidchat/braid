@@ -120,13 +120,15 @@
    {:extension/_group [:extension/id :extension/type]}])
 
 (defn- db->group [e]
-  {:id (:group/id e)
-   :name (:group/name e)
-   :admins (into #{} (map :user/id) (:group/admins e))
-   :intro (-> e (get :group/settings "{}") edn/read-string :intro)
-   :extensions (map (fn [x] {:id (:extension/id x)
-                             :type (:extension/type x)})
-                    (:extension/_group e))})
+  (let [settings (-> e (get :group/settings "{}") edn/read-string)]
+    {:id (:group/id e)
+     :name (:group/name e)
+     :admins (into #{} (map :user/id) (:group/admins e))
+     :intro (settings :intro)
+     :avatar (settings :avatar)
+     :extensions (map (fn [x] {:id (:extension/id x)
+                               :type (:extension/type x)})
+                      (:extension/_group e))}))
 
 (defmacro with-conn
   "Execute the body with *conn* dynamically bound to a new connection."
