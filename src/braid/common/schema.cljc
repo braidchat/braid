@@ -37,7 +37,7 @@
 
     #(= :tag (first %))
     [(s/one (s/eq :tag) "rule") (s/one s/Uuid "id")]))
-(def NotifyRules "User notification rules" [Rule])
+(def NotifyRules "User notification rules" [NotifyRule])
 (def rules-valid? (s/validator NotifyRules))
 
 (def Extension
