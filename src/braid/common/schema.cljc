@@ -1,7 +1,9 @@
 (ns braid.common.schema
   (:require [schema.core :as s :include-macros true]))
 
+
 (def NewMessage
+  "A new message, before saved into thread - what the client sends"
   {:id s/Uuid
    :thread-id s/Uuid
    :user-id s/Uuid
@@ -12,27 +14,28 @@
 (def new-message-valid? (s/validator NewMessage))
 
 (def ThreadMessage
+  "A message saved into a thread"
   {:id s/Uuid
    :content s/Str
    :user-id s/Uuid
    :created-at s/Inst})
 
 (def MsgThread
+  "A thread (just calling it Thread apparently causes confusion (with java.lang.Thread)"
   {:id s/Uuid
    :messages [ThreadMessage]
    :tag-ids [s/Uuid]
    :mentioned-ids [s/Uuid]})
 
 ;; Notification rules schema
-(def AnyRule [(s/one (s/eq :any) "rule")
-              (s/one (s/cond-pre (s/eq :any) s/Uuid) "id")])
-(def MentionRule [(s/one (s/eq :mention) "rule")
-                  (s/one (s/cond-pre (s/eq :any) s/Uuid) "id")])
-(def TagRule [(s/one (s/eq :tag) "rule")
-              (s/one s/Uuid "id")])
 (def Rule
-  (s/conditional #(= :any (first %)) AnyRule
-                 #(= :mention (first %)) MentionRule
-                 #(= :tag (first %)) TagRule))
-(def Rules [Rule])
+  "One rule for user notification settings"
+  (s/conditional
+    #(or (= :any (first %)) (= :mention (first %)))
+    [(s/one (s/enum :any :mention) "rule")
+     (s/one (s/cond-pre (s/eq :any) s/Uuid) "id")]
+
+    #(= :tag (first %))
+    [(s/one (s/eq :tag) "rule") (s/one s/Uuid "id")]))
+(def Rules "User notification rules" [Rule])
 (def rules-valid? (s/validator Rules))
