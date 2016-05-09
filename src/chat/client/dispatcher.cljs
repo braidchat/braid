@@ -211,6 +211,10 @@
   (sync/chsk-send! [:chat/set-group-intro args])
   (store/set-group-intro! group-id intro))
 
+(defmethod dispatch! :set-avatar [_ {:keys [group-id avatar] :as args}]
+  (sync/chsk-send! [:chat/set-group-avatar args])
+  (store/set-group-avatar! group-id avatar))
+
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
             :method :get
@@ -333,6 +337,10 @@
 (defmethod sync/event-handler :group/new-intro
   [[_ [group-id intro]]]
   (store/set-group-intro! group-id intro))
+
+(defmethod sync/event-handler :group/new-avatar
+  [[_ [group-id avatar]]]
+  (store/set-group-avatar! group-id avatar))
 
 (defmethod sync/event-handler :chat/notify-message
   [[_ message]]

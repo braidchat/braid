@@ -25,7 +25,9 @@
              :title (group :name)
              :href (routes/page-path {:group-id (group :id)
                                       :page-id "inbox"})}
-            (string/join "" (take 2 (group :name)))
+            [:span.title (string/join "" (take 2 (group :name)))]
+            (when-let [avatar (group :avatar)]
+              [:img.avatar {:src avatar}])
             [badge-view (group :id)]]))])))
 
 (defn new-group-view []

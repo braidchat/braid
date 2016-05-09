@@ -2,6 +2,7 @@
   (:require [cljs-uuid-utils.core :as uuid]
             [clojure.string :refer [split]]
             [goog.events :as events]
+            [taoensso.timbre :as timbre :refer-macros [errorf]]
             [chat.client.xhr :refer [edn-xhr ajax-xhr]]
             [chat.client.views.helpers :refer [ends-with?]])
   (:import [goog.net XhrIo EventType]))
@@ -11,8 +12,7 @@
     {:method :get
      :uri "/s3-policy"
      :on-error (fn [err]
-                 (.error js/console "Error getting s3 authorization: "
-                         (pr-str (:error err))))
+                 (errorf "Error getting s3 authorization: %s" (:error err)))
      :on-complete
      (fn [{:keys [bucket auth]}]
        (let [file-name (.-name file)
@@ -30,4 +30,4 @@
                             (.append "Content-Type" (.-type file))
                             (.append "file" file file-name))
                     :on-complete (fn [e] (on-complete file-url))
-                    :on-error (fn [e] (.error js/console "Error uploading: " (pr-str (:error e))))})))}))
+                    :on-error (fn [e] (errorf "Error uploading: %s" (:error e)))})))}))

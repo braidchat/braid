@@ -34,6 +34,7 @@
                braid.ui.styles.misc/error-banners
                braid.ui.styles.misc/page
                braid.ui.styles.misc/channels-page
+               braid.ui.styles.misc/settings-page
                braid.ui.styles.misc/me-page
                braid.ui.styles.login/login
                braid.ui.styles.misc/tag

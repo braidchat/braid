@@ -359,6 +359,15 @@
           (db/group-set! group-id :intro intro)
           (broadcast-group-change group-id [:group/new-intro [group-id intro]]))))))
 
+(defmethod event-msg-handler :chat/set-group-avatar
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (let [{:keys [group-id avatar]} ?data]
+      (db/with-conn
+        (when (and group-id (db/user-is-group-admin? user-id group-id))
+          (db/group-set! group-id :avatar avatar)
+          (broadcast-group-change group-id [:group/new-avatar [group-id avatar]]))))))
+
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
