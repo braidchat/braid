@@ -21,13 +21,16 @@
            ^{:key (group :id)}
            [:a.group.option
             {:class (when (= (:id @active-group) (:id group)) "active")
-             :style {:background-color (id->color (group :id))}
+             :style (merge
+                      {:background-color (id->color (group :id))}
+                      (when-let [avatar (group :avatar)]
+                        {:background-image (str "url(" avatar ")")
+                         :background-position "center"
+                         :background-size "100%"}))
              :title (group :name)
              :href (routes/page-path {:group-id (group :id)
                                       :page-id "inbox"})}
-            [:span.title (string/join "" (take 2 (group :name)))]
-            (when-let [avatar (group :avatar)]
-              [:img.avatar {:src avatar}])
+            (string/join "" (take 2 (group :name)))
             [badge-view (group :id)]]))])))
 
 (defn new-group-view []

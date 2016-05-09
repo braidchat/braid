@@ -14,8 +14,7 @@
      :border-color "#B53737 !important"
      :position "absolute"
      :bottom (rem -0.5)
-     :right (rem -0.5)
-     :z-index 101}]])
+     :right (rem -0.5)}]])
 
 (def sidebar
   [:.sidebar
@@ -60,15 +59,4 @@
      [:&:hover
       {:background "#555"}]]
 
-    [:.title
-     {:z-index 100
-      :position "relative"
-      :opacity 0.99}]
-
-    [:img.avatar
-     {:width vars/top-bar-height
-      :height vars/top-bar-height
-      :z-index 99
-      :position "absolute"
-      :top 0 :left 0}]
     badge]])
