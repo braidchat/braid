@@ -1,4 +1,8 @@
-(ns braid.common.notify)
+(ns braid.desktop.notify)
+
+(defn has-notify?
+  []
+  (some? (aget js/window "Notification")))
 
 (defn enabled?
   []
