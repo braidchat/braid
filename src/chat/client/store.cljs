@@ -63,7 +63,9 @@
         (errorf "State consistency error updating %s to %s: %s"
                 ks (get-in @app-state ks) (ex-data e))
         (reset! app-state old-state)
-        (display-error! :internal-consistency "Something has gone wrong")))))
+        ; Not just calling display-error! to avoid possibility of infinite loop
+        (swap! app-state update-in [:errors] conj
+               [:internal-consistency "Something has gone wrong"])))))
 
 ; login state
 
