@@ -140,11 +140,11 @@
         user-id (db/uuid)
         user-2-id (db/uuid)]
     (testing "can create a group"
-      (is (= group (assoc data :extensions () :admins #{} :intro nil))))
+      (is (= group (assoc data :extensions () :admins #{} :intro nil :avatar nil))))
     (testing "can set group intro"
       (db/group-set! (group :id) :intro "the intro")
       (is (= (db/get-group (group :id))
-             (assoc data :extensions () :admins #{} :intro "the intro"))))
+             (assoc data :extensions () :admins #{} :intro "the intro" :avatar nil))))
     (testing "can add a user to the group"
       (let [user (db/create-user! {:id user-id
                                    :email "foo@bar.com"
@@ -153,7 +153,7 @@
         (is (= #{} (db/get-groups-for-user (user :id))))
         (is (= #{} (db/get-users-in-group (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
-        (is (= #{(assoc data :extensions () :admins #{} :intro "the intro")}
+        (is (= #{(assoc data :extensions () :admins #{} :intro "the intro" :avatar nil)}
                (db/get-groups-for-user (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))
@@ -232,7 +232,7 @@
              {:id thread-1-id
               :messages (map #(dissoc % :thread-id)
                              [message-1-data message-2-data])
-              :tag-ids () :mentioned-ids ()}))
+              :tag-ids #{} :mentioned-ids #{}}))
       (let [thread-2-id (db/uuid)
             message-3-data {:id (db/uuid)
                             :user-id (user-1 :id)
@@ -244,11 +244,11 @@
                [{:id thread-1-id
                  :messages (map #(dissoc % :thread-id)
                                 [message-1-data message-2-data])
-                 :tag-ids () :mentioned-ids ()}
+                 :tag-ids #{} :mentioned-ids #{}}
                 {:id thread-2-id
                  :messages (map #(dissoc % :thread-id)
                                 [message-3-data])
-                 :tag-ids () :mentioned-ids ()}]))))))
+                 :tag-ids #{} :mentioned-ids #{}}]))))))
 
 (deftest user-hide-thread
   (let [user-1 (db/create-user! {:id (db/uuid)

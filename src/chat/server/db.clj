@@ -88,8 +88,8 @@
                      :user-id (get-in msg [:message/user :user/id])
                      :created-at (msg :message/created-at)})
                   (thread :message/_thread))
-   :tag-ids (map :tag/id (thread :thread/tag))
-   :mentioned-ids (map :user/id (thread :thread/mentioned))})
+   :tag-ids (into #{} (map :tag/id) (thread :thread/tag))
+   :mentioned-ids (into #{} (map :user/id) (thread :thread/mentioned))})
 
 (def extension-pull-pattern
   [:extension/id
@@ -528,7 +528,7 @@
               thread-pull-pattern)
          (into ()
                (map (comp (fn [t]
-                            (update-in t [:tag-ids] (partial filter visible-tags)))
+                            (update-in t [:tag-ids] (partial into #{} (filter visible-tags))))
                           (fn [t] (thread-add-last-open-at t user-id))
                           db->thread
                           first))))))

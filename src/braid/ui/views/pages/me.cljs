@@ -17,7 +17,7 @@
         set-format-error! (fn [error?] (reset! format-error error?))
         set-error! (fn [err] (reset! error err))
         user-id (subscribe [:user-id])
-        nickname (subscribe [:nickname @user-id])]
+        nickname (subscribe [:nickname] [user-id])]
     (fn []
       [:div.nickname
        (when @nickname

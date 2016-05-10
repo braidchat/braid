@@ -84,7 +84,10 @@
   (store/hide-thread! (data :thread-id)))
 
 (defmethod dispatch! :create-tag [_ [tag-name group-id id]]
-  (let [tag (schema/make-tag {:name tag-name :group-id group-id :id id})]
+  (let [tag (schema/make-tag {:name tag-name
+                              :group-id group-id
+                              :group-name (:name (store/id->group group-id))
+                              :id id})]
     (store/add-tag! tag)
     (sync/chsk-send!
       [:chat/create-tag tag]
@@ -129,7 +132,7 @@
     (fn [reply]
       (if-let [msg (reply :error)]
         (on-error msg)
-        (store/set-nickname! nickname)))))
+        (store/update-user-nick! (store/current-user-id) nickname)))))
 
 (defmethod dispatch! :set-password [_ [password on-success on-error]]
   (sync/chsk-send!
@@ -138,7 +141,8 @@
     (fn [reply]
       (cond
         (reply :error) (on-error reply)
-        (= reply :chsk/timeout) (on-error {:error "Couldn't connect to server, please try again"})
+        (= reply :chsk/timeout) (on-error
+                                  {:error "Couldn't connect to server, please try again"})
         true (on-success)))))
 
 (defmethod dispatch! :set-preference [_ [k v]]
@@ -276,7 +280,7 @@
   [[_ data]]
   (dispatch! :set-login-state! :app)
   (check-client-version (data :version-checksum))
-  (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
+  (store/set-session! {:user-id (data :user-id)})
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))

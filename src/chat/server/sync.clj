@@ -67,7 +67,7 @@
         thread (db/with-conn (db/get-thread thread-id))]
     (doseq [uid user-ids-to-send-to]
       (let [user-tags (db/with-conn (db/get-user-visible-tag-ids uid))
-            filtered-thread (update-in thread [:tag-ids] (partial filter user-tags))
+            filtered-thread (update-in thread [:tag-ids] (partial into #{} (filter user-tags)))
             thread-with-last-opens (db/with-conn (db/thread-add-last-open-at filtered-thread uid))]
         (chsk-send! uid [:chat/thread thread-with-last-opens])))))
 
@@ -172,7 +172,7 @@
         (do
           (timbre/warnf "Malformed new message: %s" (pr-str new-message))
           (when-let [cb ?reply-fn]
-          (cb :braid/error)))))))
+            (cb :braid/error)))))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -277,7 +277,7 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn
       (let [user-tags (db/get-user-visible-tag-ids user-id)
-            filter-tags (fn [t] (update-in t [:tag-ids] (partial filter user-tags)))
+            filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
             thread-ids (search/search-threads-as user-id ?data)
             threads (map (comp filter-tags db/get-thread) (take 25 thread-ids))]
         (when ?reply-fn
@@ -288,7 +288,7 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (db/with-conn
       (let [user-tags (db/get-user-visible-tag-ids user-id)
-            filter-tags (fn [t] (update-in t [:tag-ids] (partial filter user-tags)))
+            filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
             thread-ids (filter (partial db/user-can-see-thread? user-id) ?data)
             threads (map filter-tags (db/get-threads thread-ids))]
         (when ?reply-fn
@@ -298,7 +298,7 @@
   [{:keys [event id ?data ring-req ?reply-fn send-fn] :as ev-msg}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (let [user-tags (db/with-conn (db/get-user-visible-tag-ids user-id))
-          filter-tags (fn [t] (update-in t [:tag-ids] (partial filter user-tags)))
+          filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
           offset (get ?data :offset 0)
           limit (get ?data :limit 50)
           threads (db/with-conn (-> (db/threads-with-tag user-id (?data :tag-id) offset limit)
@@ -379,7 +379,6 @@
                            (db/with-conn
                              {:user-id user-id
                               :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
-                              :user-nickname (db/get-nickname user-id)
                               :user-groups (db/get-groups-for-user user-id)
                               :user-threads (db/get-open-threads-for-user user-id)
                               :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)

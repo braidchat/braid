@@ -258,8 +258,9 @@
                     doall)))))
 
 (defn get-nickname
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id :nickname])))
+  ([state [_ user-id]] (get-nickname state nil [user-id]))
+  ([state _ [user-id]]
+   (reaction (get-in @state [:users user-id :nickname]))))
 
 (defn get-invitations
   [state _]

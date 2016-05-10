@@ -179,7 +179,7 @@
                                        :mentioned-user-ids [(user-2 :id)]})]
 
           (testing "then user-2 is added to the thread"
-            (is  (= [(user-2 :id)]
+            (is  (= #{(user-2 :id)}
                     (-> (db/get-thread thread-id) :mentioned-ids))))
 
           (testing "then user-2 can see the thread"

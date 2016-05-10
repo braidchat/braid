@@ -1,6 +1,10 @@
 (ns chat.client.store
   (:require [cljs-utils.core :refer [flip]]
             [cljs-uuid-utils.core :as uuid]
+            [taoensso.timbre :as timbre :refer-macros [errorf]]
+            [clojure.set :as set]
+            [schema.core :as s :include-macros true]
+            [braid.common.schema :as app-schema]
             [reagent.core :as r]))
 
 (defonce app-state
@@ -20,17 +24,48 @@
      :notifications {:window-visible? true
                      :unread-count 0}
      :user {:open-thread-ids #{}
-            :subscribed-tag-ids #{}
-            :user-id nil
-            :nickname nil}
+            :subscribed-tag-ids #{}}
      :new-thread-id (uuid/make-random-squuid)}))
+
+(def AppState
+  {:login-state (s/enum :auth-check :login-form :ws-connect :app)
+   :open-group-id (s/maybe s/Uuid)
+   :threads {s/Uuid app-schema/MsgThread}
+   :pagination-remaining s/Int
+   :users {s/Uuid app-schema/User}
+   :tags {s/Uuid app-schema/Tag}
+   :groups {s/Uuid app-schema/Group}
+   :page {:type s/Keyword
+          (s/optional-key :id) s/Uuid
+          (s/optional-key :thread-ids) [s/Uuid]
+          (s/optional-key :search-query) s/Str}
+   :session (s/maybe {:user-id s/Uuid})
+   :errors [[(s/one (s/cond-pre s/Keyword s/Str) "err-key") (s/one s/Str "msg")]]
+   :invitations [app-schema/Invitation]
+   :preferences {s/Keyword s/Any}
+   :notifications {:window-visible? s/Bool
+                   :unread-count s/Int}
+   :user {:open-thread-ids #{s/Uuid}
+          :subscribed-tag-ids #{s/Uuid}}
+   :new-thread-id s/Uuid})
+
+(def check-app-state! (s/validator AppState))
 
 (defn- key-by-id [coll]
   (into {} (map (juxt :id identity)) coll))
 
-; TODO: write schema for app-state, make transact! verify
 (defn- transact! [ks f]
-  (swap! app-state update-in ks f))
+  (let [old-state @app-state]
+    (swap! app-state update-in ks f)
+    (try
+      (check-app-state! @app-state)
+      (catch ExceptionInfo e
+        (errorf "State consistency error updating %s to %s: %s"
+                ks (get-in @app-state ks) (:error (ex-data e)))
+        (reset! app-state old-state)
+        ; Not just calling display-error! to avoid possibility of infinite loop
+        (swap! app-state update-in [:errors] conj
+               [:internal-consistency "Something has gone wrong"])))))
 
 ; login state
 
@@ -45,7 +80,7 @@
   (when visible?
     (transact! [:notifications :unread-count] (constantly 0))
     (set! (.-title js/document) "Chat"))
-  (transact! [:notifications :window-visible?] (constantly visible?)))
+  (transact! [:notifications :window-visible?] (constantly (boolean visible?))))
 
 ; error
 
@@ -68,9 +103,6 @@
 
 (defn clear-session! []
   (transact! [:session] (constantly nil)))
-
-(defn set-nickname! [nick]
-  (transact! [:session :nickname] (constantly nick)))
 
 (defn current-user-id []
   (get-in @app-state [:session :user-id]))
@@ -145,10 +177,13 @@
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
-  (transact! [:threads (message :thread-id) :messages] #(conj % message))
+  (transact! [:threads (message :thread-id) :messages]
+    #(conj % message))
   (update-thread-last-open-at (message :thread-id))
-  (transact! [:threads (message :thread-id) :tag-ids] #(apply conj (set %) (message :mentioned-tag-ids)))
-  (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj (set %) (message :mentioned-user-ids))))
+  (transact! [:threads (message :thread-id) :tag-ids]
+    (partial set/union (set (message :mentioned-tag-ids))))
+  (transact! [:threads (message :thread-id) :mentioned-ids]
+    (partial set/union (set (message :mentioned-user-ids)))))
 
 (defn set-message-failed! [message]
   (transact! [:threads (message :thread-id) :messages]
@@ -291,6 +326,10 @@
 
 (defn open-group-id []
   (get @app-state :open-group-id))
+
+(defn open-group-name []
+  (let [st @app-state]
+    (get-in st [:groups (st :open-group-id) :name])))
 
 (defn id->group [group-id]
   (get-in @app-state [:groups group-id]))
