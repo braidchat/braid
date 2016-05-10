@@ -141,7 +141,8 @@
     (fn [reply]
       (cond
         (reply :error) (on-error reply)
-        (= reply :chsk/timeout) (on-error {:error "Couldn't connect to server, please try again"})
+        (= reply :chsk/timeout) (on-error
+                                  {:error "Couldn't connect to server, please try again"})
         true (on-success)))))
 
 (defmethod dispatch! :set-preference [_ [k v]]
