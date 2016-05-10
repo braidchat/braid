@@ -208,7 +208,7 @@
                              msg)))))
 
 (defn add-threads! [threads]
-  (transact! [:threads] #(merge % (key-by-id threads))))
+  (transact! [:threads] #(merge-with merge % (key-by-id threads))))
 
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here
@@ -217,7 +217,7 @@
     (set! (.-title js/document)
           (str "Chat (" (get-in @app-state [:notifications :unread-count]) ")")))
 
-  (transact! [:threads (thread :id)] (constantly thread))
+  (transact! [:threads (thread :id)] #(merge % thread))
   (transact! [:user :open-thread-ids] #(conj % (thread :id))))
 
 (defn hide-thread! [thread-id]
@@ -238,17 +238,17 @@
 ; channels page
 
 (defn set-channel-results! [threads]
-  (transact! [:threads] #(merge % (key-by-id threads)))
+  (transact! [:threads] #(merge-with merge % (key-by-id threads)))
   (transact! [:page :thread-ids] (constantly (map :id threads))))
 
 (defn add-channel-results! [threads]
-  (transact! [:threads] #(merge % (key-by-id threads)))
+  (transact! [:threads] #(merge-with merge % (key-by-id threads)))
   (transact! [:page :thread-ids] #(concat % (map :id threads))))
 
 ; search threads
 
 (defn set-search-results! [{:keys [threads thread-ids]}]
-  (transact! [:threads] #(merge % (key-by-id threads)))
+  (transact! [:threads] #(merge-with merge % (key-by-id threads)))
   (transact! [:page :thread-ids] (constantly thread-ids)))
 
 (defn set-search-query! [query]
