@@ -30,7 +30,8 @@
              :title (group :name)
              :href (routes/page-path {:group-id (group :id)
                                       :page-id "inbox"})}
-            (string/join "" (take 2 (group :name)))
+            (when-not (group :avatar)
+              (string/join "" (take 2 (group :name))))
             [badge-view (group :id)]]))])))
 
 (defn new-group-view []
