@@ -147,7 +147,8 @@
             (condp = e.keyCode
               KeyCodes.ENTER
               (cond
-                ; ENTER when autocomplete -> trigger chosen result's action (or exit autocomplete if no result chosen)
+                ; ENTER when autocomplete -> trigger chosen result's action
+                ; (or exit autocomplete if no result chosen)
                 (autocomplete-open?)
                 (do
                   (.preventDefault e)
