@@ -84,7 +84,10 @@
   (store/hide-thread! (data :thread-id)))
 
 (defmethod dispatch! :create-tag [_ [tag-name group-id id]]
-  (let [tag (schema/make-tag {:name tag-name :group-id group-id :id id})]
+  (let [tag (schema/make-tag {:name tag-name
+                              :group-id group-id
+                              :group-name (:name (store/id->group group-id))
+                              :id id})]
     (store/add-tag! tag)
     (sync/chsk-send!
       [:chat/create-tag tag]

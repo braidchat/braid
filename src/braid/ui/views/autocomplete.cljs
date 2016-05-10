@@ -123,7 +123,8 @@
                            [:div.extra (tag :description)]])}))
                 (cons (when-not (or exact-match? (string/blank? query))
                         (let [tag (schema/make-tag {:name query
-                                                    :group-id (store/open-group-id)})]
+                                                    :group-id (store/open-group-id)
+                                                    :group-name (store/open-group-name)})]
                           {:key (constantly (tag :id))
                            :action
                            (fn []

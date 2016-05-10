@@ -15,11 +15,19 @@
 (defn make-tag [data]
   {:id (or (data :id) (uuid/make-random-squuid))
    :name (data :name)
-   :group-id (data :group-id)})
+   :group-id (data :group-id)
+   :group-name (get data :group-name "")
+   :description nil
+   :threads-count 0
+   :subscribers-count 0})
 
 (defn make-group [data]
   {:id (or (data :id) (uuid/make-random-squuid))
-   :name (data :name)})
+   :name (data :name)
+   :admins #{}
+   :intro nil
+   :avatar nil
+   :extensions []})
 
 (defn make-invitation [data]
   {:id (or (data :id) (uuid/make-random-squuid))

@@ -1,6 +1,9 @@
 (ns chat.client.store
   (:require [cljs-utils.core :refer [flip]]
             [cljs-uuid-utils.core :as uuid]
+            [clojure.set :as set]
+            [schema.core :as s :include-macros true]
+            [braid.common.schema :as app-schema]
             [reagent.core :as r]))
 
 (defonce app-state
@@ -20,17 +23,41 @@
      :notifications {:window-visible? true
                      :unread-count 0}
      :user {:open-thread-ids #{}
-            :subscribed-tag-ids #{}
-            :user-id nil
-            :nickname nil}
+            :subscribed-tag-ids #{}}
      :new-thread-id (uuid/make-random-squuid)}))
+
+(def AppState
+  {:login-state (s/enum :auth-check :login-form :ws-connect :app)
+   :open-group-id (s/maybe s/Uuid)
+   :threads {s/Uuid app-schema/MsgThread}
+   :pagination-remaining s/Int
+   :users {s/Uuid app-schema/User}
+   :tags {s/Uuid app-schema/Tag}
+   :groups {s/Uuid app-schema/Group}
+   :page {:type s/Keyword
+          (s/optional-key :thread-ids) [s/Uuid]
+          (s/optional-key :search-query) s/Str}
+   :session (s/maybe {:user-id s/Uuid
+                      :nickname s/Str})
+   :errors [[(s/one (s/cond-pre s/Keyword s/Str) "err-key") (s/one s/Str "msg")]]
+   :invitations [app-schema/Invitation]
+   :preferences {s/Keyword s/Any}
+   :notifications {:window-visible? s/Bool
+                   :unread-count s/Int}
+   :user {:open-thread-ids #{s/Uuid}
+          :subscribed-tag-ids #{s/Uuid}}
+   :new-thread-id s/Uuid})
+
+(def check-app-state! (s/validator AppState))
 
 (defn- key-by-id [coll]
   (into {} (map (juxt :id identity)) coll))
 
 ; TODO: write schema for app-state, make transact! verify
 (defn- transact! [ks f]
-  (swap! app-state update-in ks f))
+  (swap! app-state update-in ks f)
+  (println "updating " ks (get-in @app-state ks))
+  (check-app-state! @app-state))
 
 ; login state
 
@@ -145,10 +172,13 @@
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
-  (transact! [:threads (message :thread-id) :messages] #(conj % message))
+  (transact! [:threads (message :thread-id) :messages]
+    #(conj % (select-keys message [:id :content :user-id :created-at])))
   (update-thread-last-open-at (message :thread-id))
-  (transact! [:threads (message :thread-id) :tag-ids] #(apply conj (set %) (message :mentioned-tag-ids)))
-  (transact! [:threads (message :thread-id) :mentioned-ids] #(apply conj (set %) (message :mentioned-user-ids))))
+  (transact! [:threads (message :thread-id) :tag-ids]
+    (partial set/union (set (message :mentioned-tag-ids))))
+  (transact! [:threads (message :thread-id) :mentioned-ids]
+    (partial set/union (set (message :mentioned-user-ids)))))
 
 (defn set-message-failed! [message]
   (transact! [:threads (message :thread-id) :messages]
@@ -291,6 +321,10 @@
 
 (defn open-group-id []
   (get @app-state :open-group-id))
+
+(defn open-group-name []
+  (let [st @app-state]
+    (get-in st [:groups (st :open-group-id) :name])))
 
 (defn id->group [group-id]
   (get-in @app-state [:groups group-id]))
