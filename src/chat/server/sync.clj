@@ -172,7 +172,7 @@
         (do
           (timbre/warnf "Malformed new message: %s" (pr-str new-message))
           (when-let [cb ?reply-fn]
-          (cb :braid/error)))))))
+            (cb :braid/error)))))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
