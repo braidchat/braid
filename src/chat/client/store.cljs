@@ -157,11 +157,12 @@
   (transact! [:new-thread-id] (fn [_] (uuid/make-random-squuid))))
 
 (defn update-thread-last-open-at [thread-id]
-  (let [latest-message (->> (get-in @app-state [:threads thread-id :messages])
-                            (map :created-at)
-                            (reduce max (js/Date. 0)))
-        new-last-open (js/Date. (inc (.getTime latest-message)))]
-    (transact! [:threads thread-id :last-open-at] (constantly new-last-open))))
+  (when-let [thread (get-in @app-state [:threads thread-id])]
+    (let [latest-message (->> (thread :messages)
+                              (map :created-at)
+                              (reduce max (js/Date. 0)))
+          new-last-open (js/Date. (inc (.getTime latest-message)))]
+      (transact! [:threads thread-id :last-open-at] (constantly new-last-open)))))
 
 (defn set-open-threads! [threads]
   (transact! [:threads] (constantly (key-by-id threads)))
