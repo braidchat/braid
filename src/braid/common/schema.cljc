@@ -10,7 +10,8 @@
    :content s/Str
    :created-at s/Inst
    :mentioned-user-ids [s/Uuid]
-   :mentioned-tag-ids [s/Uuid]})
+   :mentioned-tag-ids [s/Uuid]
+   (s/optional-key :failed?) s/Bool})
 (def new-message-valid? (s/validator NewMessage))
 
 (def ThreadMessage
@@ -23,7 +24,9 @@
 (def MsgThread
   "A thread (just calling it Thread apparently causes confusion (with java.lang.Thread)"
   {:id s/Uuid
-   :messages [ThreadMessage]
+   :messages [(s/conditional
+                #(contains? % :thread-id) NewMessage
+                :else ThreadMessage)]
    :tag-ids #{s/Uuid}
    :mentioned-ids #{s/Uuid}
    (s/optional-key :last-open-at) (s/cond-pre s/Int s/Inst)})

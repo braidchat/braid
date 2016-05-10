@@ -178,7 +178,7 @@
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
   (transact! [:threads (message :thread-id) :messages]
-    #(conj % (select-keys message [:id :content :user-id :created-at])))
+    #(conj % message))
   (update-thread-last-open-at (message :thread-id))
   (transact! [:threads (message :thread-id) :tag-ids]
     (partial set/union (set (message :mentioned-tag-ids))))
