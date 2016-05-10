@@ -36,6 +36,7 @@
    :tags {s/Uuid app-schema/Tag}
    :groups {s/Uuid app-schema/Group}
    :page {:type s/Keyword
+          (s/optional-key :id) s/Uuid
           (s/optional-key :thread-ids) [s/Uuid]
           (s/optional-key :search-query) s/Str}
    :session (s/maybe {:user-id s/Uuid})
