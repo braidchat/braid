@@ -12,6 +12,7 @@
     {:login-state :auth-check ; :ws-connect :login-form :app
      :open-group-id nil
      :threads {}
+     :new-thread-msg {}
      :pagination-remaining 0
      :users {}
      :tags {}
@@ -31,6 +32,7 @@
   {:login-state (s/enum :auth-check :login-form :ws-connect :app)
    :open-group-id (s/maybe s/Uuid)
    :threads {s/Uuid app-schema/MsgThread}
+   :new-thread-msg {s/Uuid s/Str}
    :pagination-remaining s/Int
    :users {s/Uuid app-schema/User}
    :tags {s/Uuid app-schema/Tag}
@@ -176,6 +178,12 @@
                                                  :tag-ids #{}
                                                  :mentioned-ids #{}} )))
   (transact! [:user :open-thread-ids] #(conj % thread-id)))
+
+(defn set-new-message!
+  [thread-id content]
+  (if (get-in @app-state [:threads thread-id])
+    (transact! [:threads thread-id :new-message] (constantly content))
+    (transact! [:new-thread-msg thread-id] (constantly content))))
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))

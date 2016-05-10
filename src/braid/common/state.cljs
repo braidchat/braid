@@ -216,6 +216,13 @@
   [state [_ thread-id]]
   (reaction (contains? (set (get-in @state [:user :open-thread-ids])) thread-id)))
 
+(defn get-thread-new-message
+  ([state [_ thread-id]] (get-thread-new-message state nil [thread-id]))
+  ([state _ [thread-id]]
+   (reaction (if-let [th (get-in @state [:threads thread-id])]
+               (get th :new-message "")
+               (get-in @state [:new-thread-msg thread-id] "")))))
+
 (defn get-errors
   [state _]
   (reaction (get-in @state [:errors])))

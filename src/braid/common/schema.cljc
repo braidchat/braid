@@ -33,7 +33,8 @@
                 :else ThreadMessage)]
    :tag-ids #{s/Uuid}
    :mentioned-ids #{s/Uuid}
-   (s/optional-key :last-open-at) (s/cond-pre s/Int s/Inst)})
+   (s/optional-key :last-open-at) (s/cond-pre s/Int s/Inst)
+   (s/optional-key :new-message) (s/maybe s/Str)})
 
 ;; Notification rules schema
 (def NotifyRule

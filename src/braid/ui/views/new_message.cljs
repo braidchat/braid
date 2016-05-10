@@ -42,7 +42,7 @@
        :reagent-render
        (fn [{:keys [text set-text! config on-key-down on-change]}]
          [:textarea {:placeholder (config :placeholder)
-                     :value text
+                     :value @text
                      :disabled (not @connected?)
                      :on-change (on-change
                                   {:on-change
@@ -51,7 +51,7 @@
                                      (resize-textbox (.. e -target)))})
                      :on-key-down (on-key-down
                                     {:on-submit (fn [e]
-                                                  (send-message! config text)
+                                                  (send-message! config @text)
                                                   (set-text! ""))})}])})))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
@@ -75,7 +75,10 @@
         kill-chan (chan)
         throttled-autocomplete-chan (debounce autocomplete-chan 100)
 
-        state (r/atom {:text ""
+        thread-id (r/atom (config :thread-id))
+        thread-text (subscribe [:thread-new-message] [thread-id])
+
+        state (r/atom {:text thread-text
                        :force-close? false
                        :highlighted-result-index 0
                        :results nil})
@@ -119,10 +122,13 @@
                              (swap! state assoc :force-close? false))
 
         set-text! (fn [text]
-                    (swap! state assoc :text (.slice text 0 5000)))
+                    (dispatch! :new-message-text {:thread-id @thread-id
+                                                  :content (.slice text 0 5000)}))
 
         update-text! (fn [f]
-                       (swap! state update-in [:text] f))
+                       (dispatch! :new-message-text
+                                  {:thread-id @thread-id
+                                   :content (f @thread-text)}))
 
         choose-result!
         (fn [result]
@@ -197,6 +203,10 @@
                        (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
                      (highlight-first!)
                      (recur)))))))
+
+       :component-will-update
+       (fn [c [_ {new-config :config}]]
+         (reset! thread-id (new-config :thread-id)))
 
        :component-will-unmount
        (fn []
