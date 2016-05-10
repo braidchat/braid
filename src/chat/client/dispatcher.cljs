@@ -132,7 +132,7 @@
     (fn [reply]
       (if-let [msg (reply :error)]
         (on-error msg)
-        (store/set-nickname! nickname)))))
+        (store/update-user-nick! (store/current-user-id) nickname)))))
 
 (defmethod dispatch! :set-password [_ [password on-success on-error]]
   (sync/chsk-send!
@@ -279,7 +279,7 @@
   [[_ data]]
   (dispatch! :set-login-state! :app)
   (check-client-version (data :version-checksum))
-  (store/set-session! {:user-id (data :user-id) :nickname (data :user-nickname)})
+  (store/set-session! {:user-id (data :user-id)})
   (store/add-users! (data :users))
   (store/add-tags! (data :tags))
   (store/set-user-subscribed-tag-ids! (data :user-subscribed-tag-ids))

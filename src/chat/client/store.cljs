@@ -38,8 +38,7 @@
    :page {:type s/Keyword
           (s/optional-key :thread-ids) [s/Uuid]
           (s/optional-key :search-query) s/Str}
-   :session (s/maybe {:user-id s/Uuid
-                      :nickname s/Str})
+   :session (s/maybe {:user-id s/Uuid})
    :errors [[(s/one (s/cond-pre s/Keyword s/Str) "err-key") (s/one s/Str "msg")]]
    :invitations [app-schema/Invitation]
    :preferences {s/Keyword s/Any}
@@ -102,9 +101,6 @@
 
 (defn clear-session! []
   (transact! [:session] (constantly nil)))
-
-(defn set-nickname! [nick]
-  (transact! [:session :nickname] (constantly nick)))
 
 (defn current-user-id []
   (get-in @app-state [:session :user-id]))

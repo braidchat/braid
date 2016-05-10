@@ -379,7 +379,6 @@
                            (db/with-conn
                              {:user-id user-id
                               :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
-                              :user-nickname (db/get-nickname user-id)
                               :user-groups (db/get-groups-for-user user-id)
                               :user-threads (db/get-open-threads-for-user user-id)
                               :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
