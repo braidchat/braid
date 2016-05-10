@@ -80,7 +80,7 @@
   (when visible?
     (transact! [:notifications :unread-count] (constantly 0))
     (set! (.-title js/document) "Chat"))
-  (transact! [:notifications :window-visible?] (constantly visible?)))
+  (transact! [:notifications :window-visible?] (constantly (boolean visible?))))
 
 ; error
 
