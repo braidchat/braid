@@ -24,8 +24,9 @@
   "A thread (just calling it Thread apparently causes confusion (with java.lang.Thread)"
   {:id s/Uuid
    :messages [ThreadMessage]
-   :tag-ids [s/Uuid]
-   :mentioned-ids [s/Uuid]})
+   :tag-ids #{s/Uuid}
+   :mentioned-ids #{s/Uuid}
+   (s/optional-key :last-open-at) (s/cond-pre s/Int s/Inst)})
 
 ;; Notification rules schema
 (def NotifyRule
@@ -47,7 +48,32 @@
 (def Group
   {:id s/Uuid
    :name s/Str
-   :admins [s/Uuid]
+   :admins #{s/Uuid}
    :intro (s/maybe s/Str)
    :avatar (s/maybe s/Str)
    :extensions [Extension]})
+
+(def User
+  {:id s/Uuid
+   :nickname s/Str
+   :avatar s/Str
+   :group-ids [s/Uuid]
+   (s/optional-key :status) (s/enum :online :offline)})
+
+(def Tag
+  {:id s/Uuid
+   :name s/Str
+   :description (s/maybe s/Str)
+   :group-id s/Uuid
+   :group-name s/Str
+   :threads-count s/Int
+   :subscribers-count s/Int})
+
+(def Invitation
+  {:id s/Uuid
+   :inviter-id s/Uuid
+   :inviter-email s/Str
+   :inviter-nickname s/Str
+   :invitee-email s/Str
+   :group-id s/Uuid
+   :group-name s/Str})
