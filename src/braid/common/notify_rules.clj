@@ -1,6 +1,6 @@
 (ns braid.common.notify-rules
   (:require [clojure.set :as set]
-            [braid.common.schema :refer [new-message-valid? rules-valid?]]
+            [braid.common.schema :refer [check-new-message! check-rules!]]
             [chat.server.db :as db]))
 
 (defn tag->group
@@ -16,9 +16,8 @@
 
 (defn notify?
   [user-id rules new-message]
-  (assert (rules-valid? rules) (str "Malformed rules:" (pr-str rules)))
-  (assert (new-message-valid? new-message)
-    (str "Malformed new message: " (pr-str new-message)))
+  (check-rules! rules)
+  (check-new-message! new-message)
   (let [{:keys [tag mention any]
          :or {tag #{} mention #{} any #{}}}
         (->> (group-by first rules)

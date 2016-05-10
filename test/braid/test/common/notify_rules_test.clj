@@ -2,7 +2,7 @@
   (:require [clojure.test :refer :all]
             [schema.core :as s]
             [chat.server.db :as db]
-            [braid.common.schema :refer [rules-valid?]]
+            [braid.common.schema :refer [rules-valid? check-rules!]]
             [braid.common.notify-rules :as rules]))
 
 (s/set-fn-validation! true)
@@ -18,8 +18,8 @@
   (testing "schema can validate rules format"
     (is (rules-valid? []))
     (is (rules-valid? [[:any :any]]))
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (rules-valid? [[:any :any] []])))
+    (is (thrown? clojure.lang.ExceptionInfo (check-rules! [[:any :any] []])))
+    (is (not (rules-valid? [[:any :any] []])))
     (is (rules-valid?
           [[:any #uuid "570fce10-9312-4550-9525-460c57fd9229"]
            [:mention :any]

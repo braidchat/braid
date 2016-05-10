@@ -1,5 +1,6 @@
 (ns braid.common.schema
-  (:require [schema.core :as s :include-macros true]))
+  (:require [schema.core :as s :include-macros true])
+  (:import #?(:clj [clojure.lang ExceptionInfo])))
 
 
 (def NewMessage
@@ -12,7 +13,10 @@
    :mentioned-user-ids [s/Uuid]
    :mentioned-tag-ids [s/Uuid]
    (s/optional-key :failed?) s/Bool})
-(def new-message-valid? (s/validator NewMessage))
+(def check-new-message! (s/validator NewMessage))
+(defn new-message-valid? [msg]
+  (try (check-new-message! msg) true
+    (catch ExceptionInfo _ false)))
 
 (def ThreadMessage
   "A message saved into a thread"
@@ -42,7 +46,10 @@
     #(= :tag (first %))
     [(s/one (s/eq :tag) "rule") (s/one s/Uuid "id")]))
 (def NotifyRules "User notification rules" [NotifyRule])
-(def rules-valid? (s/validator NotifyRules))
+(def check-rules! (s/validator NotifyRules))
+(defn rules-valid? [rs]
+  (try (check-rules! rs) true
+    (catch ExceptionInfo _ false)))
 
 (def Extension
   {:id s/Uuid
