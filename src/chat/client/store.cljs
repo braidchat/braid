@@ -1,6 +1,7 @@
 (ns chat.client.store
   (:require [cljs-utils.core :refer [flip]]
             [cljs-uuid-utils.core :as uuid]
+            [taoensso.timbre :as timbre :refer-macros [errorf]]
             [clojure.set :as set]
             [schema.core :as s :include-macros true]
             [braid.common.schema :as app-schema]
@@ -53,11 +54,17 @@
 (defn- key-by-id [coll]
   (into {} (map (juxt :id identity)) coll))
 
-; TODO: write schema for app-state, make transact! verify
+(declare display-error!)
 (defn- transact! [ks f]
-  (swap! app-state update-in ks f)
-  (println "updating " ks (get-in @app-state ks))
-  (check-app-state! @app-state))
+  (let [old-state @app-state]
+    (swap! app-state update-in ks f)
+    (try
+      (check-app-state! @app-state)
+      (catch ExceptionInfo e
+        (errorf "State consistency error updating %s to %s: %s"
+                ks (get-in @app-state ks) (ex-data e))
+        (reset! app-state old-state)
+        (display-error! :internal-consistency "Something has gone wrong")))))
 
 ; login state
 
