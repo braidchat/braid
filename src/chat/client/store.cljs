@@ -182,8 +182,8 @@
 (defn set-new-message!
   [thread-id content]
   (if (get-in @app-state [:threads thread-id])
-    (swap! app-state assoc-in [:threads thread-id :new-message] content)
-    (swap! app-state assoc-in [:new-thread-msg thread-id] content)))
+    (transact! [:threads thread-id :new-message] (constantly content))
+    (transact! [:new-thread-msg thread-id] (constantly content))))
 
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
