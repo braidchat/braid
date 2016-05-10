@@ -220,7 +220,8 @@
              [:a.nickname {:tabIndex -1
                            :href sender-path}
               (@sender :nickname)]
-             [:span.time {:title (message :created-at)} (helpers/format-date (message :created-at))]]
+             [:span.time {:title (message :created-at)}
+              (helpers/format-date (message :created-at))]]
 
             (into [:div.content] (format-message (message :content)))
 
