@@ -12,6 +12,7 @@
     {:login-state :auth-check ; :ws-connect :login-form :app
      :open-group-id nil
      :threads {}
+     :new-thread-msg {}
      :pagination-remaining 0
      :users {}
      :tags {}
@@ -31,6 +32,7 @@
   {:login-state (s/enum :auth-check :login-form :ws-connect :app)
    :open-group-id (s/maybe s/Uuid)
    :threads {s/Uuid app-schema/MsgThread}
+   :new-thread-msg {s/Uuid s/Str}
    :pagination-remaining s/Int
    :users {s/Uuid app-schema/User}
    :tags {s/Uuid app-schema/Tag}
@@ -177,6 +179,12 @@
                                                  :mentioned-ids #{}} )))
   (transact! [:user :open-thread-ids] #(conj % thread-id)))
 
+(defn set-new-message!
+  [thread-id content]
+  (if (get-in @app-state [:threads thread-id])
+    (transact! [:threads thread-id :new-message] (constantly content))
+    (transact! [:new-thread-msg thread-id] (constantly content))))
+
 (defn add-message! [message]
   (maybe-create-thread! (message :thread-id))
   (transact! [:threads (message :thread-id) :messages]
@@ -200,7 +208,7 @@
                              msg)))))
 
 (defn add-threads! [threads]
-  (transact! [:threads] #(merge % (key-by-id threads))))
+  (transact! [:threads] #(merge-with merge % (key-by-id threads))))
 
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here
@@ -209,7 +217,7 @@
     (set! (.-title js/document)
           (str "Chat (" (get-in @app-state [:notifications :unread-count]) ")")))
 
-  (transact! [:threads (thread :id)] (constantly thread))
+  (transact! [:threads (thread :id)] #(merge % thread))
   (transact! [:user :open-thread-ids] #(conj % (thread :id))))
 
 (defn hide-thread! [thread-id]
@@ -230,17 +238,17 @@
 ; channels page
 
 (defn set-channel-results! [threads]
-  (transact! [:threads] #(merge % (key-by-id threads)))
+  (transact! [:threads] #(merge-with merge % (key-by-id threads)))
   (transact! [:page :thread-ids] (constantly (map :id threads))))
 
 (defn add-channel-results! [threads]
-  (transact! [:threads] #(merge % (key-by-id threads)))
+  (transact! [:threads] #(merge-with merge % (key-by-id threads)))
   (transact! [:page :thread-ids] #(concat % (map :id threads))))
 
 ; search threads
 
 (defn set-search-results! [{:keys [threads thread-ids]}]
-  (transact! [:threads] #(merge % (key-by-id threads)))
+  (transact! [:threads] #(merge-with merge % (key-by-id threads)))
   (transact! [:page :thread-ids] (constantly thread-ids)))
 
 (defn set-search-query! [query]

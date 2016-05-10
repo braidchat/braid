@@ -103,6 +103,10 @@
   state/get-thread-open?)
 
 (register-sub
+  :thread-new-message
+  state/get-thread-new-message)
+
+(register-sub
   :errors
   state/get-errors)
 

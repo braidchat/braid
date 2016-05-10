@@ -49,6 +49,9 @@
 
 (defmulti dispatch! (fn [event data] event))
 
+(defmethod dispatch! :new-message-text [_ {:keys [thread-id content]}]
+  (store/set-new-message! thread-id content))
+
 (defmethod dispatch! :new-message [_ data]
   (when-not (string/blank? (data :content))
     (let [message (schema/make-message
