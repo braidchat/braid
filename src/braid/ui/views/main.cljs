@@ -1,5 +1,6 @@
 (ns braid.ui.views.main
   (:require [chat.client.reagent-adapter :refer [subscribe]]
+            [chat.client.routes :as routes]
             [braid.ui.views.error-banner :refer [error-banner-view]]
             [braid.ui.views.sidebar :refer [sidebar-view]]
             [braid.ui.views.header :refer [header-view]]
@@ -29,7 +30,9 @@
         :tags [tags-page-view]
         :me [me-page-view]
         :group-explore [group-explore-page-view]
-        :settings [group-settings-view]))))
+        :settings [group-settings-view]
+        (do (routes/go-to! (routes/index-path))
+            [:h1 "???"])))))
 
 (defn main-view []
   [:div.main
