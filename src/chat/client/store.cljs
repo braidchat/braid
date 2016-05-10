@@ -54,7 +54,6 @@
 (defn- key-by-id [coll]
   (into {} (map (juxt :id identity)) coll))
 
-(declare display-error!)
 (defn- transact! [ks f]
   (let [old-state @app-state]
     (swap! app-state update-in ks f)
@@ -62,7 +61,7 @@
       (check-app-state! @app-state)
       (catch ExceptionInfo e
         (errorf "State consistency error updating %s to %s: %s"
-                ks (get-in @app-state ks) (ex-data e))
+                ks (get-in @app-state ks) (:error (ex-data e)))
         (reset! app-state old-state)
         ; Not just calling display-error! to avoid possibility of infinite loop
         (swap! app-state update-in [:errors] conj
