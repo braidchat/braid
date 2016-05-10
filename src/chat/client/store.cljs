@@ -119,7 +119,8 @@
   (transact! [:users user-id :nickname] (constantly nick)))
 
 (defn update-user-status! [user-id status]
-  (transact! [:users user-id :status] (constantly status)))
+  (when (get-in @app-state [:users user-id])
+    (transact! [:users user-id :status] (constantly status))))
 
 (defn all-users []
   (vals (get-in @app-state [:users])))
