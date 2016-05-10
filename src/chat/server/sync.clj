@@ -74,10 +74,12 @@
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
   [user-id info]
-  (let [ids-to-send-to (intersection
-                         (set (:any @connected-uids))
-                         (into #{} (map :id)
-                               (db/with-conn (db/fetch-users-for-user user-id))))]
+  (let [ids-to-send-to (disj
+                         (intersection
+                           (set (:any @connected-uids))
+                           (into #{} (map :id)
+                                 (db/with-conn (db/fetch-users-for-user user-id))))
+                         user-id)]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
@@ -100,7 +102,6 @@
   [{:as ev-msg :keys [event id ring-req]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (broadcast-user-change user-id [:user/disconnected user-id])))
-
 
 (defn- user-can-message? [user-id ?data]
   (db/with-conn
@@ -189,7 +190,9 @@
     (if (valid-nickname? (?data :nickname))
       (try
         (do (db/with-conn @(db/set-nickname! user-id (?data :nickname)))
-            (broadcast-user-change user-id [:user/name-change {:user-id user-id :nickname (?data :nickname)}])
+            (broadcast-user-change user-id [:user/name-change
+                                            {:user-id user-id
+                                             :nickname (?data :nickname)}])
             (when ?reply-fn (?reply-fn {:ok true})))
         (catch java.util.concurrent.ExecutionException _
           (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))
