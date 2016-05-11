@@ -70,7 +70,7 @@
      [:div.result
       "No Results"])])
 
-(defn wrap-autocomplete [{:keys [config textarea-view results-view]}]
+(defn wrap-autocomplete [config]
   (let [autocomplete-chan (chan)
         kill-chan (chan)
         throttled-autocomplete-chan (debounce autocomplete-chan 100)
@@ -202,7 +202,7 @@
        :component-will-mount
        (fn [c]
          (swap! state assoc :text @thread-text)
-         (let [{:keys [config]} (r/props c)]
+         (let [config (r/props c)]
            (go (loop []
                  (let [[v ch] (alts! [throttled-autocomplete-chan kill-chan])]
                    (when (= ch throttled-autocomplete-chan)
@@ -212,14 +212,16 @@
                      (recur)))))
            (go (loop []
                  (let [[v ch] (alts! [throttled-thread-text-chan thread-text-kill-chan])]
-                   (when (= ch throttled-thread-text-chan)
-                     (dispatch! :new-message-text v)
-                     (recur)))))))
+                   (if (= ch throttled-thread-text-chan)
+                     (do
+                       (dispatch! :new-message-text v)
+                       (recur))
+                     (dispatch! :new-message-text {:thread-id @thread-id
+                                                   :content (@state :text)})))))))
 
        :component-will-update
-       (fn [c [_ {new-config :config}]]
-         (reset! thread-id (new-config :thread-id))
-         (swap! state assoc :text @thread-text))
+       (fn [c [_ new-config]]
+         (reset! thread-id (new-config :thread-id)))
 
        :component-will-unmount
        (fn []
@@ -227,7 +229,7 @@
          (put! thread-text-kill-chan (js/Date.)))
 
        :reagent-render
-       (fn [{:keys [config textarea-view results-view]}]
+       (fn [config]
          [:div.autocomplete-wrapper
           [textarea-view {:text (@state :text)
                           :config config
@@ -249,7 +251,5 @@
 
 (defn new-message-view [config]
   [:div.message.new
-   [wrap-autocomplete {:config config
-                       :textarea-view textarea-view
-                       :results-view autocomplete-results-view}]])
+   [wrap-autocomplete config]])
 
