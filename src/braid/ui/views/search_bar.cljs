@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
             [clojure.string :as string]
-            [cljs.core.async :as async :refer [<! put! chan]]
+            [cljs.core.async :as async :refer [<! put! chan alts!]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [debounce]]
@@ -13,19 +13,29 @@
   []
   (let [open-group-id (subscribe [:open-group-id])
         search-query (subscribe [:search-query])
+        kill-chan (chan)
         search-chan (chan)]
     (r/create-class
       {:component-will-mount
        (fn []
          (let [search (debounce search-chan 500)]
            (go
-             (while true
-               (let [{:keys [query]} (<! search)]
-                 (store/set-search-results! {})
-                 (if (string/blank? query)
-                   (routes/go-to! (routes/inbox-page-path {:group-id @open-group-id}))
-                   (routes/go-to! (routes/search-page-path {:group-id @open-group-id
-                                                            :query query}))))))))
+             (loop []
+               (let [[v ch] (alts! [search kill-chan])]
+                 (when (= ch search)
+                   (let [{:keys [query]} v]
+                     (store/set-search-results! query {})
+                     (if (string/blank? query)
+                       (routes/go-to! (routes/inbox-page-path {:group-id @open-group-id}))
+                       (do (dispatch! :search-history [query @open-group-id])
+                           (routes/go-to! (routes/search-page-path {:group-id @open-group-id
+                                                                    :query query})))))
+                   (recur)))))))
+
+       :component-will-unmount
+       (fn []
+         (put! kill-chan (js/Date.)))
+
        :reagent-render
        (fn []
          [:div.search-bar

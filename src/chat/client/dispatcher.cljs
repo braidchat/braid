@@ -161,13 +161,14 @@
                        (into [] (remove (partial = rule))))]
     (dispatch! :set-preference [:notification-rules new-rules])))
 
-(defmethod dispatch! :search-history [_ query]
-  (sync/chsk-send!
-    [:chat/search query]
-    15000
-    (fn [reply]
-      (when (:thread-ids reply)
-        (store/set-search-results! reply)))))
+(defmethod dispatch! :search-history [_ [query group-id]]
+  (when query
+    (sync/chsk-send!
+      [:chat/search [query group-id]]
+      15000
+      (fn [reply]
+        (when (:thread-ids reply)
+          (store/set-search-results! query reply))))))
 
 (defmethod dispatch! :load-threads [_ {:keys [thread-ids on-complete]}]
   (sync/chsk-send!

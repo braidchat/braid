@@ -14,15 +14,14 @@
         page (subscribe [:page])
         threads (subscribe [:threads])
         query (subscribe [:search-query])
-        group-id (subscribe [:open-group-id])
-        do-search (run! (dispatch! :search-history [@query @group-id]))]
+        group-id (subscribe [:open-group-id])]
+    (dispatch! :search-history [(@page :search-query) @group-id])
     (fn []
       (let [status (cond
                      @loading? :loading
                      (not (contains? @page :thread-ids)) :searching
                      (seq (@page :thread-ids)) :done-results
-                     :else :done-empty)
-            _ @do-search]
+                     :else :done-empty)]
         [:div.page.search
          [:div.title (str "Search for \"" @query "\"")]
          (case status
