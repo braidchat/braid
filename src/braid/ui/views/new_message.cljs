@@ -42,7 +42,7 @@
        :reagent-render
        (fn [{:keys [text set-text! config on-key-down on-change]}]
          [:textarea {:placeholder (config :placeholder)
-                     :value @text
+                     :value text
                      :disabled (not @connected?)
                      :on-change (on-change
                                   {:on-change
@@ -51,7 +51,7 @@
                                      (resize-textbox (.. e -target)))})
                      :on-key-down (on-key-down
                                     {:on-submit (fn [e]
-                                                  (send-message! config @text)
+                                                  (send-message! config text)
                                                   (set-text! ""))})}])})))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
@@ -70,15 +70,19 @@
      [:div.result
       "No Results"])])
 
-(defn wrap-autocomplete [{:keys [config textarea-view results-view]}]
+(defn wrap-autocomplete [config]
   (let [autocomplete-chan (chan)
         kill-chan (chan)
         throttled-autocomplete-chan (debounce autocomplete-chan 100)
 
+        thread-text-kill-chan (chan)
+        thread-text-chan (chan)
+        throttled-thread-text-chan (debounce thread-text-chan 500)
         thread-id (r/atom (config :thread-id))
         thread-text (subscribe [:thread-new-message] [thread-id])
 
-        state (r/atom {:text thread-text
+        ; delibrately closing over value of sub
+        state (r/atom {:text @thread-text
                        :force-close? false
                        :highlighted-result-index 0
                        :results nil})
@@ -121,14 +125,16 @@
         clear-force-close! (fn []
                              (swap! state assoc :force-close? false))
 
+        update-thread-text! (fn [thread-id text] (put! thread-text-chan {:thread-id thread-id
+                                                                         :content text}))
         set-text! (fn [text]
-                    (dispatch! :new-message-text {:thread-id @thread-id
-                                                  :content (.slice text 0 5000)}))
+                    (let [text (.slice text 0 5000)]
+                      (swap! state assoc :text text)
+                      (update-thread-text! @thread-id text)))
 
         update-text! (fn [f]
-                       (dispatch! :new-message-text
-                                  {:thread-id @thread-id
-                                   :content (f @thread-text)}))
+                       (swap! state update :text f)
+                       (update-thread-text! @thread-id (@state :text)))
 
         choose-result!
         (fn [result]
@@ -195,25 +201,35 @@
       {:display-name "autocomplete"
        :component-will-mount
        (fn [c]
-         (let [{:keys [config]} (r/props c)]
+         (swap! state assoc :text @thread-text)
+         (let [config (r/props c)]
            (go (loop []
                  (let [[v ch] (alts! [throttled-autocomplete-chan kill-chan])]
                    (when (= ch throttled-autocomplete-chan)
                      (set-results!
                        (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
                      (highlight-first!)
-                     (recur)))))))
+                     (recur)))))
+           (go (loop []
+                 (let [[v ch] (alts! [throttled-thread-text-chan thread-text-kill-chan])]
+                   (if (= ch throttled-thread-text-chan)
+                     (do
+                       (dispatch! :new-message-text v)
+                       (recur))
+                     (dispatch! :new-message-text {:thread-id @thread-id
+                                                   :content (@state :text)})))))))
 
        :component-will-update
-       (fn [c [_ {new-config :config}]]
+       (fn [c [_ new-config]]
          (reset! thread-id (new-config :thread-id)))
 
        :component-will-unmount
        (fn []
-         (put! kill-chan (js/Date.)))
+         (put! kill-chan (js/Date.))
+         (put! thread-text-kill-chan (js/Date.)))
 
        :reagent-render
-       (fn [{:keys [config textarea-view results-view]}]
+       (fn [config]
          [:div.autocomplete-wrapper
           [textarea-view {:text (@state :text)
                           :config config
@@ -235,7 +251,5 @@
 
 (defn new-message-view [config]
   [:div.message.new
-   [wrap-autocomplete {:config config
-                       :textarea-view textarea-view
-                       :results-view autocomplete-results-view}]])
+   [wrap-autocomplete config]])
 
