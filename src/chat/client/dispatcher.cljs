@@ -269,8 +269,9 @@
     (doseq [id open-thread-ids]
       (dispatch! :hide-thread {:thread-id id}))))
 
-(defmethod dispatch! :start-call [_ {:keys [id call-type]}]
-  (println call-type "call to" id))
+(defmethod dispatch! :start-call
+  [_ {:keys [caller-id callee-id call-type]}]
+  (println call-type "call from" caller-id "to" callee-id))
 
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
