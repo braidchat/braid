@@ -269,6 +269,9 @@
     (doseq [id open-thread-ids]
       (dispatch! :hide-thread {:thread-id id}))))
 
+(defmethod dispatch! :start-call [_ {:keys [id nickname]}]
+  )
+
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
     (store/display-error! :client-out-of-date "Client out of date - please refresh")))

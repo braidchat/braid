@@ -1,5 +1,6 @@
 (ns braid.ui.views.pages.user
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
+            [braid.ui.views.call :refer [caller-tag-view]]
             [braid.ui.views.pills :refer [user-pill-view]]
             [braid.ui.views.new-thread :refer [new-thread-view]]
             [braid.ui.views.threads :refer [threads-view]]
@@ -38,6 +39,7 @@
          [:img.avatar {:src @user-avatar-url}]
          [:p "One day, a profile will be here."]
          [:p "Currently only showing your open threads that mention this user."]
-         [:p "Soon, you will see all recent threads this user has participated in."]]]
+         [:p "Soon, you will see all recent threads this user has participated in."]
+         [caller-tag-view @user]]]
        [threads-view {:new-thread-args {:mentioned-ids [(@user :id)]}
                       :threads @sorted-threads}]])))

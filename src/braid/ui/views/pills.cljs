@@ -66,7 +66,6 @@
        :component-will-receive-props
        (fn [_ [_ new-user-id]]
          (reset! user-id-atom new-user-id))
-
        :reagent-render
        (fn [user-id]
          (let [path (routes/user-page-path {:group-id @open-group-id
@@ -74,6 +73,8 @@
                color (id->color user-id)]
            [:a.user.pill {:class (str (case @user-status :online "on" "off")
                                       (when @admin? " admin"))
+                          :on-hover (fn [e]
+                                      (.log js/console "call?"))
                           :title (when @admin? "admin")
                           :tabIndex -1
                           :style {:background-color color
