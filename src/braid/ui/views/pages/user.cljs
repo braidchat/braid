@@ -40,6 +40,6 @@
          [:p "One day, a profile will be here."]
          [:p "Currently only showing your open threads that mention this user."]
          [:p "Soon, you will see all recent threads this user has participated in."]
-         [caller-tag-view @user]]]
+         [caller-tag-view (@user :id)]]]
        [threads-view {:new-thread-args {:mentioned-ids [(@user :id)]}
                       :threads @sorted-threads}]])))
