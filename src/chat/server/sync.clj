@@ -315,7 +315,7 @@
       (let [data (assoc ?data :inviter-id user-id)
             invitation (db/with-conn (db/create-invitation! data))]
         (if-let [invited-user (db/with-conn (db/user-with-email (invitation :invitee-email)))]
-          (chsk-send! (invited-user :id) [:chat/invitation-recieved invitation])
+          (chsk-send! (invited-user :id) [:chat/invitation-received invitation])
           (invites/send-invite invitation)))
       ; TODO: indicate permissions error to user?
       (timbre/warnf "User %s attempted to invite %s to a group %s they don't have access to"

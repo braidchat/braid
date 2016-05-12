@@ -316,7 +316,7 @@
   [[_ data]]
   (store/add-users! data))
 
-(defmethod sync/event-handler :chat/invitation-recieved
+(defmethod sync/event-handler :chat/invitation-received
   [[_ invite]]
   (store/add-invite! invite))
 
