@@ -163,12 +163,14 @@
 
 (defmethod dispatch! :search-history [_ [query group-id]]
   (when query
+    (store/clear-search-error!)
     (sync/chsk-send!
       [:chat/search [query group-id]]
       15000
       (fn [reply]
-        (when (:thread-ids reply)
-          (store/set-search-results! query reply))))))
+        (if (:thread-ids reply)
+          (store/set-search-results! query reply)
+          (store/set-search-error!))))))
 
 (defmethod dispatch! :load-threads [_ {:keys [thread-ids on-complete]}]
   (sync/chsk-send!

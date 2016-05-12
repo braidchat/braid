@@ -40,7 +40,8 @@
    :page {:type s/Keyword
           (s/optional-key :id) s/Uuid
           (s/optional-key :thread-ids) [s/Uuid]
-          (s/optional-key :search-query) s/Str}
+          (s/optional-key :search-query) s/Str
+          (s/optional-key :search-error?) s/Bool}
    :session (s/maybe {:user-id s/Uuid})
    :errors [[(s/one (s/cond-pre s/Keyword s/Str) "err-key") (s/one s/Str "msg")]]
    :invitations [app-schema/Invitation]
@@ -255,6 +256,13 @@
 
 (defn set-search-query! [query]
   (transact! [:page :search-query] (constantly query)))
+
+(defn set-search-error! []
+  (transact! [:page :search-error?] (constantly true)))
+
+(defn clear-search-error! []
+  (transact! [:page] #(dissoc % :search-error?)))
+
 
 ; tags
 

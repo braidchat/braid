@@ -18,6 +18,7 @@
     (dispatch! :search-history [(@page :search-query) @group-id])
     (fn []
       (let [status (cond
+                     (@page :search-error?) (do (stop-loading!) :error)
                      @loading? :loading
                      (not (contains? @page :thread-ids)) :searching
                      (seq (@page :thread-ids)) :done-results
@@ -29,6 +30,13 @@
            [:div.content
             [:div.description
              "Searching..."]]
+
+           :error
+           [:div.content
+            [:p "Search timed out"]
+            [:button {:on-click (fn [_]
+                                  (dispatch! :search-history [(@page :search-query) @group-id]))}
+             "Try again"]]
 
            (:done-results :loading)
            (let [loaded-threads (reaction (vals (select-keys @threads (@page :thread-ids))))
