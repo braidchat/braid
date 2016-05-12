@@ -61,3 +61,8 @@
                               (put! out lastv))
                             (recur ::init nil (pop chans))))))))
     out))
+
+(defn location
+  [e]
+  [(.-clientX e) (.-clientY e)])
+
