@@ -4,23 +4,21 @@
             [chat.client.dispatcher :refer [dispatch!]]))
 
 (defn caller-tag-view
-  [caller-id callee-id]
+  [callee-id]
   (fn []
     [:div
      [:h3 "Call"]
-     [:a.button {:on-click
-                 (fn [_]
-                   (dispatch! :start-call
-                              (assoc {} :caller-id caller-id
-                                        :callee-id callee-id
-                                        :call-type "audio")))}
+     [:a.button
+       {:on-click
+         (fn [_]
+           (dispatch! :start-call (assoc {} :callee-id callee-id
+                                            :call-type "audio")))}
       "Audio"]
-     [:a.button {:on-click
-                 (fn [_]
-                   (dispatch! :start-call
-                              (assoc {} :caller-id caller-id
-                                        :callee-id callee-id
-                                        :call-type "video")))}
+     [:a.button
+       {:on-click
+         (fn [_]
+           (dispatch! :start-call (assoc {} :callee-id callee-id
+                                            :call-type "video")))}
       "Video"]]))
 
 (defn calling-panel-view [])

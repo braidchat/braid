@@ -269,8 +269,8 @@
     (doseq [id open-thread-ids]
       (dispatch! :hide-thread {:thread-id id}))))
 
-(defmethod dispatch! :start-call [_ {:keys [caller-id callee-id call-type] :as args}]
-  (sync/chsk-send! [:chat/make-call args]))
+(defmethod dispatch! :start-call [_ call-data]
+  (sync/chsk-send! [:chat/make-call call-data]))
 
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
@@ -356,3 +356,7 @@
   [[_ message]]
   (println "Got notification " message)
   (notify/notify {:msg (:content message)}))
+
+(defmethod sync/event-handler :chat/accept-call
+  [[_ [caller-id call-type]]]
+  #_(println call-type "call from" caller-id))

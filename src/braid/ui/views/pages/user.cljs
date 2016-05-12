@@ -42,6 +42,6 @@
          [:p "Soon, you will see all recent threads this user has participated in."]
          (when (not= @current-user-id (@user :id))
            [:div.call
-             [caller-tag-view @current-user-id (@user :id)]])]]
+             [caller-tag-view (@user :id)]])]]
        [threads-view {:new-thread-args {:mentioned-ids [(@user :id)]}
                       :threads @sorted-threads}]])))

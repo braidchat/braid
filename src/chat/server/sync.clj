@@ -373,7 +373,9 @@
 
 (defmethod event-msg-handler :chat/make-call
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  #_(println "socket data" ?data))
+  (let [{:keys [callee-id call-type]} ?data
+        caller-id (get-in ring-req [:session :user-id])]
+    (chsk-send! callee-id [:chat/accept-call [caller-id call-type]])))
 
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
