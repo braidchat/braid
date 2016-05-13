@@ -33,9 +33,10 @@
                                 (sort-by :message/created-at)
                                 first
                                 :message/user)
-                    author-grp (-> author :user/id
-                                   db/get-groups-for-user
-                                   first :id)]
+                    author-grp (some-> author :user/id
+                                       db/get-groups-for-user
+                                       first :id)
+                    fallback-group (:group/id (d/pull (d/db db/*conn*) [:group/id] [:group/name "Braid"]))]
                 (cond
                   (seq (th :thread/tag))
                   (let [grp (get-in th [:thread/tag 0 :tag/group :db/id])]
@@ -51,14 +52,14 @@
                                           db/get-groups-for-user
                                           :user/id)
                                     (cons author (th :thread/mentioned))))
-                        grp (or (first grps) author-grp)]
+                        grp (or (first grps) author-grp fallback-group)]
                     (when (nil? grp)
                       (println "Nil by mentions " (th :thread/id)))
                     [:db/add [:thread/id (th :thread/id)]
                      :thread/group [:group/id grp]])
 
                   :else
-                  (let [grp author-grp]
+                  (let [grp (or author-grp fallback-group)]
                     (when (nil? grp)
                       (println "nil by author" (th :thread/id)))
                     [:db/add [:thread/id (th :thread/id)]
