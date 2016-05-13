@@ -40,15 +40,16 @@
     (if (= old-i new-i)
       v
       (let [em (nth v old-i)]
-        (reduce (fn [v' [idx e]]
-                  (cond
-                    (= idx old-i) v'
-                    (= idx new-i) (if (< old-i new-i)
-                                    (conj v' e em)
-                                    (conj v' em e))
-                    :else (conj v' e)))
-                []
-                (map-indexed vector v))))))
+        (->> v
+             (map-indexed vector)
+             (reduce (fn [v' [idx e]]
+                       (cond
+                         (= idx old-i) v'
+                         (= idx new-i) (if (< old-i new-i)
+                                         (conj v' e em)
+                                         (conj v' em e))
+                         :else (conj v' e)))
+                     []))))))
 
 (defn badge-view [group-id]
   (let [cnt (subscribe [:group-unread-count group-id])]
@@ -74,8 +75,6 @@
                               old-idx (index-of current-groups (group :id))
                               new-idx (+ old-idx by)
                               new-groups (move-idx current-groups old-idx new-idx)]
-                          (println current-groups)
-                          (println new-groups)
                           (dispatch! :set-preference [:groups-order new-groups])))
         drag-state (r/atom {:grp nil
                             :elt-height 0
