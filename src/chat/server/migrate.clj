@@ -9,7 +9,7 @@
   "Threads have associated groups"
   []
   (db/with-conn
-    #_(d/transact db/*conn*
+    (d/transact db/*conn*
       [{:db/ident :thread/group
         :db/valueType :db.type/ref
         :db/cardinality :db.cardinality/one
