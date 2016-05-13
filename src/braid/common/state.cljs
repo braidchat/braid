@@ -292,3 +292,12 @@
 (defn get-preference
   [state [_ pref]]
   (reaction (get-in @state [:preferences pref])))
+
+(defn get-calls
+  [state _]
+  (reaction (@state :calls)))
+
+(defn get-call-status?
+  ([state [_ call-id]] get-call-status? state nil call-id)
+  ([state _ call-id]
+   (reaction (get-in @state [:calls call-id :status]))))

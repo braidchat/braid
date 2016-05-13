@@ -170,6 +170,14 @@
   :user-preference
   state/get-preference)
 
+(register-sub
+  :calls
+  state/get-calls)
+
+(register-sub
+  :call-status?
+  state/get-call-status?)
+
 (defn subscribe
   ([v]
    (let [key-v (first v)
