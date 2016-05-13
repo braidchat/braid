@@ -26,7 +26,8 @@
                      :unread-count 0}
      :user {:open-thread-ids #{}
             :subscribed-tag-ids #{}}
-     :new-thread-id (uuid/make-random-squuid)}))
+     :new-thread-id (uuid/make-random-squuid)
+     :calls {}}))
 
 (def AppState
   {:login-state (s/enum :auth-check :login-form :ws-connect :app)
@@ -49,7 +50,8 @@
                    :unread-count s/Int}
    :user {:open-thread-ids #{s/Uuid}
           :subscribed-tag-ids #{s/Uuid}}
-   :new-thread-id s/Uuid})
+   :new-thread-id s/Uuid
+   :calls {s/Uuid app-schema/Call}})
 
 (def check-app-state! (s/validator AppState))
 

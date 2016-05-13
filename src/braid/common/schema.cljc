@@ -88,3 +88,10 @@
    :invitee-email s/Str
    :group-id s/Uuid
    :group-name s/Str})
+
+(def Call
+  {:id s/Uuid
+   :type s/Str
+   :source-id s/Uuid
+   :target-id s/Uuid
+   :status s/Str})
