@@ -1,7 +1,6 @@
 (ns braid.ui.views.pills
   (:require [reagent.core :as r]
             [reagent.impl.util :refer [extract-props]]
-            [braid.ui.views.call :refer [caller-tag-view]]
             [chat.client.routes :as routes]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.views.helpers :refer [id->color]]

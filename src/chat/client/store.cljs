@@ -403,6 +403,7 @@
 ; calls
 
 (defn add-call! [call]
+  (println "call to add" call)
   (transact! [:calls] #(assoc % (:id call) call)))
 
 (defn update-call-status! [call-id status]

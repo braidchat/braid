@@ -272,6 +272,9 @@
 (defmethod dispatch! :start-call [_ call-data]
   (sync/chsk-send! [:chat/make-call call-data]))
 
+(defmethod dispatch! :accept-call [_ call-id]
+  (store/update-call-status! call-id "accepted"))
+
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
     (store/display-error! :client-out-of-date "Client out of date - please refresh")))
@@ -362,5 +365,5 @@
   (let [call (schema/make-call {:type call-type
                                 :source-id caller-id
                                 :target-id callee-id
-                                :status "created"})]
+                                :status "incoming"})]
     (store/add-call! call)))
