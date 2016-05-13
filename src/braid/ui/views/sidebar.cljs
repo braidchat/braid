@@ -78,12 +78,12 @@
                           (dispatch! :set-preference [:groups-order new-groups])))
         drag-state (r/atom {:grp nil
                             :elt-height 0
+                            :click nil
                             :listeners nil
                             :start nil
                             :location nil
                             :offset nil})
         drag-move (fn [grp evt]
-                    (.preventDefault evt)
                     (when (= grp (@drag-state :grp))
                       (swap! drag-state assoc
                              :location (v+ (location evt)
@@ -93,12 +93,16 @@
                      (doto js/window
                        (events/unlisten EventType.MOUSEUP up)
                        (events/unlisten EventType.MOUSEMOVE move)))
-                   (let [moved (-> (v- (@drag-state :location)
-                                       (@drag-state :start))
-                                   second
-                                   (/ (@drag-state :elt-height))
-                                   js/Math.round)]
-                     (move-group-by grp moved))
+                   (let [y-delta (-> (v- (@drag-state :location)
+                                         (@drag-state :start))
+                                     second)
+                         idx-delta (-> y-delta
+                                       (/ (@drag-state :elt-height))
+                                       js/Math.round)]
+                     (if (< (js/Math.abs y-delta) (/ (@drag-state :elt-height) 2))
+                       (when-let [click (@drag-state :click)]
+                         (click))
+                       (move-group-by grp idx-delta)))
                    (swap! drag-state assoc
                           :grp nil
                           :listeners nil))
@@ -112,12 +116,14 @@
                            elt-height (+ (.-clientHeight elt)
                                          (-> elt
                                              (get-style "margin-bottom")
-                                             px->n))
+                                             px->n
+                                             (* 2)))
                            up (partial drag-end grp)
                            move (partial drag-move grp)]
                        (swap! drag-state assoc
                               :grp grp
                               :start loc
+                              :click (fn [] (.click elt))
                               :elt-height elt-height
                               :location offset
                               :offset (v- offset loc)
