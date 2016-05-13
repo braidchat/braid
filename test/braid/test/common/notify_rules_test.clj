@@ -53,6 +53,7 @@
                                  :password "foobar"})
 
         msg (fn [] {:id (db/uuid)
+                    :group-id (g1 :id)
                     :thread-id (db/uuid)
                     :user-id (sender :id)
                     :content ""

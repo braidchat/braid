@@ -4,13 +4,26 @@
             [clojure.string :as string]
             [clojure.edn :as edn]))
 
+(defn migrate-2016-05-13
+  "Threads have associated groups"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [{:db/ident :thread/group
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])
+    ; TODO: migrate existing threads to appropriate groups
+    ))
+
 (defn migrate-2016-05-07
   "Change how user preferences are stored"
   []
   (db/with-conn
     ; rename old prefs
     (d/transact db/*conn* [{:db/id :user/preferences
-                                          :db/ident :user/preferences-old}])
+                            :db/ident :user/preferences-old}])
     ; create new entity type
     (d/transact db/*conn*
       [{:db/ident :user/preferences

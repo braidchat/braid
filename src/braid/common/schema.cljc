@@ -7,6 +7,7 @@
   "A new message, before saved into thread - what the client sends"
   {:id s/Uuid
    :thread-id s/Uuid
+   :group-id s/Uuid
    :user-id s/Uuid
    :content s/Str
    :created-at s/Inst
@@ -28,6 +29,7 @@
 (def MsgThread
   "A thread (just calling it Thread apparently causes confusion (with java.lang.Thread)"
   {:id s/Uuid
+   :group-id s/Uuid
    :messages [(s/conditional
                 #(contains? % :thread-id) NewMessage
                 :else ThreadMessage)]
