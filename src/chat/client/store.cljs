@@ -400,4 +400,10 @@
                                       current-group-id))))))]
       open-threads))
 
+; calls
 
+(defn add-call! [call]
+  (transact! [:calls] #(assoc % (:id call) call)))
+
+(defn update-call-status! [call-id status]
+  (transact! [:calls call-id :status] (constantly status)))
