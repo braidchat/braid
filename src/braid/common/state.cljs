@@ -3,10 +3,6 @@
     [reagent.ratom :include-macros true :refer-macros [reaction]]
     [clojure.set :refer [union intersection subset?]]))
 
-(defn set-active-group-id!
-  [state [_ group-id]]
-  (assoc state :open-group-id group-id))
-
 (defn get-active-group
   [state _]
   (let [group-id (reaction (:open-group-id @state))]
@@ -15,6 +11,13 @@
 (defn get-groups
   [state _]
   (reaction (vals (:groups @state))))
+
+(defn get-group-threads
+  ([state [_ group-id]] (get-group-threads state nil [group-id]))
+  ([state _ [group-id]]
+   (reaction (->> (get-in @state [:group-threads group-id])
+                  (map #(get-in @state [:threads %]))
+                  doall))))
 
 (defn get-group-admins
   ([state [_ group-id]]
@@ -79,16 +82,7 @@
                                                   [k (map (fn [v] (v :id)) vs)]))
                                            (into {})))
         group-user-ids (set (@group-ids->user-ids group-id))
-        thread-in-group? (fn [thread]
-                           (if (seq (thread :tag-ids))
-                             (= group-id (:group-id (@tags (first (thread :tag-ids)))))
-                             (let [user-ids-from-messages (->> (thread :messages)
-                                                               (map :user-id)
-                                                               set)
-                                   user-ids-from-refs (set (thread :user-ids))
-                                   user-ids (union user-ids-from-messages
-                                                   user-ids-from-refs)]
-                               (< 0 (count (intersection group-user-ids user-ids))))))
+        thread-in-group? (fn [thread] (= group-id (thread :group-id)))
         unseen-threads (reaction
                          (->>
                            (select-keys @threads @open-thread-ids)
@@ -110,32 +104,14 @@
   (reaction (get-in @state [:page :id])))
 
 (defn get-open-threads
-  [state [_]]
-  (let [group-id (reaction (get-in @state [:open-group-id]))
-        open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
-        tag-id->group-id (reaction
-                           (into {} (map (juxt :id :group-id))
-                                 (vals (@state :tags))))
-        threads (reaction (@state :threads))
-        open-threads (reaction (vals (select-keys @threads @open-thread-ids)))
-        group-users (reaction
-                      (into #{}
-                            (comp
-                              (filter (fn [u] (contains? (set (u :group-ids)) @group-id)))
-                              (map :id))
-                            (vals (@state :users))))]
-    (reaction
-      (doall
-        (filter (fn [thread]
-                  (and
-                    (or (empty? (thread :tag-ids))
-                        (contains?
-                          (into #{} (map @tag-id->group-id) (thread :tag-ids))
-                          @group-id))
-                    (subset?
-                      (set (thread :mentioned-ids))
-                      @group-users)))
-                @open-threads)))))
+  ([state [_ group-id]] (get-open-threads state nil [group-id]))
+  ([state _ [group-id]]
+   (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
+         threads (reaction (@state :threads))
+         open-threads (reaction (vals (select-keys @threads @open-thread-ids)))]
+     (reaction
+       (doall (filter (fn [thread] (= (thread :group-id) group-id))
+                      @open-threads))))))
 
 (defn get-users-in-group
   [state [_ group-id]]

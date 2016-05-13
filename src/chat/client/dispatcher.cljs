@@ -74,6 +74,7 @@
             (store/set-message-failed! message)))))))
 
 (defmethod dispatch! :resend-message [_ message]
+  (store/clear-error! (str :failed-to-send (message :id)))
   (store/clear-message-failed! message)
   (sync/chsk-send!
     [:chat/new-message message]

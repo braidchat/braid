@@ -6,8 +6,9 @@
 (defn inbox-page-view
   []
   (let [user-id (subscribe [:user-id])
-        open-threads (subscribe [:open-threads])
         group (subscribe [:active-group])
+        group-id (subscribe [:open-group-id])
+        open-threads (subscribe [:open-threads] [group-id])
         sorted-threads (reaction
                          (->> @open-threads
                               ; sort by last message sent by logged-in user, most recent first

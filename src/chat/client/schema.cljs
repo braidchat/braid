@@ -4,9 +4,10 @@
 
 (defn make-message [data]
   {:id (or (data :id) (uuid/make-random-squuid))
-   :content (or (data :content) nil)
+   :content (data :content)
    :thread-id (or (data :thread-id) (uuid/make-random-squuid))
-   :user-id (or (data :user-id) nil)
+   :group-id (data :group-id)
+   :user-id (data :user-id)
    :created-at (or (data :created-at) (js/Date.))
    :mentioned-user-ids (or (data :mentioned-user-ids) [])
    :mentioned-tag-ids (or (data :mentioned-tag-ids) [])})

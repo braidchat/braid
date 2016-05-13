@@ -1,5 +1,7 @@
 (ns braid.common.schema
-  (:require [schema.core :as s :include-macros true])
+  (:require [schema.core :as s :include-macros true]
+            #?(:clj [taoensso.timbre :as timbre :refer [debugf]]
+               :cljs [taoensso.timbre :as timbre :refer-macros [debugf]]))
   (:import #?(:clj [clojure.lang ExceptionInfo])))
 
 
@@ -13,11 +15,16 @@
    :created-at s/Inst
    :mentioned-user-ids [s/Uuid]
    :mentioned-tag-ids [s/Uuid]
-   (s/optional-key :failed?) s/Bool})
+   (s/optional-key :failed?) s/Bool
+   (s/optional-key :collapse?) s/Bool
+   (s/optional-key :unseen?) s/Bool
+   (s/optional-key :first-unseen?) s/Bool})
 (def check-new-message! (s/validator NewMessage))
 (defn new-message-valid? [msg]
   (try (check-new-message! msg) true
-    (catch ExceptionInfo _ false)))
+    (catch ExceptionInfo e
+      (debugf "Bad message format: %s" (:error (ex-data e)))
+      false)))
 
 (def ThreadMessage
   "A message saved into a thread"

@@ -7,7 +7,8 @@
             [braid.ui.views.search-bar :refer [search-bar-view]]))
 
 (defn clear-inbox-button-view []
-  (let [open-threads (subscribe [:open-threads])]
+  (let [group-id (subscribe [:open-group-id])
+        open-threads (subscribe [:open-threads] [group-id])]
     (fn []
       [:div.clear-inbox
         (when (< 5 (count @open-threads))

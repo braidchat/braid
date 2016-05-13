@@ -6,7 +6,6 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.threads :refer [threads-view]]
-            [braid.ui.views.new-thread :refer [new-thread-view]]
             [braid.ui.views.pills :refer [tag-pill-view subscribe-button-view]]))
 
 (defn edit-description-view
