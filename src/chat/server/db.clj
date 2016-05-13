@@ -505,6 +505,11 @@
                               (map (fn [t] (.getTime t))))]
     (apply max (concat [0] user-hides-at user-messages-at))))
 
+(defn thread-group-id
+  [thread-id]
+  (some-> (d/pull (d/db *conn*) [{:thread/group [:group/id]}])
+          :thread/group :group/id))
+
 (defn thread-add-last-open-at [thread user-id]
   (assoc thread :last-open-at (thread-last-open-at thread user-id)))
 
@@ -606,9 +611,7 @@
   [user-id thread-id]
   (or
     ;user can see the thread if it's a new (i.e. not yet in the database) thread...
-    (empty? (d/q '[:find ?t :in $ ?thread-id
-                   :where [?t :thread/id ?thread-id]]
-                 (d/db *conn*) thread-id))
+    (nil? (d/entity (d/db *conn*) [:thread/id thread-id]))
     ; ...or they're already subscribed to the thread...
     (contains? (set (get-users-subscribed-to-thread thread-id)) user-id)
     ; ...or they're mentioned in the thread
