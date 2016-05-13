@@ -357,6 +357,10 @@
   (println "Got notification " message)
   (notify/notify {:msg (:content message)}))
 
-(defmethod sync/event-handler :chat/accept-call
-  [[_ [caller-id call-type]]]
-  #_(println call-type "call from" caller-id))
+(defmethod sync/event-handler :chat/receive-call
+  [[_ [caller-id callee-id call-type]]]
+  (let [call (schema/make-call {:type call-type
+                                :source-id caller-id
+                                :target-id callee-id
+                                :status "created"})]
+    (store/add-call! call)))
