@@ -20,6 +20,7 @@
         send-message!
         (fn [config text]
           (dispatch! :new-message {:thread-id (config :thread-id)
+                                   :group-id (config :group-id)
                                    :content text
                                    :mentioned-user-ids (config :mentioned-user-ids)
                                    :mentioned-tag-ids (config :mentioned-tag-ids)}))]

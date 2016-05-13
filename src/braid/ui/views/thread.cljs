@@ -94,6 +94,7 @@
         set-uploading! (fn [bool] (swap! state assoc :uploading? bool))
         set-focused! (fn [bool] (swap! state assoc :focused? bool))
         set-dragging! (fn [bool] (swap! state assoc :dragging? bool))
+        open-group (subscribe [:open-group-id])
 
         ; Closing over thread-id, but the only time a thread's id changes is the new
         ; thread box, which is always open
@@ -191,6 +192,7 @@
             [:div.uploading-indicator "\uf110"])
 
           [new-message-view {:thread-id (thread :id)
+                             :group-id @open-group
                              :new-thread? new?
                              :placeholder (if new?
                                             "Start a conversation..."
