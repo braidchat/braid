@@ -3,7 +3,8 @@
   (:require [cljs.core.async :refer [<! put! chan alts! timeout]]
             [cljs-time.format :as f]
             [cljs-time.core :as t]
-            [chat.client.store :as store]))
+            [chat.client.store :as store]
+            [goog.style :as gstyle]))
 
 ; TODO: clojure 1.8 should implement these
 (defn starts-with? [s prefix]
@@ -61,3 +62,23 @@
                               (put! out lastv))
                             (recur ::init nil (pop chans))))))))
     out))
+
+(defn location
+  [e]
+  [(.-clientX e) (.-clientY e)])
+
+(defn element-offset
+  [elt]
+  (let [offset (gstyle/getPageOffset elt)]
+    [(.-x offset) (.-y offset)]))
+
+(defn get-style
+  [elt prop]
+  (cond
+    (.-currentStyle elt)
+    (aget (.-currentStyle elt) prop)
+
+    (.-getComputedStyle js/window)
+    (.. js/document -defaultView
+        (getComputedStyle elt nil)
+        (getPropertyValue prop))))
