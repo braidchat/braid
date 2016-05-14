@@ -34,7 +34,8 @@
    :created-at s/Inst})
 
 (def MsgThread
-  "A thread (just calling it Thread apparently causes confusion (with java.lang.Thread)"
+  "A message thread
+  Just calling it Thread apparently causes confusion with java.lang.Thread"
   {:id s/Uuid
    :group-id s/Uuid
    :messages [(s/conditional
