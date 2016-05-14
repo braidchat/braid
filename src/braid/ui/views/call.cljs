@@ -42,16 +42,29 @@
 
 (defn new-call-view
   [call]
-  (fn []
-    [:div
-     [:p (str (call :id))]
-     [:a.button
-      {:on-click
-       (fn [_] (dispatch! :accept-call (call :id)))}
-      "Accept"]
-     [:a.button
-      {:on-click
-       (fn [_] (dispatch! :decline-call (call :id)))}
-      "Decline"]]))
+  (let [call-id (call :id)
+        call-status (subscribe [:call-status?] [call-id])]
+    (fn []
+      #_(case @call-status
+            "incoming"
+            [:div
+             [:p (str (call :id))]
+             [:a.button
+              {:on-click
+               (fn [_]
+                 (dispatch! :accept-call (call :id)))}
+              "Accept"]
+             [:a.button
+              {:on-click
+               (fn [_]
+                 (dispatch! :decline-call (call :id)))}
+              "Decline"]]
+            "accepted"
+            [:p "Call Accepted"]
+            "declined"
+            {:p "Call Declined"}
+            "default"
+            [:p "Dunno"])
+      [:div [:p "Hello"]])))
 
 (defn call-interface-view [])
