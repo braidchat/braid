@@ -507,7 +507,7 @@
 
 (defn thread-group-id
   [thread-id]
-  (some-> (d/pull (d/db *conn*) [{:thread/group [:group/id]}])
+  (some-> (d/pull (d/db *conn*) [{:thread/group [:group/id]}] [:thread/id thread-id])
           :thread/group :group/id))
 
 (defn thread-add-last-open-at [thread user-id]
