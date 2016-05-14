@@ -70,7 +70,7 @@
         (reset! app-state old-state)
         ; Not just calling display-error! to avoid possibility of infinite loop
         (swap! app-state update-in [:errors] conj
-               [:internal-consistency "Something has gone wrong"])))))
+               [(str :internal-consistency (rand-int 100)) "Something has gone wrong"])))))
 
 ; login state
 
