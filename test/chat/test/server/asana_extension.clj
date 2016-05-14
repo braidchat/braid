@@ -27,11 +27,12 @@
                                            :tag-id (tag-1 :id)})
         ext2-id (db/uuid)]
     (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
-                         :user-id (user-1 :id) :created-at (java.util.Date.)
+                         :group-id (group :id) :user-id (user-1 :id)
+                         :created-at (java.util.Date.)
                          :mentioned-tag-ids [(tag-1 :id)]})
     (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
-                         :user-id (user-1 :id) :created-at (java.util.Date.)
-                         :mentioned-tag-ids [(tag-1 :id)]})
+                         :group-id (group :id) :user-id (user-1 :id)
+                         :created-at (java.util.Date.) :mentioned-tag-ids [(tag-1 :id)]})
     (testing "created extension has expected attributes"
       (is (nil? (:token ext)))
       (is (= (group :id) (:group-id ext)))

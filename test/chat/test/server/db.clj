@@ -207,18 +207,21 @@
         ))))
 
 (deftest fetch-messages-test
-  (let [user-1 (db/create-user! {:id (db/uuid)
+  (let [group (db/create-group! {:id (db/uuid) :name "group"})
+        user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar "http://www.foobar.com/1.jpg"})
         thread-1-id (db/uuid)
         message-1-data {:id (db/uuid)
+                        :group-id (group :id)
                         :user-id (user-1 :id)
                         :thread-id thread-1-id
                         :created-at (java.util.Date.)
                         :content "Hello?"}
         message-1 (db/create-message! message-1-data)
         message-2-data {:id (db/uuid)
+                        :group-id (group :id)
                         :user-id (user-1 :id)
                         :thread-id (message-1 :thread-id)
                         :created-at (java.util.Date.)
@@ -230,11 +233,13 @@
     (testing "Can retrieve threads"
       (is (= (db/get-thread thread-1-id)
              {:id thread-1-id
-              :messages (map #(dissoc % :thread-id)
+              :group-id (group :id)
+              :messages (map #(dissoc % :thread-id :group-id)
                              [message-1-data message-2-data])
               :tag-ids #{} :mentioned-ids #{}}))
       (let [thread-2-id (db/uuid)
             message-3-data {:id (db/uuid)
+                            :group-id (group :id)
                             :user-id (user-1 :id)
                             :thread-id thread-2-id
                             :created-at (java.util.Date.)
@@ -242,30 +247,36 @@
             message-3 (db/create-message! message-3-data)]
         (is (= (db/get-threads [thread-1-id thread-2-id])
                [{:id thread-1-id
-                 :messages (map #(dissoc % :thread-id)
+                 :group-id (group :id)
+                 :messages (map #(dissoc % :thread-id :group-id)
                                 [message-1-data message-2-data])
                  :tag-ids #{} :mentioned-ids #{}}
                 {:id thread-2-id
-                 :messages (map #(dissoc % :thread-id)
+                 :group-id (group :id)
+                 :messages (map #(dissoc % :thread-id :group-id)
                                 [message-3-data])
                  :tag-ids #{} :mentioned-ids #{}}]))))))
 
 (deftest user-hide-thread
-  (let [user-1 (db/create-user! {:id (db/uuid)
+  (let [group (db/create-group! {:id (db/uuid) :name "group"})
+        user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
         message-1 (db/create-message! {:id (db/uuid)
+                                       :group-id (group :id)
                                        :user-id (user-1 :id)
                                        :thread-id (db/uuid)
                                        :created-at (java.util.Date.)
                                        :content "Hello?"})
         message-1-b (db/create-message! {:id (db/uuid)
+                                         :group-id (group :id)
                                          :user-id (user-1 :id)
                                          :thread-id (db/uuid)
                                          :created-at (java.util.Date.)
                                          :content "Hello?"})
         message-2 (db/create-message! {:id (db/uuid)
+                                       :group-id (group :id)
                                        :user-id (user-1 :id)
                                        :thread-id (db/uuid)
                                        :created-at (java.util.Date.)
@@ -316,10 +327,10 @@
     (db/user-subscribe-to-group-tags! (user-3 :id) (group-2 :id))
     (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
                          :user-id (user-1 :id) :created-at (java.util.Date.)
-                         :mentioned-tag-ids [(tag-1 :id)] })
+                         :mentioned-tag-ids [(tag-1 :id)] :group-id (group-1 :id)})
     (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
                          :user-id (user-2 :id) :created-at (java.util.Date.)
-                         :mentioned-tag-ids [(tag-2 :id)]})
+                         :mentioned-tag-ids [(tag-2 :id)] :group-id (group-2 :id)})
 
 
     (testing "user 1 can see thread 1 because they created it"
@@ -407,6 +418,7 @@
 
     (db/create-message! {:thread-id thread-id :id (db/uuid) :content "zzz"
                          :user-id (user-1 :id) :created-at (java.util.Date.)
+                         :group-id (group-1 :id)
                          :mentioned-tag-ids [(tag-1 :id) (tag-2 :id)]})
 
     (is (db/user-can-see-thread? (user-1 :id) thread-id))
@@ -446,9 +458,11 @@
       (is (not (db/thread-visible-to-extension? thread-1-id (ext-1 :id))))
 
       (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
+                           :group-id (group-1 :id)
                            :user-id (user-1 :id) :created-at (java.util.Date.)
                            :mentioned-tag-ids [(tag-1 :id)]})
       (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
+                           :group-id (group-1 :id)
                            :user-id (user-1 :id) :created-at (java.util.Date.)
                            :mentioned-tag-ids [(tag-2 :id)]})
 

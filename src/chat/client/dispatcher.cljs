@@ -58,6 +58,7 @@
                     {:user-id (get-in @store/app-state [:session :user-id])
                      :content (identify-mentions (data :content))
                      :thread-id (data :thread-id)
+                     :group-id (data :group-id)
 
                      :mentioned-tag-ids (concat (data :mentioned-tag-ids)
                                                 (extract-tag-ids (data :content)))
@@ -73,6 +74,7 @@
             (store/set-message-failed! message)))))))
 
 (defmethod dispatch! :resend-message [_ message]
+  (store/clear-error! (str :failed-to-send (message :id)))
   (store/clear-message-failed! message)
   (sync/chsk-send!
     [:chat/new-message message]

@@ -103,29 +103,44 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (broadcast-user-change user-id [:user/disconnected user-id])))
 
-(defn- user-can-message? [user-id ?data]
+(defn user-can-message? [user-id ?data]
   (db/with-conn
     (every?
       true?
       (concat
         [(or (boolean (db/user-can-see-thread? user-id (?data :thread-id)))
-             (do (timbre/warnf "User %s attempted to add message to disallowed thread %s"
-                               user-id (?data :thread-id))
-                 false))]
+             (do (timbre/warnf
+                   "User %s attempted to add message to disallowed thread %s"
+                   user-id (?data :thread-id))
+                 false))
+         (or (boolean (if-let [cur-group (db/thread-group-id (?data :thread-id))]
+                        (= (?data :group-id) cur-group)
+                        true)))]
         (map
           (fn [tag-id]
-            (or (boolean (db/user-in-tag-group? user-id tag-id))
-                (do
-                  (timbre/warnf "User %s attempted to add a disallowed tag %s" user-id
-                                tag-id)
-                  false)))
+            (and
+              (or (boolean (= (?data :group-id) (db/tag-group-id tag-id)))
+                  (do
+                    (timbre/warnf "User %s attempted to add a tag %s from a different group"
+                                  user-id tag-id)
+                    false))
+              (or (boolean (db/user-in-tag-group? user-id tag-id))
+                  (do
+                    (timbre/warnf "User %s attempted to add a disallowed tag %s"
+                                  user-id tag-id)
+                    false))))
           (?data :mentioned-tag-ids))
         (map
           (fn [mentioned-id]
-            (or (boolean (db/user-visible-to-user? user-id mentioned-id))
+            (and
+              (or (boolean (db/user-in-group? user-id (?data :group-id)))
+                  (do (timbre/warnf "User %s attempted to mention disallowed user %s"
+                                    user-id mentioned-id)
+                      false))
+              (or (boolean (db/user-visible-to-user? user-id mentioned-id))
                 (do (timbre/warnf "User %s attempted to mention disallowed user %s"
                                   user-id mentioned-id)
-                    false)))
+                    false))))
           (?data :mentioned-user-ids))))))
 
 (defn notify-extensions

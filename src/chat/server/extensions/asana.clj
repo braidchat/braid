@@ -182,6 +182,7 @@
           (do (timbre/debugf "adding thread for task %s" task-data)
               (db/with-conn
                 (db/create-message! {:thread-id thread-id
+                                     :group-id (extension :group-id)
                                      :id (db/uuid)
                                      :content (format new-issue-format
                                                       (get-in task-data ["followers" 0 "name"])
@@ -217,6 +218,7 @@
                                                 (get-in story-data ["created_by" "name"])
                                                 (story-data "text"))
                                      :user-id (extension :user-id)
+                                     :group-id (extension :group-id)
                                      :created-at (java.util.Date.)
                                      :mentioned-user-ids ()
                                      :mentioned-tag-ids ()}))

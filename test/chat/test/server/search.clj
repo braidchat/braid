@@ -58,27 +58,32 @@
 
     ; this thread should be visible to user 1
     (db/create-message! {:thread-id thread-1-id :id (db/uuid)
+                         :group-id group-1-id
                          :content "Hello world" :user-id (user-1 :id)
                          :created-at (java.util.Date.)})
     (db/create-message! {:thread-id thread-1-id :id (db/uuid)
+                         :group-id group-1-id
                          :content "Hey world" :user-id (user-2 :id)
                          :created-at (java.util.Date.)
                          :mentioned-tag-ids [(tag-1 :id)]})
 
     ; this thread should be visible to user 1
     (db/create-message! {:thread-id thread-2-id :id (db/uuid)
+                         :group-id group-1-id
                          :content "Goodbye World" :user-id (user-2 :id)
                          :created-at (java.util.Date.)
                          :mentioned-tag-ids [(tag-1 :id) (tag-3 :id)]})
 
     ; this thread should not be visible to user 1
     (db/create-message! {:thread-id thread-3-id :id (db/uuid)
+                         :group-id group-2-id
                          :content "Hello world" :user-id (user-2 :id)
                          :created-at (java.util.Date.)
                          :mentioned-tag-ids [(tag-2 :id)]})
 
     ; this thread should not be visible to user 1
     (db/create-message! {:thread-id thread-4-id :id (db/uuid)
+                         :group-id group-2-id
                          :content "Something else" :user-id (user-2 :id)
                          :created-at (java.util.Date.)
                          :mentioned-tag-ids [(tag-2 :id)]})

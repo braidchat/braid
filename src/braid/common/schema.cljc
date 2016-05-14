@@ -1,5 +1,7 @@
 (ns braid.common.schema
-  (:require [schema.core :as s :include-macros true])
+  (:require [schema.core :as s :include-macros true]
+            #?(:clj [taoensso.timbre :as timbre :refer [debugf]]
+               :cljs [taoensso.timbre :as timbre :refer-macros [debugf]]))
   (:import #?(:clj [clojure.lang ExceptionInfo])))
 
 
@@ -7,16 +9,22 @@
   "A new message, before saved into thread - what the client sends"
   {:id s/Uuid
    :thread-id s/Uuid
+   :group-id s/Uuid
    :user-id s/Uuid
    :content s/Str
    :created-at s/Inst
    :mentioned-user-ids [s/Uuid]
    :mentioned-tag-ids [s/Uuid]
-   (s/optional-key :failed?) s/Bool})
+   (s/optional-key :failed?) s/Bool
+   (s/optional-key :collapse?) s/Bool
+   (s/optional-key :unseen?) s/Bool
+   (s/optional-key :first-unseen?) s/Bool})
 (def check-new-message! (s/validator NewMessage))
 (defn new-message-valid? [msg]
   (try (check-new-message! msg) true
-    (catch ExceptionInfo _ false)))
+    (catch ExceptionInfo e
+      (debugf "Bad message format: %s" (:error (ex-data e)))
+      false)))
 
 (def ThreadMessage
   "A message saved into a thread"
@@ -28,6 +36,7 @@
 (def MsgThread
   "A thread (just calling it Thread apparently causes confusion (with java.lang.Thread)"
   {:id s/Uuid
+   :group-id s/Uuid
    :messages [(s/conditional
                 #(contains? % :thread-id) NewMessage
                 :else ThreadMessage)]

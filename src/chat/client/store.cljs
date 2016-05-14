@@ -12,6 +12,7 @@
     {:login-state :auth-check ; :ws-connect :login-form :app
      :open-group-id nil
      :threads {}
+     :group-threads {}
      :new-thread-msg {}
      :pagination-remaining 0
      :users {}
@@ -32,6 +33,7 @@
   {:login-state (s/enum :auth-check :login-form :ws-connect :app)
    :open-group-id (s/maybe s/Uuid)
    :threads {s/Uuid app-schema/MsgThread}
+   :group-threads {s/Uuid #{s/Uuid}}
    :new-thread-msg {s/Uuid s/Str}
    :pagination-remaining s/Int
    :users {s/Uuid app-schema/User}
@@ -68,7 +70,7 @@
         (reset! app-state old-state)
         ; Not just calling display-error! to avoid possibility of infinite loop
         (swap! app-state update-in [:errors] conj
-               [:internal-consistency "Something has gone wrong"])))))
+               [(str :internal-consistency (rand-int 100)) "Something has gone wrong"])))))
 
 ; login state
 
@@ -170,14 +172,21 @@
 
 (defn set-open-threads! [threads]
   (transact! [:threads] (constantly (key-by-id threads)))
+  (transact! [:group-threads] (constantly
+                                (into {}
+                                      (map (fn [[g t]]
+                                             [g (into #{} (map :id) t)]))
+                                      (group-by :group-id threads))))
   (transact! [:user :open-thread-ids] (constantly (set (map :id threads)))))
 
-(defn- maybe-create-thread! [thread-id]
+(defn- maybe-create-thread! [thread-id group-id]
   (when-not (get-in @app-state [:threads thread-id])
     (transact! [:threads thread-id] (constantly {:id thread-id
+                                                 :group-id group-id
                                                  :messages []
                                                  :tag-ids #{}
-                                                 :mentioned-ids #{}} )))
+                                                 :mentioned-ids #{}}))
+    (transact! [:group-threads group-id] #(conj (set %) thread-id)))
   (transact! [:user :open-thread-ids] #(conj % thread-id)))
 
 (defn set-new-message!
@@ -187,7 +196,7 @@
     (transact! [:new-thread-msg thread-id] (constantly content))))
 
 (defn add-message! [message]
-  (maybe-create-thread! (message :thread-id))
+  (maybe-create-thread! (message :thread-id) (message :group-id))
   (transact! [:threads (message :thread-id) :messages]
     #(conj % message))
   (update-thread-last-open-at (message :thread-id))
@@ -209,7 +218,14 @@
                              msg)))))
 
 (defn add-threads! [threads]
-  (transact! [:threads] #(merge-with merge % (key-by-id threads))))
+  (transact! [:threads] #(merge-with merge % (key-by-id threads)))
+  (transact! [:group-threads] #(merge-with
+                                 set/union
+                                 %
+                                 (into {}
+                                       (map (fn [[g t]]
+                                              [g (into #{} (map :id) t)]))
+                                       (group-by :group-id threads)))))
 
 (defn add-open-thread! [thread]
   ; TODO move notifications logic out of here
@@ -219,6 +235,7 @@
           (str "Chat (" (get-in @app-state [:notifications :unread-count]) ")")))
 
   (transact! [:threads (thread :id)] #(merge % thread))
+  (transact! [:group-threads (thread :group-id)] #(conj (set %) (thread :id)))
   (transact! [:user :open-thread-ids] #(conj % (thread :id))))
 
 (defn hide-thread! [thread-id]

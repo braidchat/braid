@@ -2,7 +2,69 @@
   (:require [chat.server.db :as db]
             [datomic.api :as d]
             [clojure.string :as string]
+            [clojure.set :as set]
             [clojure.edn :as edn]))
+
+(defn migrate-2016-05-13
+  "Threads have associated groups"
+  []
+  (db/with-conn
+    (d/transact db/*conn*
+      [{:db/ident :thread/group
+        :db/valueType :db.type/ref
+        :db/cardinality :db.cardinality/one
+        :db/id #db/id [:db.part/db]
+        :db.install/_attribute :db.part/db}])
+    (let [threads (->> (d/q '[:find [?t ...]
+                              :where
+                              [?t :thread/id]]
+                            (d/db db/*conn*))
+                       (d/pull-many
+                         (d/db db/*conn*)
+                         [:thread/id
+                          {:thread/mentioned [:user/id]}
+                          {:thread/tag [:tag/group]}
+                          {:message/_thread [:message/created-at
+                                             {:message/user [:user/id]}]}]))
+          tx
+          (vec
+            (for [th threads]
+              (let [author (->> (th :message/_thread)
+                                (sort-by :message/created-at)
+                                first
+                                :message/user)
+                    author-grp (some-> author :user/id
+                                       db/get-groups-for-user
+                                       first :id)
+                    fallback-group (:group/id (d/pull (d/db db/*conn*) [:group/id] [:group/name "Braid"]))]
+                (cond
+                  (seq (th :thread/tag))
+                  (let [grp (get-in th [:thread/tag 0 :tag/group :db/id])]
+                    (when (nil? grp)
+                      (println "Nil by tag " (th :thread/id)))
+                    [:db/add [:thread/id (th :thread/id)]
+                     :thread/group grp])
+
+                  (seq (th :thread/mentioned))
+                  (let [grps (apply
+                               set/intersection
+                               (map (comp :id
+                                          db/get-groups-for-user
+                                          :user/id)
+                                    (cons author (th :thread/mentioned))))
+                        grp (or (first grps) author-grp fallback-group)]
+                    (when (nil? grp)
+                      (println "Nil by mentions " (th :thread/id)))
+                    [:db/add [:thread/id (th :thread/id)]
+                     :thread/group [:group/id grp]])
+
+                  :else
+                  (let [grp (or author-grp fallback-group)]
+                    (when (nil? grp)
+                      (println "nil by author" (th :thread/id)))
+                    [:db/add [:thread/id (th :thread/id)]
+                     :thread/group [:group/id grp]])))))]
+      (d/transact db/*conn* tx))))
 
 (defn migrate-2016-05-07
   "Change how user preferences are stored"
@@ -10,7 +72,7 @@
   (db/with-conn
     ; rename old prefs
     (d/transact db/*conn* [{:db/id :user/preferences
-                                          :db/ident :user/preferences-old}])
+                            :db/ident :user/preferences-old}])
     ; create new entity type
     (d/transact db/*conn*
       [{:db/ident :user/preferences

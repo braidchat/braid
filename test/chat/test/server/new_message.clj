@@ -17,7 +17,9 @@
         thread-id (db/uuid)]
 
     (testing "new messages can create a thread"
-      (let [message-data {:id (db/uuid)
+      (let [group (db/create-group! {:id (db/uuid) :name "group"})
+            message-data {:id (db/uuid)
+                          :group-id (group :id)
                           :user-id (user-1 :id)
                           :thread-id thread-id
                           :created-at (java.util.Date.)
@@ -25,7 +27,7 @@
             message (db/create-message! message-data)]
 
         (testing "returns message"
-          (is (= message-data message)))
+          (is (= (dissoc message-data :group-id) message)))
 
         (testing "user has thread open"
           (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
@@ -34,7 +36,9 @@
           (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))
 
     (testing "new message can add to an existing thread"
-      (let [message-2-data {:id (db/uuid)
+      (let [group (db/create-group! {:id (db/uuid) :name "group2"})
+            message-2-data {:id (db/uuid)
+                            :group-id (group :id)
                             :user-id (user-1 :id)
                             :thread-id thread-id
                             :created-at (java.util.Date.)
@@ -42,7 +46,7 @@
             message-2 (db/create-message! message-2-data)]
 
         (testing "returns message"
-          (is (= message-2-data message-2)))
+          (is (= (dissoc message-2-data :group-id) message-2)))
 
         (testing "user has thread open"
           (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
@@ -56,11 +60,13 @@
     (let [user-1 (db/create-user! {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
-                                   :avatar ""})]
+                                   :avatar ""})
+          group (db/create-group! {:id (db/uuid) :name "group"})]
 
       (testing "when the user sends a new message"
         (let [thread-id (db/uuid)
               _ (db/create-message! {:id (db/uuid)
+                                     :group-id (group :id)
                                      :user-id (user-1 :id)
                                      :thread-id thread-id
                                      :created-at (java.util.Date.)
@@ -83,13 +89,16 @@
                                    :email "quux@bar.com"
                                    :password "foobar"
                                    :avatar ""})
+          group (db/create-group! {:id (db/uuid) :name "group"})
           thread-id (db/uuid)
           message-1 (db/create-message! {:id (db/uuid)
+                                         :group-id (group :id)
                                          :user-id (user-1 :id)
                                          :thread-id thread-id
                                          :created-at (java.util.Date.)
                                          :content "Hello?"})
           message-2 (db/create-message! {:id (db/uuid)
+                                         :group-id (group :id)
                                          :user-id (user-2 :id)
                                          :thread-id thread-id
                                          :created-at (java.util.Date.)
@@ -103,6 +112,7 @@
 
       (testing "when user-1 sends another message in the thread"
         (db/create-message! {:id (db/uuid)
+                             :group-id (group :id)
                              :user-id (user-1 :id)
                              :thread-id thread-id
                              :created-at (java.util.Date.)
@@ -133,6 +143,7 @@
 
         (testing "when a new message mentions the tag..."
           (let [msg (db/create-message! {:id (db/uuid)
+                                         :group-id (group :id)
                                          :user-id (user-2 :id)
                                          :thread-id (db/uuid)
                                          :created-at (java.util.Date.)
@@ -172,6 +183,7 @@
 
       (testing "when user-1 mentions user-2 in a message..."
         (let [msg (db/create-message! {:id (db/uuid)
+                                       :group-id (group :id)
                                        :user-id (user-1 :id)
                                        :thread-id thread-id
                                        :created-at (java.util.Date.)
