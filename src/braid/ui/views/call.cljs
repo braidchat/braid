@@ -5,7 +5,7 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]))
 
-(defn caller-tag-view
+(defn call-start-view
   [callee-id]
   (fn []
     [:div.call ;TODO: pass user to render pill
@@ -25,9 +25,9 @@
            (dispatch! :start-call (assoc {} :callee-id callee-id
                                             :call-type "video")))}
       "Video"]
-     [calling-panel-view]]))
+     [call-list-view]]))
 
-(defn calling-panel-view
+(defn call-list-view
   []
   (let [calls (subscribe [:calls])]
     (fn []
@@ -38,10 +38,20 @@
           (doall
             (for [call @calls]
               ^{:key (call :id)}
-              [:div
-               [:p (str (call :id))]
-               [:a.button "Accept"]
-               [:a.button "Decline"]]))]]))))
+              [new-call-view call]))]]))))
 
+(defn new-call-view
+  [call]
+  (fn []
+    [:div
+     [:p (str (call :id))]
+     [:a.button
+      {:on-click
+       (fn [_] (dispatch! :accept-call (call :id)))}
+      "Accept"]
+     [:a.button
+      {:on-click
+       (fn [_] (dispatch! :decline-call (call :id)))}
+      "Decline"]]))
 
 (defn call-interface-view [])

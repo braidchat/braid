@@ -1,6 +1,6 @@
 (ns braid.ui.views.pages.user
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [braid.ui.views.call :refer [caller-tag-view]]
+            [braid.ui.views.call :refer [call-start-view]]
             [braid.ui.views.pills :refer [user-pill-view]]
             [braid.ui.views.new-thread :refer [new-thread-view]]
             [braid.ui.views.threads :refer [threads-view]]
@@ -41,6 +41,6 @@
          [:p "Currently only showing your open threads that mention this user."]
          [:p "Soon, you will see all recent threads this user has participated in."]
          (when (not= @current-user-id (@user :id))
-           [caller-tag-view (@user :id)])]]
+           [call-start-view (@user :id)])]]
        [threads-view {:new-thread-args {:mentioned-ids [(@user :id)]}
                       :threads @sorted-threads}]])))
