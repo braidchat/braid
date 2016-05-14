@@ -70,25 +70,13 @@
         threads (reaction (@state :threads))
         tags (reaction (@state :tags))
         users (reaction (@state :users))
-        group-ids->user-ids (reaction (->> @users
-                                           vals
-                                           (mapcat (fn [u]
-                                                     (map
-                                                       (fn [gid]
-                                                         {:id (u :id) :group-id gid})
-                                                       (u :group-ids))))
-                                           (group-by :group-id)
-                                           (map (fn [[k vs]]
-                                                  [k (map (fn [v] (v :id)) vs)]))
-                                           (into {})))
-        group-user-ids (set (@group-ids->user-ids group-id))
         thread-in-group? (fn [thread] (= group-id (thread :group-id)))
         unseen-threads (reaction
                          (->>
                            (select-keys @threads @open-thread-ids)
                            vals
-                           (filter thread-unseen?)
-                           (filter thread-in-group?)))]
+                           (filter thread-in-group?)
+                           (filter thread-unseen?)))]
     (reaction (count @unseen-threads))))
 
 (defn get-page
@@ -216,29 +204,6 @@
 (defn get-group-for-tag
   [state [_ tag-id]]
   (reaction (get-in @state [:tags tag-id :group-id])))
-
-(defn get-threads-for-group
-  ([state [_ group-id]] (get-threads-for-group state nil [group-id]))
-  ([state _ [group-id]]
-   (let [group-for-tag (fn [tag-id]
-                         (get-in @state [:tags tag-id :group-id]))
-         group-users (reaction
-                       (into #{}
-                             (comp
-                               (filter (fn [u] (contains? (set (u :group-ids)) group-id)))
-                               (map :id))
-                             (vals (@state :users))))]
-     (reaction (->> (@state :threads)
-                    vals
-                    (filter (fn [thread]
-                              (and (or (empty? (thread :tag-ids))
-                                       (contains?
-                                         (into #{} (map group-for-tag) (thread :tag-ids))
-                                         group-id))
-                                (subset?
-                                  (set (thread :mentioned-ids))
-                                  @group-users))))
-                    doall)))))
 
 (defn get-nickname
   ([state [_ user-id]] (get-nickname state nil [user-id]))

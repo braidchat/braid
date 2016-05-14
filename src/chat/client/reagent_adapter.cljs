@@ -127,10 +127,6 @@
   state/get-open-thread-ids)
 
 (register-sub
-  :get-threads-for-group
-  state/get-threads-for-group)
-
-(register-sub
   :nickname
   state/get-nickname)
 
