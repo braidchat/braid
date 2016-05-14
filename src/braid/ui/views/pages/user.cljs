@@ -12,14 +12,17 @@
         user-avatar-url (subscribe [:user-avatar-url])
         threads (subscribe [:threads])
         open-threads-ids (subscribe [:open-thread-ids])
+        open-group (subscribe [:open-group-id])
         open-threads (reaction (select-keys @threads @open-threads-ids))
         sorted-threads (reaction (->> @open-threads
                                       ; sort by last message sent by logged-in user, most recent first
                                       vals
                                       (filter
                                         (fn [thread]
-                                          (contains?
-                                            (set (thread :mentioned-ids)) @user-id)))
+                                          (and
+                                            (= (thread :group-id) @open-group)
+                                            (contains?
+                                              (set (thread :mentioned-ids)) @user-id))))
                                       (sort-by
                                         (comp (partial apply max)
                                               (partial map :created-at)
@@ -36,7 +39,7 @@
         [:div.description
          [:img.avatar {:src @user-avatar-url}]
          [:p "One day, a profile will be here."]
-         [:p "Currently only showing your open threads that mention this user."]
+         [:p "Currently only showing your open threads that mention this user in this group."]
          [:p "Soon, you will see all recent threads this user has participated in."]]]
        [threads-view {:new-thread-args {:mentioned-ids [(@user :id)]}
                       :threads @sorted-threads}]])))
