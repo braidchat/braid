@@ -178,7 +178,6 @@
 
          [:div.card
           [:div.head
-           [:code (pr-str (thread :group-id))]
            (when (and (not new?) @open?)
              [:div.close
               {:on-click (fn [_]
