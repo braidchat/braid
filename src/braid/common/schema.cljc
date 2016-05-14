@@ -46,16 +46,15 @@
    (s/optional-key :new-message) (s/maybe s/Str)})
 
 ;; Notification rules schema
-(def NotifyRule
-  "One rule for user notification settings"
-  (s/conditional
-    #(or (= :any (first %)) (= :mention (first %)))
-    [(s/one (s/enum :any :mention) "rule")
-     (s/one (s/cond-pre (s/eq :any) s/Uuid) "id")]
+(def NotifyRules
+  "User notification rules"
+  [(s/conditional
+     #(or (= :any (first %)) (= :mention (first %)))
+     [(s/one (s/enum :any :mention) "rule")
+      (s/one (s/cond-pre (s/eq :any) s/Uuid) "id")]
 
-    #(= :tag (first %))
-    [(s/one (s/eq :tag) "rule") (s/one s/Uuid "id")]))
-(def NotifyRules "User notification rules" [NotifyRule])
+     #(= :tag (first %))
+     [(s/one (s/eq :tag) "rule") (s/one s/Uuid "id")])])
 (def check-rules! (s/validator NotifyRules))
 (defn rules-valid? [rs]
   (try (check-rules! rs) true
