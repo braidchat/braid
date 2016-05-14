@@ -186,7 +186,7 @@
                                                  :messages []
                                                  :tag-ids #{}
                                                  :mentioned-ids #{}}))
-    (transact! [:group-threads group-id] #(conj % thread-id)))
+    (transact! [:group-threads group-id] #(conj (set %) thread-id)))
   (transact! [:user :open-thread-ids] #(conj % thread-id)))
 
 (defn set-new-message!
@@ -235,7 +235,7 @@
           (str "Chat (" (get-in @app-state [:notifications :unread-count]) ")")))
 
   (transact! [:threads (thread :id)] #(merge % thread))
-  (transact! [:group-threads (thread :group-id)] #(conj % (thread :id)))
+  (transact! [:group-threads (thread :group-id)] #(conj (set %) (thread :id)))
   (transact! [:user :open-thread-ids] #(conj % (thread :id))))
 
 (defn hide-thread! [thread-id]
