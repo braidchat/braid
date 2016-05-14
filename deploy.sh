@@ -21,7 +21,7 @@ SERVER="chat"
 DATE=$(date +"%Y-%m-%d_%H%M%S")
 JAR_NAME=${PROJECT_NAME}-${DATE}.jar
 VERSION="0.0.1"
-git clean -fdx -e profiles.clj
+git clean -idx -e profiles.clj
 lein clean
 lein with-profile +lp uberjar
 scp "target/${PROJECT_NAME}-${VERSION}-standalone.jar" "$SERVER:/www/deploys/${PROJECT_NAME}/${JAR_NAME}"
