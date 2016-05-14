@@ -19,7 +19,8 @@
 ; finding data
 
 (defn thread-unseen?
-  "A thread is unseen if it's last-open-at is prior to any of the messages' created-at"
+  "A thread is unseen if it's last-open-at is prior to any of the messages'
+  created-at"
   [thread]
   (let [last-open (to-date-time (thread :last-open-at))]
     (some (fn [{:keys [created-at]}]
@@ -51,8 +52,9 @@
             (-> content
                 (string/replace tag-re
                                 (comp (partial str "#") id->tag str->uuid second))
-                (string/replace mention-re
-                                (comp (partial str "@") id->nick str->uuid second))))
+                (string/replace
+                  mention-re
+                  (comp (partial str "@") id->nick str->uuid second))))
           pretty-time (comp
                         (partial format/unparse (format/formatter "h:mm MMM d"))
                         to-date-time)]
@@ -62,18 +64,22 @@
               (filter (partial last-message-after? cutoff))
               (map
                 (fn [t]
-                  (let [thread-last-open (to-date-time (db/thread-last-open-at t user-id))]
+                  (let [thread-last-open (to-date-time
+                                           (db/thread-last-open-at t user-id))]
                     (update t :messages
                             (partial map
                                      (fn [{sender-id :user-id :as m}]
                                        (-> m
                                            (update :content parse-tags-and-metions)
                                            (assoc :unseen
-                                             (if (time/before? (to-date-time (m :created-at)) thread-last-open)
+                                             (if (time/before?
+                                                   (to-date-time (m :created-at))
+                                                   thread-last-open)
                                                "seen" "unseen"))
                                            (update :created-at pretty-time)
                                            (assoc :sender (id->nick sender-id))
-                                           (assoc :sender-avatar (id->avatar sender-id))))))))))
+                                           (assoc :sender-avatar
+                                                  (id->avatar sender-id))))))))))
             (db/get-open-threads-for-user user-id)))))
 
 (defn daily-update-users
@@ -93,7 +99,8 @@
   [threads]
   {:html  (inline-css (render-resource "templates/email_digest.html.mustache"
                                        {:threads threads}))
-   :text (render-resource "templates/email_digest.txt.mustache" {:threads threads})})
+   :text (render-resource "templates/email_digest.txt.mustache"
+                          {:threads threads})})
 
 ; sending
 
