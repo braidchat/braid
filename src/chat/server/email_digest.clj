@@ -171,5 +171,6 @@
 
 (defn add-jobs
   [scheduler]
+  (timbre/debugf "scheduling email digest jobs")
   (qs/schedule scheduler (daily-digest-job) (daily-digest-trigger))
   (qs/schedule scheduler (weekly-digest-job) (weekly-digest-trigger)))
