@@ -5,8 +5,6 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]))
 
-
-
 (defn call-interface-view
   [call]
   (let [call-time (r/atom 0)
@@ -28,45 +26,54 @@
          (fn [_]
            (dispatch! :end-call (call :id)))} "End Call"]])))
 
-
 (defn new-call-view
   [call]
-  [:div
-    (case (call :status)
-      "incoming"
-        [:div
-         [:p (str (call :id))]
-         [:a.button
-          {:on-click
-           (fn [_]
-             (dispatch! :accept-call (call :id)))}
-          "Accept"]
-         [:a.button
-          {:on-click
-           (fn [_]
-             (dispatch! :decline-call (call :id)))}
-          "Decline"]]
-      "accepted"
-        [call-interface-view call]
-      "declined"
-        [:p "declined"]
-      "ended"
-        [:p "ended"])])
+  (let [user-id (subscribe [:user-id])]
+    (fn [call]
+      [:div
+        (case (call :status)
+           "incoming"
+             (if (= @user-id (call :target-id))
+               [:div
+                  [:p (str "Call from" (call :source-id))]
+                  [:a.button
+                   {:on-click
+                    (fn [_]
+                      (dispatch! :accept-call (call :id)))}
+                   "Accept"]
+                  [:a.button
+                   {:on-click
+                    (fn [_]
+                      (dispatch! :decline-call (call :id)))}
+                   "Decline"]]
+               [:div
+                  [:p (str "Calling " (call :source-id) "...")]
+                  [:a.button
+                   {:on-click
+                    (fn [_]
+                      (dispatch! :end-call (call :id)))}
+                   "Drop"]])
+           "accepted"
+             [call-interface-view call]
+           "declined"
+             [:p "declined"]
+           "ended"
+             [:p "ended"])])))
 
 (defn call-list-view
   []
   (let [calls (subscribe [:calls])]
     (fn []
-      (when (seq @calls)
-        [:div
-         [:div.calls
-          (doall
-            (for [call @calls]
-              ^{:key (call :id)}
-              [new-call-view call]))]]))))
+      [:div
+        (when (seq @calls)
+          [:div.calls
+            (doall
+              (for [call @calls]
+                ^{:key (call :id)}
+                [new-call-view call]))])])))
 
 (defn call-start-view
-  [callee-id]
+  [caller-id callee-id]
   (fn []
     [:div.call ;TODO: pass user to render pill
      [:div
@@ -76,13 +83,15 @@
      [:a.button
        {:on-click
          (fn [_]
-           (dispatch! :start-call (assoc {} :callee-id callee-id
-                                            :call-type "audio")))}
+           (dispatch! :start-call (assoc {} :type "audio"
+                                            :source-id caller-id
+                                            :target-id callee-id)))}
       "Audio"]
      [:a.button
        {:on-click
          (fn [_]
-           (dispatch! :start-call (assoc {} :callee-id callee-id
-                                            :call-type "video")))}
+           (dispatch! :start-call (assoc {} :type "video"
+                                            :source-id caller-id
+                                            :target-id callee-id)))}
       "Video"]
      [call-list-view]]))

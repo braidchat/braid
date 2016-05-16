@@ -41,6 +41,6 @@
          [:p "Currently only showing your open threads that mention this user."]
          [:p "Soon, you will see all recent threads this user has participated in."]
          (when (not= @current-user-id (@user :id))
-           [call-start-view (@user :id)])]]
+           [call-start-view @current-user-id (@user :id)])]]
        [threads-view {:new-thread-args {:mentioned-ids [(@user :id)]}
                       :threads @sorted-threads}]])))

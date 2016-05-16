@@ -373,9 +373,9 @@
 
 (defmethod event-msg-handler :chat/make-call
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (let [{:keys [callee-id call-type]} ?data
-        caller-id (get-in ring-req [:session :user-id])]
-    (chsk-send! callee-id [:chat/receive-call [caller-id callee-id call-type]])))
+  (let [target-id (?data :target-id)
+        call ?data]
+    (chsk-send! target-id [:chat/receive-call call])))
 
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]

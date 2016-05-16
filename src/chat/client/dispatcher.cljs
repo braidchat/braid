@@ -270,7 +270,12 @@
       (dispatch! :hide-thread {:thread-id id}))))
 
 (defmethod dispatch! :start-call [_ call-data]
-  (sync/chsk-send! [:chat/make-call call-data]))
+  (let [call (schema/make-call {:type (call-data :type)
+                                :source-id (call-data :source-id)
+                                :target-id (call-data :target-id)
+                                :status "incoming"})]
+    (store/add-call! call)
+    (sync/chsk-send! [:chat/make-call call])))
 
 (defmethod dispatch! :accept-call [_ call-id]
   (store/update-call-status! call-id "accepted"))
@@ -367,9 +372,5 @@
   (notify/notify {:msg (:content message)}))
 
 (defmethod sync/event-handler :chat/receive-call
-  [[_ [caller-id callee-id call-type]]]
-  (let [call (schema/make-call {:type call-type
-                                :source-id caller-id
-                                :target-id callee-id
-                                :status "incoming"})]
-    (store/add-call! call)))
+  [[_ call]]
+  (store/add-call! call))
