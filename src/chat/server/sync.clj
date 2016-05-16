@@ -20,8 +20,8 @@
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
       (sente/make-channel-socket! sente-web-server-adapter
-                                  {:user-id-fn (fn [ob]
-                                                 (get-in ob [:session :user-id]))})]
+                                  {:user-id-fn
+                                   (fn [ob] (get-in ob [:session :user-id]))})]
   (def ring-ajax-post                ajax-post-fn)
   (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
   (def ch-chsk                       ch-recv)
@@ -54,27 +54,26 @@
     (when ?reply-fn
       (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
 
-(defmethod event-msg-handler :chsk/ws-ping
-  [ev-msg]
-  ; Do nothing, just avoid unhandled event message
-  )
+;; Handler helpers
 
 (defn broadcast-thread
   "broadcasts thread to all subscribed users, except those in ids-to-skip"
   [thread-id ids-to-skip]
-  (let [subscribed-user-ids (db/with-conn
-                              (db/get-users-subscribed-to-thread thread-id))
-        user-ids-to-send-to (-> (difference
-                                  (intersection
-                                    (set subscribed-user-ids)
-                                    (set (:any @connected-uids)))
-                                  (set ids-to-skip)))
-        thread (db/with-conn (db/get-thread thread-id))]
-    (doseq [uid user-ids-to-send-to]
-      (let [user-tags (db/with-conn (db/get-user-visible-tag-ids uid))
-            filtered-thread (update-in thread [:tag-ids] (partial into #{} (filter user-tags)))
-            thread-with-last-opens (db/with-conn (db/thread-add-last-open-at filtered-thread uid))]
-        (chsk-send! uid [:chat/thread thread-with-last-opens])))))
+  (db/with-conn
+    (let [subscribed-user-ids (db/get-users-subscribed-to-thread thread-id)
+          user-ids-to-send-to (-> (difference
+                                    (intersection
+                                      (set subscribed-user-ids)
+                                      (set (:any @connected-uids)))
+                                    (set ids-to-skip)))
+          thread (db/get-thread thread-id)]
+      (doseq [uid user-ids-to-send-to]
+        (let [user-tags (db/get-user-visible-tag-ids uid)
+              filtered-thread (update-in thread [:tag-ids]
+                                         (partial into #{} (filter user-tags)))
+              thread-with-last-opens (db/thread-add-last-open-at
+                                       filtered-thread uid)]
+          (chsk-send! uid [:chat/thread thread-with-last-opens]))))))
 
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
@@ -82,8 +81,9 @@
   (let [ids-to-send-to (disj
                          (intersection
                            (set (:any @connected-uids))
-                           (into #{} (map :id)
-                                 (db/with-conn (db/fetch-users-for-user user-id))))
+                           (into
+                             #{} (map :id)
+                             (db/with-conn (db/fetch-users-for-user user-id))))
                          user-id)]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
@@ -97,16 +97,6 @@
                                (db/with-conn (db/get-users-in-group group-id))))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
-
-(defmethod event-msg-handler :chsk/uidport-open
-  [{:as ev-msg :keys [event id ring-req]}]
-  (when-let [user-id (get-in ring-req [:session :user-id])]
-    (broadcast-user-change user-id [:user/connected user-id])))
-
-(defmethod event-msg-handler :chsk/uidport-close
-  [{:as ev-msg :keys [event id ring-req]}]
-  (when-let [user-id (get-in ring-req [:session :user-id])]
-    (broadcast-user-change user-id [:user/disconnected user-id])))
 
 (defn user-can-message? [user-id ?data]
   (db/with-conn
@@ -126,8 +116,9 @@
             (and
               (or (boolean (= (?data :group-id) (db/tag-group-id tag-id)))
                   (do
-                    (timbre/warnf "User %s attempted to add a tag %s from a different group"
-                                  user-id tag-id)
+                    (timbre/warnf
+                      "User %s attempted to add a tag %s from a different group"
+                      user-id tag-id)
                     false))
               (or (boolean (db/user-in-tag-group? user-id tag-id))
                   (do
@@ -139,12 +130,14 @@
           (fn [mentioned-id]
             (and
               (or (boolean (db/user-in-group? user-id (?data :group-id)))
-                  (do (timbre/warnf "User %s attempted to mention disallowed user %s"
-                                    user-id mentioned-id)
+                  (do (timbre/warnf
+                        "User %s attempted to mention disallowed user %s"
+                        user-id mentioned-id)
                       false))
               (or (boolean (db/user-visible-to-user? user-id mentioned-id))
-                (do (timbre/warnf "User %s attempted to mention disallowed user %s"
-                                  user-id mentioned-id)
+                  (do (timbre/warnf
+                        "User %s attempted to mention disallowed user %s"
+                        user-id mentioned-id)
                     false))))
           (?data :mentioned-user-ids))))))
 
@@ -170,10 +163,27 @@
           (when (notify-rules/notify? uid rules new-message)
             (if (online? uid)
               (chsk-send! uid [:chat/notify-message new-message])
-              (-> (email/create-message [(db/get-thread (new-message :thread-id))])
+              (-> (email/create-message
+                    [(db/get-thread (new-message :thread-id))])
                   (assoc :subject "Notification from Braid")
                   (->> (email/send-message (db/user-email uid)))))))))))
 
+;; Handlers
+
+(defmethod event-msg-handler :chsk/ws-ping
+  [ev-msg]
+  ; Do nothing, just avoid unhandled event message
+  )
+
+(defmethod event-msg-handler :chsk/uidport-open
+  [{:as ev-msg :keys [event id ring-req]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (broadcast-user-change user-id [:user/connected user-id])))
+
+(defmethod event-msg-handler :chsk/uidport-close
+  [{:as ev-msg :keys [event id ring-req]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (broadcast-user-change user-id [:user/disconnected user-id])))
 
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -334,12 +344,14 @@
     (if (db/with-conn (db/user-in-group? user-id (?data :group-id)))
       (let [data (assoc ?data :inviter-id user-id)
             invitation (db/with-conn (db/create-invitation! data))]
-        (if-let [invited-user (db/with-conn (db/user-with-email (invitation :invitee-email)))]
+        (if-let [invited-user (db/with-conn
+                                (db/user-with-email (invitation :invitee-email)))]
           (chsk-send! (invited-user :id) [:chat/invitation-received invitation])
           (invites/send-invite invitation)))
       ; TODO: indicate permissions error to user?
-      (timbre/warnf "User %s attempted to invite %s to a group %s they don't have access to"
-                    user-id (?data :invitee-email) (?data :group-id)))))
+      (timbre/warnf
+        "User %s attempted to invite %s to a group %s they don't have access to"
+        user-id (?data :invitee-email) (?data :group-id)))))
 
 (defmethod event-msg-handler :chat/invitation-accept
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -373,7 +385,8 @@
         (when (and new-admin-id group-id
                 (db/user-is-group-admin? user-id group-id))
           (db/user-make-group-admin! new-admin-id group-id)
-          (broadcast-group-change group-id [:group/new-admin [group-id new-admin-id]]))))))
+          (broadcast-group-change group-id
+                                  [:group/new-admin [group-id new-admin-id]]))))))
 
 (defmethod event-msg-handler :chat/set-group-intro
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
