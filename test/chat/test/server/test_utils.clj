@@ -12,12 +12,12 @@
 
 (defn fetch-messages
   "Helper function to fetch all messages"
-  [conn]
+  []
   (->> (d/q '[:find (pull ?e [:message/id
                               :message/content
                               :message/created-at
                               {:message/user [:user/id]}
                               {:message/thread [:thread/id]}])
               :where [?e :message/id]]
-            (d/db conn))
+            (d/db db/conn))
        (map (comp db->message first))))

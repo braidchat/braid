@@ -137,7 +137,7 @@
 
 (defn- create-entity!
   "create entity with attrs, return entity"
-  [conn attrs]
+  [attrs]
   (let [new-id (d/tempid :entities)
         {:keys [db-after tempids]} @(d/transact conn
                                                 [(assoc attrs :db/id new-id)])]
@@ -145,7 +145,7 @@
          (d/entity db-after))))
 
 (defn user-get-preferences
-  [conn user-id]
+  [user-id]
   (->> (d/pull (d/db conn)
                [{:user/preferences [:user.preference/key :user.preference/value]}]
                [:user/id user-id])
@@ -155,7 +155,7 @@
                    (map (fn [[k v]] [k (edn/read-string v)]))))))
 
 (defn user-get-preference
-  [conn user-id pref]
+  [user-id pref]
   (some-> (d/q '[:find ?val .
                  :in $ ?user-id ?key
                  :where
@@ -169,7 +169,7 @@
 (defn user-preference-is-set?
   "If the preference with the given key has been set for the user, return the
   entity id, else nil"
-  [conn user-id pref]
+  [user-id pref]
   (d/q '[:find ?p .
          :in $ ?user-id ?key
          :where
@@ -181,7 +181,7 @@
 (defn user-set-preference!
   "Set a key to a value for the user's preferences.  This will throw if
   permissions are changed in between reading & setting"
-  [conn user-id k v]
+  [user-id k v]
   (if-let [e (user-preference-is-set? user-id k)]
     @(d/transact conn [[:db/add e :user.preference/value (pr-str v)]])
     @(d/transact conn [{:user.preference/key k
@@ -192,7 +192,7 @@
 (defn user-search-preferences
   "Find the ids of users that have the a given value for a given key set in
   their preferences"
-  [conn k v]
+  [k v]
   (d/q '[:find [?user-id ...]
          :in $ ?k ?v
          :where
@@ -204,7 +204,7 @@
        k (pr-str v)))
 
 (defn get-users-subscribed-to-thread
-  [conn thread-id]
+  [thread-id]
   (d/q '[:find [?user-id ...]
          :in $ ?thread-id
          :where
@@ -215,7 +215,7 @@
        thread-id))
 
 (defn- get-users-subscribed-to-tag
-  [conn tag-id]
+  [tag-id]
   (d/q '[:find [?user-id ...]
          :in $ ?tag-id
          :where
@@ -226,7 +226,7 @@
        tag-id))
 
 (defn create-message!
-  [conn {:keys [thread-id group-id id content user-id created-at
+  [{:keys [thread-id group-id id content user-id created-at
            mentioned-user-ids mentioned-tag-ids]}]
 
   ; upsert-thread
@@ -294,47 +294,47 @@
          db->message)))
 
 (defn group-exists?
-  [conn group-name]
+  [group-name]
   (some? (d/pull (d/db conn) '[:group/id] [:group/name group-name])))
 
 (defn create-group!
-  [conn {:keys [name id]}]
-  (->> {:group/id id
+  [{:keys [name id]}]
+  (-> {:group/id id
        :group/name name}
-      (create-entity! conn)
+      create-entity!
       db->group))
 
 (defn email-taken?
-  [conn email]
+  [email]
   (some? (d/entity (d/db conn) [:user/email email])))
 
 (defn create-user!
   "creates a user, returns id"
-  [conn {:keys [id email avatar nickname password]}]
-  (->> {:user/id id
+  [{:keys [id email avatar nickname password]}]
+  (-> {:user/id id
        :user/email email
        :user/avatar avatar
        :user/nickname (or nickname (-> email (string/split #"@") first))
        :user/password-token (password/encrypt password)}
-      (create-entity! conn)
+      create-entity!
       db->user))
 
 (defn nickname-taken?
-  [conn nickname]
+  [nickname]
   (some? (d/entity (d/db conn) [:user/nickname nickname])))
 
 (defn set-nickname!
   "Set the user's nickname"
-  [conn user-id nickname]
+  [user-id nickname]
   (d/transact conn [[:db/add [:user/id user-id] :user/nickname nickname]]))
 
 (defn get-nickname
-  [conn user-id]
+  [user-id]
   (:user/nickname (d/pull (d/db conn) '[:user/nickname] [:user/id user-id])))
 
 (defn authenticate-user
   "returns user-id if email and password are correct"
-  [conn email password]
+  [email password]
   (->> (let [[user-id password-token]
              (d/q '[:find [?id ?password-token]
                     :in $ ?email
@@ -349,41 +349,41 @@
            user-id))))
 
 (defn set-user-password!
-  [conn user-id password]
+  [user-id password]
   @(d/transact conn [[:db/add [:user/id user-id]
                         :user/password-token (password/encrypt password)]]))
 
 (defn user-by-id
-  [conn id]
+  [id]
   (some-> (d/pull (d/db conn) user-pull-pattern [:user/id id])
           db->user))
 
 (defn user-id-exists?
-  [conn id]
+  [id]
   (some? (d/entity (d/db conn) [:user/id id])))
 
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
-  [conn email]
+  [email]
   (some-> (d/pull (d/db conn) user-pull-pattern [:user/email email])
           db->user))
 
 (defn user-email
-  [conn user-id]
+  [user-id]
   (:user/email (d/pull (d/db conn) [:user/email] [:user/id user-id])))
 
 (defn create-invitation!
-  [conn {:keys [id inviter-id invitee-email group-id]}]
-  (->> {:invite/id id
+  [{:keys [id inviter-id invitee-email group-id]}]
+  (-> {:invite/id id
        :invite/group [:group/id group-id]
        :invite/from [:user/id inviter-id]
        :invite/to invitee-email
        :invite/created-at (java.util.Date.)}
-      (create-entity! conn)
+      create-entity!
       db->invitation))
 
 (defn get-invite
-  [conn invite-id]
+  [invite-id]
   (some-> (d/pull (d/db conn)
               [:invite/id
                {:invite/from [:user/id :user/email :user/nickname]}
@@ -393,12 +393,12 @@
       db->invitation))
 
 (defn retract-invitation!
-  [conn invite-id]
+  [invite-id]
   (d/transact conn [[:db.fn/retractEntity [:invite/id invite-id]]]))
 
 (defn fetch-users-for-user
   "Get all users visible to given user"
-  [conn user-id]
+  [user-id]
   (->> (d/q '[:find (pull ?e pull-pattern)
               :in $ ?user-id pull-pattern
               :where
@@ -413,7 +413,7 @@
 
 (defn user-visible-to-user?
   "Are the two user ids users that can see each other? i.e. do they have at least one group in common"
-  [conn user1-id user2-id]
+  [user1-id user2-id]
   (-> (d/q '[:find ?g
              :in $ ?u1-id ?u2-id
              :where
@@ -425,7 +425,7 @@
       seq boolean))
 
 (defn fetch-invitations-for-user
-  [conn user-id]
+  [user-id]
   (->> (d/q '[:find (pull ?i [{:invite/group [:group/id :group/name]}
                               {:invite/from [:user/id :user/email :user/nickname]}
                               :invite/id])
@@ -438,7 +438,7 @@
        (map (comp db->invitation first))))
 
 (defn get-open-thread-ids-for-user
-  [conn user-id]
+  [user-id]
   (d/q '[:find [?thread-id ...]
                 :in $ ?user-id
                 :where
@@ -449,11 +449,11 @@
        user-id))
 
 (defn get-group
-  [conn group-id]
+  [group-id]
   (-> (d/pull (d/db conn) group-pull-pattern [:group/id group-id])
       db->group))
 
-(defn get-groups-for-user [conn user-id]
+(defn get-groups-for-user [user-id]
   (->> (d/q '[:find [?g ...]
               :in $ ?user-id
               :where
@@ -465,7 +465,7 @@
        (map (comp #(dissoc % :users) db->group))
        set))
 
-(defn get-users-in-group [conn group-id]
+(defn get-users-in-group [group-id]
   (->> (d/q '[:find (pull ?u pull-pattern)
               :in $ ?group-id pull-pattern
               :where
@@ -478,7 +478,7 @@
        set))
 
 (defn get-user-visible-tag-ids
-  [conn user-id]
+  [user-id]
   (->> (d/q '[:find ?tag-id
               :in $ ?user-id
               :where
@@ -490,7 +490,7 @@
        (map first)
        set))
 
-(defn thread-last-open-at [conn thread user-id]
+(defn thread-last-open-at [thread user-id]
   (let [user-hides-at (->> (d/q
                              '[:find [?inst ...]
                                :in $ ?thread-id ?user-id
@@ -510,7 +510,7 @@
     (apply max (concat [0] user-hides-at user-messages-at))))
 
 (defn thread-group-id
-  [conn thread-id]
+  [thread-id]
   (some-> (d/pull (d/db conn) [{:thread/group [:group/id]}]
                   [:thread/id thread-id])
           :thread/group :group/id))
@@ -518,7 +518,7 @@
 (defn thread-add-last-open-at [thread user-id]
   (assoc thread :last-open-at (thread-last-open-at thread user-id)))
 
-(defn update-thread-last-open [conn thread-id user-id]
+(defn update-thread-last-open [thread-id user-id]
   (when (seq (d/q '[:find ?t
                     :in $ ?user-id ?thread-id
                     :where
@@ -533,7 +533,7 @@
       [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
 
 (defn get-open-threads-for-user
-  [conn user-id]
+  [user-id]
   (let [visible-tags (get-user-visible-tag-ids user-id)]
     (->> (d/q '[:find (pull ?thread pull-pattern)
                 :in $ ?user-id pull-pattern
@@ -552,19 +552,19 @@
                       first))))))
 
 (defn get-thread
-  [conn thread-id]
+  [thread-id]
   (some-> (d/pull (d/db conn) thread-pull-pattern [:thread/id thread-id])
           db->thread))
 
 (defn get-threads
-  [conn thread-ids]
+  [thread-ids]
   (->> thread-ids
        (map (fn [id] [:thread/id id]))
        (d/pull-many (d/db conn) thread-pull-pattern)
        (map db->thread)))
 
 (defn get-subscribed-thread-ids-for-user
-  [conn user-id]
+  [user-id]
   (d/q '[:find [?thread-id ...]
          :in $ ?user-id
          :where
@@ -575,25 +575,25 @@
        user-id))
 
 (defn user-hide-thread!
-  [conn user-id thread-id]
+  [user-id thread-id]
   (d/transact
     conn
     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
 (defn create-tag!
-  [conn attrs]
-  (->> {:tag/id (attrs :id)
+  [attrs]
+  (-> {:tag/id (attrs :id)
        :tag/name (attrs :name)
        :tag/group [:group/id (attrs :group-id)]}
-      (create-entity! conn)
+      create-entity!
       db->tag))
 
-(defn tag-group-id [conn tag-id]
+(defn tag-group-id [tag-id]
   (-> (d/pull (d/db conn) [{:tag/group [:group/id]}] [:tag/id tag-id])
       (get-in [:tag/group :group/id])))
 
 (defn user-in-group?
-  [conn user-id group-id]
+  [user-id group-id]
   (seq (d/q '[:find ?g
               :in $ ?user-id ?group-id
               :where
@@ -603,7 +603,7 @@
             (d/db conn)
             user-id group-id)))
 
-(defn user-in-tag-group? [conn user-id tag-id]
+(defn user-in-tag-group? [user-id tag-id]
   (seq (d/q '[:find ?g
               :in $ ?user-id ?tag-id
               :where
@@ -615,7 +615,7 @@
             user-id tag-id)))
 
 (defn user-can-see-thread?
-  [conn user-id thread-id]
+  [user-id thread-id]
   (or
     ;user can see the thread if it's a new (i.e. not yet in the database) thread...
     (nil? (d/entity (d/db conn) [:thread/id thread-id]))
@@ -637,7 +637,7 @@
                 [?user :user/id ?user-id]]
               (d/db conn) thread-id user-id))))
 
-(defn user-subscribe-to-tag! [conn user-id tag-id]
+(defn user-subscribe-to-tag! [user-id tag-id]
   ; TODO: throw an exception/some sort of error condition if user tried to
   ; subscribe to a tag they can't?
   (when (user-in-tag-group? user-id tag-id)
@@ -645,22 +645,22 @@
                          :user/subscribed-tag [:tag/id tag-id]]])))
 
 (defn user-unsubscribe-from-tag!
-  [conn user-id tag-id]
+  [user-id tag-id]
   (d/transact conn [[:db/retract [:user/id user-id]
                        :user/subscribed-tag [:tag/id tag-id]]]))
 
-(defn user-add-to-group! [conn user-id group-id]
+(defn user-add-to-group! [user-id group-id]
   (d/transact conn [[:db/add [:group/id group-id]
                        :group/user [:user/id user-id]]]))
 
-(defn user-make-group-admin! [conn user-id group-id]
+(defn user-make-group-admin! [user-id group-id]
   (d/transact conn [[:db/add [:group/id group-id]
                        :group/user [:user/id user-id]]
                       [:db/add [:group/id group-id]
                        :group/admins [:user/id user-id]]]))
 
 (defn user-is-group-admin?
-  [conn user-id group-id]
+  [user-id group-id]
   (some?
     (d/q '[:find ?u .
            :in $ ?user-id ?group-id
@@ -672,7 +672,7 @@
 
 (defn user-subscribe-to-group-tags!
   "Subscribe the user to all current tags in the group"
-  [conn user-id group-id]
+  [user-id group-id]
   (->> (d/q '[:find ?tag
               :in $ ?group-id
               :where
@@ -685,7 +685,7 @@
        (d/transact conn)))
 
 (defn get-user-subscribed-tag-ids
-  [conn user-id]
+  [user-id]
   (d/q '[:find [?tag-id ...]
          :in $ ?user-id
          :where
@@ -696,7 +696,7 @@
        user-id))
 
 (defn get-group-tags
-  [conn group-id]
+  [group-id]
   (->> (d/q '[:find (pull ?t [:tag/id
                               :tag/name
                               :tag/description
@@ -709,7 +709,7 @@
        (map (comp db->tag first))))
 
 (defn fetch-tag-statistics-for-user
-  [conn user-id]
+  [user-id]
   (->> (d/q '[:find
               ?tag-id
               (count-distinct ?th)
@@ -730,7 +730,7 @@
 
 (defn fetch-tags-for-user
   "Get all tags visible to the given user"
-  [conn user-id]
+  [user-id]
   (let [tag-stats (fetch-tag-statistics-for-user user-id)]
     (->> (d/q '[:find
                 (pull ?t [:tag/id
@@ -752,7 +752,7 @@
   most recent message.
   Paginates results, dropping `skip` threads and returning `limit`.
   Returns the threads and a count of how many threads remain."
-  [conn user-id tag-id skip limit]
+  [user-id tag-id skip limit]
   (let [all-thread-eids (d/q '[:find ?thread (max ?time)
                                :in $ ?tag-id
                                :where
@@ -773,38 +773,38 @@
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
 (defn tag-set-description!
-  [conn tag-id description]
+  [tag-id description]
   (d/transact conn [[:db/add [:tag/id tag-id]
                      :tag/description description]]))
 
 (defn create-extension!
-  [conn {:keys [id type group-id user-id config]}]
-  (->> {:extension/group [:group/id group-id]
+  [{:keys [id type group-id user-id config]}]
+  (-> {:extension/group [:group/id group-id]
        :extension/user [:user/id user-id]
        :extension/type type
        :extension/id id
        :extension/config (pr-str config)}
-      (create-entity! conn)
+      create-entity!
       db->extension))
 
 (defn retract-extension!
-  [conn extension-id]
+  [extension-id]
   @(d/transact conn [[:db.fn/retractEntity [:extension/id extension-id]]]))
 
 (defn extension-by-id
-  [conn extension-id]
+  [extension-id]
   (-> (d/pull (d/db conn) extension-pull-pattern [:extension/id extension-id])
       db->extension))
 
 (defn save-extension-token!
-  [conn extension-id {:keys [access-token refresh-token]}]
+  [extension-id {:keys [access-token refresh-token]}]
   @(d/transact conn [[:db/add [:extension/id extension-id]
                         :extension/token access-token]
                        [:db/add [:extension/id extension-id]
                         :extension/refresh-token refresh-token]]))
 
 (defn update-extension-config!
-  [conn extension-id config]
+  [extension-id config]
   @(d/transact conn [[:db/add [:extension/id extension-id]
                        :extension/config (pr-str config)]]))
 
@@ -814,7 +814,7 @@
     (update-extension-config! extension-id (assoc (:config ext) k v))))
 
 (defn thread-visible-to-extension?
-  [conn thread-id ext-id]
+  [thread-id ext-id]
   (seq (d/q '[:find ?group
               :in $ ?thread-id ?ext-id
               :where
@@ -826,28 +826,28 @@
             (d/db conn) thread-id ext-id)))
 
 (defn extension-subscribe
-  [conn extension-id thread-id]
+  [extension-id thread-id]
   (assert (thread-visible-to-extension? thread-id extension-id))
   @(d/transact conn [[:db/add [:extension/id extension-id]
                         :extension/watched-threads [:thread/id thread-id]]]))
 
 (defn extensions-watching
   "Get the extensions that are watching the given thread"
-  [conn thread-id]
+  [thread-id]
   (->> (d/pull (d/db conn) [{:extension/_watched-threads extension-pull-pattern}]
                [:thread/id thread-id])
        :extension/_watched-threads
        (map db->extension)))
 
 (defn group-extensions
-  [conn group-id]
+  [group-id]
   (->> (d/pull (d/db conn) [{:extension/_group extension-pull-pattern}]
                [:group/id group-id])
        :extension/_group
        (map db->extension)))
 
 (defn group-settings
-  [conn group-id]
+  [group-id]
   (->> (d/pull (d/db conn) [:group/settings] [:group/id group-id])
        :group/settings
        ((fnil edn/read-string "{}"))))
@@ -855,7 +855,7 @@
 (defn group-set!
   "Set a key to a value for the group's settings  This will throw if
   settings are changed in between reading & setting"
-  [conn group-id k v]
+  [group-id k v]
   (let [old-prefs (-> (d/pull (d/db conn) [:group/settings] [:group/id group-id])
                       :group/settings)
         new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
@@ -865,7 +865,7 @@
                          :group/settings old-prefs new-prefs]])))
 
 (defn public-group-with-name
-  [conn group-name]
+  [group-name]
   (when-let [group (-> (d/pull (d/db conn) group-pull-pattern
                                [:group/name group-name])
                        db->group)]

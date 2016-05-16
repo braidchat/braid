@@ -47,10 +47,10 @@
   The query can speficy tags by prefixing them with an octothope; for example,
   the query 'foo #bar' will find any threads tagged with 'bar' containing the
   text 'foo'"
-  [conn user-id [query group-id]]
+  [user-id [query group-id]]
   ; TODO: pagination?
   (let [{:keys [text tags]} (parse-query query)
-        search-db (d/db conn)
+        search-db (d/db db/conn)
         tag-search (when (seq tags)
                      (set (d/q '[:find ?t-id (max ?time)
                                  :in $ [?tag-name ...] ?g-id
@@ -83,7 +83,7 @@
     (->> (if (every? some? [text-search tag-search])
            (intersection text-search tag-search)
            (first (remove nil? [text-search tag-search])))
-         (filter (partial db/user-can-see-thread? conn user-id))
+         (filter (partial db/user-can-see-thread? db/conn user-id))
          ; sorting the ids so we can have a consistent order of results
          (sort-by second)
          (map first))))
