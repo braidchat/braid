@@ -136,15 +136,9 @@
                                :type (:extension/type x)})
                       (:extension/_group e))}))
 
-(defmacro with-conn
-  "Execute the body with *conn* dynamically bound to a new connection."
-  [& body]
-  `(binding [*conn* (d/connect *uri*)]
-     ~@body))
-
 (defn- create-entity!
   "create entity with attrs, return entity"
-  [attrs]
+  [conn attrs]
   (let [new-id (d/tempid :entities)
         {:keys [db-after tempids]} @(d/transact conn
                                                 [(assoc attrs :db/id new-id)])]
@@ -298,10 +292,10 @@
   (some? (d/pull (d/db conn) '[:group/id] [:group/name group-name])))
 
 (defn create-group!
-  [{:keys [name id]}]
-  (-> {:group/id id
+  [conn {:keys [name id]}]
+  (->> {:group/id id
        :group/name name}
-      create-entity!
+      (create-entity! conn)
       db->group))
 
 (defn email-taken?
@@ -310,13 +304,13 @@
 
 (defn create-user!
   "creates a user, returns id"
-  [{:keys [id email avatar nickname password]}]
-  (-> {:user/id id
+  [conn {:keys [id email avatar nickname password]}]
+  (->> {:user/id id
        :user/email email
        :user/avatar avatar
        :user/nickname (or nickname (-> email (string/split #"@") first))
        :user/password-token (password/encrypt password)}
-      create-entity!
+      (create-entity! conn)
       db->user))
 
 (defn nickname-taken?
@@ -373,13 +367,13 @@
   (:user/email (d/pull (d/db conn) [:user/email] [:user/id user-id])))
 
 (defn create-invitation!
-  [{:keys [id inviter-id invitee-email group-id]}]
-  (-> {:invite/id id
+  [conn {:keys [id inviter-id invitee-email group-id]}]
+  (->> {:invite/id id
        :invite/group [:group/id group-id]
        :invite/from [:user/id inviter-id]
        :invite/to invitee-email
        :invite/created-at (java.util.Date.)}
-      create-entity!
+      (create-entity! conn)
       db->invitation))
 
 (defn get-invite
@@ -579,11 +573,12 @@
     conn
     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
-(defn create-tag! [attrs]
-  (-> {:tag/id (attrs :id)
+(defn create-tag!
+  [conn attrs]
+  (->> {:tag/id (attrs :id)
        :tag/name (attrs :name)
        :tag/group [:group/id (attrs :group-id)]}
-      create-entity!
+      (create-entity! conn)
       db->tag))
 
 (defn tag-group-id [conn tag-id]
@@ -774,13 +769,13 @@
                        :tag/description description]]))
 
 (defn create-extension!
-  [{:keys [id type group-id user-id config]}]
-  (-> {:extension/group [:group/id group-id]
+  [conn {:keys [id type group-id user-id config]}]
+  (->> {:extension/group [:group/id group-id]
        :extension/user [:user/id user-id]
        :extension/type type
        :extension/id id
        :extension/config (pr-str config)}
-      create-entity!
+      (create-entity! conn)
       db->extension))
 
 (defn retract-extension!
