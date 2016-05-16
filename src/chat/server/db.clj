@@ -1,5 +1,7 @@
 (ns chat.server.db
   (:require [datomic.api :as d]
+            [mount.core :refer [defstate]]
+            [braid.server.conf :refer [config]]
             [environ.core :refer [env]]
             [clojure.edn :as edn]
             [clojure.string :as string]
@@ -9,6 +11,13 @@
 (def ^:dynamic *uri*
   "URI for the datomic database"
   (get env :db-url "datomic:free://localhost:4334/braid"))
+
+(defn connect [{:keys [db-url] :as config
+                :or {db-url "datomic:free://localhost:4334/braid"}}]
+  (d/connect db-url))
+
+(defstate conn
+  :start (connect config))
 
 (def ^:dynamic *conn* nil)
 

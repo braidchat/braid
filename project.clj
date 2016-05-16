@@ -21,6 +21,7 @@
                  [clojurewerkz/quartzite "2.0.0"]
                  [inliner "0.1.0"]
                  [de.ubercode.clostache/clostache "1.4.0"]
+                 [mount "0.1.10"]
                  ;client
                  [org.clojure/clojurescript "1.8.34"]
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]

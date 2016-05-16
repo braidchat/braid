@@ -1,5 +1,6 @@
 (ns chat.server.sync
-  (:require [taoensso.sente :as sente]
+  (:require [mount.core :as mount :refer [defstate]]
+            [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer [sente-web-server-adapter]]
             [compojure.core :refer [GET POST routes defroutes context]]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
@@ -40,6 +41,10 @@
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
   (when-not (= event [:chsk/ws-ping]) (debugf "Event: %s" event))
   (event-msg-handler ev-msg))
+
+(defstate router
+  :start (sente/start-chsk-router! ch-chsk event-msg-handler*)
+  :stop (router))
 
 (defmethod event-msg-handler :default
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -392,25 +397,19 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (let [connected (set (:any @connected-uids))]
-      (chsk-send! user-id [:session/init-data
-                           (db/with-conn
-                             {:user-id user-id
-                              :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
-                              :user-groups (db/get-groups-for-user user-id)
-                              :user-threads (db/get-open-threads-for-user user-id)
-                              :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
-                              :user-preferences (db/user-get-preferences user-id)
-                              :users (into ()
-                                           (map #(assoc % :status
-                                                   (if (connected (% :id)) :online :offline)))
-                                           (db/fetch-users-for-user user-id))
-                              :invitations (db/fetch-invitations-for-user user-id)
-                              :tags (db/fetch-tags-for-user user-id)})]))))
-
-(defonce router_ (atom nil))
-
-(defn stop-router! [] (when-let [stop-f @router_] (stop-f)))
-
-(defn start-router! []
-  (stop-router!)
-  (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler*)))
+      (chsk-send!
+        user-id
+        [:session/init-data
+         (db/with-conn
+           {:user-id user-id
+            :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
+            :user-groups (db/get-groups-for-user user-id)
+            :user-threads (db/get-open-threads-for-user user-id)
+            :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
+            :user-preferences (db/user-get-preferences user-id)
+            :users (into ()
+                         (map #(assoc % :status
+                                 (if (connected (% :id)) :online :offline)))
+                         (db/fetch-users-for-user user-id))
+            :invitations (db/fetch-invitations-for-user user-id)
+            :tags (db/fetch-tags-for-user user-id)})]))))
