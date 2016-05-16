@@ -10,32 +10,45 @@
 (defn call-interface-view
   [call]
   (let [caller-id (call :source-id)
-        callee-id (call :target-id)]
+        user (subscribe [:user caller-id])]
     (fn []
-      [:div (str "call between" caller-id "and" callee-id)])))
+      [:div
+       [:h3 "Call with " (@user :nickname) "..."]
+       [:div "seconds"]
+       [:br]
+       [:a.button "A"]
+       [:a.button "M"]
+       [:a.button "V"]
+       [:a.button
+        {:on-click
+         (fn [_]
+           (dispatch! :end-call (call :id)))} "End Call"]
+       [:video]])))
 
 
 (defn new-call-view
   [call]
   [:div
-        (case (call :status)
-          "incoming"
-            [:div
-             [:p (str (call :id))]
-             [:a.button
-              {:on-click
-               (fn [_]
-                 (dispatch! :accept-call (call :id)))}
-              "Accept"]
-             [:a.button
-              {:on-click
-               (fn [_]
-                 (dispatch! :decline-call (call :id)))}
-              "Decline"]]
-          "accepted" [:p "accepted"]
-          "declined" [:p "declined"]
-          "default" [:p "dunno"])
-       [call-interface-view call]])
+    (case (call :status)
+      "incoming"
+        [:div
+         [:p (str (call :id))]
+         [:a.button
+          {:on-click
+           (fn [_]
+             (dispatch! :accept-call (call :id)))}
+          "Accept"]
+         [:a.button
+          {:on-click
+           (fn [_]
+             (dispatch! :decline-call (call :id)))}
+          "Decline"]]
+      "accepted"
+        [call-interface-view call]
+      "declined"
+        [:p "declined"]
+      "ended"
+        [:p "ended"])])
 
 (defn call-list-view
   []
@@ -70,5 +83,3 @@
                                             :call-type "video")))}
       "Video"]
      [call-list-view]]))
-
-
