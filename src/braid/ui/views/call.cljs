@@ -13,17 +13,18 @@
         user (subscribe [:user caller-id])]
     (fn []
       [:div
-       [:h3 "Call with " (@user :nickname) "..."]
+       [:h4 "Call with " (@user :nickname) "..."]
        [:div "seconds"]
        [:br]
        [:a.button "A"]
        [:a.button "M"]
        [:a.button "V"]
+       (when (= (call :type) "video")
+         [:video])
        [:a.button
         {:on-click
          (fn [_]
-           (dispatch! :end-call (call :id)))} "End Call"]
-       [:video]])))
+           (dispatch! :end-call (call :id)))} "End Call"]])))
 
 
 (defn new-call-view
