@@ -9,12 +9,14 @@
 
 (defn call-interface-view
   [call]
-  (let [caller-id (call :source-id)
+  (let [call-time (r/atom 0)
+        caller-id (call :source-id)
         user (subscribe [:user caller-id])]
     (fn []
+      (js/setTimeout #(swap! call-time inc) 1000)
       [:div
        [:h4 "Call with " (@user :nickname) "..."]
-       [:div "seconds"]
+       [:div (str @call-time)]
        [:br]
        [:a.button "A"]
        [:a.button "M"]
