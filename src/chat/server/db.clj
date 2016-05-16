@@ -545,11 +545,12 @@
               user-id
               thread-pull-pattern)
          (into ()
-               (map (comp (fn [t]
-                            (update-in t [:tag-ids] (partial into #{} (filter visible-tags))))
-                          (fn [t] (thread-add-last-open-at t user-id))
-                          db->thread
-                          first))))))
+               (map (comp
+                      #(update-in % [:tag-ids]
+                                  (partial into #{} (filter visible-tags)))
+                      #(thread-add-last-open-at % user-id)
+                      db->thread
+                      first))))))
 
 (defn get-thread
   [conn thread-id]
@@ -748,7 +749,8 @@
          (into #{}))))
 
 (defn threads-with-tag
-  "Find threads with a given tag that the user is allowed to see, ordered by most recent message.
+  "Find threads with a given tag that the user is allowed to see, ordered by
+  most recent message.
   Paginates results, dropping `skip` threads and returning `limit`.
   Returns the threads and a count of how many threads remain."
   [conn user-id tag-id skip limit]
@@ -765,15 +767,16 @@
                          (map first)
                          (drop skip)
                          (take limit))]
-    {:threads (->> (d/pull-many (d/db conn) thread-pull-pattern thread-eids)
-                   (map db->thread)
-                   (filter (fn [thread] (user-can-see-thread? user-id (thread :id)))))
+    {:threads (into ()
+                    (comp (map db->thread)
+                          (filter #(user-can-see-thread? user-id (% :id))))
+                    (d/pull-many (d/db conn) thread-pull-pattern thread-eids))
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
 (defn tag-set-description!
   [conn tag-id description]
   (d/transact conn [[:db/add [:tag/id tag-id]
-                       :tag/description description]]))
+                     :tag/description description]]))
 
 (defn create-extension!
   [conn {:keys [id type group-id user-id config]}]
@@ -869,4 +872,3 @@
                        db->group)]
     (when (:public? (group-settings (group :id)))
       group)))
-
