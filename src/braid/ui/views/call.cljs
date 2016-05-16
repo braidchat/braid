@@ -5,6 +5,50 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]))
 
+
+
+(defn call-interface-view
+  [call]
+  (let [caller-id (call :source-id)
+        callee-id (call :target-id)]
+    (fn []
+      [:div (str "call between" caller-id "and" callee-id)])))
+
+
+(defn new-call-view
+  [call]
+  [:div
+        (case (call :status)
+          "incoming"
+            [:div
+             [:p (str (call :id))]
+             [:a.button
+              {:on-click
+               (fn [_]
+                 (dispatch! :accept-call (call :id)))}
+              "Accept"]
+             [:a.button
+              {:on-click
+               (fn [_]
+                 (dispatch! :decline-call (call :id)))}
+              "Decline"]]
+          "accepted" [:p "accepted"]
+          "declined" [:p "declined"]
+          "default" [:p "dunno"])
+       [call-interface-view call]])
+
+(defn call-list-view
+  []
+  (let [calls (subscribe [:calls])]
+    (fn []
+      (when (seq @calls)
+        [:div
+         [:div.calls
+          (doall
+            (for [call @calls]
+              ^{:key (call :id)}
+              [new-call-view call]))]]))))
+
 (defn call-start-view
   [callee-id]
   (fn []
@@ -27,44 +71,4 @@
       "Video"]
      [call-list-view]]))
 
-(defn call-list-view
-  []
-  (let [calls (subscribe [:calls])]
-    (fn []
-      (when (seq @calls)
-        [:div
-         [:h3 "Calling..."]
-         [:div.calls
-          (doall
-            (for [call @calls]
-              ^{:key (call :id)}
-              [new-call-view call]))]]))))
 
-(defn new-call-view
-  [call]
-  (let [call-id (call :id)
-        call-status (subscribe [:call-status?] [call-id])]
-    (fn []
-      #_(case @call-status
-            "incoming"
-            [:div
-             [:p (str (call :id))]
-             [:a.button
-              {:on-click
-               (fn [_]
-                 (dispatch! :accept-call (call :id)))}
-              "Accept"]
-             [:a.button
-              {:on-click
-               (fn [_]
-                 (dispatch! :decline-call (call :id)))}
-              "Decline"]]
-            "accepted"
-            [:p "Call Accepted"]
-            "declined"
-            {:p "Call Declined"}
-            "default"
-            [:p "Dunno"])
-      [:div [:p "Hello"]])))
-
-(defn call-interface-view [])

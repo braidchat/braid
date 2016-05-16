@@ -297,7 +297,6 @@
   [state _]
   (reaction (vals (@state :calls))))
 
-(defn get-call-status?
-  ([state [_ call-id]] get-call-status? state nil call-id)
-  ([state _ call-id]
-   (reaction (get-in @state [:calls call-id :status]))))
+(defn get-call-status
+  [state [_ call-id]]
+  (reaction (get-in @state [:calls call-id :status])))

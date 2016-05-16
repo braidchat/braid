@@ -175,8 +175,8 @@
   state/get-calls)
 
 (register-sub
-  :call-status?
-  state/get-call-status?)
+  :call-status
+  state/get-call-status)
 
 (defn subscribe
   ([v]
