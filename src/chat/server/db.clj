@@ -191,7 +191,8 @@
                          :db/id #db/id [:entities]}])))
 
 (defn user-search-preferences
-  "Find the ids of users that have the a given value for a given key set in their preferences"
+  "Find the ids of users that have the a given value for a given key set in
+  their preferences"
   [conn k v]
   (d/q '[:find [?user-id ...]
          :in $ ?k ?v
@@ -235,7 +236,8 @@
                                  :thread/id thread-id
                                  :thread/group [:group/id group-id]}])))
 
-  (let [; for users subscribed to mentioned tags, open and subscribe them to the thread
+  (let [; for users subscribed to mentioned tags, open and subscribe them to
+        ; the thread
         txs-for-tag-mentions (mapcat
                                (fn [tag-id]
                                  (into
@@ -243,9 +245,11 @@
                                      :thread/tag [:tag/id tag-id]]]
                                    (mapcat (fn [user-id]
                                              [[:db/add [:user/id user-id]
-                                               :user/subscribed-thread [:thread/id thread-id]]
+                                               :user/subscribed-thread
+                                               [:thread/id thread-id]]
                                               [:db/add [:user/id user-id]
-                                               :user/open-thread [:thread/id thread-id]]])
+                                               :user/open-thread
+                                               [:thread/id thread-id]]])
                                            (get-users-subscribed-to-tag tag-id))))
                                mentioned-tag-ids)
         ; subscribe and open thread for users mentioned
@@ -254,9 +258,9 @@
                                   [[:db/add [:thread/id thread-id]
                                     :thread/mentioned [:user/id user-id]]
                                    [:db/add [:user/id user-id]
-                                    :user/subscribed-thread  [:thread/id thread-id]]
+                                    :user/subscribed-thread [:thread/id thread-id]]
                                    [:db/add [:user/id user-id]
-                                    :user/open-thread  [:thread/id thread-id]]])
+                                    :user/open-thread [:thread/id thread-id]]])
                                 mentioned-user-ids)
         ; open thread for users already subscribed to thread
         txs-for-tag-subscribers (map
@@ -272,13 +276,16 @@
                   :message/thread [:thread/id thread-id]
                   :message/created-at created-at}
         ; user who created message: show thread, subscribe to thread
-        subscribe-data [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]
-                        [:db/add [:user/id user-id] :user/subscribed-thread [:thread/id thread-id]]]
-        {:keys [db-after tempids]} @(d/transact conn (concat [msg-data]
-                                                               subscribe-data
-                                                               txs-for-tag-subscribers
-                                                               txs-for-tag-mentions
-                                                               txs-for-user-mentions))]
+        subscribe-data [[:db/add [:user/id user-id]
+                         :user/open-thread [:thread/id thread-id]]
+                        [:db/add [:user/id user-id]
+                         :user/subscribed-thread [:thread/id thread-id]]]
+        {:keys [db-after tempids]} @(d/transact conn
+                                      (concat [msg-data]
+                                              subscribe-data
+                                              txs-for-tag-subscribers
+                                              txs-for-tag-mentions
+                                              txs-for-user-mentions))]
     (->> (d/resolve-tempid db-after tempids (msg-data :db/id))
          (d/pull db-after '[:message/id
                             :message/content
