@@ -1,15 +1,20 @@
 (ns chat.test.server.db
   (:require [clojure.test :refer :all]
+            [mount.core :as mount]
             [chat.test.server.test-utils :refer [fetch-messages]]
-            [chat.server.db :as db]
+            [braid.server.conf :as conf]
+            [chat.server.db :as db :refer [conn]]
             [chat.server.search :as search]))
+
 
 (use-fixtures :each
               (fn [t]
-                (binding [db/*uri* "datomic:mem://chat-test"]
-                  (db/init!)
-                  (db/with-conn (t))
-                  (datomic.api/delete-database db/*uri*))))
+                (-> (mount/only #{#'conf/config #'db/conn})
+                    (mount/swap {#'conf/config
+                                 {:db-url "datomic:mem://chat-test"}})
+                    (mount/start))
+                (t)
+                (datomic.api/delete-database (conf/config :db-url))))
 
 
 (deftest create-user
@@ -17,29 +22,29 @@
               :email "foo@bar.com"
               :password "foobar"
               :avatar "http://www.foobar.com/1.jpg"}
-        user (db/create-user! data)]
+        user (db/create-user! conn data)]
     (testing "can check if an email has been used"
-      (is (db/email-taken? (:email data)))
-      (is (not (db/email-taken? "baz@quux.net"))))
+      (is (db/email-taken? conn (:email data)))
+      (is (not (db/email-taken? conn "baz@quux.net"))))
     (testing "create returns a user"
       (is (= (dissoc user :group-ids)
              (-> data
                  (dissoc :password :email)
                  (assoc :nickname "foo")))))
     (testing "can set nickname"
-      (is (not (db/nickname-taken? "ol' fooy")))
-      @(db/set-nickname! (user :id) "ol' fooy")
-      (is (db/nickname-taken? "ol' fooy"))
-      (is (= (-> (db/user-with-email "foo@bar.com")
+      (is (not (db/nickname-taken? conn "ol' fooy")))
+      @(db/set-nickname! conn (user :id) "ol' fooy")
+      (is (db/nickname-taken? conn "ol' fooy"))
+      (is (= (-> (db/user-with-email conn "foo@bar.com")
                  (dissoc :group-ids))
              (-> data
                  (dissoc :password :email)
                  (assoc :nickname "ol' fooy"))))
-      (is (= "ol' fooy" (db/get-nickname (user :id)))))
+      (is (= "ol' fooy" (db/get-nickname conn (user :id)))))
 
     (testing "user email must be unique"
       (is (thrown? java.util.concurrent.ExecutionException
-                   (db/create-user! {:id (db/uuid)
+                   (db/create-user! conn {:id (db/uuid)
                                      :email (data :email)
                                      :password "zzz"
                                      :avatar "http://zzz.com/2.jpg"}))))
@@ -48,8 +53,9 @@
                    :email "baz@quux.com"
                    :password "foobar"
                    :avatar "foo@bar.com"}]
-        (is (some? (db/create-user! other)))
-        (is (thrown? java.util.concurrent.ExecutionException @(db/set-nickname! (other :id)  "ol' fooy")))))))
+        (is (some? (db/create-user! conn other)))
+        (is (thrown? java.util.concurrent.ExecutionException
+                     @(db/set-nickname! conn (other :id)  "ol' fooy")))))))
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)
