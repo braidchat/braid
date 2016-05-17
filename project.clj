@@ -2,6 +2,7 @@
   :source-paths ["src"]
 
   :dependencies [;server
+                 [org.clojure/data.json "0.2.6"]
                  [org.clojure/clojure "1.7.0"]
                  [javax.servlet/servlet-api "2.5"]
                  [commons-codec "1.10"]
