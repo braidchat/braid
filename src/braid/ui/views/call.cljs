@@ -24,7 +24,8 @@
        [:a.button
         {:on-click
          (fn [_]
-           (dispatch! :end-call (call :id)))} "End Call"]])))
+           (dispatch! :end-call call))}
+        "End Call"]])))
 
 (defn new-call-view
   [call]
@@ -39,19 +40,19 @@
                   [:a.button
                    {:on-click
                     (fn [_]
-                      (dispatch! :accept-call (call :id)))}
+                      (dispatch! :accept-call call))}
                    "Accept"]
                   [:a.button
                    {:on-click
                     (fn [_]
-                      (dispatch! :decline-call (call :id)))}
+                      (dispatch! :decline-call call))}
                    "Decline"]]
                [:div
                   [:p (str "Calling " (call :source-id) "...")]
                   [:a.button
                    {:on-click
                     (fn [_]
-                      (dispatch! :drop-call (call :id)))}
+                      (dispatch! :drop-call call))}
                    "Drop"]])
            "accepted"
              [call-interface-view call]

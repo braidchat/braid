@@ -277,17 +277,25 @@
     (store/add-call! call)
     (sync/chsk-send! [:chat/make-call call])))
 
-(defmethod dispatch! :accept-call [_ call-id]
-  (store/update-call-status! call-id "accepted"))
+(defmethod dispatch! :accept-call [_ call]
+  (store/update-call-status! (call :id) "accepted")
+  (sync/chsk-send! [:chat/change-call-status {:call call
+                                              :status "accepted"}]))
 
-(defmethod dispatch! :decline-call [_ call-id]
-  (store/update-call-status! call-id "declined"))
+(defmethod dispatch! :decline-call [_ call]
+  (store/update-call-status! (call :id) "declined")
+  (sync/chsk-send! [:chat/change-call-status {:call call
+                                              :status "declined"}]))
 
-(defmethod dispatch! :end-call [_ call-id]
-  (store/update-call-status! call-id "ended"))
+(defmethod dispatch! :end-call [_ call]
+  (store/update-call-status! (call :id) "ended")
+  (sync/chsk-send! [:chat/change-call-status {:call call
+                                              :status "ended"}]))
 
-(defmethod dispatch! :drop-call [_ call-id]
-  (store/update-call-status! call-id "dropped"))
+(defmethod dispatch! :drop-call [_ call]
+  (store/update-call-status! (call :id) "dropped")
+  (sync/chsk-send! [:chat/change-call-status {:call call
+                                              :status "dropped"}]))
 
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
@@ -377,3 +385,7 @@
 (defmethod sync/event-handler :chat/receive-call
   [[_ call]]
   (store/add-call! call))
+
+(defmethod sync/event-handler :chat/new-call-status
+  [[_ [call-id status]]]
+  (store/update-call-status! call-id status))

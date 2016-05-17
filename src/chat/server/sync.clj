@@ -93,6 +93,10 @@
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
+(defn signal-call-status-change
+  [user-id info]
+  (chsk-send! user-id info))
+
 (defmethod event-msg-handler :chsk/uidport-open
   [{:as ev-msg :keys [event id ring-req]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
@@ -376,6 +380,16 @@
   (let [target-id (?data :target-id)
         call ?data]
     (chsk-send! target-id [:chat/receive-call call])))
+
+(defmethod event-msg-handler :chat/change-call-status
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (let [call (?data :call)
+        call-id (call :id)
+        status (?data :status)
+        signal-id (get-in ring-req [:session :user-id])]
+    (if (= signal-id (call :target-id))
+      (signal-call-status-change (call :source-id) [:chat/new-call-status [call-id status]])
+      (signal-call-status-change (call :target-id) [:chat/new-call-status [call-id status]]))))
 
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
