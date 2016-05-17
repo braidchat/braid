@@ -51,14 +51,16 @@
                   [:a.button
                    {:on-click
                     (fn [_]
-                      (dispatch! :end-call (call :id)))}
+                      (dispatch! :drop-call (call :id)))}
                    "Drop"]])
            "accepted"
              [call-interface-view call]
            "declined"
              [:p "declined"]
            "ended"
-             [:p "ended"])])))
+             [:p "ended"]
+           "dropped"
+             [:p "dropped"])])))
 
 (defn call-list-view
   []
