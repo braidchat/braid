@@ -100,7 +100,7 @@
         open? (subscribe [:thread-open? (thread :id)])
 
         maybe-upload-file!
-        (fn [thread-id file]
+        (fn [thread file]
           (if (> (.-size file) max-file-size)
             (store/display-error! :upload-fail "File to big to upload, sorry")
             (do (set-uploading! true)
@@ -108,7 +108,8 @@
                                   (set-uploading! false)
                                   (dispatch! :new-message
                                              {:content url
-                                              :thread-id thread-id}))))))]
+                                              :group-id (thread :group-id)
+                                              :thread-id (thread :id)}))))))]
 
     (fn [thread]
       (let [{:keys [dragging? uploading? focused?]} @state
@@ -148,7 +149,7 @@
             (let [pasted-files (.. e -clipboardData -files)]
               (when (< 0 (.-length pasted-files))
                 (.preventDefault e)
-                (maybe-upload-file! (thread :id) (aget pasted-files 0)))))
+                (maybe-upload-file! thread (aget pasted-files 0)))))
 
           :on-drag-over
           (fn [e]
@@ -166,7 +167,7 @@
             (set-dragging! false)
             (let [file-list (.. e -dataTransfer -files)]
               (when (< 0 (.-length file-list))
-                (maybe-upload-file! (thread :id) (aget file-list 0)))))}
+                (maybe-upload-file! thread (aget file-list 0)))))}
 
          (when limbo?
            [:div.notice "No one can see this conversation yet. Mention a @user or #tag in a reply."])
