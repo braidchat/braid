@@ -4,6 +4,7 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
+            [chat.client.webrtc :as rtc]
             [chat.shared.util :as util]
             [chat.client.router :as router]
             [chat.client.xhr :refer [edn-xhr]]
@@ -297,6 +298,11 @@
   (sync/chsk-send! [:chat/change-call-status {:call call
                                               :status "dropped"}]))
 
+(defmethod dispatch! :request-ice-servers [_ _]
+  (sync/chsk-send! [:rtc/get-ice-servers] 500
+    (fn [servers]
+      (println "SERVERS:" servers))))
+
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
     (store/display-error! :client-out-of-date "Client out of date - please refresh")))
@@ -384,7 +390,8 @@
 
 (defmethod sync/event-handler :chat/receive-call
   [[_ call]]
-  (store/add-call! call))
+  (store/add-call! call)
+  (rtc/initialize-rtc-environment))
 
 (defmethod sync/event-handler :chat/new-call-status
   [[_ [call-id status]]]

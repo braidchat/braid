@@ -2,6 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.impl.util :refer [extract-props]]
             [braid.ui.views.pills :refer [user-pill-view]]
+            [chat.client.webrtc :as rtc]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]))
 
@@ -34,26 +35,26 @@
       [:div
         (case (call :status)
            "incoming"
-             (if (= @user-id (call :target-id))
-               [:div
-                  [:p (str "Call from" (call :source-id))]
-                  [:a.button
-                   {:on-click
-                    (fn [_]
-                      (dispatch! :accept-call call))}
-                   "Accept"]
-                  [:a.button
-                   {:on-click
-                    (fn [_]
-                      (dispatch! :decline-call call))}
-                   "Decline"]]
-               [:div
-                  [:p (str "Calling " (call :source-id) "...")]
-                  [:a.button
-                   {:on-click
-                    (fn [_]
-                      (dispatch! :drop-call call))}
-                   "Drop"]])
+              (if (= @user-id (call :target-id))
+                [:div
+                   [:p (str "Call from" (call :source-id))]
+                   [:a.button
+                    {:on-click
+                     (fn [_]
+                       (dispatch! :accept-call call))}
+                    "Accept"]
+                   [:a.button
+                    {:on-click
+                     (fn [_]
+                       (dispatch! :decline-call call))}
+                    "Decline"]]
+                [:div
+                   [:p (str "Calling " (call :source-id) "...")]
+                   [:a.button
+                    {:on-click
+                     (fn [_]
+                       (dispatch! :drop-call call))}
+                    "Drop"]])
            "accepted"
              [call-interface-view call]
            "declined"
@@ -95,6 +96,7 @@
          (fn [_]
            (dispatch! :start-call (assoc {} :type "video"
                                             :source-id caller-id
-                                            :target-id callee-id)))}
+                                            :target-id callee-id))
+           (dispatch! :request-ice-servers))}
       "Video"]
      [call-list-view]]))

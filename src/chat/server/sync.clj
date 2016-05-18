@@ -9,6 +9,7 @@
             [chat.server.search :as search]
             [chat.server.invite :as invites]
             [chat.server.digest :as digest]
+            [chat.server.webrtc :as rtc]
             [clojure.set :refer [difference intersection]]
             [chat.shared.util :refer [valid-nickname? valid-tag-name?]]
             [chat.server.extensions :refer [handle-thread-change]]
@@ -409,6 +410,10 @@
                                            (db/fetch-users-for-user user-id))
                               :invitations (db/fetch-invitations-for-user user-id)
                               :tags (db/fetch-tags-for-user user-id)})]))))
+
+(defmethod event-msg-handler :rtc/get-ice-servers
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (?reply-fn (rtc/request-ice-servers)))
 
 (defonce router_ (atom nil))
 
