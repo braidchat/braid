@@ -21,7 +21,7 @@
        [:a.button "M"]
        [:a.button "V"]
        (when (= (call :type) "video")
-         [:video])
+         [:video {:id "vid"}])
        [:a.button
         {:on-click
          (fn [_]
@@ -96,7 +96,6 @@
          (fn [_]
            (dispatch! :start-call (assoc {} :type "video"
                                             :source-id caller-id
-                                            :target-id callee-id))
-           (dispatch! :request-ice-servers))}
+                                            :target-id callee-id)))}
       "Video"]
      [call-list-view]]))

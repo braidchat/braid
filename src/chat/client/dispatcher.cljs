@@ -28,6 +28,11 @@
          (filter store/user-in-open-group?)
          (remove nil?))))
 
+(defn- get-ice-servers []
+  (sync/chsk-send! [:rtc/get-ice-servers] 500
+      (fn [servers]
+        (rtc/initialize-rtc-environment servers))))
+
 (defn identify-mentions
   [content]
   (-> content
@@ -276,7 +281,8 @@
                                 :target-id (call-data :target-id)
                                 :status "incoming"})]
     (store/add-call! call)
-    (sync/chsk-send! [:chat/make-call call])))
+    (sync/chsk-send! [:chat/make-call call])
+    (get-ice-servers)))
 
 (defmethod dispatch! :accept-call [_ call]
   (store/update-call-status! (call :id) "accepted")
@@ -301,6 +307,7 @@
 (defmethod dispatch! :request-ice-servers [_ _]
   (sync/chsk-send! [:rtc/get-ice-servers] 500
     (fn [servers]
+      (println "SERVERS:" servers)
       (rtc/initialize-rtc-environment servers))))
 
 (defn check-client-version [server-checksum]
@@ -391,7 +398,7 @@
 (defmethod sync/event-handler :chat/receive-call
   [[_ call]]
   (store/add-call! call)
-  (dispatch! :request-ice-servers))
+  (get-ice-servers))
 
 (defmethod sync/event-handler :chat/new-call-status
   [[_ [call-id status]]]
