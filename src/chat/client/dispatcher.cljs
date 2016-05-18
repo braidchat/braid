@@ -301,7 +301,7 @@
 (defmethod dispatch! :request-ice-servers [_ _]
   (sync/chsk-send! [:rtc/get-ice-servers] 500
     (fn [servers]
-      (println "SERVERS:" servers))))
+      (rtc/initialize-rtc-environment servers))))
 
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
@@ -391,7 +391,7 @@
 (defmethod sync/event-handler :chat/receive-call
   [[_ call]]
   (store/add-call! call)
-  (rtc/initialize-rtc-environment))
+  (dispatch! :request-ice-servers))
 
 (defmethod sync/event-handler :chat/new-call-status
   [[_ [call-id status]]]
