@@ -403,3 +403,7 @@
 (defmethod sync/event-handler :chat/new-call-status
   [[_ [call-id status]]]
   (store/update-call-status! call-id status))
+
+(defmethod sync/event-handler :rtc/receive-protocol-info
+  [[_ protocol-data]]
+  (rtc/handle-protocol-signal protocol-data))

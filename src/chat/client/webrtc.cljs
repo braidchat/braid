@@ -3,6 +3,9 @@
 
 (def local-peer-connnection (atom nil))
 
+(defn handle-protocol-signal [signal]
+  (println "Signal" signal))
+
 (defn handle-stream [evt]
   ;TODO: how to link up stream in ui
   (let [stream (.-stream evt)]))

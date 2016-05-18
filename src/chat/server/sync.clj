@@ -415,6 +415,13 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (?reply-fn (rtc/request-ice-servers)))
 
+(defmethod event-msg-handler :rtc/send-protocol-info
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (let [signal-id (get-in ring-req [:session :user-id])]
+        signal-data ?data
+    (doseq [user-id (:any @connected-uids) :when (not= signal-id user-id)]
+      (chsk-send! user-id [:rtc/receive-protocol-info signal-data]))))
+
 (defonce router_ (atom nil))
 
 (defn stop-router! [] (when-let [stop-f @router_] (stop-f)))
