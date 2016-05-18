@@ -11,7 +11,10 @@
 ; Offers and Answers
 
 (defn signal-session-description [description]
-  (js/console.log "DESCRIPTION: " description))
+  (js/console.log "LOCAL DESC: " description)
+  (.setLocalDescription @local-peer-connnection description)
+  (sync/chsk-send! [:rtc/send-protocol-info {:sdp (.-sdp description)
+                                             :type (.-type description)}]))
 
 (defn create-answer [connection]
   (.createAnswer @connection
@@ -42,13 +45,20 @@
 ; Protocol Exchange
 
 (defn handle-protocol-signal [signal]
-  (println "Signal" signal))
+  (if (signal :sdp)
+    (println "REMOTE DESC:" signal)
+    (println "REMOTE CAND:" signal)))
 
 ; RTC Handlers
 
 (defn handle-ice-candidate [evt]
   (let [candidate (.-candidate evt)]
-    (js/console.log "CANDIDATE: " candidate)))
+    #_(js/console.log "CANDIDATE: " candidate)
+    (println "LOCAL CAND:")
+    (when candidate
+      (sync/chsk-send! [:rtc/send-protocol-info {:candidate (.-candidate candidate)
+                                                 :sdpMid (.-sdpMid candidate)
+                                                 :sdpMLineIndex (.-sdpMLineIndex candidate)}]))))
 
 (defn handle-stream [evt]
   ;TODO: how to link up stream in ui
