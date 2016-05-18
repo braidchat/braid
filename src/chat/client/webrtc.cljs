@@ -10,7 +10,10 @@
 
 ; Offers and Answers
 
-(defn signal-session-description [description]
+(defn signal-sdp-answer [description]
+  (js/console.log "LOCAL ANSWER:" description))
+
+(defn signal-sdp-offer [description]
   (js/console.log "LOCAL DESC: " description)
   (.setLocalDescription @local-peer-connnection description)
   (sync/chsk-send! [:rtc/send-protocol-info {:sdp (.-sdp description)
@@ -18,13 +21,13 @@
 
 (defn create-answer [connection]
   (.createAnswer @connection
-                 signal-session-description
+                 signal-sdp-answer
                  (fn [error]
                    (println "Error creating offer description:" (.-message error)))))
 
 (defn create-offer [connection]
   (.createOffer @connection
-                signal-session-description
+                signal-sdp-offer
                 (fn [error]
                   (println "Error creating offer description:" (.-message error)))))
 
@@ -46,15 +49,23 @@
 
 (defn handle-protocol-signal [signal]
   (if (signal :sdp)
-    (println "REMOTE DESC:" signal)
-    (println "REMOTE CAND:" signal)))
+    (let [received-desc (js/RTCSessionDescription. (clj->js {:sdp (signal :sdp)
+                                                             :type (signal :type)}))]
+      (js/console.log "REMOTE DESC:" received-desc)
+      (.setRemoteDescription @local-peer-connnection received-desc))
+    (let [received-cand (js/RTCIceCandidate. (clj->js {:candidate (signal :candidate)
+                                                       :sdpMid (signal :sdpMid)
+                                                       :sdpMLineIndex (signal :sdpMLineIndex)}))]
+      (js/console.log "REMOTE CAND:" received-cand)
+      (.addIceCandidate @local-peer-connnection received-cand)
+      (create-answer local-peer-connnection))))
 
 ; RTC Handlers
 
 (defn handle-ice-candidate [evt]
   (let [candidate (.-candidate evt)]
     #_(js/console.log "CANDIDATE: " candidate)
-    (println "LOCAL CAND:")
+    (println "LOCAL CAND:" candidate)
     (when candidate
       (sync/chsk-send! [:rtc/send-protocol-info {:candidate (.-candidate candidate)
                                                  :sdpMid (.-sdpMid candidate)
@@ -63,7 +74,8 @@
 (defn handle-stream [evt]
   ;TODO: how to link up stream in ui
   (let [stream (.-stream evt)
-        stream-url (.. js/window -URL (createObjectURL stream))]))
+        stream-url (.. js/window -URL (createObjectURL stream))]
+    (println "onaddstream" stream)))
 
 ; Connection
 
