@@ -287,7 +287,8 @@
 (defmethod dispatch! :accept-call [_ call]
   (store/update-call-status! (call :id) "accepted")
   (sync/chsk-send! [:chat/change-call-status {:call call
-                                              :status "accepted"}]))
+                                              :status "accepted"}])
+  (rtc/open-local-stream (call :type)))
 
 (defmethod dispatch! :decline-call [_ call]
   (store/update-call-status! (call :id) "declined")

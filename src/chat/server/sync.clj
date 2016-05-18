@@ -417,8 +417,8 @@
 
 (defmethod event-msg-handler :rtc/send-protocol-info
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (let [signal-id (get-in ring-req [:session :user-id])]
-        signal-data ?data
+  (let [signal-id (get-in ring-req [:session :user-id])
+        signal-data ?data]
     (doseq [user-id (:any @connected-uids) :when (not= signal-id user-id)]
       (chsk-send! user-id [:rtc/receive-protocol-info signal-data]))))
 
