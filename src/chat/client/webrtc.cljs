@@ -52,13 +52,13 @@
     (let [received-desc (js/RTCSessionDescription. (clj->js {:sdp (signal :sdp)
                                                              :type (signal :type)}))]
       (js/console.log "REMOTE DESC:" received-desc)
-      (.setRemoteDescription @local-peer-connnection received-desc))
+      (.setRemoteDescription @local-peer-connnection received-desc)
+      (create-answer local-peer-connnection))
     (let [received-cand (js/RTCIceCandidate. (clj->js {:candidate (signal :candidate)
                                                        :sdpMid (signal :sdpMid)
                                                        :sdpMLineIndex (signal :sdpMLineIndex)}))]
       (js/console.log "REMOTE CAND:" received-cand)
-      (.addIceCandidate @local-peer-connnection received-cand)
-      (create-answer local-peer-connnection))))
+      (.addIceCandidate @local-peer-connnection received-cand))))
 
 ; RTC Handlers
 
