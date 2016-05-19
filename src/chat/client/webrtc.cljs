@@ -44,13 +44,20 @@
 ; Protocol Exchange
 
 (defn handle-ice-candidate [candidate]
-  #_(println "RECEIVED CANDIDATE:" candidate))
+  #_(println "RECEIVED CANDIDATE:" candidate)
+  (let [candidate (js/RTCIceCandidate. (clj->js {:candidate (candidate :candidate)
+                                                 :sdpMid (candidate :sdpMid)
+                                                 :sdpMLineIndex (candidate :sdpMLineIndex)}))]
+    (.addIceCandidate @local-peer-connnection candidate)))
 
 (defn handle-sdp-answer [answer]
-  (println "RECEIVED ANSWER:" answer))
+  #_(println "RECEIVED ANSWER:" answer)
+  (let [remote-answer (js/RTCSessionDescription. (clj->js {:sdp (answer :sdp)
+                                                           :type (answer :type)}))]
+    (.setRemoteDescription @local-peer-connnection remote-answer)))
 
 (defn handle-sdp-offer [offer]
-  (println "RECEIVED OFFER:" offer)
+  #_(println "RECEIVED OFFER:" offer)
   (let [remote-offer (js/RTCSessionDescription. (clj->js {:sdp (offer :sdp)
                                                           :type (offer :type)}))]
       (.setRemoteDescription @local-peer-connnection remote-offer)
