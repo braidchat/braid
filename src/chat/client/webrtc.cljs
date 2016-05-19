@@ -10,23 +10,20 @@
 
 ; Offers and Answers
 
-(defn signal-sdp-answer [description]
-  (.setLocalDescription @local-peer-connnection description))
-
-(defn signal-sdp-offer [description]
+(defn signal-sdp-description [description]
   (.setLocalDescription @local-peer-connnection description)
   (sync/chsk-send! [:rtc/send-protocol-signal {:sdp (.-sdp description)
                                                :type (.-type description)}]))
 
 (defn create-answer [connection]
   (.createAnswer @connection
-                 signal-sdp-answer
+                 signal-sdp-description
                  (fn [error]
                    (println "Error creating offer description:" (.-message error)))))
 
 (defn create-offer [connection]
   (.createOffer @connection
-                signal-sdp-offer
+                signal-sdp-description
                 (fn [error]
                   (println "Error creating offer description:" (.-message error)))))
 
@@ -47,13 +44,17 @@
 ; Protocol Exchange
 
 (defn handle-ice-candidate [candidate]
-  (println "RECEIVED CANDIDATE:" candidate))
+  #_(println "RECEIVED CANDIDATE:" candidate))
 
 (defn handle-sdp-answer [answer]
   (println "RECEIVED ANSWER:" answer))
 
 (defn handle-sdp-offer [offer]
-  (println "RECEIVED OFFER:" offer))
+  (println "RECEIVED OFFER:" offer)
+  (let [remote-offer (js/RTCSessionDescription. (clj->js {:sdp (offer :sdp)
+                                                          :type (offer :type)}))]
+      (.setRemoteDescription @local-peer-connnection remote-offer)
+      (create-answer local-peer-connnection)))
 
 (defn handle-protocol-signal [signal]
   (if (signal :sdp)
