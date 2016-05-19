@@ -11,13 +11,12 @@
 ; Offers and Answers
 
 (defn signal-sdp-answer [description]
-  (js/console.log "LOCAL ANSWER:" description))
+  (.setLocalDescription @local-peer-connnection description))
 
 (defn signal-sdp-offer [description]
-  (js/console.log "LOCAL DESC: " description)
   (.setLocalDescription @local-peer-connnection description)
-  (sync/chsk-send! [:rtc/send-protocol-info {:sdp (.-sdp description)
-                                             :type (.-type description)}]))
+  (sync/chsk-send! [:rtc/send-protocol-signal {:sdp (.-sdp description)
+                                               :type (.-type description)}]))
 
 (defn create-answer [connection]
   (.createAnswer @connection
@@ -47,35 +46,43 @@
 
 ; Protocol Exchange
 
+(defn handle-ice-candidate [candidate]
+  (println "RECEIVED CANDIDATE:" candidate))
+
+(defn handle-sdp-answer [answer]
+  (println "RECEIVED ANSWER:" answer))
+
+(defn handle-sdp-offer [offer]
+  (println "RECEIVED OFFER:" offer))
+
 (defn handle-protocol-signal [signal]
   (if (signal :sdp)
     (let [received-desc (js/RTCSessionDescription. (clj->js {:sdp (signal :sdp)
                                                              :type (signal :type)}))]
-      (js/console.log "REMOTE DESC:" received-desc)
       (.setRemoteDescription @local-peer-connnection received-desc)
       (create-answer local-peer-connnection))
     (let [received-cand (js/RTCIceCandidate. (clj->js {:candidate (signal :candidate)
                                                        :sdpMid (signal :sdpMid)
                                                        :sdpMLineIndex (signal :sdpMLineIndex)}))]
-      (js/console.log "REMOTE CAND:" received-cand)
-      (.addIceCandidate @local-peer-connnection received-cand))))
+      #_(.addIceCandidate @local-peer-connnection received-cand))))
 
 ; RTC Handlers
 
-(defn handle-ice-candidate [evt]
+(defn handle-local-ice [evt]
   (let [candidate (.-candidate evt)]
-    #_(js/console.log "CANDIDATE: " candidate)
-    (println "LOCAL CAND:" candidate)
     (when candidate
-      (sync/chsk-send! [:rtc/send-protocol-info {:candidate (.-candidate candidate)
-                                                 :sdpMid (.-sdpMid candidate)
-                                                 :sdpMLineIndex (.-sdpMLineIndex candidate)}]))))
+      (sync/chsk-send! [:rtc/send-protocol-signal {:candidate (.-candidate candidate)
+                                                   :sdpMid (.-sdpMid candidate)
+                                                   :sdpMLineIndex (.-sdpMLineIndex candidate)}]))))
 
 (defn handle-stream [evt]
   ;TODO: how to link up stream in ui
   (let [stream (.-stream evt)
-        stream-url (.. js/window -URL (createObjectURL stream))]
-    (println "onaddstream" stream)))
+        stream-url (.. js/window -URL (createObjectURL stream))
+        video-player (. js/document (getElementById "vid"))]
+    (println "video object" video-player)
+    (set! (.-src video-player) stream-url)
+    (set! (.-onloadedmetadata video-player) (fn [_] (.play video-player)))))
 
 ; Connection
 
@@ -85,7 +92,7 @@
 
 (defn create-local-connection [servers]
   (reset! local-peer-connnection (create-connection servers))
-  (set! (.-onicecandidate @local-peer-connnection) handle-ice-candidate)
+  (set! (.-onicecandidate @local-peer-connnection) handle-local-ice)
   (set! (.-onaddstream @local-peer-connnection) handle-stream)
   (js/console.log "Local Connection" @local-peer-connnection))
 

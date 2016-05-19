@@ -415,12 +415,16 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (?reply-fn (rtc/request-ice-servers)))
 
-(defmethod event-msg-handler :rtc/send-protocol-info
+(defmethod event-msg-handler :rtc/send-protocol-signal
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (let [signal-id (get-in ring-req [:session :user-id])
         signal-data ?data]
     (doseq [user-id (:any @connected-uids) :when (not= signal-id user-id)]
-      (chsk-send! user-id [:rtc/receive-protocol-info signal-data]))))
+      (if (signal-data :sdp)
+        (if (= "offer" (signal-data :type))
+          (chsk-send! user-id [:rtc/receive-sdp-offer signal-data])
+          (chsk-send! user-id [:rtc/receive-sdp-answer signal-data]))
+        (chsk-send! user-id [:rtc/receive-ice-candidate signal-data])))))
 
 (defonce router_ (atom nil))
 
