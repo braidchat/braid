@@ -420,11 +420,7 @@
   (let [signal-id (get-in ring-req [:session :user-id])
         signal-data ?data]
     (doseq [user-id (:any @connected-uids) :when (not= signal-id user-id)]
-      (if (signal-data :sdp)
-        (if (= "offer" (signal-data :type))
-          (chsk-send! user-id [:rtc/receive-sdp-offer signal-data])
-          (chsk-send! user-id [:rtc/receive-sdp-answer signal-data]))
-        (chsk-send! user-id [:rtc/receive-ice-candidate signal-data])))))
+      (chsk-send! user-id [:rtc/receive-protocol-signal signal-data]))))
 
 (defonce router_ (atom nil))
 

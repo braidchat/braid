@@ -405,16 +405,6 @@
   [[_ [call-id status]]]
   (store/update-call-status! call-id status))
 
-(defmethod sync/event-handler :rtc/receive-sdp-offer
-  [[_ offer]]
-  (rtc/handle-sdp-offer offer))
-
-(defmethod sync/event-handler :rtc/receive-sdp-answer
-  [[_ answer]]
-  (rtc/handle-sdp-answer answer))
-
-(defmethod sync/event-handler :rtc/receive-ice-candidate
-  [[_ candidate]]
-  (rtc/handle-ice-candidate candidate))
-
-
+(defmethod sync/event-handler :rtc/receive-protocol-signal
+  [[_ signal]]
+  (rtc/handle-protocol-signal signal))
