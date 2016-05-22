@@ -140,6 +140,18 @@
   :start (nrepl/start-server :port (:nrepl-port (mount/args)))
   :stop (nrepl/stop-server nrepl))
 
+;; exceptions in background thread handler
+
+(defn set-default-exception-handler
+  []
+  (Thread/setDefaultUncaughtExceptionHandler
+    (reify Thread$UncaughtExceptionHandler
+      (uncaughtException [_ thread ex]
+        (timbre/errorf "Uncaught exception %s on %s" ex (.getName thread))))))
+
+(defstate thread-handler
+  :start (set-default-exception-handler))
+
 ;; main
 (defn -main  [& args]
   (let [port (Integer/parseInt (first args))
