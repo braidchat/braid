@@ -56,7 +56,7 @@
 
 (defn send-invite
   [invite]
-  (http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
+  @(http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
              {:basic-auth ["api" (env :mailgun-password)]
               :form-params (merge {:to (invite :invitee-email)
                                    :from (str "noreply@" (env :mailgun-domain))
@@ -69,6 +69,7 @@
         form-hmac (hmac hmac-secret
                         (str now token (invite :id) (invite :invitee-email)))
         api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+    ; TODO: use mustache instead
     (str "<!DOCTYPE html>"
          "<html>"
          "  <head>"
@@ -124,31 +125,31 @@
   [user]
   (let [secret (random-nonce 20)]
     (cache-set! (str (user :id)) secret)
-    (http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
-               {:basic-auth ["api" (env :mailgun-password)]
-                :form-params {:to (user :email)
-                              :from (str "noreply@" (env :mailgun-domain))
-                              :subject "Password reset requested"
-                              :text (str "A password reset was requested on "
-                                         (env :site-url) " for " (user :email) "\n\n"
-                                         "If this was you, follow this link to reset your password "
-                                         (env :site-url) "/reset?user=" (user :id) "&token=" secret
-                                         "\n\n"
-                                         "If this wasn't you, just ignore this email")
-                              :html (str "<html><body>"
-                                         "<p>"
-                                         "A password reset was requested on "
-                                         (env :site-url) " for " (user :email)
-                                         "</p>"
-                                         "<p>"
-                                         "If this was you, <a href=\""
-                                         (env :site-url) "/reset?user=" (user :id) "&token=" secret
-                                         "\"> click here</a> to reset your password "
-                                         "</p>"
-                                         "<p>"
-                                         "If this wasn't you, just ignore this email"
-                                         "</p>"
-                                         "</body></html>")}})))
+    @(http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
+                {:basic-auth ["api" (env :mailgun-password)]
+                 :form-params {:to (user :email)
+                               :from (str "noreply@" (env :mailgun-domain))
+                               :subject "Password reset requested"
+                               :text (str "A password reset was requested on "
+                                          (env :site-url) " for " (user :email) "\n\n"
+                                          "If this was you, follow this link to reset your password "
+                                          (env :site-url) "/reset?user=" (user :id) "&token=" secret
+                                          "\n\n"
+                                          "If this wasn't you, just ignore this email")
+                               :html (str "<html><body>"
+                                          "<p>"
+                                          "A password reset was requested on "
+                                          (env :site-url) " for " (user :email)
+                                          "</p>"
+                                          "<p>"
+                                          "If this was you, <a href=\""
+                                          (env :site-url) "/reset?user=" (user :id) "&token=" secret
+                                          "\"> click here</a> to reset your password "
+                                          "</p>"
+                                          "<p>"
+                                          "If this wasn't you, just ignore this email"
+                                          "</p>"
+                                          "</body></html>")}})))
 
 (defn verify-reset-nonce
   "Verify that the given nonce is valid for the reset request"
@@ -169,6 +170,7 @@
   (let [now (.getTime (java.util.Date.))
         form-hmac (hmac hmac-secret (str now token (user :id)))
         api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+    ; TODO: use mustache instead
     (str "<!DOCTYPE html>"
          "<html>"
          "  <head>"
