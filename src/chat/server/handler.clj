@@ -153,6 +153,14 @@
   :start (set-default-exception-handler))
 
 ;; main
+(defn dev-main
+  "Start things up, but don't start the email server or nrepl"
+  [port]
+  (->
+    (mount/except #{#'email-jobs #'nrepl})
+    (mount/with-args {:port port})
+    (mount/start)))
+
 (defn -main  [& args]
   (let [port (Integer/parseInt (first args))
         repl-port (Integer/parseInt (second args))]
