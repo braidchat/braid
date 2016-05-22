@@ -2,9 +2,6 @@
   (:require [chat.server.db :as db]
             [environ.core :refer [env]]))
 
-(defn drop! []
-  (datomic.api/delete-database db/*uri*))
-
 (defn seed! []
   (let [group-1 (db/create-group! {:id (db/uuid) :name "Braid"})
         group-2 (db/create-group! {:id (db/uuid) :name "Chat"})
