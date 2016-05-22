@@ -19,5 +19,5 @@
                               {:message/user [:user/id]}
                               {:message/thread [:thread/id]}])
               :where [?e :message/id]]
-            (d/db db/*conn*))
+            (d/db db/conn))
        (map (comp db->message first))))

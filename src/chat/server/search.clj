@@ -50,7 +50,7 @@
   [user-id [query group-id]]
   ; TODO: pagination?
   (let [{:keys [text tags]} (parse-query query)
-        search-db (d/db db/*conn*)
+        search-db (d/db db/conn)
         tag-search (when (seq tags)
                      (set (d/q '[:find ?t-id (max ?time)
                                  :in $ [?tag-name ...] ?g-id

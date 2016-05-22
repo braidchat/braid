@@ -29,31 +29,29 @@
 (defn create-asana-extension
   [{:keys [id group-id user-name tag-id]}]
   ; TODO: verify user name is valid
-  (db/with-conn
-    (let [user-id (db/uuid)]
-      ; TODO: need a reasonable way to create this extension-only user
-      (db/create-user! {:id user-id
-                        :email (random-nonce 50)
-                        :password (random-nonce 50)
-                        ; TODO: ability to set avatar/reasonable default avatar
-                        :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-                        :nickname user-name})
-      (db/user-add-to-group! user-id group-id)
-      (db/create-extension! {:id id
-                             :group-id group-id
-                             :type :asana
-                             :user-id user-id
-                             :config {:tag-id tag-id}}))))
+  (let [user-id (db/uuid)]
+    ; TODO: need a reasonable way to create this extension-only user
+    (db/create-user! {:id user-id
+                      :email (random-nonce 50)
+                      :password (random-nonce 50)
+                      ; TODO: ability to set avatar/reasonable default avatar
+                      :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+                      :nickname user-name})
+    (db/user-add-to-group! user-id group-id)
+    (db/create-extension! {:id id
+                           :group-id group-id
+                           :type :asana
+                           :user-id user-id
+                           :config {:tag-id tag-id}})))
 
 (declare unregister-webhook)
 
 (defn destroy-asana-extension
   [id]
-  (db/with-conn
-    (when-let [webhook-id (-> (db/extension-by-id id)
-                              (get-in [:config :webhook-id]))]
-      (unregister-webhook id webhook-id))
-    (db/retract-extension! id)))
+  (when-let [webhook-id (-> (db/extension-by-id id)
+                            (get-in [:config :webhook-id]))]
+    (unregister-webhook id webhook-id))
+  (db/retract-extension! id))
 
 ;; Authentication flow
 (def token-url "https://app.asana.com/-/oauth_token")
@@ -89,9 +87,8 @@
           (if (= 200 (:status resp))
             (let [{:strs [access_token refresh_token]} (-> resp :body
                                                            json/read-str)]
-              (db/with-conn
-                (db/save-extension-token! ext-id {:access-token access_token
-                                                  :refresh-token refresh_token})))
+              (db/save-extension-token! ext-id {:access-token access_token
+                                                :refresh-token refresh_token}))
             (timbre/warnf "Bad response when exchanging token %s" (:body resp))))))))
 
 (defn refresh-token
@@ -105,11 +102,10 @@
                                           "refresh_token" refresh-tok}})]
       (if (= 200 (:status resp))
         (let [{:strs [access_token refresh_token]} (json/read-str (:body resp))]
-          (db/with-conn
-            (db/save-extension-token! (ext :id)
-                                      {:access-token access_token
-                                       :refresh-token (or refresh_token
-                                                          refresh-tok)})))
+          (db/save-extension-token! (ext :id)
+                                    {:access-token access_token
+                                     :refresh-token (or refresh_token
+                                                        refresh-tok)}))
         (do (timbre/warnf "Bad response when exchanging token %s" (:body resp))
             nil)))))
 
@@ -118,7 +114,7 @@
   ([ext-id path] (fetch-asana-info ext-id :get path {}))
   ([ext-id method path] (fetch-asana-info ext-id method path {}))
   ([ext-id method path opts]
-   (let [ext (db/with-conn (db/extension-by-id ext-id))
+   (let [ext (db/extension-by-id ext-id)
          resp @(http/request (merge {:method method
                                      :url (str api-url path)
                                      :oauth-token (ext :token)}
@@ -153,8 +149,7 @@
         (fetch-asana-info extension-id :post "/webhooks"
                           {:form-params {"resource" resource-id
                                          "target" (str webhook-uri "/" extension-id)}})]
-    (db/with-conn
-      (db/set-extension-config! extension-id :webhook-id (data "id")))))
+    (db/set-extension-config! extension-id :webhook-id (data "id"))))
 
 (defn unregister-webhook
   [extension-id webhook-id]
@@ -180,22 +175,21 @@
             tag-id (get-in extension [:config :tag-id])]
         (if-let [task-data (get task "data")]
           (do (timbre/debugf "adding thread for task %s" task-data)
-              (db/with-conn
-                (db/create-message! {:thread-id thread-id
-                                     :group-id (extension :group-id)
-                                     :id (db/uuid)
-                                     :content (format new-issue-format
-                                                      (get-in task-data ["followers" 0 "name"])
-                                                      (task-data "name")
-                                                      (task-data "notes"))
-                                     :user-id (extension :user-id)
-                                     :created-at (java.util.Date.)
-                                     :mentioned-user-ids ()
-                                     :mentioned-tag-ids [tag-id]})
-                (db/set-extension-config!
-                  (extension :id)
-                  :thread->issue (assoc thread->issue thread-id resource))
-                (db/extension-subscribe (extension :id) thread-id))
+              (db/create-message! {:thread-id thread-id
+                                   :group-id (extension :group-id)
+                                   :id (db/uuid)
+                                   :content (format new-issue-format
+                                              (get-in task-data ["followers" 0 "name"])
+                                              (task-data "name")
+                                              (task-data "notes"))
+                                   :user-id (extension :user-id)
+                                   :created-at (java.util.Date.)
+                                   :mentioned-user-ids ()
+                                   :mentioned-tag-ids [tag-id]})
+              (db/set-extension-config!
+                (extension :id)
+                :thread->issue (assoc thread->issue thread-id resource))
+              (db/extension-subscribe (extension :id) thread-id)
               (sync/broadcast-thread thread-id ()))
           (timbre/warnf "No such task %s" resource))))
 
@@ -211,17 +205,16 @@
                           (.startsWith (story-data "text") comment-prefix))
               (timbre/debugf "new comment %s" story story-data)
               ; TODO: check to make sure comment wasn't one we sent
-              (db/with-conn
-                (db/create-message! {:thread-id thread-id
-                                     :id (db/uuid)
-                                     :content (format issue-comment-format
-                                                (get-in story-data ["created_by" "name"])
-                                                (story-data "text"))
-                                     :user-id (extension :user-id)
-                                     :group-id (extension :group-id)
-                                     :created-at (java.util.Date.)
-                                     :mentioned-user-ids ()
-                                     :mentioned-tag-ids ()}))
+              (db/create-message! {:thread-id thread-id
+                                   :id (db/uuid)
+                                   :content (format issue-comment-format
+                                              (get-in story-data ["created_by" "name"])
+                                              (story-data "text"))
+                                   :user-id (extension :user-id)
+                                   :group-id (extension :group-id)
+                                   :created-at (java.util.Date.)
+                                   :mentioned-user-ids ()
+                                   :mentioned-tag-ids ()})
               (sync/broadcast-thread thread-id ())))
           (timbre/warnf "No existing thread for resource %s" resource))))))
 
@@ -229,8 +222,7 @@
   [extension event-req]
   (if-let [secret (get-in event-req [:headers "x-hook-secret"])]
     (do (timbre/debugf "webhook handshake for %s" (extension :id))
-        (db/with-conn
-          (db/set-extension-config! (extension :id) :webhook-secret secret))
+        (db/set-extension-config! (extension :id) :webhook-secret secret)
       {:status 200 :headers {"X-Hook-Secret" secret}})
     (if-let [signature (get-in event-req [:headers "x-hook-signature"])]
       (let [body (:body event-req)
@@ -256,7 +248,7 @@
   [extension msg]
   (timbre/debugf "New message %s for extension %s" msg extension)
   (if-let [issue (get-in extension [:config :thread->issue (msg :thread-id)])]
-    (let [sender (db/with-conn (db/user-by-id (msg :user-id)))]
+    (let [sender (db/user-by-id (msg :user-id))]
       (fetch-asana-info
         (extension :id) :post (str "/tasks/" issue "/stories")
         {:form-params {"text" (format comment-format-str (sender :nickname)
@@ -280,8 +272,7 @@
 
 (defn select-project
   [ext project-id]
-  (db/with-conn
-    (db/set-extension-config! (ext :id) :project-id project-id))
+  (db/set-extension-config! (ext :id) :project-id project-id)
   (register-webhook (ext :id) project-id)
   (edn-response {:ok true}))
 

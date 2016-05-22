@@ -1,5 +1,7 @@
 (ns chat.test.server.asana-extension
   (:require [clojure.test :refer :all]
+            [mount.core :as mount]
+            [braid.server.conf :as conf]
             [chat.server.db :as db]
             [chat.server.extensions :as ext]
             [chat.server.extensions.asana :as asana]
@@ -7,10 +9,14 @@
 
 (use-fixtures :each
               (fn [t]
-                (binding [db/*uri* "datomic:mem://chat-test"]
-                  (db/init!)
-                  (db/with-conn (t))
-                  (datomic.api/delete-database db/*uri*))))
+                (-> (mount/only #{#'conf/config #'db/conn})
+                    (mount/swap {#'conf/config
+                                 {:db-url "datomic:mem://chat-test"}})
+                    (mount/start))
+                (t)
+                (datomic.api/delete-database (conf/config :db-url))
+                (mount/stop)))
+
 
 (deftest subscribe-extension
   (let [group (db/create-group! {:id (db/uuid) :name "g1"})

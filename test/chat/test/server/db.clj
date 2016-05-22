@@ -1,15 +1,21 @@
 (ns chat.test.server.db
   (:require [clojure.test :refer :all]
+            [mount.core :as mount]
             [chat.test.server.test-utils :refer [fetch-messages]]
-            [chat.server.db :as db]
+            [braid.server.conf :as conf]
+            [chat.server.db :as db :refer [conn]]
             [chat.server.search :as search]))
+
 
 (use-fixtures :each
               (fn [t]
-                (binding [db/*uri* "datomic:mem://chat-test"]
-                  (db/init!)
-                  (db/with-conn (t))
-                  (datomic.api/delete-database db/*uri*))))
+                (-> (mount/only #{#'conf/config #'db/conn})
+                    (mount/swap {#'conf/config
+                                 {:db-url "datomic:mem://chat-test"}})
+                    (mount/start))
+                (t)
+                (datomic.api/delete-database (conf/config :db-url))
+                (mount/stop)))
 
 
 (deftest create-user
@@ -49,7 +55,8 @@
                    :password "foobar"
                    :avatar "foo@bar.com"}]
         (is (some? (db/create-user! other)))
-        (is (thrown? java.util.concurrent.ExecutionException @(db/set-nickname! (other :id)  "ol' fooy")))))))
+        (is (thrown? java.util.concurrent.ExecutionException
+                     @(db/set-nickname! (other :id)  "ol' fooy")))))))
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)

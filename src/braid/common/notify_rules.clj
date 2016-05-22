@@ -5,11 +5,11 @@
 
 (defn tag->group
   [tag-id]
-  (db/with-conn (db/tag-group-id tag-id)))
+  (db/tag-group-id tag-id))
 
 (defn thread->tags
   [thread-id]
-  (:tag-ids (db/with-conn (db/get-thread thread-id))))
+  (:tag-ids (db/get-thread thread-id)))
 
 (defn thread->groups [thread-id]
   (into #{} (map tag->group) (thread->tags thread-id)))

@@ -33,7 +33,7 @@
 (defroutes desktop-client-routes
   ; public group page
   (GET "/group/:group-name" [group-name :as req]
-    (if-let [group (db/with-conn (db/public-group-with-name group-name))]
+    (if-let [group (db/public-group-with-name group-name)]
       (clostache/render-resource "public/public_group_desktop.html.mustache"
                                  {:group-name (group :name)
                                   :group-id (group :id)
@@ -45,7 +45,7 @@
   ; invite accept page
   (GET "/accept" [invite :<< as-uuid tok]
     (if (and invite tok)
-      (if-let [invite (db/with-conn (db/get-invite invite))]
+      (if-let [invite (db/get-invite invite)]
         {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
         {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
@@ -54,7 +54,7 @@
   (GET "/reset" [user :<< as-uuid token :as req]
     (if-let [u (and user token
                  (invites/verify-reset-nonce {:id user} token)
-                 (db/with-conn (db/user-by-id user)))]
+                 (db/user-by-id user))]
       {:status 200
        :headers {"Content-Type" "text/html"}
        :body (invites/reset-page u token)}
@@ -75,7 +75,7 @@
   ; check if already logged in
   (GET "/check" req
     (if-let [user-id (get-in req [:session :user-id])]
-      (if-let [user (db/with-conn (db/user-id-exists? user-id))]
+      (if-let [user (db/user-id-exists? user-id)]
         {:status 200 :body ""}
         {:status 401 :body "" :session nil})
       {:status 401 :body "" :session nil}))
@@ -84,7 +84,7 @@
   (POST "/auth" req
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
-                         (db/with-conn (db/authenticate-user email password))))]
+                         (db/authenticate-user email password)))]
       {:status 200 :session (assoc (req :session) :user-id user-id)}
       {:status 401 :body (pr-str {:error true})}))
   ; log out
@@ -93,7 +93,7 @@
 
   ; request a password reset
   (POST "/request-reset" [email]
-    (when-let [user (db/with-conn (db/user-with-email email))]
+    (when-let [user (db/user-with-email email)]
       (invites/request-reset (assoc user :email email)))
     {:status 200 :body (pr-str {:ok true})})
 
@@ -111,7 +111,7 @@
         (not (valid-nickname? nickname))
         (assoc fail :body "Nickname must be 1-30 characters without whitespace")
 
-        (db/with-conn (db/nickname-taken? nickname))
+        (db/nickname-taken? nickname)
         (assoc fail :body "nickname taken")
 
         ; TODO: be smarter about this
@@ -119,18 +119,18 @@
         (assoc fail :body "Invalid image")
 
         :else
-        (let [invite (db/with-conn (db/get-invite (java.util.UUID/fromString invite_id)))]
+        (let [invite (db/get-invite (java.util.UUID/fromString invite_id))]
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
             (let [avatar-url (invites/upload-avatar avatar)
-                  user (db/with-conn (db/create-user! {:id (db/uuid)
-                                                       :email email
-                                                       :avatar avatar-url
-                                                       :nickname nickname
-                                                       :password password}))
+                  user (db/create-user! {:id (db/uuid)
+                                         :email email
+                                         :avatar avatar-url
+                                         :nickname nickname
+                                         :password password})
                   referer (get-in req [:headers "referer"] (env :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
-              (db/with-conn
+              (do
                 (db/user-add-to-group! (user :id) (invite :group-id))
                 (db/user-subscribe-to-group-tags! (user :id) (invite :group-id))
                 (db/retract-invitation! (invite :id))
@@ -149,12 +149,12 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/with-conn (db/group-settings group-id))]
+              group-settings (db/group-settings group-id)]
           (if-not (get group-settings :public?)
             (assoc bad-resp :body "No such group or the group is private")
             (if (string/blank? email)
               (assoc bad-resp :body "Invalid email")
-              (if (db/with-conn (db/user-with-email email))
+              (if (db/user-with-email email)
                 (assoc bad-resp
                   :body (str "A user is already registered with that email.\n"
                              "Log in and try joining"))
@@ -164,14 +164,14 @@
                       disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
                       nick (-> (first (string/split email #"@"))
                                (string/replace disallowed-chars ""))
-                      u (db/with-conn (db/create-user! {:id id
+                      u (db/create-user! {:id id
                                                         :email email
                                                         :password (random-nonce 50)
                                                         :avatar avatar
-                                                        :nickname nick}))
+                                                        :nickname nick})
                       referer (get-in req [:headers "referer"] (env :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
-                  (db/with-conn
+                  (do
                     (db/user-add-to-group! id group-id)
                     (db/user-subscribe-to-group-tags! id group-id)
                     (sync/broadcast-group-change
@@ -186,13 +186,13 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/with-conn (db/group-settings group-id))]
+              group-settings (db/group-settings group-id)]
           (if-not (:public? group-settings)
             (assoc bad-resp :body "No such group or the group is private")
             (if-let [user-id (get-in req [:session :user-id])]
               (do
-                (when-not (db/with-conn (db/user-in-group? user-id group-id))
-                  (db/with-conn
+                (when-not (db/user-in-group? user-id group-id)
+                  (do
                     (db/user-add-to-group! user-id group-id)
                     (db/user-subscribe-to-group-tags! user-id group-id)
                     (sync/broadcast-group-change
@@ -215,12 +215,12 @@
         (assoc fail :body "Invalid HMAC")
 
         :else
-        (if-let [user (db/with-conn (db/user-by-id user-id))]
+        (if-let [user (db/user-by-id user-id)]
           (if-let [err (:error (invites/verify-reset-nonce user token))]
             (assoc fail :body err)
             (let [referer (get-in req [:headers "referer"] (env :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
-              (db/with-conn (db/set-user-password! (user :id) new-password))
+              (db/set-user-password! (user :id) new-password)
               {:status 301
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
@@ -231,7 +231,7 @@
   (context "/extension" _
     (GET "/oauth" [state code]
       (let [{ext-id :extension-id} (-> state b64->str edn/read-string)
-            ext (db/with-conn (db/extension-by-id ext-id))]
+            ext (db/extension-by-id ext-id)]
         (if ext
           (do (ext/handle-oauth-token ext state code)
               {:status 302
@@ -239,24 +239,24 @@
                :body ""})
           {:status 400 :body "No such extension"})))
     (POST "/webhook/:ext" [ext :as req]
-      (if-let [ext (db/with-conn (db/extension-by-id (java.util.UUID/fromString ext)))]
+      (if-let [ext (db/extension-by-id (java.util.UUID/fromString ext))]
         (ext/handle-webhook ext req)
         {:status 400 :body "No such extension"}))
     (POST "/config" [extension-id data]
-      (if-let [ext (db/with-conn (db/extension-by-id (java.util.UUID/fromString extension-id)))]
+      (if-let [ext (db/extension-by-id (java.util.UUID/fromString extension-id))]
         (ext/extension-config ext data)
         {:status 400 :body "No such extension"}))))
 
 (defroutes api-private-routes
   (GET "/extract" [url :as {ses :session}]
-    (if (some? (db/with-conn (db/user-by-id (:user-id ses))))
+    (if (some? (db/user-by-id (:user-id ses)))
       (edn-response (embedly/extract url))
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))
 
   (GET "/s3-policy" req
-    (if (some? (db/with-conn (db/user-by-id (get-in req [:session :user-id]))))
+    (if (some? (db/user-by-id (get-in req [:session :user-id])))
       (if-let [policy (s3/generate-policy)]
         {:status 200
          :headers {"Content-Type" "application/edn"}

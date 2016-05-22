@@ -1,15 +1,16 @@
 (ns chat.server.handler
   (:gen-class)
   (:require [org.httpkit.server :refer [run-server]]
+            [mount.core :as mount :refer [defstate]]
             [compojure.core :refer [routes]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults
                                               secure-site-defaults site-defaults]]
             [ring.middleware.edn :refer [wrap-edn-params]]
             [ring.middleware.cors :refer [wrap-cors]]
             [ring.util.response :refer [get-header]]
-            [clojurewerkz.quartzite.scheduler :as qs]
+            [taoensso.timbre :as timbre]
             [clojure.tools.nrepl.server :as nrepl]
-            [chat.server.sync :as sync :refer [sync-routes]]
+            [chat.server.sync :as sync :refer [sync-routes router]]
             [chat.server.routes :as routes
              :refer [desktop-client-routes
                      mobile-client-routes
@@ -21,7 +22,7 @@
             [environ.core :refer [env]]
             ; just requiring to register multimethods
             chat.server.extensions.asana
-            [chat.server.email-digest :as email-digest]))
+            [chat.server.email-digest :refer [email-jobs]]))
 
 (if (= (env :environment) "prod")
   (do
@@ -98,58 +99,62 @@
       wrap-edn-params))
 
 ;; server
-(defonce servers (atom {:api nil
-                        :mobile nil
-                        :desktop nil}))
-
-(defn stop-server!
-  [type]
-  (when-let [stop-fn (@servers type)]
-    (stop-fn :timeout 100)))
 
 (defn start-server!
   [type port]
-  (stop-server! type)
   (let [app (case type
               :api #'api-server-app
               :desktop #'desktop-client-app
               :mobile #'mobile-client-app)]
-    (swap! servers assoc type (run-server app {:port port}))))
+    (run-server app {:port port})))
 
-(defn start-servers! [port]
-  (let [desktop-port port
-        mobile-port (+ 1 port)
-        api-port (+ 2 port)]
-    (println "starting desktop client on port " desktop-port)
-    (start-server! :desktop desktop-port)
-    (println "starting mobile client on port " mobile-port)
-    (start-server! :mobile mobile-port)
-    (reset! conf/api-port api-port)
-    (println "starting api on port " api-port)
-    (start-server! :api api-port)))
+(defn start-servers! []
+  (let [desktop-port (:port (mount/args))
+        mobile-port (inc desktop-port)
+        api-port (inc mobile-port)
+        desktop-server (do
+                         (println "starting desktop client on port " desktop-port)
+                         (start-server! :desktop desktop-port))
+        mobile-server (do (println "starting mobile client on port " mobile-port)
+                          (start-server! :mobile mobile-port))
+        api-server (do (reset! conf/api-port api-port)
+                       (println "starting api on port " api-port)
+                       (start-server! :api api-port))]
+    {:desktop desktop-server
+     :mobile mobile-server
+     :api api-server}))
 
-;; scheduler
-(defonce scheduler (atom nil))
+(defn stop-servers!
+  [srvs]
+  (doseq [[typ srv] srvs]
+    (println "stopping server " (name typ))
+    (srv :timeout 100)))
 
-(defn stop-scheduler!
+(defstate servers
+  :start (start-servers!)
+  :stop (stop-servers! servers))
+
+;; nrepl
+
+(defstate nrepl
+  :start (nrepl/start-server :port (:repl-port (mount/args)))
+  :stop (nrepl/stop-server nrepl))
+
+;; exceptions in background thread handler
+
+(defn set-default-exception-handler
   []
-  (when-let [s @scheduler]
-    (qs/shutdown s)))
+  (Thread/setDefaultUncaughtExceptionHandler
+    (reify Thread$UncaughtExceptionHandler
+      (uncaughtException [_ thread ex]
+        (timbre/errorf "Uncaught exception %s on %s" ex (.getName thread))))))
 
-(defn start-scheduler!
-  []
-  (stop-scheduler!)
-  (reset! scheduler (qs/initialize))
-  (qs/start @scheduler))
+(defstate thread-handler
+  :start (set-default-exception-handler))
 
 ;; main
 (defn -main  [& args]
   (let [port (Integer/parseInt (first args))
         repl-port (Integer/parseInt (second args))]
-    (start-servers! port)
-    (chat.server.sync/start-router!)
-    (nrepl/start-server :port repl-port)
-    (println "starting quartz scheduler")
-    (start-scheduler!)
-    (println "scheduling email digest jobs")
-    (email-digest/add-jobs @scheduler)))
+    (mount/start-with-args {:port port
+                            :repl-port repl-port})))
