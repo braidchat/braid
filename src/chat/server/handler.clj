@@ -137,7 +137,7 @@
 ;; nrepl
 
 (defstate nrepl
-  :start (nrepl/start-server :port (:nrepl-port (mount/args)))
+  :start (nrepl/start-server :port (:repl-port (mount/args)))
   :stop (nrepl/stop-server nrepl))
 
 ;; exceptions in background thread handler
