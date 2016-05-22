@@ -10,7 +10,7 @@
             [ring.util.response :refer [get-header]]
             [taoensso.timbre :as timbre]
             [clojure.tools.nrepl.server :as nrepl]
-            [chat.server.sync :as sync :refer [sync-routes]]
+            [chat.server.sync :as sync :refer [sync-routes router]]
             [chat.server.routes :as routes
              :refer [desktop-client-routes
                      mobile-client-routes
@@ -157,6 +157,4 @@
   (let [port (Integer/parseInt (first args))
         repl-port (Integer/parseInt (second args))]
     (mount/start-with-args {:port port
-                            :repl-port repl-port})
-    (chat.server.sync/start-router!)
-    ))
+                            :repl-port repl-port})))
