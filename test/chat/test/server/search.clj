@@ -1,14 +1,20 @@
 (ns chat.test.server.search
   (:require [clojure.test :refer :all]
+            [mount.core :as mount]
+            [braid.server.conf :as conf]
             [chat.server.db :as db]
             [chat.server.search :as search]))
 
 (use-fixtures :each
               (fn [t]
-                (binding [db/*uri* "datomic:mem://chat-test"]
-                  (db/init!)
-                  (db/with-conn (t))
-                  (datomic.api/delete-database db/*uri*))))
+                (-> (mount/only #{#'conf/config #'db/conn})
+                    (mount/swap {#'conf/config
+                                 {:db-url "datomic:mem://chat-test"}})
+                    (mount/start))
+                (t)
+                (datomic.api/delete-database (conf/config :db-url))
+                (mount/stop)))
+
 
 (deftest query-parsing
   (testing "can properly parse queries"

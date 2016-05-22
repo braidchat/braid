@@ -1,5 +1,7 @@
 (ns braid.test.common.notify-rules-test
   (:require [clojure.test :refer :all]
+            [mount.core :as mount]
+            [braid.server.conf :as conf]
             [schema.core :as s]
             [chat.server.db :as db]
             [braid.common.schema :refer [rules-valid? check-rules!]]
@@ -7,12 +9,16 @@
 
 (s/set-fn-validation! true)
 
+
 (use-fixtures :each
               (fn [t]
-                (binding [db/*uri* "datomic:mem://chat-test"]
-                  (db/init!)
-                  (db/with-conn (t))
-                  (datomic.api/delete-database db/*uri*))))
+                (-> (mount/only #{#'conf/config #'db/conn})
+                    (mount/swap {#'conf/config
+                                 {:db-url "datomic:mem://chat-test"}})
+                    (mount/start))
+                (t)
+                (datomic.api/delete-database (conf/config :db-url))
+                (mount/stop)))
 
 (deftest rules-schema
   (testing "schema can validate rules format"
