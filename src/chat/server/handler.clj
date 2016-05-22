@@ -8,7 +8,7 @@
             [ring.middleware.edn :refer [wrap-edn-params]]
             [ring.middleware.cors :refer [wrap-cors]]
             [ring.util.response :refer [get-header]]
-            [clojurewerkz.quartzite.scheduler :as qs]
+            [taoensso.timbre :as timbre]
             [clojure.tools.nrepl.server :as nrepl]
             [chat.server.sync :as sync :refer [sync-routes]]
             [chat.server.routes :as routes
@@ -22,7 +22,7 @@
             [environ.core :refer [env]]
             ; just requiring to register multimethods
             chat.server.extensions.asana
-            [chat.server.email-digest :as email-digest]))
+            [chat.server.email-digest :refer [email-jobs]]))
 
 (if (= (env :environment) "prod")
   (do
@@ -133,24 +133,6 @@
 (defstate servers
   :start (start-servers!)
   :stop (stop-servers! servers))
-
-;; scheduler
-
-(defn stop-scheduler!
-  [s]
-  (qs/shutdown s))
-
-(defn start-scheduler!
-  []
-  (println "starting quartz scheduler")
-  (doto (qs/initialize)
-    (qs/start)
-    ; TODO: should this go somewhere else?
-    (email-digest/add-jobs)))
-
-(defstate scheduler
-  :start (start-scheduler!)
-  :stop (stop-scheduler! scheduler))
 
 ;; nrepl
 

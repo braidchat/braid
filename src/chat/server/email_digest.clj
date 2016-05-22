@@ -1,9 +1,11 @@
 (ns chat.server.email-digest
-  (:require [clojurewerkz.quartzite
+  (:require [mount.core :refer [defstate]]
+            [clojurewerkz.quartzite
              [triggers :as t]
              [jobs :as j :refer [defjob]]
              [scheduler :as qs]]
             [clojurewerkz.quartzite.schedule.cron :as cron]
+            [braid.server.scheduler :refer [scheduler]]
             [clj-time
              [core :as time]
              [format :as format]
@@ -39,58 +41,57 @@
 
 (defn updates-for-user-since
   [user-id cutoff]
-  (db/with-conn
-    (let [users (db/fetch-users-for-user user-id)
-          id->nick (into {} (map (juxt :id :nickname)) users)
-          id->avatar (into {} (map (juxt :id :avatar)) users)
-          id->tag (into {} (map (juxt :id :name)) (db/fetch-tags-for-user user-id))
-          uuid-re #"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
-          tag-re (re-pattern (str "#" uuid-re))
-          mention-re (re-pattern (str "@" uuid-re))
-          parse-tags-and-metions
-          (fn [content]
-            (-> content
-                (string/replace tag-re
-                                (comp (partial str "#") id->tag str->uuid second))
-                (string/replace
-                  mention-re
-                  (comp (partial str "@") id->nick str->uuid second))))
-          pretty-time (comp
-                        (partial format/unparse (format/formatter "h:mm MMM d"))
-                        to-date-time)]
-      (into ()
-            (comp
-              (filter thread-unseen?)
-              (filter (partial last-message-after? cutoff))
-              (map
-                (fn [t]
-                  (let [thread-last-open (to-date-time
-                                           (db/thread-last-open-at t user-id))]
-                    (update t :messages
-                            (partial map
-                                     (fn [{sender-id :user-id :as m}]
-                                       (-> m
-                                           (update :content parse-tags-and-metions)
-                                           (assoc :unseen
-                                             (if (time/before?
-                                                   (to-date-time (m :created-at))
-                                                   thread-last-open)
-                                               "seen" "unseen"))
-                                           (update :created-at pretty-time)
-                                           (assoc :sender (id->nick sender-id))
-                                           (assoc :sender-avatar
-                                                  (id->avatar sender-id))))))))))
-            (db/get-open-threads-for-user user-id)))))
+  (let [users (db/fetch-users-for-user user-id)
+        id->nick (into {} (map (juxt :id :nickname)) users)
+        id->avatar (into {} (map (juxt :id :avatar)) users)
+        id->tag (into {} (map (juxt :id :name)) (db/fetch-tags-for-user user-id))
+        uuid-re #"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+        tag-re (re-pattern (str "#" uuid-re))
+        mention-re (re-pattern (str "@" uuid-re))
+        parse-tags-and-metions
+        (fn [content]
+          (-> content
+              (string/replace tag-re
+                              (comp (partial str "#") id->tag str->uuid second))
+              (string/replace
+                mention-re
+                (comp (partial str "@") id->nick str->uuid second))))
+        pretty-time (comp
+                      (partial format/unparse (format/formatter "h:mm MMM d"))
+                      to-date-time)]
+    (into ()
+          (comp
+            (filter thread-unseen?)
+            (filter (partial last-message-after? cutoff))
+            (map
+              (fn [t]
+                (let [thread-last-open (to-date-time
+                                         (db/thread-last-open-at t user-id))]
+                  (update t :messages
+                          (partial map
+                                   (fn [{sender-id :user-id :as m}]
+                                     (-> m
+                                         (update :content parse-tags-and-metions)
+                                         (assoc :unseen
+                                                (if (time/before?
+                                                      (to-date-time (m :created-at))
+                                                      thread-last-open)
+                                                  "seen" "unseen"))
+                                         (update :created-at pretty-time)
+                                         (assoc :sender (id->nick sender-id))
+                                         (assoc :sender-avatar
+                                                (id->avatar sender-id))))))))))
+          (db/get-open-threads-for-user user-id))))
 
 (defn daily-update-users
   "Find all ids for users that want daily digest updates"
   []
-  (db/with-conn (db/user-search-preferences :email-frequency :daily)))
+  (db/user-search-preferences :email-frequency :daily))
 
 (defn weekly-update-users
   "Find all ids for users that want weekly digest updates"
   []
-  (db/with-conn (db/user-search-preferences :email-frequency :weekly)))
+  (db/user-search-preferences :email-frequency :weekly))
 
 ; build a message from a thread
 
@@ -125,7 +126,7 @@
         cutoff (time/minus (time/now) (time/days 1))]
     (doseq [uid user-ids]
       (when-let [threads (seq (updates-for-user-since uid cutoff))]
-        (let [email (db/with-conn (db/user-email uid))]
+        (let [email (db/user-email uid)]
           (send-message email (create-message threads)))))))
 
 (defn daily-digest-job
@@ -151,7 +152,7 @@
         cutoff (time/minus (time/now) (time/days 7))]
     (doseq [uid user-ids]
       (when-let [threads (seq (updates-for-user-since uid cutoff))]
-        (let [email (db/with-conn (db/user-email uid))]
+        (let [email (db/user-email uid)]
           (send-message email (create-message threads)))))))
 
 (defn weekly-digest-job
@@ -174,3 +175,12 @@
   (timbre/debugf "scheduling email digest jobs")
   (qs/schedule scheduler (daily-digest-job) (daily-digest-trigger))
   (qs/schedule scheduler (weekly-digest-job) (weekly-digest-trigger)))
+
+(defn remove-jobs
+  [scheduler]
+  (qs/delete-jobs scheduler [(j/key "jobs.daily-email.1")
+                             (j/key "jobs.weekly-email.1")]))
+
+(defstate email-jobs
+  :start (add-jobs scheduler)
+  :stop (remove-jobs scheduler))
