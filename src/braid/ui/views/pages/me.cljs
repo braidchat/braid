@@ -88,6 +88,7 @@
    [:h2 "Invites"]
    [:ul.invites
     (for [invite invites]
+      ^{:key (invite :id)}
       [:li.invite
        "Group "
        [:strong (invite :group-name)]
