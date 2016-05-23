@@ -125,6 +125,9 @@
                             (when focused? "focused")
                             (when dragging? "dragging")])
 
+          :on-click (fn [e]
+                      ; TODO: focus input
+                      (dispatch! :mark-thread-read (thread :id)))
           :on-focus
           (fn [e]
             (set-focused! true))
