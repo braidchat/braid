@@ -41,7 +41,7 @@ Inside the REPL:
 
 Start things running
 ```clojure
-(dev-main)
+(dev-main 5555) ; start main server on port 5555
 ```
 
 Seed some data (first time only):
