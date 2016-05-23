@@ -428,6 +428,7 @@
   [user-id]
   (->> (d/q '[:find (pull ?i [{:invite/group [:group/id :group/name]}
                               {:invite/from [:user/id :user/email :user/nickname]}
+                              :invite/to
                               :invite/id])
               :in $ ?user-id
               :where
