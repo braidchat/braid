@@ -10,6 +10,7 @@
             [ring.util.response :refer [get-header]]
             [taoensso.timbre :as timbre]
             [clojure.tools.nrepl.server :as nrepl]
+            ; requiring router so mount sees state
             [chat.server.sync :as sync :refer [sync-routes router]]
             [chat.server.routes :as routes
              :refer [desktop-client-routes
@@ -22,6 +23,7 @@
             [environ.core :refer [env]]
             ; just requiring to register multimethods
             chat.server.extensions.asana
+            ; requiring so mount sees state
             [chat.server.email-digest :refer [email-jobs]]))
 
 (if (= (env :environment) "prod")
