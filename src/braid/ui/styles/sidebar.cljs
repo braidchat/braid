@@ -18,11 +18,8 @@
 
 (def sidebar
   [:.sidebar
-   mixins/flex
    {:background "#222"
     :padding vars/pad
-    :flex-direction "column"
-    :flex-wrap "nowrap"
     :overflow-x "visible"
     :overflow-y "auto"}
 
@@ -52,9 +49,7 @@
       :position "relative"}]
 
     [:&.plus
-     {:align-self "flex-end"
-      :margin-top "auto"
-      :background "#333"
+     {:background "#333"
       :color "#222"
       :font-family "fontawesome"}
 
