@@ -2,6 +2,7 @@
   (:require [clojure.string :as string]
             [reagent.core :as r]
             [chat.client.reagent-adapter :refer [reagent->react subscribe]]
+            [cljs.core.async :refer [chan put!]]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.s3 :as s3]
@@ -99,6 +100,8 @@
         ; thread box, which is always open
         open? (subscribe [:thread-open? (thread :id)])
 
+        focus-chan (chan)
+
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
@@ -126,7 +129,7 @@
                             (when dragging? "dragging")])
 
           :on-click (fn [e]
-                      ; TODO: focus input
+                      (put! focus-chan (js/Date.))
                       (dispatch! :mark-thread-read (thread :id)))
           :on-focus
           (fn [e]
@@ -196,6 +199,7 @@
 
           [new-message-view {:thread-id (thread :id)
                              :group-id (thread :group-id)
+                             :become-focused-chan focus-chan
                              :new-thread? new?
                              :placeholder (if new?
                                             "Start a conversation..."

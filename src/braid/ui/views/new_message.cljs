@@ -16,7 +16,7 @@
 
 (defn textarea-view [{:keys [text set-text! config on-key-down on-change]}]
   (let [connected? (subscribe [:connected?])
-
+        kill-chan (chan)
         send-message!
         (fn [config text]
           (dispatch! :new-message {:thread-id (config :thread-id)
@@ -34,11 +34,20 @@
            (when (and (not (config :new-thread?))
                    (= (config :thread-id) (store/get-new-thread)))
              (store/clear-new-thread!)
-             (.focus (r/dom-node c)))))
+             (.focus (r/dom-node c))))
+         (let [focus-chan (:become-focused-chan config)]
+           (go (loop []
+                 (let [[_ ch] (alts! [focus-chan kill-chan])]
+                   (when (= ch focus-chan)
+                     (.focus (r/dom-node c))
+                     (recur)))))))
 
        :component-did-update
        (fn [c]
          (resize-textbox (r/dom-node c)))
+
+       :component-will-unmount
+       (fn [] (put! kill-chan (js/Date.)))
 
        :reagent-render
        (fn [{:keys [text set-text! config on-key-down on-change]}]
