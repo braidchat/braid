@@ -356,7 +356,10 @@
     (testing "user 3 can't see thread 1"
       (is (not (db/user-can-see-thread? (user-3 :id) thread-1-id))))
     (testing "user 3 can see thread 2 because they have the tag"
-      (is (db/user-can-see-thread? (user-3 :id) thread-2-id)))))
+      (is (db/user-can-see-thread? (user-3 :id) thread-2-id))
+      (testing "but they can't after leaving"
+        (db/user-leave-group! (user-3 :id) (group-2 :id))
+        (is (not (db/user-can-see-thread? (user-3 :id) thread-2-id)))))))
 
 (deftest user-invite-to-group
   (let [user-1 (db/create-user! {:id (db/uuid)

@@ -655,8 +655,21 @@
                      :group/user [:user/id user-id]]]))
 
 (defn user-leave-group! [user-id group-id]
-  (d/transact conn [[:db/retract [:group/id group-id]
-                     :group/user [:user/id user-id]]]))
+  (let [currently-subscribed (d/q '[:find [?t ...]
+                                    :in $ ?user-id ?group-id
+                                    :where
+                                    [?u :user/id ?user-id]
+                                    [?g :group/id ?group-id]
+                                    [?t :thread/group ?g]
+                                    [?u :user/subscribed-thread ?t]]
+                                  (d/db conn) user-id group-id)
+        unsub-txn (map (fn [t]
+                         [:db/retract [:user/id user-id]
+                          :user/subscribed-thread t])
+                       currently-subscribed)]
+    (d/transact conn (into [[:db/retract [:group/id group-id]
+                             :group/user [:user/id user-id]]]
+                           unsub-txn))))
 
 (defn user-make-group-admin! [user-id group-id]
   (d/transact conn [[:db/add [:group/id group-id]
