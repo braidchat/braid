@@ -13,12 +13,12 @@
   [db-url]
   (when (d/create-database db-url)
     @(d/transact (d/connect db-url)
-       (concat
-         [; partition for our data
-          {:db/ident :entities
-           :db/id #db/id [:db.part/db]
-           :db.install/_partition :db.part/db}]
-         schema))))
+                 (concat
+                   ; partition for our data
+                   [{:db/ident :entities
+                     :db/id #db/id [:db.part/db]
+                     :db.install/_partition :db.part/db}]
+                   schema))))
 
 (defn connect [{:keys [db-url] :as config
                 :or {db-url "datomic:free://localhost:4334/braid"}}]
