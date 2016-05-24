@@ -140,7 +140,7 @@
   [attrs]
   (let [new-id (d/tempid :entities)
         {:keys [db-after tempids]} @(d/transact conn
-                                                [(assoc attrs :db/id new-id)])]
+                                      [(assoc attrs :db/id new-id)])]
     (->> (d/resolve-tempid db-after tempids new-id)
          (d/entity db-after))))
 
@@ -185,9 +185,9 @@
   (if-let [e (user-preference-is-set? user-id k)]
     @(d/transact conn [[:db/add e :user.preference/value (pr-str v)]])
     @(d/transact conn [{:user.preference/key k
-                         :user.preference/value (pr-str v)
-                         :user/_preferences [:user/id user-id]
-                         :db/id #db/id [:entities]}])))
+                        :user.preference/value (pr-str v)
+                        :user/_preferences [:user/id user-id]
+                        :db/id #db/id [:entities]}])))
 
 (defn user-search-preferences
   "Find the ids of users that have the a given value for a given key set in
@@ -232,8 +232,8 @@
   ; upsert-thread
   (when-not (d/entity (d/db conn) [:thread/id thread-id])
     (d/transact conn (concat [{:db/id (d/tempid :entities)
-                                 :thread/id thread-id
-                                 :thread/group [:group/id group-id]}])))
+                               :thread/id thread-id
+                               :thread/group [:group/id group-id]}])))
 
   (let [; for users subscribed to mentioned tags, open and subscribe them to
         ; the thread
@@ -351,7 +351,7 @@
 (defn set-user-password!
   [user-id password]
   @(d/transact conn [[:db/add [:user/id user-id]
-                        :user/password-token (password/encrypt password)]]))
+                      :user/password-token (password/encrypt password)]]))
 
 (defn user-by-id
   [id]
@@ -385,12 +385,12 @@
 (defn get-invite
   [invite-id]
   (some-> (d/pull (d/db conn)
-              [:invite/id
-               {:invite/from [:user/id :user/email :user/nickname]}
-               :invite/to
-               {:invite/group [:group/id :group/name]}]
-              [:invite/id invite-id])
-      db->invitation))
+                  [:invite/id
+                   {:invite/from [:user/id :user/email :user/nickname]}
+                   :invite/to
+                   {:invite/group [:group/id :group/name]}]
+                  [:invite/id invite-id])
+          db->invitation))
 
 (defn retract-invitation!
   [invite-id]
@@ -441,11 +441,11 @@
 (defn get-open-thread-ids-for-user
   [user-id]
   (d/q '[:find [?thread-id ...]
-                :in $ ?user-id
-                :where
-                [?e :user/id ?user-id]
-                [?e :user/open-thread ?thread]
-                [?thread :thread/id ?thread-id]]
+         :in $ ?user-id
+         :where
+         [?e :user/id ?user-id]
+         [?e :user/open-thread ?thread]
+         [?thread :thread/id ?thread-id]]
        (d/db conn)
        user-id))
 
@@ -643,22 +643,22 @@
   ; subscribe to a tag they can't?
   (when (user-in-tag-group? user-id tag-id)
     (d/transact conn [[:db/add [:user/id user-id]
-                         :user/subscribed-tag [:tag/id tag-id]]])))
+                       :user/subscribed-tag [:tag/id tag-id]]])))
 
 (defn user-unsubscribe-from-tag!
   [user-id tag-id]
   (d/transact conn [[:db/retract [:user/id user-id]
-                       :user/subscribed-tag [:tag/id tag-id]]]))
+                     :user/subscribed-tag [:tag/id tag-id]]]))
 
 (defn user-add-to-group! [user-id group-id]
   (d/transact conn [[:db/add [:group/id group-id]
-                       :group/user [:user/id user-id]]]))
+                     :group/user [:user/id user-id]]]))
 
 (defn user-make-group-admin! [user-id group-id]
   (d/transact conn [[:db/add [:group/id group-id]
-                       :group/user [:user/id user-id]]
-                      [:db/add [:group/id group-id]
-                       :group/admins [:user/id user-id]]]))
+                     :group/user [:user/id user-id]]
+                    [:db/add [:group/id group-id]
+                     :group/admins [:user/id user-id]]]))
 
 (defn user-is-group-admin?
   [user-id group-id]
@@ -761,7 +761,7 @@
                                [?thread :thread/tag ?tag]
                                [?msg :message/thread ?thread]
                                [?msg :message/created-at ?time]]
-                              (d/db conn) tag-id)
+                             (d/db conn) tag-id)
         thread-eids (->> all-thread-eids
                          (sort-by second #(compare %2 %1))
                          (map first)
@@ -800,14 +800,14 @@
 (defn save-extension-token!
   [extension-id {:keys [access-token refresh-token]}]
   @(d/transact conn [[:db/add [:extension/id extension-id]
-                        :extension/token access-token]
-                       [:db/add [:extension/id extension-id]
-                        :extension/refresh-token refresh-token]]))
+                      :extension/token access-token]
+                     [:db/add [:extension/id extension-id]
+                      :extension/refresh-token refresh-token]]))
 
 (defn update-extension-config!
   [extension-id config]
   @(d/transact conn [[:db/add [:extension/id extension-id]
-                       :extension/config (pr-str config)]]))
+                      :extension/config (pr-str config)]]))
 
 (defn set-extension-config!
   [extension-id k v]
@@ -830,7 +830,7 @@
   [extension-id thread-id]
   (assert (thread-visible-to-extension? thread-id extension-id))
   @(d/transact conn [[:db/add [:extension/id extension-id]
-                        :extension/watched-threads [:thread/id thread-id]]]))
+                      :extension/watched-threads [:thread/id thread-id]]]))
 
 (defn extensions-watching
   "Get the extensions that are watching the given thread"
@@ -863,7 +863,7 @@
                       (assoc k v)
                       pr-str)]
     (d/transact conn [[:db.fn/cas [:group/id group-id]
-                         :group/settings old-prefs new-prefs]])))
+                       :group/settings old-prefs new-prefs]])))
 
 (defn public-group-with-name
   [group-name]
