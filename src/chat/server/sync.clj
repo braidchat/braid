@@ -39,7 +39,8 @@
 (defmulti event-msg-handler :id)
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
-  (when-not (= event [:chsk/ws-ping]) (debugf "Event: %s" event))
+  (when-not (= event [:chsk/ws-ping])
+    (debugf "User: %s Event: %s" (get-in ev-msg [:ring-req :session :user-id]) event))
   (event-msg-handler ev-msg))
 
 (defstate router
