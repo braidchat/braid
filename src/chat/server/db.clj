@@ -654,6 +654,10 @@
   (d/transact conn [[:db/add [:group/id group-id]
                      :group/user [:user/id user-id]]]))
 
+(defn user-leave-group! [user-id group-id]
+  (d/transact conn [[:db/retract [:group/id group-id]
+                     :group/user [:user/id user-id]]]))
+
 (defn user-make-group-admin! [user-id group-id]
   (d/transact conn [[:db/add [:group/id group-id]
                      :group/user [:user/id user-id]]

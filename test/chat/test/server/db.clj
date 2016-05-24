@@ -119,7 +119,10 @@
     (is (not (db/user-visible-to-user? (user-1 :id) (user-3 :id))))
     (is (not (db/user-visible-to-user? (user-3 :id) (user-1 :id))))
     (is (db/user-visible-to-user? (user-2 :id) (user-3 :id)))
-    (is (db/user-visible-to-user? (user-3 :id) (user-2 :id)))))
+    (is (db/user-visible-to-user? (user-3 :id) (user-2 :id)))
+    (db/user-leave-group! (user-1 :id) (group-1 :id))
+    (is (not (db/user-in-group? (user-1 :id) (group-1 :id))))
+    (is (not (db/user-visible-to-user? (user-1 :id) (user-2 :id))))))
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
