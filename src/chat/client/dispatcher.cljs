@@ -356,5 +356,4 @@
 
 (defmethod sync/event-handler :chat/notify-message
   [[_ message]]
-  (println "Got notification " message)
   (notify/notify {:msg (:content message)}))
