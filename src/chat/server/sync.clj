@@ -15,7 +15,8 @@
             [chat.server.extensions :refer [handle-thread-change]]
             [chat.server.email-digest :as email]
             [braid.common.schema :refer [new-message-valid?]]
-            [braid.common.notify-rules :as notify-rules]))
+            [braid.common.notify-rules :as notify-rules]
+            [braid.server.message-format :refer [parse-tags-and-mentions]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -158,12 +159,20 @@
     (doseq [uid subscribed-user-ids]
       (when-let [rules (db/user-get-preference uid :notification-rules)]
         (when (notify-rules/notify? uid rules new-message)
-          (if (online? uid)
-            (chsk-send! uid [:chat/notify-message new-message])
-            (-> (email/create-message
-                  [(db/get-thread (new-message :thread-id))])
-                (assoc :subject "Notification from Braid")
-                (->> (email/send-message (db/user-email uid))))))))))
+          (let [msg (update new-message :content
+                            (partial parse-tags-and-mentions uid))]
+            (if (online? uid)
+              (chsk-send! uid [:chat/notify-message msg])
+              (let [update-msgs
+                    (partial
+                      map
+                      (fn [m] (update m :content
+                                      (partial parse-tags-and-mentions uid))))]
+                (-> (email/create-message
+                      [(-> (db/get-thread (msg :thread-id))
+                           (update :messages update-msgs))])
+                    (assoc :subject "Notification from Braid")
+                    (->> (email/send-message (db/user-email uid))))))))))))
 
 ;; Handlers
 
