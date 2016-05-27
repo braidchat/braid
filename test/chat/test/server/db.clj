@@ -34,7 +34,7 @@
                  (assoc :nickname "foo")))))
     (testing "can set nickname"
       (is (not (db/nickname-taken? "ol' fooy")))
-      @(db/set-nickname! (user :id) "ol' fooy")
+      (db/set-nickname! (user :id) "ol' fooy")
       (is (db/nickname-taken? "ol' fooy"))
       (is (= (-> (db/user-with-email "foo@bar.com")
                  (dissoc :group-ids))

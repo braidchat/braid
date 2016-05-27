@@ -231,9 +231,9 @@
 
   ; upsert-thread
   (when-not (d/entity (d/db conn) [:thread/id thread-id])
-    (d/transact conn (concat [{:db/id (d/tempid :entities)
-                               :thread/id thread-id
-                               :thread/group [:group/id group-id]}])))
+    @(d/transact conn (concat [{:db/id (d/tempid :entities)
+                                :thread/id thread-id
+                                :thread/group [:group/id group-id]}])))
 
   (let [; for users subscribed to mentioned tags, open and subscribe them to
         ; the thread
@@ -326,7 +326,7 @@
 (defn set-nickname!
   "Set the user's nickname"
   [user-id nickname]
-  (d/transact conn [[:db/add [:user/id user-id] :user/nickname nickname]]))
+  @(d/transact conn [[:db/add [:user/id user-id] :user/nickname nickname]]))
 
 (defn get-nickname
   [user-id]
@@ -394,7 +394,7 @@
 
 (defn retract-invitation!
   [invite-id]
-  (d/transact conn [[:db.fn/retractEntity [:invite/id invite-id]]]))
+  @(d/transact conn [[:db.fn/retractEntity [:invite/id invite-id]]]))
 
 (defn fetch-users-for-user
   "Get all users visible to given user"
@@ -528,10 +528,10 @@
                     [?u :user/open-thread ?t]]
                   (d/db conn) user-id thread-id))
     ; TODO: should find a better way of handling this...
-    (d/transact conn
-      [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
-    (d/transact conn
-      [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
+    @(d/transact conn
+       [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
+    @(d/transact conn
+       [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
 
 (defn get-open-threads-for-user
   [user-id]
@@ -577,9 +577,9 @@
 
 (defn user-hide-thread!
   [user-id thread-id]
-  (d/transact
-    conn
-    [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
+  @(d/transact
+     conn
+     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
 (defn create-tag!
   [attrs]
@@ -642,17 +642,17 @@
   ; TODO: throw an exception/some sort of error condition if user tried to
   ; subscribe to a tag they can't?
   (when (user-in-tag-group? user-id tag-id)
-    (d/transact conn [[:db/add [:user/id user-id]
-                       :user/subscribed-tag [:tag/id tag-id]]])))
+    @(d/transact conn [[:db/add [:user/id user-id]
+                        :user/subscribed-tag [:tag/id tag-id]]])))
 
 (defn user-unsubscribe-from-tag!
   [user-id tag-id]
-  (d/transact conn [[:db/retract [:user/id user-id]
-                     :user/subscribed-tag [:tag/id tag-id]]]))
+  @(d/transact conn [[:db/retract [:user/id user-id]
+                      :user/subscribed-tag [:tag/id tag-id]]]))
 
 (defn user-add-to-group! [user-id group-id]
-  (d/transact conn [[:db/add [:group/id group-id]
-                     :group/user [:user/id user-id]]]))
+  @(d/transact conn [[:db/add [:group/id group-id]
+                      :group/user [:user/id user-id]]]))
 
 (defn user-leave-group! [user-id group-id]
   (let [currently-subscribed (d/q '[:find [?t ...]
@@ -667,15 +667,15 @@
                          [:db/retract [:user/id user-id]
                           :user/subscribed-thread t])
                        currently-subscribed)]
-    (d/transact conn (into [[:db/retract [:group/id group-id]
-                             :group/user [:user/id user-id]]]
-                           unsub-txn))))
+    @(d/transact conn (into [[:db/retract [:group/id group-id]
+                              :group/user [:user/id user-id]]]
+                            unsub-txn))))
 
 (defn user-make-group-admin! [user-id group-id]
-  (d/transact conn [[:db/add [:group/id group-id]
-                     :group/user [:user/id user-id]]
-                    [:db/add [:group/id group-id]
-                     :group/admins [:user/id user-id]]]))
+  @(d/transact conn [[:db/add [:group/id group-id]
+                      :group/user [:user/id user-id]]
+                     [:db/add [:group/id group-id]
+                      :group/admins [:user/id user-id]]]))
 
 (defn user-is-group-admin?
   [user-id group-id]
@@ -700,7 +700,8 @@
        (map (fn [[tag]]
               [:db/add [:user/id user-id]
                :user/subscribed-tag tag]))
-       (d/transact conn)))
+       (d/transact conn)
+       deref))
 
 (defn get-user-subscribed-tag-ids
   [user-id]
@@ -792,8 +793,8 @@
 
 (defn tag-set-description!
   [tag-id description]
-  (d/transact conn [[:db/add [:tag/id tag-id]
-                     :tag/description description]]))
+  @(d/transact conn [[:db/add [:tag/id tag-id]
+                      :tag/description description]]))
 
 (defn create-extension!
   [{:keys [id type group-id user-id config]}]
@@ -879,8 +880,8 @@
         new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
                       (assoc k v)
                       pr-str)]
-    (d/transact conn [[:db.fn/cas [:group/id group-id]
-                       :group/settings old-prefs new-prefs]])))
+    @(d/transact conn [[:db.fn/cas [:group/id group-id]
+                        :group/settings old-prefs new-prefs]])))
 
 (defn public-group-with-name
   [group-name]

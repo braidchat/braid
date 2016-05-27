@@ -225,7 +225,7 @@
   (when-let [user-id (get-in ring-req [:session :user-id])]
     (if (valid-nickname? (?data :nickname))
       (try
-        (do @(db/set-nickname! user-id (?data :nickname))
+        (do (db/set-nickname! user-id (?data :nickname))
             (broadcast-user-change user-id [:user/name-change
                                             {:user-id user-id
                                              :nickname (?data :nickname)}])
