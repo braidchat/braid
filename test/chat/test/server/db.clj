@@ -300,8 +300,26 @@
       (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-1 :thread-id)))))
     (testing "user can hide thread"
       (db/user-hide-thread! (user-1 :id) (message-2 :thread-id))
-      (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id)))))))
-
+      (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id)))))
+    (testing "thread is re-opened when it gets another message"
+      (let [user-2 (db/create-user! {:id (db/uuid) :email "bar@baz.com"
+                                     :password "foobar" :avatar ""})]
+        (db/create-message! {:id (db/uuid)
+                             :group-id (group :id)
+                             :user-id (user-2 :id)
+                             :thread-id (message-1 :thread-id)
+                             :created-at (java.util.Date.)
+                             :content "wake up"})
+        (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-1 :thread-id)))
+        (testing "unless the user has unsubscribed from the thread"
+          (db/user-unsubscribe-from-thread! (user-1 :id) (message-2 :thread-id))
+          (db/create-message! {:id (db/uuid)
+                               :group-id (group :id)
+                               :user-id (user-2 :id)
+                               :thread-id (message-2 :thread-id)
+                               :created-at (java.util.Date.)
+                               :content "wake up"})
+          (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id)))))))))
 
 (deftest user-thread-visibility
   (let [user-1 (db/create-user! {:id (db/uuid)

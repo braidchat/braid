@@ -650,6 +650,11 @@
   @(d/transact conn [[:db/retract [:user/id user-id]
                       :user/subscribed-tag [:tag/id tag-id]]]))
 
+(defn user-unsubscribe-from-thread!
+  [user-id thread-id]
+  @(d/transact conn [[:db/retract [:user/id user-id]
+                      :user/subscribed-thread [:thread/id thread-id]]]))
+
 (defn user-add-to-group! [user-id group-id]
   @(d/transact conn [[:db/add [:group/id group-id]
                       :group/user [:user/id user-id]]]))
