@@ -406,6 +406,25 @@
       (db/retract-invitation! invite-id)
       (is (empty? (db/fetch-invitations-for-user (user-2 :id)))))))
 
+(deftest user-leaving-group
+  (let [user-1 (db/create-user! {:id (db/uuid)
+                                 :email "foo@bar.com"
+                                 :password "foobar"
+                                 :avatar ""})
+        group (db/create-group! {:id (db/uuid) :name "group 1"})
+        thread-id (db/uuid)]
+    (db/create-message! {:id (db/uuid) :thread-id thread-id
+                         :group-id (group :id) :user-id (user-1 :id)
+                         :created-at (java.util.Date.)
+                         :content "foobar"
+                         :mentioned-user-ids [(user-1 :id)]
+                         :mentioned-tag-ids []})
+    (testing "user leaving group removes mentios of that user"
+      (is (= #{(user-1 :id)}
+             (:mentioned-ids (db/get-thread thread-id))))
+      (db/user-leave-group! (user-1 :id) (group :id))
+      (is (empty? (:mentioned-ids (db/get-thread thread-id)))))))
+
 (deftest adding-user-to-group-subscribes-tags
   (let [user (db/create-user! {:id (db/uuid)
                                :email "foo@bar.com"
