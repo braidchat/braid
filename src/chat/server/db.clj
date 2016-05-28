@@ -660,30 +660,28 @@
                       :group/user [:user/id user-id]]]))
 
 (defn user-leave-group! [user-id group-id]
-  (let [unsub-txn (->>
-                    (d/q '[:find [?t ...]
-                           :in $ ?user-id ?group-id
-                           :where
-                           [?u :user/id ?user-id]
-                           [?g :group/id ?group-id]
-                           [?t :thread/group ?g]
-                           [?u :user/subscribed-thread ?t]]
-                         (d/db conn) user-id group-id)
-                    (map (fn [t]
-                           [:db/retract [:user/id user-id]
-                            :user/subscribed-thread t])))
-        unmention-txn (->>
-                        (d/q '[:find [?t ...]
-                               :in $ ?user-id ?group-id
-                               :where
-                               [?u :user/id ?user-id]
-                               [?g :group/id ?group-id]
-                               [?t :thread/group ?g]
-                               [?t :thread/mentioned ?u]]
-                             (d/db conn) user-id group-id)
-                        (map (fn [t]
-                               [:db/retract t
-                                :thread/mentioned [:user/id user-id]])))]
+  (let [unsub-txn (->> (d/q '[:find [?t ...]
+                              :in $ ?user-id ?group-id
+                              :where
+                              [?u :user/id ?user-id]
+                              [?g :group/id ?group-id]
+                              [?t :thread/group ?g]
+                              [?u :user/subscribed-thread ?t]]
+                            (d/db conn) user-id group-id)
+                       (map (fn [t]
+                              [:db/retract [:user/id user-id]
+                               :user/subscribed-thread t])))
+        unmention-txn (->> (d/q '[:find [?t ...]
+                                  :in $ ?user-id ?group-id
+                                  :where
+                                  [?u :user/id ?user-id]
+                                  [?g :group/id ?group-id]
+                                  [?t :thread/group ?g]
+                                  [?t :thread/mentioned ?u]]
+                                (d/db conn) user-id group-id)
+                           (map (fn [t]
+                                  [:db/retract t
+                                   :thread/mentioned [:user/id user-id]])))]
     @(d/transact conn (concat
                         [[:db/retract [:group/id group-id]
                           :group/user [:user/id user-id]]]
