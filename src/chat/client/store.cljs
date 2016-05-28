@@ -45,7 +45,8 @@
           (s/optional-key :search-query) s/Str
           (s/optional-key :search-error?) s/Bool}
    :session (s/maybe {:user-id s/Uuid})
-   :errors [[(s/one (s/cond-pre s/Keyword s/Str) "err-key") (s/one s/Str "msg")]]
+   :errors [[(s/one (s/cond-pre s/Keyword s/Str) "err-key") (s/one s/Str "msg")
+             (s/one (s/enum :error :warn :info) "type")]]
    :invitations [app-schema/Invitation]
    :preferences {s/Keyword s/Any}
    :notifications {:window-visible? s/Bool
@@ -70,7 +71,7 @@
         (reset! app-state old-state)
         ; Not just calling display-error! to avoid possibility of infinite loop
         (swap! app-state update-in [:errors] conj
-               [(str :internal-consistency (rand-int 100)) "Something has gone wrong"])))))
+               [(str :internal-consistency (rand-int 100)) "Something has gone wrong" :error])))))
 
 ; login state
 
@@ -89,8 +90,11 @@
 
 ; error
 
-(defn display-error! [err-key msg]
-  (transact! [:errors] #(conj % [err-key msg])))
+(defn display-error!
+  ([err-key msg]
+   (display-error! err-key msg :error))
+  ([err-key msg cls]
+   (transact! [:errors] #(conj % [err-key msg cls]))))
 
 (defn clear-error! [err-key]
   (transact! [:errors] #(into [] (remove (fn [[k _]] (= k err-key))) %)))

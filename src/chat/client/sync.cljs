@@ -38,7 +38,7 @@
     (do
       (debugf "Channel socket state change: %s" ?data)
       (if (not (:open? ?data))
-        (store/display-error! :disconnected "Disconnected")
+        (store/display-error! :disconnected "Disconnected" :warn)
         (store/clear-error! :disconnected))))
   (event-handler [:socket/connected ?data]))
 

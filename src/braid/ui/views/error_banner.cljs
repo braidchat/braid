@@ -7,9 +7,10 @@
     (fn []
       [:div.error-banners
        (doall
-         (for [[err-key err] @errors]
+         (for [[err-key err cls] @errors]
            ^{:key err-key}
            [:div.error-banner
+            {:class cls}
             err
             [:span.close
              {:on-click (fn [_] (store/clear-error! err-key))}

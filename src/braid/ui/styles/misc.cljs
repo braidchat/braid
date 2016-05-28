@@ -46,8 +46,13 @@
    [:.error-banner
     {:margin-bottom (rem 0.25)
      :font-size (em 2)
-     :background-color "rgba(255, 5, 14, 0.6)"
      :text-align "center"}
+    [:&.error
+     {:background-color "rgba(255, 5, 14, 0.6)"}]
+    [:&.warn
+     {:background-color "rgba(255, 190, 5, 0.6)"}]
+    [:&.info
+     {:background-color "rgba(5, 255, 70, 0.6)"}]
 
      [:.close
       {:margin-left (em 1)
