@@ -319,7 +319,16 @@
                                :thread-id (message-2 :thread-id)
                                :created-at (java.util.Date.)
                                :content "wake up"})
-          (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id)))))))))
+          (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id))))
+          (testing "but they get re-subscribed if they get mentioned/another tag is added"
+            (db/create-message! {:id (db/uuid)
+                                 :group-id (group :id)
+                                 :user-id (user-2 :id)
+                                 :thread-id (message-2 :thread-id)
+                                 :created-at (java.util.Date.)
+                                 :content "wake up"
+                                 :mentioned-user-ids [(user-1 :id)]})
+            (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id)))))))))
 
 (deftest user-thread-visibility
   (let [user-1 (db/create-user! {:id (db/uuid)
