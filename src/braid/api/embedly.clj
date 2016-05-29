@@ -1,5 +1,6 @@
 (ns braid.api.embedly
   (:require [org.httpkit.client :as http]
+            [taoensso.timbre :as timbre]
             [environ.core :refer [env]]
             [clojure.data.json :as json]))
 
@@ -20,4 +21,8 @@
 
 (defn extract [url]
   (when (env :embedly-key)
-    (get-json-memo url)))
+    (try
+      (get-json-memo url)
+      (catch java.io.EOFException ex
+        (timbre/warnf "EOF while parsing embedly json for %s" url)
+        nil))))
