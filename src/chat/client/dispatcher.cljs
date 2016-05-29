@@ -219,6 +219,9 @@
   (sync/chsk-send! [:chat/make-user-admin args])
   (store/add-group-admin! group-id user-id))
 
+(defmethod dispatch! :remove-from-group [ _ {:keys [group-id user-id] :as args}]
+  (sync/chsk-send! [:chat/remove-from-group args]))
+
 (defmethod dispatch! :set-intro [_ {:keys [group-id intro] :as args}]
   (sync/chsk-send! [:chat/set-group-intro args])
   (store/set-group-intro! group-id intro))
@@ -326,6 +329,19 @@
   [[_ {:keys [user-id nickname]}]]
   (store/update-user-nick! user-id nickname))
 
+(defmethod sync/event-handler :user/left-group
+  [[_ [group-id group-name]]]
+  (store/remove-group! {:id group-id})
+  ; TODO: move the user if they're current in that group?
+  (store/display-error!
+    (str "left-" group-id)
+    (str "You have been removed from " group-name)
+    :info)
+  (when-let [sidebar-order (:groups-order (store/user-preferences))]
+    (store/add-preferences!
+      {:groups-order (into [] (remove (partial = group-id))
+                           sidebar-order)})))
+
 (defmethod sync/event-handler :user/connected
   [[_ user-id]]
   (store/update-user-status! user-id :online))
@@ -337,6 +353,10 @@
 (defmethod sync/event-handler :group/new-user
   [[_ user]]
   (store/add-user! (assoc user :status :online)))
+
+(defmethod sync/event-handler :group/user-left
+  [[_ [group-id user-id]]]
+  (store/remove-user-group! user-id group-id))
 
 (defmethod sync/event-handler :group/new-admin
   [[_ [group-id new-admin-id]]]

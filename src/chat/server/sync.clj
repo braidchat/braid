@@ -387,6 +387,20 @@
         (broadcast-group-change group-id
                                 [:group/new-admin [group-id new-admin-id]])))))
 
+(defmethod event-msg-handler :chat/remove-from-group
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (let [{group-id :group-id to-remove-id :user-id} ?data]
+      (when (and group-id to-remove-id
+              (or (= to-remove-id user-id)
+                (db/user-is-group-admin? user-id group-id)))
+        (db/user-leave-group! to-remove-id group-id)
+        (broadcast-group-change group-id [:group/user-left
+                                          [group-id to-remove-id]])
+        (chsk-send!
+          to-remove-id
+          [:user/left-group [group-id (:name (db/get-group group-id))]])))))
+
 (defmethod event-msg-handler :chat/set-group-intro
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
