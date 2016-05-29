@@ -295,14 +295,24 @@
 (defmethod event-msg-handler :chat/create-group
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]
-    (if-not (db/group-exists? (?data :name))
-      (let [new-group (db/create-group! ?data)]
-        (db/user-make-group-admin! user-id (new-group :id)))
+    (cond
+      (string/blank? (?data :name))
+      (do
+        (timbre/warnf "User %s attempted to create group with a bad name '%s'"
+                      user-id (?data :name))
+        (when ?reply-fn
+          (?reply-fn {:error "Bad group name"})))
+
+      (db/group-exists? (?data :name))
       (do
         (timbre/warnf "User %s attempted to create group that already exsits %s"
                       user-id (?data :name))
         (when ?reply-fn
-          (?reply-fn {:error "Group name already taken"}))))))
+          (?reply-fn {:error "Group name already taken"})))
+
+      :else
+      (let [new-group (db/create-group! ?data)]
+        (db/user-make-group-admin! user-id (new-group :id))))))
 
 (defmethod event-msg-handler :chat/search
   [{:keys [event id ?data ring-req ?reply-fn send-fn] :as ev-msg}]

@@ -1,5 +1,6 @@
 (ns braid.ui.views.pages.group-explore
   (:require [reagent.core :as r]
+            [clojure.string :as string]
             [chat.client.dispatcher :refer [dispatch!]])
   (:import [goog.events KeyCodes]))
 
@@ -24,7 +25,8 @@
                        (.preventDefault e)
                        (dispatch! :create-group {:name @new-group-name})
                        (reset! new-group-name "")))}]
-          [:button {:on-click (fn [_]
+          [:button {:disabled (string/blank? @new-group-name)
+                    :on-click (fn [_]
                                 (dispatch! :create-group {:name @new-group-name})
                                 (reset! new-group-name ""))}
            "Create"]]]]])))
