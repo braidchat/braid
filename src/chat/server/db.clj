@@ -682,6 +682,10 @@
                            (map (fn [t]
                                   [:db/retract t
                                    :thread/mentioned [:user/id user-id]])))]
+    (when-let [order (user-get-preference user-id :groups-order)]
+      (user-set-preference!
+        user-id :groups-order
+        (into [] (remove (partial = group-id)) order)))
     @(d/transact conn (concat
                         [[:db/retract [:group/id group-id]
                           :group/user [:user/id user-id]]]
