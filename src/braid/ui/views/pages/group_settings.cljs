@@ -4,7 +4,20 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.s3 :as s3]
-            [chat.client.store :as store]))
+            [chat.client.store :as store]
+            [chat.client.routes :as routes]))
+
+(defn leave-group-view
+  [group]
+  (let [user-id (subscribe [:user-id])]
+    (fn [group]
+      [:button {:on-click (fn [_]
+                            (when (js/confirm "Are you sure you want to leave this group?")
+                              (dispatch! :remove-from-group
+                                         {:group-id (group :id)
+                                          :user-id @user-id})
+                              (routes/go-to! (routes/index-path))))}
+       "Leave this group"])))
 
 (defn intro-message-view
   [group]
@@ -76,9 +89,8 @@
         admin? (subscribe [:current-user-is-group-admin?] [group-id])]
     (fn []
       [:div.page.settings
-       (if (not @admin?)
-         [:h1 "Permission Denied"]
-         [:div
-          [:h1 (str "Settings for " (:name @group))]
-          [intro-message-view @group]
-          [group-avatar-view @group]])])))
+       [:div
+        [:h1 (str "Settings for " (:name @group))]
+        [leave-group-view @group]
+        (when @admin? [intro-message-view @group])
+        (when @admin? [group-avatar-view @group])]])))

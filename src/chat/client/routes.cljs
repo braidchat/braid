@@ -49,7 +49,7 @@
     (go-to! (inbox-page-path {:group-id group-id}))))
 
 (defn current-group []
-  (get-in @store/app-state [:open-group-id]))
+  (store/open-group-id))
 
 (defn current-path? [path]
   (= path (.getPath (.parse Uri js/window.location))))

@@ -9,14 +9,22 @@
   [user admin?]
   (let [group-id (subscribe [:open-group-id])
         user-id (r/atom (user :id))
-        user-is-admin? (subscribe [:user-is-group-admin?] [user-id group-id])]
+        user-is-admin? (subscribe [:user-is-group-admin?] [user-id group-id])
+        current-user-id (subscribe [:user-id])]
     (fn [user admin?]
       [:li [user-pill-view (user :id)]
        (when (and admin? (not @user-is-admin?))
          [:button {:on-click (fn [_]
                                (dispatch! :make-admin {:user-id (user :id)
                                                        :group-id @group-id}))}
-          "Make Admin"])])))
+          "Make Admin"])
+       (when admin?
+         [:button {:on-click (fn [_]
+                               (when (js/confirm "Remove user from this group?")
+                                 (dispatch! :remove-from-group
+                                            {:group-id @group-id
+                                             :user-id (user :id)})))}
+          "Remove From Group"])])))
 
 (defn users-list-view
   [users admin?]

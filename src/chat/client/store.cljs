@@ -124,6 +124,11 @@
 (defn add-user! [user]
   (transact! [:users] #(assoc % (:id user) user)))
 
+(defn remove-user-group! [user-id group-id]
+  ; TODO: also remove user from collection if group-ids is now empty? shouldn't make a difference
+  ; TODO: remove mentions of that user from the group?
+  (transact! [:users user-id :group-ids] (partial remove (partial = group-id))))
+
 (defn update-user-nick! [user-id nick]
   (transact! [:users user-id :nickname] (constantly nick)))
 
@@ -382,9 +387,13 @@
   (transact! [:groups] (flip assoc (group :id) group)))
 
 (defn remove-group! [group]
+  (let [group-threads (get-in @app-state [:group-threads (group :id)])]
+    (transact! [:threads] #(apply dissoc % group-threads)))
+  (transact! [:group-threads] (flip dissoc (group :id)))
   (transact! [:groups] (flip dissoc (group :id))))
 
 (defn become-group-admin! [group-id]
+  (transact! [:users (current-user-id) :group-ids] #(vec (conj (set %) group-id)))
   (transact! [:groups group-id :admins] #(conj % (current-user-id))))
 
 (defn add-group-admin! [group-id user-id]

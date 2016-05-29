@@ -124,7 +124,6 @@
      [help-page-pane-view]
      [users-online-pane-view]
      [tags-pane-view]
-     (when @admin?
-       [group-settings-view])
+     [group-settings-view]
      [search-bar-view]
      [current-user-button-view]])))
