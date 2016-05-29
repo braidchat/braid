@@ -386,6 +386,9 @@
   (transact! [:groups] (flip assoc (group :id) group)))
 
 (defn remove-group! [group]
+  (let [group-threads (get-in @app-state [:group-threads (group :id)])]
+    (transact! [:threads] #(apply dissoc % group-threads)))
+  (transact! [:group-threads] (flip dissoc (group :id)))
   (transact! [:groups] (flip dissoc (group :id))))
 
 (defn become-group-admin! [group-id]
