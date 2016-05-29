@@ -125,7 +125,8 @@
   (transact! [:users] #(assoc % (:id user) user)))
 
 (defn remove-user-group! [user-id group-id]
-  ; XXX: also remove user from collection if group-ids is now empty? shouldn't make a difference
+  ; TODO: also remove user from collection if group-ids is now empty? shouldn't make a difference
+  ; TODO: remove mentions of that user from the group?
   (transact! [:users user-id :group-ids] (partial remove (partial = group-id))))
 
 (defn update-user-nick! [user-id nick]
