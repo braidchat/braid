@@ -392,6 +392,7 @@
   (transact! [:groups] (flip dissoc (group :id))))
 
 (defn become-group-admin! [group-id]
+  (transact! [:users (current-user-id) :group-ids] #(vec (conj (set %) group-id)))
   (transact! [:groups group-id :admins] #(conj % (current-user-id))))
 
 (defn add-group-admin! [group-id user-id]
