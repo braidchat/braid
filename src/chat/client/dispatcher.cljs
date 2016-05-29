@@ -6,6 +6,7 @@
             [chat.client.schema :as schema]
             [chat.shared.util :as util]
             [chat.client.router :as router]
+            [chat.client.routes :as routes]
             [chat.client.xhr :refer [edn-xhr]]
             [braid.desktop.notify :as notify]))
 
@@ -332,7 +333,6 @@
 (defmethod sync/event-handler :user/left-group
   [[_ [group-id group-name]]]
   (store/remove-group! {:id group-id})
-  ; TODO: move the user if they're current in that group?
   (store/display-error!
     (str "left-" group-id)
     (str "You have been removed from " group-name)
@@ -340,7 +340,9 @@
   (when-let [sidebar-order (:groups-order (store/user-preferences))]
     (store/add-preferences!
       {:groups-order (into [] (remove (partial = group-id))
-                           sidebar-order)})))
+                           sidebar-order)}))
+  (when (= group-id (store/open-group-id))
+    (routes/go-to! (routes/index-path))))
 
 (defmethod sync/event-handler :user/connected
   [[_ user-id]]
