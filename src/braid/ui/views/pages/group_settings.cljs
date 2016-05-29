@@ -4,7 +4,8 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.s3 :as s3]
-            [chat.client.store :as store]))
+            [chat.client.store :as store]
+            [chat.client.routes :as routes]))
 
 (defn leave-group-view
   [group]
@@ -14,7 +15,8 @@
                             (when (js/confirm "Are you sure you want to leave this group?")
                               (dispatch! :remove-from-group
                                          {:group-id (group :id)
-                                          :user-id @user-id})))}
+                                          :user-id @user-id})
+                              (routes/go-to! (routes/index-path))))}
        "Leave this group"])))
 
 (defn intro-message-view
