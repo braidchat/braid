@@ -33,6 +33,7 @@
     (do (timbre/warnf "Expired nonce %s for invite %s" nonce invite)
         {:error "Expired token"})))
 
+;; invite by email
 (defn make-email-invite-link
   [invite]
   (let [secret-nonce (random-nonce 20)]
@@ -120,6 +121,8 @@
     (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename)
                           (s3/grant :all-users :read))
     (str "https://s3.amazonaws.com/" (env :aws-domain) "/avatars/" avatar-filename)))
+
+;; reset paswords
 
 (defn request-reset
   [user]
