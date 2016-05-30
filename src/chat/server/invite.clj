@@ -22,14 +22,6 @@
     mac
     (hmac hmac-secret data)))
 
-(defn make-invite-link
-  [invite]
-  (let [secret-nonce (random-nonce 20)]
-    (cache-set! (str (invite :id)) secret-nonce)
-    (str (env :site-url)
-         "/accept?tok=" secret-nonce
-         "&invite=" (invite :id))))
-
 (defn verify-invite-nonce
   "Verify that the given nonce is valid for the invite"
   [invite nonce]
@@ -41,9 +33,17 @@
     (do (timbre/warnf "Expired nonce %s for invite %s" nonce invite)
         {:error "Expired token"})))
 
+(defn make-email-invite-link
+  [invite]
+  (let [secret-nonce (random-nonce 20)]
+    (cache-set! (str (invite :id)) secret-nonce)
+    (str (env :site-url)
+         "/accept?tok=" secret-nonce
+         "&invite=" (invite :id))))
+
 (defn invite-message
   [invite]
-  (let [accept-link (make-invite-link invite)]
+  (let [accept-link (make-email-invite-link invite)]
     {:text (str (invite :inviter-email) " has invited to join the " (invite :group-name)
                 " group on " (env :site-url) ".\n\n"
                 "Go to " accept-link " to accept.")
