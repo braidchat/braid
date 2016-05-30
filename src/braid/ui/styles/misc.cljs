@@ -58,6 +58,40 @@
       {:margin-left (em 1)
        :cursor "pointer"}]]])
 
+(def page-headers
+  [[".page > .title::before"
+    {:margin-right (em 0.5)}]
+
+   [".page.inbox > .title::before"
+    (mixins/fontawesome \uf01c)]
+
+   [".page.recent > .title::before"
+    (mixins/fontawesome \uf1da)]
+
+   [".page.users > .title::before"
+    (mixins/fontawesome \uf0c0)]
+
+   [".page.channels > .title::before"
+    (mixins/fontawesome \uf02c)]
+
+   [".page.settings > .title::before"
+    (mixins/fontawesome \uf013)]
+
+   [".page.search > .title::before"
+    (mixins/fontawesome \uf002)]
+
+   [".page.help > .title::before"
+    (mixins/fontawesome \uf059)]
+
+   [".page.me > .title::before"
+    (mixins/fontawesome \uf007)]
+
+   [".page.userpage > .title::before"
+    (mixins/fontawesome \uf007)]
+
+   [".page.channel > .title::before"
+    (mixins/fontawesome \uf02b)]])
+
 (def page
   [:.page
 

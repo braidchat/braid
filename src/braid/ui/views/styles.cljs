@@ -33,6 +33,7 @@
                braid.ui.styles.misc/emojione
                braid.ui.styles.misc/error-banners
                braid.ui.styles.misc/page
+               braid.ui.styles.misc/page-headers
                braid.ui.styles.misc/channels-page
                braid.ui.styles.misc/settings-page
                braid.ui.styles.misc/me-page

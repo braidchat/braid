@@ -32,7 +32,7 @@
                                       reverse))]
 
     (fn []
-      [:div.page.channel
+      [:div.page.userpage
        [:div.title
         [user-pill-view (@user :id)]]
        [:div.content
