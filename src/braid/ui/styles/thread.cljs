@@ -133,8 +133,7 @@
       :box-sizing "border-box"
       :min-height (em 3.5)
       :box-shadow "0 0 1px 1px #ccc"
-      :border-radius vars/border-radius
-    }
+      :border-radius vars/border-radius}
 
       [:&:focus
        {:outline "none"}]]
