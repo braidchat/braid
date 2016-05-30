@@ -30,7 +30,8 @@
      :transition [["box-shadow" "0.2s"]]
      :max-height "100%"
      :background "white"
-     :border-radius vars/border-radius}]])
+     :border-radius [[vars/border-radius
+                      vars/border-radius 0 0]]}]])
 
 (defn notice [pad]
   [:.thread
