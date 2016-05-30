@@ -29,7 +29,8 @@
      :box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
      :transition [["box-shadow" "0.2s"]]
      :max-height "100%"
-     :background "white"}]])
+     :background "white"
+     :border-radius vars/border-radius}]])
 
 (defn notice [pad]
   [:.thread
@@ -131,7 +132,8 @@
       :border "none"
       :box-sizing "border-box"
       :min-height (em 3.5)
-      :box-shadow "0 0 1px 1px #ccc"}
+      :box-shadow "0 0 1px 1px #ccc"
+      :border-radius vars/border-radius}
 
       [:&:focus
        {:outline "none"}]]
@@ -192,5 +194,3 @@
     mixins/spin
     {:font-size (em 1.5)
      :text-align "center"}]])
-
-
