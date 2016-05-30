@@ -89,8 +89,8 @@
         admin? (subscribe [:current-user-is-group-admin?] [group-id])]
     (fn []
       [:div.page.settings
-       [:div
-        [:h1 (str "Settings for " (:name @group))]
+       [:div.title (str "Settings for " (:name @group))]
+       [:div.content
         [leave-group-view @group]
         (when @admin? [intro-message-view @group])
         (when @admin? [group-avatar-view @group])]])))
