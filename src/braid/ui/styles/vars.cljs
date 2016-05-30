@@ -1,5 +1,5 @@
 (ns braid.ui.styles.vars
-  (:require [garden.units :refer [rem]]
+  (:require [garden.units :refer [rem px]]
             [garden.arithmetic :as m]))
 
 (def avatar-size (rem 2))
@@ -16,3 +16,5 @@
 (def grey-text "#888")
 
 (def dark-bg-color "#3A4767")
+
+(def border-radius (px 3))
