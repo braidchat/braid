@@ -60,7 +60,7 @@
 
      [:.users
       [:.title:after
-       (mixins/fontawesome \uf007)
+       (mixins/fontawesome \uf0c0)
        {:margin-left (em 0.25)}]]
 
      [:.tags
