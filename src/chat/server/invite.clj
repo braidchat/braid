@@ -7,6 +7,7 @@
             [taoensso.carmine :as car]
             [image-resizer.core :as img]
             [image-resizer.format :as img-format]
+            [clostache.parser :as clostache]
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
             [chat.server.crypto :refer [hmac constant-comp]]
             [chat.server.conf :refer [api-port]]))
@@ -70,28 +71,13 @@
         form-hmac (hmac hmac-secret
                         (str now token (invite :id) (invite :invitee-email)))
         api-domain (or (:api-domain env) (str "localhost:" @api-port))]
-    ; TODO: use mustache instead
-    (str "<!DOCTYPE html>"
-         "<html>"
-         "  <head>"
-         "   <title>Register for Chat</title>"
-         "   <link href=\"/css/out/chat.css\" rel=\"stylesheet\" type=\"text/css\"></style>"
-         "  </head>"
-         "  <body>"
-         "  <p>Upload an avatar for " (invite :invitee-email) "</p>"
-         "  <form action=\"//" api-domain "/register\" method=\"POST\" enctype=\"multipart/form-data\">"
-         "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"
-         "    <input type=\"hidden\" name=\"invite_id\" value=\"" (invite :id) "\">"
-         "    <input type=\"hidden\" name=\"email\" value=\"" (invite :invitee-email) "\">"
-         "    <input type=\"hidden\" name=\"now\" value=\"" now "\">"
-         "    <input type=\"hidden\" name=\"hmac\" value=\"" form-hmac "\">"
-         "    <input type=\"file\" name=\"avatar\" size=\"20\">"
-         "    <label>Nickname: <input type=\"text\" name=\"nickname\"></label>"
-         "    <label>Password: <input type=\"password\" name=\"password\"></label>"
-         "    <input type=\"submit\" value=\"Register\")>"
-         "  </form>"
-         "  </body>"
-         "</html>")))
+    (clostache/render-resource "templates/register_page.html.mustache"
+                               {:invitee_email (invite :invitee-email)
+                                :api_domain api-domain
+                                :token token
+                                :invite_id (invite :id)
+                                :now now
+                                :form_hmac form-hmac})))
 
 (defn verify-form-hmac
   [params]
@@ -173,21 +159,9 @@
   (let [now (.getTime (java.util.Date.))
         form-hmac (hmac hmac-secret (str now token (user :id)))
         api-domain (or (:api-domain env) (str "localhost:" @api-port))]
-    ; TODO: use mustache instead
-    (str "<!DOCTYPE html>"
-         "<html>"
-         "  <head>"
-         "   <title>Reset Password</title>"
-         "   <link href=\"/css/out/chat.css\" rel=\"stylesheet\" type=\"text/css\"></style>"
-         "  </head>"
-         "  <body>"
-         "  <form action=\"//" api-domain "/reset\" method=\"POST\">"
-         "    <input type=\"hidden\" name=\"user-id\" value=\"" (user :id) "\">"
-         "    <input type=\"hidden\" name=\"now\" value=\"" now "\">"
-         "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"
-         "    <input type=\"hidden\" name=\"hmac\" value=\"" form-hmac "\">"
-         "    <label>New Password: <input type=\"password\" name=\"new-password\"></label>"
-         "    <input type=\"submit\" value=\"Set New Password\">"
-         "  </form>"
-         "  </body>"
-         "</html>")))
+    (clostache/render-resource "templates/reset_page.html.mustache"
+                               {:api_domain api-domain
+                                :user_id (user :id)
+                                :now now
+                                :token token
+                                :form_hmac form-hmac})))
