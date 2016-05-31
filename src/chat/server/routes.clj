@@ -34,10 +34,10 @@
   ; public group page
   (GET "/group/:group-name" [group-name :as req]
     (if-let [group (db/public-group-with-name group-name)]
-      (clostache/render-resource "public/public_group_desktop.html.mustache"
+      (clostache/render-resource "templates/public_group_desktop.html.mustache"
                                  {:group-name (group :name)
                                   :group-id (group :id)
-                                  :api_domain (or (:api-domain env) (str "localhost:" @api-port))})
+                                  :api-domain (or (:api-domain env) (str "localhost:" @api-port))})
       {:status 403
        :headers {"Content-Type" "text/plain"}
        :body "No such public group"}))
