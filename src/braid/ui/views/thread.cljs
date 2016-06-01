@@ -118,7 +118,8 @@
       (let [{:keys [dragging? uploading? focused?]} @state
             new? (thread :new?)
             private? (thread-private? thread)
-            limbo? (thread-limbo? thread)]
+            limbo? (thread-limbo? thread)
+            archived? (and (not @open?) (not new?))]
 
         [:div.thread
          {:class
@@ -126,7 +127,8 @@
                             (when private? "private")
                             (when limbo? "limbo")
                             (when focused? "focused")
-                            (when dragging? "dragging")])
+                            (when dragging? "dragging")
+                            (when archived? "archived")])
 
           :on-click (fn [e]
                       (put! focus-chan (js/Date.))

@@ -19,9 +19,32 @@
 
    [:&.new
     {:z-index 99}]
+
    [:&:before ; switch to :after to align at top
     {:content "\"\""
      :flex-grow 1}]
+
+   [:&.archived :&.limbo :&.private
+    [:.head:before
+     {:content "\"\""
+      :display "block"
+      :width "100%"
+      :height (px 5)
+      :position "absolute"
+      :top 0
+      :left 0}]
+
+      [:&.archived
+       [:.head:before
+        {:background vars/archived-thread-accent-color}]]
+
+      [:&.private
+       [:.head:before
+        {:background vars/private-thread-accent-color}]]
+
+      [:&.limbo
+       [:.head:before
+        {:background vars/limbo-thread-accent-color}]]]
 
    [:.card
     mixins/flex
@@ -51,35 +74,20 @@
     [:.card
      {; needs to be a better way
       ; which is based on the height of the notice
-      :max-height "85%"}]
-
-    [:.head:before
-     {:content "\"\""
-      :display "block"
-      :width "100%"
-      :height (px 5)
-      :position "absolute"
-      :top 0
-      :left 0}]]
+      :max-height "85%"}]]
 
    [:&.private
-    [:.head:before
-     {:background "#5f7997"}]
-
     [:.notice
      {:background "#D2E7FF"
-      :color "#5f7997"}
+      :color vars/private-thread-accent-color}
 
      [:&:before
       (mixins/fontawesome \uf21b)]]]
 
    [:&.limbo
-    [:.head:before
-     {:background "#CA1414"}]
-
     [:.notice
      {:background "#ffe4e4"
-      :color "#CA1414"}
+      :color vars/limbo-thread-accent-color}
 
      [:&:before
       (mixins/fontawesome \uf071)]]]])
