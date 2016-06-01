@@ -187,7 +187,7 @@
                 (assoc bad-resp
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
-                (let [user-id (register-user email group-id)
+                (let [id (register-user email group-id)
                       referer (get-in req [:headers "referer"] (env :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
