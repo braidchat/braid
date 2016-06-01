@@ -82,6 +82,24 @@
                                   (start-upload (group :id)
                                                 (.. e -target -files)))}]]])]])))
 
+(defn publicity-view
+  [group]
+  [:div.setting.publicity
+   [:h2 "Group Publicity Status"]
+   (if (group :public?)
+     [:div
+      [:p "Anyone can join this group by going to "
+       [:a {:href (str "/group/" (group :name))} "this link"]]
+      [:button {:on-click (fn [_]
+                            (dispatch! :make-group-private! (group :id)))}
+       "Make private"]]
+     [:div
+      [:p "This group is private (people can only join if invited)"]
+      [:button {:on-click (fn [_]
+                            (when (js/confirm "Make this group open to anyone?")
+                              (dispatch! :make-group-public! (group :id))))}
+       "Make public"]])])
+
 (defn group-settings-view
   []
   (let [group (subscribe [:active-group])
@@ -93,4 +111,5 @@
        [:div.content
         [leave-group-view @group]
         (when @admin? [intro-message-view @group])
-        (when @admin? [group-avatar-view @group])]])))
+        (when @admin? [group-avatar-view @group])
+        (when @admin? [publicity-view @group])]])))

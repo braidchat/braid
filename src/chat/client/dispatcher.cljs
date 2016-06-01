@@ -231,6 +231,12 @@
   (sync/chsk-send! [:chat/set-group-avatar args])
   (store/set-group-avatar! group-id avatar))
 
+(defmethod dispatch! :make-group-public! [_ group-id]
+  (sync/chsk-send! [:chat/set-group-publicity [group-id true]]))
+
+(defmethod dispatch! :make-group-private! [_ group-id]
+  (sync/chsk-send! [:chat/set-group-publicity [group-id false]]))
+
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
             :method :get
@@ -375,6 +381,10 @@
 (defmethod sync/event-handler :group/new-avatar
   [[_ [group-id avatar]]]
   (store/set-group-avatar! group-id avatar))
+
+(defmethod sync/event-handler :group/publicity-changed
+  [[_ [group-id publicity]]]
+  (store/set-group-publicity! group-id publicity))
 
 (defmethod sync/event-handler :chat/notify-message
   [[_ message]]
