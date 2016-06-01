@@ -36,15 +36,15 @@
 
       [:&.private
        [:.head:before
-        {:background "#5f7997"}]]
+        {:background vars/private-thread-accent-color}]]
 
       [:&.limbo
        [:.head:before
-        {:background "#CA1414"}]]
+        {:background vars/limbo-thread-accent-color}]]
 
       [:&.archived
        [:.head:before
-        {:background "#AAAAAA"}]]]
+        {:background vars/archived-thread-accent-color}]]]
 
    [:.card
     mixins/flex
@@ -78,7 +78,7 @@
    [:&.private
     [:.notice
      {:background "#D2E7FF"
-      :color "#5f7997"}
+      :color vars/private-thread-accent-color}
 
      [:&:before
       (mixins/fontawesome \uf21b)]]]
@@ -86,7 +86,7 @@
    [:&.limbo
     [:.notice
      {:background "#ffe4e4"
-      :color "#CA1414"}
+      :color vars/limbo-thread-accent-color}
 
      [:&:before
       (mixins/fontawesome \uf071)]]]])
