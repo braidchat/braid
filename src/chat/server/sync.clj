@@ -363,6 +363,17 @@
         "User %s attempted to invite %s to a group %s they don't have access to"
         user-id (?data :invitee-email) (?data :group-id)))))
 
+(defmethod event-msg-handler :chat/generate-invite-link
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [user-id (get-in ring-req [:session :user-id])]
+    (if (db/user-in-group? user-id (?data :group-id))
+      (let [{:keys [group-id expires]} ?data]
+        (?reply-fn {:link (invites/make-open-invite-link group-id expires)}))
+      (do (timbre/warnf
+            "User %s attempted to invite %s to a group %s they don't have access to"
+            user-id (?data :invitee-email) (?data :group-id))
+          (?reply-fn {:braid/error :not-allowed})))))
+
 (defmethod event-msg-handler :chat/invitation-accept
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [user-id (get-in ring-req [:session :user-id])]

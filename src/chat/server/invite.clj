@@ -8,8 +8,11 @@
             [image-resizer.core :as img]
             [image-resizer.format :as img-format]
             [clostache.parser :as clostache]
+            [clj-time.core :as t]
+            [clj-time.coerce :as c]
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
             [chat.server.crypto :refer [hmac constant-comp]]
+            [chat.server.db :as db]
             [chat.server.conf :refer [api-port]]))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
@@ -107,6 +110,36 @@
     (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename)
                           (s3/grant :all-users :read))
     (str "https://s3.amazonaws.com/" (env :aws-domain) "/avatars/" avatar-filename)))
+
+;; invite by link
+
+(defn make-open-invite-link
+  "Create a link that will allow anyone with the link to register until it expires"
+  [group-id expires]
+  (let [nonce (random-nonce 20)
+        expiry (->> (case expires
+                      :day (t/days 1)
+                      :week (t/weeks 1)
+                      :month (t/months 1)
+                      :never (t/years 1000))
+                    (t/plus (t/now))
+                    (c/to-long))
+        mac (hmac hmac-secret (str nonce group-id expiry))]
+    (str (env :site-url) "/invite?group-id=" group-id "&nonce=" nonce
+         "&expiry=" expiry "&mac=" mac)))
+
+(defn link-signup-page
+  [group-id]
+  (let [now (.getTime (java.util.Date.))
+        group (db/get-group group-id)
+        form-hmac (hmac hmac-secret (str now group-id))
+        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+    (clostache/render-resource "templates/link_signup.html.mustache"
+                               {:api-domain api-domain
+                                :now now
+                                :form-hmac form-hmac
+                                :group-id group-id
+                                :group-name (group :name)})))
 
 ;; reset paswords
 

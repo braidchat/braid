@@ -208,6 +208,16 @@
   (let [invite (schema/make-invitation data)]
     (sync/chsk-send! [:chat/invite-to-group invite])))
 
+(defmethod dispatch! :generate-link [_ {:keys [group-id expires complete]}]
+  (println "dispatching generate")
+  (sync/chsk-send!
+    [:chat/generate-invite-link {:group-id group-id :expires expires}]
+    5000
+    (fn [reply]
+      ; indicate error if it fails?
+      (when-let [link (:link reply)]
+        (complete link)))))
+
 (defmethod dispatch! :accept-invite [_ invite]
   (sync/chsk-send! [:chat/invitation-accept invite])
   (store/remove-invite! invite))
