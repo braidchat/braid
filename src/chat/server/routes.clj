@@ -71,6 +71,35 @@
   (GET "/*" []
     (get-html "mobile")))
 
+(defn register-user
+  [email group-id]
+  (let [id (db/uuid)
+        avatar (identicons/id->identicon-data-url id)
+        ; XXX: copied from chat.shared.util/nickname-rd
+        disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
+        nick (-> (first (string/split email #"@"))
+                 (string/replace disallowed-chars ""))
+        ; TODO: guard against duplicate nickname?
+        u (db/create-user! {:id id
+                            :email email
+                            :password (random-nonce 50)
+                            :avatar avatar
+                            :nickname nick})]
+    (db/user-add-to-group! id group-id)
+    (db/user-subscribe-to-group-tags! id group-id)
+    (sync/broadcast-group-change group-id
+                                 [:group/new-user (db/user-by-id id)])
+    id))
+
+(defn join-group
+  [user-id group-id]
+  (when-not (db/user-in-group? user-id group-id)
+    (db/user-add-to-group! user-id group-id)
+    (db/user-subscribe-to-group-tags! user-id group-id)
+    (sync/broadcast-group-change
+      group-id
+      [:group/new-user (db/user-by-id user-id)])))
+
 (defroutes api-public-routes
   ; check if already logged in
   (GET "/check" req
@@ -156,27 +185,11 @@
               (assoc bad-resp :body "Invalid email")
               (if (db/user-with-email email)
                 (assoc bad-resp
-                  :body (str "A user is already registered with that email.\n"
-                             "Log in and try joining"))
-                (let [id (db/uuid)
-                      avatar (identicons/id->identicon-data-url id)
-                      ; XXX: copied from chat.shared.util/nickname-rd
-                      disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
-                      nick (-> (first (string/split email #"@"))
-                               (string/replace disallowed-chars ""))
-                      u (db/create-user! {:id id
-                                                        :email email
-                                                        :password (random-nonce 50)
-                                                        :avatar avatar
-                                                        :nickname nick})
+                       :body (str "A user is already registered with that email.\n"
+                                  "Log in and try joining"))
+                (let [user-id (register-user email group-id)
                       referer (get-in req [:headers "referer"] (env :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
-                  (do
-                    (db/user-add-to-group! id group-id)
-                    (db/user-subscribe-to-group-tags! id group-id)
-                    (sync/broadcast-group-change
-                      group-id
-                      [:group/new-user (db/user-by-id id)]))
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
                    :session (assoc (req :session) :user-id id)
                    :body ""}))))))))
@@ -191,13 +204,7 @@
             (assoc bad-resp :body "No such group or the group is private")
             (if-let [user-id (get-in req [:session :user-id])]
               (do
-                (when-not (db/user-in-group? user-id group-id)
-                  (do
-                    (db/user-add-to-group! user-id group-id)
-                    (db/user-subscribe-to-group-tags! user-id group-id)
-                    (sync/broadcast-group-change
-                      group-id
-                      [:group/new-user (db/user-by-id user-id)])))
+                (join-group user-id group-id)
                 (let [referer (get-in req [:headers "referer"] (env :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302
