@@ -71,7 +71,8 @@
    :admins #{s/Uuid}
    :intro (s/maybe s/Str)
    :avatar (s/maybe s/Str)
-   :extensions [Extension]})
+   :extensions [Extension]
+   :public? s/Bool})
 
 (def User
   {:id s/Uuid
