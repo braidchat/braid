@@ -13,7 +13,7 @@
                  [environ "1.0.2"]
                  [com.taoensso/timbre "4.3.1" :exclusions [org.clojure/tools.reader]]
                  [crypto-password "0.2.0"]
-                 [joda-time "2.9.2"]
+                 [clj-time "0.11.0"]
                  [instaparse "1.4.1"]
                  [com.taoensso/carmine "2.12.2"]
                  [clj-aws-s3 "0.3.10" :exclusions [joda-time]]

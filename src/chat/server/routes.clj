@@ -34,10 +34,10 @@
   ; public group page
   (GET "/group/:group-name" [group-name :as req]
     (if-let [group (db/public-group-with-name group-name)]
-      (clostache/render-resource "public/public_group_desktop.html.mustache"
+      (clostache/render-resource "templates/public_group_desktop.html.mustache"
                                  {:group-name (group :name)
                                   :group-id (group :id)
-                                  :api_domain (or (:api-domain env) (str "localhost:" @api-port))})
+                                  :api-domain (or (:api-domain env) (str "localhost:" @api-port))})
       {:status 403
        :headers {"Content-Type" "text/plain"}
        :body "No such public group"}))
@@ -49,6 +49,14 @@
         {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
         {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
+
+  ; invite link
+  (GET "/invite" [group-id :<< as-uuid nonce expiry mac]
+    (if (and group-id nonce expiry mac)
+      (if (invites/verify-hmac mac (str nonce group-id expiry))
+        {:status 200 :headers {"Content-Type" "text/html"} :body (invites/link-signup-page group-id)}
+        {:status 400 :headers {"Content-Type" "text/plain"} :body "Parameter verification failed"})
+      {:status 400 :headers {"Content-Type" "text/plain"} :body "Missing required parameters"}))
 
   ; password reset page
   (GET "/reset" [user :<< as-uuid token :as req]
@@ -70,6 +78,35 @@
   ; TODO: add mobile routse for public joining & password resets
   (GET "/*" []
     (get-html "mobile")))
+
+(defn register-user
+  [email group-id]
+  (let [id (db/uuid)
+        avatar (identicons/id->identicon-data-url id)
+        ; XXX: copied from chat.shared.util/nickname-rd
+        disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
+        nick (-> (first (string/split email #"@"))
+                 (string/replace disallowed-chars ""))
+        ; TODO: guard against duplicate nickname?
+        u (db/create-user! {:id id
+                            :email email
+                            :password (random-nonce 50)
+                            :avatar avatar
+                            :nickname nick})]
+    (db/user-add-to-group! id group-id)
+    (db/user-subscribe-to-group-tags! id group-id)
+    (sync/broadcast-group-change group-id
+                                 [:group/new-user (db/user-by-id id)])
+    id))
+
+(defn join-group
+  [user-id group-id]
+  (when-not (db/user-in-group? user-id group-id)
+    (db/user-add-to-group! user-id group-id)
+    (db/user-subscribe-to-group-tags! user-id group-id)
+    (sync/broadcast-group-change
+      group-id
+      [:group/new-user (db/user-by-id user-id)])))
 
 (defroutes api-public-routes
   ; check if already logged in
@@ -142,6 +179,45 @@
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))))))
 
+  ; join by invite link
+  (POST "/link-register" [group-id email now form-hmac :as req]
+    (let [bad-resp {:status 400 :headers {"Content-Type" "text/plain"}}]
+      (if-not group-id
+        (assoc bad-resp :body "Missing group id")
+        (let [group-id (java.util.UUID/fromString group-id)
+              group-settings (db/group-settings group-id)]
+          (if-not (invites/verify-hmac form-hmac (str now group-id))
+            (assoc bad-resp :body "No such group or the request has been tampered with")
+            (if (string/blank? email)
+              (assoc bad-resp :body "Invalid email")
+              (if (db/user-with-email email)
+                (assoc bad-resp
+                       :body (str "A user is already registered with that email.\n"
+                                  "Log in and try joining"))
+                (let [id (register-user email group-id)
+                      referer (get-in req [:headers "referer"] (env :site-url))
+                      [proto _ referrer-domain] (string/split referer #"/")]
+                  {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
+                   :session (assoc (req :session) :user-id id)
+                   :body ""}))))))))
+
+  (POST "/link-join" [group-id now form-hmac :as req]
+    (let [bad-resp {:status 400 :headers {"Content-Type" "text/plain"}}]
+      (if-not group-id
+        (assoc bad-resp :body "Missing group id")
+        (let [group-id (java.util.UUID/fromString group-id)
+              group-settings (db/group-settings group-id)]
+          (if-not (invites/verify-hmac form-hmac (str now group-id))
+            (assoc bad-resp :body "No such group or the request has been tampered with")
+            (if-let [user-id (get-in req [:session :user-id])]
+              (do
+                (join-group user-id group-id)
+                (let [referer (get-in req [:headers "referer"] (env :site-url))
+                      [proto _ referrer-domain] (string/split referer #"/")]
+                  {:status 302
+                   :headers {"Location" (str proto "//" referrer-domain "/" group-id "/inbox")}
+                   :body ""}))
+              (assoc bad-resp :body "Not logged in")))))))
 
   ; join a public group
   (POST "/public-register" [group-id email :as req]
@@ -156,27 +232,11 @@
               (assoc bad-resp :body "Invalid email")
               (if (db/user-with-email email)
                 (assoc bad-resp
-                  :body (str "A user is already registered with that email.\n"
-                             "Log in and try joining"))
-                (let [id (db/uuid)
-                      avatar (identicons/id->identicon-data-url id)
-                      ; XXX: copied from chat.shared.util/nickname-rd
-                      disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
-                      nick (-> (first (string/split email #"@"))
-                               (string/replace disallowed-chars ""))
-                      u (db/create-user! {:id id
-                                                        :email email
-                                                        :password (random-nonce 50)
-                                                        :avatar avatar
-                                                        :nickname nick})
+                       :body (str "A user is already registered with that email.\n"
+                                  "Log in and try joining"))
+                (let [id (register-user email group-id)
                       referer (get-in req [:headers "referer"] (env :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
-                  (do
-                    (db/user-add-to-group! id group-id)
-                    (db/user-subscribe-to-group-tags! id group-id)
-                    (sync/broadcast-group-change
-                      group-id
-                      [:group/new-user (db/user-by-id id)]))
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
                    :session (assoc (req :session) :user-id id)
                    :body ""}))))))))
@@ -191,13 +251,7 @@
             (assoc bad-resp :body "No such group or the group is private")
             (if-let [user-id (get-in req [:session :user-id])]
               (do
-                (when-not (db/user-in-group? user-id group-id)
-                  (do
-                    (db/user-add-to-group! user-id group-id)
-                    (db/user-subscribe-to-group-tags! user-id group-id)
-                    (sync/broadcast-group-change
-                      group-id
-                      [:group/new-user (db/user-by-id user-id)])))
+                (join-group user-id group-id)
                 (let [referer (get-in req [:headers "referer"] (env :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302

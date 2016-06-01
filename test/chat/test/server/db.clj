@@ -150,11 +150,13 @@
         user-id (db/uuid)
         user-2-id (db/uuid)]
     (testing "can create a group"
-      (is (= group (assoc data :extensions () :admins #{} :intro nil :avatar nil))))
+      (is (= group (assoc data :extensions () :admins #{} :intro nil :avatar nil
+                     :public? false))))
     (testing "can set group intro"
       (db/group-set! (group :id) :intro "the intro")
       (is (= (db/get-group (group :id))
-             (assoc data :extensions () :admins #{} :intro "the intro" :avatar nil))))
+             (assoc data :extensions () :admins #{} :intro "the intro" :avatar nil
+               :public? false))))
     (testing "can add a user to the group"
       (let [user (db/create-user! {:id user-id
                                    :email "foo@bar.com"
@@ -163,7 +165,8 @@
         (is (= #{} (db/get-groups-for-user (user :id))))
         (is (= #{} (db/get-users-in-group (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
-        (is (= #{(assoc data :extensions () :admins #{} :intro "the intro" :avatar nil)}
+        (is (= #{(assoc data :extensions () :admins #{} :intro "the intro" :avatar nil
+                   :public? false)}
                (db/get-groups-for-user (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))

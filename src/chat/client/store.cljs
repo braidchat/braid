@@ -405,6 +405,9 @@
 (defn set-group-avatar! [group-id avatar]
   (transact! [:groups group-id :avatar] (constantly avatar)))
 
+(defn set-group-publicity! [group-id publicity]
+  (transact! [:groups group-id :public?] (constantly publicity)))
+
 ; invitations
 
 (defn set-invitations! [invitations]
