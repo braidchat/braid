@@ -34,17 +34,17 @@
       :top 0
       :left 0}]
 
+      [:&.archived
+       [:.head:before
+        {:background vars/archived-thread-accent-color}]]
+
       [:&.private
        [:.head:before
         {:background vars/private-thread-accent-color}]]
 
       [:&.limbo
        [:.head:before
-        {:background vars/limbo-thread-accent-color}]]
-
-      [:&.archived
-       [:.head:before
-        {:background vars/archived-thread-accent-color}]]]
+        {:background vars/limbo-thread-accent-color}]]]
 
    [:.card
     mixins/flex
