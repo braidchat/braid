@@ -18,15 +18,16 @@
   ; thread box, which doesn't have tags anyway
   (let [tags (subscribe [:tags-for-thread (thread :id)])
         mentions (subscribe [:mentions-for-thread (thread :id)])]
-    [:div.tags
-     (doall
-       (for [user @mentions]
-         ^{:key (user :id)}
-         [user-pill-view (user :id)]))
-     (doall
-       (for [tag @tags]
-         ^{:key (tag :id)}
-         [tag-pill-view (tag :id)]))]))
+    (fn [thread]
+      [:div.tags
+       (doall
+         (for [user @mentions]
+           ^{:key (user :id)}
+           [user-pill-view (user :id)]))
+       (doall
+         (for [tag @tags]
+           ^{:key (tag :id)}
+           [tag-pill-view (tag :id)]))])))
 
 (defn- unseen? [message thread]
   (> (:created-at message)
