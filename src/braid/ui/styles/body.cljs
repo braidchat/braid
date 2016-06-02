@@ -6,4 +6,6 @@
     :padding 0
     :font-family "\"Open Sans\", Helvetica, Arial, sans-serif"
     :font-size "12px"
-    :background "#eee"}])
+    :background "#eee"}
+   [:textarea :input
+    {:font-family "inherit"}]])
