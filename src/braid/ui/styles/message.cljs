@@ -108,4 +108,3 @@
       [:&:hover
        {:text-overflow "initial"
         :overflow-x "scroll"}]]])
-
