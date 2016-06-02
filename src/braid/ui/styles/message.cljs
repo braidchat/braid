@@ -53,7 +53,8 @@
      :padding-left (m/+ avatar-size (rem 0.5))
      :width "100%"
      :box-sizing "border-box"
-     :line-height "1.25em"}
+     :line-height "1.25em"
+     :margin-top (rem 0.20)}
 
     [:a.external
      {:text-decoration "none"
