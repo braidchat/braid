@@ -49,7 +49,7 @@
       :position "relative"}]
 
     [:&.plus
-     {:background "#333"
+     {:background "#999"
       :color "#222"
       :font-family "fontawesome"}
 
@@ -57,6 +57,6 @@
       (mixins/fontawesome \uf067)]
 
      [:&:hover
-      {:background "#555"}]]
+      {:background "#CCC"}]]
 
     badge]])
