@@ -3,7 +3,9 @@
             [chat.client.xhr :refer [edn-xhr]]))
 
 (defn- arr->rgb [arr]
-  (if arr
+  ; until embedly provides color alpha, default to transparent background
+  "rgba(255,255,255,0)"
+  #_(if arr
     (str "rgb(" (arr 0) "," (arr 1) "," (arr 2) ")")
     "rgb(150, 150, 150)"))
 
