@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Register for Braid</title>
+    <!-- TODO: style this -->
+</head>
+<body>
+  <p>Upload an avatar for {{invitee_email}}</p>
+  <form action="//{{api_domain}}/register" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="token" value="{{token}}">
+    <input type="hidden" name="invite_id" value="{{invite_id}}">
+    <input type="hidden" name="email" value="{{invitee_email}}">
+    <input type="hidden" name="now" value="{{now}}">
+    <input type="hidden" name="hmac" value="{{form_hmac}}">
+    <input type="file" name="avatar" size="20">
+    <label>Nickname: <input type="text" name="nickname"></label>
+    <label>Password: <input type="password" name="password"></label>
+    <input type="submit" value="Register">
+  </form>
+</body>
+</html>

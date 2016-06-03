@@ -208,6 +208,16 @@
   (let [invite (schema/make-invitation data)]
     (sync/chsk-send! [:chat/invite-to-group invite])))
 
+(defmethod dispatch! :generate-link [_ {:keys [group-id expires complete]}]
+  (println "dispatching generate")
+  (sync/chsk-send!
+    [:chat/generate-invite-link {:group-id group-id :expires expires}]
+    5000
+    (fn [reply]
+      ; indicate error if it fails?
+      (when-let [link (:link reply)]
+        (complete link)))))
+
 (defmethod dispatch! :accept-invite [_ invite]
   (sync/chsk-send! [:chat/invitation-accept invite])
   (store/remove-invite! invite))
@@ -230,6 +240,12 @@
 (defmethod dispatch! :set-avatar [_ {:keys [group-id avatar] :as args}]
   (sync/chsk-send! [:chat/set-group-avatar args])
   (store/set-group-avatar! group-id avatar))
+
+(defmethod dispatch! :make-group-public! [_ group-id]
+  (sync/chsk-send! [:chat/set-group-publicity [group-id true]]))
+
+(defmethod dispatch! :make-group-private! [_ group-id]
+  (sync/chsk-send! [:chat/set-group-publicity [group-id false]]))
 
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
@@ -375,6 +391,10 @@
 (defmethod sync/event-handler :group/new-avatar
   [[_ [group-id avatar]]]
   (store/set-group-avatar! group-id avatar))
+
+(defmethod sync/event-handler :group/publicity-changed
+  [[_ [group-id publicity]]]
+  (store/set-group-publicity! group-id publicity))
 
 (defmethod sync/event-handler :chat/notify-message
   [[_ message]]

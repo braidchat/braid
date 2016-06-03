@@ -220,7 +220,7 @@
    {:position "absolute"
     :top (m/+ vars/top-bar-height vars/pad vars/pad)
     :right 0
-    :bottom vars/pad
+    :bottom 0
     :left 0
     :padding-left vars/pad
 

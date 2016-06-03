@@ -7,8 +7,12 @@
             [taoensso.carmine :as car]
             [image-resizer.core :as img]
             [image-resizer.format :as img-format]
+            [clostache.parser :as clostache]
+            [clj-time.core :as t]
+            [clj-time.coerce :as c]
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
             [chat.server.crypto :refer [hmac constant-comp]]
+            [chat.server.db :as db]
             [chat.server.conf :refer [api-port]]))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
@@ -22,14 +26,6 @@
     mac
     (hmac hmac-secret data)))
 
-(defn make-invite-link
-  [invite]
-  (let [secret-nonce (random-nonce 20)]
-    (cache-set! (str (invite :id)) secret-nonce)
-    (str (env :site-url)
-         "/accept?tok=" secret-nonce
-         "&invite=" (invite :id))))
-
 (defn verify-invite-nonce
   "Verify that the given nonce is valid for the invite"
   [invite nonce]
@@ -41,9 +37,18 @@
     (do (timbre/warnf "Expired nonce %s for invite %s" nonce invite)
         {:error "Expired token"})))
 
+;; invite by email
+(defn make-email-invite-link
+  [invite]
+  (let [secret-nonce (random-nonce 20)]
+    (cache-set! (str (invite :id)) secret-nonce)
+    (str (env :site-url)
+         "/accept?tok=" secret-nonce
+         "&invite=" (invite :id))))
+
 (defn invite-message
   [invite]
-  (let [accept-link (make-invite-link invite)]
+  (let [accept-link (make-email-invite-link invite)]
     {:text (str (invite :inviter-email) " has invited to join the " (invite :group-name)
                 " group on " (env :site-url) ".\n\n"
                 "Go to " accept-link " to accept.")
@@ -69,28 +74,13 @@
         form-hmac (hmac hmac-secret
                         (str now token (invite :id) (invite :invitee-email)))
         api-domain (or (:api-domain env) (str "localhost:" @api-port))]
-    ; TODO: use mustache instead
-    (str "<!DOCTYPE html>"
-         "<html>"
-         "  <head>"
-         "   <title>Register for Chat</title>"
-         "   <link href=\"/css/out/chat.css\" rel=\"stylesheet\" type=\"text/css\"></style>"
-         "  </head>"
-         "  <body>"
-         "  <p>Upload an avatar for " (invite :invitee-email) "</p>"
-         "  <form action=\"//" api-domain "/register\" method=\"POST\" enctype=\"multipart/form-data\">"
-         "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"
-         "    <input type=\"hidden\" name=\"invite_id\" value=\"" (invite :id) "\">"
-         "    <input type=\"hidden\" name=\"email\" value=\"" (invite :invitee-email) "\">"
-         "    <input type=\"hidden\" name=\"now\" value=\"" now "\">"
-         "    <input type=\"hidden\" name=\"hmac\" value=\"" form-hmac "\">"
-         "    <input type=\"file\" name=\"avatar\" size=\"20\">"
-         "    <label>Nickname: <input type=\"text\" name=\"nickname\"></label>"
-         "    <label>Password: <input type=\"password\" name=\"password\"></label>"
-         "    <input type=\"submit\" value=\"Register\")>"
-         "  </form>"
-         "  </body>"
-         "</html>")))
+    (clostache/render-resource "templates/register_page.html.mustache"
+                               {:invitee_email (invite :invitee-email)
+                                :api_domain api-domain
+                                :token token
+                                :invite_id (invite :id)
+                                :now now
+                                :form_hmac form-hmac})))
 
 (defn verify-form-hmac
   [params]
@@ -120,6 +110,38 @@
     (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename)
                           (s3/grant :all-users :read))
     (str "https://s3.amazonaws.com/" (env :aws-domain) "/avatars/" avatar-filename)))
+
+;; invite by link
+
+(defn make-open-invite-link
+  "Create a link that will allow anyone with the link to register until it expires"
+  [group-id expires]
+  (let [nonce (random-nonce 20)
+        expiry (->> (case expires
+                      :day (t/days 1)
+                      :week (t/weeks 1)
+                      :month (t/months 1)
+                      :never (t/years 1000))
+                    (t/plus (t/now))
+                    (c/to-long))
+        mac (hmac hmac-secret (str nonce group-id expiry))]
+    (str (env :site-url) "/invite?group-id=" group-id "&nonce=" nonce
+         "&expiry=" expiry "&mac=" mac)))
+
+(defn link-signup-page
+  [group-id]
+  (let [now (.getTime (java.util.Date.))
+        group (db/get-group group-id)
+        form-hmac (hmac hmac-secret (str now group-id))
+        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+    (clostache/render-resource "templates/link_signup.html.mustache"
+                               {:api-domain api-domain
+                                :now now
+                                :form-hmac form-hmac
+                                :group-id group-id
+                                :group-name (group :name)})))
+
+;; reset paswords
 
 (defn request-reset
   [user]
@@ -170,21 +192,9 @@
   (let [now (.getTime (java.util.Date.))
         form-hmac (hmac hmac-secret (str now token (user :id)))
         api-domain (or (:api-domain env) (str "localhost:" @api-port))]
-    ; TODO: use mustache instead
-    (str "<!DOCTYPE html>"
-         "<html>"
-         "  <head>"
-         "   <title>Reset Password</title>"
-         "   <link href=\"/css/out/chat.css\" rel=\"stylesheet\" type=\"text/css\"></style>"
-         "  </head>"
-         "  <body>"
-         "  <form action=\"//" api-domain "/reset\" method=\"POST\">"
-         "    <input type=\"hidden\" name=\"user-id\" value=\"" (user :id) "\">"
-         "    <input type=\"hidden\" name=\"now\" value=\"" now "\">"
-         "    <input type=\"hidden\" name=\"token\" value=\"" token "\">"
-         "    <input type=\"hidden\" name=\"hmac\" value=\"" form-hmac "\">"
-         "    <label>New Password: <input type=\"password\" name=\"new-password\"></label>"
-         "    <input type=\"submit\" value=\"Set New Password\">"
-         "  </form>"
-         "  </body>"
-         "</html>")))
+    (clostache/render-resource "templates/reset_page.html.mustache"
+                               {:api_domain api-domain
+                                :user_id (user :id)
+                                :now now
+                                :token token
+                                :form_hmac form-hmac})))
