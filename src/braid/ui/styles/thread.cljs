@@ -32,7 +32,9 @@
       :height (px 5)
       :position "absolute"
       :top 0
-      :left 0}]
+      :left 0
+      :border-radius [[vars/border-radius
+                       vars/border-radius 0 0]]}]
 
       [:&.archived
        [:.head:before
