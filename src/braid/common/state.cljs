@@ -157,20 +157,22 @@
   (reaction (get-in @state [:page :search-query])))
 
 (defn get-tags-for-thread
-  [state [_ thread-id]]
-  (let [tag-ids (reaction (get-in @state [:threads thread-id :tag-ids]))
-        tags (reaction (doall
-                         (map (fn [thread-id]
-                                (get-in @state [:tags thread-id])) @tag-ids)))]
-    tags))
+  ([state [_ thread-id]] (get-tags-for-thread state nil [thread-id]))
+  ([state _ [thread-id]]
+   (let [tag-ids (reaction (get-in @state [:threads thread-id :tag-ids]))
+         tags (reaction (doall
+                          (map (fn [thread-id]
+                                 (get-in @state [:tags thread-id])) @tag-ids)))]
+     tags)))
 
 (defn get-mentions-for-thread
-  [state [_ thread-id]]
-  (let [mention-ids (reaction (get-in @state [:threads thread-id :mentioned-ids]))
-        mentions (reaction (doall
-                             (map (fn [user-id]
-                                    (get-in @state [:users user-id])) @mention-ids)))]
-    mentions))
+  ([state [_ thread-id]] (get-mentions-for-thread state nil [thread-id]))
+  ([state _ [thread-id]]
+   (let [mention-ids (reaction (get-in @state [:threads thread-id :mentioned-ids]))
+         mentions (reaction (doall
+                              (map (fn [user-id]
+                                     (get-in @state [:users user-id])) @mention-ids)))]
+     mentions)))
 
 (defn get-messages-for-thread
   [state [_ thread-id]]
