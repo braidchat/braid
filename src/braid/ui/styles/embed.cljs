@@ -14,6 +14,10 @@
     {:cursor "pointer"}]
 
    [:.website
+    {:background "black"
+     :padding (m/* 0.5 pad)
+     :color "white"
+     :-webkit-font-smoothing "antialiased"}
 
     [:.image
      {:width "75px"
@@ -40,16 +44,15 @@
        {:display "inline-block"
         :line-height "1em"
         :text-transform "uppercase"
-        :vertical-align "middle"
-        :color vars/grey-text}]]
+        :vertical-align "middle"}]]
 
      [:.title
       {:font-weight "bold"}]
 
      [:.url
       {:font-size "0.9em"
-       :color vars/grey-text
-       :margin-top "0.5em"}]]]
+       :margin-top "0.5em"
+       :white-space "nowrap"}]]]
 
    [:.video
     {:position "relative"}

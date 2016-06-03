@@ -11,6 +11,7 @@
 
 (defn- website-embed-view [content]
   [:div.content.loaded.website
+   {:style {:background-color (str "hsl(" (* 360 (rand)) ",70%,35%)")}}
    (if-let [img (get-in content [:images 0])]
      [:img.image {:src (img :url)
                   :style {:background-color
