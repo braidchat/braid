@@ -133,7 +133,8 @@
      :avatar (settings :avatar)
      :extensions (map (fn [x] {:id (:extension/id x)
                                :type (:extension/type x)})
-                      (:extension/_group e))}))
+                      (:extension/_group e))
+     :public? (get settings :public? false)}))
 
 (defn- create-entity!
   "create entity with attrs, return entity"

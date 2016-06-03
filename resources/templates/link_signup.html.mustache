@@ -4,11 +4,13 @@
     <title>Braid - Desktop - Join</title>
   </head>
   <body>
-    <p>Join the public group {{group-name}}</p>
+    <p>Join the group {{group-name}}</p>
     <div id="register">
       <p>If you aren't already a Braid user, sign up with your email here</p>
-      <form action="//{{api_domain}}/public-register" method="POST">
+      <form action="//{{api-domain}}/link-register" method="POST">
         <input type="hidden" name="group-id" value="{{group-id}}">
+        <input type="hidden" name="now" value="{{now}}">
+        <input type="hidden" name="form-hmac" value="{{form-hmac}}">
         <input type="email" name="email" placeholder="email address">
         <input type="submit" value="Register">
       </form>
@@ -16,10 +18,13 @@
     </div>
     <div id="join">
       <p id="join-text">If you're already logged in, just click here to join this group</p>
-      <form action="//{{api_domain}}/public-join" method="POST">
+      <form action="//{{api-domain}}/link-join" method="POST">
+        <input type="hidden" name="now" value="{{now}}">
+        <input type="hidden" name="form-hmac" value="{{form-hmac}}">
         <input type="hidden" name="group-id" value="{{group-id}}">
         <input type="submit" value="Join">
       </form>
     </div>
   </body>
 </html>
+

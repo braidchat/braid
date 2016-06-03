@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reset Password</title>
+  </head>
+  <body>
+    <form action="//{{api_domain}}/reset" method="POST">
+      <input type="hidden" name="user-id" value="{{user_id}}">
+      <input type="hidden" name="now" value="{{now}}">
+      <input type="hidden" name="token" value="{{token}}">
+      <input type="hidden" name="hmac" value="{{form_hmac}}">
+      <label>New Password: <input type="password" name="new-password"></label>
+      <input type="submit" value="Set New Password">
+    </form>
+  </body>
+</html>
