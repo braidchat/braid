@@ -17,26 +17,11 @@
         idx (.indexOf s suffix)]
     (and (not= -1 idx) (= idx pos))))
 
-(defn decimal->color [decimal]
- (str "hsl(" (int (* 360 (mod decimal 1))) ",71%,35%)") )
-
-(defn string->color [string]
-  (-> string
-      char-array
-      (->> (map int)
-           (apply +))
-      (/ 213)
-      decimal->color))
+(defn ->color [input]
+  (str "hsl(" (mod (Math/abs (hash input)) 360) ",71%,35%)"))
 
 (defn id->color [uuid]
-  (-> uuid
-      str
-      (.substring 33 36)
-      (js/parseInt 16)
-      (/ 4096)
-      ; at this point, we have a decimal between 0 and 1
-      ; approximately evenly distributed
-      decimal->color))
+  (->color uuid))
 
 (defn format-date
   "Turn a Date object into a nicely formatted string"
