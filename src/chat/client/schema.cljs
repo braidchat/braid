@@ -27,6 +27,7 @@
    :admins #{}
    :intro nil
    :avatar nil
+   :public? false
    :extensions []})
 
 (defn make-invitation [data]
