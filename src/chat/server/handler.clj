@@ -20,8 +20,6 @@
                      resource-routes]]
             [chat.server.conf :as conf]
             [environ.core :refer [env]]
-            ; just requiring to register multimethods
-            chat.server.extensions.asana
             ; requiring so mount sees state
             [chat.server.email-digest :refer [email-jobs]]))
 

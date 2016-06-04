@@ -26,8 +26,7 @@
    :name (data :name)
    :admins #{}
    :intro nil
-   :avatar nil
-   :extensions []})
+   :avatar nil})
 
 (defn make-invitation [data]
   {:id (or (data :id) (uuid/make-random-squuid))
