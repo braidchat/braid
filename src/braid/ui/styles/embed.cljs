@@ -7,7 +7,7 @@
 (defn embed [pad]
   [:.embed
    {:margin [[0 (m/* -1 pad)]]
-    :padding [[pad 0]]
+    :padding [[pad 0 0]]
     :overflow "hidden"}
 
    [:.content
@@ -17,7 +17,8 @@
     {:background "black"
      :padding (m/* 0.5 pad)
      :color "white"
-     :-webkit-font-smoothing "antialiased"}
+     :-webkit-font-smoothing "antialiased"
+     :overflow "hidden"}
 
     [:.image
      {:width "75px"
@@ -26,6 +27,7 @@
       :margin-right (m// pad 2)}]
 
     [:.about
+     {:overflow "hidden"}
 
      [:.provider
       {:font-size "0.9em"
@@ -38,7 +40,9 @@
         :background-repeat "no-repeat"
         :background-size "contain"
         :vertical-align "middle"
-        :margin-right "0.25em"}]
+        :margin-right "0.25em"
+        :white-space "nowrap"
+        :max-width "10em"}]
 
       [:.name
        {:display "inline-block"
