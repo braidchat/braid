@@ -10,20 +10,21 @@
     "rgb(150, 150, 150)"))
 
 (defn- website-embed-view [content]
-  [:div.content.loaded.website
-   {:style {:background-color (str "hsl(" (* 360 (rand)) ",70%,35%)")}}
-   (if-let [img (get-in content [:images 0])]
-     [:img.image {:src (img :url)
-                  :style {:background-color
-                          (arr->rgb (get-in img [:colors 0 :color]))}}]
-     [:img.image {:src (:favicon_url content)}])
-   [:div.about
-    [:div.provider
-     [:div.favicon {:style {:background-image
-                            (str "url(" (:favicon_url content) ")")}}]
-     [:div.name (:provider_name content)]]
-    [:div.title (:title content)]
-    [:div.url (:url content)]]])
+  (let [hue (-> (content :url) hash Math/abs (mod 360))]
+    [:div.content.loaded.website
+     {:style {:background-color (str "hsl(" hue ",70%,35%)")}}
+     (if-let [img (get-in content [:images 0])]
+       [:img.image {:src (img :url)
+                    :style {:background-color
+                            (arr->rgb (get-in img [:colors 0 :color]))}}]
+       [:img.image {:src (:favicon_url content)}])
+     [:div.about
+      [:div.provider
+       [:div.favicon {:style {:background-image
+                              (str "url(" (:favicon_url content) ")")}}]
+       [:div.name (:provider_name content)]]
+      [:div.title (:title content)]
+      [:div.url (:url content)]]]))
 
 (defn- video-overlay-view [content]
   [:div.content
