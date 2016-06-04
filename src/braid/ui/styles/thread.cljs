@@ -142,6 +142,7 @@
       :resize "none"
       :border "none"
       :box-sizing "border-box"
+      :padding (rem 0.5)
       :min-height (em 3.5)
       :box-shadow "0 0 1px 1px #ccc"
       :border-radius vars/border-radius}
