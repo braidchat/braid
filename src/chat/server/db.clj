@@ -95,33 +95,11 @@
    :tag-ids (into #{} (map :tag/id) (thread :thread/tag))
    :mentioned-ids (into #{} (map :user/id) (thread :thread/mentioned))})
 
-(def extension-pull-pattern
-  [:extension/id
-   :extension/config
-   :extension/type
-   :extension/token
-   :extension/refresh-token
-   {:extension/user [:user/id]}
-   {:extension/group [:group/id]}
-   {:extension/watched-threads [:thread/id]}])
-
-(defn- db->extension
-  [ext]
-  {:id (:extension/id ext)
-   :type (:extension/type ext)
-   :group-id (get-in ext [:extension/group :group/id])
-   :user-id (get-in ext [:extension/user :user/id])
-   :threads (map :thread/id (:extension/watched-threads ext))
-   :config (edn/read-string (:extension/config ext))
-   :token (:extension/token ext)
-   :refresh-token (:extension/refresh-token ext)})
-
 (def group-pull-pattern
   [:group/id
    :group/name
    :group/settings
-   {:group/admins [:user/id]}
-   {:extension/_group [:extension/id :extension/type]}])
+   {:group/admins [:user/id]}])
 
 (defn- db->group [e]
   (let [settings (-> e (get :group/settings "{}") edn/read-string)]
@@ -130,9 +108,6 @@
      :admins (into #{} (map :user/id) (:group/admins e))
      :intro (settings :intro)
      :avatar (settings :avatar)
-     :extensions (map (fn [x] {:id (:extension/id x)
-                               :type (:extension/type x)})
-                      (:extension/_group e))
      :public? (get settings :public? false)}))
 
 (defn- create-entity!
@@ -816,75 +791,6 @@
   [tag-id description]
   @(d/transact conn [[:db/add [:tag/id tag-id]
                       :tag/description description]]))
-
-(defn create-extension!
-  [{:keys [id type group-id user-id config]}]
-  (-> {:extension/group [:group/id group-id]
-       :extension/user [:user/id user-id]
-       :extension/type type
-       :extension/id id
-       :extension/config (pr-str config)}
-      create-entity!
-      db->extension))
-
-(defn retract-extension!
-  [extension-id]
-  @(d/transact conn [[:db.fn/retractEntity [:extension/id extension-id]]]))
-
-(defn extension-by-id
-  [extension-id]
-  (-> (d/pull (d/db conn) extension-pull-pattern [:extension/id extension-id])
-      db->extension))
-
-(defn save-extension-token!
-  [extension-id {:keys [access-token refresh-token]}]
-  @(d/transact conn [[:db/add [:extension/id extension-id]
-                      :extension/token access-token]
-                     [:db/add [:extension/id extension-id]
-                      :extension/refresh-token refresh-token]]))
-
-(defn update-extension-config!
-  [extension-id config]
-  @(d/transact conn [[:db/add [:extension/id extension-id]
-                      :extension/config (pr-str config)]]))
-
-(defn set-extension-config!
-  [extension-id k v]
-  (let [ext (extension-by-id extension-id)]
-    (update-extension-config! extension-id (assoc (:config ext) k v))))
-
-(defn thread-visible-to-extension?
-  [thread-id ext-id]
-  (seq (d/q '[:find ?group
-              :in $ ?thread-id ?ext-id
-              :where
-              [?thread :thread/id ?thread-id]
-              [?ext :extension/id ?ext-id]
-              [?thread :thread/tag ?tag]
-              [?tag :tag/group ?group]
-              [?ext :extension/group ?group]]
-            (d/db conn) thread-id ext-id)))
-
-(defn extension-subscribe
-  [extension-id thread-id]
-  (assert (thread-visible-to-extension? thread-id extension-id))
-  @(d/transact conn [[:db/add [:extension/id extension-id]
-                      :extension/watched-threads [:thread/id thread-id]]]))
-
-(defn extensions-watching
-  "Get the extensions that are watching the given thread"
-  [thread-id]
-  (->> (d/pull (d/db conn) [{:extension/_watched-threads extension-pull-pattern}]
-               [:thread/id thread-id])
-       :extension/_watched-threads
-       (map db->extension)))
-
-(defn group-extensions
-  [group-id]
-  (->> (d/pull (d/db conn) [{:extension/_group extension-pull-pattern}]
-               [:group/id group-id])
-       :extension/_group
-       (map db->extension)))
 
 (defn group-settings
   [group-id]
