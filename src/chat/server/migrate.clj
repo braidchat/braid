@@ -5,6 +5,17 @@
             [clojure.set :as set]
             [clojure.edn :as edn]))
 
+(defn migrate-2016-06-04
+  "Remove old-style extensions"
+  []
+  (->> (d/q '[:find [?e ...]
+              :where
+              [?e :extension/id]]
+            (d/db db/conn))
+       (mapv (fn [e] [:db.fn/retractEntity e]))
+       (d/transact db/conn)
+       deref))
+
 (defn migrate-2016-05-13
   "Threads have associated groups"
   []

@@ -61,17 +61,12 @@
   (try (check-rules! rs) true
     (catch ExceptionInfo _ false)))
 
-(def Extension
-  {:id s/Uuid
-   :type s/Keyword})
-
 (def Group
   {:id s/Uuid
    :name s/Str
    :admins #{s/Uuid}
    :intro (s/maybe s/Str)
    :avatar (s/maybe s/Str)
-   :extensions [Extension]
    :public? s/Bool})
 
 (def User

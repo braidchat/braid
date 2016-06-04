@@ -17,12 +17,9 @@
                      mobile-client-routes
                      api-private-routes
                      api-public-routes
-                     resource-routes
-                     extension-routes]]
+                     resource-routes]]
             [chat.server.conf :as conf]
             [environ.core :refer [env]]
-            ; just requiring to register multimethods
-            chat.server.extensions.asana
             ; requiring so mount sees state
             [chat.server.email-digest :refer [email-jobs]]))
 
@@ -80,21 +77,14 @@
             (wrap-defaults (-> site-defaults
                                (assoc-in [:security :anti-forgery] false)
                                assoc-cookie-conf)))
-
-        (-> extension-routes
-            (wrap-defaults (-> api-defaults
-                               assoc-cookie-conf
-                               )))
         (-> api-private-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
-                               assoc-csrf-conf
-                               )))
+                               assoc-csrf-conf)))
         (-> sync-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
-                               assoc-csrf-conf
-                               ))))
+                               assoc-csrf-conf))))
       (wrap-cors :access-control-allow-origin [#".*"]
                  :access-control-allow-credentials true
                  :access-control-allow-methods [:get :put :post :delete])

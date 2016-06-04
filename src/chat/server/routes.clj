@@ -13,7 +13,6 @@
     [chat.server.identicons :as identicons]
     [chat.server.cache :refer [random-nonce]]
     [chat.server.sync :as sync]
-    [chat.server.extensions :as ext :refer [b64->str]]
     [chat.server.s3 :as s3]
     [chat.server.conf :refer [api-port]]
     [braid.api.embedly :as embedly]
@@ -280,26 +279,6 @@
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))
           (assoc fail :body "Invalid user"))))))
-
-(defroutes extension-routes
-  (context "/extension" _
-    (GET "/oauth" [state code]
-      (let [{ext-id :extension-id} (-> state b64->str edn/read-string)
-            ext (db/extension-by-id ext-id)]
-        (if ext
-          (do (ext/handle-oauth-token ext state code)
-              {:status 302
-               :headers {"Location" (str "/" (ext :group-id))}
-               :body ""})
-          {:status 400 :body "No such extension"})))
-    (POST "/webhook/:ext" [ext :as req]
-      (if-let [ext (db/extension-by-id (java.util.UUID/fromString ext))]
-        (ext/handle-webhook ext req)
-        {:status 400 :body "No such extension"}))
-    (POST "/config" [extension-id data]
-      (if-let [ext (db/extension-by-id (java.util.UUID/fromString extension-id))]
-        (ext/extension-config ext data)
-        {:status 400 :body "No such extension"}))))
 
 (defroutes api-private-routes
   (GET "/extract" [url :as {ses :session}]
