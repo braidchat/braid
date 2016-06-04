@@ -8,7 +8,7 @@
             [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [chat.client.emoji :as emoji]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.views.helpers :as helpers :refer [starts-with? ends-with?]]
+            [chat.client.views.helpers :as helpers]
             [chat.client.routes :as routes]))
 
 (def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
@@ -103,9 +103,9 @@
            (cond
              ; TODO: handle starting code block with delimiter not at beginning of word
              ; start
-             (and (= @state ::start) (starts-with? input delimiter))
+             (and (= @state ::start) (string/starts-with? input delimiter))
              (cond
-               (and (not= input delimiter) (ends-with? input delimiter))
+               (and (not= input delimiter) (string/ends-with? input delimiter))
                (xf result (result-fn (.slice input (count delimiter) (- (.-length input) (count delimiter)))))
 
                (and (not= input delimiter) (not= 0 (.lastIndexOf input delimiter)))
@@ -120,7 +120,7 @@
                    result))
 
              ; end
-             (and (= @state ::in-code) (ends-with? input delimiter))
+             (and (= @state ::in-code) (string/ends-with? input delimiter))
              (let [code (conj @in-code (.slice input 0 (- (.-length input) (count delimiter))))]
                (vreset! state ::start)
                (vreset! in-code [])
