@@ -1,6 +1,12 @@
 (ns chat.server.seed
   (:require [chat.server.db :as db]
-            [environ.core :refer [env]]))
+            [braid.server.conf :refer [config]]))
+
+(defn drop! []
+  (datomic.api/delete-database (config :db-url)))
+
+(defn init! []
+  (db/init! (config :db-url)))
 
 (defn seed! []
   (let [group-1 (db/create-group! {:id (db/uuid) :name "Braid"})
