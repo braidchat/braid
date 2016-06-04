@@ -133,7 +133,6 @@
    {:flex-shrink 0
     :paddgin-bottom pad
     :padding-left (m/+ pad (rem 2))
-    :padding-top pad
     :padding-right pad
     :margin-bottom pad}
 
