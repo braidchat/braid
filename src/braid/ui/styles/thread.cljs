@@ -133,7 +133,6 @@
    {:flex-shrink 0
     :paddgin-bottom pad
     :padding-left (m/+ pad (rem 2))
-    :padding-top pad
     :padding-right pad
     :margin-bottom pad}
 
@@ -142,6 +141,7 @@
       :resize "none"
       :border "none"
       :box-sizing "border-box"
+      :padding (rem 0.5)
       :min-height (em 3.5)
       :box-shadow "0 0 1px 1px #ccc"
       :border-radius vars/border-radius}
