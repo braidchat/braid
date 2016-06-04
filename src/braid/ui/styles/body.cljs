@@ -8,4 +8,5 @@
     :font-size "12px"
     :background "#eee"}
    [:textarea :input
-    {:font-family "inherit"}]])
+    {:font-family "inherit"
+     :font-size "1em"}]])
