@@ -20,8 +20,7 @@
                      :db.install/_partition :db.part/db}]
                    schema))))
 
-(defn connect [{:keys [db-url] :as config
-                :or {db-url "datomic:free://localhost:4334/braid"}}]
+(defn connect [{:keys [db-url]}]
   (init! db-url)
   (d/connect db-url))
 
