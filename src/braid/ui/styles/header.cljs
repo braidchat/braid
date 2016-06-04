@@ -1,5 +1,5 @@
 (ns braid.ui.styles.header
-  (:require [garden.units :refer [em]]
+  (:require [garden.units :refer [em px]]
             [braid.ui.styles.vars :as vars]
             [braid.ui.styles.mixins :as mixins]))
 
@@ -34,12 +34,30 @@
        :margin-right vars/pad}
 
       [:.title
-       {:text-decoration "none"
-        :color vars/grey-text}]
+       {:display "inline-block"
+        :text-decoration "none"
+        :background "#FFF"
+        :width "2rem"
+        :height "2rem"
+        :text-align "center"
+        :line-height "2rem"
+        :border-radius "50%"
+        :box-shadow [[0 (px 1) (px 4) 0 "#ccc"]]
+        :color "#AAA"
+        :transition [["all" "0.2s" "ease-in-out"]]
+        :position "relative"
+        :bottom "0"}]
 
-      [:&.active :&:hover
+      [:&:hover
        [:.title
-        {:color "#000"}]]
+        {:box-shadow [[0 (px 4) (px 4) 0 "#ccc"]]
+         :bottom "1px"}]]
+
+      [:&.active
+       [:.title
+        {:background "#AAA"
+         :color "#fff"
+         :-webkit-font-smoothing "antialiased"}]]
 
       [:&:hover
        [:.modal
