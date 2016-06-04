@@ -6,23 +6,22 @@
             [chat.client.store :as store]
             [goog.style :as gstyle]))
 
-; TODO: clojure 1.8 should implement these
+; TODO: clojure 1.8 should implement this:
 (defn starts-with? [s prefix]
   ; not using .startsWith because it's only supported in ES6
   (= 0 (.indexOf s prefix)))
+
+; TODO: clojure 1.8 should implement this:
 (defn ends-with? [s suffix]
   (let [pos (- (count s) (count suffix))
         idx (.indexOf s suffix)]
     (and (not= -1 idx) (= idx pos))))
 
-(defn id->color [id]
-  ; normalized is approximately evenly distributed between 0 and 1
-  (let [normalized (-> id
-                       str
-                       (.substring 33 36)
-                       (js/parseInt 16)
-                       (/ 4096))]
-    (str "hsl(" (* 360 normalized) ",70%,35%)")))
+(defn ->color [input]
+  (str "hsl(" (mod (Math/abs (hash input)) 360) ",71%,35%)"))
+
+(defn id->color [uuid]
+  (->color uuid))
 
 (defn format-date
   "Turn a Date object into a nicely formatted string"
