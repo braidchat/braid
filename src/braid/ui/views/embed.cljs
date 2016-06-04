@@ -1,6 +1,7 @@
 (ns braid.ui.views.embed
   (:require [reagent.core :as r]
-            [chat.client.xhr :refer [edn-xhr]]))
+            [chat.client.xhr :refer [edn-xhr]]
+            [chat.client.views.helpers :refer [->color]]))
 
 (defn- arr->rgb [arr]
   ; until embedly provides color alpha, default to transparent background
@@ -11,7 +12,7 @@
 
 (defn- website-embed-view [content]
   [:div.content.loaded.website
-   {:style {:background-color (str "hsl(" (* 360 (rand)) ",70%,35%)")}}
+   {:style {:background-color (->color (content :provider_name))}}
    (if-let [img (get-in content [:images 0])]
      [:img.image {:src (img :url)
                   :style {:background-color
