@@ -61,7 +61,7 @@
     (apply max (concat [0] user-hides-at user-messages-at))))
 
 (defn thread-add-last-open-at [conn thread user-id]
-  (assoc thread :last-open-at (thread-last-open-at thread user-id)))
+  (assoc thread :last-open-at (thread-last-open-at conn thread user-id)))
 
 (defn get-users-subscribed-to-thread
   [conn thread-id]
