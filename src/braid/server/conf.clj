@@ -3,7 +3,9 @@
             [mount.core :refer [defstate]]))
 
 (defstate config
-  :start (select-keys env
+  :start
+  (merge {:db-url "datomic:free://localhost:4334/braid"}
+         (select-keys env
                       [:mailgun-domain
                        :mailgun-password
                        :site-url
@@ -18,4 +20,4 @@
                        :asana-client-id
                        :asana-client-secret
                        :embedly-key
-                       ]))
+                       ])))
