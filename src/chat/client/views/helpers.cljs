@@ -6,10 +6,12 @@
             [chat.client.store :as store]
             [goog.style :as gstyle]))
 
-; TODO: clojure 1.8 should implement these
+; TODO: clojure 1.8 should implement this:
 (defn starts-with? [s prefix]
   ; not using .startsWith because it's only supported in ES6
   (= 0 (.indexOf s prefix)))
+
+; TODO: clojure 1.8 should implement this:
 (defn ends-with? [s suffix]
   (let [pos (- (count s) (count suffix))
         idx (.indexOf s suffix)]
