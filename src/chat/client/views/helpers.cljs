@@ -15,14 +15,26 @@
         idx (.indexOf s suffix)]
     (and (not= -1 idx) (= idx pos))))
 
-(defn id->color [id]
-  ; normalized is approximately evenly distributed between 0 and 1
-  (let [normalized (-> id
-                       str
-                       (.substring 33 36)
-                       (js/parseInt 16)
-                       (/ 4096))]
-    (str "hsl(" (* 360 normalized) ",70%,35%)")))
+(defn decimal->color [decimal]
+ (str "hsl(" (int (* 360 (mod decimal 1))) ",71%,35%)") )
+
+(defn string->color [string]
+  (-> string
+      char-array
+      (->> (map int)
+           (apply +))
+      (/ 213)
+      decimal->color))
+
+(defn id->color [uuid]
+  (-> uuid
+      str
+      (.substring 33 36)
+      (js/parseInt 16)
+      (/ 4096)
+      ; at this point, we have a decimal between 0 and 1
+      ; approximately evenly distributed
+      decimal->color))
 
 (defn format-date
   "Turn a Date object into a nicely formatted string"
