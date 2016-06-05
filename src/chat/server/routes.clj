@@ -14,8 +14,8 @@
     [chat.server.cache :refer [random-nonce]]
     [chat.server.sync :as sync]
     [chat.server.s3 :as s3]
-    [chat.server.conf :refer [api-port]]
     [braid.api.embedly :as embedly]
+    [braid.server.conf :refer [config]]
     [environ.core :refer [env]]))
 
 (defn- edn-response [clj-body]
@@ -27,7 +27,7 @@
     (str "public/" client ".html")
     {:algo "sha256"
      :js (str (digest/from-file (str "public/js/" client "/out/braid.js")))
-     :api_domain (or (:api-domain env) (str "localhost:" @api-port))}))
+     :api_domain (or (:api-domain env) (str "localhost:" (config :api-port)))}))
 
 (defroutes desktop-client-routes
   ; public group page
@@ -36,7 +36,7 @@
       (clostache/render-resource "templates/public_group_desktop.html.mustache"
                                  {:group-name (group :name)
                                   :group-id (group :id)
-                                  :api-domain (or (:api-domain env) (str "localhost:" @api-port))})
+                                  :api-domain (or (:api-domain env) (str "localhost:" (config :api-port)))})
       {:status 403
        :headers {"Content-Type" "text/plain"}
        :body "No such public group"}))

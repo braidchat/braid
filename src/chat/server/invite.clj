@@ -13,7 +13,7 @@
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
             [chat.server.crypto :refer [hmac constant-comp]]
             [chat.server.db :as db]
-            [chat.server.conf :refer [api-port]]))
+            [braid.server.conf :refer [config]]))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
   (println "WARNING: No :hmac-secret set, using an insecure default."))
@@ -73,7 +73,7 @@
   (let [now (.getTime (java.util.Date.))
         form-hmac (hmac hmac-secret
                         (str now token (invite :id) (invite :invitee-email)))
-        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+        api-domain (or (:api-domain env) (str "localhost:" (config :api-port)))]
     (clostache/render-resource "templates/register_page.html.mustache"
                                {:invitee_email (invite :invitee-email)
                                 :api_domain api-domain
@@ -133,7 +133,7 @@
   (let [now (.getTime (java.util.Date.))
         group (db/get-group group-id)
         form-hmac (hmac hmac-secret (str now group-id))
-        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+        api-domain (or (:api-domain env) (str "localhost:" (config :api-port)))]
     (clostache/render-resource "templates/link_signup.html.mustache"
                                {:api-domain api-domain
                                 :now now
@@ -191,7 +191,7 @@
   [user token]
   (let [now (.getTime (java.util.Date.))
         form-hmac (hmac hmac-secret (str now token (user :id)))
-        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+        api-domain (or (:api-domain env) (str "localhost:" (config :api-port)))]
     (clostache/render-resource "templates/reset_page.html.mustache"
                                {:api_domain api-domain
                                 :user_id (user :id)

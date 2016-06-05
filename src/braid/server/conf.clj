@@ -1,6 +1,6 @@
 (ns braid.server.conf
   (:require [environ.core :refer [env]]
-            [mount.core :refer [defstate]]))
+            [mount.core :as mount :refer [defstate]]))
 
 (defstate config
   :start
@@ -19,5 +19,5 @@
                        :s3-upload-secret
                        :asana-client-id
                        :asana-client-secret
-                       :embedly-key
-                       ])))
+                       :embedly-key])
+         {:api-port (+ 2 (:port (mount/args)))}))

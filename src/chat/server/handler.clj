@@ -18,7 +18,6 @@
                      api-private-routes
                      api-public-routes
                      resource-routes]]
-            [chat.server.conf :as conf]
             [environ.core :refer [env]]
             ; requiring so mount sees state
             [chat.server.email-digest :refer [email-jobs]]))
@@ -109,8 +108,7 @@
                          (start-server! :desktop desktop-port))
         mobile-server (do (println "starting mobile client on port " mobile-port)
                           (start-server! :mobile mobile-port))
-        api-server (do (reset! conf/api-port api-port)
-                       (println "starting api on port " api-port)
+        api-server (do (println "starting api on port " api-port)
                        (start-server! :api api-port))]
     {:desktop desktop-server
      :mobile mobile-server
