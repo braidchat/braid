@@ -12,12 +12,11 @@
             [clojure.tools.nrepl.server :as nrepl]
             ; requiring router so mount sees state
             [chat.server.sync :as sync :refer [sync-routes router]]
-            [chat.server.routes :as routes
-             :refer [desktop-client-routes
-                     mobile-client-routes
-                     api-private-routes
-                     api-public-routes
-                     resource-routes]]
+            [braid.server.routes.client :refer [desktop-client-routes
+                                                mobile-client-routes
+                                                resource-routes]]
+            [braid.server.route.api :refer [api-private-routes
+                                            api-public-routes]]
             [environ.core :refer [env]]
             ; requiring so mount sees state
             [chat.server.email-digest :refer [email-jobs]]))

@@ -1,19 +1,18 @@
 (ns braid.server.routes.api
-  (:require
-    [clojure.string :as string]
-    [compojure.core :refer [GET POST defroutes context]]
-    [compojure.route :refer [resources]]
-    [compojure.coercions :refer [as-uuid]]
-    [chat.shared.util :refer [valid-nickname?]]
-    [chat.server.db :as db]
-    [chat.server.invite :as invites]
-    [chat.server.identicons :as identicons]
-    [chat.server.cache :refer [random-nonce]]
-    [chat.server.sync :as sync]
-    [chat.server.s3 :as s3]
-    [braid.api.embedly :as embedly]
-    [braid.server.conf :refer [config]]
-    [environ.core :refer [env]]))
+  (:require [clojure.string :as string]
+            [compojure.core :refer [GET POST defroutes context]]
+            [compojure.route :refer [resources]]
+            [compojure.coercions :refer [as-uuid]]
+            [chat.shared.util :refer [valid-nickname?]]
+            [chat.server.db :as db]
+            [chat.server.invite :as invites]
+            [chat.server.identicons :as identicons]
+            [chat.server.cache :refer [random-nonce]]
+            [chat.server.sync :as sync]
+            [chat.server.s3 :as s3]
+            [braid.api.embedly :as embedly]
+            [braid.server.conf :refer [config]]
+            [environ.core :refer [env]]))
 
 (defn- edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
@@ -241,6 +240,3 @@
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})})))
-
-(defroutes resource-routes
-  (resources "/"))

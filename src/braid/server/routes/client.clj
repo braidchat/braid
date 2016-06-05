@@ -62,3 +62,6 @@
   ; TODO: add mobile routse for public joining & password resets
   (GET "/*" []
     (get-html "mobile")))
+
+(defroutes resource-routes
+  (resources "/"))
