@@ -174,7 +174,7 @@
 (defn new-group-view []
  (let [page (subscribe [:page])]
    (fn []
-     [:a.option.plus.group
+     [:a.option.plus
       {:class (when (= (@page :type) :group-explore) "active")
        :href (routes/other-path {:page-id "group-explore"})}])))
 
