@@ -1,7 +1,6 @@
 (ns braid.server.routes.api
   (:require [clojure.string :as string]
-            [compojure.core :refer [GET POST defroutes context]]
-            [compojure.route :refer [resources]]
+            [compojure.core :refer [GET POST defroutes]]
             [compojure.coercions :refer [as-uuid]]
             [chat.shared.util :refer [valid-nickname?]]
             [chat.server.db :as db]

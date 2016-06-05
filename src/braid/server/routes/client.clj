@@ -1,6 +1,7 @@
 (ns braid.server.routes.client
   (:require [compojure.core :refer [GET defroutes]]
             [compojure.coercions :refer [as-uuid]]
+            [compojure.route :refer [resources]]
             [clostache.parser :as clostache]
             [braid.server.conf :refer [config]]
             [chat.server.digest :as digest]
