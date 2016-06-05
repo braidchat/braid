@@ -1,82 +1,20 @@
-(ns chat.server.routes
-  (:require
-    [clojure.string :as string]
-    [clojure.edn :as edn]
-    [compojure.core :refer [GET POST defroutes context]]
-    [compojure.route :refer [resources]]
-    [compojure.coercions :refer [as-uuid]]
-    [clostache.parser :as clostache]
-    [chat.shared.util :refer [valid-nickname?]]
-    [chat.server.digest :as digest]
-    [chat.server.db :as db]
-    [chat.server.invite :as invites]
-    [chat.server.identicons :as identicons]
-    [chat.server.cache :refer [random-nonce]]
-    [chat.server.sync :as sync]
-    [chat.server.s3 :as s3]
-    [chat.server.conf :refer [api-port]]
-    [braid.api.embedly :as embedly]
-    [environ.core :refer [env]]))
+(ns braid.server.routes.api
+  (:require [clojure.string :as string]
+            [compojure.core :refer [GET POST defroutes]]
+            [compojure.coercions :refer [as-uuid]]
+            [chat.shared.util :refer [valid-nickname?]]
+            [chat.server.db :as db]
+            [chat.server.invite :as invites]
+            [chat.server.identicons :as identicons]
+            [chat.server.cache :refer [random-nonce]]
+            [chat.server.sync :as sync]
+            [chat.server.s3 :as s3]
+            [braid.api.embedly :as embedly]
+            [braid.server.conf :refer [config]]))
 
 (defn- edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
    :body (pr-str clj-body)})
-
-(defn- get-html [client]
-  (clostache/render-resource
-    (str "public/" client ".html")
-    {:algo "sha256"
-     :js (str (digest/from-file (str "public/js/" client "/out/braid.js")))
-     :api_domain (or (:api-domain env) (str "localhost:" @api-port))}))
-
-(defroutes desktop-client-routes
-  ; public group page
-  (GET "/group/:group-name" [group-name :as req]
-    (if-let [group (db/public-group-with-name group-name)]
-      (clostache/render-resource "templates/public_group_desktop.html.mustache"
-                                 {:group-name (group :name)
-                                  :group-id (group :id)
-                                  :api-domain (or (:api-domain env) (str "localhost:" @api-port))})
-      {:status 403
-       :headers {"Content-Type" "text/plain"}
-       :body "No such public group"}))
-
-  ; invite accept page
-  (GET "/accept" [invite :<< as-uuid tok]
-    (if (and invite tok)
-      (if-let [invite (db/get-invite invite)]
-        {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
-        {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
-      {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
-
-  ; invite link
-  (GET "/invite" [group-id :<< as-uuid nonce expiry mac]
-    (if (and group-id nonce expiry mac)
-      (if (invites/verify-hmac mac (str nonce group-id expiry))
-        {:status 200 :headers {"Content-Type" "text/html"} :body (invites/link-signup-page group-id)}
-        {:status 400 :headers {"Content-Type" "text/plain"} :body "Parameter verification failed"})
-      {:status 400 :headers {"Content-Type" "text/plain"} :body "Missing required parameters"}))
-
-  ; password reset page
-  (GET "/reset" [user :<< as-uuid token :as req]
-    (if-let [u (and user token
-                 (invites/verify-reset-nonce {:id user} token)
-                 (db/user-by-id user))]
-      {:status 200
-       :headers {"Content-Type" "text/html"}
-       :body (invites/reset-page u token)}
-      {:status 401
-       :headers {"Content-Type" "text/plain"}
-       :body "Bad user or token"}))
-
-  ; everything else
-  (GET "/*" []
-    (get-html "desktop")))
-
-(defroutes mobile-client-routes
-  ; TODO: add mobile routse for public joining & password resets
-  (GET "/*" []
-    (get-html "mobile")))
 
 (defn register-user
   [email group-id]
@@ -164,7 +102,7 @@
                                          :avatar avatar-url
                                          :nickname nickname
                                          :password password})
-                  referer (get-in req [:headers "referer"] (env :site-url))
+                  referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
                 (db/user-add-to-group! (user :id) (invite :group-id))
@@ -194,7 +132,7 @@
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
                 (let [id (register-user email group-id)
-                      referer (get-in req [:headers "referer"] (env :site-url))
+                      referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
                    :session (assoc (req :session) :user-id id)
@@ -211,7 +149,7 @@
             (if-let [user-id (get-in req [:session :user-id])]
               (do
                 (join-group user-id group-id)
-                (let [referer (get-in req [:headers "referer"] (env :site-url))
+                (let [referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302
                    :headers {"Location" (str proto "//" referrer-domain "/" group-id "/inbox")}
@@ -234,7 +172,7 @@
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
                 (let [id (register-user email group-id)
-                      referer (get-in req [:headers "referer"] (env :site-url))
+                      referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
                    :session (assoc (req :session) :user-id id)
@@ -251,7 +189,7 @@
             (if-let [user-id (get-in req [:session :user-id])]
               (do
                 (join-group user-id group-id)
-                (let [referer (get-in req [:headers "referer"] (env :site-url))
+                (let [referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302
                    :headers {"Location" (str proto "//" referrer-domain "/" group-id "/inbox")}
@@ -271,7 +209,7 @@
         (if-let [user (db/user-by-id user-id)]
           (if-let [err (:error (invites/verify-reset-nonce user token))]
             (assoc fail :body err)
-            (let [referer (get-in req [:headers "referer"] (env :site-url))
+            (let [referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (db/set-user-password! (user :id) new-password)
               {:status 301
@@ -300,6 +238,3 @@
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})})))
-
-(defroutes resource-routes
-  (resources "/"))

@@ -2,7 +2,7 @@
   (:require [org.httpkit.client :as http]
             [clojure.string :as string]
             [taoensso.timbre :as timbre]
-            [environ.core :refer [env]]
+            [braid.server.conf :refer [config]]
             [aws.sdk.s3 :as s3]
             [taoensso.carmine :as car]
             [image-resizer.core :as img]
@@ -13,18 +13,17 @@
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
             [chat.server.crypto :refer [hmac constant-comp]]
             [chat.server.db :as db]
-            [chat.server.conf :refer [api-port]]))
+            [environ.core :refer [env]]
+            [braid.server.conf :refer [config]]))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
   (println "WARNING: No :hmac-secret set, using an insecure default."))
-
-(def hmac-secret (or (env :hmac-secret) "secret"))
 
 (defn verify-hmac
   [mac data]
   (constant-comp
     mac
-    (hmac hmac-secret data)))
+    (hmac (config :hmac-secret) data)))
 
 (defn verify-invite-nonce
   "Verify that the given nonce is valid for the invite"
@@ -42,7 +41,7 @@
   [invite]
   (let [secret-nonce (random-nonce 20)]
     (cache-set! (str (invite :id)) secret-nonce)
-    (str (env :site-url)
+    (str (config :site-url)
          "/accept?tok=" secret-nonce
          "&invite=" (invite :id))))
 
@@ -50,30 +49,30 @@
   [invite]
   (let [accept-link (make-email-invite-link invite)]
     {:text (str (invite :inviter-email) " has invited to join the " (invite :group-name)
-                " group on " (env :site-url) ".\n\n"
+                " group on " (config :site-url) ".\n\n"
                 "Go to " accept-link " to accept.")
      :html (str "<html><body>"
                 (invite :inviter-email) " has invited to join the " (invite :group-name)
-                " group on <a href=\"" (env :site-url) "\">" (env :site-url) "</a>."
+                " group on <a href=\"" (config :site-url) "\">" (config :site-url) "</a>."
                 "<br>"
                 "<a href=\"" accept-link "\">Click here</a> to accept."
                 "</body></html>")}))
 
 (defn send-invite
   [invite]
-  @(http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
-             {:basic-auth ["api" (env :mailgun-password)]
+  @(http/post (str "https://api.mailgun.net/v3/" (config :mailgun-domain) "/messages")
+             {:basic-auth ["api" (config :mailgun-password)]
               :form-params (merge {:to (invite :invitee-email)
-                                   :from (str "noreply@" (env :mailgun-domain))
+                                   :from (str "noreply@" (config :mailgun-domain))
                                    :subject "Join the conversation"}
                                   (invite-message invite))}))
 
 (defn register-page
   [invite token]
   (let [now (.getTime (java.util.Date.))
-        form-hmac (hmac hmac-secret
+        form-hmac (hmac (config :hmac-secret)
                         (str now token (invite :id) (invite :invitee-email)))
-        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+        api-domain (:api-domain config)]
     (clostache/render-resource "templates/register_page.html.mustache"
                                {:invitee_email (invite :invitee-email)
                                 :api_domain api-domain
@@ -86,7 +85,7 @@
   [params]
   (constant-comp
     (params :hmac)
-    (hmac hmac-secret
+    (hmac (config :hmac-secret)
           (str (params :now) (params :token) (params :invite_id) (params :email)))))
 
 (def avatar-size [128 128])
@@ -94,8 +93,8 @@
 (defn upload-avatar
   [f]
   ; TODO: resize avatar to something reasonable
-  (let [creds {:access-key (env :aws-access-key)
-               :secret-key (env :aws-secret-key)}
+  (let [creds {:access-key (config :aws-access-key)
+               :secret-key (config :aws-secret-key)}
         ext (case (f :content-type)
               "image/jpeg" "jpg"
               "image/png" "png"
@@ -105,11 +104,11 @@
         [h w] avatar-size
         resized-image (-> f :tempfile (img/resize-and-crop h w)
                           (img-format/as-stream ext))]
-    (s3/put-object creds (env :aws-domain) (str "avatars/" avatar-filename) resized-image
+    (s3/put-object creds (config :aws-domain) (str "avatars/" avatar-filename) resized-image
                    {:content-type (f :content-type)})
-    (s3/update-object-acl creds (env :aws-domain) (str "avatars/" avatar-filename)
+    (s3/update-object-acl creds (config :aws-domain) (str "avatars/" avatar-filename)
                           (s3/grant :all-users :read))
-    (str "https://s3.amazonaws.com/" (env :aws-domain) "/avatars/" avatar-filename)))
+    (str "https://s3.amazonaws.com/" (config :aws-domain) "/avatars/" avatar-filename)))
 
 ;; invite by link
 
@@ -124,16 +123,16 @@
                       :never (t/years 1000))
                     (t/plus (t/now))
                     (c/to-long))
-        mac (hmac hmac-secret (str nonce group-id expiry))]
-    (str (env :site-url) "/invite?group-id=" group-id "&nonce=" nonce
+        mac (hmac (config :hmac-secret) (str nonce group-id expiry))]
+    (str (config :site-url) "/invite?group-id=" group-id "&nonce=" nonce
          "&expiry=" expiry "&mac=" mac)))
 
 (defn link-signup-page
   [group-id]
   (let [now (.getTime (java.util.Date.))
         group (db/get-group group-id)
-        form-hmac (hmac hmac-secret (str now group-id))
-        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+        form-hmac (hmac (config :hmac-secret) (str now group-id))
+        api-domain (:api-domain config)]
     (clostache/render-resource "templates/link_signup.html.mustache"
                                {:api-domain api-domain
                                 :now now
@@ -147,25 +146,25 @@
   [user]
   (let [secret (random-nonce 20)]
     (cache-set! (str (user :id)) secret)
-    @(http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
-                {:basic-auth ["api" (env :mailgun-password)]
+    @(http/post (str "https://api.mailgun.net/v3/" (config :mailgun-domain) "/messages")
+                {:basic-auth ["api" (config :mailgun-password)]
                  :form-params {:to (user :email)
-                               :from (str "noreply@" (env :mailgun-domain))
+                               :from (str "noreply@" (config :mailgun-domain))
                                :subject "Password reset requested"
                                :text (str "A password reset was requested on "
-                                          (env :site-url) " for " (user :email) "\n\n"
+                                          (config :site-url) " for " (user :email) "\n\n"
                                           "If this was you, follow this link to reset your password "
-                                          (env :site-url) "/reset?user=" (user :id) "&token=" secret
+                                          (config :site-url) "/reset?user=" (user :id) "&token=" secret
                                           "\n\n"
                                           "If this wasn't you, just ignore this email")
                                :html (str "<html><body>"
                                           "<p>"
                                           "A password reset was requested on "
-                                          (env :site-url) " for " (user :email)
+                                          (config :site-url) " for " (user :email)
                                           "</p>"
                                           "<p>"
                                           "If this was you, <a href=\""
-                                          (env :site-url) "/reset?user=" (user :id) "&token=" secret
+                                          (config :site-url) "/reset?user=" (user :id) "&token=" secret
                                           "\"> click here</a> to reset your password "
                                           "</p>"
                                           "<p>"
@@ -190,8 +189,8 @@
 (defn reset-page
   [user token]
   (let [now (.getTime (java.util.Date.))
-        form-hmac (hmac hmac-secret (str now token (user :id)))
-        api-domain (or (:api-domain env) (str "localhost:" @api-port))]
+        form-hmac (hmac (config :hmac-secret) (str now token (user :id)))
+        api-domain (config :api-domain)]
     (clostache/render-resource "templates/reset_page.html.mustache"
                                {:api_domain api-domain
                                 :user_id (user :id)

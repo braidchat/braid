@@ -12,17 +12,17 @@
             [clojure.tools.nrepl.server :as nrepl]
             ; requiring router so mount sees state
             [chat.server.sync :as sync :refer [sync-routes router]]
-            [chat.server.routes :as routes
-             :refer [desktop-client-routes
-                     mobile-client-routes
-                     api-private-routes
-                     api-public-routes
-                     resource-routes]]
-            [chat.server.conf :as conf]
+            [braid.server.routes.client :refer [desktop-client-routes
+                                                mobile-client-routes
+                                                resource-routes]]
+            [braid.server.routes.api :refer [api-private-routes
+                                            api-public-routes]]
             [environ.core :refer [env]]
+            [braid.server.conf :refer [config]]
             ; requiring so mount sees state
             [chat.server.email-digest :refer [email-jobs]]))
 
+; NOT using config here, b/c it won't have started when this runs
 (if (= (env :environment) "prod")
   (do
     (require 'taoensso.carmine.ring)
@@ -40,7 +40,7 @@
 
 (defn assoc-cookie-conf [defaults]
   (-> defaults
-      (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
+      (assoc-in [:session :cookie-attrs :secure] (= (config :environment) "prod"))
       (assoc-in [:session :cookie-attrs :max-age] (* 60 60 24 7))
       (assoc-in [:session :store] session-store)))
 
@@ -109,8 +109,7 @@
                          (start-server! :desktop desktop-port))
         mobile-server (do (println "starting mobile client on port " mobile-port)
                           (start-server! :mobile mobile-port))
-        api-server (do (reset! conf/api-port api-port)
-                       (println "starting api on port " api-port)
+        api-server (do (println "starting api on port " api-port)
                        (start-server! :api api-port))]
     {:desktop desktop-server
      :mobile mobile-server

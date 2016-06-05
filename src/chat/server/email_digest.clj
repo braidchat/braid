@@ -11,7 +11,7 @@
              [format :as format]
              [coerce :refer [to-date-time]]]
             [clojure.string :as string]
-            [environ.core :refer [env]]
+            [braid.server.conf :refer [config]]
             [clostache.parser :refer [render-resource]]
             [inliner.core :refer [inline-css]]
             [org.httpkit.client :as http]
@@ -93,10 +93,10 @@
 (defn send-message
   [to {:keys [text html subject]
        :or {subject "While you were away"}}]
-  (http/post (str "https://api.mailgun.net/v3/" (env :mailgun-domain) "/messages")
-             {:basic-auth ["api" (env :mailgun-password)]
+  (http/post (str "https://api.mailgun.net/v3/" (config :mailgun-domain) "/messages")
+             {:basic-auth ["api" (config :mailgun-password)]
               :form-params {:to to
-                            :from (str "noreply@" (env :mailgun-domain))
+                            :from (str "noreply@" (config :mailgun-domain))
                             :subject subject
                             :text text
                             :html html}}))
