@@ -1,4 +1,4 @@
-(ns chat.server.routes
+(ns braid.server.routes.api
   (:require
     [clojure.string :as string]
     [compojure.core :refer [GET POST defroutes context]]
