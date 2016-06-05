@@ -89,11 +89,6 @@
       [:.title:after
        (mixins/fontawesome \uf013)]]
 
-     [:.extensions
-      [:.title:after
-       (mixins/fontawesome \uf1e6)]]
-
-
      [:.search-bar
       {:display "inline-block"}
 

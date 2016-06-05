@@ -12,7 +12,6 @@
             [chat.server.digest :as digest]
             [clojure.set :refer [difference intersection]]
             [chat.shared.util :refer [valid-nickname? valid-tag-name?]]
-            [chat.server.extensions :refer [handle-thread-change]]
             [chat.server.email-digest :as email]
             [braid.common.schema :refer [new-message-valid?]]
             [braid.common.notify-rules :as notify-rules]
@@ -141,13 +140,6 @@
                     false))))
           (?data :mentioned-user-ids)))))
 
-(defn notify-extensions
-  "Notify extensions about a thread changing if they're interested"
-  [msg]
-  (let [exts (db/extensions-watching (msg :thread-id))]
-    (doseq [ext exts]
-      (handle-thread-change ext msg))))
-
 (defn notify-users [new-message]
   (let [subscribed-user-ids (->>
                               (db/get-users-subscribed-to-thread
@@ -203,8 +195,7 @@
           (when-let [cb ?reply-fn]
             (cb :braid/ok))
           (broadcast-thread (new-message :thread-id) [])
-          (notify-users new-message)
-          (notify-extensions new-message))
+          (notify-users new-message))
         (do
           (timbre/warnf "Malformed new message: %s" (pr-str new-message))
           (when-let [cb ?reply-fn]

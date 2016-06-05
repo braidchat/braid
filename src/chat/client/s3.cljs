@@ -3,8 +3,7 @@
             [clojure.string :refer [split]]
             [goog.events :as events]
             [taoensso.timbre :as timbre :refer-macros [errorf]]
-            [chat.client.xhr :refer [edn-xhr ajax-xhr]]
-            [chat.client.views.helpers :refer [ends-with?]])
+            [chat.client.xhr :refer [edn-xhr ajax-xhr]])
   (:import [goog.net XhrIo EventType]))
 
 (defn upload [file on-complete]

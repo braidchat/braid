@@ -150,12 +150,12 @@
         user-id (db/uuid)
         user-2-id (db/uuid)]
     (testing "can create a group"
-      (is (= group (assoc data :extensions () :admins #{} :intro nil :avatar nil
+      (is (= group (assoc data :admins #{} :intro nil :avatar nil
                      :public? false))))
     (testing "can set group intro"
       (db/group-set! (group :id) :intro "the intro")
       (is (= (db/get-group (group :id))
-             (assoc data :extensions () :admins #{} :intro "the intro" :avatar nil
+             (assoc data :admins #{} :intro "the intro" :avatar nil
                :public? false))))
     (testing "can add a user to the group"
       (let [user (db/create-user! {:id user-id
@@ -165,7 +165,7 @@
         (is (= #{} (db/get-groups-for-user (user :id))))
         (is (= #{} (db/get-users-in-group (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
-        (is (= #{(assoc data :extensions () :admins #{} :intro "the intro" :avatar nil
+        (is (= #{(assoc data :admins #{} :intro "the intro" :avatar nil
                    :public? false)}
                (db/get-groups-for-user (user :id))))
         (is (= #{(dissoc user :group-ids)}
@@ -457,46 +457,6 @@
     (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
            (db/get-user-visible-tag-ids (user :id))
            (set (map :id group-tags))))))
-
-(deftest extension-permissions
-  (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
-        group-2 (db/create-group! {:id (db/uuid) :name "g2"})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-2 :id)})
-        user-1 (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-        thread-1-id (db/uuid)
-        thread-2-id (db/uuid)
-        ext-1 (db/create-extension! {:id (db/uuid)
-                                     :type :asana
-                                     :user-id (user-1 :id)
-                                     :group-id (group-1 :id)
-                                     :config {:type :asana :tag-id (tag-1 :id)}})
-        ext-2 (db/create-extension! {:id (db/uuid)
-                                     :type :asana
-                                     :user-id (user-1 :id)
-                                     :group-id (group-2 :id)
-                                     :config {:type :asana :tag-id (tag-2 :id)}})]
-
-    (testing "extensions can only see threads in the group they are in"
-      (is (not (db/thread-visible-to-extension? thread-1-id (ext-1 :id))))
-
-      (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
-                           :group-id (group-1 :id)
-                           :user-id (user-1 :id) :created-at (java.util.Date.)
-                           :mentioned-tag-ids [(tag-1 :id)]})
-      (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
-                           :group-id (group-1 :id)
-                           :user-id (user-1 :id) :created-at (java.util.Date.)
-                           :mentioned-tag-ids [(tag-2 :id)]})
-
-      (is (db/thread-visible-to-extension? thread-1-id (ext-1 :id)))
-      (is (not (db/thread-visible-to-extension? thread-2-id (ext-1 :id))))
-      (is (db/thread-visible-to-extension? thread-2-id (ext-2 :id)))
-
-      )))
 
 (deftest user-preferences
   (testing "Can set and retrieve preferences"

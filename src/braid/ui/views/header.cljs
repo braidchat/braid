@@ -103,16 +103,6 @@
          [:a.title {:href path
                     :title "Group Settings"}]]))))
 
-(defn extensions-page-button-view []
-  (let [open-group-id (subscribe [:open-group-id])]
-    (fn []
-      (let [path (routes/extensions-page-path {:group-id @open-group-id})]
-        [:div.extensions.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a.title {:href path
-                     :title "Extensions"}]
-                [:div.modal
-                  [:div "extensions"]]]))))
-
 (defn header-view []
   (let [group-id (subscribe [:open-group-id])
         admin? (subscribe [:current-user-is-group-admin?] [group-id])]
