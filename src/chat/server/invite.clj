@@ -13,18 +13,17 @@
             [chat.server.cache :refer [cache-set! cache-get cache-del! random-nonce]]
             [chat.server.crypto :refer [hmac constant-comp]]
             [chat.server.db :as db]
+            [environ.core :refer [env]]
             [braid.server.conf :refer [config]]))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
   (println "WARNING: No :hmac-secret set, using an insecure default."))
 
-(def hmac-secret (config :hmac-secret))
-
 (defn verify-hmac
   [mac data]
   (constant-comp
     mac
-    (hmac hmac-secret data)))
+    (hmac (config :hmac-secret) data)))
 
 (defn verify-invite-nonce
   "Verify that the given nonce is valid for the invite"
@@ -71,7 +70,7 @@
 (defn register-page
   [invite token]
   (let [now (.getTime (java.util.Date.))
-        form-hmac (hmac hmac-secret
+        form-hmac (hmac (config :hmac-secret)
                         (str now token (invite :id) (invite :invitee-email)))
         api-domain (:api-domain config)]
     (clostache/render-resource "templates/register_page.html.mustache"
@@ -86,7 +85,7 @@
   [params]
   (constant-comp
     (params :hmac)
-    (hmac hmac-secret
+    (hmac (config :hmac-secret)
           (str (params :now) (params :token) (params :invite_id) (params :email)))))
 
 (def avatar-size [128 128])
@@ -124,7 +123,7 @@
                       :never (t/years 1000))
                     (t/plus (t/now))
                     (c/to-long))
-        mac (hmac hmac-secret (str nonce group-id expiry))]
+        mac (hmac (config :hmac-secret) (str nonce group-id expiry))]
     (str (config :site-url) "/invite?group-id=" group-id "&nonce=" nonce
          "&expiry=" expiry "&mac=" mac)))
 
@@ -132,7 +131,7 @@
   [group-id]
   (let [now (.getTime (java.util.Date.))
         group (db/get-group group-id)
-        form-hmac (hmac hmac-secret (str now group-id))
+        form-hmac (hmac (config :hmac-secret) (str now group-id))
         api-domain (:api-domain config)]
     (clostache/render-resource "templates/link_signup.html.mustache"
                                {:api-domain api-domain
@@ -190,7 +189,7 @@
 (defn reset-page
   [user token]
   (let [now (.getTime (java.util.Date.))
-        form-hmac (hmac hmac-secret (str now token (user :id)))
+        form-hmac (hmac (config :hmac-secret) (str now token (user :id)))
         api-domain (config :api-domain)]
     (clostache/render-resource "templates/reset_page.html.mustache"
                                {:api_domain api-domain
