@@ -23,7 +23,7 @@
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [mount "0.1.10"]
                  ;client
-                 [org.clojure/clojurescript "1.9.36"]
+                 [org.clojure/clojurescript "1.8.40"]
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]
                  [cljs-ajax "0.5.4"]
                  [secretary "1.2.3"]
