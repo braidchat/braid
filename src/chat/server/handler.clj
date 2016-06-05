@@ -15,7 +15,7 @@
             [braid.server.routes.client :refer [desktop-client-routes
                                                 mobile-client-routes
                                                 resource-routes]]
-            [braid.server.route.api :refer [api-private-routes
+            [braid.server.routes.api :refer [api-private-routes
                                             api-public-routes]]
             [environ.core :refer [env]]
             [braid.server.conf :refer [config]]
