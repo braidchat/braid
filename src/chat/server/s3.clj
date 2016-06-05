@@ -1,7 +1,7 @@
 (ns chat.server.s3
   (:require [clojure.data.json :as json]
             [clojure.string :as string]
-            [environ.core :refer [env]])
+            [braid.server.conf :refer [config]])
   (:import javax.crypto.Mac
            javax.crypto.spec.SecretKeySpec
            sun.misc.BASE64Encoder
@@ -26,20 +26,20 @@
 
 (defn generate-policy
   []
-  (when-let [secret (env :s3-upload-secret)]
+  (when-let [secret (config :s3-upload-secret)]
     (let [policy (-> {:expiration (.. (DateTime. (DateTimeZone/UTC))
                                       (plus (Period/minutes 5))
                                       (toString (ISODateTimeFormat/dateTimeNoMillis)))
                       :conditions
                       [
-                       {:bucket (env :aws-domain)}
+                       {:bucket (config :aws-domain)}
                        ["starts-with" "$key" ""]
                        {:acl "public-read"}
                        ["starts-with" "$Content-Type" ""]
                        ["content-length-range" 0 524288000]]}
                      json/write-str
                      base64-encode)]
-      {:bucket (env :aws-domain)
+      {:bucket (config :aws-domain)
        :auth {:policy policy
-              :key (env :s3-upload-key)
+              :key (config :s3-upload-key)
               :signature (b64-sha1-encode policy secret)}})))

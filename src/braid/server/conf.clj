@@ -5,7 +5,8 @@
 (defstate config
   :start
   (merge {:db-url "datomic:free://localhost:4334/braid"
-          :api-domain (str "localhost:" (+ 2 (:port (mount/args))))}
+          :api-domain (str "localhost:" (+ 2 (:port (mount/args))))
+          :hmac-secret "secret"}
          (select-keys env
                       [:api-domain
                        :asana-client-id

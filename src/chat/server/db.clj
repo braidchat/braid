@@ -2,7 +2,6 @@
   (:require [datomic.api :as d]
             [mount.core :refer [defstate]]
             [braid.server.conf :refer [config]]
-            [environ.core :refer [env]]
             [clojure.edn :as edn]
             [clojure.string :as string]
             [braid.server.db.common :refer :all] ; XXX: temp
