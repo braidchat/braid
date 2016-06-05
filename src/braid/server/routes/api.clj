@@ -11,8 +11,7 @@
             [chat.server.sync :as sync]
             [chat.server.s3 :as s3]
             [braid.api.embedly :as embedly]
-            [braid.server.conf :refer [config]]
-            [environ.core :refer [env]]))
+            [braid.server.conf :refer [config]]))
 
 (defn- edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
@@ -104,7 +103,7 @@
                                          :avatar avatar-url
                                          :nickname nickname
                                          :password password})
-                  referer (get-in req [:headers "referer"] (env :site-url))
+                  referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
                 (db/user-add-to-group! (user :id) (invite :group-id))
@@ -134,7 +133,7 @@
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
                 (let [id (register-user email group-id)
-                      referer (get-in req [:headers "referer"] (env :site-url))
+                      referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
                    :session (assoc (req :session) :user-id id)
@@ -151,7 +150,7 @@
             (if-let [user-id (get-in req [:session :user-id])]
               (do
                 (join-group user-id group-id)
-                (let [referer (get-in req [:headers "referer"] (env :site-url))
+                (let [referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302
                    :headers {"Location" (str proto "//" referrer-domain "/" group-id "/inbox")}
@@ -174,7 +173,7 @@
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
                 (let [id (register-user email group-id)
-                      referer (get-in req [:headers "referer"] (env :site-url))
+                      referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
                    :session (assoc (req :session) :user-id id)
@@ -191,7 +190,7 @@
             (if-let [user-id (get-in req [:session :user-id])]
               (do
                 (join-group user-id group-id)
-                (let [referer (get-in req [:headers "referer"] (env :site-url))
+                (let [referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302
                    :headers {"Location" (str proto "//" referrer-domain "/" group-id "/inbox")}
@@ -211,7 +210,7 @@
         (if-let [user (db/user-by-id user-id)]
           (if-let [err (:error (invites/verify-reset-nonce user token))]
             (assoc fail :body err)
-            (let [referer (get-in req [:headers "referer"] (env :site-url))
+            (let [referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (db/set-user-password! (user :id) new-password)
               {:status 301
