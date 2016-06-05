@@ -4,7 +4,8 @@
 
 (defstate config
   :start
-  (merge {:db-url "datomic:free://localhost:4334/braid"}
+  (merge {:db-url "datomic:free://localhost:4334/braid"
+          :api-domain (str "localhost:" (+ 2 (:port (mount/args))))}
          (select-keys env
                       [:mailgun-domain
                        :mailgun-password
@@ -19,5 +20,5 @@
                        :s3-upload-secret
                        :asana-client-id
                        :asana-client-secret
-                       :embedly-key])
-         {:api-port (+ 2 (:port (mount/args)))}))
+                       :embedly-key
+                       :api-domain])))

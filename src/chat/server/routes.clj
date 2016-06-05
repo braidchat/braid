@@ -27,7 +27,7 @@
     (str "public/" client ".html")
     {:algo "sha256"
      :js (str (digest/from-file (str "public/js/" client "/out/braid.js")))
-     :api_domain (or (:api-domain env) (str "localhost:" (config :api-port)))}))
+     :api_domain (config :api-domain)}))
 
 (defroutes desktop-client-routes
   ; public group page
@@ -36,7 +36,7 @@
       (clostache/render-resource "templates/public_group_desktop.html.mustache"
                                  {:group-name (group :name)
                                   :group-id (group :id)
-                                  :api-domain (or (:api-domain env) (str "localhost:" (config :api-port)))})
+                                  :api-domain (config :api-domain)})
       {:status 403
        :headers {"Content-Type" "text/plain"}
        :body "No such public group"}))
