@@ -18,9 +18,11 @@
             [braid.server.route.api :refer [api-private-routes
                                             api-public-routes]]
             [environ.core :refer [env]]
+            [braid.server.conf :refer [config]]
             ; requiring so mount sees state
             [chat.server.email-digest :refer [email-jobs]]))
 
+; NOT using config here, b/c it won't have started when this runs
 (if (= (env :environment) "prod")
   (do
     (require 'taoensso.carmine.ring)
@@ -38,7 +40,7 @@
 
 (defn assoc-cookie-conf [defaults]
   (-> defaults
-      (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
+      (assoc-in [:session :cookie-attrs :secure] (= (config :environment) "prod"))
       (assoc-in [:session :cookie-attrs :max-age] (* 60 60 24 7))
       (assoc-in [:session :store] session-store)))
 
