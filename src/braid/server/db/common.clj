@@ -96,3 +96,17 @@
      :intro (settings :intro)
      :avatar (settings :avatar)
      :public? (get settings :public? false)}))
+
+(def bot-pull-pattern
+  [:bot/id
+   :bot/name
+   :bot/token
+   :bot/avatar
+   :bot/webhook-url])
+
+(defn db->bot [e]
+  {:id (:bot/id e)
+   :name (:bot/name e)
+   :avatar (:bot/avatar e)
+   :webhook-url (:bot/webhook-url e)
+   :token (:bot/token e)})

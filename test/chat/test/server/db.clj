@@ -493,3 +493,29 @@
           (is (= #{u2 (u :id)} (set (db/user-search-preferences :email-frequency :weekly))))
           (is (= [u1] (db/user-search-preferences :email-frequency :daily)))
           (is (= #{u1 u2} (set (db/user-search-preferences :favourite-color "blue")))))))))
+
+(deftest bots-test
+  (testing "can create bots & retrieve by group"
+    (let [g1 (db/create-group! {:name "group 1" :id (db/uuid)})
+          g2 (db/create-group! {:name "group 2" :id (db/uuid)})
+          g3 (db/create-group! {:name "group 3" :id (db/uuid)})
+
+          b1 (db/create-bot! {:id (db/uuid)
+                              :name "bot1"
+                              :avatar ""
+                              :webhook-url ""
+                              :group-id (g1 :id)})
+          b2 (db/create-bot! {:id (db/uuid)
+                              :name "bot2"
+                              :avatar ""
+                              :webhook-url ""
+                              :group-id (g1 :id)})
+          b3 (db/create-bot! {:id (db/uuid)
+                              :name "bot3"
+                              :avatar ""
+                              :webhook-url ""
+                              :group-id (g2 :id)})]
+      (is (= #{b1 b2} (db/bots-in-group (g1 :id))))
+      (is (= #{b3} (db/bots-in-group (g2 :id))))
+      (is (= #{} (db/bots-in-group (g3 :id))))
+      )))

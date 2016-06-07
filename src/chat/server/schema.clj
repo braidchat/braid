@@ -205,4 +205,37 @@
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
 
+ ; bots
+ {:db/ident :bot/id
+  :db/valueType :db.type/uuid
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/token
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/avatar
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/webhook-url
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/group
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+
 ])

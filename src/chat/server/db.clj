@@ -6,7 +6,7 @@
             [clojure.string :as string]
             [braid.server.db.common :refer :all] ; XXX: temp
             [chat.server.schema :refer [schema]]
-            [braid.server.db user message group invitation thread tag]))
+            [braid.server.db user message group invitation thread tag bot]))
 
 (defn init!
   "set up schema"
@@ -63,3 +63,5 @@
 (reexport-db-ns braid.server.db.thread)
 
 (reexport-db-ns braid.server.db.tag)
+
+(reexport-db-ns braid.server.db.bot)
