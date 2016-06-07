@@ -10,7 +10,7 @@
         :bot/name name
         :bot/avatar avatar
         :bot/webhook-url webhook-url
-        :bot/token (random-nonce 20)
+        :bot/token (random-nonce 30)
         :bot/group [:group/id group-id]}
        (create-entity! conn)
        db->bot))
