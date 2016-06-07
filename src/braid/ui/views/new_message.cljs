@@ -5,6 +5,7 @@
             [cljs.core.async :as async :refer [<! put! chan alts!]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
+            [chat.client.s3 :as s3]
             [chat.client.views.helpers :refer [debounce]]
             [braid.ui.views.autocomplete :refer [engines]])
   (:import [goog.events KeyCodes]))
@@ -259,8 +260,27 @@
                                             (choose-result! result)
                                             (focus-textbox!)))}])])})))
 
+(defn upload-button-view
+  [config]
+  (let [uploading? (r/atom false)]
+    (fn [config]
+      ; clicking on label == clicking on (hidden) input
+      [:label.plus {:class (when @uploading? "uploading")}
+       [:input {:type "file"
+                :multiple false
+                :style {:display "none"}
+                :on-change (fn [e]
+                             (reset! uploading? true)
+                             (s3/upload (aget (.. e -target -files) 0)
+                                        (fn [url]
+                                          (reset! uploading? false)
+                                          (dispatch! :new-message
+                                                     {:content url
+                                                      :group-id (config :group-id)
+                                                      :thread-id (config :thread-id)}))))}]])))
+
 (defn new-message-view [config]
   [:div.message.new
-   [:div.plus {:on-click (fn [])}]
+   [upload-button-view config]
    [wrap-autocomplete config]])
 

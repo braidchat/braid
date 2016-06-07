@@ -155,7 +155,10 @@
       :box-shadow "0 0 1px 1px #ccc"}]
     [:&:active
      {:color "#999"
-      :box-shadow "0 0 1px 1px #999"}]]
+      :box-shadow "0 0 1px 1px #999"}]
+    [:&.uploading:after
+     (mixins/fontawesome \uf110)
+     mixins/spin]]
 
     [:textarea
      {:width "100%"
