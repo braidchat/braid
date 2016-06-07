@@ -24,3 +24,14 @@
               [?b :bot/group ?g]]
             (d/db conn) bot-pull-pattern group-id)
        (into #{} (map db->bot))))
+
+(defn bot-by-name-in-group
+  [conn name group-id]
+  (-> (d/q '[:find (pull ?b pull-pattern) .
+             :in $ pull-pattern ?group-id ?name
+             :where
+             [?g :group/id ?group-id]
+             [?b :bot/group ?g]
+             [?b :bot/name ?name]]
+           (d/db conn) bot-pull-pattern group-id name)
+      db->bot))

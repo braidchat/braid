@@ -518,4 +518,4 @@
       (is (= #{b1 b2} (db/bots-in-group (g1 :id))))
       (is (= #{b3} (db/bots-in-group (g2 :id))))
       (is (= #{} (db/bots-in-group (g3 :id))))
-      )))
+      (is (= b1 (db/bot-by-name-in-group "bot1" (g1 :id)))))))
