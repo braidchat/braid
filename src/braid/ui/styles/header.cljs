@@ -1,9 +1,70 @@
 (ns braid.ui.styles.header
   (:require [garden.units :refer [em px]]
+            [garden.arithmetic :as m]
             [braid.ui.styles.vars :as vars]
             [braid.ui.styles.mixins :as mixins]))
 
+(def header-height vars/avatar-size)
+
 (defn header [pad]
+  [:.app
+   [:.main
+    ["> .header"
+     {:position "absolute"
+      :left vars/sidebar-width
+      :top vars/pad
+      :margin-left vars/pad
+      :z-index 100
+      :border-radius vars/border-radius
+      :overflow "hidden"
+      :height header-height}
+     (mixins/box-shadow)
+
+     [:a
+      {:display "inline-block"
+       :vertical-align "top"
+       :padding [[0 (m/* vars/pad 0.5)]]
+       :color "white"
+       :text-decoration "none"
+       :background "black"
+       :height header-height
+       :line-height header-height
+       :-webkit-font-smoothing "antialiased"}
+       
+      [:&:hover
+       {:background "#666"}]
+
+      [:&.group-name
+       {:display "inline-block"
+        :text-transform "uppercase"
+        :padding-right (m/* vars/pad 0.25)
+        :padding-left (m/* vars/pad 0.75)
+        :letter-spacing "0.1em"
+        :font-weight "bold"}]
+
+      [:&.inbox:after
+       (mixins/fontawesome \uf01c)]
+
+      [:&.recent:after
+       (mixins/fontawesome \uf1da)]]
+
+     [:.search
+      {:display "inline-block"}
+
+      [:input
+       {:border 0
+        :padding-left vars/pad
+        :min-width "15em"
+        :width "25vw"
+        :height header-height
+        :outline "none"}]
+
+       [:&:after
+        {:margin-left "-2em"
+         :color "#ccc"}
+        (mixins/fontawesome \uf002)]]]]])
+
+#_(defn header [pad]
   [:.app
    [:.main
     ["> .header"
@@ -64,13 +125,14 @@
         {:display "block"
          :padding vars/pad}]]]
 
-     [:.inbox
-      [:.title:after
-       (mixins/fontawesome \uf01c)]]
 
-     [:.recent
-      [:.title:after
-       (mixins/fontawesome \uf1da)]]
+         [:.inbox
+          [:.title:after
+           (mixins/fontawesome \uf01c)]]
+
+         [:.recent
+          [:.title:after
+           (mixins/fontawesome \uf1da)]]
 
      [:.users
       [:.title:after

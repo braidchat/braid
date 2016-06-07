@@ -90,7 +90,7 @@
          [:a.title {:href path
                     :title "Group Settings"}]]))))
 
-(defn header-view []
+#_(defn header-view []
   (let [group-id (subscribe [:open-group-id])
         admin? (subscribe [:current-user-is-group-admin?] [group-id])]
     (fn []
@@ -103,3 +103,12 @@
      [group-settings-view]
      [search-bar-view]
      [current-user-button-view]])))
+
+(defn header-view []
+  [:div.header
+    [:div
+      [:a.group-name {:href ""} "Braid"]
+      [:a.inbox {:href ""}]
+      [:a.recent {:href ""}]
+      [:div.search
+        [:input.search {:placeholder "Search..."}]]]])
