@@ -261,5 +261,6 @@
 
 (defn new-message-view [config]
   [:div.message.new
+   [:div.plus {:on-click (fn [])}]
    [wrap-autocomplete config]])
 

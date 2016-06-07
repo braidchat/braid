@@ -131,20 +131,39 @@
 (defn new-message [pad]
   [:.message.new
    {:flex-shrink 0
-    :paddgin-bottom pad
-    :padding-left (m/+ pad (rem 2))
-    :padding-right pad
-    :margin-bottom pad}
+    :padding pad
+    :margin 0
+    :position "relative"}
+
+   [:.plus
+    {:border-radius vars/border-radius
+     :text-align "center"
+     :line-height (em 2)
+     :position "absolute"
+     :top 0
+     :bottom 0
+     :left 0
+     :width vars/avatar-size
+     :margin pad
+     :cursor "pointer"
+     :color "#e6e6e6"
+     :box-shadow "0 0 1px 1px #e6e6e6"}
+    [:&:after
+     (mixins/fontawesome \uf067)]
+    [:&:hover
+     {:color "#ccc"
+      :box-shadow "0 0 1px 1px #ccc"}]
+    [:&:active
+     {:color "#999"
+      :box-shadow "0 0 1px 1px #999"}]]
 
     [:textarea
      {:width "100%"
       :resize "none"
       :border "none"
       :box-sizing "border-box"
-      :padding (rem 0.5)
       :min-height (em 3.5)
-      :box-shadow "0 0 1px 1px #ccc"
-      :border-radius vars/border-radius}
+      :padding-left (rem 2.5)}
 
       [:&:focus
        {:outline "none"}]]
