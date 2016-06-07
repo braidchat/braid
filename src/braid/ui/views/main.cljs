@@ -35,8 +35,11 @@
             [:h1 "???"])))))
 
 (defn main-view []
-  [:div.main
-   [error-banner-view]
-   [sidebar-view]
-   [header-view]
-   [page-view]])
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      [:div.main
+       [error-banner-view]
+       [sidebar-view]
+       (when @group-id
+         [header-view])
+       [page-view]])))
