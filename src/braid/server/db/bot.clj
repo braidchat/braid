@@ -35,3 +35,10 @@
              [?b :bot/name ?name]]
            (d/db conn) bot-pull-pattern group-id name)
       db->bot))
+
+(defn bot-auth?
+  "Check if token is correct for the bot with the given id"
+  [conn bot-id token]
+  (some-> (d/pull (d/db conn) [:bot/token] [:bot/id bot-id])
+          :bot/token
+          (crypto/constant-comp token)))
