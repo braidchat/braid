@@ -5,7 +5,7 @@
 (defn recent-page-view
   []
   (let [group-id (subscribe [:open-group-id])
-        threads (subscribe [:group-threads] [group-id])
+        threads (subscribe [:recent-threads] [group-id])
         user-id (subscribe [:user-id])]
     (fn []
       (let [sorted-threads
