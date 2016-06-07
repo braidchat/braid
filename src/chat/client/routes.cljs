@@ -11,9 +11,6 @@
 (defroute page-path "/:group-id/:page-id" [group-id page-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type (keyword page-id)}))
 
-(defroute other-path "/:page-id" [page-id]
-  (store/set-group-and-page! nil {:type (keyword page-id)}))
-
 (defroute inbox-page-path "/:group-id/inbox" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :inbox}))
 
@@ -37,6 +34,9 @@
 (defroute search-page-path "/:group-id/search/:query" [group-id query]
   (store/set-group-and-page! (UUID. group-id nil) {:type :search
                                                    :search-query query}))
+
+(defroute other-path "/:page-id" [page-id]
+  (store/set-group-and-page! nil {:type (keyword page-id)}))
 
 (defroute index-path "/" {}
   (when-let [group-id (-> (@store/app-state :groups) vals first :id)]

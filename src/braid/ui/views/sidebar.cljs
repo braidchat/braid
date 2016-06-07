@@ -171,17 +171,26 @@
           (when-not (drag-grp :avatar)
             (string/join "" (take 2 (drag-grp :name))))])])))
 
-(defn new-group-view []
+(defn group-explore-button-view []
   (let [page (subscribe [:page])
         invitations (subscribe [:invitations])]
     (fn []
-      [:a.option.plus
+      [:a.option.other.plus
        {:class (when (= (@page :type) :group-explore) "active")
         :href (routes/other-path {:page-id "group-explore"})}
        (when (< 0 (count @invitations))
          [:div.badge (count @invitations)])])))
 
+
+(defn global-settings-button-view []
+  (let [page (subscribe [:page])]
+    (fn []
+      [:a.option.other.global-settings
+       {:class (when (= (@page :type) :global-settings) "active")
+        :href (routes/other-path {:page-id "global-settings"})}])))
+
 (defn sidebar-view []
   [:div.sidebar
    [groups-view]
-   [new-group-view]])
+   [group-explore-button-view]
+   [global-settings-button-view]])
