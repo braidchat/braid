@@ -91,15 +91,12 @@
                     :title "Group Settings"}]]))))
 
 (defn header-view []
-  (let [group-id (subscribe [:open-group-id])
-        admin? (subscribe [:current-user-is-group-admin?] [group-id])]
-    (fn []
-    [:div.header
-     [clear-inbox-button-view]
-     [inbox-page-button-view]
-     [recent-page-button-view]
-     [users-online-pane-view]
-     [tags-pane-view]
-     [group-settings-view]
-     [search-bar-view]
-     [current-user-button-view]])))
+  [:div.header
+   [clear-inbox-button-view]
+   [inbox-page-button-view]
+   [recent-page-button-view]
+   [users-online-pane-view]
+   [tags-pane-view]
+   [group-settings-view]
+   [search-bar-view]
+   [current-user-button-view]])
