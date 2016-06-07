@@ -34,9 +34,6 @@
 (defroute group-settings-path "/:group-id/settings" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :settings}))
 
-(defroute help-page-path "/:group-id/help" [group-id]
-  (store/set-group-and-page! (UUID. group-id nil) {:type :help}))
-
 (defroute search-page-path "/:group-id/search/:query" [group-id query]
   (store/set-group-and-page! (UUID. group-id nil) {:type :search
                                                    :search-query query}))
