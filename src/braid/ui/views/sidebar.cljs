@@ -172,11 +172,14 @@
             (string/join "" (take 2 (drag-grp :name))))])])))
 
 (defn new-group-view []
- (let [page (subscribe [:page])]
-   (fn []
-     [:a.option.plus
-      {:class (when (= (@page :type) :group-explore) "active")
-       :href (routes/other-path {:page-id "group-explore"})}])))
+  (let [page (subscribe [:page])
+        invitations (subscribe [:invitations])]
+    (fn []
+      [:a.option.plus
+       {:class (when (= (@page :type) :group-explore) "active")
+        :href (routes/other-path {:page-id "group-explore"})}
+       (when (< 0 (count @invitations))
+         [:div.badge (count @invitations)])])))
 
 (defn sidebar-view []
   [:div.sidebar
