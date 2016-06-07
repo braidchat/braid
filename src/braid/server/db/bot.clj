@@ -42,3 +42,7 @@
   (some-> (d/pull (d/db conn) [:bot/token] [:bot/id bot-id])
           :bot/token
           (crypto/constant-comp token)))
+
+(defn bot-by-id
+  [conn bot-id]
+  (d/pull (d/db conn) bot-pull-pattern [:bot/id bot-id]))
