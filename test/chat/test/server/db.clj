@@ -4,6 +4,7 @@
             [chat.test.server.test-utils :refer [fetch-messages]]
             [braid.server.conf :as conf]
             [chat.server.db :as db :refer [conn]]
+            [braid.common.schema :as schema]
             [chat.server.search :as search]))
 
 
@@ -514,7 +515,9 @@
                             :avatar ""
                             :webhook-url ""
                             :group-id (g2 :id)})]
-
+    (is (schema/check-bot! b1))
+    (is (schema/check-bot! b2))
+    (is (schema/check-bot! b3))
     (testing "can create bots & retrieve by group"
       (is (= #{b1 b2} (db/bots-in-group (g1 :id))))
       (is (= #{b3} (db/bots-in-group (g2 :id))))

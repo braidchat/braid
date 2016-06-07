@@ -93,3 +93,12 @@
    :invitee-email s/Str
    :group-id s/Uuid
    :group-name s/Str})
+
+(def Bot
+  {:id s/Uuid
+   :group-id s/Uuid
+   :name s/Str
+   :avatar s/Str
+   :webhook-url s/Str
+   :token s/Str})
+(def check-bot! (s/validator Bot))

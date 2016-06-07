@@ -102,10 +102,12 @@
    :bot/name
    :bot/token
    :bot/avatar
-   :bot/webhook-url])
+   :bot/webhook-url
+   {:bot/group [:group/id]}])
 
 (defn db->bot [e]
   {:id (:bot/id e)
+   :group-id (get-in e [:bot/group :group/id])
    :name (:bot/name e)
    :avatar (:bot/avatar e)
    :webhook-url (:bot/webhook-url e)
