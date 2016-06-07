@@ -1,7 +1,7 @@
 (ns braid.server.db.bot
   (:require [datomic.api :as d]
             [braid.server.db.common :refer [create-entity! bot-pull-pattern db->bot]]
-            [braid.server.util :refer [random-nonce]]))
+            [chat.server.crypto :as crypto :refer [random-nonce]]))
 
 (defn create-bot!
   [conn {:keys [id name avatar webhook-url group-id]}]

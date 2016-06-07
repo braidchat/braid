@@ -11,8 +11,7 @@
             [clj-time.core :as t]
             [clj-time.coerce :as c]
             [chat.server.cache :refer [cache-set! cache-get cache-del!]]
-            [braid.server.util :refer [random-nonce]]
-            [chat.server.crypto :refer [hmac constant-comp]]
+            [chat.server.crypto :refer [hmac constant-comp random-nonce]]
             [chat.server.db :as db]
             [environ.core :refer [env]]
             [braid.server.conf :refer [config]]))
