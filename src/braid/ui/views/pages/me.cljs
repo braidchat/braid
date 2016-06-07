@@ -82,28 +82,6 @@
                                (not= @new-pass @pass-confirm))}
         "Change Password"]])))
 
-(defn invitations-view
-  [invites]
-  [:div.pending-invites
-   [:h2 "Invites"]
-   [:ul.invites
-    (for [invite invites]
-      ^{:key (invite :id)}
-      [:li.invite
-       "Group "
-       [:strong (invite :group-name)]
-       " from "
-       [:strong (invite :inviter-email)]
-       [:br]
-       [:button {:on-click
-                 (fn [_]
-                   (dispatch! :accept-invite invite))}
-        "Accept"]
-       [:button {:on-click
-                 (fn [_]
-                   (dispatch! :decline-invite invite))}
-        "Decline"]])]])
-
 (defn email-settings-view
   []
   (let [email-freq (subscribe [:user-preference :email-frequency])]
@@ -235,24 +213,18 @@
 
 (defn me-page-view
   []
-  (let [invitations (subscribe [:invitations])]
-    (fn []
-      [:div.page.me
-       [:div.title "Me!"]
-       [:div.content
-        [:h2 "Log Out"]
-        [:button.logout {:on-click
-                         (fn [_]
-                           (dispatch! :logout nil))} "Log Out"]
-        [:h2 "Update Nickname"]
-        [nickname-view]
-        [:h2 "Change Password"]
-        [password-view]
-        [:h2 "Received Invites"]
-        (when (seq @invitations)
-          ;TODO: render correctly
-          [invitations-view @invitations])
-        [:h2 "Email Digest Preferences"]
-        [email-settings-view]
-        [:h2 "Notification Preferences"]
-        [notification-settings-view]]])))
+  [:div.page.me
+   [:div.title "Me!"]
+   [:div.content
+    [:h2 "Log Out"]
+    [:button.logout {:on-click
+                     (fn [_]
+                       (dispatch! :logout nil))} "Log Out"]
+    [:h2 "Update Nickname"]
+    [nickname-view]
+    [:h2 "Change Password"]
+    [password-view]
+    [:h2 "Email Digest Preferences"]
+    [email-settings-view]
+    [:h2 "Notification Preferences"]
+    [notification-settings-view]]])

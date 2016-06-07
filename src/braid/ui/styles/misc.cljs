@@ -167,12 +167,6 @@
     [:.error
      {:color "red"}]]
 
-   [:.pending-invites
-    {:color "#999"}
-
-    [:ul.invites
-     {:padding-left (px 15)}]]
-
    [:.group
 
     [:.name
