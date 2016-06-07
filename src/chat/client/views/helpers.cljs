@@ -70,3 +70,13 @@
     (.. js/document -defaultView
         (getComputedStyle elt nil)
         (getPropertyValue prop))))
+
+(def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
+
+(defn extract-urls
+  "Given some text, returns a sequence of URLs contained in the text"
+  [text]
+  (map first (re-seq url-re text)))
+
+(defn contains-urls? [text]
+  (boolean (seq (extract-urls text))))
