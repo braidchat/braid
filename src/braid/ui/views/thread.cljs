@@ -5,6 +5,7 @@
             [cljs.core.async :refer [chan put!]]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
+            [chat.client.views.helpers :as helpers]
             [chat.client.s3 :as s3]
             [braid.ui.views.pills :refer [user-pill-view tag-pill-view]]
             [braid.ui.views.message :refer [message-view]]
@@ -90,7 +91,8 @@
                                    (:user-id prev-message))
                                 (> (* 2 60 1000) ; 2 minutes
                                    (- (:created-at message)
-                                      (or (:created-at prev-message) 0))))))))]
+                                      (or (:created-at prev-message) 0)))
+                                (not (helpers/contains-urls? (prev-message :content))))))))]
             (doall
               (for [message sorted-messages]
                 ^{:key (message :id)}

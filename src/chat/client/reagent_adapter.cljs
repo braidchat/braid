@@ -31,6 +31,10 @@
   state/get-group-threads)
 
 (register-sub
+  :recent-threads
+  state/get-recent-threads)
+
+(register-sub
   :user-is-group-admin?
   state/user-is-group-admin?)
 

@@ -72,10 +72,6 @@
       [:.title:after
        (mixins/fontawesome \uf1da)]]
 
-     [:.help
-      [:.title:after
-       (mixins/fontawesome \uf059)]]
-
      [:.users
       [:.title:after
        (mixins/fontawesome \uf0c0)

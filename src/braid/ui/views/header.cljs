@@ -32,19 +32,6 @@
           [:a.title {:href path
                      :title "Recent"}]]))))
 
-(defn help-page-pane-view []
-  (let [open-group-id (subscribe [:open-group-id])]
-    (fn []
-      (let [path (routes/help-page-path {:group-id @open-group-id})]
-        [:div.help.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a.title {:href path
-                     :title "Help"}]
-          [:div.modal
-            [:p "Conversations must be tagged to be seen by other people."]
-            [:p "Tag a conversation by mentioning a tag in a message: ex. #general"]
-            [:p "You can also mention users to add them to a conversation: ex. @raf"]
-            [:p "Add emoji by using :shortcodes: (they autocomplete)."]]]))))
-
 (defn users-online-pane-view []
   (let [open-group-id (subscribe [:open-group-id])
         user-id (subscribe [:user-id])
@@ -108,7 +95,6 @@
    [clear-inbox-button-view]
    [inbox-page-button-view]
    [recent-page-button-view]
-   [help-page-pane-view]
    [users-online-pane-view]
    [tags-pane-view]
    [group-settings-view]
