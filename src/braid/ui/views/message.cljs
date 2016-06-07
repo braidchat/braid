@@ -11,8 +11,6 @@
             [chat.client.views.helpers :as helpers]
             [chat.client.routes :as routes]))
 
-(def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
-
 (defn abridged-url
   "Given a full url, returns 'domain.com/*.png' where"
   [url]
@@ -28,7 +26,7 @@
 
 (def replacements
   {:urls
-   {:pattern url-re
+   {:pattern helpers/url-re
     :replace (fn [match]
                [:a.external {:href match
                              :title match
@@ -165,12 +163,6 @@
   (make-delimited-processor {:delimiter "*"
                              :result-fn (fn [body] [:strong.starred body])}))
 
-
-(defn extract-urls
-  "Given some text, returns a sequence of URLs contained in the text"
-  [text]
-  (map first (re-seq url-re text)))
-
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
   links"
@@ -225,6 +217,6 @@
 
             (into [:div.content] (format-message (message :content)))
 
-            (when-let [url (first (extract-urls (message :content)))]
+            (when-let [url (first (helpers/extract-urls (message :content)))]
               [embed-view url])]))})))
 
