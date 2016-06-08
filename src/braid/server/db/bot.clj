@@ -1,19 +1,22 @@
 (ns braid.server.db.bot
   (:require [datomic.api :as d]
             [braid.server.db.common :refer [create-entity! bot-pull-pattern db->bot]]
+            [braid.server.db.user :as user]
             [chat.server.crypto :as crypto :refer [random-nonce]]))
 
 (defn create-bot!
   [conn {:keys [id name avatar webhook-url group-id]}]
   ; TODO: enforce name is unique in that group?
-  (->> {:bot/id id
-        :bot/name name
-        :bot/avatar avatar
-        :bot/webhook-url webhook-url
-        :bot/token (random-nonce 30)
-        :bot/group [:group/id group-id]}
-       (create-entity! conn)
-       db->bot))
+  (let [fake-user (user/create-bot-user! conn {:id (d/squuid)})]
+    (->> {:bot/id id
+          :bot/name name
+          :bot/avatar avatar
+          :bot/webhook-url webhook-url
+          :bot/token (random-nonce 30)
+          :bot/group [:group/id group-id]
+          :bot/user [:user/id fake-user]}
+         (create-entity! conn)
+         db->bot)))
 
 (defn bots-in-group
   [conn group-id]

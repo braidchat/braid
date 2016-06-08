@@ -20,6 +20,13 @@
        (create-entity! conn)
        db->user))
 
+(defn create-bot-user!
+  [conn {:keys [id]}]
+  (->> {:user/id id
+        :user/is-bot? true}
+       (create-entity! conn)
+       :user/id))
+
 (defn nickname-taken?
   [conn nickname]
   (some? (d/entity (d/db conn) [:user/nickname nickname])))

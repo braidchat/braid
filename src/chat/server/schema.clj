@@ -54,6 +54,11 @@
   :db/cardinality :db.cardinality/many
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
+ {:db/ident :user/is-bot?
+  :db/valueType :db.type/boolean
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
  ; user preference - key
  {:db/ident :user.preference/key
@@ -233,6 +238,12 @@
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :bot/group
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/user
+  :db/doc "Fake user bot posts under"
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
   :db/id #db/id [:db.part/db]

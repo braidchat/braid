@@ -9,7 +9,13 @@
   "Add bot schema"
   []
   (d/transact db/conn
-    [{:db/ident :bot/id
+    [{:db/ident :user/is-bot?
+      :db/valueType :db.type/boolean
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+
+     {:db/ident :bot/id
       :db/valueType :db.type/uuid
       :db/cardinality :db.cardinality/one
       :db/unique :db.unique/identity
@@ -39,7 +45,14 @@
       :db/valueType :db.type/ref
       :db/cardinality :db.cardinality/one
       :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}]))
+      :db.install/_attribute :db.part/db}
+     {:db/ident :bot/user
+      :db/doc "Fake user bot posts under"
+      :db/valueType :db.type/ref
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+     ]))
 
 (defn migrate-2016-06-04
   "Remove old-style extensions"

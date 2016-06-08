@@ -88,10 +88,12 @@
    :bot/token
    :bot/avatar
    :bot/webhook-url
-   {:bot/group [:group/id]}])
+   {:bot/group [:group/id]}
+   {:bot/user [:user/id]}])
 
 (defn db->bot [e]
   {:id (:bot/id e)
+   :user-id (get-in e [:bot/user :user/id])
    :group-id (get-in e [:bot/group :group/id])
    :name (:bot/name e)
    :avatar (:bot/avatar e)
@@ -102,12 +104,14 @@
   "Like bot-pull-pattern but for the publicy-visible bot attributes"
   [:bot/id
    :bot/name
-   :bot/avatar])
+   :bot/avatar
+   {:bot/user [:user/id]}])
 
 (defn db->bot-display
   "Like db->bot but for the publicly-visible bot attributes"
   [e]
   {:id (:bot/id e)
+   :user-id (get-in e [:bot/user :user/id])
    :nickname (:bot/name e)
    :avatar (:bot/avatar e)})
 
