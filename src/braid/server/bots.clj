@@ -13,9 +13,9 @@
 
 (defn send-notification
   [bot message]
-  ; TODO: need some sort of signing/verification
-  (let [body (->transit message)]
+  (let [body (->transit message)
+        hmac (crypto/hmac (bot :token) body)]
     (http/put (bot :webhook-url)
               {:headers {"Content-Type" "application/transit+msgpack"
-                         "X-Braid-Signature" ""}
+                         "X-Braid-Signature" hmac}
                :body body})))
