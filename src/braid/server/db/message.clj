@@ -6,7 +6,7 @@
 
 (defn create-message!
   [conn {:keys [thread-id group-id id content user-id created-at
-           mentioned-user-ids mentioned-tag-ids]}]
+                mentioned-user-ids mentioned-tag-ids]}]
 
   ; upsert-thread
   (when-not (d/entity (d/db conn) [:thread/id thread-id])
