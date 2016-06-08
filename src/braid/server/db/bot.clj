@@ -45,4 +45,4 @@
 
 (defn bot-by-id
   [conn bot-id]
-  (d/pull (d/db conn) bot-pull-pattern [:bot/id bot-id]))
+  (db->bot (d/pull (d/db conn) bot-pull-pattern [:bot/id bot-id])))
