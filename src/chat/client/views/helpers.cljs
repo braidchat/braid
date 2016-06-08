@@ -4,10 +4,11 @@
             [cljs-time.format :as f]
             [cljs-time.core :as t]
             [chat.client.store :as store]
-            [goog.style :as gstyle]))
+            [goog.style :as gstyle]
+            [cljsjs.husl]))
 
 (defn ->color [input]
-  (str "hsl(" (mod (Math/abs (hash input)) 360) ",71%,35%)"))
+  (js/window.HUSL.toHex (mod (Math/abs (hash input)) 360) 95 50))
 
 (defn id->color [uuid]
   (->color uuid))
