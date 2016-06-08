@@ -82,21 +82,6 @@
    :tag-ids (into #{} (map :tag/id) (thread :thread/tag))
    :mentioned-ids (into #{} (map :user/id) (thread :thread/mentioned))})
 
-(def group-pull-pattern
-  [:group/id
-   :group/name
-   :group/settings
-   {:group/admins [:user/id]}])
-
-(defn db->group [e]
-  (let [settings (-> e (get :group/settings "{}") edn/read-string)]
-    {:id (:group/id e)
-     :name (:group/name e)
-     :admins (into #{} (map :user/id) (:group/admins e))
-     :intro (settings :intro)
-     :avatar (settings :avatar)
-     :public? (get settings :public? false)}))
-
 (def bot-pull-pattern
   [:bot/id
    :bot/name
@@ -112,3 +97,34 @@
    :avatar (:bot/avatar e)
    :webhook-url (:bot/webhook-url e)
    :token (:bot/token e)})
+
+(def bot-display-pull-pattern
+  "Like bot-pull-pattern but for the publicy-visible bot attributes"
+  [:bot/id
+   :bot/name
+   :bot/avatar])
+
+(defn db->bot-display
+  "Like db->bot but for the publicly-visible bot attributes"
+  [e]
+  {:id (:bot/id e)
+   :nickname (:bot/name e)
+   :avatar (:bot/avatar e)})
+
+(def group-pull-pattern
+  [:group/id
+   :group/name
+   :group/settings
+   {:group/admins [:user/id]}
+   ; delibrately not using bot-pull-pattern here - just want display info
+   {:bot/_group bot-display-pull-pattern}])
+
+(defn db->group [e]
+  (let [settings (-> e (get :group/settings "{}") edn/read-string)]
+    {:id (:group/id e)
+     :name (:group/name e)
+     :admins (into #{} (map :user/id) (:group/admins e))
+     :intro (settings :intro)
+     :avatar (settings :avatar)
+     :public? (get settings :public? false)
+     :bots (into #{} (map db->bot-display) (:bot/_group e))}))
