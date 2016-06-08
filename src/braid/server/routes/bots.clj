@@ -4,7 +4,8 @@
             [ring.middleware.transit :as transit]
             [taoensso.timbre :as timbre]
             [chat.server.db :as db]
-            [braid.common.schema :as schema])
+            [braid.common.schema :as schema]
+            [chat.server.sync :as sync])
   (:import [org.apache.commons.codec.binary Base64]))
 
 (defn basic-auth-req
@@ -13,6 +14,7 @@
                                  (->> (re-find #"^Basic (.*)$"))
                                  last
                                  Base64/decodeBase64
+                                 (String.)
                                  (string/split #":" 2))]
     (try
       (let [bot-id (java.util.UUID/fromString user)]
@@ -34,25 +36,45 @@
 (defn bot-can-message?
   [bot-id msg]
   (let [bot (db/bot-by-id bot-id)]
-    (and (= (bot :group-id) (msg :group-id))
+    (cond
+      (not= (bot :group-id) (msg :group-id))
+      (do
+        (timbre/debugf "Bot %s attempted to send a message to a group it isn't in %s"
+                       (bot :group-id) (msg :group-id))
+        nil)
+
       (let [thread-group (db/thread-group-id (msg :thread-id))]
-        (or (nil? thread-group) (= (bot :group-id) thread-group)))
-      (every? (comp (partial = (msg :group-id)) db/tag-group-id)
-              (msg :mentioned-tag-ids))
-      (every? (fn [mentioned] (db/user-in-group? mentioned (msg :group-id)))
-              (msg :mentioned-user-ids)))))
+        (and (some? thread-group) (not= (bot :group-id) thread-group)))
+      (do (timbre/debugf "Bot %s attempted to send to a thread in a different group"
+                         (bot :id))
+          nil)
+
+      (some (comp (partial not= (msg :group-id)) db/tag-group-id)
+            (msg :mentioned-tag-ids))
+      (do (timbre/debugf "Bot %s attempted to add tag %s from other group" (bot :id))
+          nil)
+
+      (some (fn [mentioned] (not (db/user-in-group? mentioned (msg :group-id))))
+            (msg :mentioned-user-ids))
+      (do (timbre/debugf "Bot %s attempted to mention a user from a different group"
+                         (bot :id))
+          nil)
+
+      :else true)))
 
 (defroutes bot-routes'
   ; TODO: allow updating/make this idempotent?
   (PUT "/message" req
     (let [bot-id (get req ::bot-id)
+          bot (db/bot-by-id bot-id)
           msg (assoc (req :body)
-                :user-id bot-id
+                :user-id (bot :user-id)
                 :created-at (java.util.Date.))]
       (if (schema/new-message-valid? msg)
         (if (bot-can-message? bot-id msg)
           (do
-            ; TODO: who is the creator?
+            (db/create-message! msg)
+            (sync/broadcast-thread (msg :thread-id) [])
             {:status 201
              :headers {"Content-Type" "text/plain"}
              :body "ok"})
@@ -67,7 +89,10 @@
          ; TODO: when we have clojure.spec, use that to explain failure
          :body "malformed message content"}))))
 
-(def bad-transit-resp
+(defn bad-transit-resp-fn
+  [ex req handler]
+  (println "transit error: " ex)
+  (println "req" req)
   {:status 400
    :headers {"Content-Type" "text/plain"}
    :body "Malformed transit body"})
@@ -76,4 +101,4 @@
   (-> bot-routes'
       wrap-basic-auth
       (transit/wrap-transit-body {:keywords? true
-                                  :malformed-response bad-transit-resp})))
+                                  :malformed-response-fn bad-transit-resp-fn})))
