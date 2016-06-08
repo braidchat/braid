@@ -172,7 +172,7 @@
 
 ; TODO: when else should this happen? should it be configurable?
 (defn notify-bots [new-message]
-  (when-let [bot-name (second (re-find #"^/(\w+)\s" (:content new-message)))]
+  (when-let [bot-name (second (re-find #"^/(\w+)\b" (:content new-message)))]
     (when-let [bot (db/bot-by-name-in-group bot-name (new-message :group-id))]
       (bots/send-notification bot new-message))))
 
