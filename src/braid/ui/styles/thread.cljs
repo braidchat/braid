@@ -148,14 +148,23 @@
      :cursor "pointer"
      :color "#e6e6e6"
      :box-shadow "0 0 1px 1px #e6e6e6"}
+
     [:&:after
-     (mixins/fontawesome \uf067)]
+     {:position "absolute"
+      :top "50%"
+      :left 0
+      :width "100%"
+      :margin-top (em -1)}
+      (mixins/fontawesome \uf067)]
+
     [:&:hover
      {:color "#ccc"
       :box-shadow "0 0 1px 1px #ccc"}]
+
     [:&:active
      {:color "#999"
       :box-shadow "0 0 1px 1px #999"}]
+
     [:&.uploading:after
      (mixins/fontawesome \uf110)
      mixins/spin]]
