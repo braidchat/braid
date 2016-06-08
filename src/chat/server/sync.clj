@@ -15,7 +15,8 @@
             [chat.server.email-digest :as email]
             [braid.common.schema :refer [new-message-valid?]]
             [braid.common.notify-rules :as notify-rules]
-            [braid.server.message-format :refer [parse-tags-and-mentions]]))
+            [braid.server.message-format :refer [parse-tags-and-mentions]]
+            [braid.server.bots :as bots]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -169,6 +170,12 @@
                     (assoc :subject "Notification from Braid")
                     (->> (email/send-message (db/user-email uid))))))))))))
 
+; TODO: when else should this happen? should it be configurable?
+(defn notify-bots [new-message]
+  (when-let [bot-name (second (re-find #"^/(\w+)\s" (:content new-message)))]
+    (when-let [bot (db/bot-by-name-in-group bot-name (new-message :group-id))]
+      (bots/send-notification bot new-message))))
+
 ;; Handlers
 
 (defmethod event-msg-handler :chsk/ws-ping
@@ -195,7 +202,8 @@
         (when-let [cb ?reply-fn]
           (cb :braid/ok))
         (broadcast-thread (new-message :thread-id) [])
-        (notify-users new-message))
+        (notify-users new-message)
+        (notify-bots new-message))
       (do
         (timbre/warnf "Malformed new message: %s" (pr-str new-message))
         (when-let [cb ?reply-fn]
