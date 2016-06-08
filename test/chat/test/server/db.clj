@@ -517,7 +517,7 @@
                             :webhook-url ""
                             :group-id (g2 :id)})
         bot->display (fn [b] (-> b
-                                 (select-keys [:id :name :avatar])
+                                 (select-keys [:id :name :avatar :user-id])
                                  (rename-keys {:name :nickname})))]
 
     (is (schema/check-bot! b1))
