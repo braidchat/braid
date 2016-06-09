@@ -108,7 +108,7 @@
   [:div.header
 
     [:div.left
-      [:a.group-name {:href ""} "Braid"]
+      [:div.group-name "Braid"]
       [inbox-page-button-view]
       [recent-page-button-view]
       [:div.search

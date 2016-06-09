@@ -121,28 +121,30 @@
         :height header-height}
        (mixins/box-shadow)
 
-       [:a
-        {:display "inline-block"
-         :vertical-align "top"
-         :padding [[0 (m/* vars/pad 0.5)]]
-         :color "white"
-         :text-decoration "none"
+       [:.group-name
+        :a
+        {:color "white"
          :background "black"
+         :display "inline-block"
+         :vertical-align "top"
          :height header-height
          :line-height header-height
-         :-webkit-font-smoothing "antialiased"}
+         :-webkit-font-smoothing "antialiased"}]
+
+       [:.group-name
+        {:text-transform "uppercase"
+         :padding-right (m/* vars/pad 0.25)
+         :padding-left (m/* vars/pad 0.75)
+         :letter-spacing "0.1em"
+         :font-weight "bold"}]
+
+       [:a
+        {:padding [[0 (m/* vars/pad 0.5)]]
+         :text-decoration "none"}
 
         [:&:hover
          :&.active
          {:background "#666"}]
-
-        [:&.group-name
-         {:display "inline-block"
-          :text-transform "uppercase"
-          :padding-right (m/* vars/pad 0.25)
-          :padding-left (m/* vars/pad 0.75)
-          :letter-spacing "0.1em"
-          :font-weight "bold"}]
 
         [:&.inbox:after
          (mixins/fontawesome \uf01c)]
