@@ -152,7 +152,7 @@
         [:&.recent:after
          (mixins/fontawesome \uf1da)]]
 
-       [:.search
+       [:.search-bar
         {:display "inline-block"}
 
         [:input

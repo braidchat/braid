@@ -111,8 +111,7 @@
       [:div.group-name "Braid"]
       [inbox-page-button-view]
       [recent-page-button-view]
-      [:div.search
-        [:input.search {:placeholder "Search..."}]]]
+      [search-bar-view]]
 
     [:div.right
       [:div.bar

@@ -39,12 +39,11 @@
        :reagent-render
        (fn []
          [:div.search-bar
-          [:input {:type "search"
-                   :placeholder "Search History"
+          [:input {:type "text"
+                   :placeholder "Search..."
                    :value @search-query
                    :on-change
                    (fn [e]
                      (let [query (.. e -target -value)]
                        (store/set-search-query! query)
                        (put! search-chan {:query query})))}]])})))
-
