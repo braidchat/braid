@@ -106,11 +106,16 @@
           [:img.avatar {:style {:background-color (id->color @user-id)}
                         :src @user-avatar-url}]]))))
 
+(defn group-name-view []
+  (let [group (subscribe [:active-group])]
+    (fn []
+      [:div.group-name (@group :name)])))
+
 (defn header-view []
   [:div.header
 
     [:div.left
-      [:div.group-name "Braid"]
+      [group-name-view]
       [inbox-page-button-view]
       [recent-page-button-view]
       [search-bar-view]]
