@@ -108,7 +108,7 @@
           [:&.edit-profile:after
            (mixins/fontawesome \uf007)]
 
-          [:&.notification-settings:after
+          [:&.settings:after
            (mixins/fontawesome \uf013)]]]]]
 
       [:.left

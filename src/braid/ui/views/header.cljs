@@ -54,13 +54,7 @@
                   ^{:key (tag :id)}
                   [tag-pill-view (tag :id)]))]]))))
 
-(defn group-settings-view []
-  (let [group-id (subscribe [:open-group-id])]
-    (fn []
-      (let [path (routes/group-settings-path {:group-id @group-id})]
-        [:div.settings.shortcut {:class (when (routes/current-path? path) "active")}
-         [:a.title {:href path
-                    :title "Group Settings"}]]))))
+
 
 #_(defn header-view []
   (let [group-id (subscribe [:open-group-id])
@@ -111,6 +105,15 @@
     (fn []
       [:div.group-name (@group :name)])))
 
+(defn settings-link-view []
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      (let [path (routes/group-settings-path {:group-id @group-id})]
+        [:a.settings
+         {:class (when (routes/current-path? path) "active")
+          :href path}
+         "Settings"]))))
+
 (defn header-view []
   [:div.header
 
@@ -128,4 +131,4 @@
         [:a.subscriptions {:href ""} "Manage Subscriptions"]
         [:a.invite-friend {:href ""} "Invite a Friend"]
         [:a.edit-profile {:href ""} "Edit Your Profile"]
-        [:a.notification-settings {:href ""} "Notification Settings"]]]])
+        [settings-link-view]]]])
