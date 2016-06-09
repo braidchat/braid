@@ -133,6 +133,7 @@
          :-webkit-font-smoothing "antialiased"}
 
         [:&:hover
+         :&.active
          {:background "#666"}]
 
         [:&.group-name

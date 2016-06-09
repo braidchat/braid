@@ -16,13 +16,6 @@
                                 (dispatch! :clear-inbox))}
             "Clear Inbox"])])))
 
-(defn inbox-page-button-view []
-  (let [open-group-id (subscribe [:open-group-id])]
-    (fn []
-      (let [path (routes/inbox-page-path {:group-id @open-group-id})]
-        [:div.inbox.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a.title {:href path
-                     :title "Inbox"}]]))))
 
 (defn recent-page-button-view []
   (let [open-group-id (subscribe [:open-group-id])]
@@ -104,12 +97,20 @@
      [search-bar-view]
      [current-user-button-view]])))
 
+(defn inbox-page-button-view []
+  (let [open-group-id (subscribe [:open-group-id])]
+    (fn []
+      (let [path (routes/inbox-page-path {:group-id @open-group-id})]
+        [:a.inbox {:class (when (routes/current-path? path) "active")
+                   :href path
+                   :title "Inbox"}]))))
+
 (defn header-view []
   [:div.header
 
     [:div.left
       [:a.group-name {:href ""} "Braid"]
-      [:a.inbox {:href ""}]
+      [inbox-page-button-view]
       [:a.recent {:href ""}]
       [:div.search
         [:input.search {:placeholder "Search..."}]]]
