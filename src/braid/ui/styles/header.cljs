@@ -34,6 +34,7 @@
          :vertical-align "top"}
 
         [:&:hover
+         :&.active
          {:background "#666"}]
 
         [:.name

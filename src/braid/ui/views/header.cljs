@@ -54,18 +54,6 @@
                   ^{:key (tag :id)}
                   [tag-pill-view (tag :id)]))]]))))
 
-(defn current-user-button-view []
-  (let [user-id (subscribe [:user-id])
-        user-avatar-url (subscribe [:user-avatar-url @user-id])
-        open-group-id (subscribe [:open-group-id])]
-    (fn []
-      (let [path (routes/page-path {:group-id @open-group-id
-                                    :page-id "me"})]
-        [:a {:href path
-             :class (when (routes/current-path? path) "active")}
-          [:img.avatar {:style {:background-color (id->color @user-id)}
-                        :src @user-avatar-url}]]))))
-
 (defn group-settings-view []
   (let [group-id (subscribe [:open-group-id])]
     (fn []
@@ -104,6 +92,20 @@
                     :href path
                     :title "Recent"}]))))
 
+(defn current-user-button-view []
+  (let [user-id (subscribe [:user-id])
+        user-avatar-url (subscribe [:user-avatar-url @user-id])
+        user-nickname (subscribe [:nickname @user-id])
+        open-group-id (subscribe [:open-group-id])]
+    (fn []
+      (let [path (routes/page-path {:group-id @open-group-id
+                                    :page-id "me"})]
+        [:a.user-info {:href path
+                       :class (when (routes/current-path? path) "active")}
+          [:div.name @user-nickname]
+          [:img.avatar {:style {:background-color (id->color @user-id)}
+                        :src @user-avatar-url}]]))))
+
 (defn header-view []
   [:div.header
 
@@ -115,9 +117,7 @@
 
     [:div.right
       [:div.bar
-        [:a.user-info {:href ""}
-          [:div.name "Sam"]
-          [:img.avatar {:src "asdfasf"}]]
+        [current-user-button-view]
         [:div.more]]
       [:div.options
         [:a.subscriptions {:href ""} "Manage Subscriptions"]
