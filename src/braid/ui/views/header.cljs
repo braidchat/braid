@@ -106,9 +106,22 @@
 
 (defn header-view []
   [:div.header
-    [:div
+
+    [:div.left
       [:a.group-name {:href ""} "Braid"]
       [:a.inbox {:href ""}]
       [:a.recent {:href ""}]
       [:div.search
-        [:input.search {:placeholder "Search..."}]]]])
+        [:input.search {:placeholder "Search..."}]]]
+
+    [:div.right
+      [:div.bar
+        [:a.user-info {:href ""}
+          [:div.name "Sam"]
+          [:img.avatar {:src "asdfasf"}]]
+        [:div.more]]
+      [:div.options
+        [:a.subscriptions {:href ""} "Manage Subscriptions"]
+        [:a.invite-friend {:href ""} "Invite a Friend"]
+        [:a.edit-profile {:href ""} "Edit Your Profile"]
+        [:a.notification-settings {:href ""} "Notification Settings"]]]])

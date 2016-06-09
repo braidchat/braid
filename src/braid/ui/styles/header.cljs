@@ -10,152 +10,157 @@
   [:.app
    [:.main
     ["> .header"
-     {:position "absolute"
-      :left vars/sidebar-width
-      :top vars/pad
-      :margin-left vars/pad
-      :z-index 100
-      :border-radius vars/border-radius
-      :overflow "hidden"
-      :height header-height}
-     (mixins/box-shadow)
 
-     [:a
-      {:display "inline-block"
-       :vertical-align "top"
-       :padding [[0 (m/* vars/pad 0.5)]]
-       :color "white"
-       :text-decoration "none"
-       :background "black"
-       :height header-height
-       :line-height header-height
-       :-webkit-font-smoothing "antialiased"}
-       
-      [:&:hover
-       {:background "#666"}]
+     [:.right
 
-      [:&.group-name
-       {:display "inline-block"
-        :text-transform "uppercase"
-        :padding-right (m/* vars/pad 0.25)
-        :padding-left (m/* vars/pad 0.75)
-        :letter-spacing "0.1em"
-        :font-weight "bold"}]
+      [".bar:hover + .options"
+       ".options:hover"
+       {:display "inline-block"}]
 
-      [:&.inbox:after
-       (mixins/fontawesome \uf01c)]
-
-      [:&.recent:after
-       (mixins/fontawesome \uf1da)]]
-
-     [:.search
-      {:display "inline-block"}
-
-      [:input
-       {:border 0
-        :padding-left vars/pad
-        :min-width "15em"
-        :width "25vw"
+      [:.bar
+       {:position "absolute"
+        :right vars/pad
+        :top vars/pad
+        :z-index 100
+        :background "black"
+        :color "white"
         :height header-height
-        :outline "none"}]
+        :border-radius vars/border-radius
+        :overflow "hidden"}
+       (mixins/box-shadow)
 
-       [:&:after
-        {:margin-left "-2em"
-         :color "#ccc"}
-        (mixins/fontawesome \uf002)]]]]])
+       [:.user-info
+        {:display "inline-block"
+         :vertical-align "top"}
 
-#_(defn header [pad]
-  [:.app
-   [:.main
-    ["> .header"
-     {:position "absolute"
-      :top vars/pad
-      :right vars/pad
-      :z-index 100
-      :line-height vars/top-bar-height
-      :color vars/grey-text}
+        [:&:hover
+         {:background "#666"}]
 
-     [:.modal
-      {:display "none"
-       :background "white"
-       :position "absolute"
-       :cursor "default"}
-      [:p
-       {:line-height (em 1.2)}]]
+        [:.name
+         {:color "white"
+          :padding [[0 (m/* vars/pad 0.75)]]
+          :text-transform "uppercase"
+          :letter-spacing "0.1em"
+          :display "inline-block"
+          :text-decoration "none"
+          :vertical-align "top"
+          :font-weight "bold"
+          :line-height header-height
+          :-webkit-font-smoothing "antialiased"}]
 
-     [:.clear-inbox
-      {:display "inline-block"
-       :margin-right vars/pad
-       :vertical-align "top"}
-      [:button
-       mixins/pill-button]]
+        [:.avatar
+         {:height header-height
+          :width header-height}]]
 
-     [:.shortcut
-      {:display "inline-block"
-       :margin-right vars/pad}
+       [:.more
+        {:display "inline-block"
+         :line-height header-height
+         :vertical-align "top"
+         :height header-height
+         :width header-height
+         :text-align "center"}
 
-      [:.title
-       {:display "inline-block"
-        :text-decoration "none"
-        :background "#FFF"
-        :width "2rem"
-        :height "2rem"
-        :text-align "center"
-        :line-height "2rem"
-        :border-radius "50%"
-        :box-shadow [[0 (px 1) (px 4) 0 "#ccc"]]
-        :color "#AAA"
-        :transition [["all" "0.2s" "ease-in-out"]]
-        :position "relative"
-        :bottom "0"}]
+        [:&:after
+         {:-webkit-font-smoothing "antialiased"}
+         (mixins/fontawesome \uf078)]]]
 
-      [:&:hover
-       [:.title
-        {:box-shadow [[0 (px 4) (px 4) 0 "#ccc"]]
-         :bottom "1px"}]]
+      [:.options
+       {:background "white"
+        :padding [[(m/* vars/pad 0.75)]]
+        :border-radius vars/border-radius
+        :position "absolute"
+        :top vars/pad
+        :right vars/pad
+        :margin-top header-height
+        :z-index 110
+        :display "none"}
+       (mixins/box-shadow)
 
-      [:&.active
-       [:.title
-        {:background "#AAA"
-         :color "#fff"
-         :-webkit-font-smoothing "antialiased"}]]
+       ; little arrow above options box
+       [:&:before
+        {:position "absolute"
+         :top "-0.65em"
+         :right (m/* vars/pad 0.70)
+         :color "white"
+         :font-size "1.5em"}
+         (mixins/fontawesome \uf0d8)]
 
-      [:&:hover
-       [:.modal
-        {:display "block"
-         :padding vars/pad}]]]
+        [:a
+         {:display "block"
+          :color "black"
+          :text-align "right"
+          :text-decoration "none"
+          :line-height "1.85em"}
 
+          [:&:hover
+           {:color "#666"}]
 
-         [:.inbox
-          [:.title:after
-           (mixins/fontawesome \uf01c)]]
+          [:&:after
+           {:margin-left "0.5em"}]
 
-         [:.recent
-          [:.title:after
-           (mixins/fontawesome \uf1da)]]
+          [:&.subscriptions:after
+           (mixins/fontawesome \uf02c)]
 
-     [:.users
-      [:.title:after
-       (mixins/fontawesome \uf0c0)
-       {:margin-left (em 0.25)}]]
+          [:&.invite-friend:after
+           (mixins/fontawesome \uf1e0)]
 
-     [:.tags
-      [:.title:after
-       (mixins/fontawesome \uf02c)]]
+          [:&.edit-profile:after
+           (mixins/fontawesome \uf007)]
 
-     [:.settings
-      [:.title:after
-       (mixins/fontawesome \uf013)]]
+          [:&.notification-settings:after
+           (mixins/fontawesome \uf013)]]]]]
 
-     [:.search-bar
-      {:display "inline-block"}
+      [:.left
+       {:position "absolute"
+        :left vars/sidebar-width
+        :top vars/pad
+        :z-index 100
+        :margin-left vars/pad
+        :border-radius vars/border-radius
+        :overflow "hidden"
+        :height header-height}
+       (mixins/box-shadow)
 
-      [:input
-       {:width (em 20)}]]
+       [:a
+        {:display "inline-block"
+         :vertical-align "top"
+         :padding [[0 (m/* vars/pad 0.5)]]
+         :color "white"
+         :text-decoration "none"
+         :background "black"
+         :height header-height
+         :line-height header-height
+         :-webkit-font-smoothing "antialiased"}
 
-     [:.avatar
-      {:width vars/top-bar-height
-       :height vars/top-bar-height
-       :vertical-align "middle"
-       :margin-left vars/pad
-       :border-radius "20%"}]]]])
+        [:&:hover
+         {:background "#666"}]
+
+        [:&.group-name
+         {:display "inline-block"
+          :text-transform "uppercase"
+          :padding-right (m/* vars/pad 0.25)
+          :padding-left (m/* vars/pad 0.75)
+          :letter-spacing "0.1em"
+          :font-weight "bold"}]
+
+        [:&.inbox:after
+         (mixins/fontawesome \uf01c)]
+
+        [:&.recent:after
+         (mixins/fontawesome \uf1da)]]
+
+       [:.search
+        {:display "inline-block"}
+
+        [:input
+         {:border 0
+          :padding-left vars/pad
+          :min-width "15em"
+          :width "25vw"
+          :height header-height
+          :outline "none"}]
+
+         [:&:after
+          {:margin-left "-2em"
+           :color "#ccc"}
+          (mixins/fontawesome \uf002)]]]]])
