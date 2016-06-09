@@ -36,23 +36,7 @@
                     ^{:key (user :id)}
                     [user-pill-view (user :id)])]]))))
 
-(defn tags-pane-view []
-  (let [open-group-id (subscribe [:open-group-id])
-        tags (subscribe [:tags])
-        group-subscribed-tags (subscribe [:group-subscribed-tags])]
-    (fn []
-      (let [path (routes/page-path {:group-id @open-group-id
-                                    :page-id "tags"})]
-        [:div.tags.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a.title {:href path
-                     :title "Tags"}]
-          [:div.modal
-              (let [sorted-tags (->> @group-subscribed-tags
-                                    (sort-by :threads-count)
-                                     reverse)]
-                (for [tag sorted-tags]
-                  ^{:key (tag :id)}
-                  [tag-pill-view (tag :id)]))]]))))
+
 
 
 
@@ -105,6 +89,16 @@
     (fn []
       [:div.group-name (@group :name)])))
 
+(defn subscriptions-link-view []
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      (let [path (routes/page-path {:group-id @group-id
+                                    :page-id "tags"})]
+        [:a.subscriptions
+         {:class (when (routes/current-path? path) "active")
+          :href path}
+         "Manage Subscriptions"]))))
+
 (defn settings-link-view []
   (let [group-id (subscribe [:open-group-id])]
     (fn []
@@ -128,7 +122,7 @@
         [current-user-button-view]
         [:div.more]]
       [:div.options
-        [:a.subscriptions {:href ""} "Manage Subscriptions"]
+        [subscriptions-link-view]
         [:a.invite-friend {:href ""} "Invite a Friend"]
         [:a.edit-profile {:href ""} "Edit Your Profile"]
         [settings-link-view]]]])
