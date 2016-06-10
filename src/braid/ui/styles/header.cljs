@@ -135,8 +135,8 @@
 
        [:.group-name
         {:text-transform "uppercase"
-         :padding-right (m/* vars/pad 0.25)
-         :padding-left (m/* vars/pad 0.75)
+         :min-width (em 5)
+         :padding [[0 (m/* vars/pad 0.75)]]
          :letter-spacing "0.1em"
          :font-weight "bold"}]
 
