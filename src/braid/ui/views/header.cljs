@@ -86,16 +86,18 @@
        [recent-page-button-view]
        [search-bar-view]])))
 
+(defn right-header-view []
+  [:div.right
+   [:div.bar
+    [current-user-button-view]
+    [:div.more]]
+   [:div.options
+    [subscriptions-link-view]
+    [invite-link-view]
+    [edit-profile-link-view]
+    [settings-link-view]]])
+
 (defn header-view []
   [:div.header
    [left-header-view]
-
-   [:div.right
-    [:div.bar
-     [current-user-button-view]
-     [:div.more]]
-    [:div.options
-     [subscriptions-link-view]
-     [invite-link-view]
-     [edit-profile-link-view]
-     [settings-link-view]]]])
+   [right-header-view]])
