@@ -6,15 +6,6 @@
             [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [braid.ui.views.search-bar :refer [search-bar-view]]))
 
-(defn clear-inbox-button-view []
-  (let [group-id (subscribe [:open-group-id])
-        open-threads (subscribe [:open-threads] [group-id])]
-    (fn []
-      [:div.clear-inbox
-        (when (< 5 (count @open-threads))
-          [:button {:on-click (fn [_]
-                                (dispatch! :clear-inbox))}
-            "Clear Inbox"])])))
 
 (defn users-online-pane-view []
   (let [open-group-id (subscribe [:open-group-id])
