@@ -119,13 +119,13 @@
         :margin-left vars/pad
         :border-radius vars/border-radius
         :overflow "hidden"
-        :height header-height}
+        :height header-height
+        :background "black"}
        (mixins/box-shadow)
 
        [:.group-name
         :a
         {:color "white"
-         :background "black"
          :display "inline-block"
          :vertical-align "top"
          :height header-height
@@ -145,7 +145,7 @@
 
         [:&:hover
          :&.active
-         {:background "#666"}]
+         {:background "rgba(0,0,0,0.25)"}]
 
         [:&.inbox:after
          (mixins/fontawesome \uf01c)]

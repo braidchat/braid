@@ -1,6 +1,6 @@
 (ns braid.ui.views.header
   (:require [chat.client.routes :as routes]
-            [chat.client.views.helpers :refer [id->color]]
+            [chat.client.views.helpers :refer [->color]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.search-bar :refer [search-bar-view]]))
 
@@ -31,7 +31,7 @@
         [:a.user-info {:href path
                        :class (when (routes/current-path? path) "active")}
           [:div.name @user-nickname]
-          [:img.avatar {:style {:background-color (id->color @user-id)}
+          [:img.avatar {:style {:background-color (->color @user-id)}
                         :src @user-avatar-url}]]))))
 
 (defn group-name-view []
@@ -77,21 +77,25 @@
           :href path}
          "Settings"]))))
 
+(defn left-header-view []
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      [:div.left {:style {:background-color (->color @group-id)}}
+       [group-name-view]
+       [inbox-page-button-view]
+       [recent-page-button-view]
+       [search-bar-view]])))
+
 (defn header-view []
   [:div.header
+   [left-header-view]
 
-    [:div.left
-      [group-name-view]
-      [inbox-page-button-view]
-      [recent-page-button-view]
-      [search-bar-view]]
-
-    [:div.right
-      [:div.bar
-        [current-user-button-view]
-        [:div.more]]
-      [:div.options
-        [subscriptions-link-view]
-        [invite-link-view]
-        [edit-profile-link-view]
-        [settings-link-view]]]])
+   [:div.right
+    [:div.bar
+     [current-user-button-view]
+     [:div.more]]
+    [:div.options
+     [subscriptions-link-view]
+     [invite-link-view]
+     [edit-profile-link-view]
+     [settings-link-view]]]])
