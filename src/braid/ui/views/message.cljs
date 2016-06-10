@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [clojure.string :as string]
             [chat.client.store :as store]
-            [chat.client.views.helpers :refer [id->color]]
+            [chat.client.views.helpers :refer [id->color ->color]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.embed :refer [embed-view]]
             [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
@@ -11,11 +11,16 @@
             [chat.client.views.helpers :as helpers]
             [chat.client.routes :as routes]))
 
+(defn url->parts [url]
+  (let [[domain path] (rest (re-find #"http(?:s)?://([^/]+)(.*)" url))]
+    {:domain domain
+     :path path}))
+
 (defn abridged-url
   "Given a full url, returns 'domain.com/*.png' where"
   [url]
   (let [char-limit 30
-        [domain path] (rest (re-find #"http(?:s)?://([^/]+)(.*)" url))]
+        {:keys [domain path]} (url->parts url)]
     (let [url-and-path (str domain path)]
       (if (> char-limit (count url-and-path))
         url-and-path
@@ -24,12 +29,16 @@
               abridged-path (apply str (take-last path-char-limit path))]
           (str domain gap abridged-path))))))
 
+(defn url->domain [url]
+  ((url->parts url) :domain))
+
 (def replacements
   {:urls
    {:pattern helpers/url-re
     :replace (fn [match]
                [:a.external {:href match
                              :title match
+                             :style {:background-color (->color (url->domain match))}
                              :target "_blank"
                              ; rel to address vuln caused by target=_blank
                              ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
