@@ -1,49 +1,8 @@
 (ns braid.ui.views.header
-  (:require [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.routes :as routes]
+  (:require [chat.client.routes :as routes]
             [chat.client.views.helpers :refer [id->color]]
             [chat.client.reagent-adapter :refer [subscribe]]
-            [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [braid.ui.views.search-bar :refer [search-bar-view]]))
-
-
-(defn users-online-pane-view []
-  (let [open-group-id (subscribe [:open-group-id])
-        user-id (subscribe [:user-id])
-        users (subscribe [:users-in-open-group :online])]
-    (fn []
-      (let [users (->> @users
-                       (remove (fn [user]
-                                   (= @user-id
-                                      (user :id)))))
-            path (routes/users-page-path {:group-id @open-group-id})]
-        [:div.users.shortcut {:class (when (routes/current-path? path) "active")}
-          [:a.title {:href path
-                     :title "Users"}
-                  (count users)]
-                 [:div.modal
-                  [:h2 "Online"]
-                  (for [user users]
-                    ^{:key (user :id)}
-                    [user-pill-view (user :id)])]]))))
-
-
-
-
-
-#_(defn header-view []
-  (let [group-id (subscribe [:open-group-id])
-        admin? (subscribe [:current-user-is-group-admin?] [group-id])]
-    (fn []
-    [:div.header
-     [clear-inbox-button-view]
-     [inbox-page-button-view]
-     [recent-page-button-view]
-     [users-online-pane-view]
-     [tags-pane-view]
-     [group-settings-view]
-     [search-bar-view]
-     [current-user-button-view]])))
 
 (defn inbox-page-button-view []
   (let [open-group-id (subscribe [:open-group-id])]
