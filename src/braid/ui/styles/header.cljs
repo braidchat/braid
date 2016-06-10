@@ -176,7 +176,8 @@
            :cursor "pointer"}]
 
          [:&.search:after
-          {:color "#ccc"}
+          {:color "#ccc"
+           :pointer-events "none"}
           (mixins/fontawesome \uf002)]
 
          [:&.clear:after
