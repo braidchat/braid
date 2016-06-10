@@ -5,7 +5,8 @@
             [cljs-time.core :as t]
             [chat.client.store :as store]
             [goog.style :as gstyle]
-            [cljsjs.husl]))
+            [cljsjs.husl])
+  (:import [goog Uri]))
 
 (defn ->color [input]
   (js/window.HUSL.toHex (mod (Math/abs (hash input)) 360) 95 50))
@@ -83,6 +84,6 @@
   (boolean (seq (extract-urls text))))
 
 (defn url->parts [url]
-  (let [[domain path] (rest (re-find #"http(?:s)?://([^/]+)(.*)" url))]
-    {:domain domain
-     :path path}))
+  (let [url-info (.parse Uri url)]
+    {:domain (.getDomain url-info)
+     :path (.getPath url-info)}))
