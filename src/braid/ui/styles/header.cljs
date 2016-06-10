@@ -1,99 +1,185 @@
 (ns braid.ui.styles.header
   (:require [garden.units :refer [em px]]
+            [garden.arithmetic :as m]
             [braid.ui.styles.vars :as vars]
             [braid.ui.styles.mixins :as mixins]))
+
+(def header-height vars/avatar-size)
 
 (defn header [pad]
   [:.app
    [:.main
     ["> .header"
-     {:position "absolute"
-      :top vars/pad
-      :right vars/pad
-      :z-index 100
-      :line-height vars/top-bar-height
-      :color vars/grey-text}
 
-     [:.modal
-      {:display "none"
-       :background "white"
-       :position "absolute"
-       :cursor "default"}
-      [:p
-       {:line-height (em 1.2)}]]
+     [:.right
 
-     [:.clear-inbox
-      {:display "inline-block"
-       :margin-right vars/pad
-       :vertical-align "top"}
-      [:button
-       mixins/pill-button]]
+      [".bar:hover + .options"
+       ".options:hover"
+       {:display "inline-block"}]
 
-     [:.shortcut
-      {:display "inline-block"
-       :margin-right vars/pad}
+      [:.bar
+       {:position "absolute"
+        :right vars/pad
+        :top vars/pad
+        :z-index 100
+        :background "black"
+        :color "white"
+        :height header-height
+        :border-radius vars/border-radius
+        :overflow "hidden"}
+       (mixins/box-shadow)
 
-      [:.title
-       {:display "inline-block"
-        :text-decoration "none"
-        :background "#FFF"
-        :width "2rem"
-        :height "2rem"
-        :text-align "center"
-        :line-height "2rem"
-        :border-radius "50%"
-        :box-shadow [[0 (px 1) (px 4) 0 "#ccc"]]
-        :color "#AAA"
-        :transition [["all" "0.2s" "ease-in-out"]]
-        :position "relative"
-        :bottom "0"}]
+       [:.user-info
+        {:display "inline-block"
+         :vertical-align "top"}
 
-      [:&:hover
-       [:.title
-        {:box-shadow [[0 (px 4) (px 4) 0 "#ccc"]]
-         :bottom "1px"}]]
+        [:&:hover
+         :&.active
+         {:background "rgba(0,0,0,0.25)"}]
 
-      [:&.active
-       [:.title
-        {:background "#AAA"
-         :color "#fff"
-         :-webkit-font-smoothing "antialiased"}]]
+        [:.name
+         {:color "white"
+          :padding [[0 (m/* vars/pad 0.75)]]
+          :text-transform "uppercase"
+          :letter-spacing "0.1em"
+          :display "inline-block"
+          :text-decoration "none"
+          :vertical-align "top"
+          :font-weight "bold"
+          :line-height header-height
+          :-webkit-font-smoothing "antialiased"}]
 
-      [:&:hover
-       [:.modal
-        {:display "block"
-         :padding vars/pad}]]]
+        [:.avatar
+         {:height header-height
+          :width header-height
+          :background "white"}]]
 
-     [:.inbox
-      [:.title:after
-       (mixins/fontawesome \uf01c)]]
+       [:.more
+        {:display "inline-block"
+         :line-height header-height
+         :vertical-align "top"
+         :height header-height
+         :width header-height
+         :text-align "center"}
 
-     [:.recent
-      [:.title:after
-       (mixins/fontawesome \uf1da)]]
+        [:&:after
+         {:-webkit-font-smoothing "antialiased"}
+         (mixins/fontawesome \uf078)]]]
 
-     [:.users
-      [:.title:after
-       (mixins/fontawesome \uf0c0)
-       {:margin-left (em 0.25)}]]
+      [:.options
+       {:background "white"
+        :padding [[(m/* vars/pad 0.75)]]
+        :border-radius vars/border-radius
+        :position "absolute"
+        :top vars/pad
+        :right vars/pad
+        :margin-top header-height
+        :z-index 110
+        :display "none"}
+       (mixins/box-shadow)
 
-     [:.tags
-      [:.title:after
-       (mixins/fontawesome \uf02c)]]
+       ; little arrow above options box
+       [:&:before
+        {:position "absolute"
+         :top "-0.65em"
+         :right (m/* vars/pad 0.70)
+         :color "white"
+         :font-size "1.5em"}
+         (mixins/fontawesome \uf0d8)]
 
-     [:.settings
-      [:.title:after
-       (mixins/fontawesome \uf013)]]
+        [:a
+         {:display "block"
+          :color "black"
+          :text-align "right"
+          :text-decoration "none"
+          :line-height "1.85em"}
 
-     [:.search-bar
-      {:display "inline-block"}
+          [:&:hover
+           {:color "#666"}]
 
-      [:input
-       {:width (em 20)}]]
+          [:&:after
+           {:margin-left "0.5em"}]
 
-     [:.avatar
-      {:width vars/top-bar-height
-       :height vars/top-bar-height
-       :vertical-align "middle"
-       :margin-left vars/pad
-       :border-radius "20%"}]]]])
+          [:&.subscriptions:after
+           (mixins/fontawesome \uf02c)]
+
+          [:&.invite-friend:after
+           (mixins/fontawesome \uf1e0)]
+
+          [:&.edit-profile:after
+           (mixins/fontawesome \uf007)]
+
+          [:&.settings:after
+           (mixins/fontawesome \uf013)]]]]]
+
+      [:.left
+       {:position "absolute"
+        :left vars/sidebar-width
+        :top vars/pad
+        :z-index 100
+        :margin-left vars/pad
+        :border-radius vars/border-radius
+        :overflow "hidden"
+        :height header-height
+        :background "black"}
+       (mixins/box-shadow)
+
+       [:.group-name
+        :a
+        {:color "white"
+         :display "inline-block"
+         :vertical-align "top"
+         :height header-height
+         :line-height header-height
+         :-webkit-font-smoothing "antialiased"}]
+
+       [:.group-name
+        {:text-transform "uppercase"
+         :min-width (em 5)
+         :padding [[0 (m/* vars/pad 0.75)]]
+         :letter-spacing "0.1em"
+         :font-weight "bold"}]
+
+       [:a
+        {:width header-height
+         :text-align "center"
+         :text-decoration "none"}
+
+        [:&:hover
+         :&.active
+         {:background "rgba(0,0,0,0.25)"}]
+
+        [:&.inbox:after
+         (mixins/fontawesome \uf01c)]
+
+        [:&.recent:after
+         (mixins/fontawesome \uf1da)]]
+
+       [:.search-bar
+        {:display "inline-block"
+         :position "relative"}
+
+        [:input
+         {:border 0
+          :padding-left vars/pad
+          :min-width "15em"
+          :width "25vw"
+          :height header-height
+          :outline "none"}]
+
+        [:.action
+         [:&:after
+          {:top 0
+           :right (m/* vars/pad 0.75)
+           :height header-height
+           :line-height header-height
+           :position "absolute"
+           :cursor "pointer"}]
+
+         [:&.search:after
+          {:color "#ccc"
+           :pointer-events "none"}
+          (mixins/fontawesome \uf002)]
+
+         [:&.clear:after
+          (mixins/fontawesome \uf057)]]]]]])

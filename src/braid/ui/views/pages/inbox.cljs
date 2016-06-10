@@ -1,7 +1,18 @@
 (ns braid.ui.views.pages.inbox
   (:require [chat.client.reagent-adapter :refer [subscribe]]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [braid.ui.views.threads :refer [threads-view]]))
+            [braid.ui.views.threads :refer [threads-view]]
+            [chat.client.dispatcher :refer [dispatch!]]))
+
+(defn clear-inbox-button-view []
+  (let [group-id (subscribe [:open-group-id])
+        open-threads (subscribe [:open-threads] [group-id])]
+    (fn []
+      [:div.clear-inbox
+        (when (< 5 (count @open-threads))
+          [:button {:on-click (fn [_]
+                                (dispatch! :clear-inbox))}
+            "Clear Inbox"])])))
 
 (defn inbox-page-view
   []
@@ -21,6 +32,8 @@
     (fn []
       [:div.page.inbox
        [:div.title "Inbox"]
-       [:div.intro (:intro @group)]
+       [:div.intro
+        (:intro @group)
+        [clear-inbox-button-view]]
        [threads-view {:new-thread-args {}
                       :threads @sorted-threads}]])))

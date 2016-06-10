@@ -17,6 +17,9 @@
 (defroute recent-page-path "/:group-id/recent" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :recent}))
 
+(defroute invite-page-path "/:group-id/invite" [group-id ]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :invite}))
+
 (defroute users-page-path "/:group-id/users" [group-id ]
   (store/set-group-and-page! (UUID. group-id nil) {:type :users}))
 
