@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [clojure.string :as string]
             [chat.client.store :as store]
-            [chat.client.views.helpers :refer [id->color]]
+            [chat.client.views.helpers :refer [id->color ->color]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.embed :refer [embed-view]]
             [braid.ui.views.pills :refer [tag-pill-view user-pill-view]]
@@ -15,7 +15,7 @@
   "Given a full url, returns 'domain.com/*.png' where"
   [url]
   (let [char-limit 30
-        [domain path] (rest (re-find #"http(?:s)?://([^/]+)(.*)" url))]
+        {:keys [domain path]} (helpers/url->parts url)]
     (let [url-and-path (str domain path)]
       (if (> char-limit (count url-and-path))
         url-and-path
@@ -28,14 +28,16 @@
   {:urls
    {:pattern helpers/url-re
     :replace (fn [match]
-               [:a.external {:href match
-                             :title match
-                             :target "_blank"
-                             ; rel to address vuln caused by target=_blank
-                             ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
-                             :rel "noopener noreferrer"
-                             :tabIndex -1}
-                 (abridged-url match)])}
+               (let [url (string/lower-case match)]
+                 [:a.external {:href url
+                               :title url
+                               :style {:background-color  (helpers/url->color url)}
+                               :target "_blank"
+                               ; rel to address vuln caused by target=_blank
+                               ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+                               :rel "noopener noreferrer"
+                               :tabIndex -1}
+                  (abridged-url url)]))}
    :users
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
