@@ -141,7 +141,8 @@
          :font-weight "bold"}]
 
        [:a
-        {:padding [[0 (m/* vars/pad 0.5)]]
+        {:width header-height
+         :text-align "center"
          :text-decoration "none"}
 
         [:&:hover
