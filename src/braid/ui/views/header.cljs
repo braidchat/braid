@@ -49,6 +49,15 @@
           :href path}
          "Edit Your Profile"]))))
 
+(defn invite-link-view []
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      (let [path (routes/invite-page-path {:group-id @group-id})]
+        [:a.invite-friend
+         {:class (when (routes/current-path? path) "active")
+          :href path}
+         "Invite a Person"]))))
+
 (defn subscriptions-link-view []
   (let [group-id (subscribe [:open-group-id])]
     (fn []
@@ -83,6 +92,6 @@
         [:div.more]]
       [:div.options
         [subscriptions-link-view]
-        [:a.invite-friend {:href ""} "Invite a Friend"]
+        [invite-link-view]
         [edit-profile-link-view]
         [settings-link-view]]]])

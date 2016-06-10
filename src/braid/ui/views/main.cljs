@@ -12,6 +12,7 @@
             [braid.ui.views.pages.tag :refer [tag-page-view]]
             [braid.ui.views.pages.tags :refer [tags-page-view]]
             [braid.ui.views.pages.me :refer [me-page-view]]
+            [braid.ui.views.pages.invite :refer [invite-page-view]]
             [braid.ui.views.pages.group-explore :refer [group-explore-page-view]]
             [braid.ui.views.pages.global-settings :refer [global-settings-page-view]]
             [braid.ui.views.pages.group-settings :refer [group-settings-view]]))
@@ -28,6 +29,7 @@
         :user [user-page-view]
         :tags [tags-page-view]
         :me [me-page-view]
+        :invite [invite-page-view]
         :group-explore [group-explore-page-view]
         :settings [group-settings-view]
         :global-settings [global-settings-page-view]
