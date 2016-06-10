@@ -11,16 +11,11 @@
             [chat.client.views.helpers :as helpers]
             [chat.client.routes :as routes]))
 
-(defn url->parts [url]
-  (let [[domain path] (rest (re-find #"http(?:s)?://([^/]+)(.*)" url))]
-    {:domain domain
-     :path path}))
-
 (defn abridged-url
   "Given a full url, returns 'domain.com/*.png' where"
   [url]
   (let [char-limit 30
-        {:keys [domain path]} (url->parts url)]
+        {:keys [domain path]} (helpers/url->parts url)]
     (let [url-and-path (str domain path)]
       (if (> char-limit (count url-and-path))
         url-and-path
@@ -29,16 +24,16 @@
               abridged-path (apply str (take-last path-char-limit path))]
           (str domain gap abridged-path))))))
 
-(defn url->domain [url]
-  ((url->parts url) :domain))
-
 (def replacements
   {:urls
    {:pattern helpers/url-re
     :replace (fn [match]
                [:a.external {:href match
                              :title match
-                             :style {:background-color (->color (url->domain match))}
+                             :style {:background-color  (-> match
+                                                            helpers/url->parts
+                                                            :domain
+                                                            ->color)}
                              :target "_blank"
                              ; rel to address vuln caused by target=_blank
                              ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/

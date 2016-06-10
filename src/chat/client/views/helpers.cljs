@@ -81,3 +81,8 @@
 
 (defn contains-urls? [text]
   (boolean (seq (extract-urls text))))
+
+(defn url->parts [url]
+  (let [[domain path] (rest (re-find #"http(?:s)?://([^/]+)(.*)" url))]
+    {:domain domain
+     :path path}))
