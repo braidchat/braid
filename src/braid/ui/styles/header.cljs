@@ -154,7 +154,8 @@
          (mixins/fontawesome \uf1da)]]
 
        [:.search-bar
-        {:display "inline-block"}
+        {:display "inline-block"
+         :position "relative"}
 
         [:input
          {:border 0
@@ -164,7 +165,18 @@
           :height header-height
           :outline "none"}]
 
+        [:.action
          [:&:after
-          {:margin-left "-2em"
-           :color "#ccc"}
-          (mixins/fontawesome \uf002)]]]]])
+          {:top 0
+           :right (m/* vars/pad 0.75)
+           :height header-height
+           :line-height header-height
+           :position "absolute"
+           :cursor "pointer"}]
+
+         [:&.search:after
+          {:color "#ccc"}
+          (mixins/fontawesome \uf002)]
+
+         [:&.clear:after
+          (mixins/fontawesome \uf057)]]]]]])

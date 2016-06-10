@@ -46,4 +46,9 @@
                    (fn [e]
                      (let [query (.. e -target -value)]
                        (store/set-search-query! query)
-                       (put! search-chan {:query query})))}]])})))
+                       (put! search-chan {:query query})))}]
+          (if (seq @search-query)
+            [:div.action.clear {:on-click (fn []
+                                            (put! search-chan {:query ""})
+                                            (store/set-search-query! ""))}]
+            [:div.action.search])])})))
