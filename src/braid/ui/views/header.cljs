@@ -30,9 +30,8 @@
                                     :page-id "me"})]
         [:a.user-info {:href path
                        :class (when (routes/current-path? path) "active")}
-          [:div.name @user-nickname]
-          [:img.avatar {:style {:background-color (->color @user-id)}
-                        :src @user-avatar-url}]]))))
+          [:div.name (str "@" @user-nickname)]
+          [:img.avatar {:src @user-avatar-url}]]))))
 
 (defn group-name-view []
   (let [group (subscribe [:active-group])]
@@ -87,15 +86,17 @@
        [search-bar-view]])))
 
 (defn right-header-view []
-  [:div.right
-   [:div.bar
-    [current-user-button-view]
-    [:div.more]]
-   [:div.options
-    [subscriptions-link-view]
-    [invite-link-view]
-    [edit-profile-link-view]
-    [settings-link-view]]])
+  (let [user-id (subscribe [:user-id])]
+    (fn []
+      [:div.right
+       [:div.bar {:style {:background-color (->color @user-id)}}
+        [current-user-button-view]
+        [:div.more]]
+       [:div.options
+        [subscriptions-link-view]
+        [invite-link-view]
+        [edit-profile-link-view]
+        [settings-link-view]]])))
 
 (defn header-view []
   [:div.header

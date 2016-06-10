@@ -35,7 +35,7 @@
 
         [:&:hover
          :&.active
-         {:background "#666"}]
+         {:background "rgba(0,0,0,0.25)"}]
 
         [:.name
          {:color "white"
@@ -51,7 +51,8 @@
 
         [:.avatar
          {:height header-height
-          :width header-height}]]
+          :width header-height
+          :background "white"}]]
 
        [:.more
         {:display "inline-block"
