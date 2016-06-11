@@ -174,6 +174,7 @@
 (defn notify-bots [new-message]
   (when-let [bot-name (second (re-find #"^/(\w+)\b" (:content new-message)))]
     (when-let [bot (db/bot-by-name-in-group bot-name (new-message :group-id))]
+      (timbre/debugf "notifying bot %s" bot)
       (bots/send-notification bot new-message))))
 
 ;; Handlers
@@ -194,6 +195,8 @@
 (defmethod event-msg-handler :chat/new-message
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
   (let [new-message (-> ?data
+                        (update :mentioned-tag-ids vec)
+                        (update :mentioned-user-ids vec)
                         (update-in [:content] #(apply str (take 5000 %)))
                         (assoc :created-at (java.util.Date.)))]
     (if (new-message-valid? new-message)
