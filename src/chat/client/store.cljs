@@ -408,6 +408,9 @@
 (defn set-group-publicity! [group-id publicity]
   (transact! [:groups group-id :public?] (constantly publicity)))
 
+(defn add-group-bot! [group-id bot]
+  (transact! [:groups group-id :bots] #(conj % bot)))
+
 ; invitations
 
 (defn set-invitations! [invitations]

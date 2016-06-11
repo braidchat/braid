@@ -396,6 +396,10 @@
   [[_ [group-id publicity]]]
   (store/set-group-publicity! group-id publicity))
 
+(defmethod sync/event-handler :group/new-bot
+  [[_ [group-id bot]]]
+  (store/add-group-bot! group-id bot))
+
 (defmethod sync/event-handler :chat/notify-message
   [[_ message]]
   (notify/notify {:msg (:content message)}))
