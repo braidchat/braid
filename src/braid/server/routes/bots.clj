@@ -51,7 +51,7 @@
 
       (some (comp (partial not= (msg :group-id)) db/tag-group-id)
             (msg :mentioned-tag-ids))
-      (do (timbre/debugf "Bot %s attempted to add tag %s from other group" (bot :id))
+      (do (timbre/debugf "Bot %s attempted to add tag from other group" (bot :id))
           nil)
 
       (some (fn [mentioned] (not (db/user-in-group? mentioned (msg :group-id))))
