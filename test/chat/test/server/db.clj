@@ -528,7 +528,8 @@
       (is (= (into #{}  (map bot->display) [b1 b2]) (:bots (db/get-group (g1 :id)))))
       (is (= #{b3} (db/bots-in-group (g2 :id))))
       (is (= #{} (db/bots-in-group (g3 :id))))
-      (is (= b1 (db/bot-by-name-in-group "bot1" (g1 :id)))))
+      (is (= b1 (db/bot-by-name-in-group "bot1" (g1 :id))))
+      (is (nil? (db/bot-by-name-in-group "bot1" (g3 :id)))))
     (testing "can check bot auth"
       (is (db/bot-auth? (b1 :id) (b1 :token)))
       (is (db/bot-auth? (b2 :id) (b2 :token)))
