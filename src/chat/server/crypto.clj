@@ -18,10 +18,9 @@
         (string/replace "/" "_")
         (string/replace "=" ""))))
 
-(defn hmac
-  [hmac-key data]
+(defn hmac-bytes
+  [hmac-key data-bytes]
   (let [key-bytes (.getBytes hmac-key "UTF-8")
-        data-bytes (.getBytes data "UTF-8")
         algo "HmacSHA256"]
     (->>
       (doto (Mac/getInstance algo)
@@ -29,6 +28,10 @@
       (#(.doFinal % data-bytes))
       (map (partial format "%02x"))
       (apply str))))
+
+(defn hmac
+  [hmac-key data]
+  (hmac-bytes hmac-key (.getBytes data "UTF-8")))
 
 (defn constant-comp
   "Compare two strings in constant time"
