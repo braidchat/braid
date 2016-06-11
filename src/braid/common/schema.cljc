@@ -61,13 +61,31 @@
   (try (check-rules! rs) true
     (catch ExceptionInfo _ false)))
 
+(def Bot
+  {:id s/Uuid
+   :group-id s/Uuid
+   :user-id s/Uuid
+   :name s/Str
+   :avatar s/Str
+   :webhook-url s/Str
+   :token s/Str})
+(def check-bot! (s/validator Bot))
+
+(def BotDisplay
+  "Like Bot but for publicly-available bot info"
+  {:id s/Uuid
+   :user-id s/Uuid
+   :nickname s/Str
+   :avatar s/Str})
+
 (def Group
   {:id s/Uuid
    :name s/Str
    :admins #{s/Uuid}
    :intro (s/maybe s/Str)
    :avatar (s/maybe s/Str)
-   :public? s/Bool})
+   :public? s/Bool
+   :bots #{BotDisplay}})
 
 (def User
   {:id s/Uuid

@@ -28,9 +28,14 @@
 (defn get-user
   "Get user by id. Can be sub'd directly or dynamically"
   ([state [_ user-id]]
-   (reaction (get-in @state [:users user-id])))
+   (get-user state nil [user-id]))
   ([state _ [user-id]]
-   (reaction (get-in @state [:users user-id]))))
+   (reaction (if-let [u (get-in @state [:users user-id])]
+               u
+               (let [g-id (@state :open-group-id)
+                     group-bots (get-in @state [:groups g-id :bots])]
+                 (first (filter (fn [b] (= (b :user-id user-id)))
+                                group-bots)))))))
 
 (defn get-users
   [state _]

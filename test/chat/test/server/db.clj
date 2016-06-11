@@ -1,9 +1,11 @@
 (ns chat.test.server.db
   (:require [clojure.test :refer :all]
+            [clojure.set :refer [rename-keys]]
             [mount.core :as mount]
             [chat.test.server.test-utils :refer [fetch-messages]]
             [braid.server.conf :as conf]
             [chat.server.db :as db :refer [conn]]
+            [braid.common.schema :as schema]
             [chat.server.search :as search]))
 
 
@@ -151,12 +153,12 @@
         user-2-id (db/uuid)]
     (testing "can create a group"
       (is (= group (assoc data :admins #{} :intro nil :avatar nil
-                     :public? false))))
+                     :public? false :bots #{}))))
     (testing "can set group intro"
       (db/group-set! (group :id) :intro "the intro")
       (is (= (db/get-group (group :id))
              (assoc data :admins #{} :intro "the intro" :avatar nil
-               :public? false))))
+               :public? false :bots #{}))))
     (testing "can add a user to the group"
       (let [user (db/create-user! {:id user-id
                                    :email "foo@bar.com"
@@ -166,7 +168,7 @@
         (is (= #{} (db/get-users-in-group (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
         (is (= #{(assoc data :admins #{} :intro "the intro" :avatar nil
-                   :public? false)}
+                   :public? false :bots #{})}
                (db/get-groups-for-user (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))
@@ -493,3 +495,42 @@
           (is (= #{u2 (u :id)} (set (db/user-search-preferences :email-frequency :weekly))))
           (is (= [u1] (db/user-search-preferences :email-frequency :daily)))
           (is (= #{u1 u2} (set (db/user-search-preferences :favourite-color "blue")))))))))
+
+(deftest bots-test
+  (let [g1 (db/create-group! {:name "group 1" :id (db/uuid)})
+        g2 (db/create-group! {:name "group 2" :id (db/uuid)})
+        g3 (db/create-group! {:name "group 3" :id (db/uuid)})
+
+        b1 (db/create-bot! {:id (db/uuid)
+                            :name "bot1"
+                            :avatar ""
+                            :webhook-url ""
+                            :group-id (g1 :id)})
+        b2 (db/create-bot! {:id (db/uuid)
+                            :name "bot2"
+                            :avatar ""
+                            :webhook-url ""
+                            :group-id (g1 :id)})
+        b3 (db/create-bot! {:id (db/uuid)
+                            :name "bot3"
+                            :avatar ""
+                            :webhook-url ""
+                            :group-id (g2 :id)})
+        bot->display (fn [b] (-> b
+                                 (select-keys [:id :name :avatar :user-id])
+                                 (rename-keys {:name :nickname})))]
+
+    (is (schema/check-bot! b1))
+    (is (schema/check-bot! b2))
+    (is (schema/check-bot! b3))
+    (testing "can create bots & retrieve by group"
+      (is (= #{b1 b2} (db/bots-in-group (g1 :id))))
+      (is (= (into #{}  (map bot->display) [b1 b2]) (:bots (db/get-group (g1 :id)))))
+      (is (= #{b3} (db/bots-in-group (g2 :id))))
+      (is (= #{} (db/bots-in-group (g3 :id))))
+      (is (= b1 (db/bot-by-name-in-group "bot1" (g1 :id)))))
+    (testing "can check bot auth"
+      (is (db/bot-auth? (b1 :id) (b1 :token)))
+      (is (db/bot-auth? (b2 :id) (b2 :token)))
+      (is (not (db/bot-auth? (b2 :id) "Foo")))
+      (is (not (db/bot-auth? (java.util.UUID/randomUUID) (b2 :token)))))))

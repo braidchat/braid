@@ -5,6 +5,55 @@
             [clojure.set :as set]
             [clojure.edn :as edn]))
 
+(defn migrate-2016-06-08
+  "Add bot schema"
+  []
+  (d/transact db/conn
+    [{:db/ident :user/is-bot?
+      :db/valueType :db.type/boolean
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+
+     {:db/ident :bot/id
+      :db/valueType :db.type/uuid
+      :db/cardinality :db.cardinality/one
+      :db/unique :db.unique/identity
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+     {:db/ident :bot/token
+      :db/valueType :db.type/string
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+     {:db/ident :bot/name
+      :db/valueType :db.type/string
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+     {:db/ident :bot/avatar
+      :db/valueType :db.type/string
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+     {:db/ident :bot/webhook-url
+      :db/valueType :db.type/string
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+     {:db/ident :bot/group
+      :db/valueType :db.type/ref
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+     {:db/ident :bot/user
+      :db/doc "Fake user bot posts under"
+      :db/valueType :db.type/ref
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+     ]))
+
 (defn migrate-2016-06-04
   "Remove old-style extensions"
   []

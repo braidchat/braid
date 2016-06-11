@@ -54,6 +54,11 @@
   :db/cardinality :db.cardinality/many
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
+ {:db/ident :user/is-bot?
+  :db/valueType :db.type/boolean
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
  ; user preference - key
  {:db/ident :user.preference/key
@@ -132,77 +137,116 @@
   :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
-{:db/ident :tag/name
- :db/valueType :db.type/string
- :db/cardinality :db.cardinality/one
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :tag/group
- :db/valueType :db.type/ref
- :db/cardinality :db.cardinality/one
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :tag/description
- :db/valueType :db.type/string
- :db/cardinality :db.cardinality/one
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
+ {:db/ident :tag/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :tag/group
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :tag/description
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
-; groups
-{:db/ident :group/id
- :db/valueType :db.type/uuid
- :db/cardinality :db.cardinality/one
- :db/unique :db.unique/identity
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :group/name
- :db/valueType :db.type/string
- :db/cardinality :db.cardinality/one
- :db/unique :db.unique/identity
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :group/user
- :db/valueType :db.type/ref
- :db/cardinality :db.cardinality/many
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :group/admins
- :db/valueType :db.type/ref
- :db/cardinality :db.cardinality/many
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :group/settings
- :db/valueType :db.type/string
- :db/cardinality :db.cardinality/one
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
+ ; groups
+ {:db/ident :group/id
+  :db/valueType :db.type/uuid
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :group/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :group/user
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :group/admins
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :group/settings
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
-; invitations
-{:db/ident :invite/id
- :db/valueType :db.type/uuid
- :db/cardinality :db.cardinality/one
- :db/unique :db.unique/identity
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :invite/group
- :db/valueType :db.type/ref
- :db/cardinality :db.cardinality/one
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :invite/from
- :db/valueType :db.type/ref
- :db/cardinality :db.cardinality/one
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :invite/to
- :db/valueType :db.type/string
- :db/cardinality :db.cardinality/one
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
-{:db/ident :invite/created-at
- :db/valueType :db.type/instant
- :db/cardinality :db.cardinality/one
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
+ ; invitations
+ {:db/ident :invite/id
+  :db/valueType :db.type/uuid
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :invite/group
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :invite/from
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :invite/to
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :invite/created-at
+  :db/valueType :db.type/instant
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ ; bots
+ {:db/ident :bot/id
+  :db/valueType :db.type/uuid
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/token
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/avatar
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/webhook-url
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/group
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :bot/user
+  :db/doc "Fake user bot posts under"
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
 ])

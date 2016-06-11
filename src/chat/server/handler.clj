@@ -2,7 +2,7 @@
   (:gen-class)
   (:require [org.httpkit.server :refer [run-server]]
             [mount.core :as mount :refer [defstate]]
-            [compojure.core :refer [routes]]
+            [compojure.core :refer [routes context]]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults
                                               secure-site-defaults site-defaults]]
             [ring.middleware.edn :refer [wrap-edn-params]]
@@ -16,7 +16,8 @@
                                                 mobile-client-routes
                                                 resource-routes]]
             [braid.server.routes.api :refer [api-private-routes
-                                            api-public-routes]]
+                                             api-public-routes]]
+            [braid.server.routes.bots :refer [bot-routes]]
             [environ.core :refer [env]]
             ; requiring so mount sees state
             [chat.server.email-digest :refer [email-jobs]]))
@@ -72,6 +73,9 @@
 
 (def api-server-app
   (-> (routes
+        (context "/bots" []
+          bot-routes)
+
         (-> api-public-routes
             (wrap-defaults (-> site-defaults
                                (assoc-in [:security :anti-forgery] false)
