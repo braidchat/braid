@@ -56,15 +56,21 @@
       :color "#222"
       :box-shadow [[0 (px 1) (px 4) 0 "rgba(0,0,0,0.5)"]]}]
 
-    [:&.plus
-     {:color "#999"}
+    [:&.other
+     {:color "#999"
+      :margin-bottom (m// vars/pad 2)}
 
      [:&:after
-      (mixins/fontawesome \uf067)
       {:font-size (em 1.25)
        :-webkit-font-smoothing "antialias"}]
 
      [:&:hover
-      {:color "#FFF"}]]
+      {:color "#FFF"}]
+
+     [:&.plus:after
+       (mixins/fontawesome \uf067)]
+
+     [:&.global-settings:after
+       (mixins/fontawesome \uf013)]]
 
     badge]])

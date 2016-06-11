@@ -6,14 +6,15 @@
             [braid.ui.views.header :refer [header-view]]
             [braid.ui.views.pages.inbox :refer [inbox-page-view]]
             [braid.ui.views.pages.recent :refer [recent-page-view]]
-            [braid.ui.views.pages.help :refer [help-page-view]]
             [braid.ui.views.pages.users :refer [users-page-view]]
             [braid.ui.views.pages.user :refer [user-page-view]]
             [braid.ui.views.pages.search :refer [search-page-view]]
             [braid.ui.views.pages.tag :refer [tag-page-view]]
             [braid.ui.views.pages.tags :refer [tags-page-view]]
             [braid.ui.views.pages.me :refer [me-page-view]]
+            [braid.ui.views.pages.invite :refer [invite-page-view]]
             [braid.ui.views.pages.group-explore :refer [group-explore-page-view]]
+            [braid.ui.views.pages.global-settings :refer [global-settings-page-view]]
             [braid.ui.views.pages.group-settings :refer [group-settings-view]]))
 
 (defn page-view []
@@ -22,21 +23,25 @@
       (case (@page :type)
         :inbox [inbox-page-view]
         :recent [recent-page-view]
-        :help [help-page-view]
         :users [users-page-view]
         :search [search-page-view]
         :tag [tag-page-view]
         :user [user-page-view]
         :tags [tags-page-view]
         :me [me-page-view]
+        :invite [invite-page-view]
         :group-explore [group-explore-page-view]
         :settings [group-settings-view]
+        :global-settings [global-settings-page-view]
         (do (routes/go-to! (routes/index-path))
             [:h1 "???"])))))
 
 (defn main-view []
-  [:div.main
-   [error-banner-view]
-   [sidebar-view]
-   [header-view]
-   [page-view]])
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      [:div.main
+       [error-banner-view]
+       [sidebar-view]
+       (when @group-id
+         [header-view])
+       [page-view]])))

@@ -1,7 +1,6 @@
 (ns braid.ui.views.pages.users
   (:require [reagent.core :as r]
             [chat.client.reagent-adapter :refer [subscribe]]
-            [braid.ui.views.group-invite :refer [group-invite-view]]
             [braid.ui.views.pills :refer [user-pill-view]]
             [chat.client.dispatcher :refer [dispatch!]]))
 
@@ -49,7 +48,4 @@
          [users-list-view @online-users @admin?]
 
          [:h2 "Offline"]
-         [users-list-view @offline-users @admin?]]
-
-        [:h2 "Invite"]
-        [group-invite-view]]])))
+         [users-list-view @offline-users @admin?]]]])))

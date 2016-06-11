@@ -1,16 +1,13 @@
 (ns chat.client.views.helpers
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [<! put! chan alts! timeout]]
+            [clojure.string :as string]
             [cljs-time.format :as f]
             [cljs-time.core :as t]
             [chat.client.store :as store]
-            [goog.style :as gstyle]))
-
-(defn ->color [input]
-  (str "hsl(" (mod (Math/abs (hash input)) 360) ",71%,35%)"))
-
-(defn id->color [uuid]
-  (->color uuid))
+            [goog.style :as gstyle]
+            [cljsjs.husl])
+  (:import [goog Uri]))
 
 (defn format-date
   "Turn a Date object into a nicely formatted string"
@@ -70,3 +67,31 @@
     (.. js/document -defaultView
         (getComputedStyle elt nil)
         (getPropertyValue prop))))
+
+(def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
+
+(defn extract-urls
+  "Given some text, returns a sequence of URLs contained in the text"
+  [text]
+  (map first (re-seq url-re text)))
+
+(defn contains-urls? [text]
+  (boolean (seq (extract-urls text))))
+
+(defn url->parts [url]
+  (let [url-info (.parse Uri url)]
+    {:domain (.getDomain url-info)
+     :path (.getPath url-info)}))
+
+(defn ->color [input]
+  (js/window.HUSL.toHex (mod (Math/abs (hash input)) 360) 95 50))
+
+(defn id->color [uuid]
+  (->color uuid))
+
+(defn url->color [url]
+  (-> url
+      string/lower-case
+      url->parts
+      :domain
+      ->color))

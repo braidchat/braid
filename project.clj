@@ -32,8 +32,9 @@
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.1"]
                  [reagent "0.5.1"]
+                 [cljsjs/husl "6.0.1-0"]
                  ;shared
-                 [org.clojure/tools.reader "1.0.0-alpha3"]
+                 [org.clojure/tools.reader "1.0.0-beta1"]
                  [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
                  [com.taoensso/sente "1.8.1" :exclusions [org.clojure/tools.reader]]
                  [prismatic/schema "1.1.0"]
@@ -44,8 +45,8 @@
 
   :main chat.server.handler
   :plugins [[lein-environ "1.0.0"]
-            [lein-cljsbuild "1.1.3"]
-            [lein-figwheel "0.5.1"]]
+            [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]]
+            [lein-figwheel "0.5.3"]]
 
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
@@ -103,11 +104,18 @@
 
   :min-lein-version "2.5.0"
 
-  :profiles {:dev {:dependencies [[com.datomic/datomic-free "0.9.5201" :exclusions [joda-time com.amazonaws/aws-java-sdk]]
-                                  [figwheel-sidecar "0.5.0-6" :exclusions
+  :profiles {:dev {:dependencies [[com.datomic/datomic-free "0.9.5201"
+                                   :exclusions [joda-time
+                                                com.amazonaws/aws-java-sdk
+                                                com.google.guava/guava]]
+                                  [figwheel-sidecar "0.5.0-6"
+                                   :exclusions
                                    [org.clojure/google-closure-library-third-party
                                     com.google.javascript/closure-compiler]]]}
-             :prod {:dependencies [[com.datomic/datomic-pro "0.9.5201" :exclusions [joda-time com.amazonaws/aws-java-sdk]]
+             :prod {:dependencies [[com.datomic/datomic-pro "0.9.5201"
+                                    :exclusions [joda-time
+                                                 com.amazonaws/aws-java-sdk
+                                                 com.google.guava/guava]]
                                    [org.postgresql/postgresql "9.3-1103-jdbc4"]
                                    [org.clojure/tools.nrepl "0.2.12"]]}
              :test [:dev]

@@ -56,3 +56,6 @@
 (def spin
   {:animation [["anim-spin" "1s" "infinite" "steps(8)"]]
    :display "block"})
+
+(defn box-shadow []
+  {:box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]})

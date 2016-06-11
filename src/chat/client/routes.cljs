@@ -11,14 +11,14 @@
 (defroute page-path "/:group-id/:page-id" [group-id page-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type (keyword page-id)}))
 
-(defroute other-path "/:page-id" [page-id]
-  (store/set-group-and-page! nil {:type (keyword page-id)}))
-
 (defroute inbox-page-path "/:group-id/inbox" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :inbox}))
 
 (defroute recent-page-path "/:group-id/recent" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :recent}))
+
+(defroute invite-page-path "/:group-id/invite" [group-id ]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :invite}))
 
 (defroute users-page-path "/:group-id/users" [group-id ]
   (store/set-group-and-page! (UUID. group-id nil) {:type :users}))
@@ -34,12 +34,12 @@
 (defroute group-settings-path "/:group-id/settings" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :settings}))
 
-(defroute help-page-path "/:group-id/help" [group-id]
-  (store/set-group-and-page! (UUID. group-id nil) {:type :help}))
-
 (defroute search-page-path "/:group-id/search/:query" [group-id query]
   (store/set-group-and-page! (UUID. group-id nil) {:type :search
                                                    :search-query query}))
+
+(defroute other-path "/:page-id" [page-id]
+  (store/set-group-and-page! nil {:type (keyword page-id)}))
 
 (defroute index-path "/" {}
   (when-let [group-id (-> (@store/app-state :groups) vals first :id)]

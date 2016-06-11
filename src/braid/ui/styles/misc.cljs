@@ -80,9 +80,6 @@
    [".page.search > .title::before"
     (mixins/fontawesome \uf002)]
 
-   [".page.help > .title::before"
-    (mixins/fontawesome \uf059)]
-
    [".page.me > .title::before"
     (mixins/fontawesome \uf007)]
 
@@ -166,12 +163,6 @@
 
     [:.error
      {:color "red"}]]
-
-   [:.pending-invites
-    {:color "#999"}
-
-    [:ul.invites
-     {:padding-left (px 15)}]]
 
    [:.group
 

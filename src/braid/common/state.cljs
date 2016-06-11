@@ -106,6 +106,16 @@
        (doall (filter (fn [thread] (= (thread :group-id) group-id))
                       @open-threads))))))
 
+(defn get-recent-threads
+  ([state _ [group-id]]
+   (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
+         threads (reaction (@state :threads))]
+     (reaction
+       (doall (filter (fn [thread] (and
+                                     (= (thread :group-id) group-id)
+                                     (not (contains? @open-thread-ids (thread :id)))))
+                      (vals @threads)))))))
+
 (defn get-users-in-group
   [state [_ group-id]]
   (reaction
