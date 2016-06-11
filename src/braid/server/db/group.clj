@@ -55,7 +55,7 @@
   (when-let [group (-> (d/pull (d/db conn) group-pull-pattern
                                [:group/name group-name])
                        db->group)]
-    (when (:public? (group-settings (group :id)))
+    (when (:public? (group-settings conn (group :id)))
       group)))
 
 (defn get-group-tags
