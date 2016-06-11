@@ -73,6 +73,7 @@
       (if (schema/new-message-valid? msg)
         (if (bot-can-message? bot-id msg)
           (do
+            (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
             (db/create-message! msg)
             (sync/broadcast-thread (msg :thread-id) [])
             {:status 201
