@@ -3,6 +3,8 @@
 The current state of Braid bots is delibrately very simple.
 We anticipate extending the API available to bots as we start to write more and see how they are used.
 
+For an example of a simple bot, see [giphybot][]
+
 ## Creating bots
 
 Creating a bot looks like the following:
@@ -54,3 +56,4 @@ The server will return the following error codes:
 
 
   [transit]: https://github.com/cognitect/transit-format
+  [giphybot]: https://github.com/braidchat/giphybot
