@@ -1,6 +1,5 @@
 (ns braid.ui.views.embed
   (:require [reagent.core :as r]
-            [clojure.string :as string]
             [chat.client.xhr :refer [edn-xhr]]
             [chat.client.views.helpers :refer [->color url->color]]))
 
