@@ -247,6 +247,14 @@
 (defmethod dispatch! :make-group-private! [_ group-id]
   (sync/chsk-send! [:chat/set-group-publicity [group-id false]]))
 
+(defmethod dispatch! :get-bot-info [_ {:keys [bot-id on-complete]}]
+  (sync/chsk-send!
+    [:chat/get-bot-info bot-id]
+    2000
+    (fn [reply]
+      (when-let [bot (:braid/ok reply)]
+        (on-complete bot)))))
+
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
             :method :get

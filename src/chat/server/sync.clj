@@ -426,6 +426,12 @@
       (db/group-set! group-id :public? publicity)
       (broadcast-group-change group-id [:group/publicity-changed [group-id publicity]]))))
 
+(defmethod event-msg-handler :chat/get-bot-info
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  (let [bot (db/bot-by-id ?data)]
+    (when (and bot (db/user-is-group-admin? user-id (bot :group-id)) ?reply-fn)
+      (?reply-fn {:braid/ok bot}))))
+
 (defmethod event-msg-handler :session/start
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
   (let [connected (set (:any @connected-uids))]
