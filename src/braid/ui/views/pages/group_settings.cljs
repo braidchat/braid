@@ -4,7 +4,6 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.s3 :as s3]
-            [chat.client.store :as store]
             [chat.client.routes :as routes]
             [braid.ui.views.upload :refer [avatar-upload-view]]))
 
@@ -37,8 +36,6 @@
                                                     :intro @new-message})
                              (reset! new-message ""))}
         "Save"]])))
-
-(def max-avatar-size (* 2 1024 1024))
 
 (defn group-avatar-view
   [group]
