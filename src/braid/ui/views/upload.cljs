@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [chat.client.s3 :as s3]))
 
-(defn avatar-upload-view [cb]
+(defn avatar-upload-view [args]
   (let [uploading? (r/atom false)
         start-upload (fn [on-upload file-list]
                        (let [file (aget file-list 0)]
@@ -14,7 +14,7 @@
                                  (fn [url]
                                    (reset! uploading? false)
                                    (on-upload url)))))))]
-    (fn [{:keys [on-upload dragging-change] :as cb}]
+    (fn [{:keys [on-upload dragging-change] :as args}]
       [:div.upload
        (if @uploading?
          [:div
