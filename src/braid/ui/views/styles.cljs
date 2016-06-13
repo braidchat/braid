@@ -37,6 +37,7 @@
                braid.ui.styles.misc/channels-page
                braid.ui.styles.misc/settings-page
                braid.ui.styles.misc/me-page
+               braid.ui.styles.misc/bots-page
                braid.ui.styles.login/login
                braid.ui.styles.misc/tag
                braid.ui.styles.misc/user

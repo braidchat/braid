@@ -31,6 +31,9 @@
   (store/set-group-and-page! (UUID. group-id nil) {:type :tag
                                                    :id (UUID. tag-id nil)}))
 
+(defroute bots-path "/:group-id/bots" [group-id]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :bots}))
+
 (defroute group-settings-path "/:group-id/settings" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :settings}))
 

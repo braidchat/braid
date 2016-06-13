@@ -21,9 +21,14 @@
 
 (defn get-group-admins
   ([state [_ group-id]]
-   (reaction (get-in @state [:groups group-id :admins])))
+   (get-group-admins nil [group-id]))
   ([state _ [group-id]]
    (reaction (get-in @state [:groups group-id :admins]))))
+
+(defn get-group-bots
+  ([state [_ group-id]] (get-group-bots state nil [group-id]))
+  ([state _ [group-id]]
+   (reaction (get-in @state [:groups group-id :bots]))))
 
 (defn get-user
   "Get user by id. Can be sub'd directly or dynamically"

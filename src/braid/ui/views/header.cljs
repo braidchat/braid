@@ -76,6 +76,15 @@
           :href path}
          "Settings"]))))
 
+(defn group-bots-view []
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      (let [path (routes/bots-path {:group-id @group-id})]
+        [:a.group-bots
+         {:class (when (routes/current-path? path) "active")
+          :href path}
+        "Bots"]))))
+
 (defn left-header-view []
   (let [group-id (subscribe [:open-group-id])]
     (fn []
@@ -95,6 +104,7 @@
        [:div.options
         [subscriptions-link-view]
         [invite-link-view]
+        [group-bots-view]
         [edit-profile-link-view]
         [settings-link-view]]])))
 
