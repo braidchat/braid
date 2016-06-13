@@ -16,7 +16,8 @@
             [braid.common.schema :refer [new-message-valid?]]
             [braid.common.notify-rules :as notify-rules]
             [braid.server.message-format :refer [parse-tags-and-mentions]]
-            [braid.server.bots :as bots]))
+            [braid.server.bots :as bots]
+            [braid.server.db.common :refer [bot->display]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -425,6 +426,17 @@
     (when (and group-id (db/user-is-group-admin? user-id group-id))
       (db/group-set! group-id :public? publicity)
       (broadcast-group-change group-id [:group/publicity-changed [group-id publicity]]))))
+
+(defmethod event-msg-handler :chat/create-bot
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  (let [bot ?data]
+    ; TODO: verify this bot has proper format
+    (when (and (bot :group-id) (db/user-is-group-admin? user-id (bot :group-id)))
+      (let [created (db/create-bot! bot)]
+        (when ?reply-fn
+          (?reply-fn {:braid/ok created}))
+        (broadcast-group-change (bot :group-id)
+                                [:group/new-bot [(bot :group-id) (bot->display created)]])))))
 
 (defmethod event-msg-handler :chat/get-bot-info
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]

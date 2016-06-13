@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.pills :refer [user-pill-view]]
-            [chat.client.dispatcher :refer [dispatch!]]))
+            [chat.client.dispatcher :refer [dispatch!]]
+            [braid.ui.views.upload :refer [avatar-upload-view]]))
 
 (defn bot-view
   [bot]
@@ -45,8 +46,76 @@
                   ^{:key (:id b)}
                   [bot-view b])))])))
 
+(defn new-bot-view []
+  (let [group-id (subscribe [:open-group-id])
+        admin? (subscribe [:current-user-is-group-admin?] [group-id])
+        dragging? (r/atom false)
+        error (r/atom nil)
+        new-bot (r/atom {})
+        state (r/atom :initial)]
+    (fn []
+      (when @admin?
+        [:div.add-bot
+         [:h2 "Add a New Bot"]
+         (case @state
+
+           :creating
+           [:div "Creating..."]
+
+           :initial
+           [:form.new-bot-form
+            {:action "/"
+             :on-submit (fn [e] (.preventDefault e)
+                          (reset! error nil)
+                          (reset! state :creating)
+                          (swap! new-bot assoc :group-id @group-id)
+                          (dispatch! :new-bot
+                                     {:bot @new-bot
+                                      :on-complete
+                                      (fn [created]
+                                        (if created
+                                          (do (reset! new-bot created)
+                                              (reset! state :created))
+                                          (do
+                                            (reset! error "Failed to create bot")
+                                            (reset! state :initial))))})
+                          (reset! state :creating))}
+            (when-let [err @error]
+              [:div.error err])
+            [:label "Bot Name"
+             [:input {:type "text" :placeholder "name" :value (@new-bot :name)
+                      :on-change #(swap! new-bot assoc :name (.. % -target -value))}]]
+            [:br]
+            [:label "Webhook URL"
+             [:input {:type "url" :placeholder "https://example.com/bot_message" :value (@new-bot :webhook-url)
+                      :on-change #(swap! new-bot assoc :webhook-url (.. % -target -value))}]]
+            [:br]
+            [:div.dragging.new-avatar {:class (when @dragging? "dragging")}
+             (when-let [avatar (@new-bot :avatar)]
+               [:img {:src avatar}])
+             [avatar-upload-view {:on-upload (fn [url] (swap! new-bot assoc :avatar url))
+                                  :dragging-change (partial reset! dragging?)}]]
+            [:input {:type "submit" :value "Add Bot"}]]
+
+           :created
+           [:div
+            [:p (str "New bot has been created! Here are the credentials you'll "
+                     "need to connect")]
+            [:label "Bot ID"
+             [:input {:type "text" :value (@new-bot :id)
+                      :on-focus #(.. % -target select)}]]
+
+            [:label "Bot Token"
+             [:input {:type "text" :value (@new-bot :token)
+                      :on-focus #(.. % -target select)}]]
+            [:button {:on-click (fn [_]
+                                  (reset! new-bot {})
+                                  (reset! state :initial))}
+             "Done"]])]))))
+
 (defn bots-view []
   [:div.page.bots
    [:div.title "Bots"]
    [:div.content
-    [group-bots-view]]])
+    [group-bots-view]
+    [new-bot-view]]])
