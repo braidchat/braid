@@ -1,5 +1,6 @@
 (ns braid.server.db.common
   (:require [datomic.api :as d]
+            [clojure.set :refer [rename-keys]]
             [clojure.edn :as edn]))
 
 (defn create-entity!
@@ -114,6 +115,13 @@
    :user-id (get-in e [:bot/user :user/id])
    :nickname (:bot/name e)
    :avatar (:bot/avatar e)})
+
+(defn bot->display
+  "Convert a private bot to public "
+  [b]
+  (-> b
+      (rename-keys {:name :nickname})
+      (select-keys (keys (db->bot-display nil)))))
 
 (def group-pull-pattern
   [:group/id
