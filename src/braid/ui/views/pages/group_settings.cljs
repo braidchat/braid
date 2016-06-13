@@ -5,7 +5,8 @@
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.s3 :as s3]
             [chat.client.store :as store]
-            [chat.client.routes :as routes]))
+            [chat.client.routes :as routes]
+            [braid.ui.views.upload :refer [avatar-upload-view]]))
 
 (defn leave-group-view
   [group]
@@ -41,46 +42,19 @@
 
 (defn group-avatar-view
   [group]
-  (let [uploading? (r/atom false)
-        dragging? (r/atom false)
-        start-upload (fn [group-id file-list]
-                       (let [file (aget file-list 0)]
-                         (if (> (.-size file) max-avatar-size)
-                           (store/display-error! :avatar-set-fail "Avatar image too large")
-                           (do (reset! uploading? true)
-                               (s3/upload
-                                 file
-                                 (fn [url]
-                                   (reset! uploading? false)
-                                   (dispatch! :set-avatar
-                                              {:group-id group-id
-                                               :avatar url})))))))]
+  (let [dragging? (r/atom false)]
     (fn [group]
       [:div.setting.avatar {:class (when @dragging? "dragging")}
        [:h2 "Group Avatar"]
        [:div
         (if (group :avatar)
           [:img {:src (group :avatar)}]
-          [:p "Avatar not set"]) ]
-       [:div.upload
-        (if @uploading?
-          [:div
-           [:p "Uploading..." [:span.uploading-indicator "\uf110"]]]
-          [:div
-           {:on-drag-over (fn [e]
-                            (doto e (.stopPropagation) (.preventDefault))
-                            (reset! dragging? true))
-            :on-drag-leave (fn [_] (reset! dragging? false))
-            :on-drop (fn [e]
-                       (.preventDefault e)
-                       (reset! dragging? false)
-                       (reset! uploading? true)
-                       (start-upload (group :id) (.. e -dataTransfer -files)))}
-           [:label "Choose a group avatar"
-            [:input {:type "file" :accept "image/*"
-                     :on-change (fn [e]
-                                  (start-upload (group :id)
-                                                (.. e -target -files)))}]]])]])))
+          [:p "Avatar not set"])]
+       [avatar-upload-view {:on-upload (fn [url]
+                                         (dispatch! :set-avatar
+                                                    {:group-id (group :id)
+                                                     :avatar url}))
+                            :dragging-change (partial reset! dragging?)}]])))
 
 (defn publicity-view
   [group]
