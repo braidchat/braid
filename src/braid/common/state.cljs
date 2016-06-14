@@ -165,8 +165,9 @@
           (vals (get-in @state [:tags])))))
 
 (defn get-user-avatar-url
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id :avatar])))
+  ([state [_ user-id]] (get-user-avatar-url state nil [user-id]))
+  ([state _ [user-id]]
+   (reaction (get-in @state [:users user-id :avatar]))))
 
 (defn get-user-status
   ([state [_ user-id]]

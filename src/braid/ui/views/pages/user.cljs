@@ -9,7 +9,7 @@
   (let [user-id (subscribe [:page-id])
         user (subscribe [:user] [user-id])
         current-user-id (subscribe [:user-id])
-        user-avatar-url (subscribe [:user-avatar-url])
+        user-avatar-url (subscribe [:user-avatar-url] [user-id])
         threads (subscribe [:threads])
         open-threads-ids (subscribe [:open-thread-ids])
         open-group (subscribe [:open-group-id])
