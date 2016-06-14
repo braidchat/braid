@@ -138,7 +138,7 @@
                         :html
                         (fn []
                           [:div.tag-match
-                           [:div.color-block{:style {:backgroundColor (id->color (tag :id))}}]
+                           [:div.color-block {:style {:backgroundColor (id->color (tag :id))}}]
                            [:div.name (tag :name)]
                            [:div.extra (tag :description)]])}))
                 (cons (when-not (or exact-match? (string/blank? query))
