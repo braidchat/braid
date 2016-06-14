@@ -7,7 +7,8 @@
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.shared.util :refer [valid-nickname?]])
+            [chat.shared.util :refer [valid-nickname?]]
+            [braid.ui.views.upload :refer [avatar-upload-view]])
   (:import [goog.events KeyCodes]))
 
 (defn nickname-view
@@ -41,6 +42,17 @@
                (dispatch! :set-nickname
                           [nickname
                            (fn [err] (set-error! err))]))))}]])))
+
+(defn avatar-view
+  []
+  (let [user-id (subscribe [:user-id])
+        user-avatar-url (subscribe [:user-avatar-url] [user-id])
+        dragging? (r/atom false)]
+    (fn []
+      [:div.avatar {:class (when @dragging? "dragging")}
+       [:img.avatar {:src @user-avatar-url}]
+       [avatar-upload-view {:on-upload (fn [u] (dispatch! :set-user-avatar u))
+                            :dragging-change (partial reset! dragging?)}]])))
 
 (defn password-view
   []
@@ -223,6 +235,8 @@
                          (dispatch! :logout nil))} "Log Out"]
       [:h2 "Update Nickname"]
       [nickname-view]
+      [:h2 "Update Avatar"]
+      [avatar-view]
       [:h2 "Change Password"]
       [password-view]
       [:h2 "Email Digest Preferences"]

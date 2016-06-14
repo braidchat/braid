@@ -235,6 +235,16 @@
         (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))
     (when ?reply-fn (?reply-fn {:error "Invalid nickname"}))))
 
+(defmethod event-msg-handler :user/set-avatar
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  (if (valid-url? ?data)
+    (do (db/set-user-avatar! user-id ?data)
+        (broadcast-user-change user-id [:user/new-avatar {:user-id user-id
+                                                          :avatar ?data}])
+        (when-let [r ?reply-fn] (r {:braid/ok true})))
+    (do (timbre/warnf "Couldn't set user avatar to %s" ?data)
+        (when-let [r ?reply-fn] (r {:braid/error "Bad url for avatar"})))))
+
 (defmethod event-msg-handler :user/set-password
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
   (if (string/blank? (?data :password))

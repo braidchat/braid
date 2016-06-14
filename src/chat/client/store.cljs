@@ -132,6 +132,9 @@
 (defn update-user-nick! [user-id nick]
   (transact! [:users user-id :nickname] (constantly nick)))
 
+(defn update-user-avatar! [user-id avatar]
+  (transact! [:users user-id :avatar] (constantly avatar)))
+
 (defn update-user-status! [user-id status]
   (when (get-in @app-state [:users user-id])
     (transact! [:users user-id :status] (constantly status))))
