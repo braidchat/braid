@@ -2,7 +2,7 @@
   (:require [braid.ui.styles.vars :refer [avatar-size pad card-width]]
             [braid.ui.styles.mixins :as mixins]
             [garden.arithmetic :as m]
-            [garden.units :refer [rem]]))
+            [garden.units :refer [rem px]]))
 
 (def message
   [:.message
@@ -36,15 +36,21 @@
      :margin-left (m/+ avatar-size (rem 0.5))
      :overflow "hidden"
      :white-space "nowrap"}
-     [:.nickname
-      {:display "inline"
-       :font-weight "bold"
-       :text-decoration "none"
-       :color "#000"}]
-     [:.time
-      {:display "inline"
-       :margin-left "0.25rem"
-       :color "#ccc"}]]
+    [:.bot-notice
+     {:background-color "#c0afc0"
+      :border-radius (px 5)
+      :padding (rem 0.25)
+      :font-weight "bold"
+      :color "#413f42"}]
+      [:.nickname
+       {:display "inline"
+        :font-weight "bold"
+        :text-decoration "none"
+        :color "#000"}]
+      [:.time
+       {:display "inline"
+        :margin-left "0.25rem"
+        :color "#ccc"}]]
 
    ["> .content"
     {:white-space "pre-wrap"

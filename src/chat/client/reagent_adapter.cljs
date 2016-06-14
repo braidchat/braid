@@ -31,6 +31,10 @@
   state/get-group-threads)
 
 (register-sub
+  :group-bots
+  state/get-group-bots)
+
+(register-sub
   :recent-threads
   state/get-recent-threads)
 

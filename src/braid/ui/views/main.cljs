@@ -15,7 +15,8 @@
             [braid.ui.views.pages.invite :refer [invite-page-view]]
             [braid.ui.views.pages.group-explore :refer [group-explore-page-view]]
             [braid.ui.views.pages.global-settings :refer [global-settings-page-view]]
-            [braid.ui.views.pages.group-settings :refer [group-settings-view]]))
+            [braid.ui.views.pages.group-settings :refer [group-settings-view]]
+            [braid.ui.views.pages.bots :refer [bots-view]]))
 
 (defn page-view []
   (let [page (subscribe [:page])]
@@ -31,6 +32,7 @@
         :me [me-page-view]
         :invite [invite-page-view]
         :group-explore [group-explore-page-view]
+        :bots [bots-view]
         :settings [group-settings-view]
         :global-settings [global-settings-page-view]
         (do (routes/go-to! (routes/index-path))

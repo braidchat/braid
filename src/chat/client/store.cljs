@@ -411,6 +411,9 @@
 (defn add-group-bot! [group-id bot]
   (transact! [:groups group-id :bots] #(conj % bot)))
 
+(defn bots-in-open-group []
+  (get-in @app-state [:groups (get @app-state :open-group-id) :bots]))
+
 ; invitations
 
 (defn set-invitations! [invitations]

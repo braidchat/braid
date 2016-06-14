@@ -53,6 +53,26 @@
 
 (def engines
   [
+   ; /<bot-name> -> autocompletes bots
+   (fn [text _]
+     (let [pattern #"^/(\w+)$"]
+       (when-let [bot-name (second (re-find pattern text))]
+         (into ()
+               (comp (filter (fn [b] (fuzzy-matches? (b :nickname) bot-name)))
+                     (map (fn [b]
+                            {:key (constantly (b :id))
+                             :action (fn [])
+                             :message-transform
+                             (fn [text]
+                               (string/replace text pattern (str "/" (b :nickname) " ")))
+                             :html
+                             (constantly
+                               [:div.bot-match
+                                [:img.avatar {:src (b :avatar)}]
+                                [:div.name (b :nickname)]
+                                [:div.extra "..."]])})))
+               (store/bots-in-open-group)))))
+
    ; ... :emoji  -> autocomplete emoji
    (fn [text _]
      (let [pattern #"\B[:(](\S{2,})$"]
@@ -118,7 +138,7 @@
                         :html
                         (fn []
                           [:div.tag-match
-                           [:div.color-block{:style {:backgroundColor (id->color (tag :id))}}]
+                           [:div.color-block {:style {:backgroundColor (id->color (tag :id))}}]
                            [:div.name (tag :name)]
                            [:div.extra (tag :description)]])}))
                 (cons (when-not (or exact-match? (string/blank? query))

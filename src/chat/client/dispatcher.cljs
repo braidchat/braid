@@ -247,6 +247,26 @@
 (defmethod dispatch! :make-group-private! [_ group-id]
   (sync/chsk-send! [:chat/set-group-publicity [group-id false]]))
 
+(defmethod dispatch! :new-bot [_ {:keys [bot on-complete]}]
+  (let [bot (schema/make-bot bot)]
+    (sync/chsk-send!
+      [:chat/create-bot bot]
+      5000
+      (fn [reply]
+        (when (nil? (:braid/ok reply))
+          (store/display-error!
+            (str "bot-" (bot :id) (rand))
+            (get reply :braid/error "Something when wrong creating bot")))
+        (on-complete (:braid/ok reply))))))
+
+(defmethod dispatch! :get-bot-info [_ {:keys [bot-id on-complete]}]
+  (sync/chsk-send!
+    [:chat/get-bot-info bot-id]
+    2000
+    (fn [reply]
+      (when-let [bot (:braid/ok reply)]
+        (on-complete bot)))))
+
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
             :method :get

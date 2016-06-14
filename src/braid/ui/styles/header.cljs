@@ -109,6 +109,9 @@
           [:&.edit-profile:after
            (mixins/fontawesome \uf007)]
 
+          [:&.group-bots:after
+           (mixins/fontawesome \uf12e)]
+
           [:&.settings:after
            (mixins/fontawesome \uf013)]]]]]
 

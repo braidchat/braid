@@ -21,9 +21,14 @@
 
 (defn get-group-admins
   ([state [_ group-id]]
-   (reaction (get-in @state [:groups group-id :admins])))
+   (get-group-admins nil [group-id]))
   ([state _ [group-id]]
    (reaction (get-in @state [:groups group-id :admins]))))
+
+(defn get-group-bots
+  ([state [_ group-id]] (get-group-bots state nil [group-id]))
+  ([state _ [group-id]]
+   (reaction (get-in @state [:groups group-id :bots]))))
 
 (defn get-user
   "Get user by id. Can be sub'd directly or dynamically"
@@ -34,8 +39,10 @@
                u
                (let [g-id (@state :open-group-id)
                      group-bots (get-in @state [:groups g-id :bots])]
-                 (first (filter (fn [b] (= (b :user-id user-id)))
-                                group-bots)))))))
+                 (-> group-bots
+                      (->> (filter (fn [b] (= (b :user-id) user-id))))
+                      first
+                      (assoc :bot? true)))))))
 
 (defn get-users
   [state _]
@@ -158,8 +165,9 @@
           (vals (get-in @state [:tags])))))
 
 (defn get-user-avatar-url
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id :avatar])))
+  ([state [_ user-id]] (get-user-avatar-url state nil [user-id]))
+  ([state _ [user-id]]
+   (reaction (get-in @state [:users user-id :avatar]))))
 
 (defn get-user-status
   ([state [_ user-id]]
