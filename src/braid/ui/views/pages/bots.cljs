@@ -1,9 +1,11 @@
 (ns braid.ui.views.pages.bots
   (:require [reagent.core :as r]
+            [reagent.ratom :refer-macros [reaction]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.ui.views.pills :refer [user-pill-view]]
             [chat.client.dispatcher :refer [dispatch!]]
-            [braid.ui.views.upload :refer [avatar-upload-view]]))
+            [braid.ui.views.upload :refer [avatar-upload-view]]
+            [chat.shared.util :refer [bot-name-re]]))
 
 (defn bot-view
   [bot]
@@ -52,7 +54,13 @@
         dragging? (r/atom false)
         error (r/atom nil)
         new-bot (r/atom {})
-        state (r/atom :initial)]
+        state (r/atom :initial)
+        bot-valid? (reaction (and
+                               (and (string? (@new-bot :name))
+                                 (re-matches bot-name-re (@new-bot :name)))
+                               (and (string? (@new-bot :webhook-url))
+                                 (re-matches #"\S+" (@new-bot :webhook-url)))
+                               (some? (@new-bot :avatar))))]
     (fn []
       (when @admin?
         [:div.add-bot
@@ -66,20 +74,21 @@
            [:form.new-bot-form
             {:action "/"
              :on-submit (fn [e] (.preventDefault e)
-                          (reset! error nil)
-                          (reset! state :creating)
-                          (swap! new-bot assoc :group-id @group-id)
-                          (dispatch! :new-bot
-                                     {:bot @new-bot
-                                      :on-complete
-                                      (fn [created]
-                                        (if created
-                                          (do (reset! new-bot created)
-                                              (reset! state :created))
-                                          (do
-                                            (reset! error "Failed to create bot")
-                                            (reset! state :initial))))})
-                          (reset! state :creating))}
+                          (when @bot-valid?
+                            (reset! error nil)
+                            (reset! state :creating)
+                            (swap! new-bot assoc :group-id @group-id)
+                            (dispatch! :new-bot
+                                       {:bot @new-bot
+                                        :on-complete
+                                        (fn [created]
+                                          (if created
+                                            (do (reset! new-bot created)
+                                                (reset! state :created))
+                                            (do
+                                              (reset! error "Failed to create bot")
+                                              (reset! state :initial))))})
+                            (reset! state :creating)))}
             (when-let [err @error]
               [:div.error err])
             [:label "Bot Name"
@@ -95,7 +104,7 @@
                [:img {:src avatar}])
              [avatar-upload-view {:on-upload (fn [url] (swap! new-bot assoc :avatar url))
                                   :dragging-change (partial reset! dragging?)}]]
-            [:input {:type "submit" :value "Add Bot"}]]
+            [:input {:type "submit" :value "Add Bot" :disabled (not @bot-valid?)}]]
 
            :created
            [:div
