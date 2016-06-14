@@ -11,13 +11,14 @@
             [chat.server.invite :as invites]
             [chat.server.digest :as digest]
             [clojure.set :refer [difference intersection]]
-            [chat.shared.util :refer [valid-nickname? valid-tag-name?]]
+            [chat.shared.util :as util :refer [valid-nickname? valid-tag-name?]]
             [chat.server.email-digest :as email]
             [braid.common.schema :refer [new-message-valid?]]
             [braid.common.notify-rules :as notify-rules]
             [braid.server.message-format :refer [parse-tags-and-mentions]]
             [braid.server.bots :as bots]
-            [braid.server.db.common :refer [bot->display]]))
+            [braid.server.db.common :refer [bot->display]]
+            [braid.server.util :refer [valid-url?]]))
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
@@ -429,14 +430,30 @@
 
 (defmethod event-msg-handler :chat/create-bot
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (let [bot ?data]
-    ; TODO: verify this bot has proper format
+  (let [bot ?data
+        reply-fn (or ?reply-fn (constantly nil))]
     (when (and (bot :group-id) (db/user-is-group-admin? user-id (bot :group-id)))
-      (let [created (db/create-bot! bot)]
-        (when ?reply-fn
-          (?reply-fn {:braid/ok created}))
-        (broadcast-group-change (bot :group-id)
-                                [:group/new-bot [(bot :group-id) (bot->display created)]])))))
+      (cond
+        (not (re-matches util/bot-name-re (bot :name)))
+        (do (timbre/warnf "User %s tried to create bot with invalid name %s"
+                          user-id (bot :name))
+            (reply-fn {:braid/error "Bad bot name"}))
+
+        (not (valid-url? (bot :webhook-url)))
+        (do (timbre/warnf "User %s tried to create bot with invalid webhook url %s"
+                          user-id (bot :webhook-url))
+            (reply-fn {:braid/error "Invalid webhook url for bot"}))
+
+        (not (string? (bot :avatar)))
+        (do (timbre/warnf "User %s tried to create bot without an avatar"
+                          user-id (bot :webhook-url))
+            (reply-fn {:braid/error "Bot needs an avatar image"}))
+
+        :else
+        (let [created (db/create-bot! bot)]
+          (reply-fn {:braid/ok created})
+          (broadcast-group-change (bot :group-id)
+                                  [:group/new-bot [(bot :group-id) (bot->display created)]]))))))
 
 (defmethod event-msg-handler :chat/get-bot-info
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]

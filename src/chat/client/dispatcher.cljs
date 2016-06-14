@@ -254,7 +254,9 @@
       5000
       (fn [reply]
         (when (nil? (:braid/ok reply))
-          (store/display-error! (str "bot-" (bot :id)) "Something when wrong creating bot"))
+          (store/display-error!
+            (str "bot-" (bot :id) (rand))
+            (get reply :braid/error "Something when wrong creating bot")))
         (on-complete (:braid/ok reply))))))
 
 (defmethod dispatch! :get-bot-info [_ {:keys [bot-id on-complete]}]
