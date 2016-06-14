@@ -7,7 +7,8 @@
             [chat.client.store :as store]
             [chat.client.views.helpers :refer [debounce]]
             [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.routes :as routes]))
+            [chat.client.routes :as routes]
+            [chat.client.views.helpers :refer [->color]]))
 
 (defn search-bar-view
   []
@@ -51,5 +52,6 @@
                        (put! search-chan {:query query})))}]
           (if (seq @search-query)
             [:div.action.clear {:on-click (fn []
-                                            (exit-search!))}]
+                                            (exit-search!))
+                                :style {:color (->color @open-group-id)}}]
             [:div.action.search])])})))
