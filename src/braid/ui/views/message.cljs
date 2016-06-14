@@ -193,8 +193,10 @@
            ((aget PR "prettyPrint"))))
        :reagent-render
        (fn [message]
-         (let [sender-path (routes/user-page-path {:group-id (routes/current-group)
-                                                   :user-id (@sender :id)})]
+         (let [sender-path (if (@sender :bot?)
+                             (routes/bots-path {:group-id (routes/current-group)})
+                             (routes/user-page-path {:group-id (routes/current-group)
+                                                     :user-id (@sender :id)}))]
            [:div.message {:class (str " " (when (:collapse? message) "collapse")
                                       " " (if (:unseen? message) "unseen" "seen")
                                       " " (when (:first-unseen? message) "first-unseen")
@@ -210,6 +212,8 @@
              [:img {:src (@sender :avatar)
                     :style {:backgroundColor (id->color (@sender :id))}}]]
             [:div.info
+             (when (@sender :bot?)
+               [:span.bot-notice "BOT"])
              [:a.nickname {:tabIndex -1
                            :href sender-path}
               (@sender :nickname)]

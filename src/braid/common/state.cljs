@@ -39,8 +39,10 @@
                u
                (let [g-id (@state :open-group-id)
                      group-bots (get-in @state [:groups g-id :bots])]
-                 (first (filter (fn [b] (= (b :user-id) user-id))
-                                group-bots)))))))
+                 (-> group-bots
+                      (->> (filter (fn [b] (= (b :user-id) user-id))))
+                      first
+                      (assoc :bot? true)))))))
 
 (defn get-users
   [state _]
