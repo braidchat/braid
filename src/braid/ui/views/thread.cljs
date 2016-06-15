@@ -198,9 +198,16 @@
          [:div.card
           [:div.head
            (when (and (not new?) @open?)
+             [:div.unsub
+              {:on-click (fn [_] (dispatch! :unsub-thread
+                                            {:thread-id (thread :id)}))
+               :title "Unsubscribe"}
+              "\uf1f7"])
+           (when (and (not new?) @open?)
              [:div.close
               {:on-click (fn [_]
-                           (dispatch! :hide-thread {:thread-id (thread :id)}))} "×"])
+                           (dispatch! :hide-thread {:thread-id (thread :id)}))}
+              "\uf00d"])
            [thread-tags-view thread]]
 
           (when-not new?

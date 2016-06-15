@@ -263,6 +263,10 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
   (db/user-hide-thread! user-id ?data))
 
+(defmethod event-msg-handler :chat/unsub-thread
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  (db/user-unsubscribe-from-thread! user-id ?data))
+
 (defmethod event-msg-handler :chat/mark-thread-read
   [{:as ev-msg :keys [ring-req ?data user-id]}]
   (db/update-thread-last-open ?data user-id))

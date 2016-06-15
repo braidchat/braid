@@ -105,6 +105,7 @@
      :box-sizing "border-box"}
 
     [:.tags
+     {:margin-left (m/* 0.3 pad)}
 
      [:.add
       mixins/pill-box]
@@ -113,13 +114,25 @@
       {:margin-bottom (em 0.5)
        :margin-right (em 0.5)} ] ]
 
+    [:.unsub
+     {:position "absolute"
+      :padding (m/* 0.5 pad)
+      :top 0
+      :left 0
+      :z-index 10
+      :cursor "pointer"
+      :font-family "fontawesome"
+      :color "rgb(224, 114, 116)"}]
+
     [:.close
      {:position "absolute"
-      :padding pad
+      :padding (m/* 0.5 pad)
       :top 0
       :right 0
       :z-index 10
-      :cursor "pointer"}]]])
+      :cursor "pointer"
+      :font-family "fontawesome"
+      :color "rgb(88, 88, 88)"}]]])
 
 (defn messages [pad]
   [:.thread
