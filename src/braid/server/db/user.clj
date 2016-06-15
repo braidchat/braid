@@ -40,6 +40,10 @@
   [conn user-id]
   (:user/nickname (d/pull (d/db conn) '[:user/nickname] [:user/id user-id])))
 
+(defn set-user-avatar!
+  [conn user-id avatar]
+  @(d/transact conn [[:db/add [:user/id user-id] :user/avatar avatar]]))
+
 (defn authenticate-user
   "returns user-id if email and password are correct"
   [conn email password]

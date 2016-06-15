@@ -48,7 +48,7 @@
           [:img {:src (group :avatar)}]
           [:p "Avatar not set"])]
        [avatar-upload-view {:on-upload (fn [url]
-                                         (dispatch! :set-avatar
+                                         (dispatch! :set-group-avatar
                                                     {:group-id (group :id)
                                                      :avatar url}))
                             :dragging-change (partial reset! dragging?)}]])))

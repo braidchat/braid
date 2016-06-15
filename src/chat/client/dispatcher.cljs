@@ -140,6 +140,10 @@
         (on-error msg)
         (store/update-user-nick! (store/current-user-id) nickname)))))
 
+(defmethod dispatch! :set-user-avatar [_ avatar-url]
+  (store/update-user-avatar! (store/current-user-id) avatar-url)
+  (sync/chsk-send! [:user/set-avatar avatar-url]))
+
 (defmethod dispatch! :set-password [_ [password on-success on-error]]
   (sync/chsk-send!
     [:user/set-password {:password password}]
@@ -237,7 +241,7 @@
   (sync/chsk-send! [:chat/set-group-intro args])
   (store/set-group-intro! group-id intro))
 
-(defmethod dispatch! :set-avatar [_ {:keys [group-id avatar] :as args}]
+(defmethod dispatch! :set-group-avatar [_ {:keys [group-id avatar] :as args}]
   (sync/chsk-send! [:chat/set-group-avatar args])
   (store/set-group-avatar! group-id avatar))
 
@@ -365,6 +369,10 @@
 (defmethod sync/event-handler :user/name-change
   [[_ {:keys [user-id nickname]}]]
   (store/update-user-nick! user-id nickname))
+
+(defmethod sync/event-handler :user/new-avatar
+  [[_ {:keys [user-id avatar]}]]
+  (store/update-user-avatar! user-id avatar))
 
 (defmethod sync/event-handler :user/left-group
   [[_ [group-id group-name]]]
