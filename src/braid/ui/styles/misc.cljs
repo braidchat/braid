@@ -100,7 +100,10 @@
 
    ["> .intro"
     {:color vars/grey-text
-     :margin vars/pad}]
+     :margin vars/pad
+     ; make intro above threads, so you can click on clear inbox button
+     :z-index 100
+     :position "relative"}]
 
    ["> .content"
     {:overflow "scroll"
