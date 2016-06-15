@@ -89,6 +89,10 @@
   (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
+(defmethod dispatch! :unsub-thread [_ data]
+  (sync/chsk-send! [:chat/unsub-thread (data :thread-id)])
+  (store/hide-thread! (data :thread-id)))
+
 (defmethod dispatch! :create-tag [_ [tag-name group-id id]]
   (let [tag (schema/make-tag {:name tag-name
                               :group-id group-id
