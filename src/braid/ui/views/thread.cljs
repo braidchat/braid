@@ -199,15 +199,16 @@
           [:div.head
            (when (and (not new?) @open?)
              [:div.controls
-              [:div.unsub
-               {:on-click (fn [_] (dispatch! :unsub-thread
-                                             {:thread-id (thread :id)}))
-                :title "Unsubscribe"}
-               "\uf1f7"]
-              [:div.close
-               {:on-click (fn [_]
-                            (dispatch! :hide-thread {:thread-id (thread :id)}))}
-               "\uf00d"]])
+              [:div.control.close
+               {:title "Close"
+                :on-click (fn [_]
+                            (dispatch! :hide-thread {:thread-id (thread :id)}))}]
+
+              [:div.control.mute
+               {:title "Mute"
+                :on-click (fn [_] (dispatch! :unsub-thread
+                                             {:thread-id (thread :id)}))}]])
+
            [thread-tags-view thread]]
 
           (when-not new?

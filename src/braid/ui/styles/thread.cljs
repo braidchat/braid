@@ -113,31 +113,36 @@
       {:margin-bottom (em 0.5)
        :margin-right (em 0.5)} ] ]
 
-    [".controls:hover > .unsub"
-     {:display "block"}]
     [:.controls
-     [:.unsub
-      {:position "absolute"
-       :padding (m/* 0.5 pad)
-       :top (m/* -1.5 pad)
-       :right 0
-       :z-index 10
-       :cursor "pointer"
-       :font-family "fontawesome"
-       :color "rgb(224, 114, 116)"
-       :background-color "white"
-       :border-radius (px 5)
-       :display "none"}]
+     {:position "absolute"
+      :padding pad
+      :top 0
+      :right 0
+      :z-index 10
+      :color "#CCC"
+      :text-align "right"}
 
-     [:.close
-      {:position "absolute"
-       :padding (m/* 0.5 pad)
-       :top 0
-       :right 0
-       :z-index 10
-       :cursor "pointer"
-       :font-family "fontawesome"
-       :color "rgb(88, 88, 88)"}]]]])
+     [:.control
+      {:cursor "pointer"}
+
+      [:&:hover
+       {:color "#333"}]
+
+      [:&.close
+       [:&:after
+        (mixins/fontawesome \uf00d)]]
+
+      [:&.mute
+       {:margin-top (m/* pad 0.5)}
+       {:display "none"}
+
+       [:&:after
+        {:font-size "0.9em"
+         :margin-right "-0.15em"}
+        (mixins/fontawesome \uf1f6)]]]]
+
+    [".controls:hover > .mute"
+     {:display "block"}]]])
 
 (defn messages [pad]
   [:.thread
