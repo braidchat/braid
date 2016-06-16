@@ -105,7 +105,6 @@
      :box-sizing "border-box"}
 
     [:.tags
-     {:margin-left (m/* 0.3 pad)}
 
      [:.add
       mixins/pill-box]
@@ -114,25 +113,31 @@
       {:margin-bottom (em 0.5)
        :margin-right (em 0.5)} ] ]
 
-    [:.unsub
-     {:position "absolute"
-      :padding (m/* 0.5 pad)
-      :top 0
-      :left 0
-      :z-index 10
-      :cursor "pointer"
-      :font-family "fontawesome"
-      :color "rgb(224, 114, 116)"}]
+    [".controls:hover > .unsub"
+     {:display "block"}]
+    [:.controls
+     [:.unsub
+      {:position "absolute"
+       :padding (m/* 0.5 pad)
+       :top (m/* -1.5 pad)
+       :right 0
+       :z-index 10
+       :cursor "pointer"
+       :font-family "fontawesome"
+       :color "rgb(224, 114, 116)"
+       :background-color "white"
+       :border-radius (px 5)
+       :display "none"}]
 
-    [:.close
-     {:position "absolute"
-      :padding (m/* 0.5 pad)
-      :top 0
-      :right 0
-      :z-index 10
-      :cursor "pointer"
-      :font-family "fontawesome"
-      :color "rgb(88, 88, 88)"}]]])
+     [:.close
+      {:position "absolute"
+       :padding (m/* 0.5 pad)
+       :top 0
+       :right 0
+       :z-index 10
+       :cursor "pointer"
+       :font-family "fontawesome"
+       :color "rgb(88, 88, 88)"}]]]])
 
 (defn messages [pad]
   [:.thread
