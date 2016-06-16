@@ -166,4 +166,6 @@
 (defn user-unsubscribe-from-thread!
   [conn user-id thread-id]
   @(d/transact conn [[:db/retract [:user/id user-id]
-                      :user/subscribed-thread [:thread/id thread-id]]]))
+                      :user/subscribed-thread [:thread/id thread-id]
+                      [:db/retract [:user/id user-id]
+                       :user/open-thread [:thread/id thread-id]]]]))
