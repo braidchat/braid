@@ -261,11 +261,13 @@
 
 (defmethod event-msg-handler :chat/hide-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (db/user-hide-thread! user-id ?data))
+  (db/user-hide-thread! user-id ?data)
+  (chsk-send! user-id [:chat/hide-thread ?data]))
 
 (defmethod event-msg-handler :chat/unsub-thread
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (db/user-unsubscribe-from-thread! user-id ?data))
+  (db/user-unsubscribe-from-thread! user-id ?data)
+  (chsk-send! user-id [:chat/hide-thread ?data]))
 
 (defmethod event-msg-handler :chat/mark-thread-read
   [{:as ev-msg :keys [ring-req ?data user-id]}]

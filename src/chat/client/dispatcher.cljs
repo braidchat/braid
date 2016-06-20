@@ -435,3 +435,7 @@
 (defmethod sync/event-handler :chat/notify-message
   [[_ message]]
   (notify/notify {:msg (:content message)}))
+
+(defmethod sync/event-handler :chat/hide-thread
+  [[_ thread-id]]
+  (store/hide-thread! thread-id))
