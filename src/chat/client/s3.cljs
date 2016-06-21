@@ -17,9 +17,9 @@
       :on-complete
       (fn [{:keys [bucket auth]}]
         (let [file-name (.-name file)
-              file-dir (uuid/make-random-squuid)
+              file-dir (str group-id (when group-id "/")
+                            (uuid/make-random-squuid))
               file-url (str "https://s3.amazonaws.com/" bucket "/uploads/"
-                            group-id (when group-id "/")
                             file-dir
                             "/" (js/encodeURIComponent file-name))]
           (ajax-xhr {:method :post
