@@ -241,7 +241,7 @@
 
   (GET "/s3-list-policy" [group-id :as req]
     (if (some? (db/user-by-id (get-in req [:session :user-id])))
-      (if-let [policy (s3/generate-list-policy)]
+      (if-let [policy (s3/generate-list-policy group-id)]
         {:status 200
          :headers {"Content-Type" "application/edn"}
          :body (pr-str policy)}
