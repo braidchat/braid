@@ -226,15 +226,28 @@
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))
 
-  (GET "/s3-policy" req
+  (GET "/s3-upload-policy" req
     (if (some? (db/user-by-id (get-in req [:session :user-id])))
-      (if-let [policy (s3/generate-policy)]
+      (if-let [policy (s3/generate-upload-policy)]
         {:status 200
          :headers {"Content-Type" "application/edn"}
          :body (pr-str policy)}
         {:status 500
          :headers {"Content-Type" "application/edn"}
          :body (pr-str {:error "No S3 secret for upload"})})
+      {:status 403
+       :headers {"Content-Type" "application/edn"}
+       :body (pr-str {:error "Unauthorized"})}))
+
+  (GET "/s3-list-policy" [group-id :as req]
+    (if (some? (db/user-by-id (get-in req [:session :user-id])))
+      (if-let [policy (s3/generate-list-policy group-id)]
+        {:status 200
+         :headers {"Content-Type" "application/edn"}
+         :body (pr-str policy)}
+        {:status 500
+         :headers {"Content-Type" "application/edn"}
+         :body (pr-str {:error "No S3 secret for listing"})})
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})})))

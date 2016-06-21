@@ -34,6 +34,9 @@
 (defroute bots-path "/:group-id/bots" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :bots}))
 
+(defroute uploads-path "/:group-id/uploads" [group-id]
+  (store/set-group-and-page! (UUID. group-id nil) {:type :uploads}))
+
 (defroute group-settings-path "/:group-id/settings" [group-id]
   (store/set-group-and-page! (UUID. group-id nil) {:type :settings}))
 

@@ -117,12 +117,14 @@
           (if (> (.-size file) max-file-size)
             (store/display-error! :upload-fail "File to big to upload, sorry")
             (do (set-uploading! true)
-                (s3/upload file (fn [url]
-                                  (set-uploading! false)
-                                  (dispatch! :new-message
-                                             {:content url
-                                              :group-id (thread :group-id)
-                                              :thread-id (thread :id)}))))))]
+                (s3/upload (thread :group-id)
+                           file
+                           (fn [url]
+                             (set-uploading! false)
+                             (dispatch! :new-message
+                                        {:content url
+                                         :group-id (thread :group-id)
+                                         :thread-id (thread :id)}))))))]
 
     (fn [thread]
       (let [{:keys [dragging? uploading? focused?]} @state
