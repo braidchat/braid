@@ -18,25 +18,25 @@
   "Get the base64-encode HMAC-SHA1 of `to-sign` with `key`"
   [to-sign key]
   (let [mac (Mac/getInstance "HmacSHA1")
-        secret-key (SecretKeySpec. (.getBytes key "UTF-8") (.getAlgorithm mac))
-        b64-encode (fn [m] (.encode (BASE64Encoder.) m))]
+        secret-key (SecretKeySpec. (.getBytes key "UTF-8") (.getAlgorithm mac))]
     (-> (doto mac (.init secret-key))
         (.doFinal (.getBytes to-sign "UTF-8"))
-        b64-encode)))
+        (->> (.encode (BASE64Encoder.))))))
 
 (defn generate-upload-policy
   []
   (when-let [secret (config :s3-upload-secret)]
-    (let [policy (-> {:expiration (.. (DateTime. (DateTimeZone/UTC))
-                                      (plus (Period/minutes 5))
-                                      (toString (ISODateTimeFormat/dateTimeNoMillis)))
-                      :conditions [{:bucket (config :aws-domain)}
-                                   ["starts-with" "$key" ""]
-                                   {:acl "public-read"}
-                                   ["starts-with" "$Content-Type" ""]
-                                   ["content-length-range" 0 524288000]]}
-                     json/write-str
-                     base64-encode)]
+    (let [policy (->
+                   {:expiration (.. (DateTime. (DateTimeZone/UTC))
+                                    (plus (Period/minutes 5))
+                                    (toString (ISODateTimeFormat/dateTimeNoMillis)))
+                    :conditions [{:bucket (config :aws-domain)}
+                                 ["starts-with" "$key" ""]
+                                 {:acl "public-read"}
+                                 ["starts-with" "$Content-Type" ""]
+                                 ["content-length-range" 0 524288000]]}
+                   json/write-str
+                   base64-encode)]
       {:bucket (config :aws-domain)
        :auth {:policy policy
               :key (config :s3-upload-key)
