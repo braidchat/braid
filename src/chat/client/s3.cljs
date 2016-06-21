@@ -34,3 +34,22 @@
                              (.append "file" file file-name))
                      :on-complete (fn [e] (on-complete file-url))
                      :on-error (fn [e] (errorf "Error uploading: %s" (:error e)))})))})))
+
+(defn uploads-in-group
+  [group-id on-complete]
+  (edn-xhr
+    {:method :get
+     :uri "/s3-list-policy"
+     :params {:group-id group-id}
+     :on-error (fn [err] (errorf "Error getting s3 authorization: %s" (:error err)))
+     :on-complete
+     (fn [{:keys [bucket auth]}]
+       ; TODO: generate signature
+       (let [auth-header (str "AWS4-HMAC-SHA256 ")]
+         (ajax-xhr {:method :get
+                    :uri "https://s3.amazonaws.com/" bucket "/?list-type=2"
+                    :headers {"Authorization" auth-header}
+                    :params {:prefix (str group-id "/")}
+                    ; TODO: display results
+                    :on-complete (fn [e] (on-complete e))
+                    :on-error (fn [e] (errorf "Error listing: %s" (:error e)))})))}))

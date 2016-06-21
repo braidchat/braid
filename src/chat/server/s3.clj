@@ -41,3 +41,8 @@
        :auth {:policy policy
               :key (config :s3-upload-key)
               :signature (b64-sha1-encode policy secret)}})))
+
+(defn generate-list-policy
+  [group-id]
+  ; TODO: generate policy
+  )
