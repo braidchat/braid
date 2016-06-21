@@ -228,7 +228,7 @@
 
   (GET "/s3-policy" req
     (if (some? (db/user-by-id (get-in req [:session :user-id])))
-      (if-let [policy (s3/generate-policy)]
+      (if-let [policy (s3/generate-upload-policy)]
         {:status 200
          :headers {"Content-Type" "application/edn"}
          :body (pr-str policy)}
