@@ -226,7 +226,7 @@
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))
 
-  (GET "/s3-policy" req
+  (GET "/s3-upload-policy" req
     (if (some? (db/user-by-id (get-in req [:session :user-id])))
       (if-let [policy (s3/generate-upload-policy)]
         {:status 200
