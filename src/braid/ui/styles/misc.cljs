@@ -210,6 +210,40 @@
        :border-radius (rem 1)
        :margin-bottom vars/pad}]]]])
 
+(def uploads-page
+  [:.page.uploads
+   [:.files
+    mixins/flex
+    {:flex-direction "row"
+     :flex-wrap "wrap"
+     :align-content "space-between"
+     :align-items "center"}
+    [:.file
+     {:margin (em 2)
+      :overflow "scroll"
+      :max-width "25%"}
+     [:a
+      {:text-decoration "none"
+       :color "white"
+       :padding "0.2em 0.25em 0.25em"
+       :border-radius "0.25em"
+       :background "#607DE1"
+       :outline "none"}
+      [:&:hover
+       {:background "#4D69C9"}]
+
+     [:&:active
+      {:background "##2B3D79"}]
+
+     [:&:visited
+      {:background "#9B81DB"}
+
+      [:&:hover
+       {:background "#735EA7"}]
+
+      [:&:active
+       {:background "#463670"}]]]]]])
+
 (def tag
   [:.tag
    mixins/pill-box])
@@ -256,3 +290,11 @@
     mixins/spin
     {:display "inline-block"
      :margin-right (em 0.5)}]])
+
+(def progress-spinner
+  [:.spinner
+   {:display "inline-block"}
+   [:&:after
+    (mixins/fontawesome \uf110)
+    mixins/spin
+    {:font-size (em 2)}]])
