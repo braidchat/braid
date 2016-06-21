@@ -6,7 +6,7 @@
            javax.crypto.spec.SecretKeySpec
            sun.misc.BASE64Encoder
            (org.joda.time DateTime DateTimeZone Period)
-           org.joda.time.format.ISODateTimeFormat))
+           (org.joda.time.format DateTimeFormat ISODateTimeFormat)))
 
 (defn base64-encode
   [input]
@@ -44,5 +44,18 @@
 
 (defn generate-list-policy
   [group-id]
-  ; TODO: generate policy
-  )
+  (when-let [secret (config :s3-upload-secret)]
+    (let [now (.. (DateTime. (DateTimeZone/UTC))
+                  (toString (DateTimeFormat/forPattern "E, dd MMM yyyy HH:mm:ss Z")))
+          policy (string/join
+                   \newline
+                   ["GET"
+                    ""
+                    ""
+                    ""
+                    (str "x-amz-date:" now)
+                    (str "/" (config :aws-domain) "/")])]
+      {:bucket (config :aws-domain)
+       :headers {"x-amz-date" now
+                 "Authorization" (str "AWS " (config :s3-upload-key)
+                                      ":" (b64-sha1-encode policy secret))}})))

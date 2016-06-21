@@ -3,8 +3,9 @@
             [clojure.string :refer [split]]
             [goog.events :as events]
             [taoensso.timbre :as timbre :refer-macros [errorf]]
-            [chat.client.xhr :refer [edn-xhr ajax-xhr]])
-  (:import [goog.net XhrIo EventType]))
+            [chat.client.xhr :refer [edn-xhr ajax-xhr]]
+            [ajax.core :as ajax]
+            [tubax.core :as xml]))
 
 (defn upload
   ([file on-complete] (upload nil file on-complete))
@@ -35,6 +36,17 @@
                      :on-complete (fn [e] (on-complete file-url))
                      :on-error (fn [e] (errorf "Error uploading: %s" (:error e)))})))})))
 
+(defn- parse-xml-listing
+  [bucket resp]
+  (let [prefix (str "https://s3.amazonaws.com/" bucket "/")]
+    (into []
+          (comp (filter #(= :Contents (:tag %)))
+                (map (fn [{:keys [content]}]
+                       (-> (into {} (map (juxt :tag (comp first :content))
+                                         content))
+                           (update :Key (partial str prefix))))))
+          (:content (xml/xml->clj resp)))))
+
 (defn uploads-in-group
   [group-id on-complete]
   (edn-xhr
@@ -43,13 +55,13 @@
      :params {:group-id group-id}
      :on-error (fn [err] (errorf "Error getting s3 authorization: %s" (:error err)))
      :on-complete
-     (fn [{:keys [bucket auth]}]
-       ; TODO: generate signature
-       (let [auth-header (str "AWS4-HMAC-SHA256 ")]
-         (ajax-xhr {:method :get
-                    :uri "https://s3.amazonaws.com/" bucket "/?list-type=2"
-                    :headers {"Authorization" auth-header}
-                    :params {:prefix (str group-id "/")}
-                    ; TODO: display results
-                    :on-complete (fn [e] (on-complete e))
-                    :on-error (fn [e] (errorf "Error listing: %s" (:error e)))})))}))
+     (fn [{:keys [bucket headers]}]
+       (ajax-xhr {:method :get
+                  :uri (str "https://s3.amazonaws.com/" bucket "/")
+                  :headers headers
+                  :params {:prefix (str "uploads/" group-id "/")
+                           ;:delimiter "/"
+                           :list-type 2}
+                  :response-format (ajax/text-response-format)
+                  :on-complete (fn [e] (on-complete (parse-xml-listing bucket e)))
+                  :on-error (fn [e] (errorf "Error listing: %s" e))}))}))
