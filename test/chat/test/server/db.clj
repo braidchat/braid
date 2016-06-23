@@ -407,17 +407,17 @@
                                  :avatar ""})
         group (db/create-group! {:name "group 1" :id (db/uuid)})]
     (db/user-add-to-group! (user-1 :id) (group :id))
-    (is (empty? (db/fetch-invitations-for-user (user-1 :id))))
-    (is (empty? (db/fetch-invitations-for-user (user-2 :id))))
+    (is (empty? (db/invites-for-user (user-1 :id))))
+    (is (empty? (db/invites-for-user (user-2 :id))))
     (let [invite-id (db/uuid)
           invite (db/create-invitation! {:id invite-id
                                          :inviter-id (user-1 :id)
                                          :invitee-email "bar@baz.com"
                                          :group-id (group :id)})]
       (is (= invite (db/invite-by-id invite-id)))
-      (is (seq (db/fetch-invitations-for-user (user-2 :id))))
+      (is (seq (db/invites-for-user (user-2 :id))))
       (db/retract-invitation! invite-id)
-      (is (empty? (db/fetch-invitations-for-user (user-2 :id)))))))
+      (is (empty? (db/invites-for-user (user-2 :id)))))))
 
 (deftest user-leaving-group
   (let [user-1 (db/create-user! {:id (db/uuid)

@@ -26,7 +26,7 @@
   [conn invite-id]
   @(d/transact conn [[:db.fn/retractEntity [:invite/id invite-id]]]))
 
-(defn fetch-invitations-for-user
+(defn invites-for-user
   [conn user-id]
   (->> (d/q '[:find (pull ?i [{:invite/group [:group/id :group/name]}
                               {:invite/from [:user/id :user/email :user/nickname]}
