@@ -28,7 +28,7 @@
                                               [:db/add [:user/id user-id]
                                                :user/open-thread
                                                [:thread/id thread-id]]])
-                                           (tag/get-users-subscribed-to-tag conn tag-id))))
+                                           (tag/users-subscribed-to-tag conn tag-id))))
                                mentioned-tag-ids)
         ; subscribe and open thread for users mentioned
         txs-for-user-mentions (mapcat

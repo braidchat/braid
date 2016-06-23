@@ -19,7 +19,7 @@
   @(d/transact conn [[:db/add [:tag/id tag-id]
                       :tag/description description]]))
 
-(defn get-users-subscribed-to-tag
+(defn users-subscribed-to-tag
   [conn tag-id]
   (d/q '[:find [?user-id ...]
          :in $ ?tag-id
