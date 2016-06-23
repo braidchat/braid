@@ -158,7 +158,7 @@
                                          :mentioned-tag-ids [(tag-1 :id)]})]
 
             (testing "then the tag is added to the thread"
-              (let [thread (db/get-thread (msg :thread-id))]
+              (let [thread (db/thread-by-id (msg :thread-id))]
                 (contains? (set (thread :tag-ids)) (tag-1 :id))))
 
             (testing "then the user has the thread opened"
@@ -199,7 +199,7 @@
 
           (testing "then user-2 is added to the thread"
             (is  (= #{(user-2 :id)}
-                    (-> (db/get-thread thread-id) :mentioned-ids))))
+                    (-> (db/thread-by-id thread-id) :mentioned-ids))))
 
           (testing "then user-2 can see the thread"
             (is (db/user-can-see-thread? (user-2 :id) thread-id)))

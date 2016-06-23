@@ -70,7 +70,7 @@
                                       (set subscribed-user-ids)
                                       (set (:any @connected-uids)))
                                     (set ids-to-skip)))
-          thread (db/get-thread thread-id)]
+          thread (db/thread-by-id thread-id)]
       (doseq [uid user-ids-to-send-to]
         (let [user-tags (db/tag-ids-for-user uid)
               filtered-thread (update-in thread [:tag-ids]
@@ -167,7 +167,7 @@
                       (fn [m] (update m :content
                                       (partial parse-tags-and-mentions uid))))]
                 (-> (email/create-message
-                      [(-> (db/get-thread (msg :thread-id))
+                      [(-> (db/thread-by-id (msg :thread-id))
                            (update :messages update-msgs))])
                     (assoc :subject "Notification from Braid")
                     (->> (email/send-message (db/user-email uid))))))))))))
@@ -329,7 +329,7 @@
     (let [user-tags (db/tag-ids-for-user user-id)
           filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
           thread-ids (search/search-threads-as user-id ?data)
-          threads (map (comp filter-tags db/get-thread) (take 25 thread-ids))]
+          threads (map (comp filter-tags db/thread-by-id) (take 25 thread-ids))]
       (when ?reply-fn
         (?reply-fn {:threads threads :thread-ids thread-ids})))))
 

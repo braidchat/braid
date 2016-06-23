@@ -24,7 +24,7 @@
     @(d/transact conn
        [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
 
-(defn get-thread
+(defn thread-by-id
   [conn thread-id]
   (some-> (d/pull (d/db conn) thread-pull-pattern [:thread/id thread-id])
           db->thread))

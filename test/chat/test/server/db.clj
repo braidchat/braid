@@ -245,7 +245,7 @@
     (testing "fetch-messages returns all messages"
       (is (= (set messages) #{message-1 message-2})))
     (testing "Can retrieve threads"
-      (is (= (db/get-thread thread-1-id)
+      (is (= (db/thread-by-id thread-1-id)
              {:id thread-1-id
               :group-id (group :id)
               :messages (map #(dissoc % :thread-id :group-id)
@@ -434,9 +434,9 @@
                          :mentioned-tag-ids []})
     (testing "user leaving group removes mentios of that user"
       (is (= #{(user-1 :id)}
-             (:mentioned-ids (db/get-thread thread-id))))
+             (:mentioned-ids (db/thread-by-id thread-id))))
       (db/user-leave-group! (user-1 :id) (group :id))
-      (is (empty? (:mentioned-ids (db/get-thread thread-id)))))))
+      (is (empty? (:mentioned-ids (db/thread-by-id thread-id)))))))
 
 (deftest adding-user-to-group-subscribes-tags
   (let [user (db/create-user! {:id (db/uuid)
