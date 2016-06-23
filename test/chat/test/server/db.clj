@@ -455,7 +455,7 @@
              (set (db/group-tags (group :id))))))
     (db/user-add-to-group! (user :id) (group :id))
     (db/user-subscribe-to-group-tags! (user :id) (group :id))
-    (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
+    (is (= (set (db/subscribed-tag-ids-for-user (user :id)))
            (db/tag-ids-for-user (user :id))
            (set (map :id group-tags))))))
 

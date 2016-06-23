@@ -56,7 +56,7 @@
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
         (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
       (testing "get-user-subscribed-tags"
-        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
+        (let [tags (db/subscribed-tag-ids-for-user (user :id))]
           (testing "returns subscribed tags"
             (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))
     (testing "user can unsubscribe from tags"
@@ -64,7 +64,7 @@
         (db/user-unsubscribe-from-tag! (user :id) (tag-1 :id))
         (db/user-unsubscribe-from-tag! (user :id) (tag-2 :id)))
       (testing "is unsubscribed"
-        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
+        (let [tags (db/subscribed-tag-ids-for-user (user :id))]
           (is (= (set tags) #{})))))))
 
 (deftest user-can-only-see-tags-in-group
@@ -113,6 +113,6 @@
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
         (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
       (testing "get-user-subscribed-tags"
-        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
+        (let [tags (db/subscribed-tag-ids-for-user (user :id))]
           (testing "returns subscribed tags"
             (is (= (set tags) #{(tag-1 :id)}))))))))

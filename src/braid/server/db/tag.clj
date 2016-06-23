@@ -107,7 +107,7 @@
   @(d/transact conn [[:db/retract [:user/id user-id]
                       :user/subscribed-tag [:tag/id tag-id]]]))
 
-(defn get-user-subscribed-tag-ids
+(defn subscribed-tag-ids-for-user
   [conn user-id]
   (d/q '[:find [?tag-id ...]
          :in $ ?user-id
