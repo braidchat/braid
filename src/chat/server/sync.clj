@@ -484,7 +484,7 @@
        {:user-id user-id
         :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
         :user-groups (db/user-groups user-id)
-        :user-threads (db/get-open-threads-for-user user-id)
+        :user-threads (db/open-threads-for-user user-id)
         :user-subscribed-tag-ids (db/subscribed-tag-ids-for-user user-id)
         :user-preferences (db/user-get-preferences user-id)
         :users (into ()

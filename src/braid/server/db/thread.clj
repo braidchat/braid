@@ -123,7 +123,7 @@
                     (d/pull-many (d/db conn) thread-pull-pattern thread-eids))
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
-(defn get-open-threads-for-user
+(defn open-threads-for-user
   [conn user-id]
   (let [visible-tags (tag/tag-ids-for-user conn user-id)]
     (->> (d/q '[:find (pull ?thread pull-pattern)
