@@ -45,7 +45,7 @@
        (map first)
        set))
 
-(defn fetch-tag-statistics-for-user
+(defn tag-statistics-for-user
   [conn user-id]
   (->> (d/q '[:find
               ?tag-id
@@ -68,7 +68,7 @@
 (defn fetch-tags-for-user
   "Get all tags visible to the given user"
   [conn user-id]
-  (let [tag-stats (fetch-tag-statistics-for-user conn user-id)]
+  (let [tag-stats (tag-statistics-for-user conn user-id)]
     (->> (d/q '[:find
                 (pull ?t [:tag/id
                           :tag/name
