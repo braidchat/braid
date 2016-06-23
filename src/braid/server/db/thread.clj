@@ -9,7 +9,8 @@
                   [:thread/id thread-id])
           :thread/group :group/id))
 
-(defn update-thread-last-open [conn thread-id user-id]
+(defn update-thread-last-open!
+  [conn thread-id user-id]
   (when (seq (d/q '[:find ?t
                     :in $ ?user-id ?thread-id
                     :where
