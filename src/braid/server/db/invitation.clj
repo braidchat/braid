@@ -12,7 +12,7 @@
        (create-entity! conn)
        db->invitation))
 
-(defn get-invite
+(defn invite-by-id
   [conn invite-id]
   (some-> (d/pull (d/db conn)
                   [:invite/id

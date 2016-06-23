@@ -379,7 +379,7 @@
 
 (defmethod event-msg-handler :chat/invitation-accept
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (if-let [invite (db/get-invite (?data :id))]
+  (if-let [invite (db/invite-by-id (?data :id))]
     (do
       (db/user-add-to-group! user-id (invite :group-id))
       (db/user-subscribe-to-group-tags! user-id (invite :group-id))
@@ -394,7 +394,7 @@
 
 (defmethod event-msg-handler :chat/invitation-decline
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (if-let [invite (db/get-invite (?data :id))]
+  (if-let [invite (db/invite-by-id (?data :id))]
     (db/retract-invitation! (invite :id))
     (timbre/warnf "User %s attempted to decline nonexistant invitaiton %s"
                   user-id (?data :id))))

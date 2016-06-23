@@ -414,7 +414,7 @@
                                          :inviter-id (user-1 :id)
                                          :invitee-email "bar@baz.com"
                                          :group-id (group :id)})]
-      (is (= invite (db/get-invite invite-id)))
+      (is (= invite (db/invite-by-id invite-id)))
       (is (seq (db/fetch-invitations-for-user (user-2 :id))))
       (db/retract-invitation! invite-id)
       (is (empty? (db/fetch-invitations-for-user (user-2 :id)))))))
