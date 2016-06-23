@@ -153,17 +153,6 @@
        (d/db conn)
        user-id))
 
-(defn get-open-thread-ids-for-user
-  [conn user-id]
-  (d/q '[:find [?thread-id ...]
-         :in $ ?user-id
-         :where
-         [?e :user/id ?user-id]
-         [?e :user/open-thread ?thread]
-         [?thread :thread/id ?thread-id]]
-       (d/db conn)
-       user-id))
-
 (defn user-unsubscribe-from-thread!
   [conn user-id thread-id]
   @(d/transact conn [[:db/retract [:user/id user-id]
