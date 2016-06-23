@@ -140,7 +140,7 @@
        (d/db conn)
        k (pr-str v)))
 
-(defn fetch-users-for-user
+(defn users-for-user
   "Get all users visible to given user"
   [conn user-id]
   (->> (d/q '[:find (pull ?e pull-pattern)

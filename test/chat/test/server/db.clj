@@ -73,7 +73,7 @@
         group (db/create-group! {:id (db/uuid) :name "aoeu"})
         _ (db/user-add-to-group! (user-1 :id) (group :id))
         _ (db/user-add-to-group! (user-2 :id) (group :id))
-        users (db/fetch-users-for-user (user-1 :id))]
+        users (db/users-for-user (user-1 :id))]
     (testing "returns all users"
       (is (= (set (map (fn [u] (dissoc u :group-ids)) users))
              (set (map (fn [u] (dissoc u :group-ids)) [user-1 user-2])))))
@@ -107,15 +107,15 @@
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-1 user-2]))
            (set (map (fn [u] (dissoc u :group-ids))
-                (db/fetch-users-for-user (user-1 :id))))))
+                (db/users-for-user (user-1 :id))))))
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-1 user-2 user-3]))
            (set (map (fn [u] (dissoc u :group-ids))
-                (db/fetch-users-for-user (user-2 :id))))))
+                (db/users-for-user (user-2 :id))))))
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-2 user-3]))
            (set (map (fn [u] (dissoc u :group-ids))
-                (db/fetch-users-for-user (user-3 :id))))))
+                (db/users-for-user (user-3 :id))))))
     (is (db/user-visible-to-user? (user-1 :id) (user-2 :id)))
     (is (not (db/user-visible-to-user? (user-1 :id) (user-3 :id))))
     (is (not (db/user-visible-to-user? (user-3 :id) (user-1 :id))))

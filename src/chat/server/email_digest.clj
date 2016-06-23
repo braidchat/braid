@@ -38,7 +38,7 @@
 
 (defn updates-for-user-since
   [user-id cutoff]
-  (let [users (db/fetch-users-for-user user-id)
+  (let [users (db/users-for-user user-id)
         id->nick (into {} (map (juxt :id :nickname)) users)
         id->avatar (into {} (map (juxt :id :avatar)) users)
         pretty-time (comp

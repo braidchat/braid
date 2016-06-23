@@ -87,7 +87,7 @@
                            (set (:any @connected-uids))
                            (into
                              #{} (map :id)
-                             (db/fetch-users-for-user user-id)))
+                             (db/users-for-user user-id)))
                          user-id)]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
@@ -387,7 +387,7 @@
       (chsk-send! user-id [:chat/joined-group
                            {:group (db/get-group (invite :group-id))
                             :tags (db/get-group-tags (invite :group-id))}])
-      (chsk-send! user-id [:chat/update-users (db/fetch-users-for-user user-id)])
+      (chsk-send! user-id [:chat/update-users (db/users-for-user user-id)])
       (broadcast-group-change (invite :group-id) [:group/new-user (db/user-by-id user-id)]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                   user-id (?data :id))))
@@ -490,6 +490,6 @@
         :users (into ()
                      (map #(assoc % :status
                              (if (connected (% :id)) :online :offline)))
-                     (db/fetch-users-for-user user-id))
+                     (db/users-for-user user-id))
         :invitations (db/fetch-invitations-for-user user-id)
         :tags (db/fetch-tags-for-user user-id)}])))
