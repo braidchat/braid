@@ -163,12 +163,12 @@
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar "http://www.foobar.com/1.jpg"})]
-        (is (= #{} (db/get-groups-for-user (user :id))))
+        (is (= #{} (db/user-groups (user :id))))
         (is (= #{} (db/group-users (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
         (is (= #{(assoc data :admins #{} :intro "the intro" :avatar nil
                    :public? false :bots #{})}
-               (db/get-groups-for-user (user :id))))
+               (db/user-groups (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))
                     (db/group-users (group :id))))))))
@@ -203,8 +203,8 @@
         (is (db/user-in-group? user-2-id (group-3 :id)))
 
         (is (= #{(group :id) (group-2 :id) (group-3 :id)}
-               (into #{} (map :id) (db/get-groups-for-user user-id))
-               (into #{} (map :id) (db/get-groups-for-user user-2-id)))
+               (into #{} (map :id) (db/user-groups user-id))
+               (into #{} (map :id) (db/user-groups user-2-id)))
             "Both users are in all the groups")
 
         (is (= #{user-2-id} (:admins (db/group-by-id (group-2 :id)))))

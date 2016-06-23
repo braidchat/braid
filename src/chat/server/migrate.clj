@@ -93,7 +93,7 @@
                               first
                               :message/user)
                   author-grp (some-> author :user/id
-                                     db/get-groups-for-user
+                                     db/user-groups
                                      first :id)
                   fallback-group (:group/id (d/pull (d/db db/conn) [:group/id] [:group/name "Braid"]))]
               (cond
@@ -108,7 +108,7 @@
                 (let [grps (apply
                              set/intersection
                              (map (comp :id
-                                        db/get-groups-for-user
+                                        db/user-groups
                                         :user/id)
                                   (cons author (th :thread/mentioned))))
                       grp (or (first grps) author-grp fallback-group)]

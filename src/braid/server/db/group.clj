@@ -72,7 +72,7 @@
             (d/db conn) group-id)
        (map (comp db->tag first))))
 
-(defn get-groups-for-user [conn user-id]
+(defn user-groups [conn user-id]
   (->> (d/q '[:find [?g ...]
               :in $ ?user-id
               :where
