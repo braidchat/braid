@@ -9,7 +9,7 @@
 (defn parse-tags-and-mentions
   [user-id content]
   (let [id->nick (into {} (map (juxt :id :nickname)) (db/users-for-user user-id))
-        id->tag (into {} (map (juxt :id :name)) (db/fetch-tags-for-user user-id))
+        id->tag (into {} (map (juxt :id :name)) (db/tags-for-user user-id))
         uuid-re #"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
         tag-re (re-pattern (str "#" uuid-re))
         mention-re (re-pattern (str "@" uuid-re))]

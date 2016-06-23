@@ -92,9 +92,9 @@
     (db/user-add-to-group! (user-2 :id) (group-2 :id))
     (db/user-add-to-group! (user-3 :id) (group-2 :id))
     (testing "user can only see tags in their group(s)"
-      (is (= #{tag-1} (db/fetch-tags-for-user (user-1 :id))))
-      (is (= #{tag-1 tag-2 tag-3} (db/fetch-tags-for-user (user-2 :id))))
-      (is (= #{tag-2 tag-3} (db/fetch-tags-for-user (user-3 :id)))))))
+      (is (= #{tag-1} (db/tags-for-user (user-1 :id))))
+      (is (= #{tag-1 tag-2 tag-3} (db/tags-for-user (user-2 :id))))
+      (is (= #{tag-2 tag-3} (db/tags-for-user (user-3 :id)))))))
 
 (deftest user-can-only-subscribe-to-tags-in-group
   (let [user (db/create-user! {:id (db/uuid)

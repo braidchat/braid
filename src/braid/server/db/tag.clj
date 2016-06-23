@@ -65,7 +65,7 @@
                        :tag/subscribers-count subscribers-count}]))
        (into {})))
 
-(defn fetch-tags-for-user
+(defn tags-for-user
   "Get all tags visible to the given user"
   [conn user-id]
   (let [tag-stats (tag-statistics-for-user conn user-id)]

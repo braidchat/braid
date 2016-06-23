@@ -492,4 +492,4 @@
                              (if (connected (% :id)) :online :offline)))
                      (db/users-for-user user-id))
         :invitations (db/invites-for-user user-id)
-        :tags (db/fetch-tags-for-user user-id)}])))
+        :tags (db/tags-for-user user-id)}])))
