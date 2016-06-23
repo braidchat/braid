@@ -72,7 +72,7 @@
                                     (set ids-to-skip)))
           thread (db/get-thread thread-id)]
       (doseq [uid user-ids-to-send-to]
-        (let [user-tags (db/get-user-visible-tag-ids uid)
+        (let [user-tags (db/tag-ids-for-user uid)
               filtered-thread (update-in thread [:tag-ids]
                                          (partial into #{} (filter user-tags)))
               thread-with-last-opens (db/thread-add-last-open-at
@@ -326,7 +326,7 @@
   [{:keys [event id ?data ring-req ?reply-fn send-fn user-id] :as ev-msg}]
   ; this can take a while, so move it to a future
   (future
-    (let [user-tags (db/get-user-visible-tag-ids user-id)
+    (let [user-tags (db/tag-ids-for-user user-id)
           filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
           thread-ids (search/search-threads-as user-id ?data)
           threads (map (comp filter-tags db/get-thread) (take 25 thread-ids))]
@@ -335,7 +335,7 @@
 
 (defmethod event-msg-handler :chat/load-threads
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (let [user-tags (db/get-user-visible-tag-ids user-id)
+  (let [user-tags (db/tag-ids-for-user user-id)
         filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
         thread-ids (filter (partial db/user-can-see-thread? user-id) ?data)
         threads (map filter-tags (db/get-threads thread-ids))]
@@ -344,7 +344,7 @@
 
 (defmethod event-msg-handler :chat/threads-for-tag
   [{:keys [event id ?data ring-req ?reply-fn send-fn user-id] :as ev-msg}]
-  (let [user-tags (db/get-user-visible-tag-ids user-id)
+  (let [user-tags (db/tag-ids-for-user user-id)
         filter-tags (fn [t] (update-in t [:tag-ids]
                                        (partial into #{} (filter user-tags))))
         offset (get ?data :offset 0)

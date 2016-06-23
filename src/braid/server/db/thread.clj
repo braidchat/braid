@@ -124,7 +124,7 @@
 
 (defn get-open-threads-for-user
   [conn user-id]
-  (let [visible-tags (tag/get-user-visible-tag-ids conn user-id)]
+  (let [visible-tags (tag/tag-ids-for-user conn user-id)]
     (->> (d/q '[:find (pull ?thread pull-pattern)
                 :in $ ?user-id pull-pattern
                 :where

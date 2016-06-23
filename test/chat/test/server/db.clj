@@ -456,7 +456,7 @@
     (db/user-add-to-group! (user :id) (group :id))
     (db/user-subscribe-to-group-tags! (user :id) (group :id))
     (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
-           (db/get-user-visible-tag-ids (user :id))
+           (db/tag-ids-for-user (user :id))
            (set (map :id group-tags))))))
 
 (deftest user-preferences

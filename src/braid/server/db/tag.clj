@@ -30,7 +30,9 @@
        (d/db conn)
        tag-id))
 
-(defn get-user-visible-tag-ids
+(defn tag-ids-for-user
+  "Get all tag ids that are accessible to the user (i.e. are from groups that
+  the user is a member of"
   [conn user-id]
   (->> (d/q '[:find ?tag-id
               :in $ ?user-id
