@@ -64,7 +64,7 @@
 (defn broadcast-thread
   "broadcasts thread to all subscribed users, except those in ids-to-skip"
   [thread-id ids-to-skip]
-  (let [subscribed-user-ids (db/get-users-subscribed-to-thread thread-id)
+  (let [subscribed-user-ids (db/users-subscribed-to-thread thread-id)
           user-ids-to-send-to (-> (difference
                                     (intersection
                                       (set subscribed-user-ids)
@@ -148,7 +148,7 @@
 
 (defn notify-users [new-message]
   (let [subscribed-user-ids (->>
-                              (db/get-users-subscribed-to-thread
+                              (db/users-subscribed-to-thread
                                 (new-message :thread-id))
                               (remove (partial = (:user-id new-message))))
         online? (intersection

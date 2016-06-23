@@ -64,7 +64,7 @@
 (defn thread-add-last-open-at [conn thread user-id]
   (assoc thread :last-open-at (thread-last-open-at conn thread user-id)))
 
-(defn get-users-subscribed-to-thread
+(defn users-subscribed-to-thread
   [conn thread-id]
   (d/q '[:find [?user-id ...]
          :in $ ?thread-id
@@ -81,7 +81,7 @@
     ;user can see the thread if it's a new (i.e. not yet in the database) thread...
     (nil? (d/entity (d/db conn) [:thread/id thread-id]))
     ; ...or they're already subscribed to the thread...
-    (contains? (set (get-users-subscribed-to-thread conn thread-id)) user-id)
+    (contains? (set (users-subscribed-to-thread conn thread-id)) user-id)
     ; ...or they're mentioned in the thread
     ; TODO: is it possible for them to be mentioned but not subscribed?
     (contains? (-> (d/pull (d/db conn) [:thread/mentioned] [:thread/id thread-id])

@@ -168,7 +168,7 @@
             (testing "then the user is subscribed-to the thread"
               (let [user-threads (db/get-subscribed-thread-ids-for-user (user-1 :id))]
                 (is (contains? (set user-threads) (msg :thread-id))))
-              (let [users (db/get-users-subscribed-to-thread (msg :thread-id))]
+              (let [users (db/users-subscribed-to-thread (msg :thread-id))]
                 (is (contains? (set users) (user-1 :id)))))))))))
 
 (deftest user-mention-subscribes-opens-thread-for-user
@@ -205,7 +205,7 @@
             (is (db/user-can-see-thread? (user-2 :id) thread-id)))
 
           (testing "then user-2 is subscribed to the thread"
-            (let [users (db/get-users-subscribed-to-thread (msg :thread-id))]
+            (let [users (db/users-subscribed-to-thread (msg :thread-id))]
               (is (contains? (set users) (user-2 :id)))))
 
           (testing "then user-2 has the thread opened"

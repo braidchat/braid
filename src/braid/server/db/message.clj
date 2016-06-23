@@ -45,7 +45,7 @@
                                   (fn [user-id]
                                     [:db/add [:user/id user-id]
                                      :user/open-thread [:thread/id thread-id]])
-                                  (thread/get-users-subscribed-to-thread conn thread-id))
+                                  (thread/users-subscribed-to-thread conn thread-id))
         ; upsert message
         msg-data {:db/id (d/tempid :entities)
                   :message/id id
