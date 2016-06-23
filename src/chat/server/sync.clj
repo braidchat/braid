@@ -385,7 +385,7 @@
       (db/user-subscribe-to-group-tags! user-id (invite :group-id))
       (db/retract-invitation! (invite :id))
       (chsk-send! user-id [:chat/joined-group
-                           {:group (db/get-group (invite :group-id))
+                           {:group (db/group-by-id (invite :group-id))
                             :tags (db/get-group-tags (invite :group-id))}])
       (chsk-send! user-id [:chat/update-users (db/users-for-user user-id)])
       (broadcast-group-change (invite :group-id) [:group/new-user (db/user-by-id user-id)]))
@@ -419,7 +419,7 @@
                                         [group-id to-remove-id]])
       (chsk-send!
         to-remove-id
-        [:user/left-group [group-id (:name (db/get-group group-id))]]))))
+        [:user/left-group [group-id (:name (db/group-by-id group-id))]]))))
 
 (defmethod event-msg-handler :chat/set-group-intro
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]

@@ -15,7 +15,7 @@
        (create-entity! conn)
        db->group))
 
-(defn get-group
+(defn group-by-id
   [conn group-id]
   (-> (d/pull (d/db conn) group-pull-pattern [:group/id group-id])
       db->group))

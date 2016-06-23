@@ -155,7 +155,7 @@
                      :public? false :bots #{}))))
     (testing "can set group intro"
       (db/group-set! (group :id) :intro "the intro")
-      (is (= (db/get-group (group :id))
+      (is (= (db/group-by-id (group :id))
              (assoc data :admins #{} :intro "the intro" :avatar nil
                :public? false :bots #{}))))
     (testing "can add a user to the group"
@@ -173,17 +173,17 @@
                (set (map (fn [u] (dissoc user :group-ids))
                     (db/get-users-in-group (group :id))))))))
     (testing "groups have no admins by default"
-      (is (empty? (:admins (db/get-group (group :id))))))
+      (is (empty? (:admins (db/group-by-id (group :id))))))
     (testing "Can add admin"
       (db/user-make-group-admin! user-id (group :id))
-      (is (= #{user-id} (:admins (db/get-group (group :id)))))
+      (is (= #{user-id} (:admins (db/group-by-id (group :id)))))
       (testing "and another admin"
         (db/create-user! {:id user-2-id
                           :email "bar@baz.com"
                           :password "foobar"
                           :avatar "http://www.foobar.com/1.jpg"})
         (db/user-make-group-admin! user-2-id (group :id))
-        (is (= #{user-id user-2-id} (:admins (db/get-group (group :id)))))))
+        (is (= #{user-id user-2-id} (:admins (db/group-by-id (group :id)))))))
     (testing "multiple groups, admin statuses"
       (let [group-2 (db/create-group! {:id (db/uuid)
                                        :name "another group"})
@@ -207,8 +207,8 @@
                (into #{} (map :id) (db/get-groups-for-user user-2-id)))
             "Both users are in all the groups")
 
-        (is (= #{user-2-id} (:admins (db/get-group (group-2 :id)))))
-        (is (= #{user-id} (:admins (db/get-group (group-3 :id)))))
+        (is (= #{user-2-id} (:admins (db/group-by-id (group-2 :id)))))
+        (is (= #{user-id} (:admins (db/group-by-id (group-3 :id)))))
 
         (is (db/user-is-group-admin? user-id (group :id)))
         (is (not (db/user-is-group-admin? user-id (group-2 :id))))
@@ -450,7 +450,7 @@
                            {:id (db/uuid) :name "t2" :group-id (group :id)}
                            {:id (db/uuid) :name "t3" :group-id (group :id)}]))]
     (testing "some misc functions"
-      (is (= group (db/get-group (group :id))))
+      (is (= group (db/group-by-id (group :id))))
       (is (= (set group-tags)
              (set (db/get-group-tags (group :id))))))
     (db/user-add-to-group! (user :id) (group :id))
@@ -524,7 +524,7 @@
     (is (schema/check-bot! b3))
     (testing "can create bots & retrieve by group"
       (is (= #{b1 b2} (db/bots-in-group (g1 :id))))
-      (is (= (into #{}  (map bot->display) [b1 b2]) (:bots (db/get-group (g1 :id)))))
+      (is (= (into #{}  (map bot->display) [b1 b2]) (:bots (db/group-by-id (g1 :id)))))
       (is (= #{b3} (db/bots-in-group (g2 :id))))
       (is (= #{} (db/bots-in-group (g3 :id))))
       (is (= b1 (db/bot-by-name-in-group "bot1" (g1 :id))))
