@@ -338,7 +338,7 @@
   (let [user-tags (db/tag-ids-for-user user-id)
         filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
         thread-ids (filter (partial db/user-can-see-thread? user-id) ?data)
-        threads (map filter-tags (db/get-threads thread-ids))]
+        threads (map filter-tags (db/threads-by-id thread-ids))]
     (when ?reply-fn
       (?reply-fn {:threads threads}))))
 

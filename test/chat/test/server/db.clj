@@ -259,7 +259,7 @@
                             :created-at (java.util.Date.)
                             :content "Blurrp"}
             message-3 (db/create-message! message-3-data)]
-        (is (= (db/get-threads [thread-1-id thread-2-id])
+        (is (= (db/threads-by-id [thread-1-id thread-2-id])
                [{:id thread-1-id
                  :group-id (group :id)
                  :messages (map #(dissoc % :thread-id :group-id)

@@ -29,7 +29,7 @@
   (some-> (d/pull (d/db conn) thread-pull-pattern [:thread/id thread-id])
           db->thread))
 
-(defn get-threads
+(defn threads-by-id
   [conn thread-ids]
   (->> thread-ids
        (map (fn [id] [:thread/id id]))
