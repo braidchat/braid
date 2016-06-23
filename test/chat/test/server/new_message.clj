@@ -40,7 +40,7 @@
           (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
 
         (testing "user has thread subscribed"
-          (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))
+          (is (contains? (set (db/subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))
 
     (testing "new message can add to an existing thread"
       (let [group (db/create-group! {:id (db/uuid) :name "group2"})
@@ -59,7 +59,7 @@
           (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
 
         (testing "user has thread subscribed"
-          (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))))
+          (is (contains? (set (db/subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))))
 
 (deftest new-message-opens-and-subscribes
 
@@ -83,7 +83,7 @@
             (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
 
           (testing "then the user has the thread open"
-            (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id))))))))
+            (is (contains? (set (db/subscribed-thread-ids-for-user (user-1 :id))) thread-id))))))))
 
 (deftest new-message-opens-thread
 
@@ -166,7 +166,7 @@
                 (is (contains? (set user-threads) (msg :thread-id)))))
 
             (testing "then the user is subscribed-to the thread"
-              (let [user-threads (db/get-subscribed-thread-ids-for-user (user-1 :id))]
+              (let [user-threads (db/subscribed-thread-ids-for-user (user-1 :id))]
                 (is (contains? (set user-threads) (msg :thread-id))))
               (let [users (db/users-subscribed-to-thread (msg :thread-id))]
                 (is (contains? (set users) (user-1 :id)))))))))))

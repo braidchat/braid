@@ -142,7 +142,7 @@
                       db->thread
                       first))))))
 
-(defn get-subscribed-thread-ids-for-user
+(defn subscribed-thread-ids-for-user
   [conn user-id]
   (d/q '[:find [?thread-id ...]
          :in $ ?user-id
