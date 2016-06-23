@@ -42,8 +42,7 @@
                  (dissoc :group-ids))
              (-> data
                  (dissoc :password :email)
-                 (assoc :nickname "ol' fooy"))))
-      (is (= "ol' fooy" (db/get-nickname (user :id)))))
+                 (assoc :nickname "ol' fooy")))))
 
     (testing "user email must be unique"
       (is (thrown? java.util.concurrent.ExecutionException

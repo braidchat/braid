@@ -36,10 +36,6 @@
   [conn user-id nickname]
   @(d/transact conn [[:db/add [:user/id user-id] :user/nickname nickname]]))
 
-(defn get-nickname
-  [conn user-id]
-  (:user/nickname (d/pull (d/db conn) '[:user/nickname] [:user/id user-id])))
-
 (defn set-user-avatar!
   [conn user-id avatar]
   @(d/transact conn [[:db/add [:user/id user-id] :user/avatar avatar]]))
