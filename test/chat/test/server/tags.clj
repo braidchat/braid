@@ -33,7 +33,7 @@
                          :subscribers-count 0))))))
       (testing "set tag description"
         (db/tag-set-description! (:id tag-data) "Some tag with stuff")
-        (is (= (first (db/get-group-tags (:id group)))
+        (is (= (first (db/group-tags (:id group)))
                (assoc tag-data
                  :description "Some tag with stuff"
                  :group-name "Lean Pixel"

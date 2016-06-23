@@ -386,7 +386,7 @@
       (db/retract-invitation! (invite :id))
       (chsk-send! user-id [:chat/joined-group
                            {:group (db/group-by-id (invite :group-id))
-                            :tags (db/get-group-tags (invite :group-id))}])
+                            :tags (db/group-tags (invite :group-id))}])
       (chsk-send! user-id [:chat/update-users (db/users-for-user user-id)])
       (broadcast-group-change (invite :group-id) [:group/new-user (db/user-by-id user-id)]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"

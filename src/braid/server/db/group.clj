@@ -59,7 +59,7 @@
     (when (:public? (group-settings conn (group :id)))
       group)))
 
-(defn get-group-tags
+(defn group-tags
   [conn group-id]
   (->> (d/q '[:find (pull ?t [:tag/id
                               :tag/name

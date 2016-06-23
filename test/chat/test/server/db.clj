@@ -452,7 +452,7 @@
     (testing "some misc functions"
       (is (= group (db/group-by-id (group :id))))
       (is (= (set group-tags)
-             (set (db/get-group-tags (group :id))))))
+             (set (db/group-tags (group :id))))))
     (db/user-add-to-group! (user :id) (group :id))
     (db/user-subscribe-to-group-tags! (user :id) (group :id))
     (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
