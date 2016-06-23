@@ -98,7 +98,7 @@
   (let [ids-to-send-to (intersection
                          (set (:any @connected-uids))
                          (into #{} (map :id)
-                               (db/get-users-in-group group-id)))]
+                               (db/group-users group-id)))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
@@ -277,7 +277,7 @@
     (if (valid-tag-name? (?data :name))
       (let [new-tag (db/create-tag! (select-keys ?data [:id :name :group-id]))
             connected? (set (:any @connected-uids))]
-        (doseq [u (db/get-users-in-group (:group-id new-tag))]
+        (doseq [u (db/group-users (:group-id new-tag))]
           (db/user-subscribe-to-tag! (u :id) (new-tag :id))
           (when (and (not= user-id (u :id)) (connected? (u :id)))
             (chsk-send! (u :id) [:chat/create-tag new-tag])))

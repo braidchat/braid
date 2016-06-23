@@ -164,14 +164,14 @@
                                    :password "foobar"
                                    :avatar "http://www.foobar.com/1.jpg"})]
         (is (= #{} (db/get-groups-for-user (user :id))))
-        (is (= #{} (db/get-users-in-group (group :id))))
+        (is (= #{} (db/group-users (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
         (is (= #{(assoc data :admins #{} :intro "the intro" :avatar nil
                    :public? false :bots #{})}
                (db/get-groups-for-user (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))
-                    (db/get-users-in-group (group :id))))))))
+                    (db/group-users (group :id))))))))
     (testing "groups have no admins by default"
       (is (empty? (:admins (db/group-by-id (group :id))))))
     (testing "Can add admin"

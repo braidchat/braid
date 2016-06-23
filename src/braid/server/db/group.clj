@@ -20,7 +20,8 @@
   (-> (d/pull (d/db conn) group-pull-pattern [:group/id group-id])
       db->group))
 
-(defn get-users-in-group [conn group-id]
+(defn group-users
+  [conn group-id]
   (->> (d/q '[:find (pull ?u pull-pattern)
               :in $ ?group-id pull-pattern
               :where
