@@ -52,7 +52,7 @@
   :stop (router))
 
 (defmethod event-msg-handler :default
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
   (let [session (:session ring-req)
         uid     (:uid     session)]
     (debugf "Unhandled event: %s" event)
@@ -187,15 +187,15 @@
   )
 
 (defmethod event-msg-handler :chsk/uidport-open
-  [{:as ev-msg :keys [event id ring-req user-id]}]
+  [{:as ev-msg :keys [user-id]}]
   (broadcast-user-change user-id [:user/connected user-id]))
 
 (defmethod event-msg-handler :chsk/uidport-close
-  [{:as ev-msg :keys [event id user-id]}]
+  [{:as ev-msg :keys [user-id]}]
   (broadcast-user-change user-id [:user/disconnected user-id]))
 
 (defmethod event-msg-handler :chat/new-message
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [new-message (-> ?data
                         (update :mentioned-tag-ids vec)
                         (update :mentioned-user-ids vec)
@@ -215,15 +215,15 @@
           (cb :braid/error))))))
 
 (defmethod event-msg-handler :user/subscribe-to-tag
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (db/user-subscribe-to-tag! user-id ?data))
 
 (defmethod event-msg-handler :user/unsubscribe-from-tag
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (db/user-unsubscribe-from-tag! user-id ?data))
 
 (defmethod event-msg-handler :user/set-nickname
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (valid-nickname? (?data :nickname))
     (try
       (do (db/set-nickname! user-id (?data :nickname))
@@ -236,7 +236,7 @@
     (when ?reply-fn (?reply-fn {:error "Invalid nickname"}))))
 
 (defmethod event-msg-handler :user/set-avatar
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (valid-url? ?data)
     (do (db/set-user-avatar! user-id ?data)
         (broadcast-user-change user-id [:user/new-avatar {:user-id user-id
@@ -246,7 +246,7 @@
         (when-let [r ?reply-fn] (r {:braid/error "Bad url for avatar"})))))
 
 (defmethod event-msg-handler :user/set-password
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (string/blank? (?data :password))
     (when ?reply-fn (?reply-fn {:error "Password cannot be blank"}))
     (do
@@ -254,27 +254,27 @@
       (when ?reply-fn (?reply-fn {:ok true})))))
 
 (defmethod event-msg-handler :user/set-preferences
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (doseq [[k v] ?data]
     (db/user-set-preference! user-id k v))
   (when ?reply-fn (?reply-fn :braid/ok)))
 
 (defmethod event-msg-handler :chat/hide-thread
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (db/user-hide-thread! user-id ?data)
   (chsk-send! user-id [:chat/hide-thread ?data]))
 
 (defmethod event-msg-handler :chat/unsub-thread
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (db/user-unsubscribe-from-thread! user-id ?data)
   (chsk-send! user-id [:chat/hide-thread ?data]))
 
 (defmethod event-msg-handler :chat/mark-thread-read
-  [{:as ev-msg :keys [ring-req ?data user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (db/update-thread-last-open! ?data user-id))
 
 (defmethod event-msg-handler :chat/create-tag
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (db/user-in-group? user-id (?data :group-id))
     (if (valid-tag-name? (?data :name))
       (let [new-tag (db/create-tag! (select-keys ?data [:id :name :group-id]))
@@ -294,7 +294,7 @@
                   user-id (?data :name) (?data :group-id))))
 
 (defmethod event-msg-handler :chat/set-tag-description
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [{:keys [tag-id description]} ?data]
     (when (and tag-id description)
       (let [group-id (db/tag-group-id tag-id)]
@@ -304,7 +304,7 @@
             group-id [:group/tag-descrption-change [tag-id description]]))))))
 
 (defmethod event-msg-handler :chat/create-group
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (cond
     (string/blank? (?data :name))
     (do
@@ -325,7 +325,7 @@
       (db/user-make-group-admin! user-id (new-group :id)))))
 
 (defmethod event-msg-handler :chat/search
-  [{:keys [event id ?data ring-req ?reply-fn send-fn user-id] :as ev-msg}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   ; this can take a while, so move it to a future
   (future
     (let [user-tags (db/tag-ids-for-user user-id)
@@ -336,7 +336,7 @@
         (?reply-fn {:threads threads :thread-ids thread-ids})))))
 
 (defmethod event-msg-handler :chat/load-threads
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [user-tags (db/tag-ids-for-user user-id)
         filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
         thread-ids (filter (partial db/user-can-see-thread? user-id) ?data)
@@ -345,7 +345,7 @@
       (?reply-fn {:threads threads}))))
 
 (defmethod event-msg-handler :chat/threads-for-tag
-  [{:keys [event id ?data ring-req ?reply-fn send-fn user-id] :as ev-msg}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [user-tags (db/tag-ids-for-user user-id)
         filter-tags (fn [t] (update-in t [:tag-ids]
                                        (partial into #{} (filter user-tags))))
@@ -357,7 +357,7 @@
       (?reply-fn threads))))
 
 (defmethod event-msg-handler :chat/invite-to-group
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (if (db/user-in-group? user-id (?data :group-id))
     (let [data (assoc ?data :inviter-id user-id)
           invitation (db/create-invitation! data)]
@@ -370,7 +370,7 @@
       user-id (?data :invitee-email) (?data :group-id))))
 
 (defmethod event-msg-handler :chat/generate-invite-link
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (db/user-in-group? user-id (?data :group-id))
     (let [{:keys [group-id expires]} ?data]
       (?reply-fn {:link (invites/make-open-invite-link group-id expires)}))
@@ -380,7 +380,7 @@
         (?reply-fn {:braid/error :not-allowed}))))
 
 (defmethod event-msg-handler :chat/invitation-accept
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (if-let [invite (db/invite-by-id (?data :id))]
     (do
       (db/user-add-to-group! user-id (invite :group-id))
@@ -395,14 +395,14 @@
                   user-id (?data :id))))
 
 (defmethod event-msg-handler :chat/invitation-decline
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (if-let [invite (db/invite-by-id (?data :id))]
     (db/retract-invitation! (invite :id))
     (timbre/warnf "User %s attempted to decline nonexistant invitaiton %s"
                   user-id (?data :id))))
 
 (defmethod event-msg-handler :chat/make-user-admin
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (let [{new-admin-id :user-id group-id :group-id} ?data]
     (when (and new-admin-id group-id
             (db/user-is-group-admin? user-id group-id))
@@ -411,7 +411,7 @@
                               [:group/new-admin [group-id new-admin-id]]))))
 
 (defmethod event-msg-handler :chat/remove-from-group
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (let [{group-id :group-id to-remove-id :user-id} ?data]
     (when (and group-id to-remove-id
             (or (= to-remove-id user-id)
@@ -424,28 +424,28 @@
         [:user/left-group [group-id (:name (db/group-by-id group-id))]]))))
 
 (defmethod event-msg-handler :chat/set-group-intro
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (let [{:keys [group-id intro]} ?data]
     (when (and group-id (db/user-is-group-admin? user-id group-id))
       (db/group-set! group-id :intro intro)
       (broadcast-group-change group-id [:group/new-intro [group-id intro]]))))
 
 (defmethod event-msg-handler :chat/set-group-avatar
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (let [{:keys [group-id avatar]} ?data]
     (when (and group-id (db/user-is-group-admin? user-id group-id))
       (db/group-set! group-id :avatar avatar)
       (broadcast-group-change group-id [:group/new-avatar [group-id avatar]]))))
 
 (defmethod event-msg-handler :chat/set-group-publicity
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data user-id]}]
   (let [[group-id publicity] ?data]
     (when (and group-id (db/user-is-group-admin? user-id group-id))
       (db/group-set! group-id :public? publicity)
       (broadcast-group-change group-id [:group/publicity-changed [group-id publicity]]))))
 
 (defmethod event-msg-handler :chat/create-bot
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [bot ?data
         reply-fn (or ?reply-fn (constantly nil))]
     (when (and (bot :group-id) (db/user-is-group-admin? user-id (bot :group-id)))
@@ -472,13 +472,13 @@
                                   [:group/new-bot [(bot :group-id) (bot->display created)]]))))))
 
 (defmethod event-msg-handler :chat/get-bot-info
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [bot (db/bot-by-id ?data)]
     (when (and bot (db/user-is-group-admin? user-id (bot :group-id)) ?reply-fn)
       (?reply-fn {:braid/ok bot}))))
 
 (defmethod event-msg-handler :session/start
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  [{:as ev-msg :keys [user-id]}]
   (let [connected (set (:any @connected-uids))]
     (chsk-send!
       user-id
