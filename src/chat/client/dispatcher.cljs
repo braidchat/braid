@@ -328,11 +328,11 @@
 
 ; Websocket Events
 
-(defmethod sync/event-handler :chat/thread
+(defmethod sync/event-handler :braid.client/thread
   [[_ data]]
   (store/add-open-thread! data))
 
-(defmethod sync/event-handler :session/init-data
+(defmethod sync/event-handler :braid.client/init-data
   [[_ data]]
   (dispatch! :set-login-state! :app)
   (check-client-version (data :version-checksum))
@@ -350,35 +350,35 @@
   [[_ _]]
   (sync/chsk-send! [:braid.server/start nil]))
 
-(defmethod sync/event-handler :chat/create-tag
+(defmethod sync/event-handler :braid.client/create-tag
   [[_ data]]
   (store/add-tag! data)
   (store/subscribe-to-tag! (data :id)))
 
-(defmethod sync/event-handler :chat/joined-group
+(defmethod sync/event-handler :braid.client/joined-group
   [[_ data]]
   (store/add-group! (data :group))
   (store/add-tags! (data :tags))
   (doseq [t (data :tags)]
     (store/subscribe-to-tag! (t :id))))
 
-(defmethod sync/event-handler :chat/update-users
+(defmethod sync/event-handler :braid.client/update-users
   [[_ data]]
   (store/add-users! data))
 
-(defmethod sync/event-handler :chat/invitation-received
+(defmethod sync/event-handler :braid.client/invitation-received
   [[_ invite]]
   (store/add-invite! invite))
 
-(defmethod sync/event-handler :user/name-change
+(defmethod sync/event-handler :braid.client/name-change
   [[_ {:keys [user-id nickname]}]]
   (store/update-user-nick! user-id nickname))
 
-(defmethod sync/event-handler :user/new-avatar
+(defmethod sync/event-handler :braid.client/user-new-avatar
   [[_ {:keys [user-id avatar]}]]
   (store/update-user-avatar! user-id avatar))
 
-(defmethod sync/event-handler :user/left-group
+(defmethod sync/event-handler :braid.client/left-group
   [[_ [group-id group-name]]]
   (store/remove-group! {:id group-id})
   (store/display-error!
@@ -392,50 +392,50 @@
   (when (= group-id (store/open-group-id))
     (routes/go-to! (routes/index-path))))
 
-(defmethod sync/event-handler :user/connected
+(defmethod sync/event-handler :braid.client/user-connected
   [[_ user-id]]
   (store/update-user-status! user-id :online))
 
-(defmethod sync/event-handler :user/disconnected
+(defmethod sync/event-handler :braid.client/user-disconnected
   [[_ user-id]]
   (store/update-user-status! user-id :offline))
 
-(defmethod sync/event-handler :group/new-user
+(defmethod sync/event-handler :braid.client/new-user
   [[_ user]]
   (store/add-user! (assoc user :status :online)))
 
-(defmethod sync/event-handler :group/user-left
+(defmethod sync/event-handler :braid.client/user-left
   [[_ [group-id user-id]]]
   (store/remove-user-group! user-id group-id))
 
-(defmethod sync/event-handler :group/new-admin
+(defmethod sync/event-handler :braid.client/new-admin
   [[_ [group-id new-admin-id]]]
   (store/add-group-admin! group-id new-admin-id))
 
-(defmethod sync/event-handler :group/tag-descrption-change
+(defmethod sync/event-handler :braid.client/tag-descrption-change
   [[_ [tag-id new-description]]]
   (store/update-tag-description! tag-id new-description))
 
-(defmethod sync/event-handler :group/new-intro
+(defmethod sync/event-handler :braid.client/new-intro
   [[_ [group-id intro]]]
   (store/set-group-intro! group-id intro))
 
-(defmethod sync/event-handler :group/new-avatar
+(defmethod sync/event-handler :braid.client/group-new-avatar
   [[_ [group-id avatar]]]
   (store/set-group-avatar! group-id avatar))
 
-(defmethod sync/event-handler :group/publicity-changed
+(defmethod sync/event-handler :braid.client/publicity-changed
   [[_ [group-id publicity]]]
   (store/set-group-publicity! group-id publicity))
 
-(defmethod sync/event-handler :group/new-bot
+(defmethod sync/event-handler :braid.client/new-bot
   [[_ [group-id bot]]]
   (store/add-group-bot! group-id bot))
 
-(defmethod sync/event-handler :chat/notify-message
+(defmethod sync/event-handler :braid.client/notify-message
   [[_ message]]
   (notify/notify {:msg (:content message)}))
 
-(defmethod sync/event-handler :chat/hide-thread
+(defmethod sync/event-handler :braid.client/hide-thread
   [[_ thread-id]]
   (store/hide-thread! thread-id))
