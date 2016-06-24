@@ -9,7 +9,8 @@
                   [:thread/id thread-id])
           :thread/group :group/id))
 
-(defn update-thread-last-open [conn thread-id user-id]
+(defn update-thread-last-open!
+  [conn thread-id user-id]
   (when (seq (d/q '[:find ?t
                     :in $ ?user-id ?thread-id
                     :where
@@ -23,12 +24,12 @@
     @(d/transact conn
        [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
 
-(defn get-thread
+(defn thread-by-id
   [conn thread-id]
   (some-> (d/pull (d/db conn) thread-pull-pattern [:thread/id thread-id])
           db->thread))
 
-(defn get-threads
+(defn threads-by-id
   [conn thread-ids]
   (->> thread-ids
        (map (fn [id] [:thread/id id]))
@@ -63,7 +64,7 @@
 (defn thread-add-last-open-at [conn thread user-id]
   (assoc thread :last-open-at (thread-last-open-at conn thread user-id)))
 
-(defn get-users-subscribed-to-thread
+(defn users-subscribed-to-thread
   [conn thread-id]
   (d/q '[:find [?user-id ...]
          :in $ ?thread-id
@@ -80,7 +81,7 @@
     ;user can see the thread if it's a new (i.e. not yet in the database) thread...
     (nil? (d/entity (d/db conn) [:thread/id thread-id]))
     ; ...or they're already subscribed to the thread...
-    (contains? (set (get-users-subscribed-to-thread conn thread-id)) user-id)
+    (contains? (set (users-subscribed-to-thread conn thread-id)) user-id)
     ; ...or they're mentioned in the thread
     ; TODO: is it possible for them to be mentioned but not subscribed?
     (contains? (-> (d/pull (d/db conn) [:thread/mentioned] [:thread/id thread-id])
@@ -122,9 +123,9 @@
                     (d/pull-many (d/db conn) thread-pull-pattern thread-eids))
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
-(defn get-open-threads-for-user
+(defn open-threads-for-user
   [conn user-id]
-  (let [visible-tags (tag/get-user-visible-tag-ids conn user-id)]
+  (let [visible-tags (tag/tag-ids-for-user conn user-id)]
     (->> (d/q '[:find (pull ?thread pull-pattern)
                 :in $ ?user-id pull-pattern
                 :where
@@ -141,24 +142,13 @@
                       db->thread
                       first))))))
 
-(defn get-subscribed-thread-ids-for-user
+(defn subscribed-thread-ids-for-user
   [conn user-id]
   (d/q '[:find [?thread-id ...]
          :in $ ?user-id
          :where
          [?user :user/id ?user-id]
          [?user :user/subscribed-thread ?thread]
-         [?thread :thread/id ?thread-id]]
-       (d/db conn)
-       user-id))
-
-(defn get-open-thread-ids-for-user
-  [conn user-id]
-  (d/q '[:find [?thread-id ...]
-         :in $ ?user-id
-         :where
-         [?e :user/id ?user-id]
-         [?e :user/open-thread ?thread]
          [?thread :thread/id ?thread-id]]
        (d/db conn)
        user-id))

@@ -9,7 +9,7 @@
 
 (defn thread->tags
   [thread-id]
-  (:tag-ids (db/get-thread thread-id)))
+  (:tag-ids (db/thread-by-id thread-id)))
 
 (defn thread->groups [thread-id]
   (into #{} (map tag->group) (thread->tags thread-id)))

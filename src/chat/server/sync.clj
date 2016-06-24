@@ -64,15 +64,15 @@
 (defn broadcast-thread
   "broadcasts thread to all subscribed users, except those in ids-to-skip"
   [thread-id ids-to-skip]
-  (let [subscribed-user-ids (db/get-users-subscribed-to-thread thread-id)
+  (let [subscribed-user-ids (db/users-subscribed-to-thread thread-id)
           user-ids-to-send-to (-> (difference
                                     (intersection
                                       (set subscribed-user-ids)
                                       (set (:any @connected-uids)))
                                     (set ids-to-skip)))
-          thread (db/get-thread thread-id)]
+          thread (db/thread-by-id thread-id)]
       (doseq [uid user-ids-to-send-to]
-        (let [user-tags (db/get-user-visible-tag-ids uid)
+        (let [user-tags (db/tag-ids-for-user uid)
               filtered-thread (update-in thread [:tag-ids]
                                          (partial into #{} (filter user-tags)))
               thread-with-last-opens (db/thread-add-last-open-at
@@ -87,7 +87,7 @@
                            (set (:any @connected-uids))
                            (into
                              #{} (map :id)
-                             (db/fetch-users-for-user user-id)))
+                             (db/users-for-user user-id)))
                          user-id)]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
@@ -98,7 +98,7 @@
   (let [ids-to-send-to (intersection
                          (set (:any @connected-uids))
                          (into #{} (map :id)
-                               (db/get-users-in-group group-id)))]
+                               (db/group-users group-id)))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
@@ -148,7 +148,7 @@
 
 (defn notify-users [new-message]
   (let [subscribed-user-ids (->>
-                              (db/get-users-subscribed-to-thread
+                              (db/users-subscribed-to-thread
                                 (new-message :thread-id))
                               (remove (partial = (:user-id new-message))))
         online? (intersection
@@ -167,7 +167,7 @@
                       (fn [m] (update m :content
                                       (partial parse-tags-and-mentions uid))))]
                 (-> (email/create-message
-                      [(-> (db/get-thread (msg :thread-id))
+                      [(-> (db/thread-by-id (msg :thread-id))
                            (update :messages update-msgs))])
                     (assoc :subject "Notification from Braid")
                     (->> (email/send-message (db/user-email uid))))))))))))
@@ -271,7 +271,7 @@
 
 (defmethod event-msg-handler :chat/mark-thread-read
   [{:as ev-msg :keys [ring-req ?data user-id]}]
-  (db/update-thread-last-open ?data user-id))
+  (db/update-thread-last-open! ?data user-id))
 
 (defmethod event-msg-handler :chat/create-tag
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
@@ -279,7 +279,7 @@
     (if (valid-tag-name? (?data :name))
       (let [new-tag (db/create-tag! (select-keys ?data [:id :name :group-id]))
             connected? (set (:any @connected-uids))]
-        (doseq [u (db/get-users-in-group (:group-id new-tag))]
+        (doseq [u (db/group-users (:group-id new-tag))]
           (db/user-subscribe-to-tag! (u :id) (new-tag :id))
           (when (and (not= user-id (u :id)) (connected? (u :id)))
             (chsk-send! (u :id) [:chat/create-tag new-tag])))
@@ -328,25 +328,25 @@
   [{:keys [event id ?data ring-req ?reply-fn send-fn user-id] :as ev-msg}]
   ; this can take a while, so move it to a future
   (future
-    (let [user-tags (db/get-user-visible-tag-ids user-id)
+    (let [user-tags (db/tag-ids-for-user user-id)
           filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
           thread-ids (search/search-threads-as user-id ?data)
-          threads (map (comp filter-tags db/get-thread) (take 25 thread-ids))]
+          threads (map (comp filter-tags db/thread-by-id) (take 25 thread-ids))]
       (when ?reply-fn
         (?reply-fn {:threads threads :thread-ids thread-ids})))))
 
 (defmethod event-msg-handler :chat/load-threads
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (let [user-tags (db/get-user-visible-tag-ids user-id)
+  (let [user-tags (db/tag-ids-for-user user-id)
         filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
         thread-ids (filter (partial db/user-can-see-thread? user-id) ?data)
-        threads (map filter-tags (db/get-threads thread-ids))]
+        threads (map filter-tags (db/threads-by-id thread-ids))]
     (when ?reply-fn
       (?reply-fn {:threads threads}))))
 
 (defmethod event-msg-handler :chat/threads-for-tag
   [{:keys [event id ?data ring-req ?reply-fn send-fn user-id] :as ev-msg}]
-  (let [user-tags (db/get-user-visible-tag-ids user-id)
+  (let [user-tags (db/tag-ids-for-user user-id)
         filter-tags (fn [t] (update-in t [:tag-ids]
                                        (partial into #{} (filter user-tags))))
         offset (get ?data :offset 0)
@@ -381,22 +381,22 @@
 
 (defmethod event-msg-handler :chat/invitation-accept
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (if-let [invite (db/get-invite (?data :id))]
+  (if-let [invite (db/invite-by-id (?data :id))]
     (do
       (db/user-add-to-group! user-id (invite :group-id))
       (db/user-subscribe-to-group-tags! user-id (invite :group-id))
       (db/retract-invitation! (invite :id))
       (chsk-send! user-id [:chat/joined-group
-                           {:group (db/get-group (invite :group-id))
-                            :tags (db/get-group-tags (invite :group-id))}])
-      (chsk-send! user-id [:chat/update-users (db/fetch-users-for-user user-id)])
+                           {:group (db/group-by-id (invite :group-id))
+                            :tags (db/group-tags (invite :group-id))}])
+      (chsk-send! user-id [:chat/update-users (db/users-for-user user-id)])
       (broadcast-group-change (invite :group-id) [:group/new-user (db/user-by-id user-id)]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                   user-id (?data :id))))
 
 (defmethod event-msg-handler :chat/invitation-decline
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (if-let [invite (db/get-invite (?data :id))]
+  (if-let [invite (db/invite-by-id (?data :id))]
     (db/retract-invitation! (invite :id))
     (timbre/warnf "User %s attempted to decline nonexistant invitaiton %s"
                   user-id (?data :id))))
@@ -421,7 +421,7 @@
                                         [group-id to-remove-id]])
       (chsk-send!
         to-remove-id
-        [:user/left-group [group-id (:name (db/get-group group-id))]]))))
+        [:user/left-group [group-id (:name (db/group-by-id group-id))]]))))
 
 (defmethod event-msg-handler :chat/set-group-intro
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
@@ -485,13 +485,13 @@
       [:session/init-data
        {:user-id user-id
         :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
-        :user-groups (db/get-groups-for-user user-id)
-        :user-threads (db/get-open-threads-for-user user-id)
-        :user-subscribed-tag-ids (db/get-user-subscribed-tag-ids user-id)
+        :user-groups (db/user-groups user-id)
+        :user-threads (db/open-threads-for-user user-id)
+        :user-subscribed-tag-ids (db/subscribed-tag-ids-for-user user-id)
         :user-preferences (db/user-get-preferences user-id)
         :users (into ()
                      (map #(assoc % :status
                              (if (connected (% :id)) :online :offline)))
-                     (db/fetch-users-for-user user-id))
-        :invitations (db/fetch-invitations-for-user user-id)
-        :tags (db/fetch-tags-for-user user-id)}])))
+                     (db/users-for-user user-id))
+        :invitations (db/invites-for-user user-id)
+        :tags (db/tags-for-user user-id)}])))

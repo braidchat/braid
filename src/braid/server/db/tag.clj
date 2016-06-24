@@ -19,7 +19,7 @@
   @(d/transact conn [[:db/add [:tag/id tag-id]
                       :tag/description description]]))
 
-(defn get-users-subscribed-to-tag
+(defn users-subscribed-to-tag
   [conn tag-id]
   (d/q '[:find [?user-id ...]
          :in $ ?tag-id
@@ -30,7 +30,9 @@
        (d/db conn)
        tag-id))
 
-(defn get-user-visible-tag-ids
+(defn tag-ids-for-user
+  "Get all tag ids that are accessible to the user (i.e. are from groups that
+  the user is a member of"
   [conn user-id]
   (->> (d/q '[:find ?tag-id
               :in $ ?user-id
@@ -43,7 +45,7 @@
        (map first)
        set))
 
-(defn fetch-tag-statistics-for-user
+(defn tag-statistics-for-user
   [conn user-id]
   (->> (d/q '[:find
               ?tag-id
@@ -63,10 +65,10 @@
                        :tag/subscribers-count subscribers-count}]))
        (into {})))
 
-(defn fetch-tags-for-user
+(defn tags-for-user
   "Get all tags visible to the given user"
   [conn user-id]
-  (let [tag-stats (fetch-tag-statistics-for-user conn user-id)]
+  (let [tag-stats (tag-statistics-for-user conn user-id)]
     (->> (d/q '[:find
                 (pull ?t [:tag/id
                           :tag/name
@@ -105,7 +107,7 @@
   @(d/transact conn [[:db/retract [:user/id user-id]
                       :user/subscribed-tag [:tag/id tag-id]]]))
 
-(defn get-user-subscribed-tag-ids
+(defn subscribed-tag-ids-for-user
   [conn user-id]
   (d/q '[:find [?tag-id ...]
          :in $ ?user-id

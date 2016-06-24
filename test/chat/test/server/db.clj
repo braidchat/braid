@@ -42,8 +42,7 @@
                  (dissoc :group-ids))
              (-> data
                  (dissoc :password :email)
-                 (assoc :nickname "ol' fooy"))))
-      (is (= "ol' fooy" (db/get-nickname (user :id)))))
+                 (assoc :nickname "ol' fooy")))))
 
     (testing "user email must be unique"
       (is (thrown? java.util.concurrent.ExecutionException
@@ -74,7 +73,7 @@
         group (db/create-group! {:id (db/uuid) :name "aoeu"})
         _ (db/user-add-to-group! (user-1 :id) (group :id))
         _ (db/user-add-to-group! (user-2 :id) (group :id))
-        users (db/fetch-users-for-user (user-1 :id))]
+        users (db/users-for-user (user-1 :id))]
     (testing "returns all users"
       (is (= (set (map (fn [u] (dissoc u :group-ids)) users))
              (set (map (fn [u] (dissoc u :group-ids)) [user-1 user-2])))))
@@ -108,15 +107,15 @@
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-1 user-2]))
            (set (map (fn [u] (dissoc u :group-ids))
-                (db/fetch-users-for-user (user-1 :id))))))
+                (db/users-for-user (user-1 :id))))))
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-1 user-2 user-3]))
            (set (map (fn [u] (dissoc u :group-ids))
-                (db/fetch-users-for-user (user-2 :id))))))
+                (db/users-for-user (user-2 :id))))))
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-2 user-3]))
            (set (map (fn [u] (dissoc u :group-ids))
-                (db/fetch-users-for-user (user-3 :id))))))
+                (db/users-for-user (user-3 :id))))))
     (is (db/user-visible-to-user? (user-1 :id) (user-2 :id)))
     (is (not (db/user-visible-to-user? (user-1 :id) (user-3 :id))))
     (is (not (db/user-visible-to-user? (user-3 :id) (user-1 :id))))
@@ -156,7 +155,7 @@
                      :public? false :bots #{}))))
     (testing "can set group intro"
       (db/group-set! (group :id) :intro "the intro")
-      (is (= (db/get-group (group :id))
+      (is (= (db/group-by-id (group :id))
              (assoc data :admins #{} :intro "the intro" :avatar nil
                :public? false :bots #{}))))
     (testing "can add a user to the group"
@@ -164,27 +163,27 @@
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar "http://www.foobar.com/1.jpg"})]
-        (is (= #{} (db/get-groups-for-user (user :id))))
-        (is (= #{} (db/get-users-in-group (group :id))))
+        (is (= #{} (db/user-groups (user :id))))
+        (is (= #{} (db/group-users (group :id))))
         (db/user-add-to-group! (user :id) (group :id))
         (is (= #{(assoc data :admins #{} :intro "the intro" :avatar nil
                    :public? false :bots #{})}
-               (db/get-groups-for-user (user :id))))
+               (db/user-groups (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))
-                    (db/get-users-in-group (group :id))))))))
+                    (db/group-users (group :id))))))))
     (testing "groups have no admins by default"
-      (is (empty? (:admins (db/get-group (group :id))))))
+      (is (empty? (:admins (db/group-by-id (group :id))))))
     (testing "Can add admin"
       (db/user-make-group-admin! user-id (group :id))
-      (is (= #{user-id} (:admins (db/get-group (group :id)))))
+      (is (= #{user-id} (:admins (db/group-by-id (group :id)))))
       (testing "and another admin"
         (db/create-user! {:id user-2-id
                           :email "bar@baz.com"
                           :password "foobar"
                           :avatar "http://www.foobar.com/1.jpg"})
         (db/user-make-group-admin! user-2-id (group :id))
-        (is (= #{user-id user-2-id} (:admins (db/get-group (group :id)))))))
+        (is (= #{user-id user-2-id} (:admins (db/group-by-id (group :id)))))))
     (testing "multiple groups, admin statuses"
       (let [group-2 (db/create-group! {:id (db/uuid)
                                        :name "another group"})
@@ -204,12 +203,12 @@
         (is (db/user-in-group? user-2-id (group-3 :id)))
 
         (is (= #{(group :id) (group-2 :id) (group-3 :id)}
-               (into #{} (map :id) (db/get-groups-for-user user-id))
-               (into #{} (map :id) (db/get-groups-for-user user-2-id)))
+               (into #{} (map :id) (db/user-groups user-id))
+               (into #{} (map :id) (db/user-groups user-2-id)))
             "Both users are in all the groups")
 
-        (is (= #{user-2-id} (:admins (db/get-group (group-2 :id)))))
-        (is (= #{user-id} (:admins (db/get-group (group-3 :id)))))
+        (is (= #{user-2-id} (:admins (db/group-by-id (group-2 :id)))))
+        (is (= #{user-id} (:admins (db/group-by-id (group-3 :id)))))
 
         (is (db/user-is-group-admin? user-id (group :id)))
         (is (not (db/user-is-group-admin? user-id (group-2 :id))))
@@ -246,7 +245,7 @@
     (testing "fetch-messages returns all messages"
       (is (= (set messages) #{message-1 message-2})))
     (testing "Can retrieve threads"
-      (is (= (db/get-thread thread-1-id)
+      (is (= (db/thread-by-id thread-1-id)
              {:id thread-1-id
               :group-id (group :id)
               :messages (map #(dissoc % :thread-id :group-id)
@@ -260,7 +259,7 @@
                             :created-at (java.util.Date.)
                             :content "Blurrp"}
             message-3 (db/create-message! message-3-data)]
-        (is (= (db/get-threads [thread-1-id thread-2-id])
+        (is (= (db/threads-by-id [thread-1-id thread-2-id])
                [{:id thread-1-id
                  :group-id (group :id)
                  :messages (map #(dissoc % :thread-id :group-id)
@@ -297,15 +296,16 @@
                                        :created-at (java.util.Date.)
                                        :content "Hello?"})]
     (testing "thread 1 is open"
-      (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-1 :thread-id))))
+      (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id))))
+                     (message-1 :thread-id))))
     (testing "thread 2 is open"
-      (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id))))
+      (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id))))
     (testing "user can hide thread"
       (db/user-hide-thread! (user-1 :id) (message-1 :thread-id))
-      (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-1 :thread-id)))))
+      (is (not (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-1 :thread-id)))))
     (testing "user can hide thread"
       (db/user-hide-thread! (user-1 :id) (message-2 :thread-id))
-      (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id)))))
+      (is (not (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id)))))
     (testing "thread is re-opened when it gets another message"
       (let [user-2 (db/create-user! {:id (db/uuid) :email "bar@baz.com"
                                      :password "foobar" :avatar ""})]
@@ -315,7 +315,7 @@
                              :thread-id (message-1 :thread-id)
                              :created-at (java.util.Date.)
                              :content "wake up"})
-        (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-1 :thread-id)))
+        (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-1 :thread-id)))
         (testing "unless the user has unsubscribed from the thread"
           (db/user-unsubscribe-from-thread! (user-1 :id) (message-2 :thread-id))
           (db/create-message! {:id (db/uuid)
@@ -324,7 +324,7 @@
                                :thread-id (message-2 :thread-id)
                                :created-at (java.util.Date.)
                                :content "wake up"})
-          (is (not (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id))))
+          (is (not (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id))))
           (testing "but they get re-subscribed if they get mentioned/another tag is added"
             (db/create-message! {:id (db/uuid)
                                  :group-id (group :id)
@@ -333,7 +333,7 @@
                                  :created-at (java.util.Date.)
                                  :content "wake up"
                                  :mentioned-user-ids [(user-1 :id)]})
-            (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) (message-2 :thread-id)))))))))
+            (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id)))))))))
 
 (deftest user-thread-visibility
   (let [user-1 (db/create-user! {:id (db/uuid)
@@ -408,17 +408,17 @@
                                  :avatar ""})
         group (db/create-group! {:name "group 1" :id (db/uuid)})]
     (db/user-add-to-group! (user-1 :id) (group :id))
-    (is (empty? (db/fetch-invitations-for-user (user-1 :id))))
-    (is (empty? (db/fetch-invitations-for-user (user-2 :id))))
+    (is (empty? (db/invites-for-user (user-1 :id))))
+    (is (empty? (db/invites-for-user (user-2 :id))))
     (let [invite-id (db/uuid)
           invite (db/create-invitation! {:id invite-id
                                          :inviter-id (user-1 :id)
                                          :invitee-email "bar@baz.com"
                                          :group-id (group :id)})]
-      (is (= invite (db/get-invite invite-id)))
-      (is (seq (db/fetch-invitations-for-user (user-2 :id))))
+      (is (= invite (db/invite-by-id invite-id)))
+      (is (seq (db/invites-for-user (user-2 :id))))
       (db/retract-invitation! invite-id)
-      (is (empty? (db/fetch-invitations-for-user (user-2 :id)))))))
+      (is (empty? (db/invites-for-user (user-2 :id)))))))
 
 (deftest user-leaving-group
   (let [user-1 (db/create-user! {:id (db/uuid)
@@ -435,9 +435,9 @@
                          :mentioned-tag-ids []})
     (testing "user leaving group removes mentios of that user"
       (is (= #{(user-1 :id)}
-             (:mentioned-ids (db/get-thread thread-id))))
+             (:mentioned-ids (db/thread-by-id thread-id))))
       (db/user-leave-group! (user-1 :id) (group :id))
-      (is (empty? (:mentioned-ids (db/get-thread thread-id)))))))
+      (is (empty? (:mentioned-ids (db/thread-by-id thread-id)))))))
 
 (deftest adding-user-to-group-subscribes-tags
   (let [user (db/create-user! {:id (db/uuid)
@@ -451,13 +451,13 @@
                            {:id (db/uuid) :name "t2" :group-id (group :id)}
                            {:id (db/uuid) :name "t3" :group-id (group :id)}]))]
     (testing "some misc functions"
-      (is (= group (db/get-group (group :id))))
+      (is (= group (db/group-by-id (group :id))))
       (is (= (set group-tags)
-             (set (db/get-group-tags (group :id))))))
+             (set (db/group-tags (group :id))))))
     (db/user-add-to-group! (user :id) (group :id))
     (db/user-subscribe-to-group-tags! (user :id) (group :id))
-    (is (= (set (db/get-user-subscribed-tag-ids (user :id)))
-           (db/get-user-visible-tag-ids (user :id))
+    (is (= (set (db/subscribed-tag-ids-for-user (user :id)))
+           (db/tag-ids-for-user (user :id))
            (set (map :id group-tags))))))
 
 (deftest user-preferences
@@ -525,7 +525,7 @@
     (is (schema/check-bot! b3))
     (testing "can create bots & retrieve by group"
       (is (= #{b1 b2} (db/bots-in-group (g1 :id))))
-      (is (= (into #{}  (map bot->display) [b1 b2]) (:bots (db/get-group (g1 :id)))))
+      (is (= (into #{}  (map bot->display) [b1 b2]) (:bots (db/group-by-id (g1 :id)))))
       (is (= #{b3} (db/bots-in-group (g2 :id))))
       (is (= #{} (db/bots-in-group (g3 :id))))
       (is (= b1 (db/bot-by-name-in-group "bot1" (g1 :id))))

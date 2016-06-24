@@ -33,7 +33,7 @@
                          :subscribers-count 0))))))
       (testing "set tag description"
         (db/tag-set-description! (:id tag-data) "Some tag with stuff")
-        (is (= (first (db/get-group-tags (:id group)))
+        (is (= (first (db/group-tags (:id group)))
                (assoc tag-data
                  :description "Some tag with stuff"
                  :group-name "Lean Pixel"
@@ -56,7 +56,7 @@
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
         (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
       (testing "get-user-subscribed-tags"
-        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
+        (let [tags (db/subscribed-tag-ids-for-user (user :id))]
           (testing "returns subscribed tags"
             (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))
     (testing "user can unsubscribe from tags"
@@ -64,7 +64,7 @@
         (db/user-unsubscribe-from-tag! (user :id) (tag-1 :id))
         (db/user-unsubscribe-from-tag! (user :id) (tag-2 :id)))
       (testing "is unsubscribed"
-        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
+        (let [tags (db/subscribed-tag-ids-for-user (user :id))]
           (is (= (set tags) #{})))))))
 
 (deftest user-can-only-see-tags-in-group
@@ -92,9 +92,9 @@
     (db/user-add-to-group! (user-2 :id) (group-2 :id))
     (db/user-add-to-group! (user-3 :id) (group-2 :id))
     (testing "user can only see tags in their group(s)"
-      (is (= #{tag-1} (db/fetch-tags-for-user (user-1 :id))))
-      (is (= #{tag-1 tag-2 tag-3} (db/fetch-tags-for-user (user-2 :id))))
-      (is (= #{tag-2 tag-3} (db/fetch-tags-for-user (user-3 :id)))))))
+      (is (= #{tag-1} (db/tags-for-user (user-1 :id))))
+      (is (= #{tag-1 tag-2 tag-3} (db/tags-for-user (user-2 :id))))
+      (is (= #{tag-2 tag-3} (db/tags-for-user (user-3 :id)))))))
 
 (deftest user-can-only-subscribe-to-tags-in-group
   (let [user (db/create-user! {:id (db/uuid)
@@ -113,6 +113,6 @@
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
         (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
       (testing "get-user-subscribed-tags"
-        (let [tags (db/get-user-subscribed-tag-ids (user :id))]
+        (let [tags (db/subscribed-tag-ids-for-user (user :id))]
           (testing "returns subscribed tags"
             (is (= (set tags) #{(tag-1 :id)}))))))))

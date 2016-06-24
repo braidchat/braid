@@ -37,10 +37,10 @@
           (is (= (dissoc message-data :group-id) message)))
 
         (testing "user has thread open"
-          (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
+          (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) thread-id)))
 
         (testing "user has thread subscribed"
-          (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))
+          (is (contains? (set (db/subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))
 
     (testing "new message can add to an existing thread"
       (let [group (db/create-group! {:id (db/uuid) :name "group2"})
@@ -56,10 +56,10 @@
           (is (= (dissoc message-2-data :group-id) message-2)))
 
         (testing "user has thread open"
-          (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
+          (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) thread-id)))
 
         (testing "user has thread subscribed"
-          (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))))
+          (is (contains? (set (db/subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))))
 
 (deftest new-message-opens-and-subscribes
 
@@ -80,10 +80,10 @@
                                      :content "Hello?"})]
 
           (testing "then the user is subscribed to the thread"
-            (is (contains? (set (db/get-open-thread-ids-for-user (user-1 :id))) thread-id)))
+            (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) thread-id)))
 
           (testing "then the user has the thread open"
-            (is (contains? (set (db/get-subscribed-thread-ids-for-user (user-1 :id))) thread-id))))))))
+            (is (contains? (set (db/subscribed-thread-ids-for-user (user-1 :id))) thread-id))))))))
 
 (deftest new-message-opens-thread
 
@@ -115,7 +115,7 @@
         (db/user-hide-thread! (user-2 :id) thread-id)
 
         (testing "then user-2 no longer has the thread open"
-          (is (not (contains? (set (db/get-open-thread-ids-for-user (user-2 :id))) thread-id)))))
+          (is (not (contains? (set (map :id (db/open-threads-for-user (user-2 :id)))) thread-id)))))
 
       (testing "when user-1 sends another message in the thread"
         (db/create-message! {:id (db/uuid)
@@ -126,7 +126,7 @@
                              :content "Hello?"})
 
         (testing "then user-2 has the thread open again"
-          (is (contains? (set (db/get-open-thread-ids-for-user (user-2 :id))) thread-id)))))))
+          (is (contains? (set (map :id (db/open-threads-for-user (user-2 :id)))) thread-id)))))))
 
 (deftest tag-mention-opens-thread-for-subscribers
 
@@ -158,17 +158,17 @@
                                          :mentioned-tag-ids [(tag-1 :id)]})]
 
             (testing "then the tag is added to the thread"
-              (let [thread (db/get-thread (msg :thread-id))]
+              (let [thread (db/thread-by-id (msg :thread-id))]
                 (contains? (set (thread :tag-ids)) (tag-1 :id))))
 
             (testing "then the user has the thread opened"
-              (let [user-threads (db/get-open-thread-ids-for-user (user-1 :id))]
+              (let [user-threads (map :id (db/open-threads-for-user (user-1 :id)))]
                 (is (contains? (set user-threads) (msg :thread-id)))))
 
             (testing "then the user is subscribed-to the thread"
-              (let [user-threads (db/get-subscribed-thread-ids-for-user (user-1 :id))]
+              (let [user-threads (db/subscribed-thread-ids-for-user (user-1 :id))]
                 (is (contains? (set user-threads) (msg :thread-id))))
-              (let [users (db/get-users-subscribed-to-thread (msg :thread-id))]
+              (let [users (db/users-subscribed-to-thread (msg :thread-id))]
                 (is (contains? (set users) (user-1 :id)))))))))))
 
 (deftest user-mention-subscribes-opens-thread-for-user
@@ -199,14 +199,14 @@
 
           (testing "then user-2 is added to the thread"
             (is  (= #{(user-2 :id)}
-                    (-> (db/get-thread thread-id) :mentioned-ids))))
+                    (-> (db/thread-by-id thread-id) :mentioned-ids))))
 
           (testing "then user-2 can see the thread"
             (is (db/user-can-see-thread? (user-2 :id) thread-id)))
 
           (testing "then user-2 is subscribed to the thread"
-            (let [users (db/get-users-subscribed-to-thread (msg :thread-id))]
+            (let [users (db/users-subscribed-to-thread (msg :thread-id))]
               (is (contains? (set users) (user-2 :id)))))
 
           (testing "then user-2 has the thread opened"
-            (is (= [thread-id] (db/get-open-thread-ids-for-user (user-2 :id))))))))))
+            (is (= [thread-id] (map :id (db/open-threads-for-user (user-2 :id)))))))))))

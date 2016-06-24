@@ -38,7 +38,7 @@
 
 (defn updates-for-user-since
   [user-id cutoff]
-  (let [users (db/fetch-users-for-user user-id)
+  (let [users (db/users-for-user user-id)
         id->nick (into {} (map (juxt :id :nickname)) users)
         id->avatar (into {} (map (juxt :id :avatar)) users)
         pretty-time (comp
@@ -66,7 +66,7 @@
                                          (assoc :sender (id->nick sender-id))
                                          (assoc :sender-avatar
                                            (id->avatar sender-id))))))))))
-          (db/get-open-threads-for-user user-id))))
+          (db/open-threads-for-user user-id))))
 
 (defn daily-update-users
   "Find all ids for users that want daily digest updates"

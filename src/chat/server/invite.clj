@@ -130,7 +130,7 @@
 (defn link-signup-page
   [group-id]
   (let [now (.getTime (java.util.Date.))
-        group (db/get-group group-id)
+        group (db/group-by-id group-id)
         form-hmac (hmac (config :hmac-secret) (str now group-id))
         api-domain (:api-domain config)]
     (clostache/render-resource "templates/link_signup.html.mustache"

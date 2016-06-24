@@ -93,7 +93,7 @@
         (assoc fail :body "Invalid image")
 
         :else
-        (let [invite (db/get-invite (java.util.UUID/fromString invite_id))]
+        (let [invite (db/invite-by-id (java.util.UUID/fromString invite_id))]
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
             (let [avatar-url (invites/upload-avatar avatar)
