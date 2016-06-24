@@ -67,7 +67,7 @@
                                                  (extract-user-ids (data :content)))})]
       (store/add-message! message)
       (sync/chsk-send!
-        [:chat/new-message message]
+        [:braid/new-message message]
         2000
         (fn [reply]
           (when (not= :braid/ok reply)
@@ -78,7 +78,7 @@
   (store/clear-error! (str :failed-to-send (message :id)))
   (store/clear-message-failed! message)
   (sync/chsk-send!
-    [:chat/new-message message]
+    [:braid/new-message message]
     2000
     (fn [reply]
       (when (not= :braid/ok reply)
@@ -86,11 +86,11 @@
         (store/set-message-failed! message)))))
 
 (defmethod dispatch! :hide-thread [_ data]
-  (sync/chsk-send! [:chat/hide-thread (data :thread-id)])
+  (sync/chsk-send! [:braid/hide-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
 (defmethod dispatch! :unsub-thread [_ data]
-  (sync/chsk-send! [:chat/unsub-thread (data :thread-id)])
+  (sync/chsk-send! [:braid/unsub-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
 (defmethod dispatch! :create-tag [_ [tag-name group-id id]]
@@ -100,7 +100,7 @@
                               :id id})]
     (store/add-tag! tag)
     (sync/chsk-send!
-      [:chat/create-tag tag]
+      [:braid/create-tag tag]
       1000
       (fn [reply]
         (if-let [msg (:error reply)]
@@ -110,22 +110,22 @@
           (dispatch! :subscribe-to-tag (tag :id)))))))
 
 (defmethod dispatch! :unsubscribe-from-tag [_ tag-id]
-  (sync/chsk-send! [:user/unsubscribe-from-tag tag-id])
+  (sync/chsk-send! [:braid/unsubscribe-from-tag tag-id])
   (store/unsubscribe-from-tag! tag-id))
 
 (defmethod dispatch! :subscribe-to-tag [_ tag-id]
-  (sync/chsk-send! [:user/subscribe-to-tag tag-id])
+  (sync/chsk-send! [:braid/subscribe-to-tag tag-id])
   (store/subscribe-to-tag! tag-id))
 
 (defmethod dispatch! :set-tag-description [_ [tag-id desc]]
   (store/update-tag-description! tag-id desc)
   (sync/chsk-send!
-    [:chat/set-tag-description {:tag-id tag-id :description desc}]))
+    [:braid/set-tag-description {:tag-id tag-id :description desc}]))
 
 (defmethod dispatch! :create-group [_ group]
   (let [group (schema/make-group group)]
     (sync/chsk-send!
-      [:chat/create-group group]
+      [:braid/create-group group]
       1000
       (fn [reply]
         (when-let [msg (reply :error)]
@@ -137,7 +137,7 @@
 
 (defmethod dispatch! :set-nickname [_ [nickname on-error]]
   (sync/chsk-send!
-    [:user/set-nickname {:nickname nickname}]
+    [:braid/set-nickname {:nickname nickname}]
     1000
     (fn [reply]
       (if-let [msg (reply :error)]
@@ -146,11 +146,11 @@
 
 (defmethod dispatch! :set-user-avatar [_ avatar-url]
   (store/update-user-avatar! (store/current-user-id) avatar-url)
-  (sync/chsk-send! [:user/set-avatar avatar-url]))
+  (sync/chsk-send! [:braid/set-avatar avatar-url]))
 
 (defmethod dispatch! :set-password [_ [password on-success on-error]]
   (sync/chsk-send!
-    [:user/set-password {:password password}]
+    [:braid/set-password {:password password}]
     3000
     (fn [reply]
       (cond
@@ -161,7 +161,7 @@
 
 (defmethod dispatch! :set-preference [_ [k v]]
   (store/add-preferences! {k v})
-  (sync/chsk-send! [:user/set-preferences {k v}]))
+  (sync/chsk-send! [:braid/set-preferences {k v}]))
 
 (defmethod dispatch! :add-notification-rule [_ rule]
   (let [current-rules (get (store/user-preferences) :notification-rules [])]
@@ -176,7 +176,7 @@
   (when query
     (store/clear-search-error!)
     (sync/chsk-send!
-      [:chat/search [query group-id]]
+      [:braid/search [query group-id]]
       15000
       (fn [reply]
         (if (:thread-ids reply)
@@ -185,7 +185,7 @@
 
 (defmethod dispatch! :load-threads [_ {:keys [thread-ids on-complete]}]
   (sync/chsk-send!
-    [:chat/load-threads thread-ids]
+    [:braid/load-threads thread-ids]
     5000
     (fn [reply]
       (when-let [threads (:threads reply)]
@@ -196,7 +196,7 @@
 (defmethod dispatch! :threads-for-tag [_ {:keys [tag-id offset limit on-complete]
                                           :or {offset 0 limit 25}}]
   (sync/chsk-send!
-    [:chat/threads-for-tag {:tag-id tag-id :offset offset :limit limit}]
+    [:braid/threads-for-tag {:tag-id tag-id :offset offset :limit limit}]
     2500
     (fn [reply]
       (when-let [results (:threads reply)]
@@ -210,16 +210,16 @@
 
 (defmethod dispatch! :mark-thread-read [_ thread-id]
   (store/update-thread-last-open-at thread-id)
-  (sync/chsk-send! [:chat/mark-thread-read thread-id]))
+  (sync/chsk-send! [:braid/mark-thread-read thread-id]))
 
 (defmethod dispatch! :invite [_ data]
   (let [invite (schema/make-invitation data)]
-    (sync/chsk-send! [:chat/invite-to-group invite])))
+    (sync/chsk-send! [:braid/invite-to-group invite])))
 
 (defmethod dispatch! :generate-link [_ {:keys [group-id expires complete]}]
   (println "dispatching generate")
   (sync/chsk-send!
-    [:chat/generate-invite-link {:group-id group-id :expires expires}]
+    [:braid/generate-invite-link {:group-id group-id :expires expires}]
     5000
     (fn [reply]
       ; indicate error if it fails?
@@ -227,38 +227,38 @@
         (complete link)))))
 
 (defmethod dispatch! :accept-invite [_ invite]
-  (sync/chsk-send! [:chat/invitation-accept invite])
+  (sync/chsk-send! [:braid/invitation-accept invite])
   (store/remove-invite! invite))
 
 (defmethod dispatch! :decline-invite [_ invite]
-  (sync/chsk-send! [:chat/invitation-decline invite])
+  (sync/chsk-send! [:braid/invitation-decline invite])
   (store/remove-invite! invite))
 
 (defmethod dispatch! :make-admin [_ {:keys [group-id user-id] :as args}]
-  (sync/chsk-send! [:chat/make-user-admin args])
+  (sync/chsk-send! [:braid/make-user-admin args])
   (store/add-group-admin! group-id user-id))
 
 (defmethod dispatch! :remove-from-group [ _ {:keys [group-id user-id] :as args}]
-  (sync/chsk-send! [:chat/remove-from-group args]))
+  (sync/chsk-send! [:braid/remove-from-group args]))
 
 (defmethod dispatch! :set-intro [_ {:keys [group-id intro] :as args}]
-  (sync/chsk-send! [:chat/set-group-intro args])
+  (sync/chsk-send! [:braid/set-group-intro args])
   (store/set-group-intro! group-id intro))
 
 (defmethod dispatch! :set-group-avatar [_ {:keys [group-id avatar] :as args}]
-  (sync/chsk-send! [:chat/set-group-avatar args])
+  (sync/chsk-send! [:braid/set-group-avatar args])
   (store/set-group-avatar! group-id avatar))
 
 (defmethod dispatch! :make-group-public! [_ group-id]
-  (sync/chsk-send! [:chat/set-group-publicity [group-id true]]))
+  (sync/chsk-send! [:braid/set-group-publicity [group-id true]]))
 
 (defmethod dispatch! :make-group-private! [_ group-id]
-  (sync/chsk-send! [:chat/set-group-publicity [group-id false]]))
+  (sync/chsk-send! [:braid/set-group-publicity [group-id false]]))
 
 (defmethod dispatch! :new-bot [_ {:keys [bot on-complete]}]
   (let [bot (schema/make-bot bot)]
     (sync/chsk-send!
-      [:chat/create-bot bot]
+      [:braid/create-bot bot]
       5000
       (fn [reply]
         (when (nil? (:braid/ok reply))
@@ -269,7 +269,7 @@
 
 (defmethod dispatch! :get-bot-info [_ {:keys [bot-id on-complete]}]
   (sync/chsk-send!
-    [:chat/get-bot-info bot-id]
+    [:braid/get-bot-info bot-id]
     2000
     (fn [reply]
       (when-let [bot (:braid/ok reply)]
@@ -348,7 +348,7 @@
 
 (defmethod sync/event-handler :socket/connected
   [[_ _]]
-  (sync/chsk-send! [:session/start nil]))
+  (sync/chsk-send! [:braid/start nil]))
 
 (defmethod sync/event-handler :chat/create-tag
   [[_ data]]
