@@ -55,7 +55,7 @@
                          (when (some? url)
                            (edn-xhr {:method :get
                                      :uri "/extract"
-                                     :params {:url (js/encodeURI url)}
+                                     :params {:url (js/encodeURIComponent url)}
                                      :on-complete set-content!})))]
     (r/create-class
       {:component-did-mount
@@ -67,7 +67,7 @@
          [:div.embed
           (if (:type @content)
             [:div.content.loaded {:on-click (fn []
-                                              (.open js/window (:url @content)))}
+                                              (.open js/window (:original_url @content)))}
              (cond
                (= "video" (get-in @content [:media :type]))
                [video-embed-view @content]
