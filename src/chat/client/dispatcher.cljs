@@ -146,7 +146,7 @@
 
 (defmethod dispatch! :set-user-avatar [_ avatar-url]
   (store/update-user-avatar! (store/current-user-id) avatar-url)
-  (sync/chsk-send! [:braid.server/set-avatar avatar-url]))
+  (sync/chsk-send! [:braid.server/set-user-avatar avatar-url]))
 
 (defmethod dispatch! :set-password [_ [password on-success on-error]]
   (sync/chsk-send!

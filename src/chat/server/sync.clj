@@ -235,7 +235,7 @@
         (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))
     (when ?reply-fn (?reply-fn {:error "Invalid nickname"}))))
 
-(defmethod event-msg-handler :braid.server/set-avatar
+(defmethod event-msg-handler :braid.server/set-user-avatar
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (valid-url? ?data)
     (do (db/set-user-avatar! user-id ?data)
