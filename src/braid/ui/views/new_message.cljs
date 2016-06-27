@@ -274,8 +274,8 @@
                              (s3/upload (aget (.. e -target -files) 0)
                                         (fn [url]
                                           (reset! uploading? false)
-                                          (dispatch! :new-message
-                                                     {:content url
+                                          (dispatch! :create-upload
+                                                     {:url url
                                                       :group-id (config :group-id)
                                                       :thread-id (config :thread-id)}))))}]])))
 

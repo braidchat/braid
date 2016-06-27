@@ -4,9 +4,9 @@
             [braid.server.conf :refer [config]]
             [clojure.edn :as edn]
             [clojure.string :as string]
-            [braid.server.db.common :refer :all] ; XXX: temp
             [chat.server.schema :refer [schema]]
-            [braid.server.db user message group invitation thread tag bot]))
+            [braid.server.db user message group invitation thread tag bot
+             upload]))
 
 (defn init!
   "set up schema"
@@ -65,3 +65,5 @@
 (reexport-db-ns braid.server.db.tag)
 
 (reexport-db-ns braid.server.db.bot)
+
+(reexport-db-ns braid.server.db.upload)

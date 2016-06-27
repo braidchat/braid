@@ -128,7 +128,6 @@
    :group/name
    :group/settings
    {:group/admins [:user/id]}
-   ; delibrately not using bot-pull-pattern here - just want display info
    {:bot/_group bot-display-pull-pattern}])
 
 (defn db->group [e]
@@ -140,3 +139,17 @@
      :avatar (settings :avatar)
      :public? (get settings :public? false)
      :bots (into #{} (map db->bot-display) (:bot/_group e))}))
+
+(def upload-pull-pattern
+  [:upload/id
+   :upload/url
+   :upload/uploaded-at
+   {:upload/thread [:thread/id]}
+   {:upload/uploaded-by [:user/id]}])
+
+(defn db->upload [e]
+  {:id (:upload/id e)
+   :uploaded-at (:upload/uploaded-at e)
+   :thread-id (get-in e [:upload/thread :thread/id])
+   :uploader-id (get-in e [:upload/uploaded-by :user/id])
+   :url (:upload/url e)})

@@ -95,6 +95,11 @@
   [state _]
   (reaction (@state :page)))
 
+(defn get-thread
+  ([state [_ thread-id]] (get-thread state nil [thread-id]))
+  ([state _ [thread-id]]
+   (reaction (get-in @state [:threads thread-id]))))
+
 (defn get-threads
   [state _]
   (reaction (@state :threads)))

@@ -151,6 +151,10 @@
   state/get-user)
 
 (register-sub
+  :thread
+  state/get-thread)
+
+(register-sub
   :threads
   state/get-threads)
 

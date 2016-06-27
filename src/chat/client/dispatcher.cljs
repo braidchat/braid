@@ -275,6 +275,22 @@
       (when-let [bot (:braid/ok reply)]
         (on-complete bot)))))
 
+(defmethod dispatch! :create-upload [_ {:keys [url thread-id group-id]}]
+  (sync/chsk-send! [:braid.server/create-upload
+                    (schema/make-upload {:url url :thread-id thread-id})])
+  (dispatch! :new-message {:content url :thread-id thread-id :group-id group-id}))
+
+(defmethod dispatch! :get-group-uploads [_ {:keys [group-id on-complete]}]
+  (sync/chsk-send!
+    [:braid.server/uploads-in-group group-id]
+    5000
+    (fn [reply]
+      (if-let [uploads (:braid/ok reply)]
+        (on-complete uploads)
+        (store/display-error! :upload-fetch-failed
+                              "Couldn't get uploads in group"
+                              :info)))))
+
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
             :method :get

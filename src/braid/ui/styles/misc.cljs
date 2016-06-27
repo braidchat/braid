@@ -210,6 +210,24 @@
        :border-radius (rem 1)
        :margin-bottom vars/pad}]]]])
 
+(def uploads-page
+  [:.page.uploads
+   [:.uploads
+    {:width "100%"
+     :flex-direction "row"
+     :flex-wrap "wrap"
+     :align-content "space-between"
+     :align-item "bottom"}
+    [:.upload
+     [:.embed
+      {:width (rem 5)
+       :margin 0}]
+     [:.uploaded-thread
+      [:.tags
+       {:display "inline"}]]
+     {:height (rem 3)
+      :margin (em 1)}]]])
+
 (def tag
   [:.tag
    mixins/pill-box])
