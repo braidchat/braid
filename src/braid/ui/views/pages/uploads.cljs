@@ -21,7 +21,7 @@
 (defn uploads-view
   []
   (let [group-id (subscribe [:open-group-id])
-        uploads (r/atom [])
+        uploads (r/atom :initial)
         get-uploads (run! (dispatch! :get-group-uploads
                                      {:group-id @group-id
                                       :on-complete (partial reset! uploads)}))]
@@ -30,10 +30,14 @@
         [:div.page.uploads
          [:div.title "Uploads"]
          [:div.content
-          [:table.uploads
-           [:thead
-            [:tr [:th ""] [:th ""] [:th ""]]]
-           (into [:tbody]
-                 (for [upload @uploads]
-                   ^{:key (upload :id)}
-                   [upload-view upload]))]]]))))
+          (cond
+            (= :initial @uploads) [:div.loading "Loading..."]
+            (empty? @uploads) [:p "No uploads in this group yet"]
+            :else
+            [:table.uploads
+             [:thead
+              [:tr [:th ""] [:th ""] [:th ""]]]
+             (into [:tbody]
+                   (for [upload @uploads]
+                     ^{:key (upload :id)}
+                     [upload-view upload]))])]]))))
