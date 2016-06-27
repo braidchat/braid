@@ -119,10 +119,10 @@
             (do (set-uploading! true)
                 (s3/upload file (fn [url]
                                   (set-uploading! false)
-                                  (dispatch! :new-message
-                                             {:content url
-                                              :group-id (thread :group-id)
-                                              :thread-id (thread :id)}))))))]
+                                  (dispatch! :create-upload
+                                             {:url url
+                                              :thread-id (thread :id)
+                                              :group-id (thread :group-id)}))))))]
 
     (fn [thread]
       (let [{:keys [dragging? uploading? focused?]} @state

@@ -37,3 +37,7 @@
 (defn make-bot [data]
   (merge {:id (uuid/make-random-squuid)}
          data))
+
+(defn make-upload [data]
+  (merge {:id (uuid/make-random-squuid)}
+         data))

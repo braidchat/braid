@@ -13,7 +13,7 @@
             [clojure.set :refer [difference intersection]]
             [chat.shared.util :as util :refer [valid-nickname? valid-tag-name?]]
             [chat.server.email-digest :as email]
-            [braid.common.schema :refer [new-message-valid?]]
+            [braid.common.schema :refer [new-message-valid? upload-valid?]]
             [braid.common.notify-rules :as notify-rules]
             [braid.server.message-format :refer [parse-tags-and-mentions]]
             [braid.server.bots :as bots]
@@ -477,6 +477,19 @@
   (let [bot (db/bot-by-id ?data)]
     (when (and bot (db/user-is-group-admin? user-id (bot :group-id)) ?reply-fn)
       (?reply-fn {:braid/ok bot}))))
+
+(defmethod event-msg-handler :braid.server/create-upload
+  [{:as ev-msg :keys [?data user-id]}]
+  (when (and (upload-valid? ?data)
+          (db/user-in-group? user-id (db/thread-group-id (?data :thread-id))))
+    (db/create-upload! ?data)))
+
+(defmethod event-msg-handler :braid.server/upload-in-group
+  [{:as ev-msg :keys [?data user-id ?reply-fn]}]
+  (when ?reply-fn
+    (if (db/user-in-group? user-id ?data)
+      (?reply-fn {:braid/ok (db/uploads-in-group)})
+      (?reply-fn {:braid/error "Not allowed"}))))
 
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]

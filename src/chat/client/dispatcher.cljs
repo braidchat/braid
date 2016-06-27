@@ -275,6 +275,11 @@
       (when-let [bot (:braid/ok reply)]
         (on-complete bot)))))
 
+(defmethod dispatch! :create-upload [_ {:keys [url thread-id group-id]}]
+  (sync/chsk-send! [:braid.server/create-upload
+                    (schema/make-upload {:url url :thread-id thread-id})])
+  (dispatch! :new-message {:content url :thread-id thread-id :group-id group-id}))
+
 (defmethod dispatch! :check-auth! [_ _]
   (edn-xhr {:uri "/check"
             :method :get
