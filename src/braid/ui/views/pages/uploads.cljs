@@ -5,6 +5,7 @@
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.routes :as routes]
+            [chat.client.views.helpers :as helpers]
             [braid.ui.views.embed :refer [embed-view]]
             [braid.ui.views.pills :as pills]
             [braid.ui.views.thread :as thread]))
@@ -33,7 +34,7 @@
           [:td.uploaded-thread
            [:a {:href (routes/thread-path {:group-id @group-id
                                            :thread-id (upload :thread-id)})}
-            (str "Uploaded at " (upload :uploaded-at))]
+            (str "Uploaded at " (helpers/format-date (upload :uploaded-at)))]
            [:br]
            (if @thread
              [:span "Tagged with " [thread/thread-tags-view @thread]]
