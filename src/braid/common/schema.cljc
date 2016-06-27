@@ -111,3 +111,15 @@
    :invitee-email s/Str
    :group-id s/Uuid
    :group-name s/Str})
+
+(def Upload
+  {:id s/Uuid
+   :thread-id s/Uuid
+   (s/optional-key :uploaded-at) s/Inst
+   :url s/Str})
+(def check-upload! (s/validator Upload))
+(defn upload-valid? [upload]
+  (try (check-upload! upload) true
+    (catch ExceptionInfo e
+      (debugf "Bad upload format: %s" (:error (ex-data e)))
+      false)))
