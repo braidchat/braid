@@ -10,16 +10,13 @@
   (let [page (subscribe [:page])
         group-id (subscribe [:open-group-id])
         thread-id (reaction (first (@page :thread-ids)))
-        all-threads (subscribe [:threads])
-        thread (reaction (if-let [th (get @all-threads @thread-id)]
-                           th
-                           (do (dispatch! :load-threads
-                                          {:thread-ids [@thread-id]})
-                               nil)))]
+        thread (subscribe [:thread] [thread-id])]
     (fn []
       [:div.page.single-thread
        [:div.title "Thread"]
        [:div.content
         (if-let [th @thread]
           [thread-view th]
-          [:div.loading])]])))
+          (do (dispatch! :load-threads
+                         {:thread-ids [@thread-id]})
+            [:div.loading]))]])))
