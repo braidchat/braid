@@ -85,6 +85,15 @@
           :href path}
         "Bots"]))))
 
+(defn group-uploads-view []
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      (let [path (routes/uploads-path {:group-id @group-id})]
+        [:a.group-uploads
+         {:class (when (routes/current-path? path) "active")
+          :href path}
+         "Uploads"]))))
+
 (defn left-header-view []
   (let [group-id (subscribe [:open-group-id])]
     (fn []
@@ -105,6 +114,7 @@
         [subscriptions-link-view]
         [invite-link-view]
         [group-bots-view]
+        [group-uploads-view]
         [edit-profile-link-view]
         [settings-link-view]]])))
 

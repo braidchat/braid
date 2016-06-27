@@ -112,6 +112,9 @@
           [:&.group-bots:after
            (mixins/fontawesome \uf12e)]
 
+          [:&.group-uploads:after
+           (mixins/fontawesome \uf0ee)]
+
           [:&.settings:after
            (mixins/fontawesome \uf013)]]]]]
 

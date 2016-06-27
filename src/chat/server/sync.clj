@@ -484,11 +484,11 @@
           (db/user-in-group? user-id (db/thread-group-id (?data :thread-id))))
     (db/create-upload! ?data)))
 
-(defmethod event-msg-handler :braid.server/upload-in-group
+(defmethod event-msg-handler :braid.server/uploads-in-group
   [{:as ev-msg :keys [?data user-id ?reply-fn]}]
   (when ?reply-fn
     (if (db/user-in-group? user-id ?data)
-      (?reply-fn {:braid/ok (db/uploads-in-group)})
+      (?reply-fn {:braid/ok (db/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
 
 (defmethod event-msg-handler :braid.server/start
