@@ -480,9 +480,12 @@
 
 (defmethod event-msg-handler :braid.server/create-upload
   [{:as ev-msg :keys [?data user-id]}]
-  (when (and (upload-valid? ?data)
-          (db/user-in-group? user-id (db/thread-group-id (?data :thread-id))))
-    (db/create-upload! ?data)))
+  (let [upload (assoc ?data
+                 :uploaded-at (java.util.Date.)
+                 :uploader-id user-id)]
+    (when (and (upload-valid? upload)
+            (db/user-in-group? user-id (db/thread-group-id (upload :thread-id))))
+      (db/create-upload! upload))))
 
 (defmethod event-msg-handler :braid.server/uploads-in-group
   [{:as ev-msg :keys [?data user-id ?reply-fn]}]

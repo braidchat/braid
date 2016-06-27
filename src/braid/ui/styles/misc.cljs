@@ -219,9 +219,13 @@
      :align-content "space-between"
      :align-item "bottom"}
     [:.upload
-     [:.embed {:width (rem 5)}]
-     {;:width (rem 6)
-      :height (rem 3)
+     [:.embed
+      {:width (rem 5)
+       :margin 0}]
+     [:.uploaded-thread
+      [:.tags
+       {:display "inline"}]]
+     {:height (rem 3)
       :margin (em 1)}]]])
 
 (def tag

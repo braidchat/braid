@@ -3,11 +3,12 @@
             [braid.server.db.common :refer :all]))
 
 (defn create-upload!
-  [conn {:keys [id url thread-id]}]
+  [conn {:keys [id url thread-id uploader-id uploaded-at]}]
   (->> {:upload/id id
         :upload/url url
         :upload/thread [:thread/id thread-id]
-        :upload/uploaded-at (java.util.Date.)}
+        :upload/uploaded-by [:user/id uploader-id]
+        :upload/uploaded-at uploaded-at}
        (create-entity! conn)
        db->upload))
 

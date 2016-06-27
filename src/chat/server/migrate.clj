@@ -30,6 +30,12 @@
       :db/valueType :db.type/instant
       :db/cardinality :db.cardinality/one
       :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}
+     {:db/ident :upload/uploaded-by
+      :db/doc "User that uploaded this file"
+      :db/valueType :db.type/ref
+      :db/cardinality :db.cardinality/one
+      :db/id #db/id [:db.part/db]
       :db.install/_attribute :db.part/db}]))
 
 (defn migrate-2016-06-08

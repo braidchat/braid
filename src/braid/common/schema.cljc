@@ -115,7 +115,8 @@
 (def Upload
   {:id s/Uuid
    :thread-id s/Uuid
-   (s/optional-key :uploaded-at) s/Inst
+   :uploader-id s/Uuid
+   :uploaded-at s/Inst
    :url s/Str})
 (def check-upload! (s/validator Upload))
 (defn upload-valid? [upload]
