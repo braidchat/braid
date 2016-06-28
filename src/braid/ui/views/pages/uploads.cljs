@@ -48,6 +48,7 @@
   []
   (let [group-id (subscribe [:open-group-id])
         uploads (r/atom :initial)
+        ; TODO: will need to page this when it gets big?
         get-uploads (run! (dispatch! :get-group-uploads
                                      {:group-id @group-id
                                       :on-complete (partial reset! uploads)}))]
