@@ -22,4 +22,4 @@
               [?u :upload/thread ?t]]
             (d/db conn) group-id upload-pull-pattern)
        (map (comp db->upload first))
-       (sort-by :uploaded-at)))
+       (sort-by :uploaded-at #(compare %2 %1))))
