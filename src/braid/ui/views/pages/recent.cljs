@@ -1,14 +1,18 @@
 (ns braid.ui.views.pages.recent
-  (:require [chat.client.reagent-adapter :refer [subscribe]]
+  (:require [reagent.ratom :refer-macros [run!]]
+            [chat.client.reagent-adapter :refer [subscribe]]
+            [chat.client.dispatcher :refer [dispatch!]]
             [braid.ui.views.threads :refer [threads-view]]))
 
 (defn recent-page-view
   []
   (let [group-id (subscribe [:open-group-id])
         threads (subscribe [:recent-threads] [group-id])
-        user-id (subscribe [:user-id])]
+        user-id (subscribe [:user-id])
+        load-recent (run! (dispatch! :load-recent-threads @group-id))]
     (fn []
-      (let [sorted-threads
+      (let [_ @load-recent
+            sorted-threads
             (->> @threads
                  ; sort by last message sent by logged-in user, most recent first
                  (sort-by
