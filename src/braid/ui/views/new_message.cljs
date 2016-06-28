@@ -271,13 +271,14 @@
                 :style {:display "none"}
                 :on-change (fn [e]
                              (reset! uploading? true)
-                             (s3/upload (aget (.. e -target -files) 0)
-                                        (fn [url]
-                                          (reset! uploading? false)
-                                          (dispatch! :create-upload
-                                                     {:url url
-                                                      :group-id (config :group-id)
-                                                      :thread-id (config :thread-id)}))))}]])))
+                             (s3/upload
+                               (aget (.. e -target -files) 0)
+                               (fn [url]
+                                 (reset! uploading? false)
+                                 (dispatch! :create-upload
+                                            {:url url
+                                             :group-id (config :group-id)
+                                             :thread-id (config :thread-id)}))))}]])))
 
 (defn new-message-view [config]
   [:div.message.new
