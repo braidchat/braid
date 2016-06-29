@@ -1,7 +1,7 @@
 (ns braid.server.db.thread
   (:require [datomic.api :as d]
             [clj-time.core :as t]
-            [clj-time.coerce :refer [to-date-time]]
+            [clj-time.coerce :refer [to-date-time to-long]]
             [braid.server.db.common :refer :all]
             [braid.server.db.tag :as tag]))
 
@@ -163,7 +163,7 @@
              (comp (filter (comp (partial user-can-see-thread? conn user-id) :id))
                    (map (comp db->thread first))
                    (map #(thread-add-last-open-at conn % user-id))))
-       (sort-by (fn [t] (apply max (map :created-at (t :messages))))
+       (sort-by (fn [t] (apply max (map (comp to-long :created-at) (t :messages))))
                 #(compare %2 %1))
        (take 10)))
 
