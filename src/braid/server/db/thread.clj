@@ -162,7 +162,10 @@
        (into ()
              (comp (filter (comp (partial user-can-see-thread? conn user-id) :id))
                    (map (comp db->thread first))
-                   (map #(thread-add-last-open-at conn % user-id))))))
+                   (map #(thread-add-last-open-at conn % user-id))))
+       (sort-by (fn [t] (apply max (map :created-at (t :messages))))
+                #(compare %2 %1))
+       (take 10)))
 
 (defn subscribed-thread-ids-for-user
   [conn user-id]
