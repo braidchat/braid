@@ -1,5 +1,7 @@
 (ns braid.server.db.thread
   (:require [datomic.api :as d]
+            [clj-time.core :as t]
+            [clj-time.coerce :refer [to-date-time]]
             [braid.server.db.common :refer :all]
             [braid.server.db.tag :as tag]))
 
@@ -141,6 +143,26 @@
                       #(thread-add-last-open-at conn % user-id)
                       db->thread
                       first))))))
+
+(defn recent-threads
+  [conn {:keys [user-id group-id]}]
+  (->> (d/q '[:find (pull ?thread pull-pattern)
+              :in $ ?group-id ?cutoff pull-pattern
+              :where
+              [?g :group/id ?group-id]
+              [?thread :thread/group ?g]
+              [?msg :message/thread ?thread]
+              [?msg :message/created-at ?time]
+              [(clj-time.coerce/to-date-time ?time) ?dtime]
+              [(clj-time.core/after? ?dtime ?cutoff)]]
+            (d/db conn)
+            group-id
+            (t/minus (t/now) (t/weeks 1))
+            thread-pull-pattern)
+       (into ()
+             (comp (filter (comp (partial user-can-see-thread? conn user-id) :id))
+                   (map (comp db->thread first))
+                   (map #(thread-add-last-open-at conn % user-id))))))
 
 (defn subscribed-thread-ids-for-user
   [conn user-id]

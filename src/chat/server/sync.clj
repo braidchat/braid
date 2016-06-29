@@ -336,6 +336,12 @@
       (when ?reply-fn
         (?reply-fn {:threads threads :thread-ids thread-ids})))))
 
+(defmethod event-msg-handler :braid.server/load-recent-threads
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
+  (when ?reply-fn
+    (?reply-fn {:braid/ok (db/recent-threads {:group-id ?data
+                                              :user-id user-id})})))
+
 (defmethod event-msg-handler :braid.server/load-threads
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [user-tags (db/tag-ids-for-user user-id)
