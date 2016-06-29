@@ -1,5 +1,6 @@
 (ns braid.ui.views.pages.recent
-  (:require [reagent.ratom :refer-macros [run!]]
+  (:require [reagent.core :as r]
+            [reagent.ratom :refer-macros [run!]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]
             [braid.ui.views.threads :refer [threads-view]]))
@@ -9,7 +10,10 @@
   (let [group-id (subscribe [:open-group-id])
         threads (subscribe [:recent-threads] [group-id])
         user-id (subscribe [:user-id])
-        load-recent (run! (dispatch! :load-recent-threads @group-id))]
+        err (r/atom nil)
+        load-recent (run! (dispatch! :load-recent-threads
+                                     {:group-id @group-id
+                                      :on-error (fn [e] (reset! err e))}))]
     (fn []
       (let [_ @load-recent
             sorted-threads
@@ -23,4 +27,6 @@
                  reverse)]
         [:div.page.recent
           [:div.title "Recent"]
-          [threads-view {:threads sorted-threads}]]))))
+          (if @err
+            [:h2.error "Couldn't load recent threads: " @err]
+            [threads-view {:threads sorted-threads}])]))))
