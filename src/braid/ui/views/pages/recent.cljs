@@ -26,7 +26,7 @@
                          :messages))
                  reverse)]
         [:div.page.recent
-          [:div.title "Recent"]
-          (if @err
-            [:h2.error "Couldn't load recent threads: " @err]
-            [threads-view {:threads sorted-threads}])]))))
+         [:div.title "Recent"]
+         (when @err
+           [:h2.error "Couldn't load recent threads: " @err])
+         [threads-view {:threads sorted-threads}]]))))
