@@ -183,7 +183,8 @@
           (store/set-search-results! query reply)
           (store/set-search-error!))))))
 
-(defmethod dispatch! :load-recent-threads [_ {:keys [group-id on-error]}]
+(defmethod dispatch! :load-recent-threads
+  [_ {:keys [group-id on-error on-complete]}]
   (sync/chsk-send!
     [:braid.server/load-recent-threads group-id]
     5000
@@ -193,7 +194,8 @@
         (cond
           (= reply :chsk/timeout) (on-error "Timed out")
           (:braid/error reply) (on-error (:braid/error reply))
-          :else (on-error "Something went wrong"))))))
+          :else (on-error "Something went wrong")))
+      (on-complete (some? (:braid/ok reply))))))
 
 (defmethod dispatch! :load-threads [_ {:keys [thread-ids on-complete]}]
   (sync/chsk-send!
