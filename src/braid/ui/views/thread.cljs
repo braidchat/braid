@@ -141,8 +141,11 @@
                             (when archived? "archived")])
 
           :on-click (fn [e]
-                      (put! focus-chan (js/Date.))
-                      (dispatch! :mark-thread-read (thread :id)))
+                      (let [sel (.getSelection js/window)
+                            selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
+                        (when (zero? selection-size)
+                          (put! focus-chan (js/Date.))
+                          (dispatch! :mark-thread-read (thread :id)))))
           :on-focus
           (fn [e]
             (set-focused! true))
