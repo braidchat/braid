@@ -48,16 +48,19 @@
   []
   (let [group-id (subscribe [:open-group-id])
         uploads (r/atom :initial)
+        error (r/atom nil)
         ; TODO: will need to page this when it gets big?
         get-uploads (run! (dispatch! :get-group-uploads
                                      {:group-id @group-id
-                                      :on-complete (partial reset! uploads)}))]
+                                      :on-success (partial reset! uploads)
+                                      :on-error (partial reset! error)}))]
     (fn []
       (let [_ @get-uploads]
         [:div.page.uploads
          [:div.title "Uploads"]
          [:div.content
           (cond
+            @error [:div.error @error]
             (= :initial @uploads) [:div.loading "Loading..."]
             (empty? @uploads) [:p "No uploads in this group yet"]
             :else
