@@ -30,15 +30,15 @@
 ;             output:
 ;                text to replace message with
 
-(defn- normalize [s]
+(defn normalize [s]
   (-> (.toLowerCase s)
      (string/replace #"\s" "")))
 
-(defn- simple-matches?
+(defn simple-matches?
   [m s]
   (not= -1 (.indexOf m s)))
 
-(defn- fuzzy-matches? [m s]
+(defn fuzzy-matches? [m s]
   (let [m (normalize m)
         s (normalize s)]
     (or (simple-matches? m s)
