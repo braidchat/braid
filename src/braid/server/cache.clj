@@ -1,4 +1,4 @@
-(ns chat.server.cache
+(ns braid.server.cache
   (:require [environ.core :refer [env]]
             [taoensso.carmine :as car]))
 

@@ -1,4 +1,4 @@
-(ns chat.server.digest
+(ns braid.server.digest
   (:require [clojure.java.io :as io])
   (:import [java.security MessageDigest]
            [org.apache.commons.codec.binary Base64]))

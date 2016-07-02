@@ -1,4 +1,4 @@
-(ns chat.server.handler
+(ns braid.server.handler
   (:gen-class)
   (:require [org.httpkit.server :refer [run-server]]
             [mount.core :as mount :refer [defstate]]
@@ -11,7 +11,7 @@
             [taoensso.timbre :as timbre]
             [clojure.tools.nrepl.server :as nrepl]
             ; requiring router so mount sees state
-            [chat.server.sync :as sync :refer [sync-routes router]]
+            [braid.server.sync :as sync :refer [sync-routes router]]
             [braid.server.routes.client :refer [desktop-client-routes
                                                 mobile-client-routes
                                                 resource-routes]]
@@ -20,7 +20,7 @@
             [braid.server.routes.bots :refer [bot-routes]]
             [environ.core :refer [env]]
             ; requiring so mount sees state
-            [chat.server.email-digest :refer [email-jobs]]))
+            [braid.server.email-digest :refer [email-jobs]]))
 
 ; NOT using config here, b/c it won't have started when this runs
 (if (= (env :environment) "prod")

@@ -1,5 +1,5 @@
-(ns chat.server.migrate
-  (:require [chat.server.db :as db]
+(ns braid.server.migrate
+  (:require [braid.server.db :as db]
             [datomic.api :as d]
             [clojure.string :as string]
             [clojure.set :as set]

@@ -1,4 +1,4 @@
-(ns chat.server.crypto
+(ns braid.server.crypto
   (:require [clojure.string :as string])
   (:import javax.crypto.Mac
            javax.crypto.spec.SecretKeySpec

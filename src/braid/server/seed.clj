@@ -1,5 +1,5 @@
-(ns chat.server.seed
-  (:require [chat.server.db :as db]
+(ns braid.server.seed
+  (:require [braid.server.db :as db]
             [braid.server.conf :refer [config]]))
 
 (defn drop! []

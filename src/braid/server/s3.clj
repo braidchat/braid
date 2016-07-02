@@ -1,4 +1,4 @@
-(ns chat.server.s3
+(ns braid.server.s3
   (:require [clojure.data.json :as json]
             [clojure.string :as string]
             [braid.server.conf :refer [config]])

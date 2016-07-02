@@ -3,12 +3,12 @@
             [compojure.core :refer [GET POST defroutes]]
             [compojure.coercions :refer [as-uuid]]
             [chat.shared.util :refer [valid-nickname?]]
-            [chat.server.db :as db]
-            [chat.server.invite :as invites]
-            [chat.server.identicons :as identicons]
-            [chat.server.crypto :refer [random-nonce]]
-            [chat.server.sync :as sync]
-            [chat.server.s3 :as s3]
+            [braid.server.db :as db]
+            [braid.server.invite :as invites]
+            [braid.server.identicons :as identicons]
+            [braid.server.crypto :refer [random-nonce]]
+            [braid.server.sync :as sync]
+            [braid.server.s3 :as s3]
             [braid.api.embedly :as embedly]
             [braid.server.conf :refer [config]]))
 

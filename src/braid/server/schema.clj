@@ -1,4 +1,4 @@
-(ns chat.server.schema)
+(ns braid.server.schema)
 
 (def schema
  [ ; user

@@ -1,9 +1,9 @@
-(ns chat.server.search
+(ns braid.server.search
   (:require [datomic.api :as d]
             [clojure.string :as string]
             [clojure.set :refer [intersection]]
             [instaparse.core :as insta]
-            [chat.server.db :as db]))
+            [braid.server.db :as db]))
 
 ; TODO: some way to search for a tag with spaces in it?
 (def query-parser

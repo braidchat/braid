@@ -1,5 +1,5 @@
-(ns chat.server.identicons
-  (:require [chat.server.digest :refer [sha256]])
+(ns braid.server.identicons
+  (:require [braid.server.digest :refer [sha256]])
   (:import (java.awt.image BufferedImage AffineTransformOp)
            (java.awt.geom AffineTransform)
            (java.io ByteArrayOutputStream)

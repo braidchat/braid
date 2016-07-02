@@ -1,7 +1,7 @@
 (ns braid.common.notify-rules
   (:require [clojure.set :as set]
             [braid.common.schema :refer [check-new-message! check-rules!]]
-            [chat.server.db :as db]))
+            [braid.server.db :as db]))
 
 (defn tag->group
   [tag-id]

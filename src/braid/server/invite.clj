@@ -1,4 +1,4 @@
-(ns chat.server.invite
+(ns braid.server.invite
   (:require [org.httpkit.client :as http]
             [clojure.string :as string]
             [taoensso.timbre :as timbre]
@@ -10,9 +10,9 @@
             [clostache.parser :as clostache]
             [clj-time.core :as t]
             [clj-time.coerce :as c]
-            [chat.server.cache :refer [cache-set! cache-get cache-del!]]
-            [chat.server.crypto :refer [hmac constant-comp random-nonce]]
-            [chat.server.db :as db]
+            [braid.server.cache :refer [cache-set! cache-get cache-del!]]
+            [braid.server.crypto :refer [hmac constant-comp random-nonce]]
+            [braid.server.db :as db]
             [environ.core :refer [env]]
             [braid.server.conf :refer [config]]))
 

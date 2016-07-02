@@ -1,10 +1,10 @@
-(ns chat.server.db
+(ns braid.server.db
   (:require [datomic.api :as d]
             [mount.core :refer [defstate]]
             [braid.server.conf :refer [config]]
             [clojure.edn :as edn]
             [clojure.string :as string]
-            [chat.server.schema :refer [schema]]
+            [braid.server.schema :refer [schema]]
             [braid.server.db user message group invitation thread tag bot
              upload]))
 

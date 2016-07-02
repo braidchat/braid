@@ -1,4 +1,4 @@
-(ns chat.server.email-digest
+(ns braid.server.email-digest
   (:require [mount.core :refer [defstate]]
             [clojurewerkz.quartzite
              [triggers :as t]
@@ -16,7 +16,7 @@
             [inliner.core :refer [inline-css]]
             [org.httpkit.client :as http]
             [taoensso.timbre :as timbre]
-            [chat.server.db :as db]
+            [braid.server.db :as db]
             [braid.server.message-format :refer [parse-tags-and-mentions]]))
 
 ; finding data
