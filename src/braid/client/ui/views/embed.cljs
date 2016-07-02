@@ -10,7 +10,10 @@
     (str "rgb(" (arr 0) "," (arr 1) "," (arr 2) ")")
     "rgb(150, 150, 150)"))
 
-(defn- website-embed-view [content]
+(defn website-embed-view
+  "View for embedly generic website info. Prefer to use embed-view with a url
+  instead of this directly"
+  [content]
   [:div.content.loaded.website
    {:style {:background-color (url->color (content :original_url))}}
    (if-let [img (get-in content [:images 0])]
@@ -26,21 +29,20 @@
     [:div.title (:title content)]
     [:div.url (:url content)]]])
 
-(defn- video-overlay-view [content]
-  [:div.content
-   [:div.frame
-    {:dangerouslySetInnerHTML {:__html (:html (:media content))}}]])
-
-(defn- content-overlay-view [content])
-
-(defn- video-embed-view [content]
+(defn video-embed-view
+  "View for embedly video info. Prefer to use embed-view with a url instead of
+  this directly"
+  [content]
   [:div.video
    (when-let [img (get-in content [:images 0])]
      [:img {:src (img :url)
             :style {:background-color
                     (arr->rgb (get-in img [:colors 0 :color]))}}])])
 
-(defn- image-embed-view [content]
+(defn image-embed-view
+  "View for embedly image info. Prefer to use embed-view with a url instead of
+  this directly"
+  [content]
   [:div.image
    (when-let [img (get-in content [:images 0])]
      [:img {:src (img :url)
