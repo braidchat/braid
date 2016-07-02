@@ -9,11 +9,11 @@
             [braid.common.util :refer [valid-tag-name?]])
   (:import [goog.events KeyCodes]))
 
-(defn- new-tag-view
+(defn new-tag-view
   [data]
   (let [error (r/atom nil)
         set-error! (fn [err?] (reset! error err?))]
-    (fn []
+    (fn [data]
       [:input.new-tag
        {:class (when error "error")
         :on-key-up
@@ -29,7 +29,7 @@
             (aset (.. e -target) "value" "")))
         :placeholder "New Tag"}])))
 
-(defn- tag-info-view
+(defn tag-info-view
   [tag]
   (let [group-id (subscribe [:open-group-id])
         admin? (subscribe [:current-user-is-group-admin?] [group-id])]
