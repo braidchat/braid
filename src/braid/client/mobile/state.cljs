@@ -1,7 +1,7 @@
-(ns braid.mobile.state
+(ns braid.client.mobile.state
   (:require [re-frame.core :as rf]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [braid.mobile.remote :refer [fake-response]]
+            [braid.client.mobile.remote :refer [fake-response]]
             [braid.common.state :as state]))
 
 ; login

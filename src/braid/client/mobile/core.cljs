@@ -1,8 +1,8 @@
-(ns braid.mobile.core
+(ns braid.client.mobile.core
   (:require [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch]]
-            [braid.mobile.state]
-            [braid.mobile.style :refer [styles]]
+            [braid.client.mobile.state]
+            [braid.client.mobile.style :refer [styles]]
             [braid.ui.views.sidebar]
             [retouch.core :refer [drawer-view swipe-view]]))
 

@@ -1,4 +1,4 @@
-(ns braid.mobile.style
+(ns braid.client.mobile.style
   (:require [garden.core :refer [css]]
             [garden.stylesheet :refer [at-import]]
             [garden.arithmetic :as m]
