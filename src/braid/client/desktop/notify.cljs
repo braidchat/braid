@@ -1,4 +1,4 @@
-(ns braid.desktop.notify)
+(ns braid.client.desktop.notify)
 
 (defn has-notify?
   []

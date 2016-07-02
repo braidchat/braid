@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [reaction]]
             [clojure.string :as string]
-            [braid.desktop.notify :as notify]
+            [braid.client.desktop.notify :as notify]
             [braid.ui.views.pills :refer [tag-pill-view]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]

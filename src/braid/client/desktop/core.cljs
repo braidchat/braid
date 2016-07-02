@@ -1,4 +1,4 @@
-(ns braid.desktop.core
+(ns braid.client.desktop.core
   (:require [reagent.core :as r]
             [chat.client.store :as store]
             [braid.ui.views.app :refer [app-view]]
