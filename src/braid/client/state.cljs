@@ -1,4 +1,4 @@
-(ns braid.common.state
+(ns braid.client.state
   (:require
     [reagent.ratom :include-macros true :refer-macros [reaction]]
     [clojure.set :refer [union intersection subset?]]))

@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [chat.client.store :as store]
-            [braid.common.state :as state]))
+            [braid.client.state :as state]))
 
 (defn reagent->react [component]
   (js/React.createFactory

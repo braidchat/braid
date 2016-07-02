@@ -2,7 +2,7 @@
   (:require [re-frame.core :as rf]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.client.mobile.remote :refer [fake-response]]
-            [braid.common.state :as state]))
+            [braid.client.state :as state]))
 
 ; login
 
