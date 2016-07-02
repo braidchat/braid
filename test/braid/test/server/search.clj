@@ -1,9 +1,9 @@
-(ns chat.test.server.search
+(ns braid.test.server.search
   (:require [clojure.test :refer :all]
             [mount.core :as mount]
             [braid.server.conf :as conf]
-            [chat.server.db :as db]
-            [chat.server.search :as search]))
+            [braid.server.db :as db]
+            [braid.server.search :as search]))
 
 (use-fixtures :each
               (fn [t]

@@ -1,4 +1,4 @@
-(ns chat.test.server.names
+(ns braid.test.server.names
   (:require [clojure.test :refer :all]
             [chat.shared.util :as util]))
 

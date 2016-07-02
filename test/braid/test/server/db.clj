@@ -1,12 +1,12 @@
-(ns chat.test.server.db
+(ns braid.test.server.db
   (:require [clojure.test :refer :all]
             [clojure.set :refer [rename-keys]]
             [mount.core :as mount]
-            [chat.test.server.test-utils :refer [fetch-messages]]
+            [braid.test.server.test-utils :refer [fetch-messages]]
             [braid.server.conf :as conf]
-            [chat.server.db :as db :refer [conn]]
+            [braid.server.db :as db :refer [conn]]
             [braid.common.schema :as schema]
-            [chat.server.search :as search]))
+            [braid.server.search :as search]))
 
 
 (use-fixtures :each

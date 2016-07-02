@@ -1,8 +1,8 @@
-(ns chat.test.server.tags
+(ns braid.test.server.tags
   (:require [clojure.test :refer :all]
             [mount.core :as mount]
             [braid.server.conf :as conf]
-            [chat.server.db :as db]))
+            [braid.server.db :as db]))
 
 
 (use-fixtures :each

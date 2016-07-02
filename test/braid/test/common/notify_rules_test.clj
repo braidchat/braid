@@ -3,7 +3,7 @@
             [mount.core :as mount]
             [braid.server.conf :as conf]
             [schema.core :as s]
-            [chat.server.db :as db]
+            [braid.server.db :as db]
             [braid.common.schema :refer [rules-valid? check-rules!]]
             [braid.common.notify-rules :as rules]))
 

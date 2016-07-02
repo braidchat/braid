@@ -1,6 +1,6 @@
-(ns chat.test.server.test-utils
+(ns braid.test.server.test-utils
   (:require [datomic.api :as d]
-            [chat.server.db :as db]))
+            [braid.server.db :as db]))
 
 (defn- db->message
   [e]
