@@ -3,7 +3,7 @@
             [chat.client.store :as store]
             [chat.client.schema :as schema]
             [clojure.string :as string]
-            [chat.client.views.helpers :refer [id->color debounce]]
+            [braid.client.helpers :refer [id->color debounce]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.emoji :as emoji])
   (:import [goog.events KeyCodes]))

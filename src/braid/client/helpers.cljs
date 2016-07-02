@@ -1,4 +1,4 @@
-(ns chat.client.views.helpers
+(ns braid.client.helpers
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [<! put! chan alts! timeout]]
             [clojure.string :as string]

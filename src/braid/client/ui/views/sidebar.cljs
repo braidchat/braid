@@ -3,8 +3,8 @@
             [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.views.helpers :refer [id->color location element-offset
-                                               get-style]]
+            [braid.client.helpers :refer [id->color location element-offset
+                                          get-style]]
             [chat.client.routes :as routes]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.client.ui.styles.vars :as style-vars]

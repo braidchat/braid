@@ -5,7 +5,7 @@
             [cljs.core.async :refer [chan put!]]
             [chat.client.store :as store]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.views.helpers :as helpers]
+            [braid.client.helpers :as helpers]
             [chat.client.s3 :as s3]
             [braid.client.ui.views.pills :refer [user-pill-view tag-pill-view]]
             [braid.client.ui.views.message :refer [message-view]]

@@ -1,6 +1,6 @@
 (ns braid.client.ui.views.header
   (:require [chat.client.routes :as routes]
-            [chat.client.views.helpers :refer [->color]]
+            [braid.client.helpers :refer [->color]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.client.ui.views.search-bar :refer [search-bar-view]]))
 

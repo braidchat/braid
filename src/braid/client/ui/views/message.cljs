@@ -2,13 +2,12 @@
   (:require [reagent.core :as r]
             [clojure.string :as string]
             [chat.client.store :as store]
-            [chat.client.views.helpers :refer [id->color ->color]]
+            [braid.client.helpers :as helpers :refer [id->color ->color]]
             [chat.client.reagent-adapter :refer [subscribe]]
             [braid.client.ui.views.embed :refer [embed-view]]
             [braid.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [chat.client.emoji :as emoji]
             [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.views.helpers :as helpers]
             [chat.client.routes :as routes]))
 
 (defn abridged-url

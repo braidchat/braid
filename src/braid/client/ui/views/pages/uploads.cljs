@@ -5,7 +5,7 @@
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.routes :as routes]
-            [chat.client.views.helpers :as helpers]
+            [braid.client.helpers :as helpers]
             [braid.client.ui.views.embed :refer [embed-view]]
             [braid.client.ui.views.pills :as pills]
             [braid.client.ui.views.thread :as thread]))

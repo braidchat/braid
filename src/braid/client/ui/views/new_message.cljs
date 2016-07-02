@@ -6,7 +6,7 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
             [chat.client.s3 :as s3]
-            [chat.client.views.helpers :refer [debounce]]
+            [braid.client.helpers :refer [debounce]]
             [braid.client.ui.views.autocomplete :refer [engines]])
   (:import [goog.events KeyCodes]))
 

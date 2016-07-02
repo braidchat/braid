@@ -5,10 +5,9 @@
             [cljs.core.async :as async :refer [<! put! chan alts!]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.client.views.helpers :refer [debounce]]
+            [braid.client.helpers :refer [debounce ->color]]
             [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.routes :as routes]
-            [chat.client.views.helpers :refer [->color]]))
+            [chat.client.routes :as routes]))
 
 (defn search-bar-view
   []

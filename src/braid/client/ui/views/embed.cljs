@@ -1,7 +1,7 @@
 (ns braid.client.ui.views.embed
   (:require [reagent.core :as r]
             [chat.client.xhr :refer [edn-xhr]]
-            [chat.client.views.helpers :refer [->color url->color]]))
+            [braid.client.helpers :refer [->color url->color]]))
 
 (defn- arr->rgb [arr]
   ; until embedly provides color alpha, default to transparent background
