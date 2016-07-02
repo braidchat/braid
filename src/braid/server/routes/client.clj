@@ -8,7 +8,7 @@
             [braid.server.db :as db]
             [braid.server.invite :as invites]))
 
-(defn- get-html [client]
+(defn get-html [client]
   (clostache/render-resource
     (str "public/" client ".html")
     {:algo "sha256"

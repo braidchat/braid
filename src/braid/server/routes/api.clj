@@ -12,7 +12,7 @@
             [braid.server.api.embedly :as embedly]
             [braid.server.conf :refer [config]]))
 
-(defn- edn-response [clj-body]
+(defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
    :body (pr-str clj-body)})
 

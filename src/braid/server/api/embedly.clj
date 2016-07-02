@@ -4,7 +4,9 @@
             [braid.server.conf :refer [config]]
             [clojure.data.json :as json]))
 
-(defn- get-json [url]
+(defn get-json
+  "Don't call this directly, prefer `extract`"
+  [url]
   (->
     @(http/request {:url "https://api.embedly.com/1/extract"
                     :query-params {"key" (config :embedly-key)
