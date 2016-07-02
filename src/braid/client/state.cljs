@@ -65,13 +65,6 @@
    (reaction (->> (get-in @state [:session :user-id])
                   (contains? (set (get-in @state [:groups group-id :admins])))))))
 
-(defn- thread-unseen?
-  [thread]
-  (> (->> (thread :messages)
-          (map :created-at)
-          (apply max))
-     (thread :last-open-at)))
-
 (defn get-open-thread-ids
   [state _]
   (reaction (get-in @state [:user :open-thread-ids])))
@@ -83,6 +76,10 @@
         tags (reaction (@state :tags))
         users (reaction (@state :users))
         thread-in-group? (fn [thread] (= group-id (thread :group-id)))
+        thread-unseen? (fn [thread] (> (->> (thread :messages)
+                                            (map :created-at)
+                                            (apply max))
+                                       (thread :last-open-at)))
         unseen-threads (reaction
                          (->>
                            (select-keys @threads @open-thread-ids)
