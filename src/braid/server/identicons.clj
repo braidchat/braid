@@ -1,5 +1,5 @@
 (ns braid.server.identicons
-  (:require [braid.server.digest :refer [sha256]])
+  (:require [braid.server.digest :refer [sha256-digest]])
   (:import (java.awt.image BufferedImage AffineTransformOp)
            (java.awt.geom AffineTransform)
            (java.io ByteArrayOutputStream)
@@ -68,7 +68,7 @@
 ;; Entry points
 (defn uuid->bytes
   [id]
-  (->> id str sha256 seq (map (partial + 128))))
+  (->> id str .getBytes sha256-digest seq (map (partial + 128))))
 
 (defn id->identicon-data-url
   ([id] (id->identicon-data-url id :default))
