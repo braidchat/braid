@@ -10,19 +10,21 @@
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.desktop.notify :as notify]))
 
-(defn- extract-tag-ids [text]
+(defn extract-tag-ids
+  [text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
                              (map second))]
     (->> mentioned-names
          (map store/name->open-tag-id)
          (remove nil?))))
 
-(defn- extract-user-ids [text]
+(defn extract-user-ids
+  [text]
   (let [mentioned-names (->> (re-seq util/sigiled-nickname-re text)
                              (map second))
-        nick->id (reduce (fn [m [id {:keys [nickname]}]] (assoc m nickname id))
+        nick->id (reduce (fn [m {:keys [id nickname]}] (assoc m nickname id))
                          {}
-                         (@store/app-state :users))]
+                         (store/all-users))]
     (->> mentioned-names
          (map nick->id)
          (filter store/user-in-open-group?)
