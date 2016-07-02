@@ -1,14 +1,14 @@
 (ns braid.client.ui.views.message
   (:require [reagent.core :as r]
             [clojure.string :as string]
-            [chat.client.store :as store]
+            [braid.client.store :as store]
             [braid.client.helpers :as helpers :refer [id->color ->color]]
-            [chat.client.reagent-adapter :refer [subscribe]]
+            [braid.client.reagent-adapter :refer [subscribe]]
             [braid.client.ui.views.embed :refer [embed-view]]
             [braid.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
-            [chat.client.emoji :as emoji]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.routes :as routes]))
+            [braid.client.emoji :as emoji]
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.routes :as routes]))
 
 (defn abridged-url
   "Given a full url, returns 'domain.com/*.png' where"

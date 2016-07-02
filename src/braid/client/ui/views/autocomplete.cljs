@@ -1,11 +1,11 @@
 (ns braid.client.ui.views.autocomplete
   (:require [clj-fuzzy.metrics :as fuzzy]
-            [chat.client.store :as store]
-            [chat.client.schema :as schema]
+            [braid.client.store :as store]
+            [braid.client.schema :as schema]
             [clojure.string :as string]
             [braid.client.helpers :refer [id->color debounce]]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.emoji :as emoji])
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.emoji :as emoji])
   (:import [goog.events KeyCodes]))
 
 ; fn that returns results that will be shown if pattern matches

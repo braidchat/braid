@@ -1,4 +1,4 @@
-(ns chat.client.clj-highlighter)
+(ns braid.client.clj-highlighter)
 
 (defn install-highlighter
   []

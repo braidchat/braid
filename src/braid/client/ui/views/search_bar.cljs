@@ -3,11 +3,11 @@
   (:require [reagent.core :as r]
             [clojure.string :as string]
             [cljs.core.async :as async :refer [<! put! chan alts!]]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.store :as store]
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.store :as store]
             [braid.client.helpers :refer [debounce ->color]]
-            [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.routes :as routes]))
+            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.routes :as routes]))
 
 (defn search-bar-view
   []

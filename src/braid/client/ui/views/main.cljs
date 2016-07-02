@@ -1,6 +1,6 @@
 (ns braid.client.ui.views.main
-  (:require [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.routes :as routes]
+  (:require [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.routes :as routes]
             [braid.client.ui.views.error-banner :refer [error-banner-view]]
             [braid.client.ui.views.sidebar :refer [sidebar-view]]
             [braid.client.ui.views.header :refer [header-view]]

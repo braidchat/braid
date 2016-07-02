@@ -1,8 +1,8 @@
 (ns braid.client.ui.views.pages.users
   (:require [reagent.core :as r]
-            [chat.client.reagent-adapter :refer [subscribe]]
+            [braid.client.reagent-adapter :refer [subscribe]]
             [braid.client.ui.views.pills :refer [user-pill-view]]
-            [chat.client.dispatcher :refer [dispatch!]]))
+            [braid.client.dispatcher :refer [dispatch!]]))
 
 (defn user-view
   [user admin?]

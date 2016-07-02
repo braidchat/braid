@@ -1,11 +1,11 @@
 (ns braid.client.ui.views.new-message
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
-            [chat.client.reagent-adapter :refer [subscribe]]
+            [braid.client.reagent-adapter :refer [subscribe]]
             [cljs.core.async :as async :refer [<! put! chan alts!]]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.store :as store]
-            [chat.client.s3 :as s3]
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.store :as store]
+            [braid.client.s3 :as s3]
             [braid.client.helpers :refer [debounce]]
             [braid.client.ui.views.autocomplete :refer [engines]])
   (:import [goog.events KeyCodes]))

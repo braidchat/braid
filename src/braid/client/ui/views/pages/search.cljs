@@ -2,9 +2,9 @@
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction run!]]
             [braid.client.ui.views.thread :refer [thread-view]]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.store :as store]))
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.store :as store]))
 
 (defn search-page-view
   []

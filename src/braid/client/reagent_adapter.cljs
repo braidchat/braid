@@ -1,7 +1,7 @@
-(ns chat.client.reagent-adapter
+(ns braid.client.reagent-adapter
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [chat.client.store :as store]
+            [braid.client.store :as store]
             [braid.client.state :as state]))
 
 (defn reagent->react [component]

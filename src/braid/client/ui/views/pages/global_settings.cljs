@@ -4,9 +4,9 @@
             [clojure.string :as string]
             [braid.client.desktop.notify :as notify]
             [braid.client.ui.views.pills :refer [tag-pill-view]]
-            [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.store :as store]
+            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.store :as store]
             [braid.common.util :refer [valid-nickname?]]
             [braid.client.ui.views.upload :refer [avatar-upload-view]])
   (:import [goog.events KeyCodes]))

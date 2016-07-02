@@ -1,13 +1,13 @@
-(ns chat.client.dispatcher
+(ns braid.client.dispatcher
   (:require [clojure.string :as string]
             [cljs-uuid-utils.core :as uuid]
-            [chat.client.store :as store]
-            [chat.client.sync :as sync]
-            [chat.client.schema :as schema]
+            [braid.client.store :as store]
+            [braid.client.sync :as sync]
+            [braid.client.schema :as schema]
             [braid.common.util :as util]
-            [chat.client.router :as router]
-            [chat.client.routes :as routes]
-            [chat.client.xhr :refer [edn-xhr]]
+            [braid.client.router :as router]
+            [braid.client.routes :as routes]
+            [braid.client.xhr :refer [edn-xhr]]
             [braid.client.desktop.notify :as notify]))
 
 (defn- extract-tag-ids [text]

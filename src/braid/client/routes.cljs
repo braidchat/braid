@@ -1,7 +1,7 @@
-(ns chat.client.routes
+(ns braid.client.routes
   (:require [secretary.core :as secretary :refer-macros [defroute]]
-            [chat.client.store :as store]
-            [chat.client.router :as router])
+            [braid.client.store :as store]
+            [braid.client.router :as router])
   (:import [goog.history Html5History]
            [goog Uri]))
 

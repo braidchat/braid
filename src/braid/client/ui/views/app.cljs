@@ -1,6 +1,6 @@
 (ns braid.client.ui.views.app
   (:require [reagent.core :as r]
-            [chat.client.reagent-adapter :refer [subscribe]]
+            [braid.client.reagent-adapter :refer [subscribe]]
             [braid.client.ui.views.styles :refer [styles-view]]
             [braid.client.ui.views.main :refer [main-view]]
             [braid.client.ui.views.login :refer [login-view]]))

@@ -1,4 +1,4 @@
-(ns chat.client.router
+(ns braid.client.router
   (:require [secretary.core :as secretary]
             [goog.history.EventType :as EventType]
             [goog.events :as events])

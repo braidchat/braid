@@ -1,7 +1,7 @@
 (ns braid.client.ui.views.upload
   (:require [reagent.core :as r]
-            [chat.client.s3 :as s3]
-            [chat.client.store :as store]))
+            [braid.client.s3 :as s3]
+            [braid.client.store :as store]))
 
 (def max-avatar-size (* 2 1024 1024))
 

@@ -1,6 +1,6 @@
 (ns braid.client.ui.views.embed
   (:require [reagent.core :as r]
-            [chat.client.xhr :refer [edn-xhr]]
+            [braid.client.xhr :refer [edn-xhr]]
             [braid.client.helpers :refer [->color url->color]]))
 
 (defn- arr->rgb [arr]

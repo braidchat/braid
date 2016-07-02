@@ -1,4 +1,4 @@
-(ns chat.client.store
+(ns braid.client.store
   (:require [cljs-utils.core :refer [flip]]
             [cljs-uuid-utils.core :as uuid]
             [taoensso.timbre :as timbre :refer-macros [errorf]]

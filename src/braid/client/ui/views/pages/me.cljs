@@ -1,5 +1,5 @@
 (ns braid.client.ui.views.pages.me
-  (:require [chat.client.routes :as routes]))
+  (:require [braid.client.routes :as routes]))
 
 (defn me-page-view
   []

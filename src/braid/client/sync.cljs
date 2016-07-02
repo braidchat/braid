@@ -1,8 +1,8 @@
-(ns chat.client.sync
+(ns braid.client.sync
   (:require [taoensso.sente  :as sente :refer [cb-success?]]
             [taoensso.timbre :as timbre :refer-macros [debugf]]
             [goog.string :as gstring]
-            [chat.client.store :as store]
+            [braid.client.store :as store]
             [goog.string.format]))
 
 ; Change to :debug to get detailed info in dev

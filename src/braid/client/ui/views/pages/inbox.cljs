@@ -1,8 +1,8 @@
 (ns braid.client.ui.views.pages.inbox
-  (:require [chat.client.reagent-adapter :refer [subscribe]]
+  (:require [braid.client.reagent-adapter :refer [subscribe]]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.client.ui.views.threads :refer [threads-view]]
-            [chat.client.dispatcher :refer [dispatch!]]))
+            [braid.client.dispatcher :refer [dispatch!]]))
 
 (defn clear-inbox-button-view []
   (let [group-id (subscribe [:open-group-id])

@@ -1,9 +1,9 @@
-(ns chat.client.s3
+(ns braid.client.s3
   (:require [cljs-uuid-utils.core :as uuid]
             [clojure.string :refer [split]]
             [goog.events :as events]
             [taoensso.timbre :as timbre :refer-macros [errorf]]
-            [chat.client.xhr :refer [edn-xhr ajax-xhr]])
+            [braid.client.xhr :refer [edn-xhr ajax-xhr]])
   (:import [goog.net XhrIo EventType]))
 
 (defn upload [file on-complete]

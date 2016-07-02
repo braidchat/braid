@@ -1,8 +1,8 @@
 (ns braid.client.ui.views.pages.group-explore
   (:require [reagent.core :as r]
             [clojure.string :as string]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.reagent-adapter :refer [subscribe]])
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.reagent-adapter :refer [subscribe]])
   (:import [goog.events KeyCodes]))
 
 (defn invitations-view

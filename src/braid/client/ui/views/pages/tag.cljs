@@ -2,9 +2,9 @@
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction run!]]
             [clojure.string :as string]
-            [chat.client.store :as store]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.reagent-adapter :refer [subscribe]]
+            [braid.client.store :as store]
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.reagent-adapter :refer [subscribe]]
             [braid.client.ui.views.threads :refer [threads-view]]
             [braid.client.ui.views.pills :refer [tag-pill-view subscribe-button-view]]))
 

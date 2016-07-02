@@ -1,6 +1,6 @@
 (ns braid.client.ui.views.error-banner
-  (:require [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.store :as store]))
+  (:require [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.store :as store]))
 
 (defn error-banner-view []
   (let [errors (subscribe [:errors])]

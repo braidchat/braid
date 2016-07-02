@@ -1,5 +1,5 @@
 (ns braid.client.ui.views.pages.invite
-  (:require [chat.client.routes :as routes]
+  (:require [braid.client.routes :as routes]
             [braid.client.ui.views.group-invite :refer [group-invite-view]]))
 
 (defn invite-page-view

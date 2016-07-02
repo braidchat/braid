@@ -1,4 +1,4 @@
-(ns chat.client.schema
+(ns braid.client.schema
   (:require [cljs-uuid-utils.core :as uuid]))
 
 

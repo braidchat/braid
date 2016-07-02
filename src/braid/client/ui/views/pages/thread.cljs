@@ -1,9 +1,9 @@
 (ns braid.client.ui.views.pages.thread
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [reaction]]
-            [chat.client.reagent-adapter :refer [subscribe]]
+            [braid.client.reagent-adapter :refer [subscribe]]
             [braid.client.ui.views.thread :refer [thread-view]]
-            [chat.client.dispatcher :refer [dispatch!]]))
+            [braid.client.dispatcher :refer [dispatch!]]))
 
 (defn single-thread-view
   []

@@ -1,10 +1,10 @@
 (ns braid.client.ui.views.pages.group-settings
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [reagent.core :as r]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.reagent-adapter :refer [subscribe]]
-            [chat.client.s3 :as s3]
-            [chat.client.routes :as routes]
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.s3 :as s3]
+            [braid.client.routes :as routes]
             [braid.client.ui.views.upload :refer [avatar-upload-view]]))
 
 (defn leave-group-view

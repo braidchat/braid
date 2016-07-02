@@ -1,4 +1,4 @@
-(ns chat.client.emoji)
+(ns braid.client.emoji)
 
 (declare unicode ascii)
 
