@@ -2,7 +2,7 @@
   (:require [clojure.string :as string]
             [compojure.core :refer [GET POST defroutes]]
             [compojure.coercions :refer [as-uuid]]
-            [chat.shared.util :refer [valid-nickname?]]
+            [braid.common.util :refer [valid-nickname?]]
             [braid.server.db :as db]
             [braid.server.invite :as invites]
             [braid.server.identicons :as identicons]
@@ -20,7 +20,7 @@
   [email group-id]
   (let [id (db/uuid)
         avatar (identicons/id->identicon-data-url id)
-        ; XXX: copied from chat.shared.util/nickname-rd
+        ; XXX: copied from braid.common.util/nickname-rd
         disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
         nick (-> (first (string/split email #"@"))
                  (string/replace disallowed-chars ""))

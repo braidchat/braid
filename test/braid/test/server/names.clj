@@ -1,6 +1,6 @@
 (ns braid.test.server.names
   (:require [clojure.test :refer :all]
-            [chat.shared.util :as util]))
+            [braid.common.util :as util]))
 
 (deftest valid-user-names
   (testing "Names can contain any letters, digits, hypens, and underscores"

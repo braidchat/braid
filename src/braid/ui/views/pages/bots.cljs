@@ -5,7 +5,7 @@
             [braid.ui.views.pills :refer [user-pill-view]]
             [chat.client.dispatcher :refer [dispatch!]]
             [braid.ui.views.upload :refer [avatar-upload-view]]
-            [chat.shared.util :refer [bot-name-re]]))
+            [braid.common.util :refer [bot-name-re]]))
 
 (defn bot-view
   [bot]

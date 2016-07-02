@@ -4,7 +4,7 @@
             [chat.client.store :as store]
             [chat.client.sync :as sync]
             [chat.client.schema :as schema]
-            [chat.shared.util :as util]
+            [braid.common.util :as util]
             [chat.client.router :as router]
             [chat.client.routes :as routes]
             [chat.client.xhr :refer [edn-xhr]]

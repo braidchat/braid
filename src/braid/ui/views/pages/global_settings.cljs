@@ -7,7 +7,7 @@
             [chat.client.reagent-adapter :refer [subscribe]]
             [chat.client.dispatcher :refer [dispatch!]]
             [chat.client.store :as store]
-            [chat.shared.util :refer [valid-nickname?]]
+            [braid.common.util :refer [valid-nickname?]]
             [braid.ui.views.upload :refer [avatar-upload-view]])
   (:import [goog.events KeyCodes]))
 

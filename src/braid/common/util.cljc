@@ -1,4 +1,4 @@
-(ns chat.shared.util
+(ns braid.common.util
   (:require [clojure.string :as string]))
 
 ; TODO: we should probably define this by a whitelist.  Unicode ranges?

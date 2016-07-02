@@ -6,7 +6,7 @@
             [chat.client.dispatcher :refer [dispatch!]]
             [braid.ui.views.pills :refer [tag-pill-view subscribe-button-view]]
             [braid.ui.views.pages.tag :refer [edit-description-view]]
-            [chat.shared.util :refer [valid-tag-name?]])
+            [braid.common.util :refer [valid-tag-name?]])
   (:import [goog.events KeyCodes]))
 
 (defn- new-tag-view

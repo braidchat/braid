@@ -11,7 +11,7 @@
             [braid.server.invite :as invites]
             [braid.server.digest :as digest]
             [clojure.set :refer [difference intersection]]
-            [chat.shared.util :as util :refer [valid-nickname? valid-tag-name?]]
+            [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
             [braid.server.email-digest :as email]
             [braid.common.schema :refer [new-message-valid? upload-valid?]]
             [braid.common.notify-rules :as notify-rules]
