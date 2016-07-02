@@ -1,4 +1,4 @@
-(ns braid.common.notify-rules
+(ns braid.server.notify-rules
   (:require [clojure.set :as set]
             [braid.common.schema :refer [check-new-message! check-rules!]]
             [braid.server.db :as db]))

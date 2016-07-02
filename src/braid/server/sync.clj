@@ -14,7 +14,7 @@
             [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
             [braid.server.email-digest :as email]
             [braid.common.schema :refer [new-message-valid? upload-valid?]]
-            [braid.common.notify-rules :as notify-rules]
+            [braid.server.notify-rules :as notify-rules]
             [braid.server.message-format :refer [parse-tags-and-mentions]]
             [braid.server.bots :as bots]
             [braid.server.db.common :refer [bot->display]]

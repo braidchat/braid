@@ -1,11 +1,11 @@
-(ns braid.test.common.notify-rules-test
+(ns braid.test.server.notify-rules-test
   (:require [clojure.test :refer :all]
             [mount.core :as mount]
             [braid.server.conf :as conf]
             [schema.core :as s]
             [braid.server.db :as db]
             [braid.common.schema :refer [rules-valid? check-rules!]]
-            [braid.common.notify-rules :as rules]))
+            [braid.server.notify-rules :as rules]))
 
 (s/set-fn-validation! true)
 
