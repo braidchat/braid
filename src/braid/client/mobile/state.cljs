@@ -23,8 +23,6 @@
 
 (rf/register-sub :active-group state/get-active-group)
 
-(rf/register-handler :set-active-group-id! state/set-active-group-id!)
-
 (rf/register-sub :active-group-inbox-threads
   (fn [state _]
     (let [group-id (reaction (:open-group-id @state))
