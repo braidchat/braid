@@ -3,9 +3,9 @@
             [compojure.core :refer [PUT defroutes]]
             [ring.middleware.transit :as transit]
             [taoensso.timbre :as timbre]
-            [chat.server.db :as db]
+            [braid.server.db :as db]
             [braid.common.schema :as schema]
-            [chat.server.sync :as sync])
+            [braid.server.sync :as sync])
   (:import [org.apache.commons.codec.binary Base64]))
 
 (defn basic-auth-req

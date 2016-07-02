@@ -44,7 +44,7 @@
                  [re-frame "0.7.0"]
                  [garden "1.3.2"]]
 
-  :main chat.server.handler
+  :main braid.server.handler
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]]
             [lein-figwheel "0.5.3"]]
@@ -58,23 +58,19 @@
   :cljsbuild {:builds
               [
                {:id "desktop-dev"
-                :figwheel {:on-jsload "braid.desktop.core/reload"}
-                :source-paths ["src/chat/client"
-                               "src/chat/shared"
-                               "src/braid/ui"
+                :figwheel {:on-jsload "braid.client.desktop.core/reload"}
+                :source-paths ["src/braid/client"
                                "src/braid/common"]
-                :compiler {:main braid.desktop.core
+                :compiler {:main braid.client.desktop.core
                            :asset-path "/js/desktop/out"
                            :output-to "resources/public/js/desktop/out/braid.js"
                            :output-dir "resources/public/js/desktop/out"
                            :verbose true}}
 
                {:id "desktop-release"
-                :source-paths ["src/chat/client"
-                               "src/chat/shared"
-                               "src/braid/ui"
+                :source-paths ["src/braid/client"
                                "src/braid/common"]
-                :compiler {:main braid.desktop.core
+                :compiler {:main braid.client.desktop.core
                            :asset-path "/js/desktop/out"
                            :output-to "resources/public/js/desktop/out/braid.js"
                            :output-dir "resources/public/js/desktop/out_prod"
@@ -83,20 +79,18 @@
 
                {:id "mobile-dev"
                 :figwheel true
-                :source-paths ["src/braid/mobile"
-                               "src/braid/ui"
+                :source-paths ["src/braid/client"
                                "src/retouch"]
-                :compiler {:main braid.mobile.core
+                :compiler {:main braid.client.mobile.core
                            :asset-path "/js/mobile/out"
                            :output-to "resources/public/js/mobile/out/braid.js"
                            :output-dir "resources/public/js/mobile/out"
                            :verbose true}}
 
                {:id "mobile-release"
-                :source-paths ["src/braid/mobile"
-                               "src/braid/ui"
+                :source-paths ["src/braid/client"
                                "src/retouch"]
-                :compiler {:main braid.mobile.core
+                :compiler {:main braid.client.mobile.core
                            :asset-path "/js/mobile/out"
                            :output-to "resources/public/js/mobile/out/braid.js"
                            :output-dir "resources/public/js/mobile/out_prod"

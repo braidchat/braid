@@ -4,9 +4,9 @@
             [compojure.route :refer [resources]]
             [clostache.parser :as clostache]
             [braid.server.conf :refer [config]]
-            [chat.server.digest :as digest]
-            [chat.server.db :as db]
-            [chat.server.invite :as invites]))
+            [braid.server.digest :as digest]
+            [braid.server.db :as db]
+            [braid.server.invite :as invites]))
 
 (defn- get-html [client]
   (clostache/render-resource

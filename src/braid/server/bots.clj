@@ -2,7 +2,7 @@
   (:require [org.httpkit.client :as http]
             [taoensso.timbre :as timbre]
             [cognitect.transit :as transit]
-            [chat.server.crypto :as crypto])
+            [braid.server.crypto :as crypto])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]))
 
 (defn ->transit

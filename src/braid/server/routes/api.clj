@@ -2,14 +2,14 @@
   (:require [clojure.string :as string]
             [compojure.core :refer [GET POST defroutes]]
             [compojure.coercions :refer [as-uuid]]
-            [chat.shared.util :refer [valid-nickname?]]
-            [chat.server.db :as db]
-            [chat.server.invite :as invites]
-            [chat.server.identicons :as identicons]
-            [chat.server.crypto :refer [random-nonce]]
-            [chat.server.sync :as sync]
-            [chat.server.s3 :as s3]
-            [braid.api.embedly :as embedly]
+            [braid.common.util :refer [valid-nickname?]]
+            [braid.server.db :as db]
+            [braid.server.invite :as invites]
+            [braid.server.identicons :as identicons]
+            [braid.server.crypto :refer [random-nonce]]
+            [braid.server.sync :as sync]
+            [braid.server.s3 :as s3]
+            [braid.server.api.embedly :as embedly]
             [braid.server.conf :refer [config]]))
 
 (defn- edn-response [clj-body]
@@ -20,7 +20,7 @@
   [email group-id]
   (let [id (db/uuid)
         avatar (identicons/id->identicon-data-url id)
-        ; XXX: copied from chat.shared.util/nickname-rd
+        ; XXX: copied from braid.common.util/nickname-rd
         disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
         nick (-> (first (string/split email #"@"))
                  (string/replace disallowed-chars ""))
