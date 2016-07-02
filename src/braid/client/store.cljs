@@ -438,9 +438,9 @@
 
 ; inbox
 
-(defn open-threads [state]
-  (let [current-group-id (state :open-group-id)
-        open-threads (-> (state :threads)
+(defn open-threads []
+  (let [current-group-id (@app-state :open-group-id)
+        open-threads (-> (@app-state :threads)
                         (select-keys (get-in @app-state [:user :open-thread-ids]))
                          vals
                          (->> (filter (fn [thread]
@@ -449,5 +449,3 @@
                                       (into #{} (map group-for-tag) (thread :tag-ids))
                                       current-group-id))))))]
       open-threads))
-
-

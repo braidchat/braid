@@ -58,7 +58,7 @@
 (defmethod dispatch! :new-message [_ data]
   (when-not (string/blank? (data :content))
     (let [message (schema/make-message
-                    {:user-id (get-in @store/app-state [:session :user-id])
+                    {:user-id (store/current-user-id)
                      :content (identify-mentions (data :content))
                      :thread-id (data :thread-id)
                      :group-id (data :group-id)
@@ -348,7 +348,7 @@
                            (store/clear-session!))}))
 
 (defmethod dispatch! :clear-inbox [_ _]
-  (let [open-thread-ids (map :id (store/open-threads @store/app-state))]
+  (let [open-thread-ids (map :id (store/open-threads))]
     (doseq [id open-thread-ids]
       (dispatch! :hide-thread {:thread-id id}))))
 
