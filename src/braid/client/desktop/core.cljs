@@ -1,7 +1,7 @@
 (ns braid.client.desktop.core
   (:require [reagent.core :as r]
             [chat.client.store :as store]
-            [braid.ui.views.app :refer [app-view]]
+            [braid.client.ui.views.app :refer [app-view]]
             [chat.client.clj-highlighter :as highlighter]
             [chat.client.dispatcher :as dispatcher]
             [chat.client.router :as router]))

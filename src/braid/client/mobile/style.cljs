@@ -3,13 +3,13 @@
             [garden.stylesheet :refer [at-import]]
             [garden.arithmetic :as m]
             [garden.units :refer [rem vw vh em]]
-            [braid.ui.styles.body]
-            [braid.ui.styles.message]
-            [braid.ui.styles.misc]
-            [braid.ui.styles.imports]
-            [braid.ui.styles.thread]
-            [braid.ui.styles.sidebar]
-            [braid.ui.styles.mixins :as mixins]))
+            [braid.client.ui.styles.body]
+            [braid.client.ui.styles.message]
+            [braid.client.ui.styles.misc]
+            [braid.client.ui.styles.imports]
+            [braid.client.ui.styles.thread]
+            [braid.client.ui.styles.sidebar]
+            [braid.client.ui.styles.mixins :as mixins]))
 
 (def styles
   (let [pad (rem 1) ; (vw 5)
@@ -23,7 +23,7 @@
                          :flex-grow}
           :vendors ["webkit"]}
 
-         braid.ui.styles.imports/imports
+         braid.client.ui.styles.imports/imports
 
          [:body
           {:touch-action "none"}]
@@ -130,12 +130,12 @@
                 :border-radius "0.5rem"
                 :vertical-align "middle"}]
 
-              braid.ui.styles.sidebar/badge
+              braid.client.ui.styles.sidebar/badge
 
               [:.badge
                {:font-size "0.8rem"}]])]]
 
-         braid.ui.styles.misc/tag
+         braid.client.ui.styles.misc/tag
 
          [:.page
           {:position "absolute"
@@ -157,8 +157,8 @@
 
            ]]
 
-         (braid.ui.styles.thread/head pad)
-         (braid.ui.styles.thread/messages pad)
+         (braid.client.ui.styles.thread/head pad)
+         (braid.client.ui.styles.thread/messages pad)
 
-         braid.ui.styles.body/body
-         braid.ui.styles.message/message)))
+         braid.client.ui.styles.body/body
+         braid.client.ui.styles.message/message)))

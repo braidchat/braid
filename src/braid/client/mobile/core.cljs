@@ -3,7 +3,7 @@
             [re-frame.core :refer [subscribe dispatch]]
             [braid.client.mobile.state]
             [braid.client.mobile.style :refer [styles]]
-            [braid.ui.views.sidebar]
+            [braid.client.ui.views.sidebar]
             [retouch.core :refer [drawer-view swipe-view]]))
 
 (enable-console-print!)
@@ -56,7 +56,7 @@
   [:div.main
    [drawer-view
     [:div.sidebar
-     [braid.ui.views.sidebar/groups-view {:subscribe subscribe}]]]
+     [braid.client.ui.views.sidebar/groups-view {:subscribe subscribe}]]]
    [inbox-view]])
 
 (defn login-flow-view []
