@@ -37,26 +37,13 @@
               ^{:key (tag :id)}
               [tag-pill-view (tag :id)]))])})))
 
-(defn- unseen? [message thread]
-  (> (:created-at message)
-     (thread :last-open-at)))
-
-(defn- thread-private? [thread]
-  (and
-    (not (thread :new?))
-    (empty? (thread :tag-ids))
-    (seq (thread :mentioned-ids))))
-
-(defn- thread-limbo? [thread]
-  (and
-    (not (thread :new?))
-    (empty? (thread :tag-ids))
-    (empty? (thread :mentioned-ids))))
-
 (defn messages-view [thread]
   ; Closing over thread-id, but the only time a thread's id changes is the new
   ; thread box, which doesn't have messages anyway
   (let [messages (subscribe [:messages-for-thread (thread :id)])
+
+        unseen? (fn [message thread] (> (:created-at message)
+                                        (thread :last-open-at)))
 
         scroll-to-bottom!
         (fn [component]
@@ -105,6 +92,16 @@
         set-uploading! (fn [bool] (swap! state assoc :uploading? bool))
         set-focused! (fn [bool] (swap! state assoc :focused? bool))
         set-dragging! (fn [bool] (swap! state assoc :dragging? bool))
+
+        thread-private? (fn [thread] (and
+                                       (not (thread :new?))
+                                       (empty? (thread :tag-ids))
+                                       (seq (thread :mentioned-ids))))
+
+        thread-limbo? (fn [thread] (and
+                                     (not (thread :new?))
+                                     (empty? (thread :tag-ids))
+                                     (empty? (thread :mentioned-ids))))
 
         ; Closing over thread-id, but the only time a thread's id changes is the new
         ; thread box, which is always open
