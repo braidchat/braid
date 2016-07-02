@@ -1,4 +1,4 @@
-(ns braid.api.embedly
+(ns braid.server.api.embedly
   (:require [org.httpkit.client :as http]
             [taoensso.timbre :as timbre]
             [braid.server.conf :refer [config]]

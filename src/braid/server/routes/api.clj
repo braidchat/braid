@@ -9,7 +9,7 @@
             [braid.server.crypto :refer [random-nonce]]
             [braid.server.sync :as sync]
             [braid.server.s3 :as s3]
-            [braid.api.embedly :as embedly]
+            [braid.server.api.embedly :as embedly]
             [braid.server.conf :refer [config]]))
 
 (defn- edn-response [clj-body]
