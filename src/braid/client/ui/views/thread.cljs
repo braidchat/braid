@@ -197,13 +197,16 @@
 
          [:div.card
           [:div.head
-           (when (and (not new?) @open?)
+           (when (not new?)
              [:div.controls
-              [:div.control.close
-               {:title "Close"
-                :on-click (fn [_]
-                            (dispatch! :hide-thread {:thread-id (thread :id)}))}]
-
+              (if @open?
+                [:div.control.close
+                 {:title "Close"
+                  :on-click (fn [_]
+                              (dispatch! :hide-thread (thread :id)))}]
+                [:div.control.unread
+                 {:title "Mark Unread"
+                  :on-click (fn [_] (dispatch! :reopen-thread (thread :id)))}])
               [:div.control.mute
                {:title "Mute"
                 :on-click (fn [_] (dispatch! :unsub-thread

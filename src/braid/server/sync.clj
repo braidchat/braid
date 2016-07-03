@@ -265,6 +265,11 @@
   (db/user-hide-thread! user-id ?data)
   (chsk-send! user-id [:braid.client/hide-thread ?data]))
 
+(defmethod event-msg-handler :braid.server/show-thread
+  [{:as ev-msg :keys [?data user-id]}]
+  (db/user-show-thread! user-id ?data)
+  (chsk-send! user-id [:braid.client/show-thread (db/thread-by-id ?data)]))
+
 (defmethod event-msg-handler :braid.server/unsub-thread
   [{:as ev-msg :keys [?data user-id]}]
   (db/user-unsubscribe-from-thread! user-id ?data)

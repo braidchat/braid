@@ -44,6 +44,12 @@
      conn
      [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
+(defn user-show-thread!
+  [conn user-id thread-id]
+  @(d/transact
+     conn
+     [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
+
 (defn thread-last-open-at [conn thread user-id]
   (let [user-hides-at (->> (d/q
                              '[:find [?inst ...]

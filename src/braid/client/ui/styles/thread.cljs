@@ -132,6 +132,10 @@
        [:&:after
         (mixins/fontawesome \uf00d)]]
 
+      [:&.unread
+       [:&:after
+        (mixins/fontawesome \uf0e2)]]
+
       [:&.mute
        {:margin-top (m/* pad 0.5)}
        {:display "none"}
