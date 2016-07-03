@@ -253,6 +253,9 @@
 (defn hide-thread! [thread-id]
   (transact! [:user :open-thread-ids] #(disj % thread-id)))
 
+(defn show-thread! [thread-id]
+  (transact! [:user :open-thread-ids] #(conj % thread-id)))
+
 (defn id->thread [thread-id]
   (get-in @app-state [:threads thread-id]))
 

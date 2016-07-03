@@ -87,9 +87,13 @@
         (store/display-error! (str :failed-to-send (message :id)) "Message failed to send!")
         (store/set-message-failed! message)))))
 
-(defmethod dispatch! :hide-thread [_ data]
-  (sync/chsk-send! [:braid.server/hide-thread (data :thread-id)])
-  (store/hide-thread! (data :thread-id)))
+(defmethod dispatch! :hide-thread [_ thread-id]
+  (sync/chsk-send! [:braid.server/hide-thread thread-id])
+  (store/hide-thread! thread-id))
+
+(defmethod dispatch! :reopen-thread [_ thread-id]
+  (store/show-thread! thread-id)
+  (sync/chsk-send! [:braid.server/show-thread thread-id]))
 
 (defmethod dispatch! :unsub-thread [_ data]
   (sync/chsk-send! [:braid.server/unsub-thread (data :thread-id)])
@@ -228,6 +232,11 @@
   (store/update-thread-last-open-at thread-id)
   (sync/chsk-send! [:braid.server/mark-thread-read thread-id]))
 
+(defmethod dispatch! :clear-inbox [_ _]
+  (let [open-thread-ids (map :id (store/open-threads))]
+    (doseq [id open-thread-ids]
+      (dispatch! :hide-thread id))))
+
 (defmethod dispatch! :invite [_ data]
   (let [invite (schema/make-invitation data)]
     (sync/chsk-send! [:braid.server/invite-to-group invite])))
@@ -347,11 +356,6 @@
                            (dispatch! :set-login-state! :login-form)
                            (store/clear-session!))}))
 
-(defmethod dispatch! :clear-inbox [_ _]
-  (let [open-thread-ids (map :id (store/open-threads))]
-    (doseq [id open-thread-ids]
-      (dispatch! :hide-thread {:thread-id id}))))
-
 (defn check-client-version [server-checksum]
   (when (not= (aget js/window "checksum") server-checksum)
     (store/display-error! :client-out-of-date "Client out of date - please refresh" :info)))
@@ -469,3 +473,7 @@
 (defmethod sync/event-handler :braid.client/hide-thread
   [[_ thread-id]]
   (store/hide-thread! thread-id))
+
+(defmethod sync/event-handler :braid.client/show-thread
+  [[_ thread]]
+  (store/add-open-thread! thread))
