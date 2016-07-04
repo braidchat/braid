@@ -7,6 +7,7 @@
             [compojure.core :refer [GET POST routes defroutes context]]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
             [taoensso.timbre :as timbre :refer [debugf]]
+            [taoensso.truss :refer [have]]
             [clojure.string :as string]
             [braid.server.db :as db]
             [braid.server.search :as search]
@@ -312,6 +313,14 @@
           (db/tag-set-description! tag-id description)
           (broadcast-group-change
             group-id [:braid.client/tag-descrption-change [tag-id description]]))))))
+
+(defmethod event-msg-handler :braid.server/retract-tag
+  [{:as ev-msg :keys [?data user-id]}]
+  (let [tag-id (have util/uuid? ?data)
+        group-id (db/tag-group-id tag-id)]
+    (when (db/user-is-group-admin? user-id group-id)
+      (db/retract-tag! tag-id)
+      (broadcast-group-change group-id [:braid.client/retract-tag tag-id]))))
 
 (defmethod event-msg-handler :braid.server/create-group
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
