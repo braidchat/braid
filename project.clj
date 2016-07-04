@@ -49,7 +49,7 @@
   :main braid.server.handler
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]]
-            [lein-figwheel "0.5.3"]]
+            [lein-figwheel "0.5.4-5"]]
 
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
