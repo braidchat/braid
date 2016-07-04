@@ -32,15 +32,15 @@
   (debugf "Unhandled event: %s" event))
 
 (defmethod event-msg-handler :chsk/state
-  [{:as ev-msg :keys [?data]}]
-  (if (?data :first-open?)
-    (debugf "Channel socket successfully established!")
-    (do
-      (debugf "Channel socket state change: %s" ?data)
-      (if (not (:open? ?data))
-        (store/display-error! :disconnected "Disconnected" :warn)
-        (store/clear-error! :disconnected))))
-  (event-handler [:socket/connected ?data]))
+  [{:as ev-msg [old-state new-state] :?data}]
+  (if (new-state :first-open?)
+      (debugf "Channel socket successfully established!")
+      (do
+        (debugf "Channel socket state change: %s" new-state)
+        (if (not (:open? new-state))
+          (store/display-error! :disconnected "Disconnected" :warn)
+          (store/clear-error! :disconnected))))
+  (event-handler [:socket/connected new-state]))
 
 (defmethod event-msg-handler :chsk/recv
   [{:as ev-msg :keys [event ?data]}]
