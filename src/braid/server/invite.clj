@@ -92,7 +92,6 @@
 
 (defn upload-avatar
   [f]
-  ; TODO: resize avatar to something reasonable
   (let [creds {:access-key (config :aws-access-key)
                :secret-key (config :aws-secret-key)}
         ext (case (f :content-type)
