@@ -10,6 +10,10 @@
        (create-entity! conn)
        db->tag))
 
+(defn retract-tag!
+  [conn tag-id]
+  @(d/transact conn [[:db.fn/retractEntity [:tag/id tag-id]]]))
+
 (defn tag-group-id [conn tag-id]
   (-> (d/pull (d/db conn) [{:tag/group [:group/id]}] [:tag/id tag-id])
       (get-in [:tag/group :group/id])))

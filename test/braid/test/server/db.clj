@@ -433,7 +433,7 @@
                          :content "foobar"
                          :mentioned-user-ids [(user-1 :id)]
                          :mentioned-tag-ids []})
-    (testing "user leaving group removes mentios of that user"
+    (testing "user leaving group removes mentions of that user"
       (is (= #{(user-1 :id)}
              (:mentioned-ids (db/thread-by-id thread-id))))
       (db/user-leave-group! (user-1 :id) (group :id))
@@ -458,7 +458,10 @@
     (db/user-subscribe-to-group-tags! (user :id) (group :id))
     (is (= (set (db/subscribed-tag-ids-for-user (user :id)))
            (db/tag-ids-for-user (user :id))
-           (set (map :id group-tags))))))
+           (set (map :id group-tags))))
+    (testing "can remove tags"
+      (db/retract-tag! (:id (first group-tags)))
+      (is (= 2 (count (db/group-tags (group :id))))))))
 
 (deftest user-preferences
   (testing "Can set and retrieve preferences"
