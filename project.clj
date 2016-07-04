@@ -12,18 +12,19 @@
                  [ring-cors "0.1.7"]
                  [compojure "1.5.0"]
                  [environ "1.0.2"]
-                 [com.taoensso/timbre "4.3.1" :exclusions [org.clojure/tools.reader]]
+                 [com.taoensso/timbre "4.4.0" :exclusions [org.clojure/tools.reader com.taoensso/encore com.taoensso/truss]]
                  [crypto-password "0.2.0"]
                  [clj-time "0.11.0"]
                  [instaparse "1.4.1"]
-                 [com.taoensso/carmine "2.12.2"]
-                 [clj-aws-s3 "0.3.10" :exclusions [joda-time]]
+                 [com.taoensso/carmine "2.12.2" :exclusions [com.taoensso/encore]]
+                 [clj-aws-s3 "0.3.10" :exclusions [joda-time org.apache.httpcomponents/httpclient com.fasterxml.jackson.core/jackson-core]]
                  [image-resizer "0.1.9"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [inliner "0.1.0"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [mount "0.1.10"]
-                 [ring-transit "0.1.4"]
+                 [com.cognitect/transit-clj "0.8.285" :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                 [ring-transit "0.1.6" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  ;client
                  [org.clojure/clojurescript "1.9.36"]
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]
@@ -34,10 +35,11 @@
                  [clj-fuzzy "0.3.1"]
                  [reagent "0.5.1"]
                  [cljsjs/husl "6.0.1-0"]
+                 [com.cognitect/transit-cljs "0.8.239"]
                  ;shared
-                 [org.clojure/tools.reader "1.0.0-beta1"]
-                 [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
-                 [com.taoensso/sente "1.8.1" :exclusions [org.clojure/tools.reader]]
+                 [org.clojure/tools.reader "1.0.0-beta3"]
+                 [org.clojure/core.async "0.2.385" :exclusions [org.clojure/tools.reader]]
+                 [com.taoensso/sente "1.9.0-beta3" :exclusions [org.clojure/tools.reader taoensso.timbre]]
                  [prismatic/schema "1.1.0"]
 
                  ;mobile
@@ -102,7 +104,8 @@
   :profiles {:dev {:dependencies [[com.datomic/datomic-free "0.9.5201"
                                    :exclusions [joda-time
                                                 com.amazonaws/aws-java-sdk
-                                                com.google.guava/guava]]
+                                                com.google.guava/guava
+                                                org.slf4j/slf4j-api]]
                                   [figwheel-sidecar "0.5.0-6"
                                    :exclusions
                                    [org.clojure/google-closure-library-third-party
