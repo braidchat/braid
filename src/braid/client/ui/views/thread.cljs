@@ -160,7 +160,7 @@
                       (= KeyCodes.ESC (.-keyCode e)))
               (.preventDefault e)
               (.stopPropagation e)
-              (dispatch! :hide-thread {:thread-id (thread :id)})))
+              (dispatch! :hide-thread (thread :id))))
 
           :on-paste
           (fn [e]
