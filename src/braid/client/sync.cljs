@@ -1,5 +1,6 @@
 (ns braid.client.sync
   (:require [taoensso.sente  :as sente :refer [cb-success?]]
+            [taoensso.sente.packers.transit :as sente-transit]
             [taoensso.timbre :as timbre :refer-macros [debugf]]
             [goog.string :as gstring]
             [braid.client.store :as store]
@@ -10,10 +11,17 @@
 
 (defn make-socket! []
   (let [domain (aget js/window "api_domain")
+        packer (sente-transit/get-transit-packer
+                 :json
+                 {}
+                 ; Need to decode UUIDs as clojurescript uuids, not
+                 ; cognitect.transit or schema gets upset
+                 {:handlers {"u" cljs.core/uuid}})
         {:keys [chsk ch-recv send-fn state]}
         (sente/make-channel-socket! "/chsk"
                                     {:host domain
-                                     :path "/chsk"})]
+                                     :path "/chsk"
+                                     :packer packer})]
     (def chsk       chsk)
     (def ch-chsk    ch-recv)
     (def chsk-send! send-fn)
