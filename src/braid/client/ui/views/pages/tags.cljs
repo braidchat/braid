@@ -29,6 +29,11 @@
             (aset (.. e -target) "value" "")))
         :placeholder "New Tag"}])))
 
+(defn delete-tag-view
+  [tag]
+  [:button {:on-click (fn [_] (dispatch! :retract-tag (tag :id)))}
+   "Delete Tag"])
+
 (defn tag-info-view
   [tag]
   (let [group-id (subscribe [:open-group-id])
@@ -47,7 +52,9 @@
            "One day, a tag description will be here."
            (tag :description))]
         (when @admin?
-          [edit-description-view tag]) ]])))
+          [:div
+           [edit-description-view tag]
+           [delete-tag-view tag]])]])))
 
 (defn tags-page-view
   []

@@ -128,6 +128,10 @@
   (sync/chsk-send!
     [:braid.server/set-tag-description {:tag-id tag-id :description desc}]))
 
+(defmethod dispatch! :retract-tag [_ tag-id]
+  (store/remove-tag! tag-id)
+  (sync/chsk-send! [:braid.server/retract-tag tag-id]))
+
 (defmethod dispatch! :create-group [_ group]
   (let [group (schema/make-group group)]
     (sync/chsk-send!
@@ -449,6 +453,10 @@
 (defmethod sync/event-handler :braid.client/tag-descrption-change
   [[_ [tag-id new-description]]]
   (store/update-tag-description! tag-id new-description))
+
+(defmethod sync/event-handler :braid.client/retract-tag
+  [[ _ tag-id]]
+  (store/remove-tag! tag-id))
 
 (defmethod sync/event-handler :braid.client/new-intro
   [[_ [group-id intro]]]

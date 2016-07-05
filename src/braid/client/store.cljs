@@ -305,6 +305,9 @@
   (transact! [:tags (tag :id)] (constantly tag)))
 
 (defn remove-tag! [tag-id]
+  (transact! [:threads] (partial into {}
+                                 (map (fn [[t-id t]]
+                                        [t-id (update t :tag-ids disj tag-id)]))))
   (transact! [:tags] #(dissoc % tag-id)))
 
 (defn update-tag-description! [tag-id desc]
