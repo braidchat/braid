@@ -141,6 +141,8 @@
                       (let [sel (.getSelection js/window)
                             selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
                         (when (zero? selection-size)
+                          (.preventDefault e)
+                          (.stopPropagation e)
                           (put! focus-chan (js/Date.))
                           (dispatch! :mark-thread-read (thread :id)))))
           :on-focus
@@ -202,15 +204,32 @@
               (if @open?
                 [:div.control.close
                  {:title "Close"
-                  :on-click (fn [_]
+                  :on-click (fn [e]
+                              ; Need to preventDefault & propagation when using
+                              ; divs as controls, otherwise divs higher up also
+                              ; get click events
+                              (.preventDefault e)
+                              (.stopPropagation e)
                               (dispatch! :hide-thread (thread :id)))}]
                 [:div.control.unread
                  {:title "Mark Unread"
-                  :on-click (fn [_] (dispatch! :reopen-thread (thread :id)))}])
+                  :on-click (fn [e]
+                              ; Need to preventDefault & propagation when using
+                              ; divs as controls, otherwise divs higher up also
+                              ; get click events
+                              (.preventDefault e)
+                              (.stopPropagation e)
+                              (dispatch! :reopen-thread (thread :id)))}])
               [:div.control.mute
                {:title "Mute"
-                :on-click (fn [_] (dispatch! :unsub-thread
-                                             {:thread-id (thread :id)}))}]])
+                :on-click (fn [e]
+                            ; Need to preventDefault & propagation when using
+                            ; divs as controls, otherwise divs higher up also
+                            ; get click events
+                            (.preventDefault e)
+                            (.stopPropagation e)
+                            (dispatch! :unsub-thread
+                                       {:thread-id (thread :id)}))}]])
 
            [thread-tags-view thread]]
 
