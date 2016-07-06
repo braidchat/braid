@@ -38,7 +38,8 @@
 (def bot-name-re
   #"(?:\w|\d){1,30}")
 
-(defn uuid?
-  [u]
-  #?(:clj (instance? java.util.UUID u)
-     :cljs (cljs.core/uuid? u)))
+; cljs already has cljs.core/uuid?
+#?(:clj
+   (defn uuid?
+     [u]
+     (instance? java.util.UUID u)))
