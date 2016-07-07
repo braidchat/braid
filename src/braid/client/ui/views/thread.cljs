@@ -141,8 +141,7 @@
                       (let [sel (.getSelection js/window)
                             selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
                         (when (zero? selection-size)
-                          (.preventDefault e)
-                          (.stopPropagation e)
+                          (helpers/stop-event! e)
                           (put! focus-chan (js/Date.))
                           (dispatch! :mark-thread-read (thread :id)))))
           :on-focus
@@ -160,8 +159,7 @@
                         (= KeyCodes.X (.-keyCode e))
                         (.-ctrlKey e))
                       (= KeyCodes.ESC (.-keyCode e)))
-              (.preventDefault e)
-              (.stopPropagation e)
+              (helpers/stop-event! e)
               (dispatch! :hide-thread (thread :id))))
 
           :on-paste
@@ -173,8 +171,7 @@
 
           :on-drag-over
           (fn [e]
-            (.stopPropagation e)
-            (.preventDefault e)
+            (helpers/stop-event! e)
             (set-dragging! true))
 
           :on-drag-leave
@@ -208,8 +205,7 @@
                               ; Need to preventDefault & propagation when using
                               ; divs as controls, otherwise divs higher up also
                               ; get click events
-                              (.preventDefault e)
-                              (.stopPropagation e)
+                              (helpers/stop-event! e)
                               (dispatch! :hide-thread (thread :id)))}]
                 [:div.control.unread
                  {:title "Mark Unread"
@@ -217,8 +213,7 @@
                               ; Need to preventDefault & propagation when using
                               ; divs as controls, otherwise divs higher up also
                               ; get click events
-                              (.preventDefault e)
-                              (.stopPropagation e)
+                              (helpers/stop-event! e)
                               (dispatch! :reopen-thread (thread :id)))}])
               [:div.control.mute
                {:title "Mute"
@@ -226,8 +221,7 @@
                             ; Need to preventDefault & propagation when using
                             ; divs as controls, otherwise divs higher up also
                             ; get click events
-                            (.preventDefault e)
-                            (.stopPropagation e)
+                            (helpers/stop-event! e)
                             (dispatch! :unsub-thread
                                        {:thread-id (thread :id)}))}]])
 
