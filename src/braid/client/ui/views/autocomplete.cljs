@@ -64,7 +64,8 @@
                              :action (fn [])
                              :message-transform
                              (fn [text]
-                               (string/replace text pattern (str "/" (b :nickname) " ")))
+                               (string/replace text pattern
+                                               (str "/" (b :nickname) " ")))
                              :html
                              (constantly
                                [:div.bot-match
@@ -138,26 +139,30 @@
                         :html
                         (fn []
                           [:div.tag-match
-                           [:div.color-block {:style {:backgroundColor (id->color (tag :id))}}]
+                           [:div.color-block
+                            {:style {:backgroundColor (id->color (tag :id))}}]
                            [:div.name (tag :name)]
                            [:div.extra (tag :description)]])}))
                 (cons (when-not (or exact-match? (string/blank? query))
-                        (let [tag (schema/make-tag {:name query
-                                                    :group-id (store/open-group-id)
-                                                    :group-name (store/open-group-name)})]
+                        (let [tag (schema/make-tag
+                                    {:name query
+                                     :group-id (store/open-group-id)
+                                     :group-name (store/open-group-name)})]
                           {:key (constantly (tag :id))
                            :action
                            (fn []
-                             (dispatch! :create-tag [(tag :name) (tag :group-id) (tag :id)]))
+                             (dispatch! :create-tag
+                                        [(tag :name) (tag :group-id) (tag :id)]))
                            :message-transform
                            (fn [text]
                              (string/replace text pattern (str "#" (tag :name) " ")))
                            :html
                            (fn []
                              [:div.tag-match
-                              [:div.color-block{:style {:backgroundColor (id->color (tag :id))}}]
+                              [:div.color-block
+                               {:style {:backgroundColor (id->color (tag :id))}}]
                               [:div.name (str "Create tag " (tag :name))]
-                              [:div.extra (:name (store/id->group (tag :group-id)))]])})))
+                              [:div.extra
+                               (:name (store/id->group (tag :group-id)))]])})))
                 (remove nil?)
-                reverse)))))
-   ])
+                reverse)))))])

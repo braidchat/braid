@@ -136,8 +136,9 @@
         clear-force-close! (fn []
                              (swap! state assoc :force-close? false))
 
-        update-thread-text! (fn [thread-id text] (put! thread-text-chan {:thread-id thread-id
-                                                                         :content text}))
+        update-thread-text! (fn [thread-id text] (put! thread-text-chan
+                                                       {:thread-id thread-id
+                                                        :content text}))
         set-text! (fn [text]
                     (let [text (.slice text 0 5000)]
                       (swap! state assoc :text text)
@@ -222,7 +223,8 @@
                      (highlight-first!)
                      (recur)))))
            (go (loop []
-                 (let [[v ch] (alts! [throttled-thread-text-chan thread-text-kill-chan])]
+                 (let [[v ch] (alts! [throttled-thread-text-chan
+                                      thread-text-kill-chan])]
                    (if (= ch throttled-thread-text-chan)
                      (do
                        (dispatch! :new-message-text v)
