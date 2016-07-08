@@ -14,14 +14,16 @@
   (fn [state _]
     (reaction (boolean (:user @state)))))
 
-(rf/register-sub :groups state/get-groups)
+(comment ; XXX: new state uses multimethod
+ (rf/register-sub :groups state/get-groups)
 
-(rf/register-sub :group-unread-count state/get-group-unread-count)
+ (rf/register-sub :group-unread-count state/get-group-unread-count)
 
 
-; current group
+ ; current group
 
-(rf/register-sub :active-group state/get-active-group)
+ (rf/register-sub :active-group state/get-active-group)
+ )
 
 (rf/register-sub :active-group-inbox-threads
   (fn [state _]
