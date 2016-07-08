@@ -81,6 +81,10 @@
      [:div.result
       "No Results"])])
 
+(defn inside-code-block?
+  [txt]
+  (odd? (count (re-seq #"`" txt))))
+
 (defn wrap-autocomplete [config]
   (let [autocomplete-chan (chan)
         kill-chan (chan)
@@ -218,9 +222,10 @@
            (go (loop []
                  (let [[text ch] (alts! [throttled-autocomplete-chan kill-chan])]
                    (when (= ch throttled-autocomplete-chan)
-                     (set-results!
-                       (seq (mapcat (fn [e] (e text)) engines)))
-                     (highlight-first!)
+                     (when-not (inside-code-block? text)
+                       (set-results!
+                         (seq (mapcat (fn [e] (e text)) engines)))
+                       (highlight-first!))
                      (recur)))))
            (go (loop []
                  (let [[v ch] (alts! [throttled-thread-text-chan
