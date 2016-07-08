@@ -39,25 +39,15 @@ lein repl
 
 Inside the REPL:
 
-Set up the database schema (first time only):
+Start things running
 ```clojure
-(chat.server.db/init!)
+(dev-main 5555) ; start main server on port 5555
 ```
 
 Seed some data (first time only):
 ```clojure
 (require 'chat.server.seed)
 (chat.server.seed/seed!)
-```
-
-Run the web server:
-```clojure
-(chat.server.handler/start-servers! 5555)
-```
-
-Run the websocket server:
-```clojure
-(chat.server.sync/start-router!)
 ```
 
 Don't navigate to the website just yet.
