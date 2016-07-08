@@ -9,7 +9,7 @@
 (defn subscribe-button-view
   [tag-id]
   (let [tag-id-atom (r/atom tag-id)
-        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag] [tag-id-atom])]
+        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag?] [tag-id-atom])]
     (r/create-class
       {:display-name "subscribe-button-view"
        :component-will-receive-props
@@ -32,7 +32,7 @@
   (let [tag-id-atom (r/atom tag-id)
         tag (subscribe [:tag] [tag-id-atom])
         open-group-id (subscribe [:open-group-id])
-        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag] [tag-id-atom])]
+        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag?] [tag-id-atom])]
     (r/create-class
       {:display-name "tag-pill-view"
        :component-will-receive-props

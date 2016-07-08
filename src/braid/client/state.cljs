@@ -144,7 +144,7 @@
   [state _]
   (reaction (vals (get-in @state [:tags]))))
 
-(defmethod subscription :user-subscribed-to-tag ; TODO: this should end in a question mark
+(defmethod subscription :user-subscribed-to-tag?
   [state [_ tag-id]]
   (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))
 
@@ -153,7 +153,7 @@
   (reaction
     (into ()
           (comp
-            (filter (fn [tag] @(subscription state [:user-subscribed-to-tag  (tag :id)])))
+            (filter (fn [tag] @(subscription state [:user-subscribed-to-tag?  (tag :id)])))
             (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id)))))
           (vals (get-in @state [:tags])))))
 
