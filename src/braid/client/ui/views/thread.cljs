@@ -1,7 +1,7 @@
 (ns braid.client.ui.views.thread
   (:require [clojure.string :as string]
             [reagent.core :as r]
-            [braid.client.reagent-adapter :refer [reagent->react subscribe]]
+            [braid.client.reagent-adapter :refer [subscribe]]
             [cljs.core.async :refer [chan put!]]
             [braid.client.store :as store]
             [braid.client.dispatcher :refer [dispatch!]]

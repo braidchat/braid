@@ -4,11 +4,6 @@
             [braid.client.store :as store]
             [braid.client.state :as state]))
 
-(defn reagent->react [component]
-  (js/React.createFactory
-    (r/reactify-component
-      component)))
-
 (defonce subscriptions (atom {}))
 
 (defn register-sub [key-v handler-fn]
