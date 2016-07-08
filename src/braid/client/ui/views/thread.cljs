@@ -1,4 +1,5 @@
 (ns braid.client.ui.views.thread
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [clojure.string :as string]
             [reagent.core :as r]
             [braid.client.reagent-adapter :refer [subscribe]]
@@ -45,6 +46,9 @@
         unseen? (fn [message thread] (> (:created-at message)
                                         (thread :last-open-at)))
 
+        kill-chan (chan)
+        embed-update-chan (chan)
+
         scroll-to-bottom!
         (fn [component]
           (when-let [messages (r/dom-node component)]
@@ -52,7 +56,17 @@
     (r/create-class
       {:display-name "thread"
 
-       :component-did-mount scroll-to-bottom!
+       :component-did-mount
+       (fn [c]
+         (scroll-to-bottom! c)
+         (go (loop []
+               (let [[_ ch] (alts! [embed-update-chan kill-chan])]
+                 (when (not= ch kill-chan)
+                   (js/setTimeout (fn [] (scroll-to-bottom! c)) 0)
+                   (recur))))))
+
+       :component-will-unmount
+       (fn [] (put! kill-chan (js/Date.)))
 
        :component-did-update scroll-to-bottom!
 
@@ -83,7 +97,7 @@
             (doall
               (for [message sorted-messages]
                 ^{:key (message :id)}
-                [message-view message])))])})))
+                [message-view message embed-update-chan])))])})))
 
 (defn thread-view [thread]
   (let [state (r/atom {:dragging? false

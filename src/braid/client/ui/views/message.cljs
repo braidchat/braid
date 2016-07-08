@@ -180,7 +180,7 @@
          (interleave (repeat " "))
          rest)))
 
-(defn message-view [message]
+(defn message-view [message embed-update-chan]
   (let [sender (subscribe [:user (message :user-id)])]
     (r/create-class
       {:component-did-mount
@@ -191,7 +191,7 @@
          (when-let [PR (aget js/window "PR")]
            ((aget PR "prettyPrint"))))
        :reagent-render
-       (fn [message]
+       (fn [message embed-update-chan]
          (let [sender-path (if (@sender :bot?)
                              (routes/bots-path {:group-id (routes/current-group)})
                              (routes/user-page-path {:group-id (routes/current-group)
@@ -222,5 +222,5 @@
             (into [:div.content] (format-message (message :content)))
 
             (when-let [url (first (helpers/extract-urls (message :content)))]
-              [embed-view url])]))})))
+              [embed-view url embed-update-chan])]))})))
 
