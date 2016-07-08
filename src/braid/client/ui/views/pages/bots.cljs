@@ -1,7 +1,7 @@
 (ns braid.client.ui.views.pages.bots
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [reaction]]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.ui.views.pills :refer [user-pill-view]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.ui.views.upload :refer [avatar-upload-view]]

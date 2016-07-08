@@ -6,7 +6,7 @@
             [braid.client.helpers :refer [id->color location element-offset
                                           get-style]]
             [braid.client.routes :as routes]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.ui.styles.vars :as style-vars]
             [goog.events :as events]
             [goog.style :as gstyle])

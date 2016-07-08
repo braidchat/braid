@@ -1,5 +1,5 @@
 (ns braid.client.ui.views.main
-  (:require [braid.client.reagent-adapter :refer [subscribe]]
+  (:require [braid.client.state :refer [subscribe]]
             [braid.client.routes :as routes]
             [braid.client.ui.views.error-banner :refer [error-banner-view]]
             [braid.client.ui.views.sidebar :refer [sidebar-view]]

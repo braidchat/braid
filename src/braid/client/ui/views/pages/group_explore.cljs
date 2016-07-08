@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [clojure.string :as string]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.reagent-adapter :refer [subscribe]])
+            [braid.client.state :refer [subscribe]])
   (:import [goog.events KeyCodes]))
 
 (defn invitations-view

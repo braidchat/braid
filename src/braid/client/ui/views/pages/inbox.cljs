@@ -1,5 +1,5 @@
 (ns braid.client.ui.views.pages.inbox
-  (:require [braid.client.reagent-adapter :refer [subscribe]]
+  (:require [braid.client.state :refer [subscribe]]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.client.ui.views.threads :refer [threads-view]]
             [braid.client.dispatcher :refer [dispatch!]]))

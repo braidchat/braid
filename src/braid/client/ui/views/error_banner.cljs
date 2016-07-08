@@ -1,5 +1,5 @@
 (ns braid.client.ui.views.error-banner
-  (:require [braid.client.reagent-adapter :refer [subscribe]]
+  (:require [braid.client.state :refer [subscribe]]
             [braid.client.store :as store]))
 
 (defn error-banner-view []

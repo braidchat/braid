@@ -2,7 +2,7 @@
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.client.ui.views.pills :refer [user-pill-view]]
             [braid.client.ui.views.threads :refer [threads-view]]
-            [braid.client.reagent-adapter :refer [subscribe]]))
+            [braid.client.state :refer [subscribe]]))
 
 (defn user-page-view
   []

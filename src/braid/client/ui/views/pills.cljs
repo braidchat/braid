@@ -4,7 +4,7 @@
             [braid.client.routes :as routes]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :refer [id->color]]
-            [braid.client.reagent-adapter :refer [subscribe]]))
+            [braid.client.state :refer [subscribe]]))
 
 (defn subscribe-button-view
   [tag-id]

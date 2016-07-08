@@ -3,7 +3,7 @@
             [clojure.string :as string]
             [braid.client.store :as store]
             [braid.client.helpers :as helpers :refer [id->color ->color]]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.ui.views.embed :refer [embed-view]]
             [braid.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [braid.client.emoji :as emoji]

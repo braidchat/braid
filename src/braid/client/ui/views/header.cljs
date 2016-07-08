@@ -1,7 +1,7 @@
 (ns braid.client.ui.views.header
   (:require [braid.client.routes :as routes]
             [braid.client.helpers :refer [->color]]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.ui.views.search-bar :refer [search-bar-view]]))
 
 (defn inbox-page-button-view []

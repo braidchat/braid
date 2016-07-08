@@ -6,7 +6,7 @@
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.store :as store]
             [braid.client.helpers :refer [debounce ->color]]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.routes :as routes]))
 
 (defn search-bar-view

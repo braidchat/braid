@@ -4,7 +4,7 @@
             [clojure.string :as string]
             [braid.client.store :as store]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.ui.views.threads :refer [threads-view]]
             [braid.client.ui.views.pills :refer [tag-pill-view subscribe-button-view]]))
 

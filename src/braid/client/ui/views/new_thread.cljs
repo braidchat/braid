@@ -1,5 +1,5 @@
 (ns braid.client.ui.views.new-thread
-  (:require [braid.client.reagent-adapter :refer [subscribe]]
+  (:require [braid.client.state :refer [subscribe]]
             [braid.client.ui.views.thread :refer [thread-view]]))
 
 (defn new-thread-view [opts]

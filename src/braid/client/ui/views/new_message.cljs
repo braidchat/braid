@@ -1,7 +1,7 @@
 (ns braid.client.ui.views.new-message
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [cljs.core.async :as async :refer [<! put! chan alts!]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.store :as store]

@@ -1,13 +1,28 @@
 (ns braid.client.state
-  (:require
-    [reagent.ratom :include-macros true :refer-macros [reaction]]
-    [clojure.set :refer [union intersection subset?]]))
+  (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
+            [braid.client.store :as store]
+            [clojure.set :refer [union intersection subset?]]))
 
 (defmulti subscription
   "Create a reaction for the particular type of information.
   Do not call directly, should be invoked by `subscribe`"
   {:arglists '([state [sub-name args]])}
   (fn [_ [sub-name _]] sub-name))
+
+(defn subscribe
+  "Get a reaction for the given data.
+  In one-argument form, this looks like `(subscribe [:key arg1 arg2])`
+  Two-argument form enables you to have a subscription which takes reactions or
+  atoms as arguments, e.g.
+  `(let [foo (subscribe [:some-key 1])
+         bar (r/atom ...)
+         baz (subscribe [:other-key 2] [foo bar])]
+     ...)"
+  ([v] (subscription store/app-state v))
+  ([v dynv] ; Dynamic subscription
+   (let [dyn-vals (reaction (mapv deref dynv))
+         sub (reaction (subscription store/app-state (into v @dyn-vals)))]
+     (reaction @@sub))))
 
 (defmethod subscription :default
   [_ [sub-name args]]
