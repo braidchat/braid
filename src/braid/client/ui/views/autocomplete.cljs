@@ -54,7 +54,7 @@
 (def engines
   [
    ; /<bot-name> -> autocompletes bots
-   (fn [text _]
+   (fn [text]
      (let [pattern #"^/(\w+)$"]
        (when-let [bot-name (second (re-find pattern text))]
          (into ()
@@ -64,7 +64,8 @@
                              :action (fn [])
                              :message-transform
                              (fn [text]
-                               (string/replace text pattern (str "/" (b :nickname) " ")))
+                               (string/replace text pattern
+                                               (str "/" (b :nickname) " ")))
                              :html
                              (constantly
                                [:div.bot-match
@@ -74,7 +75,7 @@
                (store/bots-in-open-group)))))
 
    ; ... :emoji  -> autocomplete emoji
-   (fn [text _]
+   (fn [text]
      (let [pattern #"\B[:(](\S{2,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
@@ -97,7 +98,7 @@
                                   {:react-key k}])}))))))
 
    ; ... @<user>  -> autocompletes user name
-   (fn [text _]
+   (fn [text]
      (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> (store/users-in-open-group)
@@ -119,7 +120,7 @@
                           [:div.extra "..."]])}))))))
 
    ; ... #<tag>   -> autocompletes tag
-   (fn [text _]
+   (fn [text]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (let [group-tags (store/tags-in-open-group)
@@ -138,26 +139,30 @@
                         :html
                         (fn []
                           [:div.tag-match
-                           [:div.color-block {:style {:backgroundColor (id->color (tag :id))}}]
+                           [:div.color-block
+                            {:style {:backgroundColor (id->color (tag :id))}}]
                            [:div.name (tag :name)]
                            [:div.extra (tag :description)]])}))
                 (cons (when-not (or exact-match? (string/blank? query))
-                        (let [tag (schema/make-tag {:name query
-                                                    :group-id (store/open-group-id)
-                                                    :group-name (store/open-group-name)})]
+                        (let [tag (schema/make-tag
+                                    {:name query
+                                     :group-id (store/open-group-id)
+                                     :group-name (store/open-group-name)})]
                           {:key (constantly (tag :id))
                            :action
                            (fn []
-                             (dispatch! :create-tag [(tag :name) (tag :group-id) (tag :id)]))
+                             (dispatch! :create-tag
+                                        [(tag :name) (tag :group-id) (tag :id)]))
                            :message-transform
                            (fn [text]
                              (string/replace text pattern (str "#" (tag :name) " ")))
                            :html
                            (fn []
                              [:div.tag-match
-                              [:div.color-block{:style {:backgroundColor (id->color (tag :id))}}]
+                              [:div.color-block
+                               {:style {:backgroundColor (id->color (tag :id))}}]
                               [:div.name (str "Create tag " (tag :name))]
-                              [:div.extra (:name (store/id->group (tag :group-id)))]])})))
+                              [:div.extra
+                               (:name (store/id->group (tag :group-id)))]])})))
                 (remove nil?)
-                reverse)))))
-   ])
+                reverse)))))])

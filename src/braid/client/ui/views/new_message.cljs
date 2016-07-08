@@ -81,6 +81,10 @@
      [:div.result
       "No Results"])])
 
+(defn inside-code-block?
+  [txt]
+  (odd? (count (re-seq #"`" txt))))
+
 (defn wrap-autocomplete [config]
   (let [autocomplete-chan (chan)
         kill-chan (chan)
@@ -136,8 +140,9 @@
         clear-force-close! (fn []
                              (swap! state assoc :force-close? false))
 
-        update-thread-text! (fn [thread-id text] (put! thread-text-chan {:thread-id thread-id
-                                                                         :content text}))
+        update-thread-text! (fn [thread-id text] (put! thread-text-chan
+                                                       {:thread-id thread-id
+                                                        :content text}))
         set-text! (fn [text]
                     (let [text (.slice text 0 5000)]
                       (swap! state assoc :text text)
@@ -215,14 +220,16 @@
          (swap! state assoc :text @thread-text)
          (let [config (r/props c)]
            (go (loop []
-                 (let [[v ch] (alts! [throttled-autocomplete-chan kill-chan])]
+                 (let [[text ch] (alts! [throttled-autocomplete-chan kill-chan])]
                    (when (= ch throttled-autocomplete-chan)
-                     (set-results!
-                       (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
-                     (highlight-first!)
+                     (when-not (inside-code-block? text)
+                       (set-results!
+                         (seq (mapcat (fn [e] (e text)) engines)))
+                       (highlight-first!))
                      (recur)))))
            (go (loop []
-                 (let [[v ch] (alts! [throttled-thread-text-chan thread-text-kill-chan])]
+                 (let [[v ch] (alts! [throttled-thread-text-chan
+                                      thread-text-kill-chan])]
                    (if (= ch throttled-thread-text-chan)
                      (do
                        (dispatch! :new-message-text v)
