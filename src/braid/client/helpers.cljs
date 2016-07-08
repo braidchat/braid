@@ -95,3 +95,7 @@
       url->parts
       :domain
       ->color))
+
+(defn stop-event! [e]
+  (.stopPropagation e)
+  (.preventDefault e))
