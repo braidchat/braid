@@ -216,10 +216,10 @@
          (swap! state assoc :text @thread-text)
          (let [config (r/props c)]
            (go (loop []
-                 (let [[v ch] (alts! [throttled-autocomplete-chan kill-chan])]
+                 (let [[text ch] (alts! [throttled-autocomplete-chan kill-chan])]
                    (when (= ch throttled-autocomplete-chan)
                      (set-results!
-                       (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
+                       (seq (mapcat (fn [e] (e text)) engines)))
                      (highlight-first!)
                      (recur)))))
            (go (loop []

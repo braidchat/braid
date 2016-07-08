@@ -54,7 +54,7 @@
 (def engines
   [
    ; /<bot-name> -> autocompletes bots
-   (fn [text _]
+   (fn [text]
      (let [pattern #"^/(\w+)$"]
        (when-let [bot-name (second (re-find pattern text))]
          (into ()
@@ -75,7 +75,7 @@
                (store/bots-in-open-group)))))
 
    ; ... :emoji  -> autocomplete emoji
-   (fn [text _]
+   (fn [text]
      (let [pattern #"\B[:(](\S{2,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
@@ -98,7 +98,7 @@
                                   {:react-key k}])}))))))
 
    ; ... @<user>  -> autocompletes user name
-   (fn [text _]
+   (fn [text]
      (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> (store/users-in-open-group)
@@ -120,7 +120,7 @@
                           [:div.extra "..."]])}))))))
 
    ; ... #<tag>   -> autocompletes tag
-   (fn [text _]
+   (fn [text]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (let [group-tags (store/tags-in-open-group)
