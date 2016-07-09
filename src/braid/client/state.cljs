@@ -37,6 +37,26 @@
   [state _]
   (reaction (vals (:groups @state))))
 
+(defn order-groups
+  "Helper function to impose an order on groups.
+  This is a seperate function (instead of inline in :ordered-groups because the
+  index route needs to be able to call this to find the first group"
+  [groups group-order]
+  (if (nil? group-order)
+    groups
+    (let [ordered? (comp boolean (set group-order) :id)
+          {ord true unord false} (group-by ordered? groups)
+          by-id (group-by :id groups)]
+      (concat
+        (map (comp first by-id) group-order)
+        unord))))
+
+(defmethod subscription :ordered-groups
+  [state _]
+  (let [groups (subscription state [:groups])
+        group-order (subscription state [:user-preference :groups-order])]
+    (reaction (order-groups @groups @group-order))))
+
 (defmethod subscription :group-threads
   [state [_ group-id]]
   (reaction (->> (get-in @state [:group-threads group-id])
