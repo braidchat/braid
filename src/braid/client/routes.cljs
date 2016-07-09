@@ -1,6 +1,7 @@
 (ns braid.client.routes
   (:require [secretary.core :as secretary :refer-macros [defroute]]
             [braid.client.store :as store]
+            [braid.client.state :as state]
             [braid.client.router :as router])
   (:import [goog.history Html5History]
            [goog Uri]))
@@ -53,7 +54,12 @@
   (store/set-group-and-page! nil {:type (keyword page-id)}))
 
 (defroute index-path "/" {}
-  (when-let [group-id (-> (@store/app-state :groups) vals first :id)]
+  (when-let [group-id (->> @store/app-state
+                           ((juxt (comp vals :groups)
+                                  (comp :groups-order :preferences)))
+                           (apply state/order-groups)
+                           first
+                           :id)]
     (go-to! (inbox-page-path {:group-id group-id}))))
 
 (defn current-group []
