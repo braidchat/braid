@@ -1,6 +1,5 @@
 (ns braid.client.ui.views.pills
   (:require [reagent.core :as r]
-            [reagent.impl.util :refer [extract-props]]
             [braid.client.routes :as routes]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :refer [id->color]]
