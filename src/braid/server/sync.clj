@@ -184,6 +184,16 @@
       (timbre/debugf "notifying bot %s" bot)
       (bots/send-notification bot new-message))))
 
+(defn user-join-group!
+  [user-id group-id]
+  (db/user-add-to-group! user-id group-id)
+  (db/user-subscribe-to-group-tags! user-id group-id)
+  ; add user to recent threads in group
+  (doseq [t (db/recent-threads {:user-id user-id :group-id group-id
+                                :num-threads 5})]
+    (db/user-show-thread! user-id (t :id)))
+  (broadcast-group-change group-id [:braid.client/new-user (db/user-by-id user-id)]))
+
 ;; Handlers
 
 (defmethod event-msg-handler :chsk/ws-ping
@@ -408,14 +418,12 @@
   [{:as ev-msg :keys [?data user-id]}]
   (if-let [invite (db/invite-by-id (?data :id))]
     (do
-      (db/user-add-to-group! user-id (invite :group-id))
-      (db/user-subscribe-to-group-tags! user-id (invite :group-id))
+      (user-join-group! user-id (invite :group-id))
       (db/retract-invitation! (invite :id))
       (chsk-send! user-id [:braid.client/joined-group
                            {:group (db/group-by-id (invite :group-id))
                             :tags (db/group-tags (invite :group-id))}])
-      (chsk-send! user-id [:braid.client/update-users (db/users-for-user user-id)])
-      (broadcast-group-change (invite :group-id) [:braid.client/new-user (db/user-by-id user-id)]))
+      (chsk-send! user-id [:braid.client/update-users (db/users-for-user user-id)]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                   user-id (?data :id))))
 
