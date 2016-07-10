@@ -33,7 +33,7 @@
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.1"]
-                 [reagent "0.5.1"]
+                 [reagent "0.6.0-rc"]
                  [cljsjs/husl "6.0.1-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
                  ;shared
