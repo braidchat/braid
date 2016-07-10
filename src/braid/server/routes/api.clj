@@ -30,20 +30,13 @@
                             :password (random-nonce 50)
                             :avatar avatar
                             :nickname nick})]
-    (db/user-add-to-group! id group-id)
-    (db/user-subscribe-to-group-tags! id group-id)
-    (sync/broadcast-group-change group-id
-                                 [:group/new-user (db/user-by-id id)])
+    (sync/user-join-group! id group-id)
     id))
 
 (defn join-group
   [user-id group-id]
   (when-not (db/user-in-group? user-id group-id)
-    (db/user-add-to-group! user-id group-id)
-    (db/user-subscribe-to-group-tags! user-id group-id)
-    (sync/broadcast-group-change
-      group-id
-      [:group/new-user (db/user-by-id user-id)])))
+    (sync/user-join-group! user-id group-id)))
 
 (defroutes api-public-routes
   ; check if already logged in
@@ -105,12 +98,8 @@
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
-                (db/user-add-to-group! (user :id) (invite :group-id))
-                (db/user-subscribe-to-group-tags! (user :id) (invite :group-id))
-                (db/retract-invitation! (invite :id))
-                (sync/broadcast-group-change
-                  (invite :group-id)
-                  [:group/new-user (db/user-by-id (user :id))]))
+                (sync/user-join-group! (user :id) (invite :group-id))
+                (db/retract-invitation! (invite :id)))
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
