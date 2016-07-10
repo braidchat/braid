@@ -1,7 +1,8 @@
 (ns braid.client.state
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.client.store :as store]
-            [clojure.set :refer [union intersection subset?]]))
+            [clojure.set :refer [union intersection subset?]])
+  (:import goog.Uri))
 
 (defmulti subscription
   "Create a reaction for the particular type of information.
@@ -121,6 +122,14 @@
 (defmethod subscription :page
   [state _]
   (reaction (@state :page)))
+
+(defmethod subscription :page-path
+  [state _]
+  (let [page (subscription state [:page])]
+    (reaction
+      ; depend on page, so when the page changes this sub updates too
+      (do @page
+          (.getPath (.parse Uri js/window.location))))))
 
 (defmethod subscription :thread
   [state [_ thread-id]]
