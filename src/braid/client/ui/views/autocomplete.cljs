@@ -140,7 +140,14 @@
                         (fn []
                           [:div.tag-match
                            [:div.color-block
-                            {:style {:backgroundColor (id->color (tag :id))}}]
+                            {:style
+                             (merge
+                               {:borderColor (id->color (tag :id))
+                                :borderWidth "3px"
+                                :borderStyle "solid"
+                                :borderRadius "3px"}
+                               (when (store/is-subscribed-to-tag? (tag :id))
+                                 {:backgroundColor (id->color (tag :id))}))}]
                            [:div.name (tag :name)]
                            [:div.extra (tag :description)]])}))
                 (cons (when-not (or exact-match? (string/blank? query))
