@@ -2,9 +2,7 @@
   (:require [secretary.core :as secretary :refer-macros [defroute]]
             [braid.client.store :as store]
             [braid.client.state :as state]
-            [braid.client.router :as router])
-  (:import [goog.history Html5History]
-           [goog Uri]))
+            [braid.client.router :as router]))
 
 (defn go-to! [path]
   (router/go-to path))
@@ -64,6 +62,3 @@
 
 (defn current-group []
   (store/open-group-id))
-
-(defn current-path? [path]
-  (= path (.getPath (.parse Uri js/window.location))))
