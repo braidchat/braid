@@ -30,6 +30,7 @@
                [:a.external {:href url
                              :title url
                              :style {:background-color (helpers/url->color url)}
+                             :on-click (fn [e] (.stopPropagation e))
                              :target "_blank"
                              ; rel to address vuln caused by target=_blank
                              ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
