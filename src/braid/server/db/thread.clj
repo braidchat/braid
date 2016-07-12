@@ -127,7 +127,8 @@
                          (take limit))]
     {:threads (into ()
                     (comp (map db->thread)
-                          (filter #(user-can-see-thread? conn user-id (% :id))))
+                          (filter #(user-can-see-thread? conn user-id (% :id)))
+                          (map #(thread-add-last-open-at conn % user-id)))
                     (d/pull-many (d/db conn) thread-pull-pattern thread-eids))
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
