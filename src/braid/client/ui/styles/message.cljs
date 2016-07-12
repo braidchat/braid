@@ -65,7 +65,7 @@
     [:a.external
      {:text-decoration "none"
       :color "white"
-      :padding "0.2em 0.25em 0.25em"
+      :padding "0em 0.25em"
       :border-radius "0.25em"
       :background "#607DE1"
       :outline "none"}
