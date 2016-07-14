@@ -125,10 +125,12 @@
 
 (defmethod subscription :page-path
   [state _]
-  (let [page (subscription state [:page])]
+  (let [page (subscription state [:page])
+        open-group (subscription state [:open-group-id])]
     (reaction
-      ; depend on page, so when the page changes this sub updates too
+      ; depend on page & group, so when the page changes this sub updates too
       (do @page
+          @open-group
           (.getPath (.parse Uri js/window.location))))))
 
 (defmethod subscription :thread
