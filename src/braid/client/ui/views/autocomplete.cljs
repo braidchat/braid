@@ -117,7 +117,7 @@
                         [:div.user-match
                           [:img.avatar {:src (user :avatar)}]
                           [:div.name (user :nickname)]
-                          [:div.extra "..."]])}))))))
+                          [:div.extra (user :status)]])}))))))
 
    ; ... #<tag>   -> autocompletes tag
    (fn [text]
