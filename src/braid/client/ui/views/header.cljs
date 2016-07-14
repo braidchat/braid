@@ -35,7 +35,7 @@
         [:a {:class (str class (when (= path @current-path) " active"))
              :href path
              :title title}
-         (when body body)]))))
+         body]))))
 
 (def left-headers
   [{:title "Inbox"
