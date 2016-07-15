@@ -6,7 +6,7 @@
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.store :as store]
             [braid.client.s3 :as s3]
-            [braid.client.helpers :refer [debounce]]
+            [braid.client.helpers :refer [debounce stop-event!]]
             [braid.client.ui.views.autocomplete :refer [engines]])
   (:import [goog.events KeyCodes]))
 
@@ -172,40 +172,33 @@
         autocomplete-on-key-down
         (fn [{:keys [on-submit]}]
           (fn [e]
-            (condp = e.keyCode
-              KeyCodes.ENTER
-              (cond
-                ; ENTER when autocomplete -> trigger chosen result's action
-                ; (or exit autocomplete if no result chosen)
-                (autocomplete-open?)
+            (if (not (autocomplete-open?))
+              (when (and (= e.keyCode KeyCodes.ENTER) (not e.shiftKey))
+                (stop-event! e)
+                (reset-state!)
+                (on-submit e))
+              (condp = e.keyCode
+                KeyCodes.ENTER
                 (do
-                  (.preventDefault e)
+                  (stop-event! e)
                   (when-let [result (nth (@state :results)
                                          (@state :highlighted-result-index) nil)]
                     (choose-result! result))
                   (set-force-close!))
 
-                ; ENTER otherwise -> send message
-                (not e.shiftKey)
-                (do
-                  (.preventDefault e)
-                  (reset-state!)
-                  (on-submit e)))
+                KeyCodes.ESC
+                (do (stop-event! e)
+                  (set-force-close!))
 
-              KeyCodes.ESC
-              (set-force-close!)
+                KeyCodes.UP
+                (do (stop-event! e)
+                  (highlight-prev!))
 
-              KeyCodes.UP
-              (when (autocomplete-open?)
-                (.preventDefault e)
-                (highlight-prev!))
+                KeyCodes.DOWN
+                (do (stop-event! e)
+                  (highlight-next!))
 
-              KeyCodes.DOWN
-              (when (autocomplete-open?)
-                (.preventDefault e)
-                (highlight-next!))
-
-              nil)))
+                nil))))
 
         autocomplete-on-change
         (fn [{:keys [on-change]}]
