@@ -167,7 +167,7 @@
             (set-focused! false)
             (dispatch! :mark-thread-read (thread :id)))
 
-          :on-key-up
+          :on-key-down
           (fn [e]
             (when (or (and
                         (= KeyCodes.X (.-keyCode e))
