@@ -36,7 +36,9 @@
                    (= (config :thread-id) (store/get-new-thread)))
              (store/clear-new-thread!)
              (.focus (r/dom-node c))))
-         (let [focus-chan (:become-focused-chan config)]
+
+         ; TODO: re-enable this
+         #_(let [focus-chan (:become-focused-chan config)]
            (go (loop []
                  (let [[_ ch] (alts! [focus-chan kill-chan])]
                    (when (= ch focus-chan)
