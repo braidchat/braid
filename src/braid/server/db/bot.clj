@@ -2,7 +2,7 @@
   (:require [datomic.api :as d]
             [braid.server.db.common :refer [create-entity! bot-pull-pattern db->bot]]
             [braid.server.db.user :as user]
-            [chat.server.crypto :as crypto :refer [random-nonce]]))
+            [braid.server.crypto :as crypto :refer [random-nonce]]))
 
 (defn create-bot!
   [conn {:keys [id name avatar webhook-url group-id]}]

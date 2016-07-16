@@ -1,5 +1,7 @@
 (ns braid.server.db.thread
   (:require [datomic.api :as d]
+            [clj-time.core :as t]
+            [clj-time.coerce :refer [to-date-time to-long]]
             [braid.server.db.common :refer :all]
             [braid.server.db.tag :as tag]))
 
@@ -9,7 +11,8 @@
                   [:thread/id thread-id])
           :thread/group :group/id))
 
-(defn update-thread-last-open [conn thread-id user-id]
+(defn update-thread-last-open!
+  [conn thread-id user-id]
   (when (seq (d/q '[:find ?t
                     :in $ ?user-id ?thread-id
                     :where
@@ -23,12 +26,12 @@
     @(d/transact conn
        [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
 
-(defn get-thread
+(defn thread-by-id
   [conn thread-id]
   (some-> (d/pull (d/db conn) thread-pull-pattern [:thread/id thread-id])
           db->thread))
 
-(defn get-threads
+(defn threads-by-id
   [conn thread-ids]
   (->> thread-ids
        (map (fn [id] [:thread/id id]))
@@ -40,6 +43,12 @@
   @(d/transact
      conn
      [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
+
+(defn user-show-thread!
+  [conn user-id thread-id]
+  @(d/transact
+     conn
+     [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
 (defn thread-last-open-at [conn thread user-id]
   (let [user-hides-at (->> (d/q
@@ -63,7 +72,7 @@
 (defn thread-add-last-open-at [conn thread user-id]
   (assoc thread :last-open-at (thread-last-open-at conn thread user-id)))
 
-(defn get-users-subscribed-to-thread
+(defn users-subscribed-to-thread
   [conn thread-id]
   (d/q '[:find [?user-id ...]
          :in $ ?thread-id
@@ -80,7 +89,7 @@
     ;user can see the thread if it's a new (i.e. not yet in the database) thread...
     (nil? (d/entity (d/db conn) [:thread/id thread-id]))
     ; ...or they're already subscribed to the thread...
-    (contains? (set (get-users-subscribed-to-thread conn thread-id)) user-id)
+    (contains? (set (users-subscribed-to-thread conn thread-id)) user-id)
     ; ...or they're mentioned in the thread
     ; TODO: is it possible for them to be mentioned but not subscribed?
     (contains? (-> (d/pull (d/db conn) [:thread/mentioned] [:thread/id thread-id])
@@ -118,13 +127,14 @@
                          (take limit))]
     {:threads (into ()
                     (comp (map db->thread)
-                          (filter #(user-can-see-thread? conn user-id (% :id))))
+                          (filter #(user-can-see-thread? conn user-id (% :id)))
+                          (map #(thread-add-last-open-at conn % user-id)))
                     (d/pull-many (d/db conn) thread-pull-pattern thread-eids))
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
-(defn get-open-threads-for-user
+(defn open-threads-for-user
   [conn user-id]
-  (let [visible-tags (tag/get-user-visible-tag-ids conn user-id)]
+  (let [visible-tags (tag/tag-ids-for-user conn user-id)]
     (->> (d/q '[:find (pull ?thread pull-pattern)
                 :in $ ?user-id pull-pattern
                 :where
@@ -141,7 +151,30 @@
                       db->thread
                       first))))))
 
-(defn get-subscribed-thread-ids-for-user
+(defn recent-threads
+  [conn {:keys [user-id group-id num-threads] :or {num-threads 10}}]
+  (->> (d/q '[:find (pull ?thread pull-pattern)
+              :in $ ?group-id ?cutoff pull-pattern
+              :where
+              [?g :group/id ?group-id]
+              [?thread :thread/group ?g]
+              [?msg :message/thread ?thread]
+              [?msg :message/created-at ?time]
+              [(clj-time.coerce/to-date-time ?time) ?dtime]
+              [(clj-time.core/after? ?dtime ?cutoff)]]
+            (d/db conn)
+            group-id
+            (t/minus (t/now) (t/weeks 1))
+            thread-pull-pattern)
+       (into ()
+             (comp (map (comp db->thread first))
+                   (filter (comp (partial user-can-see-thread? conn user-id) :id))
+                   (map #(thread-add-last-open-at conn % user-id))))
+       (sort-by (fn [t] (apply max (map (comp to-long :created-at) (t :messages))))
+                #(compare %2 %1))
+       (take num-threads)))
+
+(defn subscribed-thread-ids-for-user
   [conn user-id]
   (d/q '[:find [?thread-id ...]
          :in $ ?user-id
@@ -152,18 +185,9 @@
        (d/db conn)
        user-id))
 
-(defn get-open-thread-ids-for-user
-  [conn user-id]
-  (d/q '[:find [?thread-id ...]
-         :in $ ?user-id
-         :where
-         [?e :user/id ?user-id]
-         [?e :user/open-thread ?thread]
-         [?thread :thread/id ?thread-id]]
-       (d/db conn)
-       user-id))
-
 (defn user-unsubscribe-from-thread!
   [conn user-id thread-id]
   @(d/transact conn [[:db/retract [:user/id user-id]
-                      :user/subscribed-thread [:thread/id thread-id]]]))
+                      :user/subscribed-thread [:thread/id thread-id]]
+                     [:db/retract [:user/id user-id]
+                       :user/open-thread [:thread/id thread-id]]]))

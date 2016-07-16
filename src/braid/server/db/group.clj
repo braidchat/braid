@@ -15,12 +15,13 @@
        (create-entity! conn)
        db->group))
 
-(defn get-group
+(defn group-by-id
   [conn group-id]
   (-> (d/pull (d/db conn) group-pull-pattern [:group/id group-id])
       db->group))
 
-(defn get-users-in-group [conn group-id]
+(defn group-users
+  [conn group-id]
   (->> (d/q '[:find (pull ?u pull-pattern)
               :in $ ?group-id pull-pattern
               :where
@@ -58,7 +59,7 @@
     (when (:public? (group-settings conn (group :id)))
       group)))
 
-(defn get-group-tags
+(defn group-tags
   [conn group-id]
   (->> (d/q '[:find (pull ?t [:tag/id
                               :tag/name
@@ -71,7 +72,7 @@
             (d/db conn) group-id)
        (map (comp db->tag first))))
 
-(defn get-groups-for-user [conn user-id]
+(defn user-groups [conn user-id]
   (->> (d/q '[:find [?g ...]
               :in $ ?user-id
               :where

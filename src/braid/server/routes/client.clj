@@ -4,11 +4,11 @@
             [compojure.route :refer [resources]]
             [clostache.parser :as clostache]
             [braid.server.conf :refer [config]]
-            [chat.server.digest :as digest]
-            [chat.server.db :as db]
-            [chat.server.invite :as invites]))
+            [braid.server.digest :as digest]
+            [braid.server.db :as db]
+            [braid.server.invite :as invites]))
 
-(defn- get-html [client]
+(defn get-html [client]
   (clostache/render-resource
     (str "public/" client ".html")
     {:algo "sha256"
@@ -30,7 +30,7 @@
   ; invite accept page
   (GET "/accept" [invite :<< as-uuid tok]
     (if (and invite tok)
-      (if-let [invite (db/get-invite invite)]
+      (if-let [invite (db/invite-by-id invite)]
         {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
         {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))

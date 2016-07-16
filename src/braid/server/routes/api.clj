@@ -2,17 +2,17 @@
   (:require [clojure.string :as string]
             [compojure.core :refer [GET POST defroutes]]
             [compojure.coercions :refer [as-uuid]]
-            [chat.shared.util :refer [valid-nickname?]]
-            [chat.server.db :as db]
-            [chat.server.invite :as invites]
-            [chat.server.identicons :as identicons]
-            [chat.server.crypto :refer [random-nonce]]
-            [chat.server.sync :as sync]
-            [chat.server.s3 :as s3]
-            [braid.api.embedly :as embedly]
+            [braid.common.util :refer [valid-nickname?]]
+            [braid.server.db :as db]
+            [braid.server.invite :as invites]
+            [braid.server.identicons :as identicons]
+            [braid.server.crypto :refer [random-nonce]]
+            [braid.server.sync :as sync]
+            [braid.server.s3 :as s3]
+            [braid.server.api.embedly :as embedly]
             [braid.server.conf :refer [config]]))
 
-(defn- edn-response [clj-body]
+(defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
    :body (pr-str clj-body)})
 
@@ -20,7 +20,7 @@
   [email group-id]
   (let [id (db/uuid)
         avatar (identicons/id->identicon-data-url id)
-        ; XXX: copied from chat.shared.util/nickname-rd
+        ; XXX: copied from braid.common.util/nickname-rd
         disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
         nick (-> (first (string/split email #"@"))
                  (string/replace disallowed-chars ""))
@@ -30,20 +30,13 @@
                             :password (random-nonce 50)
                             :avatar avatar
                             :nickname nick})]
-    (db/user-add-to-group! id group-id)
-    (db/user-subscribe-to-group-tags! id group-id)
-    (sync/broadcast-group-change group-id
-                                 [:group/new-user (db/user-by-id id)])
+    (sync/user-join-group! id group-id)
     id))
 
 (defn join-group
   [user-id group-id]
   (when-not (db/user-in-group? user-id group-id)
-    (db/user-add-to-group! user-id group-id)
-    (db/user-subscribe-to-group-tags! user-id group-id)
-    (sync/broadcast-group-change
-      group-id
-      [:group/new-user (db/user-by-id user-id)])))
+    (sync/user-join-group! user-id group-id)))
 
 (defroutes api-public-routes
   ; check if already logged in
@@ -93,7 +86,7 @@
         (assoc fail :body "Invalid image")
 
         :else
-        (let [invite (db/get-invite (java.util.UUID/fromString invite_id))]
+        (let [invite (db/invite-by-id (java.util.UUID/fromString invite_id))]
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
             (let [avatar-url (invites/upload-avatar avatar)
@@ -105,12 +98,8 @@
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
-                (db/user-add-to-group! (user :id) (invite :group-id))
-                (db/user-subscribe-to-group-tags! (user :id) (invite :group-id))
-                (db/retract-invitation! (invite :id))
-                (sync/broadcast-group-change
-                  (invite :group-id)
-                  [:group/new-user (db/user-by-id (user :id))]))
+                (sync/user-join-group! (user :id) (invite :group-id))
+                (db/retract-invitation! (invite :id)))
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
