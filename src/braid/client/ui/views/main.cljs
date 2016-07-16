@@ -18,7 +18,8 @@
             [braid.client.ui.views.pages.group-settings :refer [group-settings-view]]
             [braid.client.ui.views.pages.bots :refer [bots-view]]
             [braid.client.ui.views.pages.uploads :refer [uploads-view]]
-            [braid.client.ui.views.pages.thread :refer [single-thread-view]]))
+            [braid.client.ui.views.pages.thread :refer [single-thread-view]]
+            [braid.client.ui.views.pages.changelog :refer [changelog-view]]))
 
 (defn page-view []
   (let [page (subscribe [:page])]
@@ -39,6 +40,7 @@
         :thread [single-thread-view]
         :settings [group-settings-view]
         :global-settings [global-settings-page-view]
+        :changelog [changelog-view]
         (do (routes/go-to! (routes/index-path))
             [:h1 "???"])))))
 
