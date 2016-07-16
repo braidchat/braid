@@ -1,8 +1,7 @@
 (ns braid.server.sync
   (:require [mount.core :as mount :refer [defstate]]
             [taoensso.sente :as sente]
-            [taoensso.sente.server-adapters.http-kit
-             :refer [sente-web-server-adapter]]
+            [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]]
             [taoensso.sente.packers.transit :as sente-transit]
             [compojure.core :refer [GET POST routes defroutes context]]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
@@ -26,7 +25,7 @@
 (let [packer (sente-transit/get-transit-packer :json)
       {:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
-      (sente/make-channel-socket! sente-web-server-adapter
+      (sente/make-channel-socket! (get-sch-adapter)
                                   {:user-id-fn
                                    (fn [ob] (get-in ob [:session :user-id]))
                                    :packer packer})]
