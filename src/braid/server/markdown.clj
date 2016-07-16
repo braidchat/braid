@@ -34,6 +34,8 @@
                               (vec (cons :div args)))
                          })))
 
+; TODO: this stuff should probably be in a different namespace - maybe just
+; under script/generate.clj or something?
 (defn generate-changelog
   []
   (let [changelog-hiccup (markdown->hiccup (slurp "CHANGELOG.md"))]
