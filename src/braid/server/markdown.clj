@@ -46,3 +46,6 @@
                             [:div.title "Changelog"]
                             [:div.content
                              changelog-hiccup]]))))))
+
+(defn -main [& args]
+  (generate-changelog))
