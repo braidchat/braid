@@ -23,6 +23,7 @@ JAR_NAME=${PROJECT_NAME}-${DATE}.jar
 VERSION="0.0.1"
 git clean -idx -e profiles.clj
 lein clean
+lein run -m braid.server.markdown
 lein with-profile +lp uberjar
 scp "target/${PROJECT_NAME}-${VERSION}-standalone.jar" "$SERVER:/www/deploys/${PROJECT_NAME}/${JAR_NAME}"
 ssh $SERVER "cd /www/deploys/${PROJECT_NAME} && ln -sf ${JAR_NAME} ${PROJECT_NAME}.jar"
