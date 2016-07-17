@@ -11,4 +11,3 @@ Session.vim
 figwheel_server.log
 /.idea
 *.iml
-src/braid/client/ui/views/pages/changelog.cljs
