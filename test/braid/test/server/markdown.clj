@@ -4,7 +4,7 @@
             [braid.server.markdown :refer [markdown->hiccup]]))
 
 (deftest basic-changelog-markdown
-  (testing
+  (testing "Simple markdown parsing"
     (is (= (markdown->hiccup
              (string/join
                "\n"
@@ -24,4 +24,25 @@
              [:li "thing one"]
              [:li "thing two"]]
             [:h2 "Other Heading"]
-            [:ul [:li "x"] [:li "y"]]]))))
+            [:ul [:li "x"] [:li "y"]]]))
+    (testing "with links"
+      (is (= (markdown->hiccup
+               (string/join
+                 "\n"
+                 ["# Hello [there](./foo.png) World"
+                  ""
+                  " - thing [one](http://foo.com)!"
+                  " - thing two"
+                  ""
+                  "## Other Heading ##"
+                  ""
+                  " - x"
+                  " - y"
+                  ""]))
+             [:div
+              [:h1 "Hello " [:a {:href "./foo.png"} "there"] " World"]
+              [:ul
+               [:li "thing " [:a {:href "http://foo.com"} "one"] "!"]
+               [:li "thing two"]]
+              [:h2 "Other Heading"]
+              [:ul [:li "x"] [:li "y"]]])))))
