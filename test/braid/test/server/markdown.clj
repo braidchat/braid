@@ -13,7 +13,7 @@
                 " - thing one"
                 " - thing two"
                 ""
-                "## Other Heading"
+                "## Other Heading ##"
                 ""
                 " - x"
                 " - y"
