@@ -7,11 +7,12 @@
   (insta/parser
     "S ::= ( <#'^'> LINE <#'\\n|$'> )*
     <LINE> ::= ( ( HEADER | LIST ) / PLAIN_LINE )
+    ws ::= #'\\s*'
     DOT ::= #'.'
     TEXT ::= #'.*'
-    HEADER ::= #'\\#+' TEXT
+    HEADER ::= #'\\#+' <ws> TEXT
     LIST ::= ( LIST_LINE <'\\n'> ) +
-    LIST_LINE ::= <#'\\s*(-|\\*)'> TEXT
+    LIST_LINE ::= <#'\\s+(-|\\*)'> <ws> TEXT
     PLAIN_LINE ::= TEXT (* TODO: add inline things *)
     "))
 
