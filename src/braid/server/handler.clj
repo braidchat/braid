@@ -20,9 +20,7 @@
             [braid.server.routes.bots :refer [bot-routes]]
             [environ.core :refer [env]]
             ; requiring so mount sees state
-            [braid.server.email-digest :refer [email-jobs]]
-            ; for generating CHANGELOG in dev, so cljs doesn't give errors
-            [braid.server.markdown :refer [generate-changelog]]))
+            [braid.server.email-digest :refer [email-jobs]]))
 
 ; NOT using config here, b/c it won't have started when this runs
 (if (= (env :environment) "prod")
@@ -152,7 +150,6 @@
 (defn dev-main
   "Start things up, but don't start the email server or nrepl"
   [port]
-  (generate-changelog)
   (->
     (mount/except #{#'email-jobs #'nrepl})
     (mount/with-args {:port port})
