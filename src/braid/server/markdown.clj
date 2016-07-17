@@ -6,10 +6,10 @@
   "Simple markdown parser. Only parsing enough to handle CHANGELOG.md, so lots
   is probably missing"
   (insta/parser
-    "S ::= ( <#'^'> LINE <ENDL> )*
-    ENDL ::= #'\\n|$'
-    <LINE> ::= ( HEADER | LIST ) / PLAIN_LINE
+    "S ::= ( ( HEADER | LIST | <BLANK_LINE> ) / PARAGRAPH ) *
 
+    <STARTL> ::= #'(?m)\\A|^'
+    <ENDL> ::= #'\\n|\\z'
     ws ::= #'[ \\t\\x0b]*'
 
     <DOT> ::= #'.'
@@ -18,12 +18,14 @@
     LINK ::= <'['> PLAIN_TEXT <']('> URL <')'>
     <TEXT> ::=  ( LINK / PLAIN_TEXT ) ( TEXT ?)
 
-    HEADER ::= #'#+' <ws> TEXT <ws> <'#'*>
+    HEADER ::= <STARTL> #'#+' <ws> TEXT <ws> <'#'*> <ENDL>
 
-    LIST ::= ( LIST_LINE <ENDL> ) +
+    LIST ::= ( <STARTL> LIST_LINE <ENDL> ) +
     LIST_LINE ::= <#'\\s+(-|\\*)'> <ws> TEXT
 
-    PLAIN_LINE ::= TEXT
+    PARAGRAPH ::= PLAIN_LINE+ <BLANK_LINE*>
+    BLANK_LINE ::= STARTL ws ENDL
+    <PLAIN_LINE> ::= <STARTL> !BLANK_LINE TEXT <ENDL>
     "))
 
 (defn markdown->hiccup
@@ -41,7 +43,7 @@
                                  (vec (cons :ul args)))
                          :LIST_LINE (fn [& args]
                                       (vec (cons :li args)))
-                         :PLAIN_LINE (fn [& args]
-                                       (vec (cons :span args)))
+                         :PARAGRAPH (fn [& lines]
+                                      (vec (cons :p lines)))
                          :S (fn [& args]
                               (vec (cons :div args)))})))
