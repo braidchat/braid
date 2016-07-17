@@ -1,3 +1,7 @@
+## 16 July 2016
+
+  - Show changelog in app
+
 ## 14 July 2016
 
   - Thread close keyboard shortcuts now triggers on key down instead of key up (to prevent confusing interactions with autocomplete key handlers)

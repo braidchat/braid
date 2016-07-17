@@ -2,6 +2,7 @@
   (:require [clojure.string :as string]
             [compojure.core :refer [GET POST defroutes]]
             [compojure.coercions :refer [as-uuid]]
+            [clojure.java.io :as io]
             [braid.common.util :refer [valid-nickname?]]
             [braid.server.db :as db]
             [braid.server.invite :as invites]
@@ -10,7 +11,8 @@
             [braid.server.sync :as sync]
             [braid.server.s3 :as s3]
             [braid.server.api.embedly :as embedly]
-            [braid.server.conf :refer [config]]))
+            [braid.server.conf :refer [config]]
+            [braid.server.markdown :refer [markdown->hiccup]]))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
@@ -208,6 +210,11 @@
           (assoc fail :body "Invalid user"))))))
 
 (defroutes api-private-routes
+  (GET "/changelog" []
+    (edn-response {:braid/ok
+                   (-> (io/resource "CHANGELOG.md")
+                       slurp markdown->hiccup)}))
+
   (GET "/extract" [url :as {ses :session}]
     (if (some? (db/user-by-id (:user-id ses)))
       (edn-response (embedly/extract url))

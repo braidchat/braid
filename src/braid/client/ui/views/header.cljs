@@ -63,6 +63,10 @@
     :route-fn routes/page-path
     :route-args {:page-id "me"}
     :body "Edit Your Profile"}
+   {:class "changelog"
+    :route-fn routes/page-path
+    :route-args {:page-id "changelog"}
+    :body "See Changelog"}
    {:class "settings"
     :route-fn routes/group-settings-path
     :body "Settings"}])
