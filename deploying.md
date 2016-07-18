@@ -135,7 +135,7 @@ add a supervisor entry for the chat app, something like this:
 ```
 [program:chat]
 command=java -server -Xmx1g -Dfile.encoding=UTF8 -jar /www/deploys/chat/chat.jar 5555 3081
-environment=ENVIRONMENT="prod",TESTER_PASSWORD="test user password",DB_URL="datomic:sql://chat_prod?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic",TIMBRE_LEVER=":debug",MALIGUN_PASSWORD="XXX",MAILGUN_DOMAIN="chat.leanpixel.com",AWS_DOMAIN="chat.leanpixel.com",AWS_ACCESS_KEY="XXX",AWS_SECRET_KEY="...",S3_UPLOAD_KEY="XXX",S#_UPLOAD_SECRET="XXX",ASANA_CLIENT_ID="XXX",ASANA_CLIENT_SECRET="XXX",API_DOMAIN="api.mydomain.com"
+environment=ENVIRONMENT="prod",TESTER_PASSWORD="test user password",DB_URL="datomic:sql://chat_prod?jdbc:postgresql://localhost:5432/datomic?user=datomic&password=datomic",TIMBRE_LEVER=":debug",MALIGUN_PASSWORD="XXX",MAILGUN_DOMAIN="chat.leanpixel.com",AWS_DOMAIN="chat.leanpixel.com",AWS_ACCESS_KEY="XXX",AWS_SECRET_KEY="...",S3_UPLOAD_KEY="XXX",S#_UPLOAD_SECRET="XXX",ASANA_CLIENT_ID="XXX",ASANA_CLIENT_SECRET="XXX",API_DOMAIN="api.mydomain.com",GITHUB_CLIENT_ID="XXX",GITHUB_CLIENT_ID="XXX"
 autostart=true
 autorestart=true
 startsecs=10
