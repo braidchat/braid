@@ -55,6 +55,11 @@
        :headers {"Content-Type" "text/plain"}
        :body "Bad user or token"}))
 
+  ; OAuth redirect
+  (GET "/oauth/github" [code state :as req]
+    (println "GITHUB OAUTH" (pr-str code) (pr-str state))
+    )
+
   ; everything else
   (GET "/*" []
     (get-html "desktop")))
