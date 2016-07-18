@@ -2,6 +2,9 @@
   (:require [instaparse.core :as insta]
             [clojure.string :as string]))
 
+; TODO: refactor this grammar to remove ambiguities - currently issues where
+; PLAIN_TEXT is ambiguous, since you can have [:PLAIN_TEXT "foo"] or
+; [:PLAIN_TEXT "f"] [:PLAIN_TEXT "oo"], etc
 (def markdown-parser
   "Simple markdown parser. Only parsing enough to handle CHANGELOG.md, so lots
   is probably missing"
