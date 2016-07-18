@@ -1,5 +1,7 @@
 (ns braid.server.util
-  (:import org.apache.commons.validator.UrlValidator))
+  (:require [clojure.string :as string])
+  (:import java.net.URLEncoder
+           org.apache.commons.validator.UrlValidator))
 
 (defn valid-url?
   "Check if the string is a valid http(s) url.  Note that this will *not*
@@ -8,3 +10,9 @@
   ([s schemes]
    (and (string? s)
      (.isValid (UrlValidator. (into-array schemes)) s))))
+
+(defn map->query-str
+  [m]
+  (->> m
+       (map (fn [[k v]] (str (name k) "=" (URLEncoder/encode (str v)))))
+       (string/join "&")))
