@@ -18,27 +18,30 @@
 
     (fn [_]
       [:div.login
-       [:form {:on-submit (fn [e]
-                            (.preventDefault e)
-                            (set-error! nil)
-                            (cond
-                              (not (seq (@state :email)))
-                              (set-error! "Please enter an email.")
+       [:form {:on-submit
+               (fn [e]
+                 (.preventDefault e)
+                 (set-error! nil)
+                 (cond
+                   (not (seq (@state :email)))
+                   (set-error! "Please enter an email.")
 
-                              (not (seq (@state :password)))
-                              (set-error! "Please enter a password.")
+                   (not (seq (@state :password)))
+                   (set-error! "Please enter a password.")
 
-                              :else
-                              (do
-                                (set-loading! true)
-                                (dispatch! :auth
-                                           {:email (@state :email)
-                                            :password (@state :password)
-                                            :on-complete (fn []
-                                                           (set-loading! false))
-                                            :on-error (fn []
-                                                        (set-loading! false)
-                                                        (set-error! "Incorrect email or password. Please try again."))}))))}
+                   :else
+                   (do
+                     (set-loading! true)
+                     (dispatch! :auth
+                                {:email (@state :email)
+                                 :password (@state :password)
+                                 :on-complete (fn []
+                                                (set-loading! false))
+                                 :on-error
+                                 (fn []
+                                   (set-loading! false)
+                                   (set-error! (str "Incorrect email or password. "
+                                                    " Please try again.")))}))))}
 
         [:fieldset
          [:label "Email"
