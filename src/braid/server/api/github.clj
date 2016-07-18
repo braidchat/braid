@@ -5,7 +5,8 @@
             [braid.server.cache :as cache]
             [braid.server.crypto :as crypto]
             [braid.server.db :as db]
-            [braid.server.util :refer [map->query-str]]))
+            [braid.server.util :refer [map->query-str]]
+            [braid.server.identicons :as identicons]))
 
 (defn build-authorize-link
   []
@@ -51,5 +52,7 @@
 
 (defn register
   [token]
-  ; TODO: create a passwordless user with email
-  )
+  (when-let [email (email-address)]
+    (let [id (db/uuid)
+          avatar (identicons/id->identicon-data-url id)]
+      (db/create-oauth-user! {:id id :email email :avatar avatar}))))
