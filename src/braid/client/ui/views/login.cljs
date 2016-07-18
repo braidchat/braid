@@ -70,4 +70,7 @@
                {:on-click (fn [e]
                             (.preventDefault e)
                             (dispatch! :request-reset (@state :email)))}
-               "Send me a password reset email"])])]]])))
+               "Send me a password reset email"])])]]
+       [:div.github
+        [:button {:on-click (fn [_] (set! (.-location js/window) "/github-login"))}
+         "Login with Github"]]])))

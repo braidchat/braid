@@ -1,12 +1,23 @@
 (ns braid.server.api.github
   (:require [org.httpkit.client :as http]
             [clojure.data.json :as json]
+            [clojure.string :as string]
             [braid.server.conf :refer [config]]
             [braid.server.cache :as cache]
             [braid.server.crypto :as crypto]
             [braid.server.db :as db]
             [braid.server.util :refer [map->query-str]]
             [braid.server.identicons :as identicons]))
+
+(defn redirect-uri
+  "This is a function instead of a var because we need to access config, which
+  wouldn't be started at compile-time"
+  []
+  (let [domain (config :api-domain)
+        proto (str "http"
+                   (when-not (string/starts-with? domain "localhost") "s")
+                   "://")]
+    (str proto domain "/oauth/github")))
 
 (defn build-authorize-link
   []
@@ -16,7 +27,7 @@
          (map->query-str
            {:client_id (config :github-client-id)
             :scope "user:email"
-            :redirect_uri (str (config :site-url) "/oauth/github")
+            :redirect_uri (redirect-uri)
             :state state}))))
 
 (defn exchange-token
@@ -31,7 +42,7 @@
                               {:client_id (config :github-client-id)
                                :client_secret (config :github-client-secret)
                                :code code
-                               :redirect_uri (str (config :site-url) "/oauth/github")
+                               :redirect_uri (redirect-uri)
                                :state state}})]
         (json/read-str (:body resp) :key-fn keyword)))))
 
@@ -47,7 +58,7 @@
 
 (defn login
   [token]
-  (let [email (email-address token)]
+  (when-let [email (email-address token)]
     (db/user-with-email email)))
 
 (defn register

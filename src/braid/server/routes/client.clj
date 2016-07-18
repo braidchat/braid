@@ -6,7 +6,8 @@
             [braid.server.conf :refer [config]]
             [braid.server.digest :as digest]
             [braid.server.db :as db]
-            [braid.server.invite :as invites]))
+            [braid.server.invite :as invites]
+            [braid.server.api.github :as github]))
 
 (defn get-html [client]
   (clostache/render-resource
@@ -55,10 +56,9 @@
        :headers {"Content-Type" "text/plain"}
        :body "Bad user or token"}))
 
-  ; OAuth redirect
-  (GET "/oauth/github" [code state :as req]
-    (println "GITHUB OAUTH" (pr-str code) (pr-str state))
-    )
+  (GET "/github-login" []
+    {:status 302
+     :headers {"Location" (github/build-authorize-link)}})
 
   ; everything else
   (GET "/*" []

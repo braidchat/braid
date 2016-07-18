@@ -11,6 +11,7 @@
             [braid.server.sync :as sync]
             [braid.server.s3 :as s3]
             [braid.server.api.embedly :as embedly]
+            [braid.server.api.github :as github]
             [braid.server.conf :refer [config]]
             [braid.server.markdown :refer [markdown->hiccup]]))
 
@@ -203,11 +204,32 @@
             (let [referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (db/set-user-password! (user :id) new-password)
-              {:status 301
+              {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))
-          (assoc fail :body "Invalid user"))))))
+          (assoc fail :body "Invalid user")))))
+
+    ; OAuth dance
+    (GET "/oauth/github"  [code state :as req]
+      (println "GITHUB OAUTH" (pr-str code) (pr-str state))
+      (let [{tok :access_token scope :scope} (github/exchange-token code state)]
+        (println "GITHUB TOKEN" tok)
+        ; check scope includes email permission? Or we could just see if
+        ; getting the email fails
+
+        ; Determine if user was trying to login or register
+        ; Assuming login for now...
+        (if-let [user (github/login tok)]
+          {:status 302
+           ; TODO: when we have mobile, redirect to correct site (maybe part of
+           ; state?)
+           :headers {"Location" (config :site-url)}
+           :session (assoc (req :session) :user-id (user :id))}
+          {:status 401
+           ; TODO: handle failure better
+           :body "No such user"
+           :session nil}))))
 
 (defroutes api-private-routes
   (GET "/changelog" []
