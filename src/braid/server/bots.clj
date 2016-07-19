@@ -2,7 +2,8 @@
   (:require [org.httpkit.client :as http]
             [taoensso.timbre :as timbre]
             [braid.server.crypto :as crypto]
-            [braid.server.util :refer [->transit]]))
+            [braid.server.util :refer [->transit]])
+  (:import java.io.ByteArrayInputStream))
 
 (defn send-notification
   [bot message]
