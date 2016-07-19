@@ -213,23 +213,38 @@
     ; OAuth dance
     (GET "/oauth/github"  [code state :as req]
       (println "GITHUB OAUTH" (pr-str code) (pr-str state))
-      (let [{tok :access_token scope :scope} (github/exchange-token code state)]
-        (println "GITHUB TOKEN" tok)
-        ; check scope includes email permission? Or we could just see if
-        ; getting the email fails
+      (if-let [{tok :access_token scope :scope :as resp}
+               (github/exchange-token code state)]
+        (do (println "GITHUB TOKEN" tok)
+            ; check scope includes email permission? Or we could just see if
+            ; getting the email fails
+            (let [email (github/email-address tok)
+                  user (db/user-with-email email)]
+              (cond
+                (nil? email) {:status 401
+                              :body "Couldn't get email address from github"}
 
-        ; Determine if user was trying to login or register
-        ; Assuming login for now...
-        (if-let [user (github/login tok)]
-          {:status 302
-           ; TODO: when we have mobile, redirect to correct site (maybe part of
-           ; state?)
-           :headers {"Location" (config :site-url)}
-           :session (assoc (req :session) :user-id (user :id))}
-          {:status 401
-           ; TODO: handle failure better
-           :body "No such user"
-           :session nil}))))
+                user {:status 302
+                      ; TODO: when we have mobile, redirect to correct site
+                      ; (maybe part of state?)
+                      :headers {"Location" (config :site-url)}
+                      :session (assoc (req :session) :user-id (user :id))}
+
+                (:braid.server.api/register? resp)
+                (let [user (register-user email (:braid.server.api/group-id resp))]
+                  {:status 302
+                   ; TODO: when we have mobile, redirect to correct site
+                   ; (maybe part of state?)
+                   :headers {"Location" (config :site-url)}
+                   :session (assoc (req :session) :user-id (user :id))})
+
+                :else
+                {:status 401
+                 ; TODO: handle failure better
+                 :body "No such user"
+                 :session nil})))
+        {:status 400
+         :body "Couldn't exchange token with github"})))
 
 (defroutes api-private-routes
   (GET "/changelog" []

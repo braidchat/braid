@@ -5,7 +5,6 @@
             [braid.server.conf :refer [config]]
             [braid.server.cache :as cache]
             [braid.server.crypto :as crypto]
-            [braid.server.db :as db]
             [braid.server.util :refer [map->query-str ->transit transit->form]]
             [braid.server.identicons :as identicons])
   (:import org.apache.commons.codec.binary.Base64))
@@ -21,13 +20,14 @@
     (str proto domain "/oauth/github")))
 
 (defn build-authorize-link
-  [register?]
+  [{:keys [register? group-id]}]
   (let [nonce (crypto/random-nonce 10)
         now (.getTime (java.util.Date.))
-        hmac (crypto/hmac (config :hmac-secret) (str nonce now register?))
+        hmac (crypto/hmac (config :hmac-secret) (str nonce now register? group-id))
         state (-> (->transit {::nonce nonce
                               ::sent-at now
                               ::register? register?
+                              ::group-id group-id
                               ::hmac hmac})
                   Base64/encodeBase64
                   String.)]
@@ -45,7 +45,7 @@
             ; TODO: use spec to validate state when we can use 1.9
             (crypto/hmac-verify {:secret (config :hmac-secret)
                                  :mac (info ::hmac)
-                                 :data (->> [::nonce ::sent-at ::register?]
+                                 :data (->> [::nonce ::sent-at ::register? ::group-id]
                                             (map info)
                                             string/join)})
             ; Was the request from the last 30 minutes?
@@ -60,7 +60,10 @@
                                :code code
                                :redirect_uri (redirect-uri)
                                :state state}})]
-        (json/read-str (:body resp) :key-fn keyword)))))
+        (when-let [parsed-resp (json/read-str (:body resp) :key-fn keyword)]
+          (assoc parsed-resp
+            :braid.server.api/register? (info ::register?)
+            :braid.server.api/group-id (info ::group-id)))))))
 
 (defn email-address
   [token]
@@ -71,15 +74,3 @@
          (filter #(and (:verified %) (:primary %)) )
          first
          :email)))
-
-(defn login
-  [token]
-  (when-let [email (email-address token)]
-    (db/user-with-email email)))
-
-(defn register
-  [token]
-  (when-let [email (email-address)]
-    (let [id (db/uuid)
-          avatar (identicons/id->identicon-data-url id)]
-      (db/create-oauth-user! {:id id :email email :avatar avatar}))))
