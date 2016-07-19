@@ -25,3 +25,8 @@
         writer (transit/writer out :msgpack)]
     (transit/write writer form)
     (.toByteArray out)))
+
+(defn transit->form
+  [^bytes ts]
+  (let [in (ByteArrayInputStream. ts)]
+    (transit/read (transit/reader in :msgpack))))
