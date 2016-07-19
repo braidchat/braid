@@ -6,8 +6,9 @@
             [braid.server.cache :as cache]
             [braid.server.crypto :as crypto]
             [braid.server.db :as db]
-            [braid.server.util :refer [map->query-str]]
-            [braid.server.identicons :as identicons]))
+            [braid.server.util :refer [map->query-str ->transit transit->form]]
+            [braid.server.identicons :as identicons])
+  (:import org.apache.commons.codec.binary.Base64))
 
 (defn redirect-uri
   "This is a function instead of a var because we need to access config, which
@@ -20,9 +21,16 @@
     (str proto domain "/oauth/github")))
 
 (defn build-authorize-link
-  []
-  (let [state (crypto/random-nonce 20)]
-    (cache/cache-set! state (.getTime (java.util.Date.)))
+  [register?]
+  (let [nonce (crypto/random-nonce 10)
+        now (.getTime (java.util.Date.))
+        hmac (crypto/hmac (config :hmac-secret) (str nonce now register?))
+        state (-> (->transit {::nonce nonce
+                              ::sent-at now
+                              ::register? register?
+                              ::hmac hmac})
+                  Base64/encodeBase64
+                  String.)]
     (str "https://github.com/login/oauth/authorize?"
          (map->query-str
            {:client_id (config :github-client-id)
@@ -32,10 +40,18 @@
 
 (defn exchange-token
   [code state]
-  (when-let [ts (cache/cache-get state)]
-    (cache/cache-del! state)
-    ; Was the request from the last 30 minutes?
-    (when (< 0 (- (.getTime (java.util.Date.)) (Long. ts)) (* 1000 60 30))
+  (let [info (transit->form (Base64/decodeBase64 state))]
+    (when (and (map? info)
+            ; TODO: use spec to validate state when we can use 1.9
+            (crypto/hmac-verify {:secret (config :hmac-secret)
+                                 :mac (info ::hmac)
+                                 :data (->> [::nonce ::sent-at ::register?]
+                                            (map info)
+                                            string/join)})
+            ; Was the request from the last 30 minutes?
+            (< 0
+               (- (.getTime (java.util.Date.)) (info ::sent-at))
+               (* 1000 60 30)))
       (let [resp @(http/post "https://github.com/login/oauth/access_token"
                              {:headers {"Accept" "application/json"}
                               :form-params

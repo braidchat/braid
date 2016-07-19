@@ -58,7 +58,7 @@
 
   (GET "/github-login" []
     {:status 302
-     :headers {"Location" (github/build-authorize-link)}})
+     :headers {"Location" (github/build-authorize-link false)}})
 
   ; everything else
   (GET "/*" []
