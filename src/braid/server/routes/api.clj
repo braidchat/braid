@@ -231,12 +231,12 @@
                       :session (assoc (req :session) :user-id (user :id))}
 
                 (:braid.server.api/register? resp)
-                (let [user (register-user email (:braid.server.api/group-id resp))]
+                (let [user-id (register-user email (:braid.server.api/group-id resp))]
                   {:status 302
                    ; TODO: when we have mobile, redirect to correct site
                    ; (maybe part of state?)
                    :headers {"Location" (config :site-url)}
-                   :session (assoc (req :session) :user-id (user :id))})
+                   :session (assoc (req :session) :user-id user-id)})
 
                 :else
                 {:status 401
