@@ -1,3 +1,7 @@
+## 20 July 2016
+
+  - Fix bug that prevented file add button in reply field from working
+
 ## 18 July 2016
 
   - Prevent tag box in autocomplete from collapsing (and highlighting looking weird) when the tag has no description
