@@ -1,3 +1,7 @@
+## 21 July 2016
+
+  - Add the ability to get permalink to a thread
+
 ## 20 July 2016
 
   - Fix bug that prevented file add button in reply field from working
