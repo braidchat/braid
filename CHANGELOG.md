@@ -1,3 +1,7 @@
+## 20 July 2016
+
+  - Add ability to log in and register (via link or to public groups) with a GitHub account
+
 ## 18 July 2016
 
   - Prevent tag box in autocomplete from collapsing (and highlighting looking weird) when the tag has no description
