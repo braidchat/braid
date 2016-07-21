@@ -48,7 +48,6 @@
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  ; user - preferences
- ; TODO: make preferences entities, instead of string
  {:db/ident :user/preferences
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many

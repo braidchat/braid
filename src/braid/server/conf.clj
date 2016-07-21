@@ -17,6 +17,8 @@
                        :db-url
                        :embedly-key
                        :environment
+                       :github-client-id
+                       :github-client-secret
                        :hmac-secret
                        :mailgun-domain
                        :mailgun-password

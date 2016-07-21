@@ -11,6 +11,7 @@
             [braid.server.sync :as sync]
             [braid.server.s3 :as s3]
             [braid.server.api.embedly :as embedly]
+            [braid.server.api.github :as github]
             [braid.server.conf :refer [config]]
             [braid.server.markdown :refer [markdown->hiccup]]))
 
@@ -203,11 +204,47 @@
             (let [referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (db/set-user-password! (user :id) new-password)
-              {:status 301
+              {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))
-          (assoc fail :body "Invalid user"))))))
+          (assoc fail :body "Invalid user")))))
+
+    ; OAuth dance
+    (GET "/oauth/github"  [code state :as req]
+      (println "GITHUB OAUTH" (pr-str code) (pr-str state))
+      (if-let [{tok :access_token scope :scope :as resp}
+               (github/exchange-token code state)]
+        (do (println "GITHUB TOKEN" tok)
+            ; check scope includes email permission? Or we could just see if
+            ; getting the email fails
+            (let [email (github/email-address tok)
+                  user (db/user-with-email email)]
+              (cond
+                (nil? email) {:status 401
+                              :body "Couldn't get email address from github"}
+
+                user {:status 302
+                      ; TODO: when we have mobile, redirect to correct site
+                      ; (maybe part of state?)
+                      :headers {"Location" (config :site-url)}
+                      :session (assoc (req :session) :user-id (user :id))}
+
+                (:braid.server.api/register? resp)
+                (let [user-id (register-user email (:braid.server.api/group-id resp))]
+                  {:status 302
+                   ; TODO: when we have mobile, redirect to correct site
+                   ; (maybe part of state?)
+                   :headers {"Location" (config :site-url)}
+                   :session (assoc (req :session) :user-id user-id)})
+
+                :else
+                {:status 401
+                 ; TODO: handle failure better
+                 :body "No such user"
+                 :session nil})))
+        {:status 400
+         :body "Couldn't exchange token with github"})))
 
 (defroutes api-private-routes
   (GET "/changelog" []

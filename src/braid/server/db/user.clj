@@ -20,6 +20,16 @@
        (create-entity! conn)
        db->user))
 
+(defn create-oauth-user!
+  "Create a user that logins via oauth (and hence has no password)"
+  [conn {:keys [id email avatar]}]
+  (->> {:user/id id
+        :user/email email
+        :user/avatar avatar
+        :user/nickname (-> email (string/split #"@") first)}
+       (create-entity! conn)
+       db->user))
+
 (defn create-bot-user!
   [conn {:keys [id]}]
   (->> {:user/id id

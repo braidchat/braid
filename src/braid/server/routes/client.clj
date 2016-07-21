@@ -6,7 +6,8 @@
             [braid.server.conf :refer [config]]
             [braid.server.digest :as digest]
             [braid.server.db :as db]
-            [braid.server.invite :as invites]))
+            [braid.server.invite :as invites]
+            [braid.server.api.github :as github]))
 
 (defn get-html [client]
   (clostache/render-resource
@@ -54,6 +55,17 @@
       {:status 401
        :headers {"Content-Type" "text/plain"}
        :body "Bad user or token"}))
+
+  (GET "/github-login" []
+    {:status 302
+     :headers {"Location" (github/build-authorize-link {:register? false})}})
+
+  (GET "/github-register" [group]
+    {:status 302
+     :headers
+     {"Location"
+      (github/build-authorize-link {:register? true
+                                    :group-id (java.util.UUID/fromString group)})}})
 
   ; everything else
   (GET "/*" []
