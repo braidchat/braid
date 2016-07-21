@@ -113,6 +113,10 @@
       {:margin-bottom (em 0.5)
        :margin-right (em 0.5)} ] ]
 
+    [:.permalink
+     [:button
+      mixins/pill-button]]
+
     [:.controls
      {:position "absolute"
       :padding pad
