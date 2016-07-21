@@ -5,7 +5,8 @@
             [clojure.string :as string]
             [braid.client.helpers :refer [id->color debounce]]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.emoji :as emoji])
+            [braid.client.emoji :as emoji]
+            [goog.string :as gstring])
   (:import [goog.events KeyCodes]))
 
 ; fn that returns results that will be shown if pattern matches
@@ -149,7 +150,8 @@
                                (when (store/is-subscribed-to-tag? (tag :id))
                                  {:backgroundColor (id->color (tag :id))}))}]
                            [:div.name (tag :name)]
-                           [:div.extra (tag :description)]])}))
+                           [:div.extra (or (tag :description)
+                                           (gstring/unescapeEntities "&nbsp;"))]])}))
                 (cons (when-not (or exact-match? (string/blank? query))
                         (let [tag (schema/make-tag
                                     {:name query
