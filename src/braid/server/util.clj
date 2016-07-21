@@ -1,6 +1,8 @@
 (ns braid.server.util
-  (:require [clojure.string :as string])
+  (:require [clojure.string :as string]
+            [cognitect.transit :as transit])
   (:import java.net.URLEncoder
+           [java.io ByteArrayOutputStream ByteArrayInputStream]
            org.apache.commons.validator.UrlValidator))
 
 (defn valid-url?
@@ -16,3 +18,15 @@
   (->> m
        (map (fn [[k v]] (str (name k) "=" (URLEncoder/encode (str v)))))
        (string/join "&")))
+
+(defn ->transit ^bytes
+  [form]
+  (let [out (ByteArrayOutputStream. 4096)
+        writer (transit/writer out :msgpack)]
+    (transit/write writer form)
+    (.toByteArray out)))
+
+(defn transit->form
+  [^bytes ts]
+  (let [in (ByteArrayInputStream. ts)]
+    (transit/read (transit/reader in :msgpack))))
