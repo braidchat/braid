@@ -265,7 +265,10 @@
   (let [uploading? (r/atom false)]
     (fn [config]
       ; clicking on label == clicking on (hidden) input
-      [:label.plus {:class (when @uploading? "uploading")}
+      [:label.plus {:class (when @uploading? "uploading")
+                    ; stop propagation so click event doesn't go to thread &
+                    ; focus reply
+                    :on-click (fn [e] (.stopPropagation e))}
        [:input {:type "file"
                 :multiple false
                 :style {:display "none"}
