@@ -222,6 +222,7 @@
                   user (db/user-with-email email)]
               (cond
                 (nil? email) {:status 401
+                              :headers {"Content-Type" "text/plain"}
                               :body "Couldn't get email address from github"}
 
                 user {:status 302
@@ -241,6 +242,7 @@
                 :else
                 {:status 401
                  ; TODO: handle failure better
+                 :headers {"Content-Type" "text/plain"}
                  :body "No such user"
                  :session nil})))
         {:status 400
