@@ -1,3 +1,7 @@
+## 21 July 2016
+
+  - Add ability to log in and register (via link or to public groups) with a GitHub account
+
 ## 20 July 2016
 
   - Fix bug that prevented file add button in reply field from working
