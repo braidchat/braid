@@ -92,6 +92,13 @@
 
       [:&:after
        (mixins/fontawesome \uf1d8)
-       {:margin-left (em 0.5)}]]]]])
+       {:margin-left (em 0.5)}]]]]
 
-
+   [:.alternatives
+    {:margin-top (em 1)}
+    [:.github
+     [:button
+      mixin-button-white
+      [:&:before
+       (mixins/fontawesome \uf09b)
+       {:font-size (em 3)}]]]]])

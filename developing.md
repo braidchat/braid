@@ -158,6 +158,9 @@ In the project folder, create a profile
         :s3-upload-secret "secret-for-uploading"
         ; for link info extraction
         :embedly-key "embedly api key"
+        ; for github login
+        :github-client-id "..."
+        :github-client-secret "..."
         }}}
 ```
 
