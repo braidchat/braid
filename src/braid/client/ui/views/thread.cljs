@@ -229,9 +229,8 @@
                                   {:thread-id (thread :id)
                                    :group-id (thread :group-id)}))}]
               [:button {:on-click (fn [e]
-                                    (reset! permalink-open? false))
-                        :style {:cursor "pointer"}}
-               "Done"] ])
+                                    (reset! permalink-open? false))}
+               "Done"]])
            (when (not new?)
              [:div.controls
               (if @open?
