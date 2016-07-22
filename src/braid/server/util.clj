@@ -11,7 +11,9 @@
   ([s] (valid-url? s ["http" "https"]))
   ([s schemes]
    (and (string? s)
-     (.isValid (UrlValidator. (into-array schemes)) s))))
+     (or
+       (string/starts-with? s "http://localhost:")
+       (.isValid (UrlValidator. (into-array schemes)) s)))))
 
 (defn map->query-str
   [m]
