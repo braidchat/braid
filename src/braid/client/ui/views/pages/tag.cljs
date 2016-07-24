@@ -25,7 +25,7 @@
                       (swap! editing? not)
                       (dispatch! :set-tag-description [(tag :id) @new-description]))}
            "Save"]]
-         [:button {:on-click (fn [_] (println @editing?) (swap! editing? not))}
+         [:button {:on-click (fn [_] (swap! editing? not))}
           "Edit description"])])))
 
 (defn tag-page-view
