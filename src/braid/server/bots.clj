@@ -1,16 +1,9 @@
 (ns braid.server.bots
   (:require [org.httpkit.client :as http]
             [taoensso.timbre :as timbre]
-            [cognitect.transit :as transit]
-            [braid.server.crypto :as crypto])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]))
-
-(defn ->transit
-  [form]
-  (let [out (ByteArrayOutputStream. 4096)
-        writer (transit/writer out :msgpack)]
-    (transit/write writer form)
-    (.toByteArray out)))
+            [braid.server.crypto :as crypto]
+            [braid.server.util :refer [->transit]])
+  (:import java.io.ByteArrayInputStream))
 
 (defn send-notification
   [bot message]

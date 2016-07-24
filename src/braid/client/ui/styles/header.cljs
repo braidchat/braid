@@ -115,6 +115,9 @@
           [:&.group-uploads:after
            (mixins/fontawesome \uf0ee)]
 
+          [:&.changelog:after
+           (mixins/fontawesome \uf1da)]
+
           [:&.settings:after
            (mixins/fontawesome \uf013)]]]]]
 
