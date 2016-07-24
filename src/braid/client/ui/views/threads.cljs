@@ -29,7 +29,6 @@
   [props]
   (let [threads (r/atom [])
         reset-threads! (fn [new-threads]
-                         (println "reset!")
                          (reset! threads (vec new-threads)))
         update-threads! (fn [new-threads]
                           (swap! threads
