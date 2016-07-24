@@ -36,11 +36,6 @@
        :component-did-mount
        (fn [c]
          (resize-textbox (r/dom-node c))
-         (let [{:keys [config]} (r/props c)]
-           (when (and (not (config :new-thread?))
-                   (= (config :thread-id) (store/get-new-thread)))
-             (store/clear-new-thread!)))
-
          (reset! this-elt (r/dom-node c)))
 
        :component-did-update
@@ -264,10 +259,7 @@
   (let [uploading? (r/atom false)]
     (fn [config]
       ; clicking on label == clicking on (hidden) input
-      [:label.plus {:class (when @uploading? "uploading")
-                    ; stop propagation so click event doesn't go to thread &
-                    ; focus reply
-                    :on-click (fn [e] (.stopPropagation e))}
+      [:label.plus {:class (when @uploading? "uploading")}
        [:input {:type "file"
                 :multiple false
                 :style {:display "none"}

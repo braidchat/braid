@@ -170,10 +170,10 @@
   [thread-id]
   (transact! [:new-thread-id] (constantly thread-id)))
 
-(defn get-new-thread []
+(defn get-new-thread-id []
   (@app-state :new-thread-id))
 
-(defn clear-new-thread! []
+(defn reset-new-thread-id! []
   (transact! [:new-thread-id] (fn [_] (uuid/make-random-squuid))))
 
 (defn focus-thread! [thread-id]

@@ -68,6 +68,10 @@
                      :mentioned-user-ids (concat (data :mentioned-user-ids)
                                                  (extract-user-ids (data :content)))})]
       (store/add-message! message)
+
+      (when (= (data :thread-id) (store/get-new-thread-id))
+        (store/reset-new-thread-id!))
+
       (sync/chsk-send!
         [:braid.server/new-message message]
         2000
