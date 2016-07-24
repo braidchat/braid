@@ -4,30 +4,10 @@
             [braid.client.ui.views.thread :refer [thread-view]]
             [braid.client.ui.views.new-thread :refer [new-thread-view]]))
 
-; currently unused
-(defn scroll-view
-  []
-  (let [this-elt (r/atom nil)]
-    (r/create-class
-      {:component-did-mount
-       (fn [this]
-         (reset! this-elt (r/dom-node this)))
-
-       :reagent-render
-       (fn []
-         [:div.scroll {:on-wheel ; make the mouse wheel scroll horizontally
-                       (fn [e]
-                         (let [target-classes (.. e -target -classList)]
-                           ; TODO: check if threads-div needs to scroll?
-                           (when (and (or (.contains target-classes "thread")
-                                          (.contains target-classes "threads"))
-                                   (= 0 (.-deltaX e) (.-deltaZ e)))
-                             (set! (.-scrollLeft @this-elt)
-                                   (- (.-scrollLeft @this-elt) (.-deltaY e))))))}])})))
-
 (defn threads-view
   [props]
   (let [threads (r/atom [])
+        this-elt (r/atom nil)
         reset-threads! (fn [new-threads]
                          (reset! threads (vec new-threads)))
         update-threads! (fn [new-threads]
@@ -38,13 +18,22 @@
                                          to-remove (difference old-thread-ids new-thread-ids)
                                          to-add (difference new-thread-ids old-thread-ids)]
                                      (vec (concat (remove (fn [t] (contains? to-remove (t :id))) old-threads)
-                                                  (filter (fn [t] (contains? to-add (t :id))) new-threads)))))))]
+                                                  (filter (fn [t] (contains? to-add (t :id))) new-threads)))))))
+        scroll-horizontally (fn [e]
+                              (let [target-classes (.. e -target -classList)]
+                                ; TODO: check if threads-div needs to scroll?
+                                (when (and (or (.contains target-classes "thread")
+                                               (.contains target-classes "threads"))
+                                        (= 0 (.-deltaX e) (.-deltaZ e)))
+                                  (set! (.-scrollLeft @this-elt)
+                                        (- (.-scrollLeft @this-elt) (.-deltaY e))))))]
     (r/create-class
       {:display-name "threads-view"
 
        :component-did-mount
        (fn [this]
-         (reset-threads! (props :threads)))
+         (reset-threads! (props :threads))
+         (reset! this-elt (r/dom-node this)))
 
        :component-will-receive-props
        (fn [this [_ next-props]]
@@ -56,7 +45,9 @@
        (fn [{:keys [new-thread-args
                     threads-opts]
              :or {threads-opts {}}}]
-         [:div.threads threads-opts
+         [:div.threads
+          (merge threads-opts
+                 {:on-wheel scroll-horizontally})
 
           (when new-thread-args
             [new-thread-view new-thread-args])
