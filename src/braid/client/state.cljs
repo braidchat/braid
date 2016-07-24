@@ -239,6 +239,10 @@
   [state [_ thread-id]]
   (reaction (contains? (set (get-in @state [:user :open-thread-ids])) thread-id)))
 
+(defmethod subscription :thread-focused?
+  [state [_ thread-id]]
+  (reaction (= thread-id (get-in @state [:focused-thread-id]))))
+
 (defmethod subscription :thread-new-message
   [state [_ thread-id]]
   (reaction (if-let [th (get-in @state [:threads thread-id])]
@@ -288,3 +292,4 @@
 (defmethod subscription :user-preference
   [state [_ pref]]
   (reaction (get-in @state [:preferences pref])))
+

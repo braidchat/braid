@@ -236,6 +236,9 @@
   (store/update-thread-last-open-at thread-id)
   (sync/chsk-send! [:braid.server/mark-thread-read thread-id]))
 
+(defmethod dispatch! :focus-thread [_ thread-id]
+  (store/focus-thread! thread-id))
+
 (defmethod dispatch! :clear-inbox [_ _]
   (let [open-thread-ids (map :id (store/open-threads))]
     (doseq [id open-thread-ids]
@@ -485,3 +488,4 @@
 (defmethod sync/event-handler :braid.client/show-thread
   [[_ thread]]
   (store/add-open-thread! thread))
+

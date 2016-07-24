@@ -1,6 +1,7 @@
 (ns braid.client.ui.views.new-message
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
+            [reagent.ratom :refer-macros [run!]]
             [braid.client.state :refer [subscribe]]
             [cljs.core.async :as async :refer [<! put! chan alts!]]
             [braid.client.dispatcher :refer [dispatch!]]
@@ -16,15 +17,19 @@
         (str (+ 5 (min 300 (.-scrollHeight el))) "px")))
 
 (defn textarea-view [{:keys [text set-text! config on-key-down on-change]}]
-  (let [connected? (subscribe [:connected?])
-        kill-chan (chan)
+  (let [this-elt (r/atom nil)
+        connected? (subscribe [:connected?])
+        focused? (subscribe [:thread-focused? (config :thread-id)])
         send-message!
         (fn [config text]
           (dispatch! :new-message {:thread-id (config :thread-id)
                                    :group-id (config :group-id)
                                    :content text
                                    :mentioned-user-ids (config :mentioned-user-ids)
-                                   :mentioned-tag-ids (config :mentioned-tag-ids)}))]
+                                   :mentioned-tag-ids (config :mentioned-tag-ids)}))
+        _ (run! (do
+                  (when (and @focused? @this-elt)
+                    (.focus @this-elt))))]
 
     (r/create-class
       {:display-name "textarea"
@@ -34,29 +39,21 @@
          (let [{:keys [config]} (r/props c)]
            (when (and (not (config :new-thread?))
                    (= (config :thread-id) (store/get-new-thread)))
-             (store/clear-new-thread!)
-             (.focus (r/dom-node c))))
+             (store/clear-new-thread!)))
 
-         ; TODO: re-enable this
-         #_(let [focus-chan (:become-focused-chan config)]
-           (go (loop []
-                 (let [[_ ch] (alts! [focus-chan kill-chan])]
-                   (when (= ch focus-chan)
-                     (.focus (r/dom-node c))
-                     (recur)))))))
+         (reset! this-elt (r/dom-node c)))
 
        :component-did-update
        (fn [c]
          (resize-textbox (r/dom-node c)))
-
-       :component-will-unmount
-       (fn [] (put! kill-chan (js/Date.)))
 
        :reagent-render
        (fn [{:keys [text set-text! config on-key-down on-change]}]
          [:textarea {:placeholder (config :placeholder)
                      :value text
                      :disabled (not @connected?)
+                     :on-focus (fn [e]
+                                 (dispatch! :focus-thread (config :thread-id)))
                      :on-change (on-change
                                   {:on-change
                                    (fn [e]
