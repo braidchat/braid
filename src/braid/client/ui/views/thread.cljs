@@ -43,8 +43,10 @@
   ; thread box, which doesn't have messages anyway
   (let [messages (subscribe [:messages-for-thread (thread :id)])
 
+        last-open-at (subscribe [:thread-last-open-at (thread :id)])
+
         unseen? (fn [message thread] (> (:created-at message)
-                                        (thread :last-open-at)))
+                                        @last-open-at))
 
         kill-chan (chan)
         embed-update-chan (chan)
