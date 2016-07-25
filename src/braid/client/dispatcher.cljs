@@ -50,12 +50,12 @@
                              "#" (or (store/name->open-tag-id tag-name)
                                       tag-name))))))
 
-(defmulti dispatch! (fn [event data] event))
+(defmulti handler (fn [event data] event))
 
-(defmethod dispatch! :new-message-text [_ {:keys [thread-id content]}]
+(defmethod handler :new-message-text [_ {:keys [thread-id content]}]
   (store/set-new-message! thread-id content))
 
-(defmethod dispatch! :new-message [_ data]
+(defmethod handler :new-message [_ data]
   (when-not (string/blank? (data :content))
     (let [message (schema/make-message
                     {:user-id (store/current-user-id)
@@ -80,7 +80,7 @@
             (store/display-error! (str :failed-to-send (message :id)) "Message failed to send!")
             (store/set-message-failed! message)))))))
 
-(defmethod dispatch! :resend-message [_ message]
+(defmethod handler :resend-message [_ message]
   (store/clear-error! (str :failed-to-send (message :id)))
   (store/clear-message-failed! message)
   (sync/chsk-send!
@@ -91,19 +91,19 @@
         (store/display-error! (str :failed-to-send (message :id)) "Message failed to send!")
         (store/set-message-failed! message)))))
 
-(defmethod dispatch! :hide-thread [_ thread-id]
+(defmethod handler :hide-thread [_ thread-id]
   (sync/chsk-send! [:braid.server/hide-thread thread-id])
   (store/hide-thread! thread-id))
 
-(defmethod dispatch! :reopen-thread [_ thread-id]
+(defmethod handler :reopen-thread [_ thread-id]
   (store/show-thread! thread-id)
   (sync/chsk-send! [:braid.server/show-thread thread-id]))
 
-(defmethod dispatch! :unsub-thread [_ data]
+(defmethod handler :unsub-thread [_ data]
   (sync/chsk-send! [:braid.server/unsub-thread (data :thread-id)])
   (store/hide-thread! (data :thread-id)))
 
-(defmethod dispatch! :create-tag [_ [tag-name group-id id]]
+(defmethod handler :create-tag [_ [tag-name group-id id]]
   (let [tag (schema/make-tag {:name tag-name
                               :group-id group-id
                               :group-name (:name (store/id->group group-id))
@@ -117,26 +117,26 @@
           (do
             (store/remove-tag! (tag :id))
             (store/display-error! (str :bad-tag (tag :id)) msg))
-          (dispatch! :subscribe-to-tag (tag :id)))))))
+          (handler :subscribe-to-tag (tag :id)))))))
 
-(defmethod dispatch! :unsubscribe-from-tag [_ tag-id]
+(defmethod handler :unsubscribe-from-tag [_ tag-id]
   (sync/chsk-send! [:braid.server/unsubscribe-from-tag tag-id])
   (store/unsubscribe-from-tag! tag-id))
 
-(defmethod dispatch! :subscribe-to-tag [_ tag-id]
+(defmethod handler :subscribe-to-tag [_ tag-id]
   (sync/chsk-send! [:braid.server/subscribe-to-tag tag-id])
   (store/subscribe-to-tag! tag-id))
 
-(defmethod dispatch! :set-tag-description [_ [tag-id desc]]
+(defmethod handler :set-tag-description [_ [tag-id desc]]
   (store/update-tag-description! tag-id desc)
   (sync/chsk-send!
     [:braid.server/set-tag-description {:tag-id tag-id :description desc}]))
 
-(defmethod dispatch! :retract-tag [_ tag-id]
+(defmethod handler :retract-tag [_ tag-id]
   (store/remove-tag! tag-id)
   (sync/chsk-send! [:braid.server/retract-tag tag-id]))
 
-(defmethod dispatch! :create-group [_ group]
+(defmethod handler :create-group [_ group]
   (let [group (schema/make-group group)]
     (sync/chsk-send!
       [:braid.server/create-group group]
@@ -149,7 +149,7 @@
     (store/add-group! group)
     (store/become-group-admin! (:id group))))
 
-(defmethod dispatch! :set-nickname [_ [nickname on-error]]
+(defmethod handler :set-nickname [_ [nickname on-error]]
   (sync/chsk-send!
     [:braid.server/set-nickname {:nickname nickname}]
     1000
@@ -158,11 +158,11 @@
         (on-error msg)
         (store/update-user-nick! (store/current-user-id) nickname)))))
 
-(defmethod dispatch! :set-user-avatar [_ avatar-url]
+(defmethod handler :set-user-avatar [_ avatar-url]
   (store/update-user-avatar! (store/current-user-id) avatar-url)
   (sync/chsk-send! [:braid.server/set-user-avatar avatar-url]))
 
-(defmethod dispatch! :set-password [_ [password on-success on-error]]
+(defmethod handler :set-password [_ [password on-success on-error]]
   (sync/chsk-send!
     [:braid.server/set-password {:password password}]
     3000
@@ -173,20 +173,20 @@
                                   {:error "Couldn't connect to server, please try again"})
         true (on-success)))))
 
-(defmethod dispatch! :set-preference [_ [k v]]
+(defmethod handler :set-preference [_ [k v]]
   (store/add-preferences! {k v})
   (sync/chsk-send! [:braid.server/set-preferences {k v}]))
 
-(defmethod dispatch! :add-notification-rule [_ rule]
+(defmethod handler :add-notification-rule [_ rule]
   (let [current-rules (get (store/user-preferences) :notification-rules [])]
-    (dispatch! :set-preference [:notification-rules (conj current-rules rule)])))
+    (handler :set-preference [:notification-rules (conj current-rules rule)])))
 
-(defmethod dispatch! :remove-notification-rule [_ rule]
+(defmethod handler :remove-notification-rule [_ rule]
   (let [new-rules (->> (get (store/user-preferences) :notification-rules [])
                        (into [] (remove (partial = rule))))]
-    (dispatch! :set-preference [:notification-rules new-rules])))
+    (handler :set-preference [:notification-rules new-rules])))
 
-(defmethod dispatch! :search-history [_ [query group-id]]
+(defmethod handler :search-history [_ [query group-id]]
   (when query
     (store/clear-search-error!)
     (sync/chsk-send!
@@ -197,7 +197,7 @@
           (store/set-search-results! query reply)
           (store/set-search-error!))))))
 
-(defmethod dispatch! :load-recent-threads
+(defmethod handler :load-recent-threads
   [_ {:keys [group-id on-error on-complete]}]
   (sync/chsk-send!
     [:braid.server/load-recent-threads group-id]
@@ -211,7 +211,7 @@
           :else (on-error "Something went wrong")))
       (on-complete (some? (:braid/ok reply))))))
 
-(defmethod dispatch! :load-threads [_ {:keys [thread-ids on-complete]}]
+(defmethod handler :load-threads [_ {:keys [thread-ids on-complete]}]
   (sync/chsk-send!
     [:braid.server/load-threads thread-ids]
     5000
@@ -221,7 +221,7 @@
       (when on-complete
         (on-complete)))))
 
-(defmethod dispatch! :threads-for-tag [_ {:keys [tag-id offset limit on-complete]
+(defmethod handler :threads-for-tag [_ {:keys [tag-id offset limit on-complete]
                                           :or {offset 0 limit 25}}]
   (sync/chsk-send!
     [:braid.server/threads-for-tag {:tag-id tag-id :offset offset :limit limit}]
@@ -236,23 +236,23 @@
         (store/set-pagination-remaining! (:remaining reply))
         (when on-complete (on-complete))))))
 
-(defmethod dispatch! :mark-thread-read [_ thread-id]
+(defmethod handler :mark-thread-read [_ thread-id]
   (store/update-thread-last-open-at thread-id)
   (sync/chsk-send! [:braid.server/mark-thread-read thread-id]))
 
-(defmethod dispatch! :focus-thread [_ thread-id]
+(defmethod handler :focus-thread [_ thread-id]
   (store/focus-thread! thread-id))
 
-(defmethod dispatch! :clear-inbox [_ _]
+(defmethod handler :clear-inbox [_ _]
   (let [open-thread-ids (map :id (store/open-threads))]
     (doseq [id open-thread-ids]
-      (dispatch! :hide-thread id))))
+      (handler :hide-thread id))))
 
-(defmethod dispatch! :invite [_ data]
+(defmethod handler :invite [_ data]
   (let [invite (schema/make-invitation data)]
     (sync/chsk-send! [:braid.server/invite-to-group invite])))
 
-(defmethod dispatch! :generate-link [_ {:keys [group-id expires complete]}]
+(defmethod handler :generate-link [_ {:keys [group-id expires complete]}]
   (println "dispatching generate")
   (sync/chsk-send!
     [:braid.server/generate-invite-link {:group-id group-id :expires expires}]
@@ -262,36 +262,36 @@
       (when-let [link (:link reply)]
         (complete link)))))
 
-(defmethod dispatch! :accept-invite [_ invite]
+(defmethod handler :accept-invite [_ invite]
   (sync/chsk-send! [:braid.server/invitation-accept invite])
   (store/remove-invite! invite))
 
-(defmethod dispatch! :decline-invite [_ invite]
+(defmethod handler :decline-invite [_ invite]
   (sync/chsk-send! [:braid.server/invitation-decline invite])
   (store/remove-invite! invite))
 
-(defmethod dispatch! :make-admin [_ {:keys [group-id user-id] :as args}]
+(defmethod handler :make-admin [_ {:keys [group-id user-id] :as args}]
   (sync/chsk-send! [:braid.server/make-user-admin args])
   (store/add-group-admin! group-id user-id))
 
-(defmethod dispatch! :remove-from-group [ _ {:keys [group-id user-id] :as args}]
+(defmethod handler :remove-from-group [ _ {:keys [group-id user-id] :as args}]
   (sync/chsk-send! [:braid.server/remove-from-group args]))
 
-(defmethod dispatch! :set-intro [_ {:keys [group-id intro] :as args}]
+(defmethod handler :set-intro [_ {:keys [group-id intro] :as args}]
   (sync/chsk-send! [:braid.server/set-group-intro args])
   (store/set-group-intro! group-id intro))
 
-(defmethod dispatch! :set-group-avatar [_ {:keys [group-id avatar] :as args}]
+(defmethod handler :set-group-avatar [_ {:keys [group-id avatar] :as args}]
   (sync/chsk-send! [:braid.server/set-group-avatar args])
   (store/set-group-avatar! group-id avatar))
 
-(defmethod dispatch! :make-group-public! [_ group-id]
+(defmethod handler :make-group-public! [_ group-id]
   (sync/chsk-send! [:braid.server/set-group-publicity [group-id true]]))
 
-(defmethod dispatch! :make-group-private! [_ group-id]
+(defmethod handler :make-group-private! [_ group-id]
   (sync/chsk-send! [:braid.server/set-group-publicity [group-id false]]))
 
-(defmethod dispatch! :new-bot [_ {:keys [bot on-complete]}]
+(defmethod handler :new-bot [_ {:keys [bot on-complete]}]
   (let [bot (schema/make-bot bot)]
     (sync/chsk-send!
       [:braid.server/create-bot bot]
@@ -303,7 +303,7 @@
             (get reply :braid/error "Something when wrong creating bot")))
         (on-complete (:braid/ok reply))))))
 
-(defmethod dispatch! :get-bot-info [_ {:keys [bot-id on-complete]}]
+(defmethod handler :get-bot-info [_ {:keys [bot-id on-complete]}]
   (sync/chsk-send!
     [:braid.server/get-bot-info bot-id]
     2000
@@ -311,12 +311,12 @@
       (when-let [bot (:braid/ok reply)]
         (on-complete bot)))))
 
-(defmethod dispatch! :create-upload [_ {:keys [url thread-id group-id]}]
+(defmethod handler :create-upload [_ {:keys [url thread-id group-id]}]
   (sync/chsk-send! [:braid.server/create-upload
                     (schema/make-upload {:url url :thread-id thread-id})])
-  (dispatch! :new-message {:content url :thread-id thread-id :group-id group-id}))
+  (handler :new-message {:content url :thread-id thread-id :group-id group-id}))
 
-(defmethod dispatch! :get-group-uploads [_ {:keys [group-id on-success on-error]}]
+(defmethod handler :get-group-uploads [_ {:keys [group-id on-success on-error]}]
   (sync/chsk-send!
     [:braid.server/uploads-in-group group-id]
     5000
@@ -325,23 +325,23 @@
         (on-success uploads)
         (on-error (get reply :braid/error "Couldn't get uploads in group"))))))
 
-(defmethod dispatch! :check-auth! [_ _]
+(defmethod handler :check-auth! [_ _]
   (edn-xhr {:uri "/check"
             :method :get
             :on-complete (fn [_]
-                           (dispatch! :start-socket!))
+                           (handler :start-socket!))
             :on-error (fn [_]
-                        (dispatch! :set-login-state! :login-form))}))
+                        (handler :set-login-state! :login-form))}))
 
-(defmethod dispatch! :set-login-state! [_ state]
+(defmethod handler :set-login-state! [_ state]
   (store/set-login-state! state))
 
-(defmethod dispatch! :start-socket! [_ _]
-  (dispatch! :set-login-state! :ws-connect)
+(defmethod handler :start-socket! [_ _]
+  (handler :set-login-state! :ws-connect)
   (sync/make-socket!)
   (sync/start-router!))
 
-(defmethod dispatch! :auth [_ data]
+(defmethod handler :auth [_ data]
   (edn-xhr {:uri "/auth"
             :method :post
             :params {:email (data :email)
@@ -349,22 +349,22 @@
             :on-complete (fn [_]
                            (when-let [cb (data :on-complete)]
                              (cb))
-                           (dispatch! :start-socket!))
+                           (handler :start-socket!))
             :on-error (fn [_]
                         (when-let [cb (data :on-error)]
                           (cb)))}))
 
-(defmethod dispatch! :request-reset [_ email]
+(defmethod handler :request-reset [_ email]
   (edn-xhr {:uri "/request-reset"
             :method :post
             :params {:email email}}))
 
-(defmethod dispatch! :logout [_ _]
+(defmethod handler :logout [_ _]
   (edn-xhr {:uri "/logout"
             :method :post
             :params {:csrf-token (:csrf-token @sync/chsk-state)}
             :on-complete (fn [data]
-                           (dispatch! :set-login-state! :login-form)
+                           (handler :set-login-state! :login-form)
                            (store/clear-session!))}))
 
 (defn check-client-version [server-checksum]
@@ -379,7 +379,7 @@
 
 (defmethod sync/event-handler :braid.client/init-data
   [[_ data]]
-  (dispatch! :set-login-state! :app)
+  (handler :set-login-state! :app)
   (check-client-version (data :version-checksum))
   (store/set-session! {:user-id (data :user-id)})
   (store/add-users! (data :users))
@@ -493,3 +493,4 @@
   [[_ thread]]
   (store/add-open-thread! thread))
 
+(def dispatch! handler)
