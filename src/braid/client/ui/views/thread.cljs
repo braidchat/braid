@@ -4,6 +4,7 @@
             [reagent.core :as r]
             [braid.client.state :refer [subscribe]]
             [cljs.core.async :refer [chan put!]]
+            [braid.client.routes :as routes]
             [braid.client.store :as store]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :as helpers]
@@ -121,6 +122,8 @@
         ; thread box, which is always open
         open? (subscribe [:thread-open? (thread :id)])
 
+        permalink-open? (r/atom false)
+
         focus-chan (chan)
 
         maybe-upload-file!
@@ -152,12 +155,16 @@
                             (when archived? "archived")])
 
           :on-click (fn [e]
-                      (let [sel (.getSelection js/window)
-                            selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
-                        (when (zero? selection-size)
-                          (helpers/stop-event! e)
-                          (put! focus-chan (js/Date.))
-                          (dispatch! :mark-thread-read (thread :id)))))
+                      (let [target-type (.. e -target -tagName)]
+                        (when-not (or (= target-type "INPUT")
+                                      (= target-type "A")
+                                      (= target-type "BUTTON"))
+                          (let [sel (.getSelection js/window)
+                                selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
+                            (when (zero? selection-size)
+                              (helpers/stop-event! e)
+                              (put! focus-chan (js/Date.))
+                              (dispatch! :mark-thread-read (thread :id)))))))
           :on-focus
           (fn [e]
             (set-focused! true))
@@ -210,6 +217,20 @@
 
          [:div.card
           [:div.head
+           (when @permalink-open?
+             [:div.permalink
+              [:input {:type "text"
+                       :read-only true
+                       :on-focus (fn [e] (.. e -target select))
+                       :on-click (fn [e] (.. e -target select))
+                       :value (str
+                                (helpers/site-url)
+                                (routes/thread-path
+                                  {:thread-id (thread :id)
+                                   :group-id (thread :group-id)}))}]
+              [:button {:on-click (fn [e]
+                                    (reset! permalink-open? false))}
+               "Done"]])
            (when (not new?)
              [:div.controls
               (if @open?
@@ -229,7 +250,12 @@
                               ; get click events
                               (helpers/stop-event! e)
                               (dispatch! :reopen-thread (thread :id)))}])
-              [:div.control.mute
+              [:div.control.permalink.hidden
+               {:title "Get Permalink"
+                :on-click (fn [e]
+                            (helpers/stop-event! e)
+                            (reset! permalink-open? true))}]
+              [:div.control.mute.hidden
                {:title "Mute"
                 :on-click (fn [e]
                             ; Need to preventDefault & propagation when using

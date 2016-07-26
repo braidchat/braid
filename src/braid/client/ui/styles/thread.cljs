@@ -113,6 +113,10 @@
       {:margin-bottom (em 0.5)
        :margin-right (em 0.5)} ] ]
 
+    [:.permalink
+     [:button
+      mixins/pill-button]]
+
     [:.controls
      {:position "absolute"
       :padding pad
@@ -136,16 +140,20 @@
        [:&:after
         (mixins/fontawesome \uf0e2)]]
 
+      [:&.permalink
+       [:&:after (mixins/fontawesome \uf0c1)]]
       [:&.mute
-       {:margin-top (m/* pad 0.5)}
-       {:display "none"}
+       [:&:after (mixins/fontawesome \uf1f6)]]
+
+      [:&.hidden
+       {:margin-top (m/* pad 0.5)
+        :display "none"}
 
        [:&:after
         {:font-size "0.9em"
-         :margin-right "-0.15em"}
-        (mixins/fontawesome \uf1f6)]]]]
+         :margin-right "-0.15em"}]]]]
 
-    [".controls:hover > .mute"
+    [".controls:hover > .hidden"
      {:display "block"}]]])
 
 (defn messages [pad]
