@@ -4,7 +4,6 @@
             [clojure.string :as string]
             [cljs-time.format :as f]
             [cljs-time.core :as t]
-            [braid.client.store :as store]
             [goog.style :as gstyle]
             [cljsjs.husl])
   (:import [goog Uri]))

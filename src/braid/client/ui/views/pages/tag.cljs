@@ -2,7 +2,6 @@
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction run!]]
             [clojure.string :as string]
-            [braid.client.store :as store]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.state :refer [subscribe]]
             [braid.client.ui.views.threads :refer [threads-view]]
@@ -23,7 +22,9 @@
           [:button {:on-click
                     (fn [_]
                       (swap! editing? not)
-                      (dispatch! :set-tag-description [(tag :id) @new-description]))}
+                      (dispatch! :set-tag-description {:tag-id (tag :id)
+                                                       :description @new-description
+                                                       :remote? true}))}
            "Save"]]
          [:button {:on-click (fn [_] (swap! editing? not))}
           "Edit description"])])))

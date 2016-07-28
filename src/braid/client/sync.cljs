@@ -45,9 +45,10 @@
       (debugf "Channel socket successfully established!")
       (do
         (debugf "Channel socket state change: %s" new-state)
-        (if (not (:open? new-state))
-          (store/display-error! :disconnected "Disconnected" :warn)
-          (store/clear-error! :disconnected))))
+        ; FIXME should use dispatch!, but issue w/ circular dependency
+        #_(if (not (:open? new-state))
+            (store/display-error! :disconnected "Disconnected" :warn)
+            (store/clear-error! :disconnected))))
   (event-handler [:socket/connected new-state]))
 
 (defmethod event-msg-handler :chsk/recv

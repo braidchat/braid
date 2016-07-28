@@ -40,8 +40,8 @@
              (when (and (= KeyCodes.ENTER e.keyCode)
                      (re-matches #"\S+" nickname))
                (dispatch! :set-nickname
-                          [nickname
-                           (fn [err] (set-error! err))]))))}]])))
+                          {:nickname nickname
+                           :on-error (fn [err] (set-error! err))}))))}]])))
 
 (defn avatar-view
   []
