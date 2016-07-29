@@ -49,3 +49,20 @@
 (defn bot-by-id
   [conn bot-id]
   (db->bot (d/pull (d/db conn) bot-pull-pattern [:bot/id bot-id])))
+
+(defn bot-watch-thread!
+  [conn bot-id thread-id]
+  ; need to verify that thread is in bot's group
+  @(d/transact [[:db/add [:bot/id bot-id]
+                 :bot/watched [:thread/id thread-id]]]))
+
+(defn bots-watching-thread
+  [conn thread-id]
+  (->> (d/q '[:find (pull ?b pull-pattern)
+              :in $ pull-pattern ?thread-id
+              :where
+              [?t :thread/id ?thread-id]
+              [?b :bot/watched ?t]
+              [?t :thread/group ?g]
+              [?b :bot/group ?g]])
+       (into #{} (map db->bot))))

@@ -83,7 +83,24 @@
         {:status 400
          :headers {"Content-Type" "text/plain"}
          ; TODO: when we have clojure.spec, use that to explain failure
-         :body "malformed message content"}))))
+         :body "malformed message content"})))
+  (PUT "/subscribe/:thread-id" [thread-id :as req]
+    (let [bot-id (get req ::bot-id)
+          bot (db/bot-by-id bot-id)]
+      (if-let [thread-id (try (java.util.UUID/fromString thread-id)
+                           (catch IllegalArgumentException _ nil))]
+        (if (= (bot :group-id) (db/thread-group-id thread-id))
+          (do
+            (db/bot-watch-thread! bot-id thread-id)
+            {:status 200
+             :headers {"Content-Type" "text/plain"}
+             :body "ok"})
+          {:status 403
+           :headers {"Content-Type" "text/plain"}
+           :body "Can't subscribe to a thread in a different group"})
+        {:status 400
+         :headers {"Content-Type" "text/plain"}
+         :body "Invalid thread id"}))))
 
 (defn bad-transit-resp-fn
   [ex req handler]
