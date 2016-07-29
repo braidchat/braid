@@ -160,7 +160,7 @@
                                  (let [v (.. e -target -value)]
                                    (if (= v "any")
                                      (reset! condition :any)
-                                     (reset! condition (UUID. v nil)))))}
+                                     (reset! condition (uuid v)))))}
            [:option {:value :any} "Any Group"]
            (doall
              (for [group @groups]
@@ -170,7 +170,7 @@
           :tag
           [:select {:value @event-tag
                     :on-change (fn [e]
-                                 (let [tag-id (UUID. (.. e -target -value) nil)]
+                                 (let [tag-id (uuid (.. e -target -value))]
                                    (reset! condition tag-id)))}
            (doall
              (for [group-id (keys @tags)]
