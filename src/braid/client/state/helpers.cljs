@@ -29,7 +29,7 @@
                          (->> (filter (fn [thread]
                                         (or (empty? (thread :tag-ids))
                                             (contains?
-                                              (into #{} (map (partial group-for-tag) (thread :tag-ids)))
+                                              (into #{} (map (partial group-for-tag state) (thread :tag-ids)))
                                               current-group-id))))))]
     open-threads))
 
