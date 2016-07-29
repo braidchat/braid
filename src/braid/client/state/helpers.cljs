@@ -163,12 +163,13 @@
 (defn maybe-create-thread [state thread-id group-id]
   (let [state (update-in state [:user :open-thread-ids] #(conj % thread-id))]
     (when-not (get-in state [:threads thread-id])
-      (assoc-in state [:threads thread-id] {:id thread-id
-                                            :group-id group-id
-                                            :messages []
-                                            :tag-ids #{}
-                                            :mentioned-ids #{}})
-      (update-in state [:group-threads group-id] #(conj (set %) thread-id)))))
+      (-> state
+          (assoc-in [:threads thread-id] {:id thread-id
+                                          :group-id group-id
+                                          :messages []
+                                          :tag-ids #{}
+                                          :mentioned-ids #{}})
+          (update-in [:group-threads group-id] #(conj (set %) thread-id))))))
 
 (defn add-message [state message]
   (-> state
