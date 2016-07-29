@@ -4,6 +4,7 @@
             [reagent.core :as r]
             [braid.client.state :refer [subscribe]]
             [cljs.core.async :refer [chan put!]]
+            [braid.client.routes :as routes]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :as helpers]
             [braid.client.s3 :as s3]
@@ -120,7 +121,7 @@
         ; thread box, which is always open
         open? (subscribe [:thread-open? (thread :id)])
         focused? (subscribe [:thread-focused? (thread :id)])
-
+        permalink-open? (r/atom false)
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
@@ -203,6 +204,20 @@
 
          [:div.card
           [:div.head
+           (when @permalink-open?
+             [:div.permalink
+              [:input {:type "text"
+                       :read-only true
+                       :on-focus (fn [e] (.. e -target select))
+                       :on-click (fn [e] (.. e -target select))
+                       :value (str
+                                (helpers/site-url)
+                                (routes/thread-path
+                                  {:thread-id (thread :id)
+                                   :group-id (thread :group-id)}))}]
+              [:button {:on-click (fn [e]
+                                    (reset! permalink-open? false))}
+               "Done"]])
            (when (not new?)
              [:div.controls
               (if @open?
@@ -222,7 +237,12 @@
                               ; get click events
                               (helpers/stop-event! e)
                               (dispatch! :reopen-thread (thread :id)))}])
-              [:div.control.mute
+              [:div.control.permalink.hidden
+               {:title "Get Permalink"
+                :on-click (fn [e]
+                            (helpers/stop-event! e)
+                            (reset! permalink-open? true))}]
+              [:div.control.mute.hidden
                {:title "Mute"
                 :on-click (fn [e]
                             ; Need to preventDefault & propagation when using
