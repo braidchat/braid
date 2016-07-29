@@ -168,7 +168,7 @@
                         (.-ctrlKey e))
                       (= KeyCodes.ESC (.-keyCode e)))
               (helpers/stop-event! e)
-              (dispatch! :hide-thread {:thread-id (thread :id) :remote? true})))
+              (dispatch! :hide-thread {:thread-id (thread :id)})))
 
           :on-paste
           (fn [e]
@@ -228,7 +228,7 @@
                               ; divs as controls, otherwise divs higher up also
                               ; get click events
                               (helpers/stop-event! e)
-                              (dispatch! :hide-thread {:thread-id (thread :id) :remote? true}))}]
+                              (dispatch! :hide-thread {:thread-id (thread :id)}))}]
                 [:div.control.unread
                  {:title "Mark Unread"
                   :on-click (fn [e]

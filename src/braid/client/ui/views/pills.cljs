@@ -23,8 +23,7 @@
             "Unsubscribe"]
            [:a.button {:on-click
                        (fn [_]
-                         (dispatch! :subscribe-to-tag {:tag-id tag-id
-                                                       :remote? true}))}
+                         (dispatch! :subscribe-to-tag {:tag-id tag-id}))}
             "Subscribe"]))})))
 
 (defn tag-pill-view

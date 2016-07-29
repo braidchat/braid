@@ -160,8 +160,7 @@
                           {:key (constantly (tag :id))
                            :action
                            (fn []
-                             (dispatch! :create-tag {:tag tag
-                                                     :remote? true}))
+                             (dispatch! :create-tag {:tag tag}))
                            :message-transform
                            (fn [text]
                              (string/replace text pattern (str "#" (tag :name) " ")))

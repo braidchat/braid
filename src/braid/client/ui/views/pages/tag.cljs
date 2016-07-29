@@ -23,8 +23,7 @@
                     (fn [_]
                       (swap! editing? not)
                       (dispatch! :set-tag-description {:tag-id (tag :id)
-                                                       :description @new-description
-                                                       :remote? true}))}
+                                                       :description @new-description}))}
            "Save"]]
          [:button {:on-click (fn [_] (swap! editing? not))}
           "Edit description"])])))

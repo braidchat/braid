@@ -109,8 +109,8 @@
         (dispatch! :display-error [(str :failed-to-send (message :id)) "Message failed to send!"])
         (dispatch! :set-message-failed message)))))
 
-(defmethod handler :hide-thread [state [_ {:keys [thread-id remote?]} ]]
-  (when remote?
+(defmethod handler :hide-thread [state [_ {:keys [thread-id local-only?]} ]]
+  (when-not local-only?
     (sync/chsk-send! [:braid.server/hide-thread thread-id]))
   (helpers/hide-thread state thread-id))
 
@@ -120,41 +120,41 @@
 
 (defmethod handler :unsub-thread [state [_ data]]
   (sync/chsk-send! [:braid.server/unsub-thread (data :thread-id)])
-  (dispatch! :hide-thread {:thread-id (data :thread-id) :remote? false}))
+  (dispatch! :hide-thread {:thread-id (data :thread-id) :local-only? true}))
 
-(defmethod handler :create-tag [state [_ [{:keys [tag remote?]}]]]
+(defmethod handler :create-tag [state [_ [{:keys [tag local-only?]}]]]
   (let [tag (merge (schema/make-tag) tag)]
-      (when remote?
+      (when-not local-only?
         (sync/chsk-send!
           [:braid.server/create-tag tag]
           1000
           (fn [reply]
             (if-let [msg (:error reply)]
               (do
-                (dispatch! :remove-tag {:tag-id (tag :id) :remote? false})
+                (dispatch! :remove-tag {:tag-id (tag :id) :local-only? true})
                 (dispatch! :display-error [(str :bad-tag (tag :id)) msg])))))
         (-> state
             (helpers/add-tag tag)
             (helpers/subscribe-to-tag {:tag-id (tag :id)
-                                       :remote? false})))))
+                                       :local-only? true})))))
 
 (defmethod handler :unsubscribe-from-tag [state [_ tag-id]]
   (sync/chsk-send! [:braid.server/unsubscribe-from-tag tag-id])
   (helpers/unsubscribe-from-tag state tag-id))
 
-(defmethod handler :subscribe-to-tag [state [_ {:keys [tag-id remote?]}]]
-  (when remote?
+(defmethod handler :subscribe-to-tag [state [_ {:keys [tag-id local-only?]}]]
+  (when-not local-only?
     (sync/chsk-send! [:braid.server/subscribe-to-tag tag-id]))
   (helpers/subscribe-to-tag state tag-id))
 
-(defmethod handler :set-tag-description [state [_ {:keys [tag-id description remote?]}]]
-  (when remote?
+(defmethod handler :set-tag-description [state [_ {:keys [tag-id description local-only?]}]]
+  (when local-only?
     (sync/chsk-send!
       [:braid.server/set-tag-description {:tag-id tag-id :description description}]))
   (helpers/set-tag-description state tag-id description))
 
-(defmethod handler :retract-tag [state [_ {:keys [tag-id remote?]}]]
-  (when remote?
+(defmethod handler :retract-tag [state [_ {:keys [tag-id local-only?]}]]
+  (when-not local-only?
     (sync/chsk-send! [:braid.server/retract-tag tag-id]))
   (helpers/remove-tag state tag-id))
 
@@ -305,7 +305,7 @@
 (defmethod handler :clear-inbox [state [_ _]]
   (let [open-thread-ids (map :id (helpers/get-open-threads state))]
     (doseq [id open-thread-ids]
-      (dispatch! :hide-thread {:thread-id id :remote? true})))
+      (dispatch! :hide-thread {:thread-id id :local-only? false})))
   state)
 
 (defmethod handler :invite [state [_ data]]
@@ -332,8 +332,8 @@
   (sync/chsk-send! [:braid.server/invitation-decline invite])
   (helpers/remove-invite state invite))
 
-(defmethod handler :make-admin [state [_ {:keys [group-id user-id remote?] :as args}]]
-  (when remote?
+(defmethod handler :make-admin [state [_ {:keys [group-id user-id local-only?] :as args}]]
+  (when-not local-only?
     (sync/chsk-send! [:braid.server/make-user-admin args]))
   (helpers/make-user-admin state user-id group-id))
 
@@ -341,13 +341,13 @@
   (sync/chsk-send! [:braid.server/remove-from-group args])
   state)
 
-(defmethod handler :set-group-intro [state [_ {:keys [group-id intro remote?] :as args}]]
-  (when remote?
+(defmethod handler :set-group-intro [state [_ {:keys [group-id intro local-only?] :as args}]]
+  (when-not local-only?
     (sync/chsk-send! [:braid.server/set-group-intro args]))
   (helpers/set-group-intro state group-id intro))
 
-(defmethod handler :set-group-avatar [state [_ {:keys [group-id avatar remote?] :as args}]]
-  (when remote?
+(defmethod handler :set-group-avatar [state [_ {:keys [group-id avatar local-only?] :as args}]]
+  (when-not local-only?
     (sync/chsk-send! [:braid.server/set-group-avatar args]))
   (helpers/set-group-avatar state group-id avatar))
 
@@ -543,7 +543,7 @@
 (defmethod sync/event-handler :braid.client/create-tag
   [[_ data]]
   (dispatch! :create-tag {:tag data
-                          :remote? false}))
+                          :local-only? true}))
 
 (defmethod sync/event-handler :braid.client/joined-group
   [[_ data]]
@@ -592,29 +592,29 @@
   [[_ [group-id new-admin-id]]]
   (dispatch! :make-admin {:group-id group-id
                           :user-id new-admin-id
-                          :remote? false}))
+                          :local-only? true}))
 
 (defmethod sync/event-handler :braid.client/tag-descrption-change
   [[_ [tag-id new-description]]]
   (dispatch! :set-tag-description {:tag-id tag-id
                                    :description new-description
-                                   :remote? false}))
+                                   :local-only? true}))
 
 (defmethod sync/event-handler :braid.client/retract-tag
   [[ _ tag-id]]
-  (dispatch! :remove-tag {:tag-id tag-id :remote? false}))
+  (dispatch! :remove-tag {:tag-id tag-id :local-only? true}))
 
 (defmethod sync/event-handler :braid.client/new-intro
   [[_ [group-id intro]]]
   (dispatch! :set-group-intro {:group-id group-id
                                :intro intro
-                               :remote? false}))
+                               :local-only? true}))
 
 (defmethod sync/event-handler :braid.client/group-new-avatar
   [[_ [group-id avatar]]]
   (dispatch! :set-group-avatar {:group-id group-id
                                 :avatar avatar
-                                :remote? false}))
+                                :local-only? true}))
 
 (defmethod sync/event-handler :braid.client/publicity-changed
   [[_ [group-id publicity]]]
@@ -630,7 +630,7 @@
 
 (defmethod sync/event-handler :braid.client/hide-thread
   [[_ thread-id]]
-  (dispatch! :hide-thread {:thread-id thread-id :remote? false}))
+  (dispatch! :hide-thread {:thread-id thread-id :local-only? true}))
 
 (defmethod sync/event-handler :braid.client/show-thread
   [[_ thread]]

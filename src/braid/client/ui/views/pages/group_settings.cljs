@@ -33,8 +33,7 @@
                    :on-change (fn [e] (reset! new-message (.. e -target -value)))}]
        [:button {:on-click (fn [_]
                              (dispatch! :set-group-intro {:group-id (group :id)
-                                                          :intro @new-message
-                                                          :remote? true})
+                                                          :intro @new-message})
                              (reset! new-message ""))}
         "Save"]])))
 
@@ -51,8 +50,7 @@
        [avatar-upload-view {:on-upload (fn [url]
                                          (dispatch! :set-group-avatar
                                                     {:group-id (group :id)
-                                                     :avatar url
-                                                     :remote? true}))
+                                                     :avatar url}))
                             :dragging-change (partial reset! dragging?)}]])))
 
 (defn publicity-view
