@@ -37,12 +37,6 @@
   [bot-id msg]
   (let [bot (db/bot-by-id bot-id)]
     (cond
-      (not= (bot :group-id) (msg :group-id))
-      (do
-        (timbre/debugf "Bot %s attempted to send a message to a group it isn't in %s"
-                       (bot :group-id) (msg :group-id))
-        nil)
-
       (let [thread-group (db/thread-group-id (msg :thread-id))]
         (and (some? thread-group) (not= (bot :group-id) thread-group)))
       (do (timbre/debugf "Bot %s attempted to send to a thread in a different group"
@@ -69,6 +63,7 @@
           bot (db/bot-by-id bot-id)
           msg (assoc (req :body)
                 :user-id (bot :user-id)
+                :group-id (bot :group-id)
                 :created-at (java.util.Date.))]
       (if (schema/new-message-valid? msg)
         (if (bot-can-message? bot-id msg)
