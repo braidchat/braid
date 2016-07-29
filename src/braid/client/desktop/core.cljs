@@ -3,6 +3,7 @@
             [braid.client.ui.views.app :refer [app-view]]
             [braid.client.clj-highlighter :as highlighter]
             [braid.client.state.handlers]
+            [braid.client.state.remote-handlers]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.router :as router]))
 
