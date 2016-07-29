@@ -44,7 +44,9 @@
           (s/optional-key :id) s/Uuid
           (s/optional-key :thread-ids) [s/Uuid]
           (s/optional-key :search-query) s/Str
-          (s/optional-key :search-error?) s/Bool}
+          (s/optional-key :search-error?) s/Bool
+          (s/optional-key :loading?) s/Bool
+          (s/optional-key :error?) s/Bool}
    :session (s/maybe {:user-id s/Uuid})
    :errors [[(s/one (s/cond-pre s/Keyword s/Str) "err-key") (s/one s/Str "msg")
              (s/one (s/enum :error :warn :info) "type")]]

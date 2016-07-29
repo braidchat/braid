@@ -81,6 +81,12 @@
     :open-group-id group-id
     :page page-id))
 
+(defn set-page-error [state bool]
+  (assoc-in state [:page :error?] bool))
+
+(defn set-page-loading [state bool]
+  (assoc-in state [:page :loading?] bool))
+
 ; session
 
 (defn set-session [state data]

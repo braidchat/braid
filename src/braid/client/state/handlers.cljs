@@ -439,6 +439,12 @@
 (defmethod handler :set-group-and-page [state [_ [group-id page-id]]]
   (helpers/set-group-and-page state group-id page-id))
 
+(defmethod handler :set-page-loading [state [_ bool]]
+  (helpers/set-page-loading state bool))
+
+(defmethod handler :set-page-error [state [_ bool]]
+  (helpers/set-page-error state bool))
+
 (defmethod handler :set-preference [state [_ [k v]]]
   (sync/chsk-send! [:braid.server/set-preferences {k v}])
   (helpers/set-preferences state {k v}))
