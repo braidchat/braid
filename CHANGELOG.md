@@ -1,3 +1,7 @@
+## 22 July 2016
+
+  - Add the ability to get permalink to a thread
+
 ## 21 July 2016
 
   - Add ability to log in and register (via link or to public groups) with a GitHub account
