@@ -67,7 +67,7 @@
   (helpers/set-new-message state thread-id content))
 
 (defmethod handler :display-error [state [_ args]]
-  (apply helpers/display-error (concat [state] args)))
+  (apply helpers/display-error state args))
 
 (defmethod handler :set-message-failed [state [_ message]]
   (helpers/set-message-failed! state message))
