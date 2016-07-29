@@ -27,7 +27,8 @@
                      :unread-count 0}
      :user {:open-thread-ids #{}
             :subscribed-tag-ids #{}}
-     :new-thread-id (uuid/make-random-squuid)}))
+     :new-thread-id (uuid/make-random-squuid)
+     :focused-thread-id nil}))
 
 (def AppState
   {:login-state (s/enum :auth-check :login-form :ws-connect :app)
@@ -53,7 +54,8 @@
                    :unread-count s/Int}
    :user {:open-thread-ids #{s/Uuid}
           :subscribed-tag-ids #{s/Uuid}}
-   :new-thread-id s/Uuid})
+   :new-thread-id s/Uuid
+   :focused-thread-id (s/maybe s/Uuid)})
 
 (def check-app-state! (s/validator AppState))
 
@@ -168,11 +170,14 @@
   [thread-id]
   (transact! [:new-thread-id] (constantly thread-id)))
 
-(defn get-new-thread []
+(defn get-new-thread-id []
   (@app-state :new-thread-id))
 
-(defn clear-new-thread! []
+(defn reset-new-thread-id! []
   (transact! [:new-thread-id] (fn [_] (uuid/make-random-squuid))))
+
+(defn focus-thread! [thread-id]
+  (transact! [:focused-thread-id] (constantly thread-id)))
 
 (defn update-thread-last-open-at [thread-id]
   (when-let [thread (get-in @app-state [:threads thread-id])]

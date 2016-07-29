@@ -68,6 +68,10 @@
                      :mentioned-user-ids (concat (data :mentioned-user-ids)
                                                  (extract-user-ids (data :content)))})]
       (store/add-message! message)
+
+      (when (= (data :thread-id) (store/get-new-thread-id))
+        (store/reset-new-thread-id!))
+
       (sync/chsk-send!
         [:braid.server/new-message message]
         2000
@@ -235,6 +239,9 @@
 (defmethod dispatch! :mark-thread-read [_ thread-id]
   (store/update-thread-last-open-at thread-id)
   (sync/chsk-send! [:braid.server/mark-thread-read thread-id]))
+
+(defmethod dispatch! :focus-thread [_ thread-id]
+  (store/focus-thread! thread-id))
 
 (defmethod dispatch! :clear-inbox [_ _]
   (let [open-thread-ids (map :id (store/open-threads))]
@@ -485,3 +492,4 @@
 (defmethod sync/event-handler :braid.client/show-thread
   [[_ thread]]
   (store/add-open-thread! thread))
+

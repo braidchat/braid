@@ -12,6 +12,7 @@
     :min-width vars/card-width
     :width vars/card-width
     :box-sizing "border-box"
+    :outline "none"
 
     :flex-direction "column"
     :height "100%"
@@ -48,6 +49,10 @@
        [:.head:before
         {:background vars/limbo-thread-accent-color}]]]
 
+   [:&.focused
+    [:.card
+     {:box-shadow [[0 (px 10) (px 10) (px 10) "#ccc"]]}]]
+
    [:.card
     mixins/flex
     {:flex-direction "column"
@@ -60,7 +65,6 @@
 
 (defn notice [pad]
   [:.thread
-
    [:.notice
     {:box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
      :padding pad
@@ -262,9 +266,6 @@
     {:background-color "gray"
      :border [[(px 5) "dashed" "black"]]}]
 
-   [:&.focused
-    [:.card
-     {:box-shadow [[0 (px 10) (px 10) (px 10) "#ccc"]]}]]
 
    [:.uploading-indicator
     (mixins/fontawesome \uf110)

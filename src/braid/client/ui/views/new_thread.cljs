@@ -6,6 +6,7 @@
   (let [new-thread-id (subscribe [:new-thread-id])
         open-group-id (subscribe [:open-group-id])]
     (fn [opts]
+      ^{:key @new-thread-id}
       [thread-view (merge {:id @new-thread-id
                            :group-id (get opts :group-id @open-group-id)
                            :new? true

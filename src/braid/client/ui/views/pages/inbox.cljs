@@ -36,4 +36,5 @@
         (:intro @group)
         [clear-inbox-button-view]]
        [threads-view {:new-thread-args {}
+                      :group-id @group-id
                       :threads @sorted-threads}]])))

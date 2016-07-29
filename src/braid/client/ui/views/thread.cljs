@@ -44,8 +44,10 @@
   ; thread box, which doesn't have messages anyway
   (let [messages (subscribe [:messages-for-thread (thread :id)])
 
+        last-open-at (subscribe [:thread-last-open-at (thread :id)])
+
         unseen? (fn [message thread] (> (:created-at message)
-                                        (thread :last-open-at)))
+                                        @last-open-at))
 
         kill-chan (chan)
         embed-update-chan (chan)
@@ -102,10 +104,8 @@
 
 (defn thread-view [thread]
   (let [state (r/atom {:dragging? false
-                       :uploading? false
-                       :focused? false})
+                       :uploading? false})
         set-uploading! (fn [bool] (swap! state assoc :uploading? bool))
-        set-focused! (fn [bool] (swap! state assoc :focused? bool))
         set-dragging! (fn [bool] (swap! state assoc :dragging? bool))
 
         thread-private? (fn [thread] (and
@@ -121,11 +121,8 @@
         ; Closing over thread-id, but the only time a thread's id changes is the new
         ; thread box, which is always open
         open? (subscribe [:thread-open? (thread :id)])
-
+        focused? (subscribe [:thread-focused? (thread :id)])
         permalink-open? (r/atom false)
-
-        focus-chan (chan)
-
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
@@ -139,7 +136,7 @@
                                               :group-id (thread :group-id)}))))))]
 
     (fn [thread]
-      (let [{:keys [dragging? uploading? focused?]} @state
+      (let [{:keys [dragging? uploading?]} @state
             new? (thread :new?)
             private? (thread-private? thread)
             limbo? (thread-limbo? thread)
@@ -150,28 +147,19 @@
           (string/join " " [(when new? "new")
                             (when private? "private")
                             (when limbo? "limbo")
-                            (when focused? "focused")
+                            (when @focused? "focused")
                             (when dragging? "dragging")
                             (when archived? "archived")])
 
-          :on-click (fn [e]
-                      (let [target-type (.. e -target -tagName)]
-                        (when-not (or (= target-type "INPUT")
-                                      (= target-type "A")
-                                      (= target-type "BUTTON"))
-                          (let [sel (.getSelection js/window)
-                                selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
-                            (when (zero? selection-size)
-                              (helpers/stop-event! e)
-                              (put! focus-chan (js/Date.))
-                              (dispatch! :mark-thread-read (thread :id)))))))
-          :on-focus
+          :on-click
           (fn [e]
-            (set-focused! true))
+            (let [sel (.getSelection js/window)
+                  selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
+              (when (zero? selection-size)
+                (dispatch! :focus-thread (thread :id)))))
 
           :on-blur
           (fn [e]
-            (set-focused! false)
             (dispatch! :mark-thread-read (thread :id)))
 
           :on-key-down
@@ -275,7 +263,6 @@
 
           [new-message-view {:thread-id (thread :id)
                              :group-id (thread :group-id)
-                             :become-focused-chan focus-chan
                              :new-thread? new?
                              :placeholder (if new?
                                             "Start a conversation..."
