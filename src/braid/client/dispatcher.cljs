@@ -211,12 +211,12 @@
 
 (defmethod handler :add-notification-rule [state [_ rule]]
   (let [current-rules (get (helpers/get-user-preferences state) :notification-rules [])]
-    (dispatch! :set-preference [:notification-rules (conj current-rules rule)])))
+    (handler state [:set-preference [:notification-rules (conj current-rules rule)]])))
 
 (defmethod handler :remove-notification-rule [state [_ rule]]
   (let [new-rules (->> (get (helpers/get-user-preferences state) :notification-rules [])
                        (into [] (remove (partial = rule))))]
-    (dispatch! :set-preference [:notification-rules new-rules])))
+    (handler state [:set-preference [:notification-rules new-rules]])))
 
 (defmethod handler :clear-search-error [state _]
   (helpers/clear-search-error state))
@@ -303,10 +303,11 @@
   (helpers/focus-thread state thread-id))
 
 (defmethod handler :clear-inbox [state [_ _]]
-  (let [open-thread-ids (map :id (helpers/get-open-threads state))]
-    (doseq [id open-thread-ids]
-      (dispatch! :hide-thread {:thread-id id :local-only? false})))
-  state)
+  (->> (helpers/get-open-threads state)
+       (map :id )
+       (reduce (fn [state id]
+                 (handler state [:hide-thread {:thread-id id :local-only? false}]))
+               state)))
 
 (defmethod handler :invite [state [_ data]]
   (let [invite (schema/make-invitation data)]
@@ -384,8 +385,7 @@
 (defmethod handler :create-upload [state [_ {:keys [url thread-id group-id]}]]
   (sync/chsk-send! [:braid.server/create-upload
                     (schema/make-upload {:url url :thread-id thread-id})])
-  (dispatch! :new-message {:content url :thread-id thread-id :group-id group-id})
-  state)
+  (handler state [:new-message {:content url :thread-id thread-id :group-id group-id}]))
 
 (defmethod handler :get-group-uploads [state [_ {:keys [group-id on-success on-error]}]]
   (sync/chsk-send!
@@ -466,9 +466,9 @@
           tags))
 
 (defmethod handler :notify-if-client-out-of-date [state [_ server-checksum]]
-  (when (not= (aget js/window "checksum") server-checksum)
-    (dispatch! :display-error [:client-out-of-date "Client out of date - please refresh" :info]))
-  state)
+  (if (not= (aget js/window "checksum") server-checksum)
+    (handler state [:display-error [:client-out-of-date "Client out of date - please refresh" :info]])
+    state))
 
 (defmethod handler :set-init-data [state [_ data]]
   (-> state
