@@ -4,7 +4,8 @@
             [taoensso.timbre :as timbre :refer-macros [debugf]]
             [goog.string :as gstring]
             [braid.client.store :as store]
-            [goog.string.format]))
+            [goog.string.format]
+            [braid.client.dispatcher :refer [dispatch!]]))
 
 ; Change to :debug to get detailed info in dev
 (timbre/set-level! :info)
@@ -42,13 +43,12 @@
 (defmethod event-msg-handler :chsk/state
   [{:as ev-msg [old-state new-state] :?data}]
   (if (new-state :first-open?)
-      (debugf "Channel socket successfully established!")
-      (do
-        (debugf "Channel socket state change: %s" new-state)
-        ; FIXME should use dispatch!, but issue w/ circular dependency
-        #_(if (not (:open? new-state))
-            (store/display-error! :disconnected "Disconnected" :warn)
-            (store/clear-error! :disconnected))))
+    (debugf "Channel socket successfully established!")
+    (do
+      (debugf "Channel socket state change: %s" new-state)
+      (if (not (:open? new-state))
+        (dispatch! :disconnected ["Disconnected" :warn])
+        (dispatch! :clear-error [:disconnected]))))
   (event-handler [:socket/connected new-state]))
 
 (defmethod event-msg-handler :chsk/recv
