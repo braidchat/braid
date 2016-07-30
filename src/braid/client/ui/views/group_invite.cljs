@@ -17,7 +17,7 @@
     (fn []
       [:div
        [:div
-        [:p "Invite by link"]
+        [:h2 "Invite by link"]
         [:p "Anyone with this link will be able to join"]
         [:label "Link expires"
          [:select {:value @link-expires
@@ -41,7 +41,8 @@
           [:input {:type "text"
                    :on-focus (fn [e] (.. e -target select))
                    :value @invite-link}])]
-       [:p "Invite by email"
+       [:div
+        [:h2 "Invite By Email"]
         (if @collapsed?
           [:button.invite-open {:on-click
                                 (fn [_]
