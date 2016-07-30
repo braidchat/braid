@@ -40,6 +40,7 @@
         (when @invite-link
           [:input {:type "text"
                    :on-focus (fn [e] (.. e -target select))
+                   :read-only true
                    :value @invite-link}])]
        [:div
         [:h2 "Invite By Email"]
