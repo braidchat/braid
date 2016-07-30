@@ -63,7 +63,7 @@
   (helpers/set-message-failed! state message))
 
 (defmethod handler :new-message [state [_ data]]
-  (when-not (string/blank? (data :content))
+  (if-not (string/blank? (data :content))
     (let [message (schema/make-message
                     {:user-id (helpers/current-user-id state)
                      :content (identify-mentions (data :content))
@@ -82,7 +82,8 @@
             (dispatch! :set-message-failed message))))
       (-> state
           (helpers/add-message message)
-          (helpers/maybe-reset-new-thread-id (data :thread-id))))))
+          (helpers/maybe-reset-new-thread-id (data :thread-id))))
+    state))
 
 (defmethod handler :clear-error [state [_ err-key]]
   (helpers/clear-error state err-key))
