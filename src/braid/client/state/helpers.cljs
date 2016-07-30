@@ -190,7 +190,7 @@
       (update-in [:threads (message :thread-id) :mentioned-ids]
                  (partial set/union (set (message :mentioned-user-ids))))))
 
-(defn set-message-failed! [state message]
+(defn set-message-failed [state message]
   (update-in state [:threads (message :thread-id) :messages]
              (partial map (fn [msg] (if (= (message :id) (msg :id))
                                       (assoc msg :failed? true)

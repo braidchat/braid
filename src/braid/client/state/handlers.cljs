@@ -60,7 +60,7 @@
   (apply helpers/display-error state args))
 
 (defmethod handler :set-message-failed [state [_ message]]
-  (helpers/set-message-failed! state message))
+  (helpers/set-message-failed state message))
 
 (defmethod handler :new-message [state [_ data]]
   (if-not (string/blank? (data :content))
