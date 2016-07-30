@@ -176,12 +176,16 @@
                     (assoc :subject "Notification from Braid")
                     (->> (email/send-message (db/user-email uid))))))))))))
 
-; TODO: when else should this happen? should it be configurable?
 (defn notify-bots [new-message]
+  ; Notify bots mentioned in the message
   (when-let [bot-name (second (re-find #"^/(\w+)\b" (:content new-message)))]
     (when-let [bot (db/bot-by-name-in-group bot-name (new-message :group-id))]
       (timbre/debugf "notifying bot %s" bot)
-      (bots/send-notification bot new-message))))
+      (bots/send-notification bot new-message)))
+  ; Notify bots subscribed to the thread
+  (doseq [bot (db/bots-watching-thread (new-message :thread-id))]
+    (timbre/debugf "notifying bot %s" bot)
+    (bots/send-notification bot new-message)))
 
 (defn user-join-group!
   [user-id group-id]
