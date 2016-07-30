@@ -126,8 +126,7 @@
               (dispatch! :display-error [(str :bad-tag (tag :id)) msg]))))))
     (-> state
         (helpers/add-tag tag)
-        (helpers/subscribe-to-tag {:tag-id (tag :id)
-                                   :local-only? true}))))
+        (helpers/subscribe-to-tag (tag :id)))))
 
 (defmethod handler :unsubscribe-from-tag [state [_ tag-id]]
   (sync/chsk-send! [:braid.server/unsubscribe-from-tag tag-id])
