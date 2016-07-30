@@ -481,12 +481,15 @@
       (helpers/set-open-threads (data :user-threads))))
 
 (defmethod handler :leave-group [state [_ {:keys [group-id group-name]}]]
+  ; need to :remove-group before router is dispatched below
+  (dispatch! :remove-group group-id)
   (when (= group-id (helpers/get-open-group-id state))
     (router/go-to "/"))
   (-> state
       (helpers/display-error (str "left-" group-id)
                              (str "You have been removed from " group-name)
                              :info)
+      ; need this here also so the state gets changed when this dispatcher returns
       (helpers/remove-group group-id)
       ((fn [state]
          (if-let [sidebar-order (:groups-order (helpers/get-user-preferences state))]
