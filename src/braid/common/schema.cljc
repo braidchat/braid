@@ -99,7 +99,6 @@
    :name s/Str
    :description (s/maybe s/Str)
    :group-id s/Uuid
-   :group-name s/Str
    :threads-count s/Int
    :subscribers-count s/Int})
 

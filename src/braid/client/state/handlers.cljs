@@ -113,21 +113,21 @@
   (sync/chsk-send! [:braid.server/unsub-thread (data :thread-id)])
   (handler state [:hide-thread {:thread-id (data :thread-id) :local-only? true}]))
 
-(defmethod handler :create-tag [state [_ [{:keys [tag local-only?]}]]]
+(defmethod handler :create-tag [state [_ {:keys [tag local-only?]}]]
   (let [tag (merge (schema/make-tag) tag)]
-      (when-not local-only?
-        (sync/chsk-send!
-          [:braid.server/create-tag tag]
-          1000
-          (fn [reply]
-            (if-let [msg (:error reply)]
-              (do
-                (dispatch! :remove-tag {:tag-id (tag :id) :local-only? true})
-                (dispatch! :display-error [(str :bad-tag (tag :id)) msg])))))
-        (-> state
-            (helpers/add-tag tag)
-            (helpers/subscribe-to-tag {:tag-id (tag :id)
-                                       :local-only? true})))))
+    (when-not local-only?
+      (sync/chsk-send!
+        [:braid.server/create-tag tag]
+        1000
+        (fn [reply]
+          (if-let [msg (:error reply)]
+            (do
+              (dispatch! :remove-tag {:tag-id (tag :id) :local-only? true})
+              (dispatch! :display-error [(str :bad-tag (tag :id)) msg]))))))
+    (-> state
+        (helpers/add-tag tag)
+        (helpers/subscribe-to-tag {:tag-id (tag :id)
+                                   :local-only? true}))))
 
 (defmethod handler :unsubscribe-from-tag [state [_ tag-id]]
   (sync/chsk-send! [:braid.server/unsubscribe-from-tag tag-id])
