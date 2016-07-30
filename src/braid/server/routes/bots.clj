@@ -101,6 +101,7 @@
          :headers {"Content-Type" "text/plain"}
          :body "Invalid user id"})))
 
+  ; TODO: allow unsubscribed by sending DELETE
   (PUT "/subscribe/:thread-id" [thread-id :as req]
     (let [bot-id (get req ::bot-id)
           bot (db/bot-by-id bot-id)]
