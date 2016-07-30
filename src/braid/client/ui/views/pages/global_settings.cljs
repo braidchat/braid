@@ -39,7 +39,7 @@
            (let [nickname (.. e -target -value)]
              (when (and (= KeyCodes.ENTER e.keyCode)
                      (re-matches #"\S+" nickname))
-               (dispatch! :set-nickname
+               (dispatch! :set-user-nickname
                           {:nickname nickname
                            :on-error (fn [err] (set-error! err))}))))}]])))
 

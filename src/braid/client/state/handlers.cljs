@@ -166,17 +166,17 @@
         (helpers/add-group group)
         (helpers/become-group-admin (:id group)))))
 
-(defmethod handler :update-nickname [state [_ {:keys [nickname user-id]}]]
+(defmethod handler :update-user-nickname [state [_ {:keys [nickname user-id]}]]
   (helpers/update-user-nickname state user-id nickname))
 
-(defmethod handler :set-nickname [state [_ {:keys [nickname on-error]}]]
+(defmethod handler :set-user-nickname [state [_ {:keys [nickname on-error]}]]
   (sync/chsk-send!
     [:braid.server/set-nickname {:nickname nickname}]
     1000
     (fn [reply]
       (if-let [msg (reply :error)]
         (on-error msg)
-        (dispatch! :update-nickname
+        (dispatch! :update-user-nickname
                    {:nickname nickname
                     :user-id (helpers/current-user-id state)}))))
   state)
