@@ -415,7 +415,7 @@
             :on-complete (fn [_]
                            (when-let [cb (data :on-complete)]
                              (cb))
-                           (dispatch! :start-socket!))
+                           (dispatch! :start-socket))
             :on-error (fn [_]
                         (when-let [cb (data :on-error)]
                           (cb)))})
