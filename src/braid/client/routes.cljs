@@ -34,7 +34,12 @@
 
 (defroute tag-page-path "/:group-id/tag/:tag-id" [group-id tag-id]
   (dispatch! :set-group-and-page [(uuid group-id) {:type :tag
-                                                   :id (uuid tag-id)}]))
+                                                   :id (uuid tag-id)}])
+  (dispatch! :set-page-loading true)
+  (dispatch! :threads-for-tag {:tag-id (uuid tag-id)
+                               :on-complete
+                               (fn [_]
+                                 (dispatch! :set-page-loading false))}))
 
 (defroute bots-path "/:group-id/bots" [group-id]
   (dispatch! :set-group-and-page [(uuid group-id) {:type :bots}]))
