@@ -5,6 +5,16 @@
             [clojure.set :as set]
             [clojure.edn :as edn]))
 
+(defn migrate-2016-07-29
+  "Add watched threads for bots"
+  []
+  (d/transact db/conn
+    [{:db/ident :bot/watched
+      :db/valueType :db.type/ref
+      :db/cardinality :db.cardinality/many
+      :db/id #db/id [:db.part/db]
+      :db.install/_attribute :db.part/db}]))
+
 (defn migrate-2016-06-27
   "Add uploads schema"
   []
