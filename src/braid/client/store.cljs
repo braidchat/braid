@@ -60,9 +60,6 @@
 
 (def check-app-state! (s/validator AppState))
 
-(defn- key-by-id [coll]
-  (into {} (map (juxt :id identity)) coll))
-
 (defn transact! [v]
   (let [old-state @app-state]
     (reset! app-state v)
@@ -71,6 +68,7 @@
       (catch ExceptionInfo e
         (errorf "State consistency error: %s"
                 (:error (ex-data e)))
+        (println (ex-data e))
         (reset! app-state old-state)
         ; Not just calling display-error! to avoid possibility of infinite loop
         (swap! app-state update-in [:errors] conj
@@ -78,17 +76,15 @@
 
 ; GETTERS
 
+; used in handlers/extract-user-ids
+
 (defn all-users []
   (vals (get-in @app-state [:users])))
 
-(defn users-in-group [group-id]
-  (filter (fn [u] (contains? (set (u :group-ids)) group-id)) (vals (@app-state :users))))
-
-(defn users-in-open-group []
-  (users-in-group (@app-state :open-group-id)))
-
 (defn user-in-open-group? [user-id]
   (contains? (set (get-in @app-state [:users user-id :group-ids])) (@app-state :open-group-id)))
+
+; use in handlers/identify-mentions
 
 (defn nickname->user [nickname]
   (->> (get-in @app-state [:users])
@@ -97,29 +93,7 @@
        ; nicknames are unique, so take the first
        first))
 
-(defn valid-user-id? [user-id]
-  (some? (get-in @app-state [:users user-id])))
-
-(defn id->thread [thread-id]
-  (get-in @app-state [:threads thread-id]))
-
-(defn open-thread? [thread-id]
-  (contains? (set (get-in @app-state [:user :open-thread-ids])) thread-id))
-
-(defn pagination-remaining []
-  (get @app-state :pagination-remaining 0))
-
-(defn all-tags []
-  (vals (get-in @app-state [:tags])))
-
-(defn tags-in-group [group-id]
-  (filter #(= group-id (% :group-id)) (vals (@app-state :tags))))
-
-(defn tags-in-open-group []
-  (tags-in-group (@app-state :open-group-id)))
-
-(defn tag-in-open-group? [tag-id]
-  (= (get-in @app-state [:tags tag-id :group-id]) (@app-state :open-group-id)))
+; used in handlers/extract-tag-ids
 
 (defn name->open-tag-id
   "Lookup tag by name in the open group"
@@ -131,21 +105,40 @@
          first
          :id)))
 
-(defn get-tag [tag-id]
-  (get-in @app-state [:tags tag-id]))
+; used in autocomplete:
+
+(defn users-in-group [group-id]
+  (filter (fn [u] (contains? (set (u :group-ids)) group-id)) (vals (@app-state :users))))
+
+(defn users-in-open-group []
+  (users-in-group (@app-state :open-group-id)))
+
+(defn tags-in-group [group-id]
+  (filter #(= group-id (% :group-id)) (vals (@app-state :tags))))
+
+(defn tags-in-open-group []
+  (tags-in-group (@app-state :open-group-id)))
+
+(defn bots-in-open-group []
+  (get-in @app-state [:groups (get @app-state :open-group-id) :bots]))
 
 (defn is-subscribed-to-tag? [tag-id]
   (contains? (get-in @app-state [:user :subscribed-tag-ids]) tag-id))
 
-(defn open-group-name []
-  (let [st @app-state]
-    (get-in st [:groups (st :open-group-id) :name])))
+; used in views.message
+
+(defn valid-user-id? [user-id]
+  (some? (get-in @app-state [:users user-id])))
+
+(defn get-tag [tag-id]
+  (get-in @app-state [:tags tag-id]))
+
+; used in autocomplete and group_settings
 
 (defn id->group [group-id]
   (get-in @app-state [:groups group-id]))
 
-(defn bots-in-open-group []
-  (get-in @app-state [:groups (get @app-state :open-group-id) :bots]))
+; used in autocomplete and routes
 
 (defn open-group-id []
   (get @app-state :open-group-id))
