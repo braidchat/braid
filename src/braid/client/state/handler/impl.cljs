@@ -215,17 +215,17 @@
   (helpers/set-search-query state query))
 
 (defmethod handler :search-history [state [_ [query group-id]]]
-  (when query
-    (do (dispatch! :set-page-error false)
-        (sync/chsk-send!
+  (if query
+    (do (sync/chsk-send!
           [:braid.server/search [query group-id]]
           15000
           (fn [reply]
             (dispatch! :set-page-loading false)
             (if (:thread-ids reply)
               (dispatch! :set-search-results [query reply])
-              (dispatch! :set-page-error true))))))
-  state)
+              (dispatch! :set-page-error true))))
+        (helpers/set-page-error state false))
+    state))
 
 (defmethod handler :add-threads [state [_ threads]]
   (helpers/add-threads state threads))
