@@ -208,28 +208,24 @@
                        (into [] (remove (partial = rule))))]
     (handler state [:set-preference [:notification-rules new-rules]])))
 
-(defmethod handler :clear-search-error [state _]
-  (helpers/clear-search-error state))
-
 (defmethod handler :set-search-results [state [_ [query reply]]]
   (helpers/set-search-results state query reply))
-
-(defmethod handler :set-search-error [state _]
-  (helpers/set-search-error state))
 
 (defmethod handler :set-search-query [state [_ query]]
   (helpers/set-search-query state query))
 
 (defmethod handler :search-history [state [_ [query group-id]]]
-  (if query
-    (do (dispatch! :clear-search-error)
+  (when query
+    (do (dispatch! :set-page-error false)
         (sync/chsk-send!
           [:braid.server/search [query group-id]]
           15000
           (fn [reply]
+            (dispatch! :set-page-loading false)
             (if (:thread-ids reply)
               (dispatch! :set-search-results [query reply])
-              (dispatch! :set-search-error!)))))))
+              (dispatch! :set-page-error true))))))
+  state)
 
 (defmethod handler :add-threads [state [_ threads]]
   (helpers/add-threads state threads))

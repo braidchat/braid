@@ -57,7 +57,9 @@
 
 (defroute search-page-path "/:group-id/search/:query" [group-id query]
   (dispatch! :set-group-and-page [(uuid group-id) {:type :search
-                                                   :search-query query}]))
+                                                   :search-query query}])
+  (dispatch! :set-page-loading true)
+  (dispatch! :search-history [query (uuid group-id)]))
 
 (defroute other-path "/:page-id" [page-id]
   (dispatch! :set-group-and-page [nil {:type (keyword page-id)}]))

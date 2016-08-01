@@ -283,12 +283,6 @@
                                    (assoc p :thread-ids thread-ids)
                                    p)))))
 
-(defn clear-search-error [state]
-  (update-in state [:page] #(dissoc % :search-error?)))
-
-(defn set-search-error [state]
-  (assoc-in state [:page :search-error?] true))
-
 (defn set-search-query [state query]
   (assoc-in state [:page :search-query] query))
 

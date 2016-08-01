@@ -44,7 +44,6 @@
           (s/optional-key :id) s/Uuid
           (s/optional-key :thread-ids) [s/Uuid]
           (s/optional-key :search-query) s/Str
-          (s/optional-key :search-error?) s/Bool
           (s/optional-key :loading?) s/Bool
           (s/optional-key :error?) s/Bool}
    :session (s/maybe {:user-id s/Uuid})
