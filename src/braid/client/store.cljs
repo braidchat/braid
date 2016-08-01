@@ -62,17 +62,16 @@
 (def check-app-state! (s/validator AppState))
 
 (defn transact! [v]
-  (let [old-state @app-state]
-   (try
-     (do
-       (check-app-state! v)
-       (reset! app-state v))
-     (catch ExceptionInfo e
-       (errorf "State consistency error: %s"
-                (:error (ex-data e)))
-       (swap! app-state helpers/display-error
-              (gensym :internal-consistency)
-              "Something has gone wrong")))))
+  (try
+    (do
+      (check-app-state! v)
+      (reset! app-state v))
+    (catch ExceptionInfo e
+      (errorf "State consistency error: %s"
+              (:error (ex-data e)))
+      (swap! app-state helpers/display-error
+             (gensym :internal-consistency)
+             "Something has gone wrong"))))
 
 ; GETTERS
 
