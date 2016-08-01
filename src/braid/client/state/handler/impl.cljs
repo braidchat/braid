@@ -1,4 +1,4 @@
-(ns braid.client.state.handlers
+(ns braid.client.state.handler.impl
   (:require [clojure.string :as string]
             [braid.client.store :as store]
             [braid.client.sync :as sync]
@@ -8,7 +8,7 @@
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.state.helpers :as helpers]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.state.handler :refer [handler]]))
+            [braid.client.state.handler.core :refer [handler]]))
 
 (defn extract-tag-ids
   [text]
