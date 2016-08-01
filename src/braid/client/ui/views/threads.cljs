@@ -16,9 +16,10 @@
                                    (let [old-thread-ids (set (map :id old-threads))
                                          new-thread-ids (set (map :id new-threads))
                                          to-remove (difference old-thread-ids new-thread-ids)
-                                         to-add (difference new-thread-ids old-thread-ids)]
-                                     (vec (concat (remove (fn [t] (contains? to-remove (t :id))) old-threads)
-                                                  (filter (fn [t] (contains? to-add (t :id))) new-threads)))))))
+                                         to-add (difference new-thread-ids old-thread-ids)
+                                         ordered-ids (concat (remove to-remove old-thread-ids)
+                                                             (filter to-add new-thread-ids))]
+                                     (mapv (comp first (group-by :id new-threads)) ordered-ids)))))
         scroll-horizontally (fn [e]
                               (let [target-classes (.. e -target -classList)]
                                 ; TODO: check if threads-div needs to scroll?
