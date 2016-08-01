@@ -5,7 +5,8 @@
             [clojure.set :as set]
             [schema.core :as s :include-macros true]
             [braid.common.schema :as app-schema]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [braid.client.state.helpers :as helpers]))
 
 (defonce app-state
   (r/atom
@@ -62,17 +63,16 @@
 
 (defn transact! [v]
   (let [old-state @app-state]
-    (reset! app-state v)
-    (try
-      (check-app-state! @app-state)
-      (catch ExceptionInfo e
-        (errorf "State consistency error: %s"
+   (try
+     (do
+       (check-app-state! v)
+       (reset! app-state v))
+     (catch ExceptionInfo e
+       (errorf "State consistency error: %s"
                 (:error (ex-data e)))
-        (println (ex-data e))
-        (reset! app-state old-state)
-        ; Not just calling display-error! to avoid possibility of infinite loop
-        (swap! app-state update-in [:errors] conj
-               [(str :internal-consistency (rand-int 100)) "Something has gone wrong" :error])))))
+       (swap! app-state helpers/display-error
+              (gensym :internal-consistency)
+              "Something has gone wrong")))))
 
 ; GETTERS
 
