@@ -117,8 +117,9 @@
   (assoc-in state [:users user-id :avatar] avatar))
 
 (defn update-user-status [state user-id status]
-  (when (get-in state [:users user-id])
-    (assoc-in state [:users user-id :status] status)))
+  (if (get-in state [:users user-id])
+    (assoc-in state [:users user-id :status] status)
+    state))
 
 (defn remove-user-from-group [state user-id group-id]
   ; TODO: also remove user from collection if group-ids is now empty? shouldn't make a difference
