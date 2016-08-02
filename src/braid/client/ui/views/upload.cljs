@@ -1,7 +1,7 @@
 (ns braid.client.ui.views.upload
   (:require [reagent.core :as r]
             [braid.client.s3 :as s3]
-            [braid.client.store :as store]))
+            [braid.client.dispatcher :refer [dispatch!]]))
 
 (def max-avatar-size (* 2 1024 1024))
 
@@ -10,7 +10,7 @@
         start-upload (fn [on-upload file-list]
                        (let [file (aget file-list 0)]
                          (if (> (.-size file) max-avatar-size)
-                           (store/display-error! :avatar-set-fail "Avatar image too large")
+                           (dispatch! :display-error [:avatar-set-fail "Avatar image too large"])
                            (do (reset! uploading? true)
                                (s3/upload
                                  file

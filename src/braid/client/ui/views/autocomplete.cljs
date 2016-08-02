@@ -153,15 +153,13 @@
                            [:div.extra (or (tag :description)
                                            (gstring/unescapeEntities "&nbsp;"))]])}))
                 (cons (when-not (or exact-match? (string/blank? query))
-                        (let [tag (schema/make-tag
-                                    {:name query
-                                     :group-id (store/open-group-id)
-                                     :group-name (store/open-group-name)})]
+                        (let [tag (merge (schema/make-tag)
+                                         {:name query
+                                          :group-id (store/open-group-id)})]
                           {:key (constantly (tag :id))
                            :action
                            (fn []
-                             (dispatch! :create-tag
-                                        [(tag :name) (tag :group-id) (tag :id)]))
+                             (dispatch! :create-tag {:tag tag}))
                            :message-transform
                            (fn [text]
                              (string/replace text pattern (str "#" (tag :name) " ")))

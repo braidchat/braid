@@ -10,16 +10,9 @@
   (let [group-id (subscribe [:open-group-id])
         threads (subscribe [:recent-threads] [group-id])
         user-id (subscribe [:user-id])
-        loading? (r/atom true)
-        err (r/atom nil)
-        load-recent (run! (dispatch! :load-recent-threads
-                                     {:group-id @group-id
-                                      :on-complete (fn [_]
-                                                     (reset! loading? false))
-                                      :on-error (fn [e] (reset! err e))}))]
+        page (subscribe [:page])]
     (fn []
-      (let [_ @load-recent
-            sorted-threads
+      (let [sorted-threads
             (->> @threads
                  ; sort by last message sent by logged-in user, most recent first
                  (sort-by
@@ -29,11 +22,8 @@
                          :messages))
                  reverse)]
         [:div.page.recent
-         [:div.title "Recent"
-          (when @loading?
-            [:div.loading "Loading..."])]
-         (when @err
-           [:h2.error "Couldn't load recent threads: " @err])
-         (if (and (not @loading?) (empty? sorted-threads))
+         [:div.title "Recent"]
+         (if (and (not (@page :loading?)) (empty? sorted-threads))
            [:p "No recent threads in this group"]
            [threads-view {:threads sorted-threads}])]))))
+

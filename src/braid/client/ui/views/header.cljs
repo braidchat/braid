@@ -71,16 +71,27 @@
     :route-fn routes/group-settings-path
     :body "Settings"}])
 
+(defn loading-indicator-view [group-id]
+  (let [page (subscribe [:page])]
+    (fn [group-id]
+      [:div.loading-indicator
+       {:class (cond
+                 (@page :loading?) "loading"
+                 (@page :error?) "error")
+        :style {:color (->color group-id)}}])))
+
 (defn left-header-view []
   (let [group-id (subscribe [:open-group-id])]
     (fn []
-      [:div.left {:style {:background-color (->color @group-id)}}
-       [group-name-view]
-       (doall
-         (for [header left-headers]
-           ^{:key (header :title)}
-           [header-item-view header]))
-       [search-bar-view]])))
+      [:div.left
+       [:div.bar {:style {:background-color (->color @group-id)}}
+        [group-name-view]
+        (doall
+          (for [header left-headers]
+            ^{:key (header :title)}
+            [header-item-view header]))
+        [search-bar-view]]
+       [loading-indicator-view @group-id]])))
 
 (defn right-header-view []
   (let [user-id (subscribe [:user-id])]

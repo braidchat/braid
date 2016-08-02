@@ -24,7 +24,8 @@
         (fn [e]
           (when (= KeyCodes.ENTER e.keyCode)
             (let [text (.. e -target -value)]
-              (dispatch! :create-tag [text (data :group-id)]))
+              (dispatch! :create-tag {:tag {:name text
+                                            :group-id (data :group-id)}}))
             (.preventDefault e)
             (aset (.. e -target) "value" "")))
         :placeholder "New Tag"}])))

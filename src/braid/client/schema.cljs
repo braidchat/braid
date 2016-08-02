@@ -12,11 +12,10 @@
    :mentioned-user-ids (or (data :mentioned-user-ids) [])
    :mentioned-tag-ids (or (data :mentioned-tag-ids) [])})
 
-(defn make-tag [data]
-  {:id (or (data :id) (uuid/make-random-squuid))
-   :name (data :name)
-   :group-id (data :group-id)
-   :group-name (get data :group-name "")
+(defn make-tag []
+  {:id (uuid/make-random-squuid)
+   :name nil
+   :group-id nil
    :description nil
    :threads-count 0
    :subscribers-count 0})
@@ -27,7 +26,8 @@
    :admins #{}
    :intro nil
    :avatar nil
-   :public? false})
+   :public? false
+   :bots #{}})
 
 (defn make-invitation [data]
   {:id (or (data :id) (uuid/make-random-squuid))

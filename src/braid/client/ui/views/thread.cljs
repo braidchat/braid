@@ -5,7 +5,6 @@
             [braid.client.state :refer [subscribe]]
             [cljs.core.async :refer [chan put!]]
             [braid.client.routes :as routes]
-            [braid.client.store :as store]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :as helpers]
             [braid.client.s3 :as s3]
@@ -126,7 +125,7 @@
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
-            (store/display-error! :upload-fail "File to big to upload, sorry")
+            (dispatch! :display-error [:upload-fail "File to big to upload, sorry"])
             (do (set-uploading! true)
                 (s3/upload file (fn [url]
                                   (set-uploading! false)
@@ -169,7 +168,7 @@
                         (.-ctrlKey e))
                       (= KeyCodes.ESC (.-keyCode e)))
               (helpers/stop-event! e)
-              (dispatch! :hide-thread (thread :id))))
+              (dispatch! :hide-thread {:thread-id (thread :id)})))
 
           :on-paste
           (fn [e]
@@ -229,7 +228,7 @@
                               ; divs as controls, otherwise divs higher up also
                               ; get click events
                               (helpers/stop-event! e)
-                              (dispatch! :hide-thread (thread :id)))}]
+                              (dispatch! :hide-thread {:thread-id (thread :id)}))}]
                 [:div.control.unread
                  {:title "Mark Unread"
                   :on-click (fn [e]

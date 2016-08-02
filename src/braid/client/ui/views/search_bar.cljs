@@ -4,7 +4,6 @@
             [clojure.string :as string]
             [cljs.core.async :as async :refer [<! put! chan alts!]]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.store :as store]
             [braid.client.helpers :refer [debounce ->color]]
             [braid.client.state :refer [subscribe]]
             [braid.client.routes :as routes]))
@@ -26,7 +25,7 @@
                (let [[v ch] (alts! [search kill-chan])]
                  (when (= ch search)
                    (let [{:keys [query]} v]
-                     (store/set-search-results! query {})
+                     (dispatch! :set-search-results [query {}])
                      (if (string/blank? query)
                        (exit-search!)
                        (do (dispatch! :search-history [query @open-group-id])
@@ -47,7 +46,7 @@
                    :on-change
                    (fn [e]
                      (let [query (.. e -target -value)]
-                       (store/set-search-query! query)
+                       (dispatch! :set-search-query query)
                        (put! search-chan {:query query})))}]
           (if (seq @search-query)
             [:div.action.clear {:on-click (fn []
