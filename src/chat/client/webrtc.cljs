@@ -1,5 +1,5 @@
 (ns chat.client.webrtc
-  (:require [chat.client.sync :as sync]))
+  (:require [braid.client.sync :as sync]))
 
 (defonce svga-dimensions
   (clj->js {:mandatory
