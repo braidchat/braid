@@ -333,4 +333,4 @@
   (update-in state [:calls] #(assoc % (:id call) call)))
 
 (defn set-call-status [state call-id status]
-  (update-in state [:calls call-id :status] (constantly status)))
+  (assoc-in state [:calls call-id :status] status))
