@@ -77,7 +77,7 @@
                 (pull ?t [:tag/id
                           :tag/name
                           :tag/description
-                          {:tag/group [:group/id :group/name]}])
+                          {:tag/group [:group/id]}])
                 :in $ ?user-id
                 :where
                 [?u :user/id ?user-id]

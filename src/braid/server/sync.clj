@@ -1,8 +1,7 @@
 (ns braid.server.sync
   (:require [mount.core :as mount :refer [defstate]]
             [taoensso.sente :as sente]
-            [taoensso.sente.server-adapters.http-kit
-             :refer [sente-web-server-adapter]]
+            [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]]
             [taoensso.sente.packers.transit :as sente-transit]
             [compojure.core :refer [GET POST routes defroutes context]]
             [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
@@ -27,7 +26,7 @@
 (let [packer (sente-transit/get-transit-packer :json)
       {:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
               connected-uids]}
-      (sente/make-channel-socket! sente-web-server-adapter
+      (sente/make-channel-socket! (get-sch-adapter)
                                   {:user-id-fn
                                    (fn [ob] (get-in ob [:session :user-id]))
                                    :packer packer})]
@@ -178,12 +177,26 @@
                     (assoc :subject "Notification from Braid")
                     (->> (email/send-message (db/user-email uid))))))))))))
 
-; TODO: when else should this happen? should it be configurable?
 (defn notify-bots [new-message]
+  ; Notify bots mentioned in the message
   (when-let [bot-name (second (re-find #"^/(\w+)\b" (:content new-message)))]
     (when-let [bot (db/bot-by-name-in-group bot-name (new-message :group-id))]
       (timbre/debugf "notifying bot %s" bot)
-      (bots/send-notification bot new-message))))
+      (bots/send-notification bot new-message)))
+  ; Notify bots subscribed to the thread
+  (doseq [bot (db/bots-watching-thread (new-message :thread-id))]
+    (timbre/debugf "notifying bot %s" bot)
+    (bots/send-notification bot new-message)))
+
+(defn user-join-group!
+  [user-id group-id]
+  (db/user-add-to-group! user-id group-id)
+  (db/user-subscribe-to-group-tags! user-id group-id)
+  ; add user to recent threads in group
+  (doseq [t (db/recent-threads {:user-id user-id :group-id group-id
+                                :num-threads 5})]
+    (db/user-show-thread! user-id (t :id)))
+  (broadcast-group-change group-id [:braid.client/new-user (db/user-by-id user-id)]))
 
 ;; Handlers
 
@@ -409,14 +422,12 @@
   [{:as ev-msg :keys [?data user-id]}]
   (if-let [invite (db/invite-by-id (?data :id))]
     (do
-      (db/user-add-to-group! user-id (invite :group-id))
-      (db/user-subscribe-to-group-tags! user-id (invite :group-id))
+      (user-join-group! user-id (invite :group-id))
       (db/retract-invitation! (invite :id))
       (chsk-send! user-id [:braid.client/joined-group
                            {:group (db/group-by-id (invite :group-id))
                             :tags (db/group-tags (invite :group-id))}])
-      (chsk-send! user-id [:braid.client/update-users (db/users-for-user user-id)])
-      (broadcast-group-change (invite :group-id) [:braid.client/new-user (db/user-by-id user-id)]))
+      (chsk-send! user-id [:braid.client/update-users (db/users-for-user user-id)]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                   user-id (?data :id))))
 

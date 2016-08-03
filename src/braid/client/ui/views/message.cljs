@@ -3,7 +3,7 @@
             [clojure.string :as string]
             [braid.client.store :as store]
             [braid.client.helpers :as helpers :refer [id->color ->color]]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.ui.views.embed :refer [embed-view]]
             [braid.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [braid.client.emoji :as emoji]
@@ -30,6 +30,7 @@
                [:a.external {:href url
                              :title url
                              :style {:background-color (helpers/url->color url)}
+                             :on-click (fn [e] (.stopPropagation e))
                              :target "_blank"
                              ; rel to address vuln caused by target=_blank
                              ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
@@ -180,7 +181,7 @@
          (interleave (repeat " "))
          rest)))
 
-(defn message-view [message]
+(defn message-view [message embed-update-chan]
   (let [sender (subscribe [:user (message :user-id)])]
     (r/create-class
       {:component-did-mount
@@ -191,7 +192,7 @@
          (when-let [PR (aget js/window "PR")]
            ((aget PR "prettyPrint"))))
        :reagent-render
-       (fn [message]
+       (fn [message embed-update-chan]
          (let [sender-path (if (@sender :bot?)
                              (routes/bots-path {:group-id (routes/current-group)})
                              (routes/user-page-path {:group-id (routes/current-group)
@@ -222,5 +223,5 @@
             (into [:div.content] (format-message (message :content)))
 
             (when-let [url (first (helpers/extract-urls (message :content)))]
-              [embed-view url])]))})))
+              [embed-view url embed-update-chan])]))})))
 

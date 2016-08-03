@@ -1,15 +1,23 @@
 (ns braid.client.dispatcher
   (:require [clojure.string :as string]
             [cljs-uuid-utils.core :as uuid]
-            [chat.client.webrtc :as rtc]
+            [braid.client.webrtc :as rtc]
             [braid.client.store :as store]
             [braid.client.sync :as sync]
+            [braid.client.state.handler.core :refer [handler]]
             [braid.client.schema :as schema]
             [braid.common.util :as util]
             [braid.client.router :as router]
             [braid.client.routes :as routes]
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.desktop.notify :as notify]))
+
+(defn dispatch!
+  ([event args]
+   (println event)
+   (store/transact! (handler @store/app-state [event args])))
+  ([event]
+   (dispatch! event nil)))
 
 (defn extract-tag-ids
   [text]

@@ -115,6 +115,9 @@
           [:&.group-uploads:after
            (mixins/fontawesome \uf0ee)]
 
+          [:&.changelog:after
+           (mixins/fontawesome \uf1da)]
+
           [:&.settings:after
            (mixins/fontawesome \uf013)]]]]]
 
@@ -124,11 +127,16 @@
         :top vars/pad
         :z-index 100
         :margin-left vars/pad
-        :border-radius vars/border-radius
-        :overflow "hidden"
-        :height header-height
-        :background "black"}
-       (mixins/box-shadow)
+        }
+
+       [:.bar
+        {:background "black"
+         :border-radius vars/border-radius
+         :overflow "hidden"
+         :display "inline-block"
+         :vertical-align "top"
+         :height header-height}
+        (mixins/box-shadow)]
 
        [:.group-name
         :a
@@ -188,4 +196,23 @@
           (mixins/fontawesome \uf002)]
 
          [:&.clear:after
-          (mixins/fontawesome \uf057)]]]]]])
+          (mixins/fontawesome \uf057)]]]
+
+       [:.loading-indicator
+        {:display "inline-block"
+         :vertical-align "middle"}
+
+        [:&:before
+         {:height header-height
+          :line-height header-height
+          :margin-left (em 0.5)
+          :font-size (em 1.5)}]
+
+        [:&.error
+         [:&:before
+          (mixins/fontawesome\uf071)]]
+
+        [:&.loading
+         [:&:before
+          (mixins/fontawesome \uf110)
+          mixins/spin]]]]]])

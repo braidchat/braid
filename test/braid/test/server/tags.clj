@@ -28,7 +28,6 @@
           (testing "returns tag"
             (is (= tag (assoc tag-data
                          :description nil
-                         :group-name "Lean Pixel"
                          :threads-count 0
                          :subscribers-count 0))))))
       (testing "set tag description"
@@ -36,7 +35,6 @@
         (is (= (first (db/group-tags (:id group)))
                (assoc tag-data
                  :description "Some tag with stuff"
-                 :group-name "Lean Pixel"
                  :threads-count 0
                  :subscribers-count 0)))
         ))))

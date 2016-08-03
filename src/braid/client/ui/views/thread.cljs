@@ -1,9 +1,10 @@
 (ns braid.client.ui.views.thread
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [clojure.string :as string]
             [reagent.core :as r]
-            [braid.client.reagent-adapter :refer [reagent->react subscribe]]
+            [braid.client.state :refer [subscribe]]
             [cljs.core.async :refer [chan put!]]
-            [braid.client.store :as store]
+            [braid.client.routes :as routes]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :as helpers]
             [braid.client.s3 :as s3]
@@ -42,8 +43,13 @@
   ; thread box, which doesn't have messages anyway
   (let [messages (subscribe [:messages-for-thread (thread :id)])
 
+        last-open-at (subscribe [:thread-last-open-at (thread :id)])
+
         unseen? (fn [message thread] (> (:created-at message)
-                                        (thread :last-open-at)))
+                                        @last-open-at))
+
+        kill-chan (chan)
+        embed-update-chan (chan)
 
         scroll-to-bottom!
         (fn [component]
@@ -52,7 +58,17 @@
     (r/create-class
       {:display-name "thread"
 
-       :component-did-mount scroll-to-bottom!
+       :component-did-mount
+       (fn [c]
+         (scroll-to-bottom! c)
+         (go (loop []
+               (let [[_ ch] (alts! [embed-update-chan kill-chan])]
+                 (when (not= ch kill-chan)
+                   (js/setTimeout (fn [] (scroll-to-bottom! c)) 0)
+                   (recur))))))
+
+       :component-will-unmount
+       (fn [] (put! kill-chan (js/Date.)))
 
        :component-did-update scroll-to-bottom!
 
@@ -83,14 +99,12 @@
             (doall
               (for [message sorted-messages]
                 ^{:key (message :id)}
-                [message-view message])))])})))
+                [message-view message embed-update-chan])))])})))
 
 (defn thread-view [thread]
   (let [state (r/atom {:dragging? false
-                       :uploading? false
-                       :focused? false})
+                       :uploading? false})
         set-uploading! (fn [bool] (swap! state assoc :uploading? bool))
-        set-focused! (fn [bool] (swap! state assoc :focused? bool))
         set-dragging! (fn [bool] (swap! state assoc :dragging? bool))
 
         thread-private? (fn [thread] (and
@@ -106,13 +120,12 @@
         ; Closing over thread-id, but the only time a thread's id changes is the new
         ; thread box, which is always open
         open? (subscribe [:thread-open? (thread :id)])
-
-        focus-chan (chan)
-
+        focused? (subscribe [:thread-focused? (thread :id)])
+        permalink-open? (r/atom false)
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
-            (store/display-error! :upload-fail "File to big to upload, sorry")
+            (dispatch! :display-error [:upload-fail "File to big to upload, sorry"])
             (do (set-uploading! true)
                 (s3/upload file (fn [url]
                                   (set-uploading! false)
@@ -122,7 +135,7 @@
                                               :group-id (thread :group-id)}))))))]
 
     (fn [thread]
-      (let [{:keys [dragging? uploading? focused?]} @state
+      (let [{:keys [dragging? uploading?]} @state
             new? (thread :new?)
             private? (thread-private? thread)
             limbo? (thread-limbo? thread)
@@ -133,34 +146,29 @@
           (string/join " " [(when new? "new")
                             (when private? "private")
                             (when limbo? "limbo")
-                            (when focused? "focused")
+                            (when @focused? "focused")
                             (when dragging? "dragging")
                             (when archived? "archived")])
 
-          :on-click (fn [e]
-                      (let [sel (.getSelection js/window)
-                            selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
-                        (when (zero? selection-size)
-                          (helpers/stop-event! e)
-                          (put! focus-chan (js/Date.))
-                          (dispatch! :mark-thread-read (thread :id)))))
-          :on-focus
+          :on-click
           (fn [e]
-            (set-focused! true))
+            (let [sel (.getSelection js/window)
+                  selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
+              (when (zero? selection-size)
+                (dispatch! :focus-thread (thread :id)))))
 
           :on-blur
           (fn [e]
-            (set-focused! false)
             (dispatch! :mark-thread-read (thread :id)))
 
-          :on-key-up
+          :on-key-down
           (fn [e]
             (when (or (and
                         (= KeyCodes.X (.-keyCode e))
                         (.-ctrlKey e))
                       (= KeyCodes.ESC (.-keyCode e)))
               (helpers/stop-event! e)
-              (dispatch! :hide-thread (thread :id))))
+              (dispatch! :hide-thread {:thread-id (thread :id)})))
 
           :on-paste
           (fn [e]
@@ -196,6 +204,20 @@
 
          [:div.card
           [:div.head
+           (when @permalink-open?
+             [:div.permalink
+              [:input {:type "text"
+                       :read-only true
+                       :on-focus (fn [e] (.. e -target select))
+                       :on-click (fn [e] (.. e -target select))
+                       :value (str
+                                (helpers/site-url)
+                                (routes/thread-path
+                                  {:thread-id (thread :id)
+                                   :group-id (thread :group-id)}))}]
+              [:button {:on-click (fn [e]
+                                    (reset! permalink-open? false))}
+               "Done"]])
            (when (not new?)
              [:div.controls
               (if @open?
@@ -206,7 +228,7 @@
                               ; divs as controls, otherwise divs higher up also
                               ; get click events
                               (helpers/stop-event! e)
-                              (dispatch! :hide-thread (thread :id)))}]
+                              (dispatch! :hide-thread {:thread-id (thread :id)}))}]
                 [:div.control.unread
                  {:title "Mark Unread"
                   :on-click (fn [e]
@@ -215,7 +237,12 @@
                               ; get click events
                               (helpers/stop-event! e)
                               (dispatch! :reopen-thread (thread :id)))}])
-              [:div.control.mute
+              [:div.control.permalink.hidden
+               {:title "Get Permalink"
+                :on-click (fn [e]
+                            (helpers/stop-event! e)
+                            (reset! permalink-open? true))}]
+              [:div.control.mute.hidden
                {:title "Mute"
                 :on-click (fn [e]
                             ; Need to preventDefault & propagation when using
@@ -235,7 +262,6 @@
 
           [new-message-view {:thread-id (thread :id)
                              :group-id (thread :group-id)
-                             :become-focused-chan focus-chan
                              :new-thread? new?
                              :placeholder (if new?
                                             "Start a conversation..."

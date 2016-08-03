@@ -6,7 +6,7 @@
             [braid.client.helpers :refer [id->color location element-offset
                                           get-style]]
             [braid.client.routes :as routes]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.ui.styles.vars :as style-vars]
             [goog.events :as events]
             [goog.style :as gstyle])
@@ -59,17 +59,8 @@
         [:div]))))
 
 (defn groups-view []
-  (let [groups (subscribe [:groups])
-        active-group (subscribe [:active-group])
-        group-order (subscribe [:user-preference :groups-order])
-        ordered-groups (reaction (if (nil? @group-order)
-                                   @groups
-                                   (let [ordered? (comp boolean (set @group-order) :id)
-                                         {ord true unord false} (group-by ordered? @groups)
-                                         by-id (group-by :id @groups)]
-                                     (concat
-                                       (map (comp first by-id) @group-order)
-                                       unord))))
+  (let [active-group (subscribe [:active-group])
+        ordered-groups (subscribe [:ordered-groups])
         move-group-by (fn [group by]
                         (let [current-groups (mapv :id @ordered-groups)
                               old-idx (index-of current-groups (group :id))

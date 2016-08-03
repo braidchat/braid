@@ -127,7 +127,8 @@
                          (take limit))]
     {:threads (into ()
                     (comp (map db->thread)
-                          (filter #(user-can-see-thread? conn user-id (% :id))))
+                          (filter #(user-can-see-thread? conn user-id (% :id)))
+                          (map #(thread-add-last-open-at conn % user-id)))
                     (d/pull-many (d/db conn) thread-pull-pattern thread-eids))
      :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
 
@@ -151,7 +152,7 @@
                       first))))))
 
 (defn recent-threads
-  [conn {:keys [user-id group-id]}]
+  [conn {:keys [user-id group-id num-threads] :or {num-threads 10}}]
   (->> (d/q '[:find (pull ?thread pull-pattern)
               :in $ ?group-id ?cutoff pull-pattern
               :where
@@ -171,7 +172,7 @@
                    (map #(thread-add-last-open-at conn % user-id))))
        (sort-by (fn [t] (apply max (map (comp to-long :created-at) (t :messages))))
                 #(compare %2 %1))
-       (take 10)))
+       (take num-threads)))
 
 (defn subscribed-thread-ids-for-user
   [conn user-id]

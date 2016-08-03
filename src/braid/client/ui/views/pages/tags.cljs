@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [clojure.string :as string]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.ui.views.pills :refer [tag-pill-view subscribe-button-view]]
             [braid.client.ui.views.pages.tag :refer [edit-description-view]]
@@ -24,7 +24,8 @@
         (fn [e]
           (when (= KeyCodes.ENTER e.keyCode)
             (let [text (.. e -target -value)]
-              (dispatch! :create-tag [text (data :group-id)]))
+              (dispatch! :create-tag {:tag {:name text
+                                            :group-id (data :group-id)}}))
             (.preventDefault e)
             (aset (.. e -target) "value" "")))
         :placeholder "New Tag"}])))

@@ -56,7 +56,6 @@
    :name (:tag/name e)
    :description (:tag/description e)
    :group-id (get-in e [:tag/group :group/id])
-   :group-name (get-in e [:tag/group :group/name])
    :threads-count (get e :tag/threads-count 0)
    :subscribers-count (get e :tag/subscribers-count 0)})
 

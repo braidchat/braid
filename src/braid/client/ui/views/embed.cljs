@@ -1,5 +1,6 @@
 (ns braid.client.ui.views.embed
   (:require [reagent.core :as r]
+            [cljs.core.async :refer [put!]]
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.helpers :refer [->color url->color]]))
 
@@ -49,7 +50,7 @@
             :style {:background-color
                     (arr->rgb (get-in img [:colors 0 :color]))}}])])
 
-(defn embed-view [url]
+(defn embed-view [url embed-update-chan]
   (let [content (r/atom {})
         set-content! (fn [response]
                       (reset! content response))
@@ -64,8 +65,13 @@
        (fn []
          (fetch-content! url))
 
+       :component-did-update
+       (fn [_]
+         (when embed-update-chan
+           (put! embed-update-chan (js/Date.))))
+
        :reagent-render
-       (fn []
+       (fn [_ _]
          [:div.embed
           (if (:type @content)
             [:div.content.loaded {:on-click (fn []

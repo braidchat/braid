@@ -1,0 +1,547 @@
+@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");
+@-webkit-keyframes anim-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@keyframes anim-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+.app > .main > .groups-nav {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4rem;
+  box-sizing: border-box;
+}
+.app > .main > .page {
+  position: absolute;
+  left: 4rem;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+.app .main > .groups-nav {
+  background: #222;
+  padding: 1rem;
+}
+.app .main > .groups-nav .option {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.3333333333333333rem;
+  display: block;
+  text-decoration: none;
+  line-height: 2rem;
+  text-align: center;
+  font-size: 1.5em;
+}
+.app .main > .groups-nav .option.active:before {
+  content: "";
+  background: #eee;
+  width: 0.3333333333333333rem;
+  height: 100%;
+  position: absolute;
+  left: -1rem;
+  border-radius: 0 0.3333333333333333rem 0.3333333333333333rem 0;
+}
+.app .main > .groups-nav .group {
+  margin: 0 0 1rem 0;
+  color: #222;
+  position: relative;
+}
+.app .main > .groups-nav .plus {
+  position: absolute;
+  bottom: 1rem;
+  background: #333;
+  color: #222;
+  font-family: "fontawesome";
+}
+.app .main > .groups-nav .plus:hover {
+  background: #555;
+}
+.app .main > .groups-nav .badge {
+  font-size: 0.75em;
+  display: inline-block;
+  padding: 0 0.5em;
+  border-radius: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background-color: #222;
+  border: 1px solid #222;
+  height: 1.75em;
+  line-height: 1.75em;
+  max-width: 10em;
+  white-space: nowrap;
+  overflow: hidden;
+  vertical-align: middle;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.6rem;
+  color: #aaa;
+  background: #B53737;
+  color: white;
+  border-color: #B53737;
+  position: absolute;
+  bottom: -0.5rem;
+  right: -0.5rem;
+}
+.app .main > .groups-nav .badge.on {
+  color: white !important;
+}
+.app .main > .groups-nav .badge.off {
+  background-color: white !important;
+}
+.emojione {
+  font-size: inherit;
+  height: 3ex;
+  width: 3.1ex;
+  min-height: 20px;
+  min-width: 20px;
+  display: inline-block;
+  margin: -0.2ex 0.15em 0.2ex;
+  line-height: normal;
+  vertical-align: middle;
+}
+.error-banners {
+  z-index: 9999;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+}
+.error-banners .error-banner {
+  margin-bottom: 0.25rem;
+  font-size: 2em;
+  background-color: rgba(255, 5, 14, 0.6);
+  text-align: center;
+}
+.error-banners .error-banner .close {
+  margin-left: 1em;
+  cursor: pointer;
+}
+.tag {
+  font-size: 0.75em;
+  display: inline-block;
+  padding: 0 0.5em;
+  border-radius: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background-color: #222;
+  border: 1px solid #222;
+  height: 1.75em;
+  line-height: 1.75em;
+  max-width: 10em;
+  white-space: nowrap;
+  overflow: hidden;
+  color: white;
+  vertical-align: middle;
+  cursor: pointer;
+  text-decoration: none;
+}
+.tag.on {
+  color: white !important;
+}
+.tag.off {
+  background-color: white !important;
+}
+.user {
+  font-size: 0.75em;
+  display: inline-block;
+  padding: 0 0.5em;
+  border-radius: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background-color: #222;
+  border: 1px solid #222;
+  height: 1.75em;
+  line-height: 1.75em;
+  max-width: 10em;
+  white-space: nowrap;
+  overflow: hidden;
+  color: white;
+  vertical-align: middle;
+  cursor: pointer;
+  text-decoration: none;
+  /* removed for now
+  .status {
+    margin-left: 0.3em;
+    width: 0.85em;
+    height: 0.85em;
+    display: inline-block;
+    border: solid 1px white;
+    border-radius: 0.5em;
+    box-sizing: border-box;
+    vertical-align: middle;
+    margin-bottom: 0.15em;
+    &.online {
+      background: white;
+    }
+    &.offline {
+
+    }
+    &.away {
+
+    }
+  }
+  */
+}
+.user.on {
+  color: white !important;
+}
+.user.off {
+  background-color: white !important;
+}
+.button {
+  font-size: 0.75em;
+  display: inline-block;
+  padding: 0 0.5em;
+  border-radius: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background-color: #222;
+  border: 1px solid #222;
+  height: 1.75em;
+  line-height: 1.75em;
+  max-width: 10em;
+  white-space: nowrap;
+  overflow: hidden;
+  color: white;
+  vertical-align: middle;
+  cursor: pointer;
+  text-decoration: none;
+  color: #888888;
+  border: 1px solid #888888;
+  background: none;
+  margin-left: 1em;
+}
+.button.on {
+  color: white !important;
+}
+.button.off {
+  background-color: white !important;
+}
+.button:hover {
+  color: #eee;
+  background: #888888;
+  cursor: pointer;
+}
+.button:active {
+  color: #eee;
+  background: #666;
+  border-color: #666;
+  cursor: pointer;
+}
+.threads {
+  position: absolute;
+  top: 4rem;
+  right: 0;
+  bottom: 1rem;
+  left: 0;
+  padding-left: 1rem;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: flex-end;
+  align-items: flex-end;
+  overflow-x: scroll;
+}
+.thread {
+  margin-right: 1rem;
+  min-width: 17rem;
+  width: 17rem;
+  box-sizing: border-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  height: 100%;
+}
+.thread:before {
+  content: "";
+  -webkit-flex-grow: 1;
+  flex-grow: 1;
+}
+.thread .card {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  box-shadow: 0 1px 2px 0 #ccc;
+  max-height: 100%;
+  background: white;
+}
+.thread .card .head {
+  min-height: 3.5em;
+  width: 100%;
+  position: relative;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+}
+.thread .card .head .tags {
+  margin: 1rem 2rem 1rem 1rem;
+}
+.thread .card .head .tags .pill {
+  margin-bottom: 0.5em;
+  margin-right: 0.5em;
+}
+.thread .card .head .close {
+  position: absolute;
+  padding: 1rem;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+.thread .card .messages {
+  position: relative;
+  overflow-y: scroll;
+  padding: 0 1rem;
+}
+.thread .card .message.new {
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+  padding-bottom: 1rem;
+}
+.thread .card .message.new textarea {
+  min-height: 3.5em;
+}
+.thread .tags-preview .ambiguous .group {
+  border: 1px dashed black;
+  cursor: pointer;
+}
+.thread .notice {
+  box-shadow: 0 1px 2px 0 #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.thread .notice:before {
+  float: left;
+  font-size: 2rem;
+  margin-right: 0.5rem;
+  font-family: "fontawesome";
+}
+.thread.private .card {
+  max-height: 85%;
+}
+.thread.private .head:before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 5px;
+  background: #5f7997;
+  position: absolute;
+}
+.thread.private .notice {
+  background: #D2E7FF;
+  color: #5f7997;
+}
+.thread.private .notice:before {
+  content: "\f21b";
+}
+.thread.dragging {
+  background-color: gray;
+  border: 5px dashed black;
+}
+.thread .card {
+  -webkit-transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s;
+}
+.thread.focused .card {
+  box-shadow: 0 10px 10px 10px #ccc;
+}
+.thread.limbo .card {
+  max-height: 85%;
+}
+.thread.limbo .head:before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 5px;
+  background: #CA1414;
+  position: absolute;
+}
+.thread.limbo .notice {
+  background: #ffe4e4;
+  color: #CA1414;
+}
+.thread.limbo .notice:before {
+  content: "\f071";
+}
+.thread .uploading-indicator {
+  font-size: 1.5em;
+  text-align: center;
+  content: "\f110";
+  font-family: "fontawesome";
+  -webkit-animation: anim-spin 1s infinite steps(8);
+  animation: anim-spin 1s infinite steps(8);
+}
+.login {
+  background: white;
+  box-shadow: 0 1px 2px 0 #ccc;
+  width: 17rem;
+  padding: 1rem;
+  box-sizing: border-box;
+  position: relative;
+}
+.login input {
+  width: 100%;
+  margin: 0 0 1em;
+  padding: 0.25em;
+  box-sizing: border-box;
+}
+.page.me .nickname .error {
+  color: red;
+}
+.page.me.active {
+  display: block;
+}
+.page.me .pending-invites {
+  color: #999;
+}
+.page.me .pending-invites ul.invites {
+  padding-left: 15px;
+}
+.page.me .group .name {
+  color: #999;
+  margin-bottom: 0.25em;
+}
+.page.me .group .invite-form .autocomplete {
+  background-color: #999;
+}
+.page.me .group .invite-form .autocomplete .results {
+  list-style-type: none;
+  padding-left: 10px;
+}
+.page.me .group .invite-form .autocomplete .results .result:hover {
+  background: #eee;
+}
+.page.me .group .invite-form .autocomplete .results .active {
+  font-weight: bold;
+}
+.page.me .group .new-tag.error {
+  border-color: red;
+}
+.app .main > .header {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
+  line-height: 2rem;
+  color: #888888;
+}
+.app .main > .header .modal {
+  display: none;
+  background: white;
+  position: absolute;
+  cursor: default;
+}
+.app .main > .header .modal p {
+  line-height: 1.2em;
+}
+.app .main > .header .shortcut {
+  display: inline-block;
+  margin-right: 1rem;
+}
+.app .main > .header .shortcut .title {
+  text-decoration: none;
+  color: #888888;
+}
+.app .main > .header .shortcut.active .title,
+.app .main > .header .shortcut:hover .title {
+  color: #000;
+}
+.app .main > .header .shortcut:hover .modal {
+  display: block;
+  padding: 1rem;
+}
+.app .main > .header .inbox .title:after {
+  font-family: "fontawesome";
+  content: "\f01c";
+}
+.app .main > .header .recent .title:after {
+  font-family: "fontawesome";
+  content: "\f1da";
+}
+.app .main > .header .help .title:after {
+  font-family: "fontawesome";
+  content: "\f059";
+}
+.app .main > .header .users .title:after {
+  font-family: "fontawesome";
+  content: "\f007";
+  margin-left: 0.25em;
+}
+.app .main > .header .tags .title:after {
+  font-family: "fontawesome";
+  content: "\f02c";
+}
+.app .main > .header .extensions .title:after {
+  font-family: "fontawesome";
+  content: "\f1e6";
+}
+.app .main > .header .search-bar {
+  display: inline-block;
+}
+.app .main > .header .search-bar input {
+  width: 20em;
+}
+.app .main > .header .avatar {
+  width: 2rem;
+  height: 2rem;
+  vertical-align: middle;
+  margin-left: 1rem;
+  border-radius: 20%;
+}
+.page > .title {
+  height: 2rem;
+  line-height: 2rem;
+  color: #888888;
+  margin: 1rem;
+}
+.page > .content {
+  overflow: scroll;
+  padding: 1rem;
+  color: #888888;
+}
+.page > .content .description {
+  width: 17rem;
+}
+.page > .content .description .avatar {
+  width: 4rem;
+  height: 4rem;
+  display: block;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+}
+.page.channels .tags {
+  margin-top: 1em;
+  color: #888888;
+}
+.page.channels .tags .tag-info {
+  margin-bottom: 1em;
+}
+.page.channels .count {
+  margin-right: 0.5em;
+}
+.page.channels .count:after {
+  font-family: "fontawesome";
+  margin-left: 0.25em;
+}
+.page.channels .count.threads-count:after {
+  content: "\f181";
+}
+.page.channels .count.subscribers-count:after {
+  content: "\f0c0";
+}

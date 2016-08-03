@@ -2,7 +2,7 @@
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [reagent.core :as r]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.s3 :as s3]
             [braid.client.routes :as routes]
             [braid.client.ui.views.upload :refer [avatar-upload-view]]))
@@ -32,8 +32,8 @@
                    :value @new-message
                    :on-change (fn [e] (reset! new-message (.. e -target -value)))}]
        [:button {:on-click (fn [_]
-                             (dispatch! :set-intro {:group-id (group :id)
-                                                    :intro @new-message})
+                             (dispatch! :set-group-intro {:group-id (group :id)
+                                                          :intro @new-message})
                              (reset! new-message ""))}
         "Save"]])))
 

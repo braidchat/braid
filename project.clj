@@ -6,7 +6,7 @@
                  [javax.servlet/servlet-api "2.5"]
                  [commons-codec "1.10"]
                  [commons-validator "1.5.1"]
-                 [http-kit "2.2.0-alpha1"]
+                 [http-kit "2.2.0"]
                  [ring/ring-defaults "0.2.1"]
                  [fogus/ring-edn "0.3.0"]
                  [ring-cors "0.1.8"]
@@ -24,7 +24,7 @@
                  [inliner "0.1.0"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [mount "0.1.10"]
-                 [com.cognitect/transit-clj "0.8.285" :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                 [com.cognitect/transit-clj "0.8.288" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [ring-transit "0.1.6" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  ;client
                  [org.clojure/clojurescript "1.9.93"]
@@ -34,7 +34,7 @@
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.1"]
-                 [reagent "0.5.1"]
+                 [reagent "0.6.0-rc"]
                  [cljsjs/husl "6.0.1-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
                  ;shared

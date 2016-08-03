@@ -4,7 +4,6 @@
             [clojure.string :as string]
             [cljs-time.format :as f]
             [cljs-time.core :as t]
-            [braid.client.store :as store]
             [goog.style :as gstyle]
             [cljsjs.husl])
   (:import [goog Uri]))
@@ -81,7 +80,18 @@
 (defn url->parts [url]
   (let [url-info (.parse Uri url)]
     {:domain (.getDomain url-info)
-     :path (.getPath url-info)}))
+     :path (.getPath url-info)
+     :scheme (.getScheme url-info)
+     :port (.getPort url-info)}))
+
+(defn site-url
+  []
+  (let [{:keys [domain scheme port]} (url->parts (.-location js/window))]
+    (str scheme "://" domain (when (or (and (= scheme "http")
+                                       (not= port 80))
+                                     (and (= scheme "https")
+                                       (not= port 443)))
+                             (str ":" port)))))
 
 (defn ->color [input]
   (js/window.HUSL.toHex (mod (Math/abs (hash input)) 360) 95 50))

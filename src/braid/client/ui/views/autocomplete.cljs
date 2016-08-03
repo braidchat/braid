@@ -5,7 +5,8 @@
             [clojure.string :as string]
             [braid.client.helpers :refer [id->color debounce]]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.emoji :as emoji])
+            [braid.client.emoji :as emoji]
+            [goog.string :as gstring])
   (:import [goog.events KeyCodes]))
 
 ; fn that returns results that will be shown if pattern matches
@@ -54,7 +55,7 @@
 (def engines
   [
    ; /<bot-name> -> autocompletes bots
-   (fn [text _]
+   (fn [text]
      (let [pattern #"^/(\w+)$"]
        (when-let [bot-name (second (re-find pattern text))]
          (into ()
@@ -64,7 +65,8 @@
                              :action (fn [])
                              :message-transform
                              (fn [text]
-                               (string/replace text pattern (str "/" (b :nickname) " ")))
+                               (string/replace text pattern
+                                               (str "/" (b :nickname) " ")))
                              :html
                              (constantly
                                [:div.bot-match
@@ -74,7 +76,7 @@
                (store/bots-in-open-group)))))
 
    ; ... :emoji  -> autocomplete emoji
-   (fn [text _]
+   (fn [text]
      (let [pattern #"\B[:(](\S{2,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> emoji/unicode
@@ -97,7 +99,7 @@
                                   {:react-key k}])}))))))
 
    ; ... @<user>  -> autocompletes user name
-   (fn [text _]
+   (fn [text]
      (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (->> (store/users-in-open-group)
@@ -116,10 +118,10 @@
                         [:div.user-match
                           [:img.avatar {:src (user :avatar)}]
                           [:div.name (user :nickname)]
-                          [:div.extra "..."]])}))))))
+                          [:div.extra (user :status)]])}))))))
 
    ; ... #<tag>   -> autocompletes tag
-   (fn [text _]
+   (fn [text]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
          (let [group-tags (store/tags-in-open-group)
@@ -138,26 +140,36 @@
                         :html
                         (fn []
                           [:div.tag-match
-                           [:div.color-block {:style {:backgroundColor (id->color (tag :id))}}]
+                           [:div.color-block
+                            {:style
+                             (merge
+                               {:borderColor (id->color (tag :id))
+                                :borderWidth "3px"
+                                :borderStyle "solid"
+                                :borderRadius "3px"}
+                               (when (store/is-subscribed-to-tag? (tag :id))
+                                 {:backgroundColor (id->color (tag :id))}))}]
                            [:div.name (tag :name)]
-                           [:div.extra (tag :description)]])}))
+                           [:div.extra (or (tag :description)
+                                           (gstring/unescapeEntities "&nbsp;"))]])}))
                 (cons (when-not (or exact-match? (string/blank? query))
-                        (let [tag (schema/make-tag {:name query
-                                                    :group-id (store/open-group-id)
-                                                    :group-name (store/open-group-name)})]
+                        (let [tag (merge (schema/make-tag)
+                                         {:name query
+                                          :group-id (store/open-group-id)})]
                           {:key (constantly (tag :id))
                            :action
                            (fn []
-                             (dispatch! :create-tag [(tag :name) (tag :group-id) (tag :id)]))
+                             (dispatch! :create-tag {:tag tag}))
                            :message-transform
                            (fn [text]
                              (string/replace text pattern (str "#" (tag :name) " ")))
                            :html
                            (fn []
                              [:div.tag-match
-                              [:div.color-block{:style {:backgroundColor (id->color (tag :id))}}]
+                              [:div.color-block
+                               {:style {:backgroundColor (id->color (tag :id))}}]
                               [:div.name (str "Create tag " (tag :name))]
-                              [:div.extra (:name (store/id->group (tag :group-id)))]])})))
+                              [:div.extra
+                               (:name (store/id->group (tag :group-id)))]])})))
                 (remove nil?)
-                reverse)))))
-   ])
+                reverse)))))])

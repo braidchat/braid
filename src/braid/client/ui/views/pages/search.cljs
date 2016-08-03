@@ -3,26 +3,22 @@
             [reagent.ratom :include-macros true :refer-macros [reaction run!]]
             [braid.client.ui.views.thread :refer [thread-view]]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.reagent-adapter :refer [subscribe]]
-            [braid.client.store :as store]))
+            [braid.client.state :refer [subscribe]]))
 
 (defn search-page-view
   []
-  (let [loading? (r/atom false)
-        start-loading! (fn [] (reset! loading? true))
-        stop-loading! (fn [] (reset! loading? false))
-        page (subscribe [:page])
+  (let [page (subscribe [:page])
         threads (subscribe [:threads])
         query (subscribe [:search-query])
         group-id (subscribe [:open-group-id])]
-    (dispatch! :search-history [(@page :search-query) @group-id])
     (fn []
       (let [status (cond
-                     (@page :search-error?) (do (stop-loading!) :error)
-                     @loading? :loading
+                     (@page :error?) :error
+                     (@page :loading?) :loading
                      (not (contains? @page :thread-ids)) :searching
                      (seq (@page :thread-ids)) :done-results
                      :else :done-empty)]
+
         [:div.page.search
          [:div.title (str "Search for \"" @query "\"")]
          (case status
@@ -60,7 +56,7 @@
                             (< (count @loaded-threads) (count (@page :thread-ids)))
                             (> 100 (- (.-scrollWidth div)
                                       (+ (.-scrollLeft div) (.-offsetWidth div)))))
-                      (start-loading!)
+                      (dispatch! :set-page-loading true)
                       (let [already-have (set (map :id @loaded-threads))
                             to-load (->> (@page :thread-ids)
                                          (remove already-have)
@@ -69,7 +65,7 @@
                                    {:thread-ids to-load
                                     :on-complete
                                     (fn []
-                                      (stop-loading!))})))))
+                                      (dispatch! :set-page-loading false))})))))
                 :on-wheel ; make the mouse wheel scroll horizontally
                 (fn [e]
                   (let [target-classes (.. e -target -classList)

@@ -4,7 +4,7 @@
             [clojure.string :as string]
             [braid.client.desktop.notify :as notify]
             [braid.client.ui.views.pills :refer [tag-pill-view]]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [braid.client.state :refer [subscribe]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.store :as store]
             [braid.common.util :refer [valid-nickname?]]
@@ -39,9 +39,9 @@
            (let [nickname (.. e -target -value)]
              (when (and (= KeyCodes.ENTER e.keyCode)
                      (re-matches #"\S+" nickname))
-               (dispatch! :set-nickname
-                          [nickname
-                           (fn [err] (set-error! err))]))))}]])))
+               (dispatch! :set-user-nickname
+                          {:nickname nickname
+                           :on-error (fn [err] (set-error! err))}))))}]])))
 
 (defn avatar-view
   []
@@ -160,7 +160,7 @@
                                  (let [v (.. e -target -value)]
                                    (if (= v "any")
                                      (reset! condition :any)
-                                     (reset! condition (UUID. v nil)))))}
+                                     (reset! condition (uuid v)))))}
            [:option {:value :any} "Any Group"]
            (doall
              (for [group @groups]
@@ -170,7 +170,7 @@
           :tag
           [:select {:value @event-tag
                     :on-change (fn [e]
-                                 (let [tag-id (UUID. (.. e -target -value) nil)]
+                                 (let [tag-id (uuid (.. e -target -value))]
                                    (reset! condition tag-id)))}
            (doall
              (for [group-id (keys @tags)]

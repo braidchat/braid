@@ -1,15 +1,14 @@
 (ns braid.client.ui.views.pills
   (:require [reagent.core :as r]
-            [reagent.impl.util :refer [extract-props]]
             [braid.client.routes :as routes]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :refer [id->color]]
-            [braid.client.reagent-adapter :refer [subscribe]]))
+            [braid.client.state :refer [subscribe]]))
 
 (defn subscribe-button-view
   [tag-id]
   (let [tag-id-atom (r/atom tag-id)
-        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag] [tag-id-atom])]
+        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag?] [tag-id-atom])]
     (r/create-class
       {:display-name "subscribe-button-view"
        :component-will-receive-props
@@ -24,7 +23,7 @@
             "Unsubscribe"]
            [:a.button {:on-click
                        (fn [_]
-                         (dispatch! :subscribe-to-tag tag-id))}
+                         (dispatch! :subscribe-to-tag {:tag-id tag-id}))}
             "Subscribe"]))})))
 
 (defn tag-pill-view
@@ -32,7 +31,7 @@
   (let [tag-id-atom (r/atom tag-id)
         tag (subscribe [:tag] [tag-id-atom])
         open-group-id (subscribe [:open-group-id])
-        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag] [tag-id-atom])]
+        user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag?] [tag-id-atom])]
     (r/create-class
       {:display-name "tag-pill-view"
        :component-will-receive-props

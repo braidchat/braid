@@ -1,12 +1,13 @@
 (ns braid.client.ui.views.new-message
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
-            [braid.client.reagent-adapter :refer [subscribe]]
+            [reagent.ratom :refer-macros [run!]]
+            [braid.client.state :refer [subscribe]]
             [cljs.core.async :as async :refer [<! put! chan alts!]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.store :as store]
             [braid.client.s3 :as s3]
-            [braid.client.helpers :refer [debounce]]
+            [braid.client.helpers :refer [debounce stop-event!]]
             [braid.client.ui.views.autocomplete :refer [engines]])
   (:import [goog.events KeyCodes]))
 
@@ -16,45 +17,38 @@
         (str (+ 5 (min 300 (.-scrollHeight el))) "px")))
 
 (defn textarea-view [{:keys [text set-text! config on-key-down on-change]}]
-  (let [connected? (subscribe [:connected?])
-        kill-chan (chan)
+  (let [this-elt (r/atom nil)
+        connected? (subscribe [:connected?])
+        focused? (subscribe [:thread-focused? (config :thread-id)])
         send-message!
         (fn [config text]
           (dispatch! :new-message {:thread-id (config :thread-id)
                                    :group-id (config :group-id)
                                    :content text
                                    :mentioned-user-ids (config :mentioned-user-ids)
-                                   :mentioned-tag-ids (config :mentioned-tag-ids)}))]
+                                   :mentioned-tag-ids (config :mentioned-tag-ids)}))
+        _ (run! (do
+                  (when (and @focused? @this-elt)
+                    (.focus @this-elt))))]
 
     (r/create-class
       {:display-name "textarea"
        :component-did-mount
        (fn [c]
          (resize-textbox (r/dom-node c))
-         (let [{:keys [config]} (r/props c)]
-           (when (and (not (config :new-thread?))
-                   (= (config :thread-id) (store/get-new-thread)))
-             (store/clear-new-thread!)
-             (.focus (r/dom-node c))))
-         (let [focus-chan (:become-focused-chan config)]
-           (go (loop []
-                 (let [[_ ch] (alts! [focus-chan kill-chan])]
-                   (when (= ch focus-chan)
-                     (.focus (r/dom-node c))
-                     (recur)))))))
+         (reset! this-elt (r/dom-node c)))
 
        :component-did-update
        (fn [c]
          (resize-textbox (r/dom-node c)))
-
-       :component-will-unmount
-       (fn [] (put! kill-chan (js/Date.)))
 
        :reagent-render
        (fn [{:keys [text set-text! config on-key-down on-change]}]
          [:textarea {:placeholder (config :placeholder)
                      :value text
                      :disabled (not @connected?)
+                     :on-focus (fn [e]
+                                 (dispatch! :focus-thread (config :thread-id)))
                      :on-change (on-change
                                   {:on-change
                                    (fn [e]
@@ -80,6 +74,10 @@
          results))
      [:div.result
       "No Results"])])
+
+(defn inside-code-block?
+  [txt]
+  (odd? (count (re-seq #"`" txt))))
 
 (defn wrap-autocomplete [config]
   (let [autocomplete-chan (chan)
@@ -136,8 +134,9 @@
         clear-force-close! (fn []
                              (swap! state assoc :force-close? false))
 
-        update-thread-text! (fn [thread-id text] (put! thread-text-chan {:thread-id thread-id
-                                                                         :content text}))
+        update-thread-text! (fn [thread-id text] (put! thread-text-chan
+                                                       {:thread-id thread-id
+                                                        :content text}))
         set-text! (fn [text]
                     (let [text (.slice text 0 5000)]
                       (swap! state assoc :text text)
@@ -167,40 +166,33 @@
         autocomplete-on-key-down
         (fn [{:keys [on-submit]}]
           (fn [e]
-            (condp = e.keyCode
-              KeyCodes.ENTER
-              (cond
-                ; ENTER when autocomplete -> trigger chosen result's action
-                ; (or exit autocomplete if no result chosen)
-                (autocomplete-open?)
+            (if (not (autocomplete-open?))
+              (when (and (= e.keyCode KeyCodes.ENTER) (not e.shiftKey))
+                (stop-event! e)
+                (reset-state!)
+                (on-submit e))
+              (condp = e.keyCode
+                KeyCodes.ENTER
                 (do
-                  (.preventDefault e)
+                  (stop-event! e)
                   (when-let [result (nth (@state :results)
                                          (@state :highlighted-result-index) nil)]
                     (choose-result! result))
                   (set-force-close!))
 
-                ; ENTER otherwise -> send message
-                (not e.shiftKey)
-                (do
-                  (.preventDefault e)
-                  (reset-state!)
-                  (on-submit e)))
+                KeyCodes.ESC
+                (do (stop-event! e)
+                  (set-force-close!))
 
-              KeyCodes.ESC
-              (set-force-close!)
+                KeyCodes.UP
+                (do (stop-event! e)
+                  (highlight-prev!))
 
-              KeyCodes.UP
-              (when (autocomplete-open?)
-                (.preventDefault e)
-                (highlight-prev!))
+                KeyCodes.DOWN
+                (do (stop-event! e)
+                  (highlight-next!))
 
-              KeyCodes.DOWN
-              (when (autocomplete-open?)
-                (.preventDefault e)
-                (highlight-next!))
-
-              nil)))
+                nil))))
 
         autocomplete-on-change
         (fn [{:keys [on-change]}]
@@ -215,14 +207,16 @@
          (swap! state assoc :text @thread-text)
          (let [config (r/props c)]
            (go (loop []
-                 (let [[v ch] (alts! [throttled-autocomplete-chan kill-chan])]
+                 (let [[text ch] (alts! [throttled-autocomplete-chan kill-chan])]
                    (when (= ch throttled-autocomplete-chan)
-                     (set-results!
-                       (seq (mapcat (fn [e] (e v (config :thread-id))) engines)))
-                     (highlight-first!)
+                     (when-not (inside-code-block? text)
+                       (set-results!
+                         (seq (mapcat (fn [e] (e text)) engines)))
+                       (highlight-first!))
                      (recur)))))
            (go (loop []
-                 (let [[v ch] (alts! [throttled-thread-text-chan thread-text-kill-chan])]
+                 (let [[v ch] (alts! [throttled-thread-text-chan
+                                      thread-text-kill-chan])]
                    (if (= ch throttled-thread-text-chan)
                      (do
                        (dispatch! :new-message-text v)
