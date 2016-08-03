@@ -27,7 +27,8 @@
      :notifications {:window-visible? true
                      :unread-count 0}
      :user {:open-thread-ids #{}
-            :subscribed-tag-ids #{}}
+            :subscribed-tag-ids #{}
+            :completed-quest-ids #{}}
      :new-thread-id (uuid/make-random-squuid)
      :focused-thread-id nil}))
 
@@ -55,7 +56,8 @@
    :notifications {:window-visible? s/Bool
                    :unread-count s/Int}
    :user {:open-thread-ids #{s/Uuid}
-          :subscribed-tag-ids #{s/Uuid}}
+          :subscribed-tag-ids #{s/Uuid}
+          :completed-quest-ids #{s/Keyword}}
    :new-thread-id s/Uuid
    :focused-thread-id (s/maybe s/Uuid)})
 

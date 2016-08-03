@@ -297,3 +297,10 @@
   [state [_ pref]]
   (reaction (get-in @state [:preferences pref])))
 
+(defmethod subscription :quest-completed?
+  [state [_ quest-id]]
+  (reaction (contains? (get-in @state [:user :completed-quest-ids]) quest-id)))
+
+(defmethod subscription :completed-quest-count
+  [state _]
+  (reaction (count (get-in @state [:user :completed-quest-ids]))))
