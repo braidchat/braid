@@ -517,3 +517,9 @@
 
 (defmethod handler :add-group-bot [state [_ [group-id bot]]]
   (helpers/add-group-bot state group-id bot))
+
+(defmethod handler :add-call [state [_ call]]
+  (helpers/add-call state call))
+
+(defmethod handler :set-call-status [state [_ [call-id status]]]
+  (helpers/set-call-status state call-id status))
