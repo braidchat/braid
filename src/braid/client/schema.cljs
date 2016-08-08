@@ -39,7 +39,7 @@
    :type (data :type)
    :source-id (data :source-id)
    :target-id (data :target-id)
-   :status (data :status)})
+   :status :incoming})
 
 (defn make-bot [data]
   (merge {:id (uuid/make-random-squuid)}
