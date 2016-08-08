@@ -1,10 +1,9 @@
-(ns braid.ui.views.call
+(ns braid.client.ui.views.call
   (:require [reagent.core :as r]
-            [reagent.impl.util :refer [extract-props]]
-            [braid.ui.views.pills :refer [user-pill-view]]
-            [chat.client.webrtc :as rtc]
-            [chat.client.dispatcher :refer [dispatch!]]
-            [chat.client.reagent-adapter :refer [subscribe]]))
+            [braid.client.ui.views.pills :refer [user-pill-view]]
+            [braid.client.webrtc :as rtc]
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.state :refer [subscribe]]))
 
 (defn call-interface-view
   [call]
@@ -79,7 +78,7 @@
 (defn call-start-view
   [caller-id callee-id]
   (fn []
-    [:div.call ;TODO: pass user to render pill
+    [:div.call
      [:div
       [:h3 "Call"]
       [user-pill-view callee-id]]
