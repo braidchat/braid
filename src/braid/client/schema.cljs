@@ -35,7 +35,7 @@
    :group-id (data :group-id)})
 
 (defn make-call [data]
-  {:id (or (data :id) (uuid/make-random-squuid))
+  {:id (uuid/make-random-squuid)
    :type (data :type)
    :source-id (data :source-id)
    :target-id (data :target-id)

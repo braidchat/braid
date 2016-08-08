@@ -113,10 +113,10 @@
 
 (def Call
   {:id s/Uuid
-   :type s/Str
+   :type (s/enum :audio :video)
    :source-id s/Uuid
    :target-id s/Uuid
-   :status s/Str})
+   :status s/Keyword})
 
 (def Upload
   {:id s/Uuid
