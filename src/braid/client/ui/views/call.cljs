@@ -5,12 +5,21 @@
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.state :refer [subscribe]]))
 
-(defn call-interface-view
+(defn dropped-call-view []
+  [:p "dropped"])
+
+(defn ended-call-view []
+  [:p "ended"])
+
+(defn declined-call-view []
+  [:p "declined"])
+
+(defn accepted-call-view
   [call]
   (let [call-time (r/atom 0)
         caller-id (call :source-id)
         user (subscribe [:user caller-id])]
-    (fn []
+    (fn [call]
       (js/setTimeout #(swap! call-time inc) 1000)
       [:div
        [:h4 "Call with " (@user :nickname) "..."]
@@ -27,55 +36,43 @@
            (dispatch! :end-call call))}
         "End Call"]])))
 
-(defn new-call-view
+(defn incoming-call-view [call]
+  (let [user-id (subscribe [:user-id])]
+    (fn [call]
+      (if (= @user-id (call :target-id))
+        [:div
+           [:p (str "Call from" (call :source-id))]
+           [:a.button
+            {:on-click
+             (fn [_]
+               (dispatch! :accept-call call))}
+            "Accept"]
+           [:a.button
+            {:on-click
+             (fn [_]
+               (dispatch! :decline-call call))}
+            "Decline"]]
+        [:div
+           [:p (str "Calling " (call :source-id) "...")]
+           [:a.button
+            {:on-click
+             (fn [_]
+               (dispatch! :drop-call call))}
+            "Drop"]]))))
+
+(defn call-view
   [call]
   (let [user-id (subscribe [:user-id])]
     (fn [call]
       [:div
         (case (call :status)
-           "incoming"
-              (if (= @user-id (call :target-id))
-                [:div
-                   [:p (str "Call from" (call :source-id))]
-                   [:a.button
-                    {:on-click
-                     (fn [_]
-                       (dispatch! :accept-call call))}
-                    "Accept"]
-                   [:a.button
-                    {:on-click
-                     (fn [_]
-                       (dispatch! :decline-call call))}
-                    "Decline"]]
-                [:div
-                   [:p (str "Calling " (call :source-id) "...")]
-                   [:a.button
-                    {:on-click
-                     (fn [_]
-                       (dispatch! :drop-call call))}
-                    "Drop"]])
-           "accepted"
-             [call-interface-view call]
-           "declined"
-             [:p "declined"]
-           "ended"
-             [:p "ended"]
-           "dropped"
-             [:p "dropped"])])))
+           :incoming [incoming-call-view]
+           :accepted [accepted-call-view call]
+           :declined [declined-call-view]
+           :ended [ended-call-view]
+           :dropped [dropped-call-view])])))
 
-(defn call-list-view
-  []
-  (let [calls (subscribe [:calls])]
-    (fn []
-      [:div
-        (when (seq @calls)
-          [:div.calls
-            (doall
-              (for [call @calls]
-                ^{:key (call :id)}
-                [new-call-view call]))])])))
-
-(defn call-start-view
+(defn pre-call-view
   [caller-id callee-id]
   (fn []
     [:div.call
@@ -86,15 +83,24 @@
      [:a.button
        {:on-click
          (fn [_]
-           (dispatch! :start-call (assoc {} :type "audio"
-                                            :source-id caller-id
-                                            :target-id callee-id)))}
+           (dispatch! :start-call {:type :audio
+                                   :source-id caller-id
+                                   :target-id callee-id}))}
       "Audio"]
      [:a.button
        {:on-click
          (fn [_]
-           (dispatch! :start-call (assoc {} :type "video"
-                                            :source-id caller-id
-                                            :target-id callee-id)))}
-      "Video"]
-     [call-list-view]]))
+           (dispatch! :start-call {:type :video
+                                   :source-id caller-id
+                                   :target-id callee-id}))}
+      "Video"]]))
+
+(defn call-list-view
+  []
+  (let [calls (subscribe [:calls])]
+    (fn []
+      [:div.calls
+        (doall
+          (for [call @calls]
+            ^{:key (call :id)}
+            [call-view call]))])))
