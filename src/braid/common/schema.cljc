@@ -113,6 +113,7 @@
 
 (def Call
   {:id s/Uuid
+   :created-at s/Inst
    :type (s/enum :audio :video)
    :source-id s/Uuid
    :target-id s/Uuid

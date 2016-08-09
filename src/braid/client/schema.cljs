@@ -36,6 +36,7 @@
 
 (defn make-call [data]
   {:id (uuid/make-random-squuid)
+   :created-at (or (data :created-at) (js/Date.))
    :type (data :type)
    :source-id (data :source-id)
    :target-id (data :target-id)
