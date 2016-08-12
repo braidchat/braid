@@ -7,22 +7,32 @@
             [braid.client.state :refer [subscribe]]))
 
 (defn ended-call-view
-  [nickname]
-  [:p (str "Call with " nickname " ended")])
+  [call]
+  (let [correct-nickname (subscribe [:correct-nickname call])]
+    (fn [call]
+      [:div
+        [:a.button {:on-click (fn [_] (dispatch! :archive-call call))} "X"]
+        [:p (str "Call with " @correct-nickname " ended")]])))
 
 (defn dropped-call-view
-  [nickname]
-  [:p (str "Call with " nickname " dropped")])
+  [call]
+  (let [correct-nickname (subscribe [:correct-nickname call])]
+    (fn [call]
+      [:div
+        [:a.button {:on-click (fn [_] (dispatch! :archive-call call))} "X"]
+        [:p (str "Call with " @correct-nickname " dropped")]])))
 
 (defn declined-call-view
-  [caller-id callee-id]
-  (let [user-is-caller? (subscribe [:current-user-is-caller? caller-id])
-        caller-nickname (subscribe [:nickname caller-id])
-        callee-nickname (subscribe [:nickname callee-id])]
-    (fn [caller-id callee-id]
-      (if @user-is-caller?
-        [:p (str @callee-nickname " declined your call")]
-        [:p (str "Call with " @caller-nickname "declined")]))))
+  [call]
+  (let [user-is-caller? (subscribe [:current-user-is-caller? (call :caller-id)])
+        caller-nickname (subscribe [:nickname (call :caller-id)])
+        callee-nickname (subscribe [:nickname (call :callee-id)])]
+    (fn [call]
+      [:div
+        [:a.button {:on-click (fn [_] (dispatch! :archive-call call))} "X"]
+        (if @user-is-caller?
+          [:p (str @callee-nickname " declined your call")]
+          [:p (str "Call with " @caller-nickname "declined")])])))
 
 (defn accepted-call-view
   [call]

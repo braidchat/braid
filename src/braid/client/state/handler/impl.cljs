@@ -552,6 +552,10 @@
   (sync/chsk-send! [:braid.server/change-call-status {:call call :status :dropped}])
   (helpers/set-call-status state (call :id) :dropped))
 
+(defmethod handler :archive-call [state [_ call]]
+  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :archived}])
+  (helpers/set-call-status state (call :id) :archived))
+
 (defmethod handler :set-requester-call-status [state [_ [call-id status]]]
   (sync/chsk-send! [:braid.server/change-call-status {:call call-id :status status}])
   (helpers/set-call-status state call-id status))
