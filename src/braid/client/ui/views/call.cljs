@@ -6,10 +6,6 @@
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.state :refer [subscribe]]))
 
-;TODO: make sub
-(defn is-caller? [user-id call]
-  (= user-id (call :source-id)))
-
 (defn ended-call-view
   [nickname]
   [:p (str "Call with " nickname " ended")])
