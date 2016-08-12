@@ -50,7 +50,7 @@
   :main braid.server.handler
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]]
-            [lein-figwheel "0.5.4-5"]]
+            [lein-figwheel "0.5.4-7"]]
 
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
@@ -107,7 +107,7 @@
                                                 com.amazonaws/aws-java-sdk
                                                 com.google.guava/guava
                                                 org.slf4j/slf4j-api]]
-                                  [figwheel-sidecar "0.5.4-5"
+                                  [figwheel-sidecar "0.5.4-7"
                                    :exclusions
                                    [org.clojure/google-closure-library-third-party
                                     com.google.javascript/closure-compiler]]]}
