@@ -115,8 +115,8 @@
   {:id s/Uuid
    :created-at s/Inst
    :type (s/enum :audio :video)
-   :source-id s/Uuid
-   :target-id s/Uuid
+   :caller-id s/Uuid
+   :callee-id s/Uuid
    :status s/Keyword})
 
 (def Upload
