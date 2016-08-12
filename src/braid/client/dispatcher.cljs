@@ -1,16 +1,6 @@
 (ns braid.client.dispatcher
-  (:require [clojure.string :as string]
-            [cljs-uuid-utils.core :as uuid]
-            [braid.client.webrtc :as rtc]
-            [braid.client.store :as store]
-            [braid.client.sync :as sync]
-            [braid.client.state.handler.core :refer [handler]]
-            [braid.client.schema :as schema]
-            [braid.common.util :as util]
-            [braid.client.router :as router]
-            [braid.client.routes :as routes]
-            [braid.client.xhr :refer [edn-xhr]]
-            [braid.client.desktop.notify :as notify]))
+  (:require [braid.client.store :as store]
+            [braid.client.state.handler.core :refer [handler]]))
 
 (defn dispatch!
   ([event args]
