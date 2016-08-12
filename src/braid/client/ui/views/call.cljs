@@ -107,6 +107,6 @@
   (let [callee-id (subscribe [:page-id])
         new-call (subscribe [:new-call])]
     (fn []
-      (if-not @new-call
-        [before-call-view @callee-id]
-        [during-call-view @new-call]))))
+      (if @new-call
+        [during-call-view @new-call]
+        [before-call-view @callee-id]))))
