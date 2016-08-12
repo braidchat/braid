@@ -1,6 +1,6 @@
 (ns braid.server.routes.bots
   (:require [clojure.string :as string]
-            [compojure.core :refer [PUT defroutes]]
+            [compojure.core :refer [GET PUT defroutes]]
             [ring.middleware.transit :as transit]
             [taoensso.timbre :as timbre]
             [braid.server.db :as db]
@@ -37,12 +37,6 @@
   [bot-id msg]
   (let [bot (db/bot-by-id bot-id)]
     (cond
-      (not= (bot :group-id) (msg :group-id))
-      (do
-        (timbre/debugf "Bot %s attempted to send a message to a group it isn't in %s"
-                       (bot :group-id) (msg :group-id))
-        nil)
-
       (let [thread-group (db/thread-group-id (msg :thread-id))]
         (and (some? thread-group) (not= (bot :group-id) thread-group)))
       (do (timbre/debugf "Bot %s attempted to send to a thread in a different group"
@@ -69,6 +63,7 @@
           bot (db/bot-by-id bot-id)
           msg (assoc (req :body)
                 :user-id (bot :user-id)
+                :group-id (bot :group-id)
                 :created-at (java.util.Date.))]
       (if (schema/new-message-valid? msg)
         (if (bot-can-message? bot-id msg)
@@ -88,7 +83,45 @@
         {:status 400
          :headers {"Content-Type" "text/plain"}
          ; TODO: when we have clojure.spec, use that to explain failure
-         :body "malformed message content"}))))
+         :body "malformed message content"})))
+
+  (GET "/names/:user-id" [user-id :as req]
+    (let [bot-id (get req ::bot-id)
+          bot (db/bot-by-id bot-id)]
+      (if-let [user-id (try (java.util.UUID/fromString user-id)
+                         (catch IllegalArgumentException _ nil))]
+        (if (db/user-in-group? user-id (bot :group-id))
+          {:status 200
+           :headers {"Content-Type" "text/plain"}
+           :body (:nickname (db/user-by-id user-id))}
+          {:status 403
+           :headers {"Content-Type" "text/plain"}
+           :body "Can't lookup user in a different group"})
+        {:status 400
+         :headers {"Content-Type" "text/plain"}
+         :body "Invalid user id"})))
+
+  ; TODO: allow unsubscribed by sending DELETE
+  (PUT "/subscribe/:thread-id" [thread-id :as req]
+    (let [bot-id (get req ::bot-id)
+          bot (db/bot-by-id bot-id)]
+      (if-let [thread-id (try (java.util.UUID/fromString thread-id)
+                           (catch IllegalArgumentException _ nil))]
+        (if (= (bot :group-id) (db/thread-group-id thread-id))
+          (do
+            (db/bot-watch-thread! bot-id thread-id)
+            {:status 201
+             :headers {"Content-Type" "text/plain"}
+             :body "ok"})
+          (do
+            (timbre/warnf "bot %s tried to add to thread in other group %s"
+                          bot-id thread-id)
+            {:status 403
+             :headers {"Content-Type" "text/plain"}
+             :body "Can't subscribe to a thread in a different group"}))
+        {:status 400
+         :headers {"Content-Type" "text/plain"}
+         :body "Invalid thread id"}))))
 
 (defn bad-transit-resp-fn
   [ex req handler]

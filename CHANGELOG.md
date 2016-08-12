@@ -1,3 +1,11 @@
+## 2 August 2016
+
+  - Fix bug that made thread "limbo" and "private" headers not go away
+
+## 1 August 2016
+
+  - Expand bots API to allow bots to subscribe to threads & look up user nicknames
+
 ## 22 July 2016
 
   - Add the ability to get permalink to a thread
