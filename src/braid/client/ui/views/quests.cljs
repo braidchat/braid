@@ -43,3 +43,4 @@
 ; show instructions when click show-me
 ; update descriptions
 ; update listeners
+; consider requiring multiple of certain actions (and have progress)
