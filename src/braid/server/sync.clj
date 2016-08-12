@@ -548,15 +548,15 @@
     (when (not= source-id (call :callee-id))
       (chsk-send! (call :callee-id) [:braid.client/receive-call call]))))
 
-(defmethod event-msg-handler :chat/change-call-status
+(defmethod event-msg-handler :braid.server/change-call-status
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (let [call (?data :call)
         call-id (call :id)
         status (?data :status)
-        signal-id (get-in ring-req [:session :user-id])]
-    (if (= signal-id (call :target-id))
-      (chsk-send! (call :source-id) [:chat/new-call-status [call-id status]])
-      (chsk-send! (call :target-id) [:chat/new-call-status [call-id status]]))))
+        source-id (get-in ring-req [:session :user-id])]
+    (if (= source-id (call :caller-id))
+      (chsk-send! (call :callee-id) [:braid.client/receive-new-call-status [call-id status]])
+      (chsk-send! (call :caller-id) [:braid.client/receive-new-call-status [call-id status]]))))
 
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]
