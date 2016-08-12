@@ -12,7 +12,7 @@
             [braid.server.search :as search]
             [braid.server.invite :as invites]
             [braid.server.digest :as digest]
-            [chat.server.webrtc :as rtc]
+            [braid.server.webrtc :as rtc]
             [clojure.set :refer [difference intersection]]
             [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
             [braid.server.email-digest :as email]
@@ -530,11 +530,11 @@
       (?reply-fn {:braid/ok (db/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
 
-(defmethod event-msg-handler :rtc/get-ice-servers
+(defmethod event-msg-handler :braid.server/get-ice-servers
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (?reply-fn (rtc/request-ice-servers)))
 
-(defmethod event-msg-handler :rtc/send-protocol-signal
+(defmethod event-msg-handler :braid.server/send-rtc-protocol-signal
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (let [signal-id (get-in ring-req [:session :user-id])
         signal-data ?data]
