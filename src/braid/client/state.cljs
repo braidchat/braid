@@ -304,3 +304,6 @@
 (defmethod subscription :call-status
   [state [_ call-id]]
   (reaction (get-in @state [:calls call-id :status])))
+(defmethod subscription :current-user-is-caller?
+  [state [_ caller-id]]
+  (reaction (= @(subscription state [:user-id]) caller-id)))
