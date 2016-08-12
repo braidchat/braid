@@ -12,8 +12,8 @@
 
 (defn signal-sdp-description [description]
   (.setLocalDescription @local-peer-connnection description)
-  (sync/chsk-send! [:rtc/send-protocol-signal {:sdp (.-sdp description)
-                                               :type (.-type description)}]))
+  (sync/chsk-send! [:braid.server/send-rtc-protocol-signal {:sdp (.-sdp description)
+                                                            :type (.-type description)}]))
 
 (defn create-answer [connection]
   (.createAnswer
