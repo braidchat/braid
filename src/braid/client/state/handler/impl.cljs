@@ -8,7 +8,8 @@
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.state.helpers :as helpers]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.state.handler.core :refer [handler]]))
+            [braid.client.state.handler.core :refer [handler]]
+            [braid.client.webrtc :as rtc]))
 
 (defn extract-tag-ids
   [text]
