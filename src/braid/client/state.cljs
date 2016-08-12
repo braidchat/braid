@@ -302,8 +302,8 @@
   (reaction (vals (@state :calls))))
 
 (defmethod subscription :call-status
-  [state [_ call-id]]
-  (reaction (get-in @state [:calls call-id :status])))
+  [state [_ call]]
+  (reaction (get-in @state [:calls (call :id) :status])))
 
 (defmethod subscription :new-call
   [state _]
