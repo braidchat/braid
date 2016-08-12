@@ -316,3 +316,10 @@
 (defmethod subscription :current-user-is-caller?
   [state [_ caller-id]]
   (reaction (= @(subscription state [:user-id]) caller-id)))
+
+(defmethod subscription :correct-nickname
+  [state [_ call]]
+  (let [is-caller? (reaction @(subscription state [:current-user-is-caller? (call :caller-id)]))
+        caller-nickname (reaction @(subscription state [:nickname (call :caller-id)]))
+        callee-nickname (reaction @(subscription state [:nickname (call :callee-id)]))]
+    (reaction (if @is-caller? @callee-nickname @caller-nickname))))
