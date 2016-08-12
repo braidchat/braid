@@ -16,16 +16,18 @@
                                                :type (.-type description)}]))
 
 (defn create-answer [connection]
-  (.createAnswer @connection
-                 signal-sdp-description
-                 (fn [error]
-                   (println "Error creating offer description:" (.-message error)))))
+  (.createAnswer
+    @connection
+    signal-sdp-description
+    (fn [error]
+      (println "Error creating offer description:" (.-message error)))))
 
 (defn create-offer [connection]
-  (.createOffer @connection
-                signal-sdp-description
-                (fn [error]
-                  (println "Error creating offer description:" (.-message error)))))
+  (.createOffer
+    @connection
+    signal-sdp-description
+    (fn [error]
+      (println "Error creating offer description:" (.-message error)))))
 
 ; Media
 
