@@ -50,6 +50,11 @@
                              "#" (or (store/name->open-tag-id tag-name)
                                       tag-name))))))
 
+(defn- get-ice-servers []
+  (sync/chsk-send! [:braid.server/get-ice-servers] 500
+    (fn [servers]
+      (rtc/initialize-rtc-environment servers))))
+
 (defmethod handler :clear-session [state _]
   (helpers/clear-session state))
 
