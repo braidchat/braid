@@ -3,6 +3,7 @@
     [braid.client.sync :as sync]
     [braid.client.router :as router]
     [braid.client.desktop.notify :as notify]
+    [braid.client.webrtc :as rtc]
     [braid.client.dispatcher :refer [dispatch!]]))
 
 (defmethod sync/event-handler :braid.client/thread
@@ -116,4 +117,14 @@
   [[_ thread]]
   (dispatch! :add-open-thread thread))
 
+(defmethod sync/event-handler :braid.client/receive-call
+  [[_ call]]
+  (dispatch! :add-call call))
 
+(defmethod sync/event-handler :braid.client/receive-new-call-status
+  [[_ [call status]]]
+  (dispatch! :set-receiver-call-status [call status]))
+
+(defmethod sync/event-handler :braid.client/receive-protocol-signal
+  [[_ signal]]
+  (rtc/handle-protocol-signal signal))
