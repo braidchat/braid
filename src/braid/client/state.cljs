@@ -309,7 +309,7 @@
   [state _]
   (reaction (->> (@state :calls)
                  vals
-                 (filter (fn [c] (not= :ended (c :status))))
+                 (filter (fn [c] (not= :archived (c :status))))
                  (sort-by :created-at)
                  first)))
 
