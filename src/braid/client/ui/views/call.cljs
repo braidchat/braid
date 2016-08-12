@@ -75,34 +75,48 @@
 
 (defn during-call-view
   [call]
-  (let [call-status (subscribe [:call-status (call :id)])
-        correct-nickname (subscribe [:correct-nickname call])]
-    (fn [call]
-      [:div
-        (case @call-status
-           :incoming [incoming-call-view call]
-           :accepted [accepted-call-view call]
-           :declined [declined-call-view (call :caller-id) (call :caller-id)]
-           :dropped [dropped-call-view @correct-nickname]
-           :ended [ended-call-view @correct-nickname])])))
+  (let [call-atom (r/atom call)
+        call-status (subscribe [:call-status] [call-atom])
+        correct-nickname (subscribe [:correct-nickname] [call-atom])]
+    (r/create-class
+      {:display-name "during-call-view"
+       :component-will-receive-props
+       (fn [_ [_ new-call]]
+         (reset! call-atom new-call))
+       :reagent-render
+       (fn [call]
+         [:div
+           (case @call-status
+             :incoming [incoming-call-view call]
+             :accepted [accepted-call-view call]
+             :declined [declined-call-view call]
+             :dropped [dropped-call-view call]
+             :ended [ended-call-view call])])})))
 
 (defn before-call-view
   [callee-id]
-  (let [caller-id (subscribe [:user-id])
-        callee-nickname (subscribe [:nickname callee-id])]
-    (fn [callee-id]
-      [:div.call
-      [:h3 (str "Call " @callee-nickname)]
-      [:a.button {:on-click
-                   (fn [_]
-                     (dispatch! :start-call {:type :audio
-                                             :caller-id @caller-id
-                                             :callee-id callee-id}))} "Audio"]
-      [:a.button {:on-click
-                   (fn [_]
-                     (dispatch! :start-call {:type :video
-                                             :caller-id @caller-id
-                                             :callee-id callee-id}))} "Video"]])))
+  (let [callee-id-atom (r/atom callee-id)
+        caller-id (subscribe [:user-id])
+        callee-nickname (subscribe [:nickname] [callee-id-atom])]
+    (r/create-class
+      {:display-name "before-call-view"
+       :component-will-receive-props
+       (fn [_ [_ new-callee-id]]
+         (reset! callee-id-atom new-callee-id))
+       :reagent-render
+       (fn [callee-id]
+         [:div.call
+           [:h3 (str "Call " @callee-nickname)]
+           [:a.button {:on-click
+                        (fn [_]
+                          (dispatch! :start-call {:type :audio
+                                                  :caller-id @caller-id
+                                                  :callee-id callee-id}))} "Audio"]
+           [:a.button {:on-click
+                        (fn [_]
+                          (dispatch! :start-call {:type :video
+                                                  :caller-id @caller-id
+                                                  :callee-id callee-id}))} "Video"]])})))
 
 (defn call-view []
   (let [callee-id (subscribe [:page-id])
