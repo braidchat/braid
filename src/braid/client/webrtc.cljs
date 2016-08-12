@@ -60,9 +60,9 @@
 (defn handle-ice-candidate [evt]
   (let [candidate (.-candidate evt)]
     (when candidate
-      (sync/chsk-send! [:rtc/send-protocol-signal {:candidate (.-candidate candidate)
-                                                   :sdpMid (.-sdpMid candidate)
-                                                   :sdpMLineIndex (.-sdpMLineIndex candidate)}]))))
+      (sync/chsk-send! [:braid.server/send-rtc-protocol-signal {:candidate (.-candidate candidate)
+                                                                :sdpMid (.-sdpMid candidate)
+                                                                :sdpMLineIndex (.-sdpMLineIndex candidate)}]))))
 
 (defn handle-stream [evt]
   (let [stream (.-stream evt)
