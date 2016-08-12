@@ -15,25 +15,23 @@
   [:p (str "Call with " nickname " dropped")])
 
 (defn declined-call-view
-  [call]
-  (let [current-user-id (subscribe [:user-id])
-        caller-nickname (subscribe [:nickname (call :source-id)])
-        callee-nickname (subscribe [:nickname (call :target-id)])]
-    (fn [call]
-      (if (is-caller? @current-user-id call)
+  [caller-id callee-id]
+  (let [user-is-caller? (subscribe [:current-user-is-caller? caller-id])
+        caller-nickname (subscribe [:nickname caller-id])
+        callee-nickname (subscribe [:nickname callee-id])]
+    (fn [caller-id callee-id]
+      (if @user-is-caller?
         [:p (str @callee-nickname " declined your call")]
         [:p (str "Call with " @caller-nickname "declined")]))))
 
 (defn accepted-call-view
   [call]
   (let [call-time (r/atom 0)
-        current-user-id (subscribe [:user-id])
-        caller-nickname (subscribe [:nickname (call :source-id)])
-        callee-nickname (subscribe [:nickname (call :target-id)])]
+        correct-nickname (subscribe [:correct-nickname call])]
     (fn [call]
       (js/setTimeout #(swap! call-time inc) 1000)
       [:div
-       [:h4 (str "Call with " (if (is-caller? @current-user-id call) @callee-nickname @caller-nickname) "...")]
+       [:h4 (str "Call with " @correct-nickname "...")]
        [:div (str @call-time)]
        [:br]
        [:a.button "A"]
@@ -42,66 +40,59 @@
        [:video {:class (if (= (call :type) :video) "video" "audio")}]
        [:a.button {:on-click
                     (fn [_]
-                      (dispatch! :end-call (call :id)))} "End"]])))
+                      (dispatch! :end-call call))} "End"]])))
 
 (defn incoming-call-view
   [call]
-  (let [current-user-id (subscribe [:user-id])]
+  (let [user-is-caller? (subscribe [:current-user-is-caller? (call :caller-id)])
+        caller-nickname (subscribe [:nickname (call :caller-id)])
+        callee-nickname (subscribe [:nickname (call :callee-id)])]
     (fn [call]
-      (if (= @current-user-id (call :target-id))
-
+      (if @user-is-caller?
         [:div
-           [:p (str "Call from " (call :source-id))]
+           [:p (str "Calling " @callee-nickname "...")]
            [:a.button {:on-click
                         (fn [_]
-                          (dispatch! :accept-call (call :id)))} "Accept"]
-           [:a.button {:on-click
-                        (fn [_]
-                          (dispatch! :decline-call (call :id)))} "Decline"]]
-
+                          (dispatch! :drop-call call))} "Drop"]]
         [:div
-           [:p (str "Calling " (call :target-id) "...")]
+           [:p (str "Call from " @caller-nickname)]
            [:a.button {:on-click
                         (fn [_]
-                          (dispatch! :drop-call (call :id)))} "Drop"]]))))
+                          (dispatch! :accept-call call))} "Accept"]
+           [:a.button {:on-click
+                        (fn [_]
+                          (dispatch! :decline-call call))} "Decline"]]))))
 
 (defn during-call-view
   [call]
   (let [call-status (subscribe [:call-status (call :id)])
-        current-user-id (subscribe [:user-id])
-        caller-nickname (subscribe [:nickname (call :source-id)])
-        callee-nickname (subscribe [:nickname (call :target-id)])
-        nickname (if (is-caller? @current-user-id call) @callee-nickname @caller-nickname)]
+        correct-nickname (subscribe [:correct-nickname call])]
     (fn [call]
       [:div
         (case @call-status
            :incoming [incoming-call-view call]
            :accepted [accepted-call-view call]
-           :declined [declined-call-view call]
-           :dropped [dropped-call-view nickname]
-           :ended [ended-call-view nickname])])))
+           :declined [declined-call-view (call :caller-id) (call :caller-id)]
+           :dropped [dropped-call-view @correct-nickname]
+           :ended [ended-call-view @correct-nickname])])))
 
 (defn before-call-view
   [callee-id]
-  (let [caller-id (subscribe [:user-id])]
+  (let [caller-id (subscribe [:user-id])
+        callee-nickname (subscribe [:nickname callee-id])]
     (fn [callee-id]
       [:div.call
-       [:div
-        [:h3 "Call"]
-        [user-pill-view callee-id]]
-       [:br]
-       [:a.button {:on-click
-                    (fn [_]
-                      (dispatch! :start-call {:type :audio
-                                              :source-id caller-id
-                                              :target-id callee-id}))}
-        "Audio"]
-       [:a.button {:on-click
-                  (fn [_]
-                    (dispatch! :start-call {:type :video
-                                            :source-id caller-id
-                                            :target-id callee-id}))}
-        "Video"]])))
+      [:h3 (str "Call " @callee-nickname)]
+      [:a.button {:on-click
+                   (fn [_]
+                     (dispatch! :start-call {:type :audio
+                                             :caller-id @caller-id
+                                             :callee-id callee-id}))} "Audio"]
+      [:a.button {:on-click
+                   (fn [_]
+                     (dispatch! :start-call {:type :video
+                                             :caller-id @caller-id
+                                             :callee-id callee-id}))} "Video"]])))
 
 (defn call-view []
   (let [callee-id (subscribe [:page-id])
