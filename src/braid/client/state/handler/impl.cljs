@@ -518,8 +518,37 @@
 (defmethod handler :add-group-bot [state [_ [group-id bot]]]
   (helpers/add-group-bot state group-id bot))
 
+(defmethod handler :start-call [state [_ data]]
+  (let [call (schema/make-call data)]
+    (sync/chsk-send! [:braid.server/make-call call])
+    (helpers/add-call state call)
+
+    #_(get-ice-servers)))
+
 (defmethod handler :add-call [state [_ call]]
   (helpers/add-call state call))
 
-(defmethod handler :set-call-status [state [_ [call-id status]]]
+(defmethod handler :accept-call [state [_ call]]
+  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :accepted}])
+  (helpers/set-call-status state (call :id) :accepted)
+
+  #_(rtc/open-local-stream (call :type)))
+
+(defmethod handler :decline-call [state [_ call]]
+  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :declined}])
+  (helpers/set-call-status state (call :id) :declined))
+
+(defmethod handler :end-call [state [_ call]]
+  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :ended}])
+  (helpers/set-call-status state (call :id) :ended))
+
+(defmethod handler :drop-call [state [_ call]]
+  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :dropped}])
+  (helpers/set-call-status state (call :id) :dropped))
+
+(defmethod handler :set-requester-call-status [state [_ [call-id status]]]
+  (sync/chsk-send! [:braid.server/change-call-status {:call call-id :status status}])
+  (helpers/set-call-status state call-id status))
+
+(defmethod handler :set-receiver-call-status [state [_ [call-id status]]]
   (helpers/set-call-status state call-id status))
