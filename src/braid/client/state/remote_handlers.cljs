@@ -119,7 +119,7 @@
 
 (defmethod sync/event-handler :braid.client/receive-call
   [[_ call]]
-  (dispatch! :add-call call))
+  (dispatch! :add-new-call call))
 
 (defmethod sync/event-handler :braid.client/receive-new-call-status
   [[_ [call status]]]

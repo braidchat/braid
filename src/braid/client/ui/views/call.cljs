@@ -109,12 +109,12 @@
            [:h3 (str "Call " @callee-nickname)]
            [:a.button {:on-click
                         (fn [_]
-                          (dispatch! :start-call {:type :audio
+                          (dispatch! :start-new-call {:type :audio
                                                   :caller-id @caller-id
                                                   :callee-id callee-id}))} "Audio"]
            [:a.button {:on-click
                         (fn [_]
-                          (dispatch! :start-call {:type :video
+                          (dispatch! :start-new-call {:type :video
                                                   :caller-id @caller-id
                                                   :callee-id callee-id}))} "Video"]])})))
 

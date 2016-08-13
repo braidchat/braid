@@ -524,14 +524,13 @@
 (defmethod handler :add-group-bot [state [_ [group-id bot]]]
   (helpers/add-group-bot state group-id bot))
 
-(defmethod handler :start-call [state [_ data]]
+(defmethod handler :start-new-call [state [_ data]]
   (let [call (schema/make-call data)]
     (sync/chsk-send! [:braid.server/make-call call])
-    (helpers/add-call state call)
+    (get-ice-servers)
+    (helpers/add-call state call)))
 
-    #_(get-ice-servers)))
-
-(defmethod handler :add-call [state [_ call]]
+(defmethod handler :add-new-call [state [_ call]]
   (helpers/add-call state call))
 
 (defmethod handler :accept-call [state [_ call]]
