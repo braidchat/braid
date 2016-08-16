@@ -46,12 +46,3 @@
         "Quests"]
        [quests-menu-view]])))
 
-; TODO
-; don’t have all of them displayed at the beginning
-; notify when a task is completed
-; notify when a new task added
-; show overall progress
-; show instructions when click show-me
-; update descriptions
-; update listeners
-; consider requiring multiple of certain actions (and have progress)
