@@ -31,10 +31,15 @@
     (fn []
       [:div.quests-menu
        [:div.content
-        [:div.quests
-         (for [quest @active-quests]
-           ^{:key (quest :id)}
-           [quest-view quest])]]])))
+         (if (seq @active-quests)
+           [:div.quests
+            (for [quest @active-quests]
+              ^{:key (quest :id)}
+              [quest-view quest])]
+
+           [:div.congrats
+            [:h1 "Congrats!"]
+            [:p "You've completed all the quests we have so far. Stay tuned for more."]])]])))
 
 (defn quests-header-view []
   (let [completed-quest-count (subscribe [:quests/completed-quest-count])]
