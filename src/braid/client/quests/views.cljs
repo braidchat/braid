@@ -10,9 +10,9 @@
     [:p (or (quest :description) "A short description would be here. Lorem ispum dolor it amet.")]
 
 
-    [:p "(" (quest :progress) "/" (quest :count) ")"]]
+    [:p "(" (quest :progress) "/" (quest :goal) ")"]]
 
-   (if (< (quest :progress) (quest :count))
+   (if (< (quest :progress) (quest :goal))
      [:div.actions
       [:a.skip {:on-click (fn [_]
                             (dispatch! :skip-quest (quest :id)))} "Skip"]

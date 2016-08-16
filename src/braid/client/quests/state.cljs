@@ -30,7 +30,7 @@
                   :active
                   :complete
                   :skipped)
-   :count s/Int
+   :goal s/Int
    :progress s/Int
    :listener js/Function})
 
