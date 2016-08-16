@@ -2,7 +2,7 @@
   (:require [braid.client.state.handler.core :refer [handler]]
             [braid.client.quests.helpers :as helpers]))
 
-(defmethod handler :skip-quest [state [_ quest-id]]
+(defmethod handler :quests/skip-quest [state [_ quest-id]]
   (-> state
       (helpers/skip-quest quest-id)
       (helpers/activate-next-quest)))

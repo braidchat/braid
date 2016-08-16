@@ -17,7 +17,7 @@
    (if (< (quest :progress) (quest :goal))
      [:div.actions
       [:a.skip {:on-click (fn [_]
-                            (dispatch! :skip-quest (quest :id)))} "Skip"]
+                            (dispatch! :quests/skip-quest (quest :id)))} "Skip"]
       [:a.show-me {:on-click (fn [_]
                                (dispatch! :quests/show-quest-instructions (quest :id)))}
        "Show Me"]]
@@ -36,7 +36,7 @@
          [quest-view quest])]]]))
 
 (defn quests-header-view []
-  (let [completed-quest-count (subscribe [:completed-quest-count])]
+  (let [completed-quest-count (subscribe [:quests/completed-quest-count])]
     (fn []
       [:div.quests-header
        [:div.bar
