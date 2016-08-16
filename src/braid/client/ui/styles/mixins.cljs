@@ -57,7 +57,8 @@
     :text-decoration "none"
     :color "#aaa"
     :padding [[(em 0.1) (em 0.25)]]
-    :white-space "nowrap"}
+    :white-space "nowrap"
+    :cursor "pointer"}
    [:&:hover
     {:color "#999"
      :border-color "#aaa"}]])
