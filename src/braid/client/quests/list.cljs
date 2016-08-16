@@ -8,8 +8,10 @@
     :description "Conversations are the heart of Braid. Type in the box in the bottom left corner and hit [Enter]."
     :icon \uf0e6
     :goal 3
-    :listener (fn [state [event args]]
-                (= event :quests/show-quest-instructions))}])
+    :listener (fn [state [event data]]
+                (and
+                  (= event :new-message)
+                  (= (data :thread-id) (:new-thread-id state))))}])
 
 (def disabled-quests
   [; conversations
