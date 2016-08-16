@@ -25,7 +25,8 @@
 (def Quest
   {:id QuestId
    :name s/Str
-   (s/optional-key :icon) s/Str ;TODO shouldn't be optional
+   :description s/Str
+   :icon s/Str
    :state (s/enum :inactive
                   :active
                   :complete

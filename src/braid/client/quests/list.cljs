@@ -5,6 +5,7 @@
 
    {:id :quest/conversation-new
     :name "Start a conversation"
+    :description "Conversations are the heart of Braid. Start one using the box in the bottom left corner."
     :icon \uf0e6
     :goal 3
     :listener (fn [state [event args]]
