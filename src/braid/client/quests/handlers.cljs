@@ -1,7 +1,16 @@
 (ns braid.client.quests.handlers
-  (:require [braid.client.state.handler.core :refer [handler]]))
+  (:require [braid.client.state.handler.core :refer [handler]]
+            [braid.client.quests.helpers :as helpers]))
 
 (defmethod handler :skip-quest [state [_ quest-id]]
-  (update-in state [:user :completed-quest-ids]
-             (fn [s]
-               (conj s quest-id))))
+  (-> state
+      (helpers/skip-quest quest-id)
+      (helpers/activate-next-quest)))
+
+(defmethod handler :quests/show-quest-instructions [state [_ quest-id]]
+  state)
+
+(defmethod handler :quests/get-next-quest [state [_ quest-id]]
+  (-> state
+      (helpers/complete-quest quest-id)
+      (helpers/activate-next-quest)))
