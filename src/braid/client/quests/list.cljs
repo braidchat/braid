@@ -8,7 +8,10 @@
     :icon \uf0e6
     :goal 3
     :listener (fn [state [event args]]
-                (= event :quests/show-quest-instructions))}
+                (= event :quests/show-quest-instructions))}])
+
+(def disabled-quests
+  [; conversations
 
    {:id :quest/conversation-tag
     :name "Tag a conversation"
