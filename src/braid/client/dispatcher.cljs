@@ -7,7 +7,7 @@
   ([event args]
    (println event)
    (store/transact! (-> @store/app-state
-                        (handler [event args])
-                        (quests-handler [event args]))))
+                        (quests-handler [event args])
+                        (handler [event args]))))
   ([event]
    (dispatch! event nil)))
