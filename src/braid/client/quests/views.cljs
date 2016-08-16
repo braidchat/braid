@@ -5,12 +5,14 @@
 
 (defn quest-view [quest]
   [:div.quest {:data-icon (quest :icon)}
-   [:div
-    [:h1 (quest :name) ]
-    [:p (or (quest :description) "A short description would be here. Lorem ispum dolor it amet.")]
-
-
-    [:p "(" (quest :progress) "/" (quest :goal) ")"]]
+   [:div.info
+    [:h1 (quest :name)]
+    [:div.progress
+     (for [i (range (quest :goal))]
+       [:div.icon {:class (if (< i (quest :progress))
+                            "complete"
+                            "incomplete")}])]
+    [:p (or (quest :description) "A short description would be here. Lorem ispum dolor it amet.")]]
 
    (if (< (quest :progress) (quest :goal))
      [:div.actions

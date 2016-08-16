@@ -49,13 +49,33 @@
          :margin [[0 vars/pad 0 (m// vars/pad 2)]]
          :align-self "center"}]
 
-       [:h1
-        {:font-size (em 1)
-         :margin 0}]
+       [:.info
+        {:margin-right (em 1)}
 
-       [:p
-        {:margin 0
-         :width (em 18)}]
+        [:h1
+         {:font-size (em 1.2)
+          :margin 0
+          :display "inline-block"}]
+
+        [:.progress
+         {:display "inline-block"
+          :float "right"}
+
+         [:.icon
+          {:display "inline-block"
+           :font-size (em 1.2)
+           :margin-right (em 0.5)
+           :vertical-align "bottom"}
+
+          [:&.incomplete::before
+           (mixins/fontawesome \uf10c)]
+
+          [:&.complete::before
+           (mixins/fontawesome \uf058)]]]
+
+        [:p
+         {:margin 0
+          :width (em 18)}]]
 
        [:.actions
         {:align-self "center"}
