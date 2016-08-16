@@ -27,13 +27,13 @@
                  [com.cognitect/transit-clj "0.8.288" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [ring-transit "0.1.6" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  ;client
-                 [org.clojure/clojurescript "1.9.93"]
+                 [org.clojure/clojurescript "1.9.92"]
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]
                  [cljs-ajax "0.5.8"]
                  [secretary "1.2.3"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
-                 [clj-fuzzy "0.3.1"]
+                 [clj-fuzzy "0.3.2"]
                  [reagent "0.6.0-rc"]
                  [cljsjs/husl "6.0.1-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
@@ -51,7 +51,7 @@
   :main braid.server.handler
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]]
-            [lein-figwheel "0.5.4-5"]]
+            [lein-figwheel "0.5.4-7"]]
 
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
@@ -108,7 +108,7 @@
                                                 com.amazonaws/aws-java-sdk
                                                 com.google.guava/guava
                                                 org.slf4j/slf4j-api]]
-                                  [figwheel-sidecar "0.5.4-5"
+                                  [figwheel-sidecar "0.5.4-7"
                                    :exclusions
                                    [org.clojure/google-closure-library-third-party
                                     com.google.javascript/closure-compiler]]]}
