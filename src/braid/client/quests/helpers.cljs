@@ -17,11 +17,12 @@
   (assoc-in state [:quests quest-id :state] :skipped))
 
 (defn activate-next-quest [state]
-  (let [quest-id-to-activate (->> state
-                                  :quests
-                                  vals
-                                  (filter (fn [quest]
-                                            (= (quest :state) :inactive)))
-                                  first
-                                  :id)]
-    (assoc-in state [:quests quest-id-to-activate :state] :active)))
+  (let [quest-to-activate (->> state
+                               :quests
+                               vals
+                               (filter (fn [quest]
+                                         (= (quest :state) :inactive)))
+                               first)]
+    (if quest-to-activate
+      (assoc-in state [:quests (quest-to-activate :id) :state] :active)
+      state)))
