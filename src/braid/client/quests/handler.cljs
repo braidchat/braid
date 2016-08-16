@@ -1,5 +1,4 @@
-(ns braid.client.state.handler.quests
-  (:require [braid.client.state.handler.core :refer [handler]]))
+(ns braid.client.quests.handler)
 
 (def quests
   [; conversations
@@ -219,8 +218,3 @@
                                                     (apply
                                                       (partial conj s)
                                                       new-completed-quest-ids)))))
-
-(defmethod handler :skip-quest [state [_ quest-id]]
-  (update-in state [:user :completed-quest-ids]
-             (fn [s]
-               (conj s quest-id))))

@@ -4,7 +4,7 @@
             [braid.client.helpers :refer [->color]]
             [braid.client.state :refer [subscribe]]
             [braid.client.ui.views.search-bar :refer [search-bar-view]]
-            [braid.client.ui.views.quests :refer [quests-header-view quests-menu-view]]))
+            [braid.client.quests.views :refer [quests-header-view quests-menu-view]]))
 
 (defn current-user-button-view []
   (let [user-id (subscribe [:user-id])

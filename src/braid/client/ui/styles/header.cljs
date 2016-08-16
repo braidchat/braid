@@ -2,109 +2,19 @@
   (:require [garden.units :refer [em px rem]]
             [garden.arithmetic :as m]
             [braid.client.ui.styles.vars :as vars]
-            [braid.client.ui.styles.mixins :as mixins]))
+            [braid.client.ui.styles.mixins :as mixins]
+
+            [braid.client.quests.styles :refer [quests-header]]))
 
 (def header-height vars/avatar-size)
 
-(defn mixins-context-menu []
-  [:&
-   {:background "white"
-    :border-radius vars/border-radius}
-   (mixins/box-shadow)
-
-   [:.content
-    {:overflow-x "scroll"
-     :height "100%"
-     :box-sizing "border-box"
-     :padding [[(m/* vars/pad 0.75)]]}]
-
-   ; little arrow above options box
-   [:&:before
-    (mixins/fontawesome \uf0d8)
-    {:position "absolute"
-     :top "-0.65em"
-     :right (m/* vars/pad 0.70)
-     :color "white"
-     :font-size "1.5em"}]])
-
-(defn mixins-button []
-  [:&
-   {:border-radius "0.25em"
-    :border "1px solid #ccc"
-    :text-decoration "none"
-    :color "#aaa"
-    :padding [[(em 0.1) (em 0.25)]]
-    :white-space "nowrap"}
-   [:&:hover
-    {:color "#999"
-     :border-color "#aaa"}]])
-
-(defn mixins-header-text []
+(defn header-text []
   {:text-transform "uppercase"
    :letter-spacing "0.1em"
    :font-weight "bold"
    :line-height header-height
    :-webkit-font-smoothing "antialiased"
    :padding [[0 (m/* vars/pad 0.75)]] })
-
-(def quest-icon-size (rem 2))
-
-(defn quests-header []
-  [:&
-   [:.quests-header
-    {:position "relative"}
-
-    [".bar:hover + .quests-menu"
-     ".quests-menu:hover"
-     {:display "inline-block"}]
-
-    [:.bar
-     (mixins-header-text)
-
-     [:&:before
-      (mixins/fontawesome \uf091)
-      {:margin-right (em 0.5)}]]
-
-    [:.quests-menu
-     (mixins-context-menu)
-     {:position "absolute"
-      :top header-height
-      :right 0
-      :z-index 150
-      :display "none"}
-
-     [:.content
-
-      [:.quest
-       {:margin-bottom (em 2)
-        :display "flex"
-        :justify-content "space-between"}
-
-       [:&:last-child
-        {:margin-bottom 0}]
-
-       [:&:before
-        {:content "attr(data-icon)"
-         :font-family "FontAwesome"
-         :display "block"
-         :font-size quest-icon-size
-         :color "#666"
-         :margin [[0 vars/pad 0 (m// vars/pad 2)]]
-         :align-self "center"}]
-
-       [:h1
-        {:font-size (em 1)
-         :margin 0}]
-
-       [:p
-        {:margin 0
-         :width (em 18)}]
-
-       [:.actions
-        {:align-self "center"}
-        [:a
-         (mixins-button)
-         {:margin-left (em 0.5)}]]]]]]])
 
 (defn group-header []
   [:.group-header
@@ -123,7 +33,7 @@
      :-webkit-font-smoothing "antialiased"}]
 
    [:.group-name
-    (mixins-header-text)
+    (header-text)
     {:min-width (em 5)}]
 
    [:a
@@ -208,7 +118,7 @@
       {:background "rgba(0,0,0,0.25)"}]
 
      [:.name
-      (mixins-header-text)
+      (header-text)
       {:color "white"
        :display "inline-block"
        :text-decoration "none"
@@ -232,7 +142,7 @@
       (mixins/fontawesome \uf078)]]]
 
    [:.options
-    (mixins-context-menu)
+    (mixins/context-menu)
     {:position "absolute"
      :top 0
      :right 0
@@ -299,5 +209,5 @@
      (group-header)
      [:.spacer
       {:flex-grow 2}]
-     (quests-header)
+     (quests-header header-text header-height)
      (user-header)]]])

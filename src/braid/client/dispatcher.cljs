@@ -1,7 +1,7 @@
 (ns braid.client.dispatcher
   (:require [braid.client.store :as store]
             [braid.client.state.handler.core :refer [handler]]
-            [braid.client.state.handler.quests :refer [quests-handler]]))
+            [braid.client.quests.handler :refer [quests-handler]]))
 
 (defn dispatch!
   ([event args]

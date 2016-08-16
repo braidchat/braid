@@ -1,5 +1,6 @@
 (ns braid.client.ui.styles.mixins
   (:require [garden.units :refer [px em]]
+            [garden.arithmetic :as m]
             [braid.client.ui.styles.vars :as vars]))
 
 (def flex
@@ -49,6 +50,18 @@
      :border-color "#666"
      :cursor "pointer"}]])
 
+(defn outline-button []
+  [:&
+   {:border-radius "0.25em"
+    :border "1px solid #ccc"
+    :text-decoration "none"
+    :color "#aaa"
+    :padding [[(em 0.1) (em 0.25)]]
+    :white-space "nowrap"}
+   [:&:hover
+    {:color "#999"
+     :border-color "#aaa"}]])
+
 (defn fontawesome [unicode]
   {:font-family "fontawesome"
    :content (str "\"" unicode "\"")})
@@ -59,3 +72,25 @@
 
 (defn box-shadow []
   {:box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]})
+
+(defn context-menu []
+  [:&
+   {:background "white"
+    :border-radius vars/border-radius}
+   (box-shadow)
+
+   [:.content
+    {:overflow-x "scroll"
+     :height "100%"
+     :box-sizing "border-box"
+     :padding [[(m/* vars/pad 0.75)]]}]
+
+   ; triangle
+   [:&:before
+    (fontawesome \uf0d8)
+    {:position "absolute"
+     :top "-0.65em"
+     :right (m/* vars/pad 0.70)
+     :color "white"
+     :font-size "1.5em"}]])
+

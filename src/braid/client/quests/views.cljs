@@ -1,6 +1,6 @@
-(ns braid.client.ui.views.quests
+(ns braid.client.quests.views
   (:require [braid.client.state :refer [subscribe]]
-            [braid.client.state.handler.quests :refer [quests]]
+            [braid.client.quests.handler :refer [quests]]
             [braid.client.dispatcher :refer [dispatch!]]))
 
 (defn quest-view [quest]
