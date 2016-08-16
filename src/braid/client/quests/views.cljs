@@ -28,12 +28,13 @@
 
 (defn quests-menu-view []
   (let [active-quests (subscribe [:quests/active-quests])]
-    [:div.quests-menu
-     [:div.content
-      [:div.quests
-       (for [quest @active-quests]
-         ^{:key (quest :id)}
-         [quest-view quest])]]]))
+    (fn []
+      [:div.quests-menu
+       [:div.content
+        [:div.quests
+         (for [quest @active-quests]
+           ^{:key (quest :id)}
+           [quest-view quest])]]])))
 
 (defn quests-header-view []
   (let [completed-quest-count (subscribe [:quests/completed-quest-count])]
