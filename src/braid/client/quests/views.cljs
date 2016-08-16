@@ -23,6 +23,7 @@
    [:div.content
     [:div.quests
      (for [quest (take 3 quests)]
+       ^{:key (quest :id)}
        [quest-view quest])]]])
 
 (defn quests-header-view []
