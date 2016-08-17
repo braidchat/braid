@@ -1,7 +1,17 @@
 (ns braid.client.quests.list)
 
 (def quests
-  [; conversations
+  [
+   ; quests
+   {:id :quest/quest-complete
+    :name "Learn about quests"
+    :description "These quests will teach you about the various features throughout Braid. This one is complete, so click 'Get New Quest'."
+    :icon \uf091
+    :goal 1
+    :listener (fn [state [event data]]
+                true)}
+
+   ; conversations
 
    {:id :quest/conversation-new
     :name "Start a conversation"
