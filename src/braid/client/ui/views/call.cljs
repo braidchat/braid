@@ -11,7 +11,7 @@
   (let [correct-nickname (subscribe [:correct-nickname call])]
     (fn [call]
       [:div
-        [:a.button {:on-click (fn [_] (dispatch! :archive-call call))} "X"]
+        [:a.button {:on-click (fn [_] (dispatch! :set-requester-call-status [call :archived]))} "X"]
         [:p (str "Call with " @correct-nickname " ended")]])))
 
 (defn dropped-call-view
@@ -19,7 +19,7 @@
   (let [correct-nickname (subscribe [:correct-nickname call])]
     (fn [call]
       [:div
-        [:a.button {:on-click (fn [_] (dispatch! :archive-call call))} "X"]
+        [:a.button {:on-click (fn [_] (dispatch! :set-requester-call-status [call :archived]))} "X"]
         [:p (str "Call with " @correct-nickname " dropped")]])))
 
 (defn declined-call-view
@@ -29,7 +29,7 @@
         callee-nickname (subscribe [:nickname (call :callee-id)])]
     (fn [call]
       [:div
-        [:a.button {:on-click (fn [_] (dispatch! :archive-call call))} "X"]
+        [:a.button {:on-click (fn [_] (dispatch! :set-requester-call-status [call :archived]))} "X"]
         (if @user-is-caller?
           [:p (str @callee-nickname " declined your call")]
           [:p (str "Call with " @caller-nickname "declined")])])))
@@ -47,10 +47,11 @@
        [:a.button "A"]
        [:a.button "M"]
        [:a.button "V"]
-       [:video {:class (if (= (call :type) :video) "video" "audio")}]
+       [:video {:id "video"
+                :class (if (= (call :type) :video) "video" "audio")}]
        [:a.button {:on-click
                     (fn [_]
-                      (dispatch! :end-call call))} "End"]])))
+                      (dispatch! :set-requester-call-status [call :ended]))} "End"]])))
 
 (defn incoming-call-view
   [call]
@@ -63,15 +64,15 @@
            [:p (str "Calling " @callee-nickname "...")]
            [:a.button {:on-click
                         (fn [_]
-                          (dispatch! :drop-call call))} "Drop"]]
+                          (dispatch! :set-requester-call-status [call :dropped]))} "Drop"]]
         [:div
            [:p (str "Call from " @caller-nickname)]
            [:a.button {:on-click
                         (fn [_]
-                          (dispatch! :accept-call call))} "Accept"]
+                          (dispatch! :set-requester-call-status [call :accepted]))} "Accept"]
            [:a.button {:on-click
                         (fn [_]
-                          (dispatch! :decline-call call))} "Decline"]]))))
+                          (dispatch! :set-requester-call-status [call :declined]))} "Decline"]]))))
 
 (defn during-call-view
   [call]
@@ -110,13 +111,13 @@
            [:a.button {:on-click
                         (fn [_]
                           (dispatch! :start-new-call {:type :audio
-                                                  :caller-id @caller-id
-                                                  :callee-id callee-id}))} "Audio"]
+                                                      :caller-id @caller-id
+                                                      :callee-id callee-id}))} "Audio"]
            [:a.button {:on-click
                         (fn [_]
                           (dispatch! :start-new-call {:type :video
-                                                  :caller-id @caller-id
-                                                  :callee-id callee-id}))} "Video"]])})))
+                                                      :caller-id @caller-id
+                                                      :callee-id callee-id}))} "Video"]])})))
 
 (defn call-view []
   (let [callee-id (subscribe [:page-id])

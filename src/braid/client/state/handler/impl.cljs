@@ -545,36 +545,14 @@
         (dispatch! :add-new-call call))))
   state)
 
-;TODO: RENAME
 (defmethod handler :add-new-call [state [_ call]]
   (helpers/add-call state call))
 
-;TODO: CONDENSE TO ONE METHOD
-(defmethod handler :accept-call [state [_ call]]
-  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :accepted}])
-  (helpers/set-call-status state (call :id) :accepted)
+(defmethod handler :set-requester-call-status [state [_ [call status]]]
+  (sync/chsk-send! [:braid.server/change-call-status {:call (dissoc call :local-connection) :status status}])
+;;   (when (= status :accepted)
+;;     (rtc/open-local-stream (call :type)))
+  (helpers/set-call-status state (call :id) status))
 
-  #_(rtc/open-local-stream (call :type)))
-
-(defmethod handler :decline-call [state [_ call]]
-  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :declined}])
-  (helpers/set-call-status state (call :id) :declined))
-
-(defmethod handler :end-call [state [_ call]]
-  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :ended}])
-  (helpers/set-call-status state (call :id) :ended))
-
-(defmethod handler :drop-call [state [_ call]]
-  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :dropped}])
-  (helpers/set-call-status state (call :id) :dropped))
-
-(defmethod handler :archive-call [state [_ call]]
-  (sync/chsk-send! [:braid.server/change-call-status {:call call :status :archived}])
-  (helpers/set-call-status state (call :id) :archived))
-
-(defmethod handler :set-requester-call-status [state [_ [call-id status]]]
-  (sync/chsk-send! [:braid.server/change-call-status {:call call-id :status status}])
-  (helpers/set-call-status state call-id status))
-
-(defmethod handler :set-receiver-call-status [state [_ [call-id status]]]
-  (helpers/set-call-status state call-id status))
+(defmethod handler :set-receiver-call-status [state [_ [call status]]]
+  (helpers/set-call-status state (call :id) status))
