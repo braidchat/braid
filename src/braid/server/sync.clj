@@ -532,7 +532,7 @@
 
 (defmethod event-msg-handler :braid.server/get-ice-servers
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (?reply-fn (rtc/request-ice-servers)))
+  (?reply-fn (rtc/get-ice-servers)))
 
 (defmethod event-msg-handler :braid.server/send-rtc-protocol-signal
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -545,8 +545,8 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (let [call ?data
         source-id (get-in ring-req [:session :user-id])]
-    (when (not= source-id (call :callee-id))
-      (chsk-send! (call :callee-id) [:braid.client/receive-call call]))))
+    (when (= source-id (call :caller-id))
+      (chsk-send! (call :callee-id) [:braid.client/receive-new-call call]))))
 
 (defmethod event-msg-handler :braid.server/change-call-status
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
