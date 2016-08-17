@@ -60,30 +60,24 @@
 ; RTC Handlers
 
 (defn handle-ice-candidate [evt]
-  (let [candidate (.-candidate evt)]
-    (when candidate
-      (sync/chsk-send! [:braid.server/send-rtc-protocol-signal {:candidate (.-candidate candidate)
-                                                                :sdpMid (.-sdpMid candidate)
-                                                                :sdpMLineIndex (.-sdpMLineIndex candidate)}]))))
+  (let [candidate (aget evt "candidate")]
+    (sync/chsk-send!
+      [:braid.server/send-rtc-protocol-signal
+        {:candidate (aget candidate "candidate")
+         :sdpMid (aget candidate "sdpMid")
+         :sdpMLineIndex (aget candidate "sdpMLineIndex")}])))
 
 (defn handle-stream [evt]
-  (let [stream (.-stream evt)
-        stream-url (.. js/window -URL (createObjectURL stream))
+  (let [stream (aget evt "stream")
+        stream-url (aset js/window "URL" (.createObjectURL stream))
         video-player (. js/document (getElementById "vid"))]
-    (set! (.-src video-player) stream-url)
-    (set! (.-onloadedmetadata video-player) (fn [_] (.play video-player)))))
+    (aset video-player "src" stream-url)
+    (aset video-player "onloadedmetadata" (fn [_] (.play video-player)))))
 
 ; Connection
 
-(defn create-connection [servers]
-  (let [connection (js/webkitRTCPeerConnection. (clj->js {:iceServers servers}))]
-    connection))
-
 (defn create-local-connection [servers]
-  (reset! local-peer-connnection (create-connection servers))
-  (set! (.-onicecandidate @local-peer-connnection) handle-ice-candidate)
-  (set! (.-onaddstream @local-peer-connnection) handle-stream))
-
-(defn initialize-rtc-environment [servers]
-  (when servers
-    (create-local-connection servers)))
+  (let [connection (js/webkitRTCPeerConnection. (clj->js {:iceServers servers}))]
+    (aset connection "onicecandidate" handle-ice-candidate)
+    (aset connection "onaddstream" handle-stream)
+    connection))
