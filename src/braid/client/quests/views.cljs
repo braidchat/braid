@@ -25,7 +25,7 @@
      [:div.actions
       [:a.next {:on-click (fn [_]
                             (dispatch! :quests/get-next-quest (quest :id)))}
-       "Get Next Quest"]])])
+       "Get New Quest"]])])
 
 (defn quests-menu-view []
   (let [active-quests (subscribe [:quests/active-quests])]
