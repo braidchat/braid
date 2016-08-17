@@ -12,6 +12,7 @@
        [:div.icon {:class (if (< i (quest :progress))
                             "complete"
                             "incomplete")}])]
+
     [:p (or (quest :description) "A short description would be here. Lorem ispum dolor it amet.")]]
 
    (if (< (quest :progress) (quest :goal))
