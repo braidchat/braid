@@ -5,41 +5,59 @@
 
    {:id :quest/conversation-new
     :name "Start a conversation"
-    :description "Conversations are the heart of Braid. Type in the box in the bottom left corner and hit [Enter]."
+    :description "To start a new conversation, click on the left-most conversation, type your message, and hit [Enter]."
     :icon \uf0e6
     :goal 3
     :listener (fn [state [event data]]
                 (and
                   (= event :new-message)
-                  (= (data :thread-id) (:new-thread-id state))))}])
+                  (= (data :thread-id) (:new-thread-id state))))}
+
+   {:id :quest/conversation-reply
+    :name "Reply to a conversation"
+    :description "To add another message to a conversation, type in the text-area at the bottom of the conversation and hit [Enter]."
+    :icon \uf112
+    :goal 3
+    :listener (fn [state [event data]]
+                (and
+                  (= event :new-message)
+                  (not= (data :thread-id) (:new-thread-id state))))}
+
+   {:id :quest/conversation-close
+    :name "Close a conversation"
+    :description "Close a conversation by clicking the X in its top-right corner. A conversation will show up again when someone replies to it, so feel free to close them frequently."
+    :icon \uf00d
+    :goal 3
+    :listener (fn [state [event data]]
+                (and
+                  (= event :hide-thread)
+                  (not (data :local-only?))))}])
 
 (def disabled-quests
-  [; conversations
+  [
+   ; visit
+
+   {:id :quest/visit
+    :name "Log in on 5 different days"
+    :description "asdf"
+    :icon \uf02c
+    :goal 5
+    :listener (fn [state [event args]]
+                false)}
+
+   ; conversations
 
    {:id :quest/conversation-tag
     :name "Tag a conversation"
+    :description "asdf"
     :icon \uf02c
     :goal 3
     :listener (fn [state [event args]]
                 false)}
 
-   {:id :quest/conversation-reply
-    :name "Reply to a conversation"
-    :icon \uf112
-    :goal 3
-    :listener (fn [state [event args]]
-                (= event :new-message))}
-
    {:id :quest/conversation-private
     :name "Start a private conversation"
     :icon \uf21b
-    :goal 3
-    :listener (fn [state [event args]]
-                false)}
-
-   {:id :quest/conversation-mute
-    :name "Close a conversation"
-    :icon \uf00d
     :goal 3
     :listener (fn [state [event args]]
                 false)}
