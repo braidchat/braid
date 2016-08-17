@@ -6,7 +6,7 @@
 
 (def pad (rem 1))
 
-(def card-width (rem 17))
+(def card-width (rem 18))
 
 (def top-bar-height (rem 2))
 
