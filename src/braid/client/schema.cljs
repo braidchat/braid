@@ -40,7 +40,8 @@
    :type (data :type)
    :caller-id (data :caller-id)
    :callee-id (data :callee-id)
-   :status :incoming})
+   :status :incoming
+   :local-connection (data :local-connection)})
 
 (defn make-bot [data]
   (merge {:id (uuid/make-random-squuid)}

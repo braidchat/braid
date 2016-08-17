@@ -117,7 +117,8 @@
    :type (s/enum :audio :video)
    :caller-id s/Uuid
    :callee-id s/Uuid
-   :status s/Keyword})
+   :status s/Keyword
+   :local-connection #?(:cljs js/webkitRTCPeerConnection :clj nil)})
 
 (def Upload
   {:id s/Uuid
