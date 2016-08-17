@@ -51,10 +51,7 @@
                              "#" (or (store/name->open-tag-id tag-name)
                                       tag-name))))))
 
-(defn- get-ice-servers []
-  (sync/chsk-send! [:braid.server/get-ice-servers] 500
-    (fn [servers]
-      (rtc/initialize-rtc-environment servers))))
+
 
 (defmethod handler :clear-session [state _]
   (helpers/clear-session state))
@@ -524,15 +521,35 @@
 (defmethod handler :add-group-bot [state [_ [group-id bot]]]
   (helpers/add-group-bot state group-id bot))
 
-(defmethod handler :start-new-call [state [_ data]]
-  (let [call (schema/make-call data)]
-    (sync/chsk-send! [:braid.server/make-call call])
-    (get-ice-servers)
-    (helpers/add-call state call)))
+(defn- get-ice-servers [cb]
+  (sync/chsk-send! [:braid.server/get-ice-servers] 2500
+    (fn [servers]
+      (if (= servers :chsk/timeout)
+        (println "TIMEOUT") ; TODO TRY AGAIN
+        (cb servers)))))
 
+(defmethod handler :start-new-call [state [_ data]]
+  (get-ice-servers
+    (fn [servers]
+      (let [call (-> data
+                     (assoc :local-connection (rtc/create-local-connection servers))
+                     (schema/make-call))]
+        (sync/chsk-send! [:braid.server/make-call (dissoc call :local-connection)])
+        (dispatch! :add-new-call call))))
+  state)
+
+(defmethod handler :receive-new-call [state [_ call]]
+  (get-ice-servers
+    (fn [servers]
+      (let [call (assoc call :local-connection (rtc/create-local-connection servers))]
+        (dispatch! :add-new-call call))))
+  state)
+
+;TODO: RENAME
 (defmethod handler :add-new-call [state [_ call]]
   (helpers/add-call state call))
 
+;TODO: CONDENSE TO ONE METHOD
 (defmethod handler :accept-call [state [_ call]]
   (sync/chsk-send! [:braid.server/change-call-status {:call call :status :accepted}])
   (helpers/set-call-status state (call :id) :accepted)

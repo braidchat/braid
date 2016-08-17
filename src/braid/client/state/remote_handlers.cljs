@@ -117,9 +117,9 @@
   [[_ thread]]
   (dispatch! :add-open-thread thread))
 
-(defmethod sync/event-handler :braid.client/receive-call
+(defmethod sync/event-handler :braid.client/receive-new-call
   [[_ call]]
-  (dispatch! :add-new-call call))
+  (dispatch! :receive-new-call call))
 
 (defmethod sync/event-handler :braid.client/receive-new-call-status
   [[_ [call status]]]
