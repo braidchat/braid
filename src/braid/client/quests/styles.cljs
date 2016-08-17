@@ -1,6 +1,7 @@
 (ns braid.client.quests.styles
   (:require [garden.units :refer [em px rem]]
             [garden.arithmetic :as m]
+            [garden.stylesheet :refer [at-keyframes]]
             [braid.client.ui.styles.vars :as vars]
             [braid.client.ui.styles.mixins :as mixins]))
 
@@ -12,22 +13,26 @@
    [:.quests-header
     {:position "relative"}
 
-    [".bar:hover + .quests-menu"
+    [".quests-icon:hover + .quests-menu"
      ".quests-menu:hover"
      {:display "inline-block"}]
 
-    [:.bar
+    [:.quests-icon
      (header-text)
+     {:padding 0}
 
      [:&:before
-      (mixins/fontawesome \uf091)
-      {:margin-right (em 0.5)}]]
+      (mixins/fontawesome \uf091)]
+
+     ; make it easier to hover over the menu
+     [:&:hover
+      {:padding-left (em 5)}]]
 
     [:.quests-menu
      (mixins/context-menu)
      {:position "absolute"
       :top header-height
-      :right 0
+      :right (rem -0.5)
       :z-index 150
       :display "none"}
 

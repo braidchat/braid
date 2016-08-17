@@ -1,7 +1,7 @@
 (ns braid.client.quests.views
   (:require [braid.client.state :refer [subscribe]]
-            [braid.client.quests.list :refer [quests]]
-            [braid.client.dispatcher :refer [dispatch!]]))
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.helpers :refer [->color]]))
 
 (defn quest-view [quest]
   [:div.quest {:data-icon (quest :icon)}
@@ -43,7 +43,9 @@
             [:p "You've completed all the quests we have so far. Stay tuned for more."]])]])))
 
 (defn quests-header-view []
-  [:div.quests-header
-   [:div.bar "Quests"]
-   [quests-menu-view]])
+  (let [user-id (subscribe [:user-id])]
+    (fn []
+      [:div.quests-header
+       [:div.quests-icon {:style {:color (->color @user-id)}}]
+       [quests-menu-view]])))
 
