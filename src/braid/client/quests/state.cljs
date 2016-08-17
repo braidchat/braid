@@ -27,6 +27,7 @@
    :name s/Str
    :description s/Str
    :icon s/Str
+   :video s/Str
    :state (s/enum :inactive
                   :active
                   :complete

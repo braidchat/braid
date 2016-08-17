@@ -57,52 +57,72 @@
       [:.quests
 
        [:.quest
-        {:margin-bottom (em 2)
-         :display "flex"
-         :justify-content "space-between"}
+        {:margin-bottom (em 2)}
 
         [:&:last-child
          {:margin-bottom 0}]
 
-        [:&:before
-         {:content "attr(data-icon)"
-          :font-family "FontAwesome"
-          :display "block"
-          :font-size quest-icon-size
-          :color "#666"
-          :margin [[0 vars/pad 0 (m// vars/pad 2)]]
-          :align-self "center"}]
+        [:.main
+         {:display "flex"
+          :justify-content "space-between"}
 
-        [:.info
-         {:margin-right (em 1)}
+         [:&:before
+          {:content "attr(data-icon)"
+           :font-family "FontAwesome"
+           :display "block"
+           :font-size quest-icon-size
+           :color "#666"
+           :margin [[0 vars/pad 0 (m// vars/pad 2)]]
+           :align-self "center"}]
 
-         [:h1
-          {:font-size (em 1.2)
-           :margin 0
-           :display "inline-block"}]
+         [:.info
+          {:margin-right (em 1)}
 
-         [:.progress
-          {:display "inline-block"
-           :float "right"}
+          [:h1
+           {:font-size (em 1.2)
+            :margin 0
+            :display "inline-block"}]
 
-          [:.icon
+          [:.progress
            {:display "inline-block"
-            :font-size (em 1.2)
-            :margin-right (em 0.5)
-            :vertical-align "bottom"}
+            :float "right"}
 
-           [:&.incomplete::before
-            (mixins/fontawesome \uf10c)]
+           [:.icon
+            {:display "inline-block"
+             :font-size (em 1.2)
+             :margin-right (em 0.5)
+             :vertical-align "bottom"}
 
-           [:&.complete::before
-            (mixins/fontawesome \uf058)]]]
+            [:&.incomplete::before
+             (mixins/fontawesome \uf10c)]
 
-         [:p
-          {:margin 0
-           :width (em 20)}]]
+            [:&.complete::before
+             (mixins/fontawesome \uf058)]]]
 
-        [:.actions
-         {:align-self "center"}
-         [:a
-          (mixins/outline-button)
-          {:margin-left (em 0.5)}]]]]]]]])
+          [:p
+           {:margin 0
+            :width (em 20)}]]
+
+         [:.actions
+          {:align-self "center"
+           :white-space "nowrap"}
+          [:a
+           (mixins/outline-button)
+           {:margin-left (em 0.5)}
+
+           [:&.video
+            {:width (em 5.5)}]
+
+           [:&.video::after
+            {:margin [[0 (em 0.25)]]}]
+
+           [:&.video.show::after
+            (mixins/fontawesome \uf144)]
+
+           [:&.video.hide::after
+            (mixins/fontawesome \uf28d)]]]]
+
+        ["> .video"
+         {:margin [[(em 1) (em -1) 0]]}
+         [:img
+          {:width "100%"}]]]]]]]])

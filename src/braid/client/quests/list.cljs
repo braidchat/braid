@@ -7,6 +7,7 @@
     :name "Learn about quests"
     :description "These quests will teach you about the various features throughout Braid. This one is complete, so click 'Get New Quest'."
     :icon \uf091
+    :video ""
     :goal 1
     :listener (fn [state [event data]]
                 true)}
@@ -17,6 +18,7 @@
     :name "Start a conversation"
     :description "To start a new conversation, click on the left-most conversation, type your message, and hit [Enter]."
     :icon \uf0e6
+    :video "/images/quests/conversation-new.gif"
     :goal 3
     :listener (fn [state [event data]]
                 (and
@@ -27,6 +29,7 @@
     :name "Reply to a conversation"
     :description "To add another message to a conversation, type in the text-area at the bottom of the conversation and hit [Enter]."
     :icon \uf112
+    :video "/images/quests/conversation-new.gif"
     :goal 3
     :listener (fn [state [event data]]
                 (and
@@ -37,6 +40,7 @@
     :name "Close a conversation"
     :description "Close a conversation by clicking the X in its top-right corner. A conversation will show up again when someone replies to it, so feel free to close them frequently."
     :icon \uf00d
+    :video "/images/quests/conversation-new.gif"
     :goal 3
     :listener (fn [state [event data]]
                 (and

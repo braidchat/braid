@@ -52,13 +52,15 @@
 
 (defn outline-button []
   [:&
-   {:border-radius "0.25em"
+   {:display "inline-block"
+    :border-radius "0.25em"
     :border "1px solid #ccc"
     :text-decoration "none"
     :color "#aaa"
     :padding [[(em 0.1) (em 0.25)]]
     :white-space "nowrap"
-    :cursor "pointer"}
+    :cursor "pointer"
+    :text-align "center"}
    [:&:hover
     {:color "#999"
      :border-color "#aaa"}]])

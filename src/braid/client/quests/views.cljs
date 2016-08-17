@@ -1,31 +1,42 @@
 (ns braid.client.quests.views
-  (:require [braid.client.state :refer [subscribe]]
+  (:require [reagent.core :as r]
+            [braid.client.state :refer [subscribe]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :refer [->color]]))
 
 (defn quest-view [quest]
-  [:div.quest {:data-icon (quest :icon)}
-   [:div.info
-    [:h1 (quest :name)]
-    [:div.progress
-     (for [i (range (quest :goal))]
-       [:div.icon {:class (if (< i (quest :progress))
-                            "complete"
-                            "incomplete")}])]
+  (let [show-video? (r/atom false)]
+    (fn []
+      [:div.quest
+       [:div.main {:data-icon (quest :icon)}
+        [:div.info
+         [:h1 (quest :name)]
+         [:div.progress
+          (for [i (range (quest :goal))]
+            [:div.icon {:class (if (< i (quest :progress))
+                                 "complete"
+                                 "incomplete")}])]
 
-    [:p (or (quest :description) "A short description would be here. Lorem ispum dolor it amet.")]]
+         [:p (or (quest :description) "A short description would be here. Lorem ispum dolor it amet.")]]
 
-   (if (< (quest :progress) (quest :goal))
-     [:div.actions
-      [:a.skip {:on-click (fn [_]
-                            (dispatch! :quests/skip-quest (quest :id)))} "Skip"]
-      [:a.show-me {:on-click (fn [_]
-                               (dispatch! :quests/show-quest-instructions (quest :id)))}
-       "Show Me"]]
-     [:div.actions
-      [:a.next {:on-click (fn [_]
-                            (dispatch! :quests/get-next-quest (quest :id)))}
-       "Get New Quest"]])])
+        (if (< (quest :progress) (quest :goal))
+          [:div.actions
+           [:a.skip {:on-click (fn [_]
+                                 (dispatch! :quests/skip-quest (quest :id)))} "Skip"]
+           (if @show-video?
+             [:a.video.hide {:on-click (fn [_]
+                                      (reset! show-video? false))}
+              "Hide Vid"]
+             [:a.video.show {:on-click (fn [_]
+                                      (reset! show-video? true))}
+              "Show Me"])]
+          [:div.actions
+           [:a.next {:on-click (fn [_]
+                                 (dispatch! :quests/get-next-quest (quest :id)))}
+            "Get New Quest"]])]
+       (when @show-video?
+         [:div.video
+          [:img {:src (quest :video)}]])])))
 
 (defn quests-menu-view []
   (let [active-quests (subscribe [:quests/active-quests])]
