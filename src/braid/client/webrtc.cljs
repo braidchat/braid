@@ -47,14 +47,11 @@
 
 (defn handle-protocol-signal [signal]
   (if (signal :sdp)
-    (let [remote-description (js/RTCSessionDescription. (clj->js {:sdp (signal :sdp)
-                                                                  :type (signal :type)}))]
+    (let [remote-description (js/RTCSessionDescription. (clj->js signal))]
       (.setRemoteDescription @local-peer-connnection remote-description)
       (when (= "offer" (signal :type))
         (create-answer local-peer-connnection)))
-    (let [remote-candidate (js/RTCIceCandidate. (clj->js {:candidate (signal :candidate)
-                                                          :sdpMid (signal :sdpMid)
-                                                          :sdpMLineIndex (signal :sdpMLineIndex)}))]
+    (let [remote-candidate (js/RTCIceCandidate. (clj->js signal))]
       (.addIceCandidate @local-peer-connnection remote-candidate))))
 
 ; RTC Handlers
@@ -70,7 +67,7 @@
 (defn handle-stream [evt]
   (let [stream (aget evt "stream")
         stream-url (aset js/window "URL" (.createObjectURL stream))
-        video-player (. js/document (getElementById "vid"))]
+        video-player (. js/document (getElementById "video"))] ;TODO: avoid document selectors
     (aset video-player "src" stream-url)
     (aset video-player "onloadedmetadata" (fn [_] (.play video-player)))))
 
