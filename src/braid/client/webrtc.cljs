@@ -81,3 +81,10 @@
     (aset connection "onicecandidate" handle-ice-candidate)
     (aset connection "onaddstream" handle-stream)
     connection))
+
+(defn get-ice-servers [handler]
+  (sync/chsk-send! [:braid.server/get-ice-servers] 2500
+    (fn [servers]
+      (if (= servers :chsk/timeout)
+        (println "TIMEOUT") ; TODO TRY AGAIN
+        (handler servers)))))

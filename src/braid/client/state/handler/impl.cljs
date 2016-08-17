@@ -521,25 +521,18 @@
 (defmethod handler :add-group-bot [state [_ [group-id bot]]]
   (helpers/add-group-bot state group-id bot))
 
-(defn- get-ice-servers [cb]
-  (sync/chsk-send! [:braid.server/get-ice-servers] 2500
-    (fn [servers]
-      (if (= servers :chsk/timeout)
-        (println "TIMEOUT") ; TODO TRY AGAIN
-        (cb servers)))))
-
 (defmethod handler :start-new-call [state [_ data]]
-  (get-ice-servers
+  (rtc/get-ice-servers
     (fn [servers]
       (let [call (-> data
                      (assoc :local-connection (rtc/create-local-connection servers))
                      (schema/make-call))]
-        (sync/chsk-send! [:braid.server/make-call (dissoc call :local-connection)])
+        (sync/chsk-send! [:braid.server/make-new-call (dissoc call :local-connection)])
         (dispatch! :add-new-call call))))
   state)
 
 (defmethod handler :receive-new-call [state [_ call]]
-  (get-ice-servers
+  (rtc/get-ice-servers
     (fn [servers]
       (let [call (assoc call :local-connection (rtc/create-local-connection servers))]
         (dispatch! :add-new-call call))))
