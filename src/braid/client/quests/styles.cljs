@@ -4,10 +4,11 @@
             [braid.client.ui.styles.vars :as vars]
             [braid.client.ui.styles.mixins :as mixins]))
 
-(def quest-icon-size (rem 2))
+(def quest-icon-size (rem 2.5))
 
 (defn quests-header [header-text header-height]
   [:&
+
    [:.quests-header
     {:position "relative"}
 
@@ -93,7 +94,7 @@
 
          [:p
           {:margin 0
-           :width (em 18)}]]
+           :width (em 20)}]]
 
         [:.actions
          {:align-self "center"}
