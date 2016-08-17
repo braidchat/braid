@@ -29,7 +29,7 @@
     :name "Reply to a conversation"
     :description "To add another message to a conversation, type in the text-area at the bottom of the conversation and hit [Enter]."
     :icon \uf112
-    :video "/images/quests/conversation-new.gif"
+    :video "/images/quests/conversation-reply.gif"
     :goal 3
     :listener (fn [state [event data]]
                 (and
@@ -40,7 +40,7 @@
     :name "Close a conversation"
     :description "Close a conversation by clicking the X in its top-right corner. A conversation will show up again when someone replies to it, so feel free to close them frequently."
     :icon \uf00d
-    :video "/images/quests/conversation-new.gif"
+    :video "/images/quests/conversation-close.gif"
     :goal 3
     :listener (fn [state [event data]]
                 (and
