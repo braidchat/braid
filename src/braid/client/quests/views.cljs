@@ -6,7 +6,7 @@
 
 (defn quest-view [quest]
   (let [show-video? (r/atom false)]
-    (fn []
+    (fn [quest]
       [:div.quest
        [:div.main {:data-icon (quest :icon)}
         [:div.info
