@@ -43,12 +43,7 @@
             [:p "You've completed all the quests we have so far. Stay tuned for more."]])]])))
 
 (defn quests-header-view []
-  (let [completed-quest-count (subscribe [:quests/completed-quest-count])]
-    (fn []
-      [:div.quests-header
-       [:div.bar
-        @completed-quest-count
-        " "
-        "Quests"]
-       [quests-menu-view]])))
+  [:div.quests-header
+   [:div.bar "Quests"]
+   [quests-menu-view]])
 
