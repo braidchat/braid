@@ -541,12 +541,10 @@
     (doseq [user-id (:any @connected-uids) :when (not= signal-id user-id)]
       (chsk-send! user-id [:rtc/receive-protocol-signal signal-data]))))
 
-(defmethod event-msg-handler :braid.server/make-call
+(defmethod event-msg-handler :braid.server/make-new-call
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (let [call ?data
-        source-id (get-in ring-req [:session :user-id])]
-    (when (= source-id (call :caller-id))
-      (chsk-send! (call :callee-id) [:braid.client/receive-new-call call]))))
+  (when (= (get-in ring-req [:session :user-id]) (?data :caller-id))
+    (chsk-send! (?data :callee-id) [:braid.client/receive-new-call ?data])))
 
 (defmethod event-msg-handler :braid.server/change-call-status
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -555,8 +553,8 @@
         status (?data :status)
         source-id (get-in ring-req [:session :user-id])]
     (if (= source-id (call :caller-id))
-      (chsk-send! (call :callee-id) [:braid.client/receive-new-call-status [call-id status]])
-      (chsk-send! (call :caller-id) [:braid.client/receive-new-call-status [call-id status]]))))
+      (chsk-send! (call :callee-id) [:braid.client/receive-new-call-status [call status]])
+      (chsk-send! (call :caller-id) [:braid.client/receive-new-call-status [call status]]))))
 
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]
