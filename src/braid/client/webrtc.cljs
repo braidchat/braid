@@ -1,5 +1,6 @@
 (ns braid.client.webrtc
-  (:require [braid.client.sync :as sync]))
+  (:require [braid.client.sync :as sync]
+            [braid.client.dispatcher :refer [dispatch!]]))
 
 (defonce svga-dimensions
   (clj->js {:mandatory
@@ -7,54 +8,51 @@
              :maxHeight 180}}))
 
 (def local-peer-connnection (atom nil))
+(def remote-peer-connection (atom nil))
 
-; Offers and Answers
+; Offer/Answer
+
+;TODO: handle somewhere else - can't get connection
 
 (defn signal-sdp-description [description]
   (.setLocalDescription @local-peer-connnection description)
-  (sync/chsk-send! [:braid.server/send-rtc-protocol-signal {:sdp (.-sdp description)
-                                                            :type (.-type description)}]))
+  (sync/chsk-send!
+    [:braid.server/send-rtc-protocol-signal
+      {:sdp (aget description "sdp")
+       :type (aget description "type")}]))
 
 (defn create-answer [connection]
-  (.createAnswer
-    @connection
-    signal-sdp-description
+  (.createAnswer connection signal-sdp-description
     (fn [error]
-      (println "Error creating offer description:" (.-message error)))))
+      (println "Error creating offer description: " (aget error "message")))))
 
 (defn create-offer [connection]
-  (.createOffer
-    @connection
-    signal-sdp-description
+  (.createOffer connection signal-sdp-description
     (fn [error]
-      (println "Error creating offer description:" (.-message error)))))
+      (println "Error creating offer description: " (aget error "message")))))
+
+(defn handle-protocol-signal [signal]
+  (if (signal :candidate)
+    (.addIceCandidate @local-peer-connnection (js/RTCIceCandidate. (clj->js signal)))
+    (do
+      (.setRemoteDescription @local-peer-connnection (js/RTCSessionDescription. (clj->js signal)))
+      (when (= "offer" (signal :type))
+        (create-answer local-peer-connnection)))))
 
 ; Media
 
-(defn open-local-stream [stream-type]
-  (let [constraints (atom nil)
+(defn open-local-stream [call]
+  (let [local-connection (call :local-connection)
         stream-success (fn [stream]
-                         (.addStream @local-peer-connnection stream)
-                         (create-offer local-peer-connnection))
+                         (.addStream local-connection stream)
+                         (dispatch! :create-sdp-offer local-connection))
         stream-failure (fn [error]
-                         (println "Error opening stream:" (.-message error)))]
-    (if (= stream-type "audio")
-      (reset! constraints (clj->js {:audio true :video false}))
-      (reset! constraints (clj->js {:audio true :video svga-dimensions})))
-    (. js/navigator (webkitGetUserMedia @constraints stream-success stream-failure))))
+                         (println "Error opening stream: " (aget error "message")))]
+    (. js/navigator
+       (webkitGetUserMedia
+         (clj->js {:audio true :video svga-dimensions}) stream-success stream-failure))))
 
-; Protocol Exchange
-
-(defn handle-protocol-signal [signal]
-  (if (signal :sdp)
-    (let [remote-description (js/RTCSessionDescription. (clj->js signal))]
-      (.setRemoteDescription @local-peer-connnection remote-description)
-      (when (= "offer" (signal :type))
-        (create-answer local-peer-connnection)))
-    (let [remote-candidate (js/RTCIceCandidate. (clj->js signal))]
-      (.addIceCandidate @local-peer-connnection remote-candidate))))
-
-; RTC Handlers
+; Setup
 
 (defn handle-ice-candidate [evt]
   (let [candidate (aget evt "candidate")]
@@ -67,21 +65,20 @@
 (defn handle-stream [evt]
   (let [stream (aget evt "stream")
         stream-url (aset js/window "URL" (.createObjectURL stream))
-        video-player (. js/document (getElementById "video"))] ;TODO: avoid document selectors
+        video-player (. js/document (getElementById "video"))]
     (aset video-player "src" stream-url)
     (aset video-player "onloadedmetadata" (fn [_] (.play video-player)))))
-
-; Connection
 
 (defn create-local-connection [servers]
   (let [connection (js/webkitRTCPeerConnection. (clj->js {:iceServers servers}))]
     (aset connection "onicecandidate" handle-ice-candidate)
     (aset connection "onaddstream" handle-stream)
-    connection))
+    (reset! local-peer-connnection connection)
+    (js/console.log @local-peer-connnection)))
 
 (defn get-ice-servers [handler]
   (sync/chsk-send! [:braid.server/get-ice-servers] 2500
     (fn [servers]
       (if (= servers :chsk/timeout)
-        (println "TIMEOUT") ; TODO TRY AGAIN
+        (get-ice-servers handler) ; TODO TRY AGAIN
         (handler servers)))))
