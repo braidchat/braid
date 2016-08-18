@@ -102,7 +102,7 @@
         (dispatch! :display-error [(str :failed-to-send (message :id)) "Message failed to send!"])
         (dispatch! :set-message-failed message)))))
 
-(defmethod handler :hide-thread [state [_ {:keys [thread-id local-only?]} ]]
+(defmethod handler :hide-thread [state [_ {:keys [thread-id local-only?]}]]
   (when-not local-only?
     (sync/chsk-send! [:braid.server/hide-thread thread-id]))
   (helpers/hide-thread state thread-id))

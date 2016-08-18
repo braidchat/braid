@@ -16,7 +16,7 @@
 (defmethod sync/event-handler :braid.client.quests/increment-quest
   [[_ quest-record-id]]
   (dispatch! :quests/increment-quest {:quest-record-id quest-record-id
-                                 :local-only? true}))
+                                      :local-only? true}))
 
 (defmethod sync/event-handler :braid.client.quests/complete-quest
   [[_ quest-record-id]]
