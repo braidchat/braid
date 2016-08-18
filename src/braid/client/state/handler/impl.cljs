@@ -541,7 +541,9 @@
   (helpers/add-call state call))
 
 (defmethod handler :set-requester-call-status [state [_ [call status]]]
-  (sync/chsk-send! [:braid.server/change-call-status {:call (dissoc call :local-connection) :status status}])
+  (when (= status :accepted)
+    (rtc/open-local-stream))
+  (sync/chsk-send! [:braid.server/change-call-status {:call call :status status}])
   (helpers/set-call-status state (call :id) status))
 
 (defmethod handler :set-receiver-call-status [state [_ [call status]]]

@@ -47,7 +47,7 @@
        [:a.button "A"]
        [:a.button "M"]
        [:a.button "V"]
-       [:video {:id "video"
+       [:video {:id "vid"
                 :class (if (= (call :type) :video) "video" "audio")}]
        [:a.button {:on-click
                     (fn [_]

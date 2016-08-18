@@ -127,4 +127,4 @@
 
 (defmethod sync/event-handler :braid.client/receive-protocol-signal
   [[_ signal]]
-  (rtc/handle-protocol-signal signal))
+  (rtc/receive-protocol-signal signal))
