@@ -14,13 +14,18 @@
    :progress 0
    :quest-id quest-id})
 
+(defmethod handler :quests/store-quest-record [state [_ {:keys [quest-record local-only?]}]]
+  (-> state
+      (helpers/store-quest-record quest-record)
+      (when-> (not local-only?)
+              (fn [] (sync/chsk-send! [:braid.server.quests/store-quest-record quest-record])))))
+
 (defn activate-next-quest [state {:keys [local-only?]}]
   (if-let [quest (helpers/get-next-quest state)]
     (let [quest-record (make-quest-record {:quest-id (quest :id)})]
       (-> state
-          (helpers/store-quest-record quest-record)
-          (when-> (not local-only?)
-                  (fn [] (sync/chsk-send! [:braid.server.quests/store-quest-record quest-record])))))
+          (handler [:quests/store-quest-record {:quest-record quest-record
+                                                :local-only? local-only?}])))
     state))
 
 (defmethod handler :quests/skip-quest [state [_ {:keys [quest-record-id local-only?]}]]
