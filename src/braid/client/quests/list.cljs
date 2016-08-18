@@ -5,7 +5,8 @@
 (def quests
   [
    ; quests
-   {:quest/id :quest/quest-complete
+   {:quest/order 0
+    :quest/id :quest/quest-complete
     :quest/name "Learn about quests"
     :quest/description "These quests will teach you about the various features throughout Braid. This one is complete, so click 'Get New Quest'."
     :quest/icon \uf091
@@ -16,7 +17,8 @@
 
    ; conversations
 
-   {:quest/id :quest/conversation-new
+   {:quest/order 1
+    :quest/id :quest/conversation-new
     :quest/name "Start a conversation"
     :quest/description "To start a new conversation, click on the left-most conversation, type your message, and hit [Enter]."
     :quest/icon \uf0e6
@@ -27,7 +29,8 @@
                         (= event :new-message)
                         (= (data :thread-id) (:new-thread-id state))))}
 
-   {:quest/id :quest/conversation-reply
+   {:quest/order 2
+    :quest/id :quest/conversation-reply
     :quest/name "Reply to a conversation"
     :quest/description "To add another message to a conversation, type in the text-area at the bottom of the conversation and hit [Enter]."
     :quest/icon \uf112
@@ -38,7 +41,8 @@
                         (= event :new-message)
                         (not= (data :thread-id) (:new-thread-id state))))}
 
-   {:quest/id :quest/conversation-close
+   {:quest/order 3
+    :quest/id :quest/conversation-close
     :quest/name "Close a conversation"
     :quest/description "Close a conversation by clicking the X in its top-right corner. A conversation will show up again when someone replies to it, so feel free to close them frequently."
     :quest/icon \uf00d

@@ -9,7 +9,8 @@
        :quest-records
        vals
        (filter (fn [quest-record]
-                 (= (quest-record :quest-record/state) :active)))))
+                 (= (quest-record :quest-record/state) :active)))
+       (sort-by :quest/order)))
 
 (defn get-next-quest [state]
   (let [quest-ids-with-records (->> state
@@ -19,6 +20,7 @@
                                            (quest-record :quest-record/quest-id)))
                                     set)
         next-quest (->> quests
+                        (sort-by :quest/order)
                         (remove (fn [quest]
                                   (contains? quest-ids-with-records (quest :quest/id))))
                         first)]
