@@ -11,7 +11,7 @@
             [taoensso.timbre :as timbre]
             [clojure.tools.nrepl.server :as nrepl]
             ; requiring router so mount sees state
-            [braid.server.sync :as sync :refer [sync-routes router]]
+            [braid.server.sync :refer [sync-routes router]]
             [braid.server.routes.client :refer [desktop-client-routes
                                                 mobile-client-routes
                                                 resource-routes]]

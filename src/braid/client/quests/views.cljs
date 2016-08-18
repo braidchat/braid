@@ -7,24 +7,24 @@
 
 (defn quest-view [quest-record]
   (let [show-video? (r/atom false)
-        quest (quests-by-id (quest-record :quest-id))]
+        quest (quests-by-id (quest-record :quest-record/quest-id))]
     (fn [quest-record]
       [:div.quest
-       [:div.main {:data-icon (quest :icon)}
+       [:div.main {:data-icon (quest :quest/icon)}
         [:div.info
-         [:h1 (quest :name)]
+         [:h1 (quest :quest/name)]
          [:div.progress
-          (for [i (range (quest :goal))]
-            [:div.icon {:class (if (< i (quest-record :progress))
+          (for [i (range (quest :quest/goal))]
+            [:div.icon {:class (if (< i (quest-record :quest-record/progress))
                                  "complete"
                                  "incomplete")}])]
 
-         [:p (or (quest :description) "A short description would be here. Lorem ispum dolor it amet.")]]
+         [:p (quest :quest/description)]]
 
-        (if (< (quest-record :progress) (quest :goal))
+        (if (< (quest-record :quest-record/progress) (quest :quest/goal))
           [:div.actions
            [:a.skip {:on-click (fn [_]
-                                 (dispatch! :quests/skip-quest {:quest-record-id (quest-record :id)}))} "Skip"]
+                                 (dispatch! :quests/skip-quest {:quest-record-id (quest-record :quest-record/id)}))} "Skip"]
            (if @show-video?
              [:a.video.hide {:on-click (fn [_]
                                       (reset! show-video? false))}
@@ -34,11 +34,11 @@
               "Show Me"])]
           [:div.actions
            [:a.next {:on-click (fn [_]
-                                 (dispatch! :quests/complete-quest {:quest-record-id (quest-record :id)}))}
+                                 (dispatch! :quests/complete-quest {:quest-record-id (quest-record :quest-record/id)}))}
             "Get New Quest"]])]
        (when @show-video?
          [:div.video
-          [:img {:src (quest :video)}]])])))
+          [:img {:src (quest :quest/video)}]])])))
 
 (defn quests-menu-view []
   (let [active-quest-records (subscribe [:quests/active-quest-records])]
@@ -48,7 +48,7 @@
          (if (seq @active-quest-records)
            [:div.quests
             (for [quest-record @active-quest-records]
-              ^{:key (quest-record :id)}
+              ^{:key (quest-record :quest-record/id)}
               [quest-view quest-record])]
 
            [:div.congrats

@@ -9,10 +9,10 @@
   state)
 
 (defn make-quest-record [{:keys [quest-id]}]
-  {:id (uuid/make-random-squuid)
-   :state :active
-   :progress 0
-   :quest-id quest-id})
+  {:quest-record/id (uuid/make-random-squuid)
+   :quest-record/state :active
+   :quest-record/progress 0
+   :quest-record/quest-id quest-id})
 
 (defmethod handler :quests/store-quest-record [state [_ {:keys [quest-record local-only?]}]]
   (-> state
@@ -22,7 +22,7 @@
 
 (defn activate-next-quest [state {:keys [local-only?]}]
   (if-let [quest (helpers/get-next-quest state)]
-    (let [quest-record (make-quest-record {:quest-id (quest :id)})]
+    (let [quest-record (make-quest-record {:quest-id (quest :quest/id)})]
       (-> state
           (handler [:quests/store-quest-record {:quest-record quest-record
                                                 :local-only? local-only?}])))

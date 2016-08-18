@@ -20,7 +20,9 @@
             [braid.server.message-format :refer [parse-tags-and-mentions]]
             [braid.server.bots :as bots]
             [braid.server.db.common :refer [bot->display]]
-            [braid.server.util :refer [valid-url?]]))
+            [braid.server.util :refer [valid-url?]]
+            [braid.server.sync-handler :refer [event-msg-handler* event-msg-handler]]
+            [braid.server.quests.sync]))
 
 (let [packer (sente-transit/get-transit-packer :json)
       {:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
@@ -43,25 +45,9 @@
           ring-ajax-get-or-ws-handshake))
   (POST "/chsk" req (ring-ajax-post req)))
 
-(defmulti event-msg-handler :id)
-
-(defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
-  (when-not (= event [:chsk/ws-ping])
-    (debugf "User: %s Event: %s" (get-in ev-msg [:ring-req :session :user-id]) event))
-  (when-let [user-id (get-in ev-msg [:ring-req :session :user-id])]
-    (event-msg-handler (assoc ev-msg :user-id user-id))))
-
 (defstate router
   :start (sente/start-chsk-router! ch-chsk event-msg-handler*)
   :stop (router))
-
-(defmethod event-msg-handler :default
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (let [session (:session ring-req)
-        uid     (:uid     session)]
-    (debugf "Unhandled event: %s" event)
-    (when ?reply-fn
-      (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
 
 ;; Handler helpers
 
@@ -546,4 +532,5 @@
                              (if (connected (% :id)) :online :offline)))
                      (db/users-for-user user-id))
         :invitations (db/invites-for-user user-id)
-        :tags (db/tags-for-user user-id)}])))
+        :tags (db/tags-for-user user-id)
+        :quest-records (db/get-active-quests-for-user-id user-id)}])))

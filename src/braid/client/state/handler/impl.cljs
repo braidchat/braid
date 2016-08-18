@@ -9,7 +9,8 @@
             [braid.client.state.helpers :as helpers]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.state.handler.core :refer [handler]]
-            [braid.client.quests.handlers]))
+            [braid.client.quests.handlers]
+            [braid.client.quests.helpers :as quest-helpers]))
 
 (defn extract-tag-ids
   [text]
@@ -474,7 +475,8 @@
       (helpers/set-groups (data :user-groups))
       (helpers/set-invitations (data :invitations))
       (helpers/set-threads (data :user-threads))
-      (helpers/set-open-threads (data :user-threads))))
+      (helpers/set-open-threads (data :user-threads))
+      (quest-helpers/set-quest-records (data :quest-records))))
 
 (defmethod handler :leave-group [state [_ {:keys [group-id group-name]}]]
   ; need to :remove-group before router is dispatched below

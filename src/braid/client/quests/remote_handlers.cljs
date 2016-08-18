@@ -10,7 +10,7 @@
 
 (defmethod sync/event-handler :braid.client.quests/skip-quest
   [[_ quest-record-id]]
-  (dispatch! :quests/skip-quest {:quest-record-id quest-id
+  (dispatch! :quests/skip-quest {:quest-record-id quest-record-id
                                  :local-only? true}))
 
 (defmethod sync/event-handler :braid.client.quests/increment-quest

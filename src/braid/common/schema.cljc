@@ -123,3 +123,10 @@
     (catch ExceptionInfo e
       (debugf "Bad upload format: %s" (:error (ex-data e)))
       false)))
+
+(def QuestRecord
+  {:quest-record/id s/Uuid
+   :quest-record/quest-id s/Keyword
+   :quest-record/user-id s/Uuid
+   :quest-record/progress s/Int
+   :quest-record/state s/Keyword})

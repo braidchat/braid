@@ -4,10 +4,10 @@
             [braid.client.quests.list :refer [quests-by-id]]))
 
 (defn maybe-increment-quest-record [state quest-record event args]
-  (let [quest (quests-by-id (quest-record :quest-id))
-        inc-progress? ((quest :listener) state [event args])]
+  (let [quest (quests-by-id (quest-record :quest-record/quest-id))
+        inc-progress? ((quest :quest/listener) state [event args])]
     (if inc-progress?
-      (handler state [:quests/increment-quest {:quest-record-id (quest-record :id)}])
+      (handler state [:quests/increment-quest {:quest-record-id (quest-record :quest-record/id)}])
       state)))
 
 (defn quests-handler [state [event args]]
