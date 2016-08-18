@@ -1,40 +1,36 @@
 (ns braid.client.quests.state
   (:require [schema.core :as s :include-macros true]
-            [braid.client.quests.list :refer [quests]]))
+            [braid.client.quests.list :refer [quests]]
+            [cljs-uuid-utils.core :as uuid]))
 
 (def init-state
-  ;{:quests {}}
-  {:quests
+  #_{:quest-records {}}
+  {:quest-records
    (->> quests
+        (take 3)
         (map (fn [quest]
-               (assoc quest
-                 :state :inactive
-                 :progress 0)))
-        ; mark first three as active
-        (map-indexed (fn [i quest]
-                       (if (< i 3)
-                         (assoc quest :state :active)
-                         quest)))
-        (map (fn [quest]
-               [(quest :id) quest]))
+               {:id (uuid/make-random-squuid)
+                :quest-id (quest :id)
+                :state :active
+                :progress 0}))
+        (map (fn [quest-record]
+               [(quest-record :id) quest-record]))
         (into {}))})
+
+(def QuestRecordId
+  s/Uuid)
 
 (def QuestId
   s/Keyword)
 
-(def Quest
-  {:id QuestId
-   :name s/Str
-   :description s/Str
-   :icon s/Str
-   :video s/Str
+(def QuestRecord
+  {:id QuestRecordId
+   :quest-id QuestId
    :state (s/enum :inactive
                   :active
                   :complete
                   :skipped)
-   :goal s/Int
-   :progress s/Int
-   :listener js/Function})
+   :progress s/Int})
 
 (def QuestsState
-  {:quests {QuestId Quest}})
+  {:quest-records {QuestRecordId QuestRecord}})

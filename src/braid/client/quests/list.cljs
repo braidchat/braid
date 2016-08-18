@@ -47,6 +47,12 @@
                   (= event :hide-thread)
                   (not (data :local-only?))))}])
 
+
+(def quests-by-id
+  (->> quests
+       (reduce (fn [memo quest]
+                 (assoc memo (quest :id) quest)) {})))
+
 (def disabled-quests
   [
    ; visit
