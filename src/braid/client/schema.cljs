@@ -34,6 +34,14 @@
    :invitee-email (data :invitee-email)
    :group-id (data :group-id)})
 
+(defn make-call [data]
+  {:id (uuid/make-random-squuid)
+   :created-at (or (data :created-at) (js/Date.))
+   :type (data :type)
+   :caller-id (data :caller-id)
+   :callee-id (data :callee-id)
+   :status :incoming})
+
 (defn make-bot [data]
   (merge {:id (uuid/make-random-squuid)}
          data))

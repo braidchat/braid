@@ -12,6 +12,7 @@
             [braid.server.search :as search]
             [braid.server.invite :as invites]
             [braid.server.digest :as digest]
+            [braid.server.webrtc :as rtc]
             [clojure.set :refer [difference intersection]]
             [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
             [braid.server.email-digest :as email]
@@ -528,6 +529,32 @@
     (if (db/user-in-group? user-id ?data)
       (?reply-fn {:braid/ok (db/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
+
+(defmethod event-msg-handler :braid.server/get-ice-servers
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (?reply-fn (rtc/get-ice-servers)))
+
+(defmethod event-msg-handler :braid.server/send-protocol-signal
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (let [signal-id (get-in ring-req [:session :user-id])
+        signal-data ?data]
+    (doseq [user-id (:any @connected-uids) :when (not= signal-id user-id)]
+      (chsk-send! user-id [:braid.client/receive-protocol-signal signal-data]))))
+
+(defmethod event-msg-handler :braid.server/make-new-call
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when (= (get-in ring-req [:session :user-id]) (?data :caller-id))
+    (chsk-send! (?data :callee-id) [:braid.client/receive-new-call ?data])))
+
+(defmethod event-msg-handler :braid.server/change-call-status
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (let [call (?data :call)
+        call-id (call :id)
+        status (?data :status)
+        source-id (get-in ring-req [:session :user-id])]
+    (if (= source-id (call :caller-id))
+      (chsk-send! (call :callee-id) [:braid.client/receive-new-call-status [call status]])
+      (chsk-send! (call :caller-id) [:braid.client/receive-new-call-status [call status]]))))
 
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]

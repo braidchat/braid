@@ -8,7 +8,8 @@
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.state.helpers :as helpers]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.state.handler.core :refer [handler]]))
+            [braid.client.state.handler.core :refer [handler]]
+            [braid.client.webrtc :as rtc]))
 
 (defn extract-tag-ids
   [text]
@@ -49,6 +50,8 @@
                         (str (second (re-matches #"^(\s).*" m))
                              "#" (or (store/name->open-tag-id tag-name)
                                       tag-name))))))
+
+
 
 (defmethod handler :clear-session [state _]
   (helpers/clear-session state))
@@ -517,3 +520,31 @@
 
 (defmethod handler :add-group-bot [state [_ [group-id bot]]]
   (helpers/add-group-bot state group-id bot))
+
+(defmethod handler :start-new-call [state [_ data]]
+  (rtc/get-ice-servers
+    (fn [servers]
+      (rtc/create-local-connection servers)
+      (let [call (schema/make-call data)]
+        (sync/chsk-send! [:braid.server/make-new-call call])
+        (dispatch! :add-new-call call))))
+  state)
+
+(defmethod handler :receive-new-call [state [_ call]]
+  (rtc/get-ice-servers
+    (fn [servers]
+      (rtc/create-local-connection servers)
+      (dispatch! :add-new-call call)))
+  state)
+
+(defmethod handler :add-new-call [state [_ call]]
+  (helpers/add-call state call))
+
+(defmethod handler :set-requester-call-status [state [_ [call status]]]
+  (when (= status :accepted)
+    (rtc/open-local-stream))
+  (sync/chsk-send! [:braid.server/change-call-status {:call call :status status}])
+  (helpers/set-call-status state (call :id) status))
+
+(defmethod handler :set-receiver-call-status [state [_ [call status]]]
+  (helpers/set-call-status state (call :id) status))

@@ -12,6 +12,7 @@
                  [ring-cors "0.1.8"]
                  [compojure "1.5.1"]
                  [environ "1.0.3"]
+                 [org.clojure/data.json "0.2.6"]
                  [com.taoensso/timbre "4.5.1" :exclusions [org.clojure/tools.reader]]
                  [crypto-password "0.2.0"]
                  [clj-time "0.12.0"]

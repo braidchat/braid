@@ -1,5 +1,6 @@
 (ns braid.client.ui.views.pages.user
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
+            [braid.client.ui.views.call :refer [call-view]]
             [braid.client.ui.views.pills :refer [user-pill-view]]
             [braid.client.ui.views.threads :refer [threads-view]]
             [braid.client.state :refer [subscribe]]))
@@ -39,7 +40,9 @@
         [:div.description
          [:img.avatar {:src @user-avatar-url}]
          [:p "One day, a profile will be here."]
-         [:p "Currently only showing your open threads that mention this user in this group."]
-         [:p "Soon, you will see all recent threads this user has participated in."]]]
+         [:p "Currently only showing your open threads that mention this user."]
+         [:p "Soon, you will see all recent threads this user has participated in."]
+         (when (not= @current-user-id (@user :id))
+           [call-view])]]
        [threads-view {:new-thread-args {:mentioned-ids [(@user :id)]}
                       :threads @sorted-threads}]])))

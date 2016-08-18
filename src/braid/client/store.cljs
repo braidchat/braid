@@ -29,6 +29,7 @@
      :user {:open-thread-ids #{}
             :subscribed-tag-ids #{}}
      :new-thread-id (uuid/make-random-squuid)
+     :calls {}
      :focused-thread-id nil}))
 
 (def AppState
@@ -57,6 +58,7 @@
    :user {:open-thread-ids #{s/Uuid}
           :subscribed-tag-ids #{s/Uuid}}
    :new-thread-id s/Uuid
+   :calls {s/Uuid app-schema/Call}
    :focused-thread-id (s/maybe s/Uuid)})
 
 (def check-app-state! (s/validator AppState))
@@ -141,4 +143,3 @@
 
 (defn open-group-id []
   (get @app-state :open-group-id))
-

@@ -111,6 +111,14 @@
    :group-id s/Uuid
    :group-name s/Str})
 
+(def Call
+  {:id s/Uuid
+   :created-at s/Inst
+   :type (s/enum :audio :video)
+   :caller-id s/Uuid
+   :callee-id s/Uuid
+   :status s/Keyword})
+
 (def Upload
   {:id s/Uuid
    :thread-id s/Uuid
