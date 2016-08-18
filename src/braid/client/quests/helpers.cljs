@@ -24,6 +24,9 @@
                         first)]
     next-quest))
 
+(defn get-quest-record [state quest-record-id]
+  (get-in state [:quest-records quest-record-id]))
+
 ; setters
 
 (defn set-quest-records [state quest-records]

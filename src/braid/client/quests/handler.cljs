@@ -8,7 +8,7 @@
         inc-progress? ((quest :quest/listener) state [event args])
         local-only? (:local-only? args)]
     (if (and inc-progress? (not local-only?))
-      (handler state [:quests/increment-quest {:quest-record-id (quest-record :quest-record/id)}])
+      (handler state [:quests/increment-quest (quest-record :quest-record/id)])
       state)))
 
 (defn quests-handler [state [event args]]

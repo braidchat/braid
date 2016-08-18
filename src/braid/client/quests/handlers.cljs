@@ -4,10 +4,8 @@
             [braid.client.sync :as sync]
             [cljs-uuid-utils.core :as uuid]))
 
-(defn when-> [state bool f]
-  (if bool
-    (f state)
-    state))
+(defn fn-> [state f]
+  (f state))
 
 (defn make-quest-record [{:keys [quest-id]}]
   {:quest-record/id (uuid/make-random-squuid)
@@ -15,38 +13,39 @@
    :quest-record/progress 0
    :quest-record/quest-id quest-id})
 
-(defmethod handler :quests/store-quest-record [state [_ {:keys [quest-record local-only?]}]]
-  (-> state
-      (helpers/store-quest-record quest-record)
-      (when-> (not local-only?)
-              (fn [state] (sync/chsk-send! [:braid.server.quests/store-quest-record quest-record]) state))))
-
-(defn activate-next-quest [state {:keys [local-only?]}]
+(defn activate-next-quest [state]
   (if-let [quest (helpers/get-next-quest state)]
     (let [quest-record (make-quest-record {:quest-id (quest :quest/id)})]
       (-> state
-          (handler [:quests/store-quest-record {:quest-record quest-record
-                                                :local-only? local-only?}])))
+          (helpers/store-quest-record quest-record)
+          (fn-> (fn [state]
+                  (sync/chsk-send! [:braid.server.quests/upsert-quest-record quest-record])
+                  state))))
     state))
 
-(defmethod handler :quests/skip-quest [state [_ {:keys [quest-record-id local-only?]}]]
+(defmethod handler :quests/skip-quest [state [_ quest-record-id]]
   (-> state
       (helpers/skip-quest quest-record-id)
-      (when-> (not local-only?)
-              (fn [state]
-                (sync/chsk-send! [:braid.server.quests/skip-quest quest-record-id] state)
-                (activate-next-quest state {:local-only? local-only?})))))
+      (fn-> (fn [state]
+              (sync/chsk-send! [:braid.server.quests/upsert-quest-record (helpers/get-quest-record state quest-record-id)])
+              state))
+      (activate-next-quest)))
 
-(defmethod handler :quests/complete-quest [state [_ {:keys [quest-record-id local-only?]}]]
+(defmethod handler :quests/complete-quest [state [_ quest-record-id]]
   (-> state
       (helpers/complete-quest quest-record-id)
-      (when-> (not local-only?)
-              (fn [state]
-                (sync/chsk-send! [:braid.server.quests/complete-quest quest-record-id]) state
-                (activate-next-quest state {:local-only? local-only?})))))
+      (fn-> (fn [state]
+              (sync/chsk-send! [:braid.server.quests/upsert-quest-record (helpers/get-quest-record state quest-record-id)])
+              state))
+      (activate-next-quest)))
 
-(defmethod handler :quests/increment-quest [state [_ {:keys [quest-record-id local-only?]}]]
+(defmethod handler :quests/increment-quest [state [_ quest-record-id]]
   (-> state
       (helpers/increment-quest quest-record-id)
-      (when-> (not local-only?)
-              (fn [state] (sync/chsk-send! [:braid.server.quests/increment-quest quest-record-id]) state))))
+      (fn-> (fn [state]
+              (sync/chsk-send! [:braid.server.quests/upsert-quest-record (helpers/get-quest-record state quest-record-id)])
+              state))))
+
+(defmethod handler :quests/upsert-quest-record [state [_ quest-record]]
+  (-> state
+      (helpers/store-quest-record quest-record)))

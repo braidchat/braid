@@ -24,7 +24,7 @@
         (if (< (quest-record :quest-record/progress) (quest :quest/goal))
           [:div.actions
            [:a.skip {:on-click (fn [_]
-                                 (dispatch! :quests/skip-quest {:quest-record-id (quest-record :quest-record/id)}))} "Skip"]
+                                 (dispatch! :quests/skip-quest (quest-record :quest-record/id)))} "Skip"]
            (if @show-video?
              [:a.video.hide {:on-click (fn [_]
                                       (reset! show-video? false))}
@@ -34,7 +34,7 @@
               "Show Me"])]
           [:div.actions
            [:a.next {:on-click (fn [_]
-                                 (dispatch! :quests/complete-quest {:quest-record-id (quest-record :quest-record/id)}))}
+                                 (dispatch! :quests/complete-quest (quest-record :quest-record/id)))}
             "Get New Quest"]])]
        (when @show-video?
          [:div.video

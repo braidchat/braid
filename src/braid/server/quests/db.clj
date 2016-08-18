@@ -30,15 +30,11 @@
 
 ; setters
 
-(defn- update-quest-record! [conn user-id quest-record-id f]
-  (when-let [quest-record (-> (d/q '[:find (pull ?qr pull-pattern)
-                                     :in $ ?quest-record-id pull-pattern
-                                     :where
-                                     [?qr :quest-record/id ?quest-record-id]]
-                                   (d/db conn) quest-record-id quest-record-pull-pattern)
-                              ffirst)]
-    @(d/transact conn [(assoc (f quest-record)
-                         :db/id [:quest-record/id (quest-record :quest-record/id)])])))
+(defn upsert-quest-record! [conn user-id quest-record]
+  (let [db-id (if (d/entity (d/db conn) [:quest-record/id (quest-record :id)])
+                [:quest-record/id (quest-record :quest-record/id)]
+                (d/tempid :entities))]
+    @(d/transact conn [(assoc quest-record :db/id db-id)])))
 
 (defn activate-first-quests! [conn user-id]
   (let [txs (->> [:quest/quest-complete :quest/conversation-new :quest/conversation-reply]
@@ -51,20 +47,4 @@
                          :quest-record/state :active})))]
     @(d/transact conn txs)))
 
-(defn store-quest-record! [conn user-id quest-record]
-  @(d/transact conn [(assoc quest-record
-                       :db/id (d/tempid :entities)
-                       :quest-record/user [:user/id user-id])]))
-
-(defn increment-quest! [conn user-id quest-record-id]
-  (update-quest-record! conn user-id quest-record-id (fn [quest-record]
-                                                       (update quest-record :quest-record/progress inc))))
-
-(defn skip-quest! [conn user-id quest-record-id]
-  (update-quest-record! conn user-id quest-record-id (fn [quest-record]
-                                                       (assoc quest-record :quest-record/state :skipped))))
-
-(defn complete-quest! [conn user-id quest-record-id]
-  (update-quest-record! conn user-id quest-record-id (fn [quest-record]
-                                                       (assoc quest-record :quest-record/state :complete))))
 

@@ -1,24 +1,9 @@
 (ns braid.server.quests.sync
   (:require [braid.server.sync-handler :refer [event-msg-handler]]
             [braid.server.db :as db]
-            [braid.server.socket :refer [chsk-send!]]))
+            [braid.server.socket :refer [chsk-send! connected-uids]]))
 
-(defmethod event-msg-handler :braid.server.quests/skip-quest
+(defmethod event-msg-handler :braid.server.quests/upsert-quest-record
   [{:keys [?data user-id]}]
-  (chsk-send! user-id [:braid.client.quests/skip-quest ?data])
-  (db/skip-quest! user-id ?data))
-
-(defmethod event-msg-handler :braid.server.quests/complete-quest
-  [{:keys [?data user-id]}]
-  (chsk-send! user-id [:braid.client.quests/complete-quest ?data])
-  (db/complete-quest! user-id ?data))
-
-(defmethod event-msg-handler :braid.server.quests/increment-quest
-  [{:keys [?data user-id]}]
-  (chsk-send! user-id [:braid.client.quests/increment-quest ?data])
-  (db/increment-quest! user-id ?data))
-
-(defmethod event-msg-handler :braid.server.quests/store-quest-record
-  [{:keys [?data user-id]}]
-  (chsk-send! user-id [:braid.client.quests/store-quest-record ?data])
-  (db/store-quest-record! user-id ?data))
+  (chsk-send! user-id [:braid.client.quests/upsert-quest-record ?data])
+  (db/upsert-quest-record! user-id ?data))
