@@ -1,11 +1,5 @@
 (ns braid.server.sync
-  (:require [mount.core :as mount :refer [defstate]]
-            [taoensso.sente :as sente]
-            [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]]
-            [taoensso.sente.packers.transit :as sente-transit]
-            [compojure.core :refer [GET POST routes defroutes context]]
-            [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
-            [taoensso.timbre :as timbre :refer [debugf]]
+  (:require [taoensso.timbre :as timbre :refer [debugf]]
             [taoensso.truss :refer [have]]
             [clojure.string :as string]
             [braid.server.db :as db]
@@ -21,33 +15,10 @@
             [braid.server.bots :as bots]
             [braid.server.db.common :refer [bot->display]]
             [braid.server.util :refer [valid-url?]]
-            [braid.server.sync-handler :refer [event-msg-handler* event-msg-handler]]
-            [braid.server.quests.sync]))
-
-(let [packer (sente-transit/get-transit-packer :json)
-      {:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
-              connected-uids]}
-      (sente/make-channel-socket! (get-sch-adapter)
-                                  {:user-id-fn
-                                   (fn [ob] (get-in ob [:session :user-id]))
-                                   :packer packer})]
-  (def ring-ajax-post                ajax-post-fn)
-  (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
-  (def ch-chsk                       ch-recv)
-  (def chsk-send!                    send-fn)
-  (def connected-uids                connected-uids))
-
-(defroutes sync-routes
-  (GET  "/chsk" req
-      (-> req
-          (assoc-in [:session :ring.middleware.anti-forgery/anti-forgery-token]
-            *anti-forgery-token*)
-          ring-ajax-get-or-ws-handshake))
-  (POST "/chsk" req (ring-ajax-post req)))
-
-(defstate router
-  :start (sente/start-chsk-router! ch-chsk event-msg-handler*)
-  :stop (router))
+            [braid.server.sync-handler :refer [event-msg-handler]]
+            [braid.server.quests.sync]
+            [braid.server.socket :refer [chsk-send!
+                                         connected-uids]]))
 
 ;; Handler helpers
 

@@ -5,8 +5,9 @@
             [cljs-uuid-utils.core :as uuid]))
 
 (defn when-> [state bool f]
-  (when bool (f))
-  state)
+  (if bool
+    (f state)
+    state))
 
 (defn make-quest-record [{:keys [quest-id]}]
   {:quest-record/id (uuid/make-random-squuid)
@@ -18,7 +19,7 @@
   (-> state
       (helpers/store-quest-record quest-record)
       (when-> (not local-only?)
-              (fn [] (sync/chsk-send! [:braid.server.quests/store-quest-record quest-record])))))
+              (fn [state] (sync/chsk-send! [:braid.server.quests/store-quest-record quest-record]) state))))
 
 (defn activate-next-quest [state {:keys [local-only?]}]
   (if-let [quest (helpers/get-next-quest state)]
@@ -32,18 +33,20 @@
   (-> state
       (helpers/skip-quest quest-record-id)
       (when-> (not local-only?)
-              (fn [] (sync/chsk-send! [:braid.server.quests/skip-quest quest-record-id])))
-      (activate-next-quest {:local-only? local-only?})))
+              (fn [state]
+                (sync/chsk-send! [:braid.server.quests/skip-quest quest-record-id] state)
+                (activate-next-quest state {:local-only? local-only?})))))
 
 (defmethod handler :quests/complete-quest [state [_ {:keys [quest-record-id local-only?]}]]
   (-> state
       (helpers/complete-quest quest-record-id)
       (when-> (not local-only?)
-              (fn [] (sync/chsk-send! [:braid.server.quests/complete-quest quest-record-id])))
-      (activate-next-quest {:local-only? local-only?})))
+              (fn [state]
+                (sync/chsk-send! [:braid.server.quests/complete-quest quest-record-id]) state
+                (activate-next-quest state {:local-only? local-only?})))))
 
 (defmethod handler :quests/increment-quest [state [_ {:keys [quest-record-id local-only?]}]]
   (-> state
       (helpers/increment-quest quest-record-id)
       (when-> (not local-only?)
-              (fn [] (sync/chsk-send! [:braid.server.quests/increment-quest quest-record-id])))))
+              (fn [state] (sync/chsk-send! [:braid.server.quests/increment-quest quest-record-id]) state))))

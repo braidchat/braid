@@ -5,8 +5,9 @@
 
 (defn maybe-increment-quest-record [state quest-record event args]
   (let [quest (quests-by-id (quest-record :quest-record/quest-id))
-        inc-progress? ((quest :quest/listener) state [event args])]
-    (if inc-progress?
+        inc-progress? ((quest :quest/listener) state [event args])
+        local-only? (:local-only? args)]
+    (if (and inc-progress? (not local-only?))
       (handler state [:quests/increment-quest {:quest-record-id (quest-record :quest-record/id)}])
       state)))
 
