@@ -25,12 +25,15 @@
 
 ; setters
 
+(defn store-quest-record [state quest-record]
+  (assoc-in state [:quest-records (quest-record :id)] quest-record))
+
 (defn complete-quest [state quest-record-id]
   (assoc-in state [:quest-records quest-record-id :state] :complete))
 
 (defn skip-quest [state quest-record-id]
   (assoc-in state [:quest-records quest-record-id :state] :skipped))
 
-(defn store-quest-record [state quest-record]
-  (assoc-in state [:quest-records (quest-record :id)] quest-record))
+(defn increment-quest [state quest-record-id]
+  (update-in state [:quest-records quest-record-id :progress] inc))
 

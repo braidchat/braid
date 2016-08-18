@@ -1,5 +1,7 @@
 (ns braid.client.quests.list)
 
+; listeners must filter based on event name to avoid infinite loops
+
 (def quests
   [
    ; quests
@@ -8,9 +10,9 @@
     :description "These quests will teach you about the various features throughout Braid. This one is complete, so click 'Get New Quest'."
     :icon \uf091
     :video ""
-    :goal 1
+    :goal 0
     :listener (fn [state [event data]]
-                true)}
+                false)}
 
    ; conversations
 

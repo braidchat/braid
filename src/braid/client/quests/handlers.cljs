@@ -36,3 +36,9 @@
       (when-> (not local-only?)
               (fn [] (sync/chsk-send! [:braid.server.quests/complete-quest quest-record-id])))
       (activate-next-quest {:local-only? local-only?})))
+
+(defmethod handler :quests/increment-quest [state [_ {:keys [quest-record-id local-only?]}]]
+  (-> state
+      (helpers/increment-quest quest-record-id)
+      (when-> (not local-only?)
+              (fn [] (sync/chsk-send! [:braid.server.quests/increment-quest quest-record-id])))))
