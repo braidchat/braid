@@ -19,7 +19,8 @@
 
     [:.quests-icon
      (header-text)
-     {:padding 0}
+     {:padding 0
+      :color "#CCC"}
 
      [:&:before
       (mixins/fontawesome \uf091)]

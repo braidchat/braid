@@ -56,9 +56,11 @@
             [:p "You've completed all the quests we have so far. Stay tuned for more."]])]])))
 
 (defn quests-header-view []
-  (let [user-id (subscribe [:user-id])]
+  (let [user-id (subscribe [:user-id])
+        active-quest-records (subscribe [:quests/active-quest-records])]
     (fn []
       [:div.quests-header
-       [:div.quests-icon {:style {:color (->color @user-id)}}]
+       [:div.quests-icon {:style {:color (when (seq @active-quest-records)
+                                           (->color @user-id))}}]
        [quests-menu-view]])))
 
