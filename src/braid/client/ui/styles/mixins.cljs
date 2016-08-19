@@ -35,17 +35,18 @@
   [:&
    pill-box
    [:&
-    {:color vars/grey-text
-     :border [[(px 1) "solid" vars/grey-text]]
+    {:color "#888"
+     :border [[(px 1) "solid" "#BBB"]]
      :background "none"}]
 
    [:&:hover
-    {:color "#eee"
-     :background vars/grey-text
+    {:color "#EEE"
+     :background "#888"
+     :border-color "#888"
      :cursor "pointer"}]
 
    [:&:active
-    {:color "#eee"
+    {:color "#EEE"
      :background "#666"
      :border-color "#666"
      :cursor "pointer"}]])
