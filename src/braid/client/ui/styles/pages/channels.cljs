@@ -10,7 +10,11 @@
     {:margin-top (em 1)
      :color "grey-text"}
     [:.tag-info
-     {:margin-bottom (em 1)}]]
+     {:margin-bottom (em 1)}
+
+     [:.button
+      mixins/pill-button
+      {:margin-left (em 1)}]]]
 
     [:.count
      {:margin-right (em 0.5)}

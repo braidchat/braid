@@ -49,7 +49,6 @@
                braid.client.ui.styles.login/login
                braid.client.ui.styles.pills/tag
                braid.client.ui.styles.pills/user
-               braid.client.ui.styles.misc/button
                braid.client.ui.styles.misc/status
                (braid.client.ui.styles.misc/threads vars/pad)
                (braid.client.ui.styles.thread/thread vars/pad)

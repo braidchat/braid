@@ -82,10 +82,6 @@
    [".page.channel > .title::before"
     (mixins/fontawesome \uf02b)]])
 
-(def button
-  [:.button
-   mixins/pill-button
-   {:margin-left (em 1)}])
 
 (defn threads [pad]
   [:.page
