@@ -8,7 +8,7 @@
 
    [:.tags
     {:margin-top (em 1)
-     :color "grey-text"}
+     :color vars/grey-text}
     [:.tag-info
      {:margin-bottom (em 1)}
 
