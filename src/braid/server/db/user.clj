@@ -19,8 +19,8 @@
                    :user/nickname (or nickname (-> email (string/split #"@") first))
                    :user/password-token (password/encrypt password)}
                   (create-entity! conn)
-                  db->user)
-        _ (activate-first-quests! conn id)]
+                  db->user)]
+    (activate-first-quests! conn id)
     user))
 
 (defn create-oauth-user!
