@@ -24,6 +24,6 @@
         [:div.page.recent
          (if (and (not (@page :loading?)) (empty? sorted-threads))
            [:div.content
-            [:p "No recent threads in this group"]]
+            [:p "No recent threads"]]
            [threads-view {:threads sorted-threads}])]))))
 
