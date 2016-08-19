@@ -16,27 +16,18 @@
 (def max-file-size (* 10 1024 1024))
 
 (defn thread-tags-view [thread]
-  (let [thread-id (r/atom (thread :id))
-        tags (subscribe [:tags-for-thread] [thread-id])
-        mentions (subscribe [:mentions-for-thread] [thread-id])]
-    (r/create-class
-      {:display-name "thread-tags-view"
-
-       :component-will-update
-       (fn [c [_ new-thread]]
-         (reset! thread-id (new-thread :id)))
-
-       :reagent-render
-       (fn [thread]
-         [:div.tags
-          (doall
-            (for [user @mentions]
-              ^{:key (user :id)}
-              [user-pill-view (user :id)]))
-          (doall
-            (for [tag @tags]
-              ^{:key (tag :id)}
-              [tag-pill-view (tag :id)]))])})))
+  (let [tags (subscribe [:tags-for-thread (thread :id)])
+        mentions (subscribe [:mentions-for-thread (thread :id)])]
+    (fn [thread]
+      [:div.tags
+       (doall
+         (for [user @mentions]
+           ^{:key (user :id)}
+           [user-pill-view (user :id)]))
+       (doall
+         (for [tag @tags]
+           ^{:key (tag :id)}
+           [tag-pill-view (tag :id)]))])))
 
 (defn messages-view [thread]
   ; Closing over thread-id, but the only time a thread's id changes is the new
