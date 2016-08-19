@@ -36,7 +36,16 @@
        :db/valueType :db.type/long
        :db/cardinality :db.cardinality/one
        :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db.install/_attribute :db.part/db}])
+
+  (let [user-ids (->> (d/q '[:find ?user-id
+                             :in $
+                             :where
+                             [?u :user/id ?user-id]]
+                           (d/db db/conn))
+                      (map first))]
+    (doseq [user-id user-ids]
+      (db/activate-first-quests! user-id))))
 
 (defn migrate-2016-07-29
   "Add watched threads for bots"
