@@ -10,6 +10,7 @@
             [braid.client.ui.styles.animations]
             [braid.client.ui.styles.embed]
             [braid.client.ui.styles.login]
+            [braid.client.ui.styles.page]
             [braid.client.ui.styles.vars :as vars]))
 
 (defn styles-view []
@@ -28,11 +29,11 @@
                braid.client.ui.styles.animations/anim-spin
                braid.client.ui.styles.body/body
                braid.client.ui.styles.message/message
+               braid.client.ui.styles.page/page
                braid.client.ui.styles.misc/layout
                braid.client.ui.styles.sidebar/sidebar
                braid.client.ui.styles.misc/emojione
                braid.client.ui.styles.misc/error-banners
-               braid.client.ui.styles.misc/page
                braid.client.ui.styles.misc/page-headers
                braid.client.ui.styles.misc/channels-page
                braid.client.ui.styles.misc/settings-page
