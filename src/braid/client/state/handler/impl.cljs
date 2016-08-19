@@ -524,7 +524,7 @@
 (defmethod handler :start-new-call [state [_ data]]
   (rtc/get-ice-servers
     (fn [servers]
-      (rtc/create-local-connection servers)
+      (rtc/create-connections servers)
       (let [call (schema/make-call data)]
         (sync/chsk-send! [:braid.server/make-new-call call])
         (dispatch! :add-new-call call))))
@@ -533,7 +533,7 @@
 (defmethod handler :receive-new-call [state [_ call]]
   (rtc/get-ice-servers
     (fn [servers]
-      (rtc/create-local-connection servers)
+      (rtc/create-connections servers)
       (dispatch! :add-new-call call)))
   state)
 
@@ -542,7 +542,7 @@
 
 (defmethod handler :set-requester-call-status [state [_ [call status]]]
   (when (= status :accepted)
-    (rtc/open-local-stream))
+    (rtc/set-caller-stream))
   (sync/chsk-send! [:braid.server/change-call-status {:call call :status status}])
   (helpers/set-call-status state (call :id) status))
 

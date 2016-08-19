@@ -5,47 +5,62 @@
 (defonce svga-dimensions
   (clj->js {:mandatory {:maxWidth 320 :maxHeight 180}}))
 
-(def local-peer-connnection (atom nil))
-(def remote-peer-connection (atom nil))
+(def sending-peer-connection (atom nil))
+
+(def receiving-peer-connection (atom nil))
+
+; REMOTE STUFF
 
 ; Protocols
 
-(defn signal-sdp-description [description]
-  (.setLocalDescription @local-peer-connnection description)
+(defn signal-sdp-description [connection description]
+  (.setLocalDescription @connection description)
   (sync/chsk-send!
     [:braid.server/send-protocol-signal
       {:sdp (aget description "sdp")
        :type (aget description "type")}]))
 
 (defn create-answer [connection]
-  (.createAnswer @connection signal-sdp-description
+  (.createAnswer
+    @connection
+    (fn [description]
+      (signal-sdp-description connection description))
     (fn [error]
       (println "Error creating offer description: " (aget error "message")))))
 
 (defn create-offer [connection]
-  (.createOffer @connection signal-sdp-description
+  (.createOffer
+    @connection
+    (fn [description]
+      (signal-sdp-description connection description))
     (fn [error]
       (println "Error creating offer description: " (aget error "message")))))
 
 (defn receive-protocol-signal [signal]
   (if (signal :candidate)
-    (.addIceCandidate @local-peer-connnection (js/RTCIceCandidate. (clj->js signal)))
+    (.addIceCandidate @sending-peer-connection (js/RTCIceCandidate. (clj->js signal)))
     (do
-      (.setRemoteDescription @local-peer-connnection (js/RTCSessionDescription. (clj->js signal)))
+      (.setRemoteDescription @sending-peer-connection (js/RTCSessionDescription. (clj->js signal)))
       (when (= "offer" (signal :type))
-        (create-answer local-peer-connnection)))))
+        (create-answer sending-peer-connection)))))
 
 ; Media
 
-(defn open-local-stream []
+(defn set-stream [peer-connection]
   (letfn [(stream-success [stream]
-            (.addStream @local-peer-connnection stream)
-            (create-offer local-peer-connnection))
+            (.addStream @peer-connection stream)
+            (create-offer peer-connection))
           (stream-failure [error]
             (println "Error opening stream: " (aget error "message")))]
     (. js/navigator
        (webkitGetUserMedia
          (clj->js {:audio true :video svga-dimensions}) stream-success stream-failure))))
+
+(defn set-callee-stream []
+  (set-stream receiving-peer-connection))
+
+(defn set-caller-stream []
+  (set-stream sending-peer-connection))
 
 ; Setup
 
@@ -65,11 +80,23 @@
     (aset video-player "src" stream-url)
     (aset video-player "onloadedmetadata" (fn [_] (.play video-player)))))
 
-(defn create-local-connection [servers]
-  (let [connection (js/webkitRTCPeerConnection. (clj->js {:iceServers servers}))]
-    (aset connection "onicecandidate" handle-ice-candidate)
-    (aset connection "onaddstream" handle-stream)
-    (reset! local-peer-connnection connection)))
+(defn set-connection-atom [conn conn-atom on-ice on-stream]
+  (aset conn "onicecandidate" on-ice)
+  (aset conn "onaddstream" on-stream)
+  (reset! conn-atom conn)
+  (js/console.log @conn-atom))
+
+(defn create-connections [servers]
+  (set-connection-atom
+    (js/webkitRTCPeerConnection. (clj->js {:iceServers servers}))
+    sending-peer-connection
+    handle-ice-candidate
+    handle-stream)
+  (set-connection-atom
+    (js/webkitRTCPeerConnection. (clj->js {:iceServers servers}))
+    receiving-peer-connection
+    handle-ice-candidate
+    handle-stream))
 
 (defn get-ice-servers [handler]
   (sync/chsk-send! [:braid.server/get-ice-servers] 2500
