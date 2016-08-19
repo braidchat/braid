@@ -14,14 +14,7 @@
        :top 0
        :bottom 0
        :width vars/sidebar-width
-       :box-sizing "border-box"}]
-
-     [:.page
-      {:position "absolute"
-       :left vars/sidebar-width
-       :top 0
-       :bottom 0
-       :right 0}]]])
+       :box-sizing "border-box"}] ]])
 
 (def emojione
   [:.emojione
@@ -91,12 +84,19 @@
 
 (def page
   [:.page
+   {:position "absolute"
+    :left vars/sidebar-width
+    :top vars/pad
+    :bottom 0
+    :right 0
+    :margin-top vars/top-bar-height
+    :overflow-x "scroll"}
 
    ["> .title"
     {:height vars/top-bar-height
      :line-height vars/top-bar-height
      :color vars/grey-text
-     :margin vars/pad}]
+     :margin [[vars/pad 0 0 vars/pad]]}]
 
    ["> .intro"
     {:color vars/grey-text
@@ -106,8 +106,7 @@
      :position "relative"}]
 
    ["> .content"
-    {:overflow "scroll"
-     :padding vars/pad
+    {:padding vars/pad
      :color vars/grey-text}
 
     [:.description
