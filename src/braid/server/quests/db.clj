@@ -16,18 +16,6 @@
             quest-record-pull-pattern)
        (map first)))
 
-; for debugging only:
-(defn get-quests-for-user-id [conn user-id]
-  (->> (d/q '[:find (pull ?qr pull-pattern)
-              :in $ ?user-id pull-pattern
-              :where
-              [?qr :quest-record/user ?u]
-              [?u :user/id ?user-id]]
-            (d/db conn)
-            user-id
-            quest-record-pull-pattern)
-       (map first)))
-
 ; setters
 
 (defn upsert-quest-record! [conn user-id quest-record]
@@ -46,5 +34,4 @@
                          :quest-record/progress 0
                          :quest-record/state :active})))]
     @(d/transact conn txs)))
-
 
