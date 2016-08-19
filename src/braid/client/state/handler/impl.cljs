@@ -542,11 +542,11 @@
 
 (defmethod handler :set-requester-call-status [state [_ [call status]]]
   (when (= status :accepted)
-    (rtc/set-caller-stream))
+    (rtc/set-stream))
   (sync/chsk-send! [:braid.server/change-call-status {:call call :status status}])
   (helpers/set-call-status state (call :id) status))
 
 (defmethod handler :set-receiver-call-status [state [_ [call status]]]
   (when (= status :accepted)
-    (rtc/set-caller-stream))
+    (rtc/set-stream))
   (helpers/set-call-status state (call :id) status))
