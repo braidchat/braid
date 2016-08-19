@@ -5,9 +5,29 @@
             [braid.client.state :refer [subscribe]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.ui.views.pills :refer [tag-pill-view subscribe-button-view]]
-            [braid.client.ui.views.pages.tag :refer [edit-description-view]]
             [braid.common.util :refer [valid-tag-name?]])
   (:import [goog.events KeyCodes]))
+
+(defn edit-description-view
+  [tag]
+  (let [editing? (r/atom false)
+        new-description (r/atom "")]
+    (fn [tag]
+      [:div.description-edit
+       (if @editing?
+         [:div
+          [:textarea {:placeholder "New description"
+                      :value @new-description
+                      :on-change (fn [e]
+                                   (reset! new-description (.. e -target -value)))}]
+          [:button {:on-click
+                    (fn [_]
+                      (swap! editing? not)
+                      (dispatch! :set-tag-description {:tag-id (tag :id)
+                                                       :description @new-description}))}
+           "Save"]]
+         [:button {:on-click (fn [_] (swap! editing? not))}
+          "Edit description"])])))
 
 (defn new-tag-view
   [data]

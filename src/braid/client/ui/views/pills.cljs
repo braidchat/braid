@@ -67,8 +67,8 @@
 
        :reagent-render
        (fn [user-id]
-         (let [path (routes/user-page-path {:group-id @open-group-id
-                                            :user-id user-id})
+         (let [path (routes/search-page-path {:group-id @open-group-id
+                                              :query (str "@" (@user :nickname))})
                color (id->color user-id)]
            [:a.user.pill {:class (str (case @user-status :online "on" "off")
                                       (when @admin? " admin"))
