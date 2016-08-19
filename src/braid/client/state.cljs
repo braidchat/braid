@@ -2,7 +2,7 @@
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.client.store :as store]
             [clojure.set :refer [union intersection subset?]]
-[braid.client.state.subscription :refer [subscription]]
+            [braid.client.state.subscription :refer [subscription]]
             [braid.client.quests.subscriptions])
   (:import goog.Uri))
 
