@@ -5,6 +5,7 @@
             [clojure.edn :as edn]
             [clojure.string :as string]
             [braid.server.schema :refer [schema]]
+            [braid.server.quests.db]
             [braid.server.db user message group invitation thread tag bot
              upload]))
 
@@ -67,3 +68,5 @@
 (reexport-db-ns braid.server.db.bot)
 
 (reexport-db-ns braid.server.db.upload)
+
+(reexport-db-ns braid.server.quests.db)

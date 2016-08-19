@@ -1,14 +1,10 @@
 (ns braid.client.state
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.client.store :as store]
-            [clojure.set :refer [union intersection subset?]])
+            [clojure.set :refer [union intersection subset?]]
+            [braid.client.state.subscription :refer [subscription]]
+            [braid.client.quests.subscriptions])
   (:import goog.Uri))
-
-(defmulti subscription
-  "Create a reaction for the particular type of information.
-  Do not call directly, should be invoked by `subscribe`"
-  {:arglists '([state [sub-name args]])}
-  (fn [_ [sub-name _]] sub-name))
 
 (defn subscribe
   "Get a reaction for the given data.
@@ -296,4 +292,3 @@
 (defmethod subscription :user-preference
   [state [_ pref]]
   (reaction (get-in @state [:preferences pref])))
-
