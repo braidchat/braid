@@ -22,7 +22,6 @@
                          :messages))
                  reverse)]
         [:div.page.recent
-         [:div.title "Recent"]
          (if (and (not (@page :loading?)) (empty? sorted-threads))
            [:p "No recent threads in this group"]
            [threads-view {:threads sorted-threads}])]))))
