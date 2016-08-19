@@ -46,8 +46,8 @@ Start things running
 
 Seed some data (first time only):
 ```clojure
-(require 'chat.server.seed)
-(chat.server.seed/seed!)
+(require 'braid.server.seed)
+(braid.server.seed/seed!)
 ```
 
 Don't navigate to the website just yet.
