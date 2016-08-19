@@ -1,6 +1,7 @@
 (ns braid.client.ui.views.thread
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [clojure.string :as string]
+            [clojure.set :refer [difference]]
             [reagent.core :as r]
             [braid.client.state :refer [subscribe]]
             [cljs.core.async :refer [chan put!]]
@@ -15,6 +16,33 @@
 
 (def max-file-size (* 10 1024 1024))
 
+(defn add-tag-list-view [thread close-list!]
+  (let [group-tags (subscribe [:open-group-tags])
+        thread-tags (subscribe [:tags-for-thread (thread :id)])]
+    (fn [thread]
+      (let [tags (difference (set @group-tags) (set @thread-tags))]
+        [:div.tag-list
+         (if (seq tags)
+           (for [tag tags]
+             [:div.tag-option
+              {:style {:background-color (helpers/->color (tag :id))}
+               :on-click (fn []
+                           (close-list!)
+                           (dispatch! :add-tag-to-thread [(thread :id) (tag :id)]))}
+              (tag :name)])
+           [:div.name "All tags used already."])]))))
+
+(defn add-tag-button-view [thread]
+  (let [show-list? (r/atom false)
+        close-list! (fn []
+                      (reset! show-list? false))]
+    (fn [thread]
+      [:div.add
+       [:span.pill {:on-click (fn [] (swap! show-list? not))}
+        (if @show-list? "×" "+")]
+       (when @show-list?
+         [add-tag-list-view thread close-list!])])))
+
 (defn thread-tags-view [thread]
   (let [tags (subscribe [:tags-for-thread (thread :id)])
         mentions (subscribe [:mentions-for-thread (thread :id)])]
@@ -27,7 +55,8 @@
        (doall
          (for [tag @tags]
            ^{:key (tag :id)}
-           [tag-pill-view (tag :id)]))])))
+           [tag-pill-view (tag :id)]))
+       [add-tag-button-view thread]])))
 
 (defn messages-view [thread]
   ; Closing over thread-id, but the only time a thread's id changes is the new

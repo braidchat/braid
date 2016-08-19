@@ -271,6 +271,9 @@
 (defn set-subscribed-tag-ids [state tag-ids]
   (assoc-in state [:user :subscribed-tag-ids] (set tag-ids)))
 
+(defn add-tag-to-thread [state thread-id tag-id]
+  (update-in state [:threads thread-id :tag-ids] conj tag-id))
+
 ; new thread msg
 
 (defn set-new-message [state thread-id content]

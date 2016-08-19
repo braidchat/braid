@@ -115,6 +115,9 @@
   (sync/chsk-send! [:braid.server/unsub-thread (data :thread-id)])
   (handler state [:hide-thread {:thread-id (data :thread-id) :local-only? true}]))
 
+(defmethod handler :add-tag-to-thread [state [_ [thread-id tag-id]]]
+  (helpers/add-tag-to-thread state thread-id tag-id))
+
 (defmethod handler :create-tag [state [_ {:keys [tag local-only?]}]]
   (let [tag (merge (schema/make-tag) tag)]
     (when-not local-only?

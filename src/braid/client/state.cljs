@@ -186,6 +186,14 @@
   [state _]
   (reaction (vals (get-in @state [:tags]))))
 
+(defmethod subscription :open-group-tags
+  [state _]
+   (reaction
+     (into ()
+           (comp
+             (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id)))))
+           (vals (get-in @state [:tags])))))
+
 (defmethod subscription :user-subscribed-to-tag?
   [state [_ tag-id]]
   (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))
