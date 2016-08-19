@@ -9,10 +9,11 @@
    [:.tags
     {:margin-top (em 1)
      :color vars/grey-text}
+
     [:.tag-info
      {:margin-bottom (em 1)}
 
-     [:.button
+     ["> .button"
       mixins/pill-button
       {:margin-left (em 1)}]]]
 
