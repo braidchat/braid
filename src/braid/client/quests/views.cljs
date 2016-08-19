@@ -12,7 +12,10 @@
       [:div.quest
        [:div.main {:data-icon (quest :quest/icon)}
         [:div.info
-         [:h1 (quest :quest/name)]
+         [:h1
+          (quest :quest/name)
+          (when (> (quest :quest/goal) 1)
+            [:span.count " × " (quest :quest/goal)])]
          [:div.progress
           (for [i (range (quest :quest/goal))]
             [:div.icon {:class (if (< i (quest-record :quest-record/progress))

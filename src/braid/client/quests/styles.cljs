@@ -82,7 +82,10 @@
           [:h1
            {:font-size (em 1.2)
             :margin 0
-            :display "inline-block"}]
+            :display "inline-block"}
+
+           [:.count
+            {:color "#999"}]]
 
           [:.progress
            {:display "inline-block"
