@@ -39,8 +39,8 @@
          (reset! tag-id-atom new-tag-id))
        :reagent-render
        (fn [tag-id]
-         (let [path (routes/tag-page-path {:group-id @open-group-id
-                                           :tag-id (@tag :id)})
+         (let [path (routes/search-page-path {:group-id @open-group-id
+                                              :query (str "#" (@tag :name))})
                color (id->color (@tag :id))]
            [:a.tag.pill {:class (if @user-subscribed-to-tag? "on" "off")
                          :tabIndex -1
@@ -67,8 +67,8 @@
 
        :reagent-render
        (fn [user-id]
-         (let [path (routes/user-page-path {:group-id @open-group-id
-                                            :user-id user-id})
+         (let [path (routes/search-page-path {:group-id @open-group-id
+                                              :query (str "@" (@user :nickname))})
                color (id->color user-id)]
            [:a.user.pill {:class (str (case @user-status :online "on" "off")
                                       (when @admin? " admin"))
