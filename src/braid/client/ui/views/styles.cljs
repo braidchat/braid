@@ -7,6 +7,7 @@
             [braid.client.ui.styles.sidebar]
             [braid.client.ui.styles.imports]
             [braid.client.ui.styles.misc]
+            [braid.client.ui.styles.pills]
             [braid.client.ui.styles.animations]
             [braid.client.ui.styles.embed]
             [braid.client.ui.styles.login]
@@ -46,9 +47,8 @@
                braid.client.ui.styles.pages.bots/bots-page
                braid.client.ui.styles.pages.uploads/uploads-page
                braid.client.ui.styles.login/login
-               braid.client.ui.styles.misc/tag
-               braid.client.ui.styles.misc/user
-               braid.client.ui.styles.misc/button
+               braid.client.ui.styles.pills/tag
+               braid.client.ui.styles.pills/user
                braid.client.ui.styles.misc/status
                (braid.client.ui.styles.misc/threads vars/pad)
                (braid.client.ui.styles.thread/thread vars/pad)

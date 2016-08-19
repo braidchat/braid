@@ -6,14 +6,16 @@
 (def flex
   {:display #{:flex :-webkit-flex}})
 
+(defn mini-text []
+  {:font-size (em 0.75)
+   :text-transform "uppercase"
+    :letter-spacing (em 0.1)})
+
 (def pill-box
   [:&
-   {:font-size (em 0.75)
-    :display "inline-block"
+   {:display "inline-block"
     :padding [[0 (em 0.5)]]
     :border-radius (em 0.5)
-    :text-transform "uppercase"
-    :letter-spacing (em 0.1)
     :background-color "#222"
     :border [[(px 1) "solid" "#222"]]
     :height (em 1.75)
@@ -26,6 +28,7 @@
     :cursor "pointer"
     :text-decoration "none"
     :text-align "center"}
+   (mini-text)
   [:&.on
    {:color [["white" "!important"]]}]
   [:&.off
@@ -35,17 +38,18 @@
   [:&
    pill-box
    [:&
-    {:color vars/grey-text
-     :border [[(px 1) "solid" vars/grey-text]]
+    {:color "#888"
+     :border [[(px 1) "solid" "#BBB"]]
      :background "none"}]
 
    [:&:hover
-    {:color "#eee"
-     :background vars/grey-text
+    {:color "#EEE"
+     :background "#888"
+     :border-color "#888"
      :cursor "pointer"}]
 
    [:&:active
-    {:color "#eee"
+    {:color "#EEE"
      :background "#666"
      :border-color "#666"
      :cursor "pointer"}]])

@@ -82,33 +82,20 @@
    [".page.channel > .title::before"
     (mixins/fontawesome \uf02b)]])
 
-(def tag
-  [:.tag
-   mixins/pill-box])
-
-(def user
-  [:.user
-   mixins/pill-box
-   [:&.admin:before
-    (mixins/fontawesome \uf0e3)]])
-
-(def button
-  [:.button
-   mixins/pill-button
-   {:margin-left (em 1)}])
 
 (defn threads [pad]
-  [:.threads
-   mixins/flex
-   {:position "absolute"
-    :top (m/+ vars/top-bar-height vars/pad vars/pad)
-    :right 0
-    :bottom 0
-    :left 0
-    :padding-left vars/pad
+  [:.page
+   ["> .threads"
+    mixins/flex
+    {:position "absolute"
+     :top (m/+ vars/top-bar-height vars/pad vars/pad)
+     :right 0
+     :bottom 0
+     :left 0
+     :padding-left vars/pad
 
-    :align-items "flex-end"
-    :overflow-x "scroll" }])
+     :align-items "flex-end"
+     :overflow-x "scroll" }]])
 
 (def status
   [".app > .status"
