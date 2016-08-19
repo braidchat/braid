@@ -34,6 +34,7 @@
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.2"]
                  [reagent "0.6.0-rc"]
+                 [re-frame "0.8.0"]
                  [cljsjs/husl "6.0.1-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
                  ;shared
@@ -44,7 +45,6 @@
                  [prismatic/schema "1.1.2"]
 
                  ;mobile
-                 [re-frame "0.7.0"]
                  [garden "1.3.2"]]
 
   :main braid.server.handler

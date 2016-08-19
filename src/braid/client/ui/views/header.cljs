@@ -7,8 +7,8 @@
 
 (defn current-user-button-view []
   (let [user-id (subscribe [:user-id])
-        user-avatar-url (subscribe [:user-avatar-url @user-id])
-        user-nickname (subscribe [:nickname @user-id])
+        user-avatar-url (subscribe [:user-avatar-url] [user-id])
+        user-nickname (subscribe [:nickname] [user-id])
         open-group-id (subscribe [:open-group-id])
         current-path (subscribe [:page-path])]
     (fn []

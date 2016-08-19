@@ -1,42 +1,25 @@
 (ns braid.client.state
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [braid.client.store :as store]
-            [clojure.set :refer [union intersection subset?]])
+            [re-frame.core :as re-frame :refer [reg-sub reg-sub-raw]])
   (:import goog.Uri))
 
-(defmulti subscription
-  "Create a reaction for the particular type of information.
-  Do not call directly, should be invoked by `subscribe`"
-  {:arglists '([state [sub-name args]])}
-  (fn [_ [sub-name _]] sub-name))
+(def subscribe re-frame/subscribe)
 
-(defn subscribe
-  "Get a reaction for the given data.
-  In one-argument form, this looks like `(subscribe [:key arg1 arg2])`
-  Two-argument form enables you to have a subscription which takes reactions or
-  atoms as arguments, e.g.
-  `(let [foo (subscribe [:some-key 1])
-         bar (r/atom ...)
-         baz (subscribe [:other-key 2] [foo bar])]
-     ...)"
-  ([v] (subscription store/app-state v))
-  ([v dynv] ; Dynamic subscription
-   (let [dyn-vals (reaction (mapv deref dynv))
-         sub (reaction (subscription store/app-state (into v @dyn-vals)))]
-     (reaction @@sub))))
+(reg-sub
+  :open-group-id
+  (fn [state _]
+    (get-in state [:open-group-id])))
 
-(defmethod subscription :default
-  [_ [sub-name args]]
-  (ex-info (str "No subscription for " sub-name) {::name sub-name ::args args}))
+(reg-sub-raw
+  :active-group
+  (fn [state _]
+    (let [group-id (reaction (:open-group-id @state))]
+      (reaction (get-in @state [:groups @group-id])))))
 
-(defmethod subscription :active-group
-  [state _]
-  (let [group-id (reaction (:open-group-id @state))]
-    (reaction (get-in @state [:groups @group-id]))))
-
-(defmethod subscription :groups
-  [state _]
-  (reaction (vals (:groups @state))))
+(reg-sub
+  :groups
+  (fn [state _]
+    (vals (:groups state))))
 
 (defn order-groups
   "Helper function to impose an order on groups.
@@ -52,248 +35,270 @@
         (map (comp first by-id) group-order)
         unord))))
 
-(defmethod subscription :ordered-groups
-  [state _]
-  (let [groups (subscription state [:groups])
-        group-order (subscription state [:user-preference :groups-order])]
-    (reaction (order-groups @groups @group-order))))
+(reg-sub
+  :ordered-groups
+  :<- [:groups]
+  :<- [:user-preference :groups-order]
+  (fn [[groups group-order] _]
+    (order-groups groups group-order)))
 
-(defmethod subscription :group-threads
-  [state [_ group-id]]
-  (reaction (->> (get-in @state [:group-threads group-id])
-                 (map #(get-in @state [:threads %]))
-                 doall)))
+(reg-sub-raw
+  :group-bots
+  (fn [state _ [group-id]]
+    (reaction (get-in @state [:groups group-id :bots]))))
 
-(defmethod subscription :group-admins
-  [state [_ group-id]]
-  (reaction (get-in @state [:groups group-id :admins])))
+(reg-sub-raw
+  :user
+  (fn [state [_ q-user-id] [d-user-id]]
+    (let [user-id (or d-user-id q-user-id)]
+      (reaction (if-let [u (get-in @state [:users user-id])]
+                  u
+                  (let [g-id (@state :open-group-id)
+                        group-bots (get-in @state [:groups g-id :bots])]
+                    (-> group-bots
+                        (->> (filter (fn [b] (= (b :user-id) user-id))))
+                        first
+                        (assoc :bot? true))))))))
 
-(defmethod subscription :group-bots
-  [state [_ group-id]]
-  (reaction (get-in @state [:groups group-id :bots])))
+(reg-sub-raw
+  :users
+  (fn [state _]
+    (reaction (@state :users))))
 
-(defmethod subscription :user
-  [state [_ user-id]]
-  (reaction (if-let [u (get-in @state [:users user-id])]
-              u
-              (let [g-id (@state :open-group-id)
-                    group-bots (get-in @state [:groups g-id :bots])]
-                (-> group-bots
-                    (->> (filter (fn [b] (= (b :user-id) user-id))))
-                    first
-                    (assoc :bot? true))))))
+(reg-sub-raw
+  :user-is-group-admin?
+  (fn [state _ [user-id group-id]]
+    (reaction (contains? (get-in @state [:groups group-id :admins]) user-id))))
 
-(defmethod subscription :users
-  [state _]
-  (reaction (@state :users)))
+(reg-sub-raw
+  :current-user-is-group-admin?
+  (fn [state _ [group-id]]
+    (reaction (->> (get-in @state [:session :user-id])
+                   (contains? (set (get-in @state [:groups group-id :admins])))))))
 
-(defmethod subscription :user-is-group-admin?
-  [state [_ user-id group-id]]
-  (reaction (contains? (get-in @state [:groups group-id :admins]) user-id)))
+(reg-sub-raw
+  :open-thread-ids
+  (fn [state _]
+    (reaction (get-in @state [:user :open-thread-ids]))))
 
-(defmethod subscription :current-user-is-group-admin?
-  [state [_ group-id]]
-  (reaction (->> (get-in @state [:session :user-id])
-                 (contains? (set (get-in @state [:groups group-id :admins]))))))
+(reg-sub-raw
+  :group-unread-count
+  (fn [state [_ group-id]]
+    (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
+          threads (reaction (@state :threads))
+          tags (reaction (@state :tags))
+          users (reaction (@state :users))
+          thread-in-group? (fn [thread] (= group-id (thread :group-id)))
+          thread-unseen? (fn [thread] (> (->> (thread :messages)
+                                              (map :created-at)
+                                              (apply max))
+                                         (thread :last-open-at)))
+          unseen-threads (reaction
+                           (->>
+                             (select-keys @threads @open-thread-ids)
+                             vals
+                             (filter thread-in-group?)
+                             (filter thread-unseen?)))]
+      (reaction (count @unseen-threads)))))
 
-(defmethod subscription :open-thread-ids
-  [state _]
-  (reaction (get-in @state [:user :open-thread-ids])))
+(reg-sub-raw
+  :page
+  (fn [state _]
+    (reaction (@state :page))))
 
-(defmethod subscription :group-unread-count
-  [state [_ group-id]]
-  (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
-        threads (reaction (@state :threads))
-        tags (reaction (@state :tags))
-        users (reaction (@state :users))
-        thread-in-group? (fn [thread] (= group-id (thread :group-id)))
-        thread-unseen? (fn [thread] (> (->> (thread :messages)
-                                            (map :created-at)
-                                            (apply max))
-                                       (thread :last-open-at)))
-        unseen-threads (reaction
-                         (->>
-                           (select-keys @threads @open-thread-ids)
-                           vals
-                           (filter thread-in-group?)
-                           (filter thread-unseen?)))]
-    (reaction (count @unseen-threads))))
+(reg-sub
+  :page-path
+  :<- [:page]
+  :<- [:open-group-id]
+  (fn [[page open-group] _]
+    ; depend on page & group, so when the page changes this sub updates too
+    (.getPath (.parse Uri js/window.location))))
 
-(defmethod subscription :page
-  [state _]
-  (reaction (@state :page)))
+(reg-sub-raw
+  :thread
+  (fn [state _ [thread-id]]
+    (reaction (get-in @state [:threads thread-id]))))
 
-(defmethod subscription :page-path
-  [state _]
-  (let [page (subscription state [:page])
-        open-group (subscription state [:open-group-id])]
+(reg-sub-raw
+  :threads
+  (fn [state _]
+    (reaction (@state :threads))))
+
+(reg-sub-raw
+  :page-id
+  (fn [state _]
+    (reaction (get-in @state [:page :id]))))
+
+(reg-sub-raw
+  :open-threads
+  (fn [state _ [group-id]]
+    (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
+          threads (reaction (@state :threads))
+          open-threads (reaction (vals (select-keys @threads @open-thread-ids)))]
+      (reaction
+        (doall (filter (fn [thread] (= (thread :group-id) group-id))
+                       @open-threads))))))
+
+(reg-sub-raw
+  :recent-threads
+  (fn [state _ [group-id]]
+    (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
+          threads (reaction (@state :threads))]
+      (reaction
+        (doall (filter (fn [thread] (and
+                                      (= (thread :group-id) group-id)
+                                      (not (contains? @open-thread-ids (thread :id)))))
+                       (vals @threads)))))))
+
+(reg-sub-raw
+  :users-in-group
+  (fn [state [_ group-id]]
     (reaction
-      ; depend on page & group, so when the page changes this sub updates too
-      (do @page
-          @open-group
-          (.getPath (.parse Uri js/window.location))))))
+      (->> (@state :users)
+           vals
+           (filter (fn [u] (contains? (set (u :group-ids)) group-id)))
+           doall))))
 
-(defmethod subscription :thread
-  [state [_ thread-id]]
-  (reaction (get-in @state [:threads thread-id])))
+(reg-sub-raw
+  :users-in-open-group
+  (fn [state [_ status]]
+    (reaction (->> @(subscribe [:users-in-group (@state :open-group-id)])
+                   (filter (fn [u] (= status (u :status))))
+                   doall))))
 
-(defmethod subscription :threads
-  [state _]
-  (reaction (@state :threads)))
+(reg-sub-raw
+  :user-id
+  (fn [state _]
+    (reaction (get-in @state [:session :user-id]))))
 
-(defmethod subscription :page-id
-  [state _]
-  (reaction (get-in @state [:page :id])))
+(reg-sub-raw
+  :tags
+  (fn [state _]
+    (reaction (vals (get-in @state [:tags])))))
 
-(defmethod subscription :open-threads
-  [state [_ group-id]]
-  (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
-        threads (reaction (@state :threads))
-        open-threads (reaction (vals (select-keys @threads @open-thread-ids)))]
+(reg-sub-raw
+  :user-subscribed-to-tag?
+  (fn [state [_ q-tag-id] [d-tag-id]]
+    (let [tag-id (or d-tag-id q-tag-id)]
+      (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))))
+
+(reg-sub-raw
+  :group-subscribed-tags
+  (fn [state _]
     (reaction
-      (doall (filter (fn [thread] (= (thread :group-id) group-id))
-                     @open-threads)))))
+      (into ()
+            (comp
+              (filter (fn [tag] @(subscribe [:user-subscribed-to-tag? (tag :id)])))
+              (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id)))))
+            (vals (get-in @state [:tags]))))))
 
-(defmethod subscription :recent-threads
-  [state [_ group-id]]
-  (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
-        threads (reaction (@state :threads))]
-    (reaction
-      (doall (filter (fn [thread] (and
-                                    (= (thread :group-id) group-id)
-                                    (not (contains? @open-thread-ids (thread :id)))))
-                     (vals @threads))))))
+(reg-sub-raw
+  :user-avatar-url
+  (fn [state _ [user-id]]
+    (reaction (get-in @state [:users user-id :avatar]))))
 
-(defmethod subscription :users-in-group
-  [state [_ group-id]]
-  (reaction
-    (->> (@state :users)
-         vals
-         (filter (fn [u] (contains? (set (u :group-ids)) group-id)))
-         doall)))
+(reg-sub-raw
+  :user-status
+  (fn [state _ [user-id]]
+    (reaction (get-in @state [:users user-id :status]))))
 
-(defmethod subscription :open-group-id
-  [state _]
-  (reaction (get-in @state [:open-group-id])))
+(reg-sub-raw
+  :search-query
+  (fn [state _]
+    (reaction (get-in @state [:page :search-query]))))
 
-(defmethod subscription :users-in-open-group
-  [state [_ status]]
-  (reaction (->> @(subscription state state [:users-in-group (@state :open-group-id)])
-                 (filter (fn [u] (= status (u :status))))
-                 doall)))
+(reg-sub-raw
+  :tags-for-thread
+  (fn [state _ [thread-id]]
+    (let [tag-ids (reaction (get-in @state [:threads thread-id :tag-ids]))
+          tags (reaction (doall
+                           (map (fn [thread-id]
+                                  (get-in @state [:tags thread-id])) @tag-ids)))]
+      tags)))
 
-(defmethod subscription :user-id
-  [state _]
-  (reaction (get-in @state [:session :user-id])))
+(reg-sub-raw
+  :mentions-for-thread
+  (fn [state _ [thread-id]]
+    (let [mention-ids (reaction (get-in @state [:threads thread-id :mentioned-ids]))
+          mentions (reaction (doall
+                               (map (fn [user-id]
+                                      (get-in @state [:users user-id]))
+                                    @mention-ids)))]
+      mentions)))
 
-(defmethod subscription :tags
-  [state _]
-  (reaction (vals (get-in @state [:tags]))))
+(reg-sub-raw
+  :messages-for-thread
+  (fn [state [_ thread-id]]
+    (reaction (get-in @state [:threads thread-id :messages]))))
 
-(defmethod subscription :user-subscribed-to-tag?
-  [state [_ tag-id]]
-  (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))
+(reg-sub-raw
+  :thread-open?
+  (fn [state [_ thread-id]]
+    (reaction (contains? (set (get-in @state [:user :open-thread-ids])) thread-id))))
 
-(defmethod subscription :group-subscribed-tags
-  [state _]
-  (reaction
-    (into ()
-          (comp
-            (filter (fn [tag] @(subscription state [:user-subscribed-to-tag?  (tag :id)])))
-            (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id)))))
-          (vals (get-in @state [:tags])))))
+(reg-sub-raw
+  :thread-focused?
+  (fn [state [_ thread-id]]
+    (reaction (= thread-id (get-in @state [:focused-thread-id])))))
 
-(defmethod subscription :user-avatar-url
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id :avatar])))
+(reg-sub-raw
+  :thread-last-open-at
+  (fn [state [_ thread-id]]
+    (reaction (get-in @state [:threads thread-id :last-open-at]))))
 
-(defmethod subscription :user-status
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id :status])))
+(reg-sub-raw
+  :thread-new-message
+  (fn [state _ [thread-id]]
+    (reaction (if-let [th (get-in @state [:threads thread-id])]
+                (get th :new-message "")
+                (get-in @state [:new-thread-msg thread-id] "")))))
 
-(defmethod subscription :search-query
-  [state _]
-  (reaction (get-in @state [:page :search-query])))
+(reg-sub-raw
+  :errors
+  (fn [state _]
+    (reaction (get-in @state [:errors]))))
 
-(defmethod subscription :tags-for-thread
-  [state [_ thread-id]]
-  (let [tag-ids (reaction (get-in @state [:threads thread-id :tag-ids]))
-        tags (reaction (doall
-                         (map (fn [thread-id]
-                                (get-in @state [:tags thread-id])) @tag-ids)))]
-    tags))
+(reg-sub-raw
+  :login-state
+  (fn [state _]
+    (reaction (get-in @state [:login-state]))))
 
-(defmethod subscription :mentions-for-thread
-  [state [_ thread-id]]
-  (let [mention-ids (reaction (get-in @state [:threads thread-id :mentioned-ids]))
-        mentions (reaction (doall
-                             (map (fn [user-id]
-                                    (get-in @state [:users user-id])) @mention-ids)))]
-    mentions))
+(reg-sub
+  :tag
+  (fn [state _ [tag-id]]
+    (get-in state [:tags tag-id])))
 
-(defmethod subscription :messages-for-thread
-  [state [_ thread-id]]
-  (reaction (get-in @state [:threads thread-id :messages])))
+(reg-sub-raw
+  :nickname
+  (fn [state _ [user-id]]
+    (reaction (get-in @state [:users user-id :nickname]))))
 
-(defmethod subscription :thread-open?
-  [state [_ thread-id]]
-  (reaction (contains? (set (get-in @state [:user :open-thread-ids])) thread-id)))
+(reg-sub-raw
+  :invitations
+  (fn [state _]
+    (reaction (get-in @state [:invitations]))))
 
-(defmethod subscription :thread-focused?
-  [state [_ thread-id]]
-  (reaction (= thread-id (get-in @state [:focused-thread-id]))))
+(reg-sub-raw
+  :pagination-remaining
+  (fn [state _]
+    (reaction (@state :pagination-remaining))))
 
-(defmethod subscription :thread-last-open-at
-  [state [_ thread-id]]
-  (reaction (get-in @state [:threads thread-id :last-open-at])))
+(reg-sub-raw
+  :user-subscribed-tag-ids
+  (fn [state _]
+    (reaction (set (get-in @state [:user :subscribed-tag-ids])))))
 
-(defmethod subscription :thread-new-message
-  [state [_ thread-id]]
-  (reaction (if-let [th (get-in @state [:threads thread-id])]
-              (get th :new-message "")
-              (get-in @state [:new-thread-msg thread-id] ""))))
+(reg-sub-raw
+  :connected?
+  (fn [state _]
+    (reaction (not-any? (fn [[k _]] (= :disconnected k)) (@state :errors)))))
 
-(defmethod subscription :errors
-  [state _]
-  (reaction (get-in @state [:errors])))
+(reg-sub-raw
+  :new-thread-id
+  (fn [state _]
+    (reaction (get @state :new-thread-id))))
 
-(defmethod subscription :login-state
-  [state _]
-  (reaction (get-in @state [:login-state])))
-
-(defmethod subscription :tag
-  [state [_ tag-id]]
-  (reaction (get-in @state [:tags tag-id])))
-
-(defmethod subscription :group-for-tag
-  [state [_ tag-id]]
-  (reaction (get-in @state [:tags tag-id :group-id])))
-
-(defmethod subscription :nickname
-  [state [_ user-id]]
-  (reaction (get-in @state [:users user-id :nickname])))
-
-(defmethod subscription :invitations
-  [state _]
-  (reaction (get-in @state [:invitations])))
-
-(defmethod subscription :pagination-remaining
-  [state _]
-  (reaction (@state :pagination-remaining)))
-
-(defmethod subscription :user-subscribed-tag-ids
-  [state _]
-  (reaction (set (get-in @state [:user :subscribed-tag-ids]))))
-
-(defmethod subscription :connected?
-  [state _]
-  (reaction (not-any? (fn [[k _]] (= :disconnected k)) (@state :errors))))
-
-(defmethod subscription :new-thread-id
-  [state _]
-  (reaction (get @state :new-thread-id)))
-
-(defmethod subscription :user-preference
-  [state [_ pref]]
-  (reaction (get-in @state [:preferences pref])))
-
+(reg-sub-raw
+  :user-preference
+  (fn [state [_ pref]]
+    (reaction (get-in @state [:preferences pref]))))

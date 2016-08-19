@@ -1,5 +1,6 @@
 (ns braid.client.desktop.core
   (:require [reagent.core :as r]
+            [re-frame.core :refer [dispatch-sync]]
             [braid.client.ui.views.app :refer [app-view]]
             [braid.client.clj-highlighter :as highlighter]
             [braid.client.state.handler.impl]
@@ -10,8 +11,12 @@
 (enable-console-print!)
 
 (defn ^:export init []
+  (dispatch-sync [:initialize-db])
+
   (.addEventListener js/document "visibilitychange"
-                     (fn [e] (dispatch! :set-window-visibility (= "visible" (.-visibilityState js/document)))))
+                     (fn [e]
+                       (dispatch! :set-window-visibility
+                                  [(= "visible" (.-visibilityState js/document))])))
 
   (highlighter/install-highlighter)
 
