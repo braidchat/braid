@@ -16,8 +16,7 @@
   (let [quest-ids-with-records (->> state
                                     :quest-records
                                     vals
-                                    (map (fn [quest-record]
-                                           (quest-record :quest-record/quest-id)))
+                                    (map :quest-record/quest-id)
                                     set)
         next-quest (->> quests
                         (sort-by :quest/order)
