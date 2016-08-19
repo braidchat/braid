@@ -29,7 +29,7 @@
     {:padding vars/pad
      :color vars/grey-text}
 
-    [:.description
+    ["> .description"
      {:width vars/card-width
       ; we want description to appear above the new thread, but below other threads
       ; TODO: is there a way to make description clickable but not cover
