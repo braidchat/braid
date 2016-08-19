@@ -82,16 +82,6 @@
    [".page.channel > .title::before"
     (mixins/fontawesome \uf02b)]])
 
-(def tag
-  [:.tag
-   mixins/pill-box])
-
-(def user
-  [:.user
-   mixins/pill-box
-   [:&.admin:before
-    (mixins/fontawesome \uf0e3)]])
-
 (def button
   [:.button
    mixins/pill-button
