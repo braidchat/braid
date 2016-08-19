@@ -25,7 +25,7 @@
      [:&:before
       (mixins/fontawesome \uf091)]
 
-     ; make it easier to hover over the menu
+     ; make it easier to transition cursor to the menu
      [:&:hover
       {:padding-left (em 5)}]]
 
@@ -105,7 +105,7 @@
 
           [:p
            {:margin 0
-            :width (em 20)}]]
+            :width (em 22)}]]
 
          [:.actions
           {:align-self "center"
