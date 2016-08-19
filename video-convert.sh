@@ -23,6 +23,8 @@
 #
 # 4. Add the image path to `braid.client.quests.list`
 #
+# For Linux, consider using byzanz: http://linux.die.net/man/1/byzanz-record
+#
 # Code based on http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
 
 INFILE=$1
