@@ -547,4 +547,6 @@
   (helpers/set-call-status state (call :id) status))
 
 (defmethod handler :set-receiver-call-status [state [_ [call status]]]
+  (when (= status :accepted)
+    (rtc/set-caller-stream))
   (helpers/set-call-status state (call :id) status))

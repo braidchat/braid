@@ -92,7 +92,7 @@
     sending-peer-connection
     handle-ice-candidate
     handle-stream)
-  (set-connection-atom
+  #_(set-connection-atom
     (js/webkitRTCPeerConnection. (clj->js {:iceServers servers}))
     receiving-peer-connection
     handle-ice-candidate
