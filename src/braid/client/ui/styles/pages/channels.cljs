@@ -19,8 +19,7 @@
     [:.count
      {:margin-right (em 0.5)}
       [:&:after
-       {:font-family "fontawesome"
-        :margin-left (em 0.25)}]
+       {:margin-left (em 0.25)}]
 
       [:&.threads-count
        [:&:after
