@@ -17,6 +17,7 @@
             [braid.client.ui.styles.pages.me]
             [braid.client.ui.styles.pages.bots]
             [braid.client.ui.styles.pages.uploads]
+            [braid.client.calls.styles]
             [braid.client.ui.styles.vars :as vars]))
 
 (defn styles-view []
@@ -50,6 +51,7 @@
                braid.client.ui.styles.pills/tag
                braid.client.ui.styles.pills/user
                braid.client.ui.styles.misc/status
+               (braid.client.calls.styles/call-view)
                (braid.client.ui.styles.misc/threads vars/pad)
                (braid.client.ui.styles.thread/thread vars/pad)
                (braid.client.ui.styles.thread/head vars/pad)

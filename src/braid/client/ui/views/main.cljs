@@ -4,6 +4,7 @@
             [braid.client.ui.views.error-banner :refer [error-banner-view]]
             [braid.client.ui.views.sidebar :refer [sidebar-view]]
             [braid.client.ui.views.header :refer [header-view]]
+            [braid.client.calls.views :refer [call-view]]
             [braid.client.ui.views.pages.inbox :refer [inbox-page-view]]
             [braid.client.ui.views.pages.recent :refer [recent-page-view]]
             [braid.client.ui.views.pages.users :refer [users-page-view]]
@@ -48,4 +49,5 @@
        [sidebar-view]
        (when @group-id
          [header-view])
+       [call-view]
        [page-view]])))
