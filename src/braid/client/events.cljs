@@ -13,36 +13,63 @@
 (defn handler [& args]
   (ex-info "Turn this into a fx with :dispatch" {:args args}))
 
+(defn name->open-tag-id
+  "Lookup tag by name in the open group"
+  [state tag-name]
+  (let [open-group (state :open-group-id)]
+    (->> (state :tags)
+         vals
+         (filter (fn [t] (and (= open-group (t :group-id)) (= tag-name (t :name)))))
+         first
+         :id)))
+
 (defn extract-tag-ids
-  [text]
+  [state text]
   (let [mentioned-names (->> (re-seq util/sigiled-tag-name-re text)
                              (map second))]
     (->> mentioned-names
-         (map store/name->open-tag-id)
+         (map (partial name->open-tag-id state))
          (remove nil?))))
 
+(defn all-users
+  [state]
+  (vals (get-in state [:users])))
+
+(defn user-in-open-group?
+  [state user-id]
+  (contains? (set (get-in state [:users user-id :group-ids]))
+             (state :open-group-id)))
+
 (defn extract-user-ids
-  [text]
+  [state text]
   (let [mentioned-names (->> (re-seq util/sigiled-nickname-re text)
                              (map second))
         nick->id (reduce (fn [m {:keys [id nickname]}] (assoc m nickname id))
                          {}
-                         (store/all-users))]
+                         (all-users state))]
     (->> mentioned-names
          (map nick->id)
-         (filter store/user-in-open-group?)
+         (filter (partial user-in-open-group? state))
          (remove nil?))))
 
+(defn nickname->user
+  [state nickname]
+  (->> (get-in state [:users])
+       vals
+       (filter (fn [u] (= nickname (u :nickname))))
+       ; nicknames are unique, so take the first
+       first))
+
 (defn identify-mentions
-  [content]
+  [state content]
   (-> content
       (string/replace util/sigiled-nickname-re
                       (fn [[m nick]]
                         ; sometimes need leading whitespace, because javascript regex doesn't have lookbehind
                         (str (second (re-matches #"^(\s).*" m))
                              "@"
-                             (if-let [user-id (:id (store/nickname->user nick))]
-                                   (if (store/user-in-open-group? user-id)
+                             (if-let [user-id (:id (nickname->user state nick))]
+                                   (if (user-in-open-group? state user-id)
                                      user-id
                                      nick)
                                    nick))))
@@ -50,7 +77,7 @@
                       (fn [[m tag-name]]
                         ; sometimes need leading whitespace, because javascript regex doesn't have lookbehind
                         (str (second (re-matches #"^(\s).*" m))
-                             "#" (or (store/name->open-tag-id tag-name)
+                             "#" (or (name->open-tag-id state tag-name)
                                       tag-name))))))
 
 (reg-event-db
@@ -84,13 +111,15 @@
     (if-not (string/blank? (data :content))
       (let [message (schema/make-message
                       {:user-id (helpers/current-user-id state)
-                       :content (identify-mentions (data :content))
+                       :content (identify-mentions state (data :content))
                        :thread-id (data :thread-id)
                        :group-id (data :group-id)
-                       :mentioned-tag-ids (concat (data :mentioned-tag-ids)
-                                                  (extract-tag-ids (data :content)))
-                       :mentioned-user-ids (concat (data :mentioned-user-ids)
-                                                   (extract-user-ids (data :content)))})]
+                       :mentioned-tag-ids (concat
+                                            (data :mentioned-tag-ids)
+                                            (extract-tag-ids state (data :content)))
+                       :mentioned-user-ids (concat
+                                             (data :mentioned-user-ids)
+                                             (extract-user-ids state (data :content)))})]
         (sync/chsk-send!
           [:braid.server/new-message message]
           2000

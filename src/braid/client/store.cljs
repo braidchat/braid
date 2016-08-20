@@ -75,34 +75,6 @@
 
 ; GETTERS
 
-; used in handlers/extract-user-ids
-
-(defn all-users []
-  (vals (get-in @app-state [:users])))
-
-(defn user-in-open-group? [user-id]
-  (contains? (set (get-in @app-state [:users user-id :group-ids])) (@app-state :open-group-id)))
-
-; use in handlers/identify-mentions
-
-(defn nickname->user [nickname]
-  (->> (get-in @app-state [:users])
-       vals
-       (filter (fn [u] (= nickname (u :nickname))))
-       ; nicknames are unique, so take the first
-       first))
-
-; used in handlers/extract-tag-ids
-
-(defn name->open-tag-id
-  "Lookup tag by name in the open group"
-  [tag-name]
-  (let [open-group (@app-state :open-group-id)]
-    (->> (@app-state :tags)
-         vals
-         (filter (fn [t] (and (= open-group (t :group-id)) (= tag-name (t :name)))))
-         first
-         :id)))
 
 ; used in autocomplete and group_settings
 
