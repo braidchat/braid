@@ -1,6 +1,6 @@
 (ns braid.client.ui.views.pages.user
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [braid.client.ui.views.call :refer [call-view]]
+            [braid.client.calls.views :refer [call-view]]
             [braid.client.ui.views.pills :refer [user-pill-view]]
             [braid.client.ui.views.threads :refer [threads-view]]
             [braid.client.state :refer [subscribe]]))

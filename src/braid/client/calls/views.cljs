@@ -1,4 +1,4 @@
-(ns braid.client.ui.views.call
+(ns braid.client.calls.views
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.client.ui.views.pills :refer [user-pill-view]]
