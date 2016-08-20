@@ -104,26 +104,6 @@
          first
          :id)))
 
-; used in autocomplete:
-
-(defn users-in-group [group-id]
-  (filter (fn [u] (contains? (set (u :group-ids)) group-id)) (vals (@app-state :users))))
-
-(defn users-in-open-group []
-  (users-in-group (@app-state :open-group-id)))
-
-(defn tags-in-group [group-id]
-  (filter #(= group-id (% :group-id)) (vals (@app-state :tags))))
-
-(defn tags-in-open-group []
-  (tags-in-group (@app-state :open-group-id)))
-
-(defn bots-in-open-group []
-  (get-in @app-state [:groups (get @app-state :open-group-id) :bots]))
-
-(defn is-subscribed-to-tag? [tag-id]
-  (contains? (get-in @app-state [:user :subscribed-tag-ids]) tag-id))
-
 ; used in views.message
 
 (defn valid-user-id? [user-id]

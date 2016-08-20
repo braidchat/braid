@@ -151,7 +151,7 @@
                                 :borderWidth "3px"
                                 :borderStyle "solid"
                                 :borderRadius "3px"}
-                               (when (store/is-subscribed-to-tag? (tag :id))
+                               (when @(subscribe [:user-subscribed-to-tag? (tag :id)])
                                  {:backgroundColor (id->color (tag :id))}))}]
                            [:div.name (tag :name)]
                            [:div.extra (or (tag :description)
