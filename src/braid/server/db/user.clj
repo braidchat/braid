@@ -3,7 +3,8 @@
             [clojure.edn :as edn]
             [clojure.string :as string]
             [crypto.password.scrypt :as password]
-            [braid.server.db.common :refer :all]))
+            [braid.server.db.common :refer :all]
+            [braid.server.quests.db :refer [activate-first-quests!]]))
 
 (defn email-taken?
   [conn email]
@@ -12,13 +13,15 @@
 (defn create-user!
   "creates a user, returns id"
   [conn {:keys [id email avatar nickname password]}]
-  (->> {:user/id id
-        :user/email email
-        :user/avatar avatar
-        :user/nickname (or nickname (-> email (string/split #"@") first))
-        :user/password-token (password/encrypt password)}
-       (create-entity! conn)
-       db->user))
+  (let [user (->> {:user/id id
+                   :user/email email
+                   :user/avatar avatar
+                   :user/nickname (or nickname (-> email (string/split #"@") first))
+                   :user/password-token (password/encrypt password)}
+                  (create-entity! conn)
+                  db->user)]
+    (activate-first-quests! conn id)
+    user))
 
 (defn create-oauth-user!
   "Create a user that logins via oauth (and hence has no password)"

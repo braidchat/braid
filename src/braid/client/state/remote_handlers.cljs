@@ -4,7 +4,8 @@
     [braid.client.router :as router]
     [braid.client.desktop.notify :as notify]
     [braid.client.dispatcher :refer [dispatch!]]
-    [braid.client.calls.remote-handlers]))
+    [braid.client.calls.remote-handlers]
+    [braid.client.quests.remote-handlers]))
 
 (defmethod sync/event-handler :braid.client/thread
   [[_ data]]

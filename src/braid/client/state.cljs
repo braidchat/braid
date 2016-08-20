@@ -3,7 +3,8 @@
             [braid.client.store :as store]
             [clojure.set :refer [union intersection subset?]]
             [braid.client.state.subscription :refer [subscription]]
-            [braid.client.calls.subscriptions])
+            [braid.client.calls.subscriptions]
+            [braid.client.quests.subscriptions])
   (:import goog.Uri))
 
 (defn subscribe

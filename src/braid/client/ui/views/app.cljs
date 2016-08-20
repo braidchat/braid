@@ -1,6 +1,5 @@
 (ns braid.client.ui.views.app
-  (:require [reagent.core :as r]
-            [braid.client.state :refer [subscribe]]
+  (:require [braid.client.state :refer [subscribe]]
             [braid.client.ui.views.styles :refer [styles-view]]
             [braid.client.ui.views.main :refer [main-view]]
             [braid.client.ui.views.login :refer [login-view]]))
