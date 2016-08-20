@@ -3,7 +3,7 @@
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.sync :as sync]
             [braid.client.schema :as schema]
-            [braid.client.state.helpers :as helpers]
+            [braid.client.calls.helpers :as helpers]
             [braid.client.state.handler.core :refer [handler]]))
 
 (defmethod handler :calls/start-new-call [state [_ data]]

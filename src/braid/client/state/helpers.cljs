@@ -326,11 +326,3 @@
 
 (defn add-group-bot [state group-id bot]
   (update-in state [:groups group-id :bots] #(conj % bot)))
-
-; calls
-
-(defn add-call [state call]
-  (update-in state [:calls] #(assoc % (:id call) call)))
-
-(defn set-call-status [state call-id status]
-  (assoc-in state [:calls call-id :status] status))
