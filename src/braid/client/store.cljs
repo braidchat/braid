@@ -7,6 +7,7 @@
             [braid.common.schema :as app-schema]
             [reagent.core :as r]
             [braid.client.state.helpers :as helpers]
+            [braid.client.calls.state :as calls]
             [braid.client.quests.state :as quests]))
 
 (defonce app-state
@@ -31,8 +32,8 @@
        :user {:open-thread-ids #{}
               :subscribed-tag-ids #{}}
        :new-thread-id (uuid/make-random-squuid)
-       :calls {}
        :focused-thread-id nil}
+      calls/init-state
       quests/init-state)))
 
 (def AppState
@@ -62,8 +63,8 @@
      :user {:open-thread-ids #{s/Uuid}
             :subscribed-tag-ids #{s/Uuid}}
      :new-thread-id s/Uuid
-     :calls {s/Uuid app-schema/Call}
      :focused-thread-id (s/maybe s/Uuid)}
+    calls/CallsState
     quests/QuestsState))
 
 (def check-app-state! (s/validator AppState))
