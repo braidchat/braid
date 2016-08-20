@@ -262,8 +262,8 @@
 
 (reg-sub
   :tag
-  (fn [state _ [tag-id]]
-    (get-in state [:tags tag-id])))
+  (fn [state [_ q-tag-id] [d-tag-id]]
+    (get-in state [:tags (or d-tag-id q-tag-id)])))
 
 (reg-sub
   :nickname

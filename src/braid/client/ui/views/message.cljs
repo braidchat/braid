@@ -1,7 +1,6 @@
 (ns braid.client.ui.views.message
   (:require [reagent.core :as r]
             [clojure.string :as string]
-            [braid.client.store :as store]
             [braid.client.helpers :as helpers :refer [id->color ->color]]
             [re-frame.core :refer [subscribe]]
             [braid.client.ui.views.embed :refer [embed-view]]
@@ -41,13 +40,13 @@
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]
                ;TODO: Subscribe to valid user id
-               (if (store/valid-user-id? (uuid match))
+               (if (some? @(subscribe [:user (uuid match)]))
                  [user-pill-view (uuid match)]
                  [:span "@" match]))}
    :tags
    {:pattern #"#([-0-9a-z]+)"
     :replace (fn [match]
-               (if (store/get-tag (uuid match))
+               (if (some? @(subscribe [:tag (uuid match)]))
                  [tag-pill-view (uuid match)]
                  [:span "#" match]))}
    :emoji-shortcodes

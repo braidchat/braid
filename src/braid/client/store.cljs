@@ -104,14 +104,6 @@
          first
          :id)))
 
-; used in views.message
-
-(defn valid-user-id? [user-id]
-  (some? (get-in @app-state [:users user-id])))
-
-(defn get-tag [tag-id]
-  (get-in @app-state [:tags tag-id]))
-
 ; used in autocomplete and group_settings
 
 (defn id->group [group-id]
