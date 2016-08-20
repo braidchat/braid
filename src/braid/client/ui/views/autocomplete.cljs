@@ -159,7 +159,7 @@
                 (cons (when-not (or exact-match? (string/blank? query))
                         (let [tag (merge (schema/make-tag)
                                          {:name query
-                                          :group-id (store/open-group-id)})]
+                                          :group-id @open-group-id})]
                           {:key (constantly (tag :id))
                            :action
                            (fn []

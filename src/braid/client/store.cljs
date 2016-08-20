@@ -81,8 +81,3 @@
 (defn id->group [group-id]
   (get-in @app-state [:groups group-id]))
 
-; used in autocomplete and routes
-
-(defn open-group-id []
-  (get @app-state :open-group-id))
-
