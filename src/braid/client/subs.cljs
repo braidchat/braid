@@ -1,4 +1,4 @@
-(ns braid.client.state
+(ns braid.client.subs
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [re-frame.core :refer [subscribe reg-sub reg-sub-raw]])
   (:import goog.Uri))
