@@ -182,7 +182,8 @@
          rest)))
 
 (defn message-view [message embed-update-chan]
-  (let [sender (subscribe [:user (message :user-id)])]
+  (let [sender (subscribe [:user (message :user-id)])
+        current-group (subscribe [:open-group-id])]
     (r/create-class
       {:component-did-mount
        (fn []
@@ -194,8 +195,8 @@
        :reagent-render
        (fn [message embed-update-chan]
          (let [sender-path (if (@sender :bot?)
-                             (routes/bots-path {:group-id (routes/current-group)})
-                             (routes/user-page-path {:group-id (routes/current-group)
+                             (routes/bots-path {:group-id @current-group})
+                             (routes/user-page-path {:group-id @current-group
                                                      :user-id (@sender :id)}))]
            [:div.message {:class (str " " (when (:collapse? message) "collapse")
                                       " " (if (:unseen? message) "unseen" "seen")

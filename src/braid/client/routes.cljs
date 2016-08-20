@@ -1,6 +1,6 @@
 (ns braid.client.routes
   (:require [secretary.core :as secretary :refer-macros [defroute]]
-            [braid.client.store :as store]
+            [re-frame.core :refer [subscribe]]
             [braid.client.state :as state]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.router :as router]))
@@ -68,13 +68,4 @@
   (dispatch! :set-group-and-page [(uuid group-id) {:type (keyword page-id)}]))
 
 (defroute index-path "/" {}
-  (when-let [group-id (->> @store/app-state
-                           ((juxt (comp vals :groups)
-                                  (comp :groups-order :preferences)))
-                           (apply state/order-groups)
-                           first
-                           :id)]
-    (go-to! (inbox-page-path {:group-id group-id}))))
-
-(defn current-group []
-  (store/open-group-id))
+  (dispatch! :set-group-and-page [nil {:type :index}]))

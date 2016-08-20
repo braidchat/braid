@@ -1,5 +1,5 @@
 (ns braid.client.ui.views.main
-  (:require [braid.client.state :refer [subscribe]]
+  (:require [re-frame.core :refer [subscribe]]
             [braid.client.routes :as routes]
             [braid.client.ui.views.error-banner :refer [error-banner-view]]
             [braid.client.ui.views.sidebar :refer [sidebar-view]]
@@ -41,6 +41,11 @@
         :settings [group-settings-view]
         :global-settings [global-settings-page-view]
         :changelog [changelog-view]
+        :index (do (when-let [group-id (-> @(subscribe [:ordered-groups])
+                                           first
+                                           :id)]
+                     (routes/go-to! (routes/inbox-page-path {:group-id group-id})))
+                   [:h1 "Redirecting..."])
         (do (routes/go-to! (routes/index-path))
             [:h1 "???"])))))
 
