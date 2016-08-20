@@ -1,4 +1,4 @@
-(ns braid.client.state.handler.impl
+(ns braid.client.events
   (:require [clojure.string :as string]
             [re-frame.core :refer [reg-event-db reg-event-fx]]
             [braid.client.store :as store]
@@ -8,8 +8,10 @@
             [braid.client.router :as router]
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.state.helpers :as helpers]
-            [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.state.handler.core :refer [handler]]))
+            [braid.client.dispatcher :refer [dispatch!]]))
+; XXX
+(defn handler [& args]
+  (ex-info "Turn this into a fx with :dispatch" {:args args}))
 
 (defn extract-tag-ids
   [text]
@@ -269,6 +271,7 @@
   :add-notification-rule
   (fn [state [_ rule]]
     (let [current-rules (get (helpers/get-user-preferences state) :notification-rules [])]
+      ; TODO
       (handler state [:set-preference [:notification-rules (conj current-rules rule)]]))))
 
 (reg-event-db
@@ -276,6 +279,7 @@
   (fn [state [_ rule]]
     (let [new-rules (->> (get (helpers/get-user-preferences state) :notification-rules [])
                          (into [] (remove (partial = rule))))]
+      ; TODO
       (handler state [:set-preference [:notification-rules new-rules]]))))
 
 (reg-event-db
@@ -392,6 +396,7 @@
     (->> (helpers/get-open-threads state)
          (map :id)
          (reduce (fn [state id]
+                   ; TODO
                    (handler state [:hide-thread {:thread-id id :local-only? false}]))
                  state))))
 

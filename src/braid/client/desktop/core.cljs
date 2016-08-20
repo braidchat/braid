@@ -3,11 +3,11 @@
             [re-frame.core :refer [dispatch-sync]]
             [braid.client.ui.views.app :refer [app-view]]
             [braid.client.clj-highlighter :as highlighter]
-            [braid.client.state.handler.impl]
             [braid.client.state.remote-handlers]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.router :as router]
-            braid.client.subs))
+            braid.client.subs
+            braid.client.events))
 
 (enable-console-print!)
 
