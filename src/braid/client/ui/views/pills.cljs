@@ -68,6 +68,20 @@
    [tag-pill tag-id]
    [tag-car-view tag-id]])
 
+(defn call-button-view
+  [callee-id]
+  (let [caller-id (subscribe [:user-id])
+        callee-status (subscribe [:user-status callee-id])]
+    (fn [callee-id]
+      (when (and (= @callee-status :online)
+                 (not= @caller-id callee-id))
+        [:a.button {:on-click
+                    (fn [_]
+                      (dispatch! :calls/start-new-call {:type :audio
+                                                        :caller-id @caller-id
+                                                        :callee-id callee-id}))}
+         "Call"]))))
+
 (defn user-pill
   [user-id]
   (let [user (subscribe [:user user-id])
@@ -86,7 +100,8 @@
   (let [user (subscribe [:user user-id])
         open-group-id (subscribe [:open-group-id])
         admin? (subscribe [:user-is-group-admin? user-id open-group-id])
-        user-status (subscribe [:user-status user-id])]
+        user-status (subscribe [:user-status user-id])
+        current-user-id (subscribe [:user-id])]
     (fn [user-id]
       [:div.card
        [:div.header {:style {:background-color (id->color user-id)}}
@@ -108,7 +123,8 @@
        [:div.actions
         ; [:a.pm "PM"]
         ; [:a.mute "Mute"]
-        [search-button-view (str "@" (@user :nickname))]]])))
+        [search-button-view (str "@" (@user :nickname))]
+        [call-button-view user-id]]])))
 
 (defn user-pill-view
   [user-id]
