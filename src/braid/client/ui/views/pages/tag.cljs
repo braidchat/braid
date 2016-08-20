@@ -3,7 +3,7 @@
             [reagent.ratom :include-macros true :refer-macros [reaction run!]]
             [clojure.string :as string]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.ui.views.threads :refer [threads-view]]
             [braid.client.ui.views.pills :refer [tag-pill-view subscribe-button-view]]))
 

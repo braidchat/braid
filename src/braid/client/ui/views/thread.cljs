@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [clojure.string :as string]
             [reagent.core :as r]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [cljs.core.async :refer [chan put!]]
             [braid.client.routes :as routes]
             [braid.client.dispatcher :refer [dispatch!]]

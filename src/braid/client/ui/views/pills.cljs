@@ -3,7 +3,7 @@
             [braid.client.routes :as routes]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :refer [id->color]]
-            [braid.client.state :refer [subscribe]]))
+            [re-frame.core :refer [subscribe]]))
 
 (defn subscribe-button-view
   [tag-id]

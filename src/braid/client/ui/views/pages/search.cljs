@@ -3,7 +3,7 @@
             [reagent.ratom :include-macros true :refer-macros [reaction run!]]
             [braid.client.ui.views.thread :refer [thread-view]]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.state :refer [subscribe]]))
+            [re-frame.core :refer [subscribe]]))
 
 (defn search-page-view
   []

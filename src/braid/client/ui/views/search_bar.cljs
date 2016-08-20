@@ -5,7 +5,7 @@
             [cljs.core.async :as async :refer [<! put! chan alts!]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :refer [debounce ->color]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.routes :as routes]))
 
 (defn search-bar-view

@@ -1,7 +1,7 @@
 (ns braid.client.ui.views.pages.thread
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [reaction]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.ui.views.thread :refer [thread-view]]
             [braid.client.dispatcher :refer [dispatch!]]))
 

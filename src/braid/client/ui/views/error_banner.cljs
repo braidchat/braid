@@ -1,5 +1,5 @@
 (ns braid.client.ui.views.error-banner
-  (:require [braid.client.state :refer [subscribe]]
+  (:require [re-frame.core :refer [subscribe]]
             [braid.client.dispatcher :refer [dispatch!]]))
 
 (defn error-banner-view []

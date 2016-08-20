@@ -1,6 +1,6 @@
 (ns braid.client.ui.views.pages.users
   (:require [reagent.core :as r]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.ui.views.pills :refer [user-pill-view]]
             [braid.client.dispatcher :refer [dispatch!]]))
 

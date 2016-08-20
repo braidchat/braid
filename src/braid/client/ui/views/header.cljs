@@ -2,7 +2,7 @@
   (:require [reagent.ratom :refer-macros [reaction]]
             [braid.client.routes :as routes]
             [braid.client.helpers :refer [->color]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.ui.views.search-bar :refer [search-bar-view]]))
 
 (defn current-user-button-view []

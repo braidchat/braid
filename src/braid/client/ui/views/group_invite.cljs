@@ -1,7 +1,7 @@
 (ns braid.client.ui.views.group-invite
   (:require [reagent.core :as r]
             [clojure.string :as string]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.dispatcher :refer [dispatch!]])
   (:import [goog.events KeyCodes]))
 

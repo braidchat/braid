@@ -2,7 +2,7 @@
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [reagent.core :as r]
             [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.s3 :as s3]
             [braid.client.routes :as routes]
             [braid.client.ui.views.upload :refer [avatar-upload-view]]))

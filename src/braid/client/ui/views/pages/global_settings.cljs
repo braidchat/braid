@@ -4,7 +4,7 @@
             [clojure.string :as string]
             [braid.client.desktop.notify :as notify]
             [braid.client.ui.views.pills :refer [tag-pill-view]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.store :as store]
             [braid.common.util :refer [valid-nickname?]]

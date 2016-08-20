@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [run!]]
             [clojure.string :as string]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.routes :as routes]
             [braid.client.helpers :as helpers]
