@@ -42,44 +42,44 @@
   (fn [[groups group-order] _]
     (order-groups groups group-order)))
 
-(reg-sub-raw
+(reg-sub
   :group-bots
   (fn [state _ [group-id]]
-    (reaction (get-in @state [:groups group-id :bots]))))
+    (get-in state [:groups group-id :bots])))
 
-(reg-sub-raw
+(reg-sub
   :user
   (fn [state [_ q-user-id] [d-user-id]]
     (let [user-id (or d-user-id q-user-id)]
-      (reaction (if-let [u (get-in @state [:users user-id])]
-                  u
-                  (let [g-id (@state :open-group-id)
-                        group-bots (get-in @state [:groups g-id :bots])]
-                    (-> group-bots
-                        (->> (filter (fn [b] (= (b :user-id) user-id))))
-                        first
-                        (assoc :bot? true))))))))
+      (if-let [u (get-in state [:users user-id])]
+        u
+        (let [g-id (state :open-group-id)
+              group-bots (get-in state [:groups g-id :bots])]
+          (-> group-bots
+              (->> (filter (fn [b] (= (b :user-id) user-id))))
+              first
+              (assoc :bot? true)))))))
 
-(reg-sub-raw
+(reg-sub
   :users
   (fn [state _]
-    (reaction (@state :users))))
+    (state :users)))
 
-(reg-sub-raw
+(reg-sub
   :user-is-group-admin?
   (fn [state _ [user-id group-id]]
-    (reaction (contains? (get-in @state [:groups group-id :admins]) user-id))))
+    (contains? (get-in state [:groups group-id :admins]) user-id)))
 
-(reg-sub-raw
+(reg-sub
   :current-user-is-group-admin?
   (fn [state _ [group-id]]
-    (reaction (->> (get-in @state [:session :user-id])
-                   (contains? (set (get-in @state [:groups group-id :admins])))))))
+    (->> (get-in state [:session :user-id])
+         (contains? (set (get-in state [:groups group-id :admins]))))))
 
-(reg-sub-raw
+(reg-sub
   :open-thread-ids
   (fn [state _]
-    (reaction (get-in @state [:user :open-thread-ids]))))
+    (get-in state [:user :open-thread-ids])))
 
 (reg-sub-raw
   :group-unread-count
@@ -101,10 +101,10 @@
                              (filter thread-unseen?)))]
       (reaction (count @unseen-threads)))))
 
-(reg-sub-raw
+(reg-sub
   :page
   (fn [state _]
-    (reaction (@state :page))))
+    (state :page)))
 
 (reg-sub
   :page-path
@@ -114,20 +114,20 @@
     ; depend on page & group, so when the page changes this sub updates too
     (.getPath (.parse Uri js/window.location))))
 
-(reg-sub-raw
+(reg-sub
   :thread
   (fn [state _ [thread-id]]
-    (reaction (get-in @state [:threads thread-id]))))
+    (get-in state [:threads thread-id])))
 
-(reg-sub-raw
+(reg-sub
   :threads
   (fn [state _]
-    (reaction (@state :threads))))
+    (state :threads)))
 
-(reg-sub-raw
+(reg-sub
   :page-id
   (fn [state _]
-    (reaction (get-in @state [:page :id]))))
+    (get-in state [:page :id])))
 
 (reg-sub-raw
   :open-threads
@@ -150,14 +150,13 @@
                                       (not (contains? @open-thread-ids (thread :id)))))
                        (vals @threads)))))))
 
-(reg-sub-raw
+(reg-sub
   :users-in-group
   (fn [state [_ group-id]]
-    (reaction
-      (->> (@state :users)
-           vals
-           (filter (fn [u] (contains? (set (u :group-ids)) group-id)))
-           doall))))
+    (->> (state :users)
+         vals
+         (filter (fn [u] (contains? (set (u :group-ids)) group-id)))
+         doall)))
 
 (reg-sub-raw
   :users-in-open-group
@@ -166,21 +165,21 @@
                    (filter (fn [u] (= status (u :status))))
                    doall))))
 
-(reg-sub-raw
+(reg-sub
   :user-id
   (fn [state _]
-    (reaction (get-in @state [:session :user-id]))))
+    (get-in state [:session :user-id])))
 
-(reg-sub-raw
+(reg-sub
   :tags
   (fn [state _]
-    (reaction (vals (get-in @state [:tags])))))
+    (vals (get-in state [:tags]))))
 
-(reg-sub-raw
+(reg-sub
   :user-subscribed-to-tag?
   (fn [state [_ q-tag-id] [d-tag-id]]
     (let [tag-id (or d-tag-id q-tag-id)]
-      (reaction (contains? (set (get-in @state [:user :subscribed-tag-ids])) tag-id)))))
+      (contains? (set (get-in state [:user :subscribed-tag-ids])) tag-id))))
 
 (reg-sub-raw
   :group-subscribed-tags
@@ -192,20 +191,20 @@
               (filter (fn [tag] (= (get-in @state [:open-group-id]) (tag :group-id)))))
             (vals (get-in @state [:tags]))))))
 
-(reg-sub-raw
+(reg-sub
   :user-avatar-url
   (fn [state _ [user-id]]
-    (reaction (get-in @state [:users user-id :avatar]))))
+    (get-in state [:users user-id :avatar])))
 
-(reg-sub-raw
+(reg-sub
   :user-status
   (fn [state _ [user-id]]
-    (reaction (get-in @state [:users user-id :status]))))
+    (get-in state [:users user-id :status])))
 
-(reg-sub-raw
+(reg-sub
   :search-query
   (fn [state _]
-    (reaction (get-in @state [:page :search-query]))))
+    (get-in state [:page :search-query])))
 
 (reg-sub-raw
   :tags-for-thread
@@ -226,82 +225,82 @@
                                     @mention-ids)))]
       mentions)))
 
-(reg-sub-raw
+(reg-sub
   :messages-for-thread
   (fn [state [_ thread-id]]
-    (reaction (get-in @state [:threads thread-id :messages]))))
+    (get-in state [:threads thread-id :messages])))
 
-(reg-sub-raw
+(reg-sub
   :thread-open?
   (fn [state [_ thread-id]]
-    (reaction (contains? (set (get-in @state [:user :open-thread-ids])) thread-id))))
+    (contains? (set (get-in state [:user :open-thread-ids])) thread-id)))
 
-(reg-sub-raw
+(reg-sub
   :thread-focused?
   (fn [state [_ thread-id]]
-    (reaction (= thread-id (get-in @state [:focused-thread-id])))))
+    (= thread-id (get-in state [:focused-thread-id]))))
 
-(reg-sub-raw
+(reg-sub
   :thread-last-open-at
   (fn [state [_ thread-id]]
-    (reaction (get-in @state [:threads thread-id :last-open-at]))))
+    (get-in state [:threads thread-id :last-open-at])))
 
-(reg-sub-raw
+(reg-sub
   :thread-new-message
   (fn [state _ [thread-id]]
-    (reaction (if-let [th (get-in @state [:threads thread-id])]
-                (get th :new-message "")
-                (get-in @state [:new-thread-msg thread-id] "")))))
+    (if-let [th (get-in state [:threads thread-id])]
+      (get th :new-message "")
+      (get-in state [:new-thread-msg thread-id] ""))))
 
-(reg-sub-raw
+(reg-sub
   :errors
   (fn [state _]
-    (reaction (get-in @state [:errors]))))
+    (get-in state [:errors])))
 
-(reg-sub-raw
+(reg-sub
   :login-state
   (fn [state _]
-    (reaction (get-in @state [:login-state]))))
+    (get-in state [:login-state])))
 
 (reg-sub
   :tag
   (fn [state _ [tag-id]]
     (get-in state [:tags tag-id])))
 
-(reg-sub-raw
+(reg-sub
   :nickname
   (fn [state _ [user-id]]
-    (reaction (get-in @state [:users user-id :nickname]))))
+    (get-in state [:users user-id :nickname])))
 
-(reg-sub-raw
+(reg-sub
   :invitations
   (fn [state _]
-    (reaction (get-in @state [:invitations]))))
+    (get-in state [:invitations])))
 
-(reg-sub-raw
+(reg-sub
   :pagination-remaining
   (fn [state _]
-    (reaction (@state :pagination-remaining))))
+    (state :pagination-remaining)))
 
-(reg-sub-raw
+(reg-sub
   :user-subscribed-tag-ids
   (fn [state _]
-    (reaction (set (get-in @state [:user :subscribed-tag-ids])))))
+    (set (get-in state [:user :subscribed-tag-ids]))))
 
-(reg-sub-raw
+(reg-sub
   :connected?
   (fn [state _]
-    (reaction (not-any? (fn [[k _]] (= :disconnected k)) (@state :errors)))))
+    (not-any? (fn [[k _]] (= :disconnected k)) (state :errors))))
 
-(reg-sub-raw
+(reg-sub
   :new-thread-id
   (fn [state _]
-    (reaction (get @state :new-thread-id))))
+    (get state :new-thread-id)))
 
-(reg-sub-raw
+(reg-sub
   :user-preference
   (fn [state [_ pref]]
-    (reaction (get-in @state [:preferences pref]))))
+    (get-in state [:preferences pref])))
 
 (reg-sub
   :tags-in-group
