@@ -1,7 +1,6 @@
 (ns braid.client.ui.views.autocomplete
   (:require [clj-fuzzy.metrics :as fuzzy]
             [re-frame.core :refer [subscribe]]
-            [braid.client.store :as store]
             [braid.client.schema :as schema]
             [clojure.string :as string]
             [braid.client.helpers :refer [id->color debounce]]
@@ -174,6 +173,6 @@
                                {:style {:backgroundColor (id->color (tag :id))}}]
                               [:div.name (str "Create tag " (tag :name))]
                               [:div.extra
-                               (:name (store/id->group (tag :group-id)))]])})))
+                               (:name @(subscribe [:group (tag :group-id)]))]])})))
                 (remove nil?)
                 reverse)))))])

@@ -19,6 +19,11 @@
   (fn [state _]
     (vals (:groups state))))
 
+(reg-sub
+  :group
+  (fn [state [_ q-group-id] [d-group-id]]
+    (get-in state [:groups (or d-group-id q-group-id)])))
+
 (defn order-groups
   "Helper function to impose an order on groups.
   This is a seperate function (instead of inline in :ordered-groups because the

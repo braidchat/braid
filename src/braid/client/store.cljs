@@ -72,12 +72,3 @@
       (swap! app-state helpers/display-error
              (gensym :internal-consistency)
              "Something has gone wrong"))))
-
-; GETTERS
-
-
-; used in autocomplete and group_settings
-
-(defn id->group [group-id]
-  (get-in @app-state [:groups group-id]))
-

@@ -114,23 +114,24 @@
 
 (defn notification-rule-view
   [[event condition]]
-  (case event
-    [:tr
-     [:td (case event
-            :any "Any Event"
-            :mention "I am mentioned"
-            :tag "Message is tagged ")]
-     [:td (case event
-            (:any :mention)
-            (str "In "
-                 (if (= condition :any)
-                   "any group"
-                   (:name (store/id->group condition))))
-            :tag [tag-pill-view condition])]
-     [:td [:button {:on-click (fn [_]
-                                (dispatch! :remove-notification-rule
-                                           [event condition]))}
-           "-"]]]))
+  (let [group (if (= condition :any)
+                (r/atom {:name "any group"})
+                (subscribe [:group condition]))]
+    (fn [[event condition]]
+    (case event
+      [:tr
+       [:td (case event
+              :any "Any Event"
+              :mention "I am mentioned"
+              :tag "Message is tagged ")]
+       [:td (case event
+              (:any :mention)
+              (str "In " (:name @group))
+              :tag [tag-pill-view condition])]
+       [:td [:button {:on-click (fn [_]
+                                  (dispatch! :remove-notification-rule
+                                             [event condition]))}
+             "-"]]]))))
 
 (defn new-rule-view
   []
@@ -175,7 +176,7 @@
            (doall
              (for [group-id (keys @tags)]
                ^{:key group-id}
-               [:optgroup {:label (:name (store/id->group group-id))}
+               [:optgroup {:label (:name @(subscribe [:group group-id]))}
                 (doall
                   (for [tag (get @tags group-id)]
                     ^{:key (tag :id)}
