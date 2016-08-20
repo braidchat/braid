@@ -1,14 +1,10 @@
 (ns braid.client.state
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [braid.client.store :as store]
-            [clojure.set :refer [union intersection subset?]])
+            [clojure.set :refer [union intersection subset?]]
+            [braid.client.state.subscription :refer [subscription]]
+            [braid.client.calls.subscriptions])
   (:import goog.Uri))
-
-(defmulti subscription
-  "Create a reaction for the particular type of information.
-  Do not call directly, should be invoked by `subscribe`"
-  {:arglists '([state [sub-name args]])}
-  (fn [_ [sub-name _]] sub-name))
 
 (defn subscribe
   "Get a reaction for the given data.
@@ -296,30 +292,3 @@
 (defmethod subscription :user-preference
   [state [_ pref]]
   (reaction (get-in @state [:preferences pref])))
-
-(defmethod subscription :calls
-  [state _]
-  (reaction (vals (@state :calls))))
-
-(defmethod subscription :call-status
-  [state [_ call]]
-  (reaction (get-in @state [:calls (call :id) :status])))
-
-(defmethod subscription :new-call
-  [state _]
-  (reaction (->> (@state :calls)
-                 vals
-                 (filter (fn [c] (not= :archived (c :status))))
-                 (sort-by :created-at)
-                 first)))
-
-(defmethod subscription :current-user-is-caller?
-  [state [_ caller-id]]
-  (reaction (= @(subscription state [:user-id]) caller-id)))
-
-(defmethod subscription :correct-nickname
-  [state [_ call]]
-  (let [is-caller? (reaction @(subscription state [:current-user-is-caller? (call :caller-id)]))
-        caller-nickname (reaction @(subscription state [:nickname (call :caller-id)]))
-        callee-nickname (reaction @(subscription state [:nickname (call :callee-id)]))]
-    (reaction (if @is-caller? @callee-nickname @caller-nickname))))
