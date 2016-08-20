@@ -9,9 +9,6 @@
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.state.helpers :as helpers]
             [braid.client.dispatcher :refer [dispatch!]]))
-; XXX
-(defn handler [& args]
-  (ex-info "Turn this into a fx with :dispatch" {:args args}))
 
 (defn name->open-tag-id
   "Lookup tag by name in the open group"
@@ -169,13 +166,12 @@
     (sync/chsk-send! [:braid.server/show-thread thread-id])
     (helpers/show-thread state thread-id)))
 
-(reg-event-db
+(reg-event-fx
   :unsub-thread
-  (fn [state [_ data]]
+  (fn [cofx [_ data]]
     ; TODO
     (sync/chsk-send! [:braid.server/unsub-thread (data :thread-id)])
-    ; TODO
-    (handler state [:hide-thread {:thread-id (data :thread-id) :local-only? true}])))
+    {:dispatch [:hide-thread {:thread-id (data :thread-id) :local-only? true}]}))
 
 (reg-event-db
   :create-tag
@@ -296,20 +292,18 @@
           true (on-success))))
     state))
 
-(reg-event-db
+(reg-event-fx
   :add-notification-rule
-  (fn [state [_ rule]]
+  (fn [{state :db :as cofx} [_ rule]]
     (let [current-rules (get (helpers/get-user-preferences state) :notification-rules [])]
-      ; TODO
-      (handler state [:set-preference [:notification-rules (conj current-rules rule)]]))))
+      {:dispatch [:set-preference [:notification-rules (conj current-rules rule)]]})))
 
 (reg-event-db
   :remove-notification-rule
-  (fn [state [_ rule]]
+  (fn [{state :db :as cofx} [_ rule]]
     (let [new-rules (->> (get (helpers/get-user-preferences state) :notification-rules [])
                          (into [] (remove (partial = rule))))]
-      ; TODO
-      (handler state [:set-preference [:notification-rules new-rules]]))))
+      {:dispatch [:set-preference [:notification-rules new-rules]]})))
 
 (reg-event-db
   :set-search-results
@@ -419,15 +413,14 @@
   (fn [state [_ thread-id]]
     (helpers/focus-thread state thread-id)))
 
-(reg-event-db
+(reg-event-fx
   :clear-inbox
-  (fn [state [_ _]]
-    (->> (helpers/get-open-threads state)
-         (map :id)
-         (reduce (fn [state id]
-                   ; TODO
-                   (handler state [:hide-thread {:thread-id id :local-only? false}]))
-                 state))))
+  (fn [{state :db :as cofx} [_ _]]
+    {:dispatch-n
+     (into ()
+           (comp (map :id)
+                 (map (fn [id] [:hide-thread {:thread-id id :local-only? false}])))
+           (helpers/get-open-threads state))}))
 
 (reg-event-db
   :invite
@@ -537,14 +530,13 @@
           (on-complete bot))))
     state))
 
-(reg-event-db
+(reg-event-fx
   :create-upload
-  (fn [state [_ {:keys [url thread-id group-id]}]]
+  (fn [{state :db :as cofx} [_ {:keys [url thread-id group-id]}]]
     ; TODO
     (sync/chsk-send! [:braid.server/create-upload
                       (schema/make-upload {:url url :thread-id thread-id})])
-    ; TODO
-    (handler state [:new-message {:content url :thread-id thread-id :group-id group-id}])))
+    {:dispatch [:new-message {:content url :thread-id thread-id :group-id group-id}]}))
 
 (reg-event-db
   :get-group-uploads
@@ -670,9 +662,9 @@
   :notify-if-client-out-of-date
   (fn [state [_ server-checksum]]
     (if (not= (aget js/window "checksum") server-checksum)
-      ; TODO
-      (handler state [:display-error [:client-out-of-date "Client out of date - please refresh" :info]])
-      state)))
+      {:dispatch [:display-error
+                  [:client-out-of-date "Client out of date - please refresh" :info]]}
+      {})))
 
 (reg-event-db
   :set-init-data
