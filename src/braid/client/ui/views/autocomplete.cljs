@@ -1,5 +1,6 @@
 (ns braid.client.ui.views.autocomplete
   (:require [clj-fuzzy.metrics :as fuzzy]
+            [re-frame.core :refer [subscribe]]
             [braid.client.store :as store]
             [braid.client.schema :as schema]
             [clojure.string :as string]
@@ -56,7 +57,8 @@
   [
    ; /<bot-name> -> autocompletes bots
    (fn [text]
-     (let [pattern #"^/(\w+)$"]
+     (let [pattern #"^/(\w+)$"
+           open-group (subscribe [:open-group-id])]
        (when-let [bot-name (second (re-find pattern text))]
          (into ()
                (comp (filter (fn [b] (fuzzy-matches? (b :nickname) bot-name)))
@@ -73,7 +75,7 @@
                                 [:img.avatar {:src (b :avatar)}]
                                 [:div.name (b :nickname)]
                                 [:div.extra "..."]])})))
-               (store/bots-in-open-group)))))
+               @(subscribe [:group-bots] [open-group])))))
 
    ; ... :emoji  -> autocomplete emoji
    (fn [text]
@@ -102,29 +104,31 @@
    (fn [text]
      (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (->> (store/users-in-open-group)
-              (filter (fn [u]
-                        (fuzzy-matches? (u :nickname) query)))
-              (map (fn [user]
-                     {:key
-                      (fn [] (user :id))
-                      :action
-                      (fn [])
-                      :message-transform
-                      (fn [text]
-                        (string/replace text pattern (str "@" (user :nickname) " ")))
-                      :html
-                      (fn []
-                        [:div.user-match
-                          [:img.avatar {:src (user :avatar)}]
-                          [:div.name (user :nickname)]
-                          [:div.extra (user :status)]])}))))))
+         (let [group-id (subscribe [:open-group-id])]
+           (->> @(subscribe [:users-in-group @group-id])
+                (filter (fn [u]
+                          (fuzzy-matches? (u :nickname) query)))
+                (map (fn [user]
+                       {:key
+                        (fn [] (user :id))
+                        :action
+                        (fn [])
+                        :message-transform
+                        (fn [text]
+                          (string/replace text pattern (str "@" (user :nickname) " ")))
+                        :html
+                        (fn []
+                          [:div.user-match
+                           [:img.avatar {:src (user :avatar)}]
+                           [:div.name (user :nickname)]
+                           [:div.extra (user :status)]])})))))))
 
    ; ... #<tag>   -> autocompletes tag
    (fn [text]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (let [group-tags (store/tags-in-open-group)
+         (let [open-group-id (subscribe [:open-group-id])
+               group-tags @(subscribe [:tags-in-group @open-group-id])
                exact-match? (some #(= query (:name %)) group-tags)]
            (->> group-tags
                 (filter (fn [t]

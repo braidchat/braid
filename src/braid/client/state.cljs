@@ -302,3 +302,11 @@
   :user-preference
   (fn [state [_ pref]]
     (reaction (get-in @state [:preferences pref]))))
+
+(reg-sub
+  :tags-in-group
+  (fn [state [_ group-id]]
+    (->> (state :tags)
+         vals
+         (filter #(= group-id (:group-id %)))
+         doall)))
