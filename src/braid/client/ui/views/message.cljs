@@ -195,8 +195,8 @@
        (fn [message embed-update-chan]
          (let [sender-path (if (@sender :bot?)
                              (routes/bots-path {:group-id @current-group})
-                             (routes/user-page-path {:group-id @current-group
-                                                     :user-id (@sender :id)}))]
+                             (routes/search-page-path {:group-id @current-group
+                                                       :query (str "@" (@sender :nickname))}))]
            [:div.message {:class (str " " (when (:collapse? message) "collapse")
                                       " " (if (:unseen? message) "unseen" "seen")
                                       " " (when (:first-unseen? message) "first-unseen")

@@ -6,6 +6,9 @@
 (defn- key-by-id [coll]
   (into {} (map (juxt :id identity)) coll))
 
+(defn- key-by [k coll]
+  (into {} (map (juxt k identity)) coll))
+
 ; ALL HELPERS BELOW SHOULD TAKE STATE AS FIRST ARG
 
 ; GETTERS

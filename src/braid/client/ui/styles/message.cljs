@@ -31,26 +31,29 @@
      :position "absolute"
      :border-radius "20%"}]
 
-   [:.info
+   ["> .info"
     {:height "1rem"
      :margin-left (m/+ avatar-size (rem 0.5))
      :overflow "hidden"
      :white-space "nowrap"}
+
     [:.bot-notice
      {:background-color "#c0afc0"
       :border-radius (px 5)
       :padding (rem 0.25)
       :font-weight "bold"
       :color "#413f42"}]
-      [:.nickname
-       {:display "inline"
-        :font-weight "bold"
-        :text-decoration "none"
-        :color "#000"}]
-      [:.time
-       {:display "inline"
-        :margin-left "0.25rem"
-        :color "#ccc"}]]
+
+    [:.nickname
+     {:display "inline"
+      :font-weight "bold"
+      :text-decoration "none"
+      :color "#000"}]
+
+    [:.time
+     {:display "inline"
+      :margin-left "0.25rem"
+      :color "#ccc"}]]
 
    ["> .content"
     {:white-space "pre-wrap"

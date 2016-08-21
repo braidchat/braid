@@ -3,7 +3,8 @@
             [braid.client.routes :as routes]
             [braid.client.helpers :refer [->color]]
             [re-frame.core :refer [subscribe]]
-            [braid.client.ui.views.search-bar :refer [search-bar-view]]))
+            [braid.client.ui.views.search-bar :refer [search-bar-view]]
+            [braid.client.quests.views :refer [quests-header-view quests-menu-view]]))
 
 (defn current-user-button-view []
   (let [user-id (subscribe [:user-id])
@@ -37,7 +38,7 @@
              :title title}
          body]))))
 
-(def left-headers
+(def group-headers
   [{:title "Inbox"
     :route-fn routes/inbox-page-path
     :class "inbox"}
@@ -45,7 +46,7 @@
     :route-fn routes/recent-page-path
     :class "recent"}])
 
-(def right-headers
+(def user-headers
   [{:class "subscriptions"
     :route-fn routes/page-path
     :route-args {:page-id "tags"}
@@ -80,33 +81,36 @@
                  (@page :error?) "error")
         :style {:color (->color group-id)}}])))
 
-(defn left-header-view []
+(defn group-header-view []
   (let [group-id (subscribe [:open-group-id])]
     (fn []
-      [:div.left
+      [:div.group-header
        [:div.bar {:style {:background-color (->color @group-id)}}
         [group-name-view]
         (doall
-          (for [header left-headers]
+          (for [header group-headers]
             ^{:key (header :title)}
             [header-item-view header]))
         [search-bar-view]]
        [loading-indicator-view @group-id]])))
 
-(defn right-header-view []
+(defn user-header-view []
   (let [user-id (subscribe [:user-id])]
     (fn []
-      [:div.right
+      [:div.user-header
        [:div.bar {:style {:background-color (->color @user-id)}}
         [current-user-button-view]
         [:div.more]]
        [:div.options
-        (doall
-          (for [header right-headers]
-            ^{:key (header :class)}
-            [header-item-view header]))]])))
+        [:div.content
+         (doall
+           (for [header user-headers]
+             ^{:key (header :class)}
+             [header-item-view header]))]]])))
 
 (defn header-view []
   [:div.header
-   [left-header-view]
-   [right-header-view]])
+   [group-header-view]
+   [:div.spacer]
+   [quests-header-view]
+   [user-header-view]])

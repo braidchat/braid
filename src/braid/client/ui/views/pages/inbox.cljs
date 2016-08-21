@@ -31,7 +31,6 @@
                               reverse))]
     (fn []
       [:div.page.inbox
-       [:div.title "Inbox"]
        [:div.intro
         (:intro @group)
         [clear-inbox-button-view]]

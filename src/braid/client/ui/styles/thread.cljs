@@ -50,10 +50,10 @@
         {:background vars/limbo-thread-accent-color}]]]
 
    [:&.focused
-    [:.card
+    ["> .card"
      {:box-shadow [[0 (px 10) (px 10) (px 10) "#ccc"]]}]]
 
-   [:.card
+   ["> .card"
     mixins/flex
     {:flex-direction "column"
      :box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
@@ -77,7 +77,7 @@
       :content "\"\""}]]
 
    [:&.private :&.limbo
-    [:.card
+    ["> .card"
      {; needs to be a better way
       ; which is based on the height of the notice
       :max-height "85%"}]]

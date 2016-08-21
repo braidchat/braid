@@ -5,6 +5,48 @@
             [clojure.set :as set]
             [clojure.edn :as edn]))
 
+(defn migrate-2016-08-18
+  "schema change for quests"
+  []
+  @(d/transact db/conn
+     [
+      ; quest-records
+      {:db/ident :quest-record/id
+       :db/valueType :db.type/uuid
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :quest-record/quest-id
+       :db/valueType :db.type/keyword
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :quest-record/user
+       :db/valueType :db.type/ref
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :quest-record/state
+       :db/valueType :db.type/keyword
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      {:db/ident :quest-record/progress
+       :db/valueType :db.type/long
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}])
+
+  (let [user-ids (->> (d/q '[:find ?user-id
+                             :in $
+                             :where
+                             [?u :user/id ?user-id]]
+                           (d/db db/conn))
+                      (map first))]
+    (doseq [user-id user-ids]
+      (db/activate-first-quests! user-id))))
+
 (defn migrate-2016-07-29
   "Add watched threads for bots"
   []
@@ -435,3 +477,4 @@
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
       ]))
+
