@@ -1,7 +1,7 @@
 (ns braid.client.quests.views
   (:require [reagent.core :as r]
+            [re-frame.core :refer [subscribe]]
             [braid.client.quests.list :refer [quests-by-id]]
-            [braid.client.state :refer [subscribe]]
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :refer [->color]]))
 

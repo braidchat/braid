@@ -21,4 +21,6 @@
          [login-view]
 
          :app
-         [main-view])])))
+         [main-view]
+
+         [:p "wha?"])])))

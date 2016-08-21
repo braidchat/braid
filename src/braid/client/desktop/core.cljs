@@ -7,6 +7,7 @@
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.router :as router]
             braid.client.subs
+            braid.client.quests.subscriptions
             braid.client.events))
 
 (enable-console-print!)

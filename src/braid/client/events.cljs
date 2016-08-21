@@ -8,7 +8,8 @@
             [braid.client.router :as router]
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.state.helpers :as helpers]
-            [braid.client.dispatcher :refer [dispatch!]]))
+            [braid.client.dispatcher :refer [dispatch!]]
+            [braid.client.quests.helpers :as quest-helpers]))
 
 (reg-fx :websocket-send (partial apply sync/chsk-send!))
 
@@ -683,7 +684,8 @@
         (helpers/set-groups (data :user-groups))
         (helpers/set-invitations (data :invitations))
         (helpers/set-threads (data :user-threads))
-        (helpers/set-open-threads (data :user-threads)))))
+        (helpers/set-open-threads (data :user-threads))
+        (quest-helpers/set-quest-records (data :quest-records)))))
 
 (reg-event-db
   :leave-group

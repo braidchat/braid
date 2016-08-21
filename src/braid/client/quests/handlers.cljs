@@ -1,8 +1,9 @@
 (ns braid.client.quests.handlers
-  (:require [braid.client.state.handler.core :refer [handler]]
-            [braid.client.quests.helpers :as helpers]
+  (:require [braid.client.quests.helpers :as helpers]
             [braid.client.sync :as sync]
             [cljs-uuid-utils.core :as uuid]))
+
+(defmulti handler (fn [state [event data]] event))
 
 (defn fn-> [state f]
   (f state))
