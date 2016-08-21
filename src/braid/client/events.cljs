@@ -11,7 +11,7 @@
             [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.quests.helpers :as quest-helpers]))
 
-(reg-fx :websocket-send (partial apply sync/chsk-send!))
+(reg-fx :websocket-send (fn [args] (apply sync/chsk-send! args)))
 
 (defn name->open-tag-id
   "Lookup tag by name in the open group"
