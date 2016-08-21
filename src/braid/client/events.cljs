@@ -304,7 +304,7 @@
     (let [current-rules (get (helpers/get-user-preferences state) :notification-rules [])]
       {:dispatch [:set-preference [:notification-rules (conj current-rules rule)]]})))
 
-(reg-event-db
+(reg-event-fx
   :remove-notification-rule
   (fn [{state :db :as cofx} [_ rule]]
     (let [new-rules (->> (get (helpers/get-user-preferences state) :notification-rules [])
@@ -664,9 +664,9 @@
             state
             tags)))
 
-(reg-event-db
+(reg-event-fx
   :notify-if-client-out-of-date
-  (fn [state [_ server-checksum]]
+  (fn [cofx [_ server-checksum]]
     (if (not= (aget js/window "checksum") server-checksum)
       {:dispatch [:display-error
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
