@@ -66,7 +66,7 @@
 
 (defmethod sync/event-handler :braid.client/user-left
   [[_ [group-id user-id]]]
-  (dispatch [:remove-user-group [user-id group-id]]))
+  (dispatch [:remove-user-from-group [user-id group-id]]))
 
 (defmethod sync/event-handler :braid.client/new-admin
   [[_ [group-id new-admin-id]]]
