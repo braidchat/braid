@@ -13,6 +13,9 @@
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (apply sync/chsk-send! args)))
 
+; TODO: handle callbacks declaratively too?
+(reg-fx :edn-xhr (fn [args] (edn-xhr args)))
+
 (reg-fx :redirect-to (fn [route] (router/go-to route)))
 
 (defn name->open-tag-id
@@ -544,15 +547,13 @@
            (on-success uploads)
            (on-error (get reply :braid/error "Couldn't get uploads in group")))))}))
 
-(reg-event-db
+(reg-event-fx
   :check-auth
-  (fn [state _]
-    ; TODO
-    (edn-xhr {:uri "/check"
-              :method :get
-              :on-complete (fn [_] (dispatch [:start-socket]))
-              :on-error (fn [_] (dispatch [:set-login-state :login-form]))})
-    state))
+  (fn [cofx _]
+    {:edn-xhr {:uri "/check"
+               :method :get
+               :on-complete (fn [_] (dispatch [:start-socket]))
+               :on-error (fn [_] (dispatch [:set-login-state :login-form]))}}))
 
 (reg-event-db
   :set-login-state
@@ -573,43 +574,37 @@
   (fn [state [_ visible?]]
     (helpers/set-window-visibility state visible?)))
 
-(reg-event-db
+(reg-event-fx
   :auth
-  (fn [state [_ data]]
-    ; TODO
-    (edn-xhr {:uri "/auth"
-              :method :post
-              :params {:email (data :email)
-                       :password (data :password)}
-              :on-complete (fn [_]
-                             (when-let [cb (data :on-complete)]
-                               (cb))
-                             (dispatch [:start-socket]))
-              :on-error (fn [_]
-                          (when-let [cb (data :on-error)]
-                            (cb)))})
-    state))
+  (fn [cofx [_ data]]
+    {:edn-xhr {:uri "/auth"
+               :method :post
+               :params {:email (data :email)
+                        :password (data :password)}
+               :on-complete (fn [_]
+                              (when-let [cb (data :on-complete)]
+                                (cb))
+                              (dispatch [:start-socket]))
+               :on-error (fn [_]
+                           (when-let [cb (data :on-error)]
+                             (cb)))}}))
 
-(reg-event-db
+(reg-event-fx
   :request-reset
-  (fn [state [_ email]]
-    ; TODO
-    (edn-xhr {:uri "/request-reset"
-              :method :post
-              :params {:email email}})
-    state))
+  (fn [cofx [_ email]]
+    {:edn-xhr {:uri "/request-reset"
+               :method :post
+               :params {:email email}}}))
 
-(reg-event-db
+(reg-event-fx
   :logout
-  (fn [state [_ _]]
-    ; TODO
-    (edn-xhr {:uri "/logout"
-              :method :post
-              :params {:csrf-token (:csrf-token @sync/chsk-state)}
-              :on-complete (fn [data]
-                             (dispatch [:set-login-state :login-form])
-                             (dispatch [:clear-session]))})
-    state))
+  (fn [cofx [_ _]]
+    {:edn-xhr {:uri "/logout"
+               :method :post
+               :params {:csrf-token (:csrf-token @sync/chsk-state)}
+               :on-complete (fn [data]
+                              (dispatch [:set-login-state :login-form])
+                              (dispatch [:clear-session]))}}))
 
 (reg-event-db
   :set-group-and-page
