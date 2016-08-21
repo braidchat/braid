@@ -563,10 +563,8 @@
     ; TODO
     (edn-xhr {:uri "/check"
               :method :get
-              :on-complete (fn [_]
-                             (dispatch! :start-socket))
-              :on-error (fn [_]
-                          (dispatch! :set-login-state :login-form))})
+              :on-complete (fn [_] (dispatch! :start-socket))
+              :on-error (fn [_] (dispatch! :set-login-state :login-form))})
     state))
 
 (reg-event-db
