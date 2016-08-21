@@ -41,7 +41,7 @@
 ; login
 
 (defn set-login-state [state login-state]
-  (assoc-in state [:login-state] login-state))
+  (assoc state :login-state login-state))
 
 ; window visibility and notifications
 
