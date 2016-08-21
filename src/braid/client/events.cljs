@@ -80,7 +80,7 @@
 (reg-event-db
   :initialize-db
   (fn [_ _]
-    @store/app-state))
+    store/initial-state))
 
 (reg-event-db
   :clear-session
