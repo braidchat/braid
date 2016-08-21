@@ -18,6 +18,7 @@
             [:span.count " × " (quest :quest/goal)])]
          [:div.progress
           (for [i (range (quest :quest/goal))]
+            ^{:key i}
             [:div.icon {:class (if (< i (quest-record :quest-record/progress))
                                  "complete"
                                  "incomplete")}])]
