@@ -1,12 +1,7 @@
 (ns braid.client.quests.handlers
-  (:require [braid.client.quests.helpers :as helpers]
-            [braid.client.sync :as sync]
+  (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
+            [braid.client.quests.helpers :as helpers]
             [cljs-uuid-utils.core :as uuid]))
-
-(defmulti handler (fn [state [event data]] event))
-
-(defn fn-> [state f]
-  (f state))
 
 (defn make-quest-record [{:keys [quest-id]}]
   {:quest-record/id (uuid/make-random-squuid)
@@ -14,39 +9,43 @@
    :quest-record/progress 0
    :quest-record/quest-id quest-id})
 
-(defn activate-next-quest [state]
-  (if-let [quest (helpers/get-next-quest state)]
-    (let [quest-record (make-quest-record {:quest-id (quest :quest/id)})]
-      (-> state
-          (helpers/store-quest-record quest-record)
-          (fn-> (fn [state]
-                  (sync/chsk-send! [:braid.server.quests/upsert-quest-record quest-record])
-                  state))))
-    state))
+(reg-event-fx
+  :quests/activate-next-quest
+  (fn [{state :db :as cofx} _]
+    (if-let [quest (helpers/get-next-quest state)]
+      (let [quest-record (make-quest-record {:quest-id (quest :quest/id)})
+            state (helpers/store-quest-record state quest-record)]
+        {:db state
+         :websocket-send (list [:braid.server.quests/upsert-quest-record quest-record])})
+      {})))
 
-(defmethod handler :quests/skip-quest [state [_ quest-record-id]]
-  (-> state
-      (helpers/skip-quest quest-record-id)
-      (fn-> (fn [state]
-              (sync/chsk-send! [:braid.server.quests/upsert-quest-record (helpers/get-quest-record state quest-record-id)])
-              state))
-      (activate-next-quest)))
+(reg-event-fx
+  :quests/skip-quest
+  (fn [state [_ quest-record-id]]
+    (let [state (helpers/skip-quest state quest-record-id)]
+      {:websocket-send
+       (list [:braid.server.quests/upsert-quest-record
+              (helpers/get-quest-record state quest-record-id)])
+       :dispatch [:activate-next-quest]})))
 
-(defmethod handler :quests/complete-quest [state [_ quest-record-id]]
-  (-> state
-      (helpers/complete-quest quest-record-id)
-      (fn-> (fn [state]
-              (sync/chsk-send! [:braid.server.quests/upsert-quest-record (helpers/get-quest-record state quest-record-id)])
-              state))
-      (activate-next-quest)))
+(reg-event-fx
+  :quests/complete-quest
+  (fn [{state :db :as cofx} [_ quest-record-id]]
+    (let [state (helpers/complete-quest state quest-record-id)]
+      {:websocket-send
+       (list [:braid.server.quests/upsert-quest-record
+              (helpers/get-quest-record state quest-record-id)])
+       :dispatch [:activate-next-quest]})))
 
-(defmethod handler :quests/increment-quest [state [_ quest-record-id]]
-  (-> state
-      (helpers/increment-quest quest-record-id)
-      (fn-> (fn [state]
-              (sync/chsk-send! [:braid.server.quests/upsert-quest-record (helpers/get-quest-record state quest-record-id)])
-              state))))
+(reg-event-fx
+  :quests/increment-quest
+  (fn [{state :db :as cofx} [_ quest-record-id]]
+    (let [state (helpers/increment-quest state quest-record-id)]
+      {:db state
+       :websocket-send (list [:braid.server.quests/upsert-quest-record
+                              (helpers/get-quest-record state quest-record-id)])})))
 
-(defmethod handler :quests/upsert-quest-record [state [_ quest-record]]
-  (-> state
-      (helpers/store-quest-record quest-record)))
+(reg-event-db
+  :quests/upsert-quest-record
+  (fn [state [_ quest-record]]
+    (helpers/store-quest-record state quest-record)))
