@@ -1,8 +1,7 @@
 (ns braid.client.ui.views.pages.users
   (:require [reagent.core :as r]
-            [re-frame.core :refer [subscribe]]
-            [braid.client.ui.views.pills :refer [user-pill-view]]
-            [braid.client.dispatcher :refer [dispatch!]]))
+            [re-frame.core :refer [dispatch subscribe]]
+            [braid.client.ui.views.pills :refer [user-pill-view]]))
 
 (defn user-view
   [user admin?]
@@ -14,15 +13,15 @@
       [:li [user-pill-view (user :id)]
        (when (and admin? (not @user-is-admin?))
          [:button {:on-click (fn [_]
-                               (dispatch! :make-admin {:user-id (user :id)
-                                                       :group-id @group-id}))}
+                               (dispatch [:make-admin {:user-id (user :id)
+                                                       :group-id @group-id}]))}
           "Make Admin"])
        (when admin?
          [:button {:on-click (fn [_]
                                (when (js/confirm "Remove user from this group?")
-                                 (dispatch! :remove-from-group
+                                 (dispatch [:remove-from-group
                                             {:group-id @group-id
-                                             :user-id (user :id)})))}
+                                             :user-id (user :id)}])))}
           "Remove From Group"])])))
 
 (defn users-list-view

@@ -6,5 +6,4 @@
     :quest-handler
     (fn [event queue]
       (when (not= "quests" (namespace (first event)))
-        (println "event callback" (pr-str event))
         (rf/dispatch [:quests/update-handler event])))))

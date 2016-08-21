@@ -4,8 +4,7 @@
             [clojure.string :as string]
             [braid.client.desktop.notify :as notify]
             [braid.client.ui.views.pills :refer [tag-pill-view]]
-            [re-frame.core :refer [subscribe]]
-            [braid.client.dispatcher :refer [dispatch!]]
+            [re-frame.core :refer [dispatch subscribe]]
             [braid.client.store :as store]
             [braid.common.util :refer [valid-nickname?]]
             [braid.client.ui.views.upload :refer [avatar-upload-view]])
@@ -39,9 +38,9 @@
            (let [nickname (.. e -target -value)]
              (when (and (= KeyCodes.ENTER e.keyCode)
                      (re-matches #"\S+" nickname))
-               (dispatch! :set-user-nickname
+               (dispatch [:set-user-nickname
                           {:nickname nickname
-                           :on-error (fn [err] (set-error! err))}))))}]])))
+                           :on-error (fn [err] (set-error! err))}]))))}]])))
 
 (defn avatar-view
   []
@@ -51,7 +50,7 @@
     (fn []
       [:div.avatar {:class (when @dragging? "dragging")}
        [:img.avatar {:src @user-avatar-url}]
-       [avatar-upload-view {:on-upload (fn [u] (dispatch! :set-user-avatar u))
+       [avatar-upload-view {:on-upload (fn [u] (dispatch [:set-user-avatar u]))
                             :dragging-change (partial reset! dragging?)}]])))
 
 (defn password-view
@@ -66,14 +65,14 @@
                      (.stopPropagation e)
                      (when (and (not (string/blank? @new-pass))
                              (= @new-pass @pass-confirm))
-                       (dispatch! :set-password
+                       (dispatch [:set-password
                                   [@new-pass
                                    (fn []
                                      (reset! response {:ok true})
                                      (reset! new-pass "")
                                      (reset! pass-confirm ""))
                                    (fn [err]
-                                     (reset! response err))])))}
+                                     (reset! response err))]])))}
        (when @response
          (if-let [err (:error @response)]
            [:div.error err]
@@ -106,7 +105,7 @@
        [:select {:value @email-freq
                  :on-change (fn [e]
                               (let [v (keyword (.. e -target -value))]
-                                (dispatch! :set-preference [:email-frequency v])))}
+                                (dispatch [:set-preference [:email-frequency v]])))}
         (doall
           (for [freq [:never :weekly :daily]]
             ^{:key freq}
@@ -129,8 +128,8 @@
               (str "In " (:name @group))
               :tag [tag-pill-view condition])]
        [:td [:button {:on-click (fn [_]
-                                  (dispatch! :remove-notification-rule
-                                             [event condition]))}
+                                  (dispatch [:remove-notification-rule
+                                             [event condition]]))}
              "-"]]]))))
 
 (defn new-rule-view
@@ -183,7 +182,7 @@
                     [:option {:value (tag :id)} (tag :name)]))]))])]
        [:td
         [:button {:on-click (fn [_]
-                              (dispatch! :add-notification-rule [@event @condition]))}
+                              (dispatch [:add-notification-rule [@event @condition]]))}
          "Save"]]])))
 
 (defn notification-rules-view
@@ -233,7 +232,7 @@
       [:h2 "Log Out"]
       [:button.logout {:on-click
                        (fn [_]
-                         (dispatch! :logout nil))} "Log Out"]
+                         (dispatch [:logout nil]))} "Log Out"]
       [:h2 "Update Nickname"]
       [nickname-view]
       [:h2 "Update Avatar"]

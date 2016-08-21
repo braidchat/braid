@@ -1,10 +1,9 @@
 (ns braid.client.ui.views.autocomplete
   (:require [clj-fuzzy.metrics :as fuzzy]
-            [re-frame.core :refer [subscribe]]
+            [re-frame.core :refer [subscribe dispatch]]
             [braid.client.schema :as schema]
             [clojure.string :as string]
             [braid.client.helpers :refer [id->color debounce]]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.emoji :as emoji]
             [goog.string :as gstring])
   (:import [goog.events KeyCodes]))
@@ -162,7 +161,7 @@
                           {:key (constantly (tag :id))
                            :action
                            (fn []
-                             (dispatch! :create-tag {:tag tag}))
+                             (dispatch [:create-tag {:tag tag}]))
                            :message-transform
                            (fn [text]
                              (string/replace text pattern (str "#" (tag :name) " ")))

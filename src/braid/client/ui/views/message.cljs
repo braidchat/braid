@@ -1,12 +1,11 @@
 (ns braid.client.ui.views.message
   (:require [reagent.core :as r]
             [clojure.string :as string]
+            [re-frame.core :refer [dispatch subscribe]]
             [braid.client.helpers :as helpers :refer [id->color ->color]]
-            [re-frame.core :refer [subscribe]]
             [braid.client.ui.views.embed :refer [embed-view]]
             [braid.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
             [braid.client.emoji :as emoji]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.routes :as routes]))
 
 (defn abridged-url
@@ -205,7 +204,7 @@
               [:div.error
                [:span "Message failed to send"]
                [:button {:on-click
-                         (fn [_] (dispatch! :resend-message message))}
+                         (fn [_] (dispatch [:resend-message message]))}
                 "Resend"]])
             [:a.avatar {:href sender-path
                         :tabIndex -1}

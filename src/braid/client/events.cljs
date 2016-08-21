@@ -8,7 +8,6 @@
             [braid.client.router :as router]
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.state.helpers :as helpers]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.quests.helpers :as quest-helpers]))
 
 (reg-fx :websocket-send (fn [args] (apply sync/chsk-send! args)))
@@ -150,8 +149,8 @@
       2000
       (fn [reply]
         (when (not= :braid/ok reply)
-          (dispatch! :display-error [(str :failed-to-send (message :id)) "Message failed to send!"])
-          (dispatch! :set-message-failed message))))
+          (dispatch [:display-error [(str :failed-to-send (message :id)) "Message failed to send!"]])
+          (dispatch [:set-message-failed message]))))
 
     (-> state
         (helpers/clear-error (str :failed-to-send (message :id)))
@@ -192,8 +191,8 @@
           (fn [reply]
             (if-let [msg (:error reply)]
               (do
-                (dispatch! :remove-tag {:tag-id (tag :id) :local-only? true})
-                (dispatch! :display-error [(str :bad-tag (tag :id)) msg]))))))
+                (dispatch [:remove-tag {:tag-id (tag :id) :local-only? true}])
+                (dispatch [:display-error [(str :bad-tag (tag :id)) msg]]))))))
       (-> state
           (helpers/add-tag tag)
           (helpers/subscribe-to-tag (tag :id))))))
@@ -246,8 +245,8 @@
         (fn [reply]
           (when-let [msg (reply :error)]
             (.error js/console msg)
-            (dispatch! :display-error [(str :bad-group (group :id)) msg])
-            (dispatch! :remove-group (group :id)))))
+            (dispatch [:display-error [(str :bad-group (group :id)) msg]])
+            (dispatch [:remove-group (group :id)]))))
       (-> state
           (helpers/add-group group)
           (helpers/become-group-admin (:id group))))))
@@ -267,9 +266,9 @@
       (fn [reply]
         (if-let [msg (reply :error)]
           (on-error msg)
-          (dispatch! :update-user-nickname
+          (dispatch [:update-user-nickname
                      {:nickname nickname
-                      :user-id (helpers/current-user-id state)}))))
+                      :user-id (helpers/current-user-id state)}]))))
     state))
 
 (reg-event-db
@@ -331,10 +330,10 @@
             [:braid.server/search [query group-id]]
             15000
             (fn [reply]
-              (dispatch! :set-page-loading false)
+              (dispatch [:set-page-loading false])
               (if (:thread-ids reply)
-                (dispatch! :set-search-results [query reply])
-                (dispatch! :set-page-error true))))
+                (dispatch [:set-search-results [query reply]])
+                (dispatch [:set-page-error true]))))
           (helpers/set-page-error state false))
       state)))
 
@@ -352,7 +351,7 @@
       5000
       (fn [reply]
         (if-let [threads (:braid/ok reply)]
-          (dispatch! :add-threads threads)
+          (dispatch [:add-threads threads])
           (cond
             (= reply :chsk/timeout) (on-error "Timed out")
             (:braid/error reply) (on-error (:braid/error reply))
@@ -369,7 +368,7 @@
       5000
       (fn [reply]
         (when-let [threads (:threads reply)]
-          (dispatch! :add-threads threads))
+          (dispatch [:add-threads threads]))
         (when on-complete
           (on-complete))))
     state))
@@ -401,10 +400,10 @@
         (when-let [results (:threads reply)]
           (if (zero? offset)
             ; initial load of threads
-            (dispatch! :set-channel-results results)
+            (dispatch [:set-channel-results results])
             ; paging more results in
-            (dispatch! :add-channel-results results))
-          (dispatch! :set-pagination-remaining (:remaining reply))
+            (dispatch [:add-channel-results results]))
+          (dispatch [:set-pagination-remaining (:remaining reply)])
           (when on-complete (on-complete)))))
     state))
 
@@ -519,9 +518,10 @@
         5000
         (fn [reply]
           (when (nil? (:braid/ok reply))
-            (dispatch! :display-error
+            (dispatch [:display-error
                        [(str "bot-" (bot :id) (rand))
-                        (get reply :braid/error "Something when wrong creating bot")]))
+                        (get reply :braid/error
+                          "Something when wrong creating bot")]]))
           (on-complete (:braid/ok reply)))))
     state))
 
@@ -564,8 +564,8 @@
     ; TODO
     (edn-xhr {:uri "/check"
               :method :get
-              :on-complete (fn [_] (dispatch! :start-socket))
-              :on-error (fn [_] (dispatch! :set-login-state :login-form))})
+              :on-complete (fn [_] (dispatch [:start-socket]))
+              :on-error (fn [_] (dispatch [:set-login-state :login-form]))})
     state))
 
 (reg-event-db
@@ -598,7 +598,7 @@
               :on-complete (fn [_]
                              (when-let [cb (data :on-complete)]
                                (cb))
-                             (dispatch! :start-socket))
+                             (dispatch [:start-socket]))
               :on-error (fn [_]
                           (when-let [cb (data :on-error)]
                             (cb)))})
@@ -621,8 +621,8 @@
               :method :post
               :params {:csrf-token (:csrf-token @sync/chsk-state)}
               :on-complete (fn [data]
-                             (dispatch! :set-login-state :login-form)
-                             (dispatch! :clear-session))})
+                             (dispatch [:set-login-state :login-form])
+                             (dispatch [:clear-session]))})
     state))
 
 (reg-event-db
@@ -692,7 +692,7 @@
   (fn [state [_ {:keys [group-id group-name]}]]
     ; TODO
     ; need to :remove-group before router is dispatched below)
-    (dispatch! :remove-group group-id)
+    (dispatch [:remove-group group-id])
     (when (= group-id (helpers/get-open-group-id state))
       (router/go-to "/"))
     (-> state

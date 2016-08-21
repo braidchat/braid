@@ -1,8 +1,7 @@
 (ns braid.client.quests.views
   (:require [reagent.core :as r]
-            [re-frame.core :refer [subscribe]]
+            [re-frame.core :refer [dispatch subscribe]]
             [braid.client.quests.list :refer [quests-by-id]]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :refer [->color]]))
 
 (defn quest-view [quest-record]
@@ -27,8 +26,10 @@
 
         (if (< (quest-record :quest-record/progress) (quest :quest/goal))
           [:div.actions
-           [:a.skip {:on-click (fn [_]
-                                 (dispatch! :quests/skip-quest (quest-record :quest-record/id)))} "Skip"]
+           [:a.skip {:on-click
+                     (fn [_]
+                       (dispatch [:quests/skip-quest (quest-record :quest-record/id)]))}
+            "Skip"]
            (if @show-video?
              [:a.video.hide {:on-click (fn [_]
                                       (reset! show-video? false))}
@@ -37,8 +38,10 @@
                                       (reset! show-video? true))}
               "Show Me"])]
           [:div.actions
-           [:a.next {:on-click (fn [_]
-                                 (dispatch! :quests/complete-quest (quest-record :quest-record/id)))}
+           [:a.next
+            {:on-click
+             (fn [_]
+               (dispatch [:quests/complete-quest (quest-record :quest-record/id)]))}
             "Get New Quest"]])]
        (when @show-video?
          [:div.video

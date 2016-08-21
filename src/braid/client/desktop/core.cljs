@@ -1,10 +1,9 @@
 (ns braid.client.desktop.core
   (:require [reagent.core :as r]
-            [re-frame.core :as rf :refer [dispatch-sync]]
+            [re-frame.core :as rf :refer [dispatch-sync dispatch]]
             [braid.client.ui.views.app :refer [app-view]]
             [braid.client.clj-highlighter :as highlighter]
             [braid.client.state.remote-handlers]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.router :as router]
             braid.client.subs
             braid.client.events
@@ -19,8 +18,8 @@
 
   (.addEventListener js/document "visibilitychange"
                      (fn [e]
-                       (dispatch! :set-window-visibility
-                                  [(= "visible" (.-visibilityState js/document))])))
+                       (dispatch [:set-window-visibility
+                                  [(= "visible" (.-visibilityState js/document))]])))
 
   (highlighter/install-highlighter)
 
@@ -28,7 +27,7 @@
 
   (router/init)
 
-  (dispatch! :check-auth)
+  (dispatch [:check-auth])
 
   (quests/install-quests-handler!))
 
