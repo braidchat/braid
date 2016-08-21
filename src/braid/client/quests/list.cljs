@@ -25,9 +25,14 @@
     :quest/video "/images/quests/conversation-new.gif"
     :quest/goal 3
     :quest/listener (fn [state [event data]]
+                      ; TODO: by the time this sees state, new-thread-id is out of date
+                      ; check if it's new by looking at the thread
                       (and
                         (= event :new-message)
-                        (= (data :thread-id) (:new-thread-id state))))}
+                        (->>
+                          (get-in state [:threads (data :thread-id) :messages])
+                          count
+                          (= 1))))}
 
    {:quest/order 2
     :quest/id :quest/conversation-reply
@@ -39,7 +44,10 @@
     :quest/listener (fn [state [event data]]
                       (and
                         (= event :new-message)
-                        (not= (data :thread-id) (:new-thread-id state))))}
+                        (->>
+                          (get-in state [:threads (data :thread-id) :messages])
+                          count
+                          (not= 1))))}
 
    {:quest/order 3
     :quest/id :quest/conversation-close
