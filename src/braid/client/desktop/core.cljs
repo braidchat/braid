@@ -1,6 +1,6 @@
 (ns braid.client.desktop.core
   (:require [reagent.core :as r]
-            [re-frame.core :refer [dispatch-sync]]
+            [re-frame.core :as rf :refer [dispatch-sync]]
             [braid.client.ui.views.app :refer [app-view]]
             [braid.client.clj-highlighter :as highlighter]
             [braid.client.state.remote-handlers]
@@ -30,9 +30,11 @@
 
   (dispatch! :check-auth)
 
-  (quests/install-quests-handler))
+  (quests/install-quests-handler!))
 
 (defn ^:export reload
   "Force a re-render. For use with figwheel"
   []
+  (rf/remove-post-event-callback :quest-handler)
+  (quests/install-quests-handler!)
   (r/render [app-view] (.getElementById js/document "app")))
