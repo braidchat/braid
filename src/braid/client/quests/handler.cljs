@@ -1,20 +1,9 @@
 (ns braid.client.quests.handler
-  (:require [braid.client.quests.helpers :as helpers]
-            [braid.client.quests.list :refer [quests-by-id]]))
+  (:require [re-frame.core :as rf]))
 
-(defn maybe-increment-quest-record [state quest-record event args]
-  (let [quest (quests-by-id (quest-record :quest-record/quest-id))
-        inc-progress? ((quest :quest/listener) state [event args])
-        local-only? (:local-only? args)]
-    (when (and inc-progress? (not local-only?))
-      [:quests/increment-quest (quest-record :quest-record/id)])))
-
-(defn quests-handler [state [event args]]
-  {:dispatch-n
-   (into ()
-         (comp (map
-                 (fn [quest-record]
-                   (maybe-increment-quest-record state quest-record event args)))
-               (remove nil?))
-         (helpers/get-active-quest-records state))})
-
+(defn install-quests-handler []
+  (rf/add-post-event-callback
+    (fn [event queue]
+      (when (not= (first event) :quests/update-handler)
+        (println "event callback" (pr-str event))
+        (rf/dispatch [:quests/update-handler event])))))

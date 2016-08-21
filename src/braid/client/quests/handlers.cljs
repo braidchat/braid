@@ -1,7 +1,8 @@
 (ns braid.client.quests.handlers
   (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
+            [cljs-uuid-utils.core :as uuid]
             [braid.client.quests.helpers :as helpers]
-            [cljs-uuid-utils.core :as uuid]))
+            [braid.client.quests.list :refer [quests-by-id]]))
 
 (defn make-quest-record [{:keys [quest-id]}]
   {:quest-record/id (uuid/make-random-squuid)
@@ -49,3 +50,21 @@
   :quests/upsert-quest-record
   (fn [state [_ quest-record]]
     (helpers/store-quest-record state quest-record)))
+
+(defn maybe-increment-quest-record [state quest-record event args]
+  (let [quest (quests-by-id (quest-record :quest-record/quest-id))
+        inc-progress? ((quest :quest/listener) state [event args])
+        local-only? (:local-only? args)]
+    (when (and inc-progress? (not local-only?))
+      [:quests/increment-quest (quest-record :quest-record/id)])))
+
+(reg-event-fx
+  :quests/update-handler
+  (fn [{state :db :as cofx} [_ [event args]]]
+    {:dispatch-n
+     (into ()
+           (comp (map
+                   (fn [quest-record]
+                     (maybe-increment-quest-record state quest-record event args)))
+                 (remove nil?))
+           (helpers/get-active-quest-records state))}))

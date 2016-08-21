@@ -9,7 +9,8 @@
             braid.client.subs
             braid.client.events
             braid.client.quests.subscriptions
-            braid.client.quests.handlers))
+            braid.client.quests.handlers
+            [braid.client.quests.handler :as quests]))
 
 (enable-console-print!)
 
@@ -27,7 +28,9 @@
 
   (router/init)
 
-  (dispatch! :check-auth))
+  (dispatch! :check-auth)
+
+  (quests/install-quests-handler))
 
 (defn ^:export reload
   "Force a re-render. For use with figwheel"
