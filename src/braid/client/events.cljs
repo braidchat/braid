@@ -64,7 +64,8 @@
   (-> content
       (string/replace util/sigiled-nickname-re
                       (fn [[m nick]]
-                        ; sometimes need leading whitespace, because javascript regex doesn't have lookbehind
+                        ; sometimes need leading whitespace, because javascript
+                        ; regex doesn't have lookbehind
                         (str (second (re-matches #"^(\s).*" m))
                              "@"
                              (if-let [user-id (:id (nickname->user state nick))]
@@ -74,7 +75,8 @@
                                    nick))))
       (string/replace util/sigiled-tag-name-re
                       (fn [[m tag-name]]
-                        ; sometimes need leading whitespace, because javascript regex doesn't have lookbehind
+                        ; sometimes need leading whitespace, because javascript
+                        ; regex doesn't have lookbehind
                         (str (second (re-matches #"^(\s).*" m))
                              "#" (or (name->open-tag-id state tag-name)
                                       tag-name))))))
