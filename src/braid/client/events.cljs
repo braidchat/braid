@@ -1,6 +1,6 @@
 (ns braid.client.events
   (:require [clojure.string :as string]
-            [re-frame.core :refer [reg-event-db reg-event-fx]]
+            [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]
             [braid.client.store :as store]
             [braid.client.sync :as sync]
             [braid.client.schema :as schema]
@@ -9,6 +9,8 @@
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.state.helpers :as helpers]
             [braid.client.dispatcher :refer [dispatch!]]))
+
+(reg-fx :websocket-send (partial apply sync/chsk-send!))
 
 (defn name->open-tag-id
   "Lookup tag by name in the open group"
@@ -102,9 +104,9 @@
   (fn [state [_ message]]
     (helpers/set-message-failed state message)))
 
-(reg-event-db
+(reg-event-fx
   :new-message
-  (fn [state [_ data]]
+  (fn [{state :db :as cofx} [_ data]]
     (if-not (string/blank? (data :content))
       (let [message (schema/make-message
                       {:user-id (helpers/current-user-id state)
@@ -117,17 +119,21 @@
                        :mentioned-user-ids (concat
                                              (data :mentioned-user-ids)
                                              (extract-user-ids state (data :content)))})]
-        (sync/chsk-send!
-          [:braid.server/new-message message]
-          2000
-          (fn [reply]
-            (when (not= :braid/ok reply)
-              (dispatch! :display-error [(str :failed-to-send (message :id)) "Message failed to send!"])
-              (dispatch! :set-message-failed message))))
-        (-> state
-            (helpers/add-message message)
-            (helpers/maybe-reset-new-thread-id (data :thread-id))))
-      state)))
+        {:websocket-send
+         (list
+           [:braid.server/new-message message]
+           2000
+           ; TODO: handle callbacks declaratively too?
+           (fn [reply]
+             (when (not= :braid/ok reply)
+               ; TODO
+               (dispatch [:display-error [(str :failed-to-send (message :id))
+                                          "Message failed to send!"]])
+               ; TODO
+               (dispatch [:set-message-failed message]))))
+         :db (-> state
+                 (helpers/add-message message)
+                 (helpers/maybe-reset-new-thread-id (data :thread-id)))}))))
 
 (reg-event-db
   :clear-error
