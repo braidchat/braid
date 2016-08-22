@@ -11,14 +11,14 @@
             [braid.client.quests.helpers :as quest-helpers]))
 
 ; TODO: handle callbacks declaratively too?
-(reg-fx :websocket-send (fn [args] (apply sync/chsk-send! args)))
+(reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :edn-xhr (fn [args] (edn-xhr args)))
 
-(reg-fx :redirect-to (fn [route] (router/go-to route)))
+(reg-fx :redirect-to (fn [route] (when route (router/go-to route))))
 
-(reg-fx :window-title (fn [title] (set! (.-title js/document) title)))
+(reg-fx :window-title (fn [title] (when title (set! (.-title js/document) title))))
 
 (defn name->open-tag-id
   "Lookup tag by name in the open group"
@@ -169,10 +169,9 @@
 (reg-event-fx
   :hide-thread
   (fn [{state :db :as cofx} [_ {:keys [thread-id local-only?]}]]
-    (merge
-      {:db (helpers/hide-thread state thread-id)}
-      (when-not local-only?
-        {:websocket-send (list [:braid.server/hide-thread thread-id])}))))
+    {:db (helpers/hide-thread state thread-id)
+     :websocket-send (when-not local-only?
+                       (list [:braid.server/hide-thread thread-id]))}))
 
 (reg-event-fx
   :reopen-thread
@@ -190,20 +189,19 @@
   :create-tag
   (fn [{state :db :as cofx} [_ {:keys [tag local-only?]}]]
     (let [tag (merge (schema/make-tag) tag)]
-      (merge
-        {:db (-> state
-                 (helpers/add-tag tag)
-                 (helpers/subscribe-to-tag (tag :id)))}
-        (when-not local-only?
-          {:websocket-send
-           (list
-             [:braid.server/create-tag tag]
-             1000
-             (fn [reply]
-               (if-let [msg (:error reply)]
-                 (do
-                   (dispatch [:remove-tag {:tag-id (tag :id) :local-only? true}])
-                   (dispatch [:display-error [(str :bad-tag (tag :id)) msg]])))))})))))
+      {:db (-> state
+               (helpers/add-tag tag)
+               (helpers/subscribe-to-tag (tag :id)))
+       :websocket-send
+       (when-not local-only?
+         (list
+           [:braid.server/create-tag tag]
+           1000
+           (fn [reply]
+             (if-let [msg (:error reply)]
+               (do
+                 (dispatch [:remove-tag {:tag-id (tag :id) :local-only? true}])
+                 (dispatch [:display-error [(str :bad-tag (tag :id)) msg]]))))))})))
 
 (reg-event-fx
   :unsubscribe-from-tag
@@ -214,29 +212,26 @@
 (reg-event-fx
   :subscribe-to-tag
   (fn [{state :db :as cofx} [_ {:keys [tag-id local-only?]}]]
-    (merge
-      {:db (helpers/subscribe-to-tag state tag-id)}
-      (when-not local-only?
-        {:websocket-send (list [:braid.server/subscribe-to-tag tag-id])}))))
+    {:db (helpers/subscribe-to-tag state tag-id)
+     :websocket-send (when-not local-only?
+                       (list [:braid.server/subscribe-to-tag tag-id]))}))
 
 (reg-event-fx
   :set-tag-description
   (fn [{state :db :as cofx} [_ {:keys [tag-id description local-only?]}]]
-    (merge
-      {:db (helpers/set-tag-description state tag-id description)}
-      (when-not local-only?
-        {:websocket-send
-         (list
-           [:braid.server/set-tag-description {:tag-id tag-id
-                                               :description description}])}))))
+    {:db (helpers/set-tag-description state tag-id description)
+     :websocket-send
+     (when-not local-only?
+       (list
+         [:braid.server/set-tag-description {:tag-id tag-id
+                                             :description description}]))}))
 
 (reg-event-fx
   :remove-tag
   (fn [{state :db :as cofx} [_ {:keys [tag-id local-only?]}]]
-    (merge
-      {:db (helpers/remove-tag state tag-id)}
-      (when-not local-only?
-        {:websocket-send (list [:braid.server/retract-tag tag-id])}))))
+    {:db (helpers/remove-tag state tag-id)
+     :websocket-send (when-not local-only?
+                       (list [:braid.server/retract-tag tag-id]))}))
 
 (reg-event-db
   :remove-group
@@ -467,10 +462,9 @@
 (reg-event-fx
   :make-admin
   (fn [{state :db :as cofx} [_ {:keys [group-id user-id local-only?] :as args}]]
-    (merge
-      {:db (helpers/make-user-admin state user-id group-id)}
-      (when-not local-only?
-        {:websocket-send (list [:braid.server/make-user-admin args])}))))
+    {:db (helpers/make-user-admin state user-id group-id)
+     :websocket-send (when-not local-only?
+                       (list [:braid.server/make-user-admin args]))}))
 
 (reg-event-fx
   :remove-from-group
@@ -480,18 +474,16 @@
 (reg-event-fx
   :set-group-intro
   (fn [{state :db :as cofx} [_ {:keys [group-id intro local-only?] :as args}]]
-    (merge
-      {:db (helpers/set-group-intro state group-id intro)}
-      (when-not local-only?
-        {:websocket-send (list [:braid.server/set-group-intro args])}))))
+    {:db (helpers/set-group-intro state group-id intro)
+     :websocket-send (when-not local-only?
+                       (list [:braid.server/set-group-intro args]))}))
 
 (reg-event-fx
   :set-group-avatar
   (fn [{state :db :as cofx} [_ {:keys [group-id avatar local-only?] :as args}]]
-    (merge
-      {:db (helpers/set-group-avatar state group-id avatar)}
-      (when-not local-only?
-        {:websocket-send (list [:braid.server/set-group-avatar args])}))))
+    {:db (helpers/set-group-avatar state group-id avatar)
+     :websocket-send (when-not local-only?
+                       (list [:braid.server/set-group-avatar args]))}))
 
 (reg-event-fx
   :make-group-public!
@@ -574,10 +566,8 @@
 (reg-event-fx
   :set-window-visibility
   (fn [{state :db :as cofx} [_ visible?]]
-    (merge
-      {:db (helpers/set-window-visibility state visible?)}
-      (when visible?
-        {:window-title "Chat"}))))
+    {:db (helpers/set-window-visibility state visible?)
+     :window-title (when visible? "Chat")}))
 
 (reg-event-fx
   :auth
@@ -675,23 +665,22 @@
 (reg-event-fx
   :leave-group
   (fn [{state :db :as cofx} [_ {:keys [group-id group-name]}]]
-    (merge
-      {:db
-       (-> state
-           (helpers/display-error (str "left-" group-id)
-                                  (str "You have been removed from " group-name)
-                                  :info)
-           (helpers/remove-group group-id)
-           ((fn [state]
-              (if-let [sidebar-order (:groups-order
-                                       (helpers/get-user-preferences state))]
-                (helpers/set-preferences
-                  state
-                  {:groups-order (into [] (remove (partial = group-id))
-                                       sidebar-order)})
-                state))))}
-      (when (= group-id (helpers/get-open-group-id state))
-        {:redirect-to "/"}))))
+    {:db
+     (-> state
+         (helpers/display-error (str "left-" group-id)
+                                (str "You have been removed from " group-name)
+                                :info)
+         (helpers/remove-group group-id)
+         ((fn [state]
+            (if-let [sidebar-order (:groups-order
+                                     (helpers/get-user-preferences state))]
+              (helpers/set-preferences
+                state
+                {:groups-order (into [] (remove (partial = group-id))
+                                     sidebar-order)})
+              state))))
+     :redirect-to (when (= group-id (helpers/get-open-group-id state))
+                    "/")}))
 
 (reg-event-db
   :add-open-thread
