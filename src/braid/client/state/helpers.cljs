@@ -217,21 +217,6 @@
 (defn show-thread [state thread-id]
   (update-in state [:user :open-thread-ids] #(conj % thread-id)))
 
-; pages
-
-(defn set-channel-results [state threads]
-  (-> state
-      (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-      (update-in [:page :thread-ids] (constantly (map :id threads)))))
-
-(defn add-channel-results [state threads]
-  (-> state
-      (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-      (update-in [:page :thread-ids] #(concat % (map :id threads)))))
-
-(defn set-pagination-remaining [state threads-count]
-  (update-in state [:pagination-remaining] (constantly threads-count)))
-
 ; tags
 
 (defn subscribe-to-tag [state tag-id]

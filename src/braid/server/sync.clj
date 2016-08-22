@@ -339,18 +339,6 @@
     (when ?reply-fn
       (?reply-fn {:threads threads}))))
 
-(defmethod event-msg-handler :braid.server/threads-for-tag
-  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-  (let [user-tags (db/tag-ids-for-user user-id)
-        filter-tags (fn [t] (update-in t [:tag-ids]
-                                       (partial into #{} (filter user-tags))))
-        offset (get ?data :offset 0)
-        limit (get ?data :limit 50)
-        threads (-> (db/threads-with-tag user-id (?data :tag-id) offset limit)
-                    (update :threads (comp doall (partial map filter-tags))))]
-    (when ?reply-fn
-      (?reply-fn threads))))
-
 (defmethod event-msg-handler :braid.server/invite-to-group
   [{:as ev-msg :keys [?data user-id]}]
   (if (db/user-in-group? user-id (?data :group-id))

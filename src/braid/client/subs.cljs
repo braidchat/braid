@@ -281,11 +281,6 @@
     (get-in state [:invitations])))
 
 (reg-sub
-  :pagination-remaining
-  (fn [state _]
-    (state :pagination-remaining)))
-
-(reg-sub
   :user-subscribed-tag-ids
   (fn [state _]
     (set (get-in state [:user :subscribed-tag-ids]))))

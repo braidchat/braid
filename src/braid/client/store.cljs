@@ -11,7 +11,6 @@
      :threads {}
      :group-threads {}
      :new-thread-msg {}
-     :pagination-remaining 0
      :users {}
      :tags {}
      :groups {}
@@ -35,7 +34,6 @@
      :threads {s/Uuid app-schema/MsgThread}
      :group-threads {s/Uuid #{s/Uuid}}
      :new-thread-msg {s/Uuid s/Str}
-     :pagination-remaining s/Int
      :users {s/Uuid app-schema/User}
      :tags {s/Uuid app-schema/Tag}
      :groups {s/Uuid app-schema/Group}

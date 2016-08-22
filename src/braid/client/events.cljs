@@ -376,39 +376,6 @@
          (when on-complete
            (on-complete))))}))
 
-(reg-event-db
-  :set-channel-results
-  (fn [state [_ results]]
-    (helpers/set-channel-results state results)))
-
-(reg-event-db
-  :add-channel-results
-  (fn [state [_ results]]
-    (helpers/add-channel-results state results)))
-
-(reg-event-db
-  :set-pagination-remaining
-  (fn [state [_ threads-count]]
-    (helpers/set-pagination-remaining state threads-count)))
-
-(reg-event-fx
-  :threads-for-tag
-  (fn [cofx [_ {:keys [tag-id offset limit on-complete]
-                 :or {offset 0 limit 25}}]]
-    {:websocket-send
-     (list
-       [:braid.server/threads-for-tag {:tag-id tag-id :offset offset :limit limit}]
-       2500
-       (fn [reply]
-         (when-let [results (:threads reply)]
-           (if (zero? offset)
-             ; initial load of threads
-             (dispatch [:set-channel-results results])
-             ; paging more results in
-             (dispatch [:add-channel-results results]))
-           (dispatch [:set-pagination-remaining (:remaining reply)])
-           (when on-complete (on-complete)))))}))
-
 (reg-event-fx
   :mark-thread-read
   (fn [{state :db :as cofx} [_ thread-id]]
