@@ -117,20 +117,20 @@
                 (r/atom {:name "any group"})
                 (subscribe [:group condition]))]
     (fn [[event condition]]
-    (case event
-      [:tr
-       [:td (case event
-              :any "Any Event"
-              :mention "I am mentioned"
-              :tag "Message is tagged ")]
-       [:td (case event
-              (:any :mention)
-              (str "In " (:name @group))
-              :tag [tag-pill-view condition])]
-       [:td [:button {:on-click (fn [_]
-                                  (dispatch [:remove-notification-rule
-                                             [event condition]]))}
-             "-"]]]))))
+      (case event
+        [:tr
+         [:td (case event
+                :any "Any Event"
+                :mention "I am mentioned"
+                :tag "Message is tagged ")]
+         [:td (case event
+                (:any :mention)
+                (str "In " (:name @group))
+                :tag [tag-pill-view condition])]
+         [:td [:button {:on-click (fn [_]
+                                    (dispatch [:remove-notification-rule
+                                               [event condition]]))}
+               "-"]]]))))
 
 (defn new-rule-view
   []
