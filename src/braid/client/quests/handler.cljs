@@ -2,6 +2,7 @@
   (:require [re-frame.core :as rf]))
 
 (defn install-quests-handler! []
+  (rf/remove-post-event-callback :quest-handler)
   (rf/add-post-event-callback
     :quest-handler
     (fn [event queue]

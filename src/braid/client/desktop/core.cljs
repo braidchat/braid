@@ -34,6 +34,5 @@
 (defn ^:export reload
   "Force a re-render. For use with figwheel"
   []
-  (rf/remove-post-event-callback :quest-handler)
   (quests/install-quests-handler!)
   (r/render [app-view] (.getElementById js/document "app")))
