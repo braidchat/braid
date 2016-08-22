@@ -99,8 +99,7 @@
          (when @admin?
            [:div.admin {:title "admin"}])]]
        [:div.info
-        [:div.avatar
-         [:img {:src (@user :avatar)}]]
+        [:img.avatar {:src (@user :avatar)}]
         [:div.local-time (helpers/format-date (js/Date.))]
         ; [:div.since "member since]
         [:div.description
