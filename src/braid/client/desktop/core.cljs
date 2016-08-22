@@ -19,7 +19,7 @@
   (.addEventListener js/document "visibilitychange"
                      (fn [e]
                        (dispatch [:set-window-visibility
-                                  [(= "visible" (.-visibilityState js/document))]])))
+                                  (= "visible" (.-visibilityState js/document))])))
 
   (highlighter/install-highlighter)
 

@@ -51,22 +51,10 @@
 (defn set-window-visibility
     [state visible?]
     (if visible?
-      (do
-        (set! (.-title js/document) "Chat")
-        (-> state
-            (assoc-in [:notifications :unread-count] 0)
-            (assoc-in [:notifications :window-visible?] visible?)))
+      (-> state
+          (assoc-in [:notifications :unread-count] 0)
+          (assoc-in [:notifications :window-visible?] visible?))
       (assoc-in state [:notifications :window-visible?] visible?)))
-
-(defn maybe-increment-unread [state]
-  (if-not (get-in state [:notifications :window-visible?])
-    (do
-      ; TODO this should be done with a subscription
-      ; TODO should store time when went away and recalculate unread-count instead of maintaing an unread-count in state
-      (set! (.-title js/document)
-            (str "Chat (" (inc (get-in state [:notifications :unread-count])) ")"))
-      (update-in state [:notifications :unread-count] inc))
-    state))
 
 ; error
 

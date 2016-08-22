@@ -18,6 +18,8 @@
 
 (reg-fx :redirect-to (fn [route] (router/go-to route)))
 
+(reg-fx :window-title (fn [title] (set! (.-title js/document) title)))
+
 (defn name->open-tag-id
   "Lookup tag by name in the open group"
   [state tag-name]
@@ -569,10 +571,13 @@
     (sync/start-router!)
     (helpers/set-login-state state :ws-connect)))
 
-(reg-event-db
+(reg-event-fx
   :set-window-visibility
-  (fn [state [_ visible?]]
-    (helpers/set-window-visibility state visible?)))
+  (fn [{state :db :as cofx} [_ visible?]]
+    (merge
+      {:db (helpers/set-window-visibility state visible?)}
+      (when visible?
+        {:window-title "Chat"}))))
 
 (reg-event-fx
   :auth
@@ -693,10 +698,14 @@
   (fn [state [_ thread]]
     (helpers/add-open-thread state thread)))
 
-(reg-event-db
+(reg-event-fx
   :maybe-increment-unread
-  (fn [state _]
-    (helpers/maybe-increment-unread state)))
+  (fn [{state :db :as cofx} _]
+    (when-not (get-in state [:notifications :window-visible?])
+      (let [state (update-in state [:notifications :unread-count] inc)
+            unread (get-in state [:notifications :unread-count])]
+        {:db state
+         :window-title (str "Chat (" unread ")")}))))
 
 (reg-event-db
   :add-invite
