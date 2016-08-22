@@ -52,7 +52,7 @@
 
 (defn delete-tag-view
   [tag]
-  [:button {:on-click (fn [_] (dispatch! :retract-tag (tag :id)))}
+  [:button {:on-click (fn [_] (dispatch! :remove-tag {:tag-id (tag :id)}))}
    "Delete Tag"])
 
 (defn tag-info-view

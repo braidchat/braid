@@ -145,7 +145,7 @@
       [:braid.server/set-tag-description {:tag-id tag-id :description description}]))
   (helpers/set-tag-description state tag-id description))
 
-(defmethod handler :retract-tag [state [_ {:keys [tag-id local-only?]}]]
+(defmethod handler :remove-tag [state [_ {:keys [tag-id local-only?]}]]
   (when-not local-only?
     (sync/chsk-send! [:braid.server/retract-tag tag-id]))
   (helpers/remove-tag state tag-id))
