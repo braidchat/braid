@@ -103,14 +103,14 @@
         :-webkit-font-smoothing "antialiased"}
        (mixins/fontawesome \uf0e3)]]]
 
-    [:.avatar
-     {:width vars/avatar-size
-      :height vars/avatar-size
-      :border-radius (px 3)
-      :position "absolute"
+    [:img.avatar
+     {:position "absolute"
       :top offset
       :right offset
-      :margin-top (px 2)}]
+      :margin-top (px 1)
+      :border-radius (px 3)
+      :width (rem 2.5)
+      :height (rem 2.5)}]
 
     [:.local-time
 
