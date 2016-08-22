@@ -20,16 +20,18 @@
   (let [group-tags (subscribe [:open-group-tags])
         thread-tags (subscribe [:tags-for-thread (thread :id)])]
     (fn [thread]
-      (let [tags (difference (set @group-tags) (set @thread-tags))]
+      (let [tags (->> (difference (set @group-tags) (set @thread-tags))
+                      (sort-by :name))]
         [:div.tag-list
          (if (seq tags)
            (for [tag tags]
              [:div.tag-option
-              {:style {:background-color (helpers/->color (tag :id))}
-               :on-click (fn []
+              {:on-click (fn []
                            (close-list!)
                            (dispatch! :add-tag-to-thread [(thread :id) (tag :id)]))}
-              (tag :name)])
+              [:div.rect {:style {:background (helpers/->color (tag :id))}}]
+              [:span {:style {:color (helpers/->color (tag :id))}}
+               "#" (tag :name)]])
            [:div.name "All tags used already."])]))))
 
 (defn add-tag-button-view [thread]

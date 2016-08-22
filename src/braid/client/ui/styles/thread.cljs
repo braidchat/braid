@@ -120,16 +120,33 @@
       [:.tag-list
        {:position "absolute"
         :left "100%"
-        :top 0
+        :margin-left (em 0.5)
+        :bottom "-0.5em"
         :background "white"
-        :z-index 100}
+        :z-index 100
+        :max-height (em 12)
+        :overflow-x "scroll"}
         (mixins/box-shadow)]
 
         [:.tag-option
-         (mixins/mini-text)
-         {:cursor "pointer"}
+         {:cursor "pointer"
+          :white-space "nowrap"
+          :padding (em 0.25)}
 
-         [:&:hover]]]
+         [:&:hover
+          {:background "#eee"}]
+
+         [:.rect
+          {:width (em 1)
+           :height (em 2)
+           :display "inline-block"
+           :vertical-align "middle"
+           :border-radius (px 3)}]
+
+         [:span
+          {:margin (rem 0.25)
+           :display "inline-block"
+           :vertical-align "middle"}]]]
 
      [:.user :.tag :.add
       {:display "inline-block"
