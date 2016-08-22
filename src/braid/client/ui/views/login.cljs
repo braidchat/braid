@@ -1,6 +1,6 @@
 (ns braid.client.ui.views.login
   (:require [reagent.core :as r]
-            [braid.client.dispatcher :refer [dispatch!]]))
+            [re-frame.core :refer [dispatch]]))
 
 (defn login-view []
   (let [state (r/atom {:email ""
@@ -33,7 +33,7 @@
                     :else
                     (do
                       (set-loading! true)
-                      (dispatch! :auth
+                      (dispatch [:auth
                                  {:email (@state :email)
                                   :password (@state :password)
                                   :on-complete (fn []
@@ -42,7 +42,7 @@
                                   (fn []
                                     (set-loading! false)
                                     (set-error! (str "Incorrect email or password. "
-                                                     " Please try again.")))}))))}
+                                                     " Please try again.")))}]))))}
 
          [:fieldset
           [:label "Email"
@@ -70,7 +70,7 @@
                [:button.reset-password
                 {:on-click (fn [e]
                              (.preventDefault e)
-                             (dispatch! :request-reset (@state :email)))}
+                             (dispatch [:request-reset (@state :email)]))}
                 "Send me a password reset email"])])]]
         [:div.alternatives
          "Or"

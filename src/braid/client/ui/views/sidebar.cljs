@@ -2,11 +2,10 @@
   (:require [clojure.string :as string]
             [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [braid.client.dispatcher :refer [dispatch!]]
+            [re-frame.core :refer [dispatch subscribe]]
             [braid.client.helpers :refer [id->color location element-offset
                                           get-style]]
             [braid.client.routes :as routes]
-            [braid.client.state :refer [subscribe]]
             [braid.client.ui.styles.vars :as style-vars]
             [goog.events :as events]
             [goog.style :as gstyle])
@@ -66,7 +65,7 @@
                               old-idx (index-of current-groups (group :id))
                               new-idx (+ old-idx by)
                               new-groups (move-idx current-groups old-idx new-idx)]
-                          (dispatch! :set-preference [:groups-order new-groups])))
+                          (dispatch [:set-preference [:groups-order new-groups]])))
         drag-state (r/atom {:grp nil
                             :elt-height 0
                             :click nil

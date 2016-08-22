@@ -2,10 +2,9 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [clojure.string :as string]
             [reagent.core :as r]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [dispatch subscribe]]
             [cljs.core.async :refer [chan put!]]
             [braid.client.routes :as routes]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :as helpers]
             [braid.client.s3 :as s3]
             [braid.client.ui.views.pills :refer [user-pill-view tag-pill-view]]
@@ -125,14 +124,14 @@
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
-            (dispatch! :display-error [:upload-fail "File to big to upload, sorry"])
+            (dispatch [:display-error [:upload-fail "File to big to upload, sorry"]])
             (do (set-uploading! true)
                 (s3/upload file (fn [url]
                                   (set-uploading! false)
-                                  (dispatch! :create-upload
+                                  (dispatch [:create-upload
                                              {:url url
                                               :thread-id (thread :id)
-                                              :group-id (thread :group-id)}))))))]
+                                              :group-id (thread :group-id)}]))))))]
 
     (fn [thread]
       (let [{:keys [dragging? uploading?]} @state
@@ -155,11 +154,11 @@
             (let [sel (.getSelection js/window)
                   selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
               (when (zero? selection-size)
-                (dispatch! :focus-thread (thread :id)))))
+                (dispatch [:focus-thread (thread :id)]))))
 
           :on-blur
           (fn [e]
-            (dispatch! :mark-thread-read (thread :id)))
+            (dispatch [:mark-thread-read (thread :id)]))
 
           :on-key-down
           (fn [e]
@@ -168,7 +167,7 @@
                         (.-ctrlKey e))
                       (= KeyCodes.ESC (.-keyCode e)))
               (helpers/stop-event! e)
-              (dispatch! :hide-thread {:thread-id (thread :id)})))
+              (dispatch [:hide-thread {:thread-id (thread :id)}])))
 
           :on-paste
           (fn [e]
@@ -228,7 +227,7 @@
                               ; divs as controls, otherwise divs higher up also
                               ; get click events
                               (helpers/stop-event! e)
-                              (dispatch! :hide-thread {:thread-id (thread :id)}))}]
+                              (dispatch [:hide-thread {:thread-id (thread :id)}]))}]
                 [:div.control.unread
                  {:title "Mark Unread"
                   :on-click (fn [e]
@@ -236,7 +235,7 @@
                               ; divs as controls, otherwise divs higher up also
                               ; get click events
                               (helpers/stop-event! e)
-                              (dispatch! :reopen-thread (thread :id)))}])
+                              (dispatch [:reopen-thread (thread :id)]))}])
               [:div.control.permalink.hidden
                {:title "Get Permalink"
                 :on-click (fn [e]
@@ -249,8 +248,8 @@
                             ; divs as controls, otherwise divs higher up also
                             ; get click events
                             (helpers/stop-event! e)
-                            (dispatch! :unsub-thread
-                                       {:thread-id (thread :id)}))}]])
+                            (dispatch [:unsub-thread
+                                       {:thread-id (thread :id)}]))}]])
 
            [thread-tags-view thread]]
 

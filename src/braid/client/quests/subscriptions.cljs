@@ -1,8 +1,8 @@
 (ns braid.client.quests.subscriptions
-  (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [braid.client.state.subscription :refer [subscription]]
+  (:require [re-frame.core :refer [reg-sub]]
             [braid.client.quests.helpers :as helpers]))
 
-(defmethod subscription :quests/active-quest-records
-  [state _]
-  (reaction (helpers/get-active-quest-records @state)))
+(reg-sub
+  :quests/active-quest-records
+  (fn [state _]
+    (helpers/get-active-quest-records state)))

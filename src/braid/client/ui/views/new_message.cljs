@@ -2,9 +2,8 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [run!]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [dispatch subscribe]]
             [cljs.core.async :as async :refer [<! put! chan alts!]]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.store :as store]
             [braid.client.s3 :as s3]
             [braid.client.helpers :refer [debounce stop-event!]]
@@ -22,11 +21,11 @@
         focused? (subscribe [:thread-focused? (config :thread-id)])
         send-message!
         (fn [config text]
-          (dispatch! :new-message {:thread-id (config :thread-id)
+          (dispatch [:new-message {:thread-id (config :thread-id)
                                    :group-id (config :group-id)
                                    :content text
                                    :mentioned-user-ids (config :mentioned-user-ids)
-                                   :mentioned-tag-ids (config :mentioned-tag-ids)}))
+                                   :mentioned-tag-ids (config :mentioned-tag-ids)}]))
         _ (run! (do
                   (when (and @focused? @this-elt)
                     (.focus @this-elt))))]
@@ -48,7 +47,7 @@
                      :value text
                      :disabled (not @connected?)
                      :on-focus (fn [e]
-                                 (dispatch! :focus-thread (config :thread-id)))
+                                 (dispatch [:focus-thread (config :thread-id)]))
                      :on-change (on-change
                                   {:on-change
                                    (fn [e]
@@ -219,10 +218,10 @@
                                       thread-text-kill-chan])]
                    (if (= ch throttled-thread-text-chan)
                      (do
-                       (dispatch! :new-message-text v)
+                       (dispatch [:new-message-text v])
                        (recur))
-                     (dispatch! :new-message-text {:thread-id @thread-id
-                                                   :content (@state :text)})))))))
+                     (dispatch [:new-message-text {:thread-id @thread-id
+                                                   :content (@state :text)}])))))))
 
        :component-will-update
        (fn [c [_ new-config]]
@@ -269,10 +268,10 @@
                                (aget (.. e -target -files) 0)
                                (fn [url]
                                  (reset! uploading? false)
-                                 (dispatch! :create-upload
+                                 (dispatch [:create-upload
                                             {:url url
                                              :group-id (config :group-id)
-                                             :thread-id (config :thread-id)}))))}]])))
+                                             :thread-id (config :thread-id)}]))))}]])))
 
 (defn new-message-view [config]
   [:div.message.new

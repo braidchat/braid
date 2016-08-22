@@ -3,9 +3,9 @@
   (:require [reagent.core :as r]
             [clojure.string :as string]
             [cljs.core.async :as async :refer [<! put! chan alts!]]
-            [braid.client.dispatcher :refer [dispatch!]]
+            [re-frame.core :refer [dispatch]]
             [braid.client.helpers :refer [debounce ->color]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.routes :as routes]))
 
 (defn search-bar-view
@@ -25,10 +25,10 @@
                (let [[v ch] (alts! [search kill-chan])]
                  (when (= ch search)
                    (let [{:keys [query]} v]
-                     (dispatch! :set-search-results [query {}])
+                     (dispatch [:set-search-results [query {}]])
                      (if (string/blank? query)
                        (exit-search!)
-                       (do (dispatch! :search-history [query @open-group-id])
+                       (do (dispatch [:search-history [query @open-group-id]])
                            (routes/go-to! (routes/search-page-path {:group-id @open-group-id
                                                                     :query query})))))
                    (recur)))))))
@@ -46,7 +46,7 @@
                    :on-change
                    (fn [e]
                      (let [query (.. e -target -value)]
-                       (dispatch! :set-search-query query)
+                       (dispatch [:set-search-query query])
                        (put! search-chan {:query query})))}]
           (if (seq @search-query)
             [:div.action.clear {:on-click (fn []

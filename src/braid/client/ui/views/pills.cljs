@@ -1,9 +1,8 @@
 (ns braid.client.ui.views.pills
   (:require [reagent.core :as r]
+            [re-frame.core :refer [dispatch subscribe]]
             [braid.client.routes :as routes]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.helpers :refer [id->color]]
-            [braid.client.state :refer [subscribe]]
             [braid.client.helpers :as helpers]))
 
 (defn subscribe-button-view
@@ -13,11 +12,11 @@
       (if @user-subscribed-to-tag?
         [:a.button {:on-click
                     (fn [_]
-                      (dispatch! :unsubscribe-from-tag tag-id))}
+                      (dispatch [:unsubscribe-from-tag tag-id]))}
          "Unsubscribe"]
         [:a.button {:on-click
                     (fn [_]
-                      (dispatch! :subscribe-to-tag {:tag-id tag-id}))}
+                      (dispatch [:subscribe-to-tag {:tag-id tag-id}]))}
          "Subscribe"]))))
 
 (defn tag-pill

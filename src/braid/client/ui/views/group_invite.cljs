@@ -1,8 +1,7 @@
 (ns braid.client.ui.views.group-invite
   (:require [reagent.core :as r]
             [clojure.string :as string]
-            [braid.client.state :refer [subscribe]]
-            [braid.client.dispatcher :refer [dispatch!]])
+            [re-frame.core :refer [dispatch subscribe]])
   (:import [goog.events KeyCodes]))
 
 (defn group-invite-view
@@ -31,11 +30,11 @@
             ^{:key :never}
             [:option {:value :never} "Never"])]]
         [:button {:on-click (fn []
-                              (dispatch!
-                                :generate-link
-                                {:group-id @group-id
-                                 :expires @link-expires
-                                 :complete (fn [link] (reset! invite-link link))}))}
+                              (dispatch
+                                [:generate-link
+                                 {:group-id @group-id
+                                  :expires @link-expires
+                                  :complete (fn [link] (reset! invite-link link))}]))}
          "Generate"]
         (when @invite-link
           [:input {:type "text"
@@ -59,8 +58,8 @@
            [:button.invite {:disabled (string/blank? @invitee-email)
                             :on-click
                             (fn [_]
-                              (dispatch! :invite {:group-id @group-id
-                                                  :invitee-email @invitee-email})
+                              (dispatch [:invite {:group-id @group-id
+                                                  :invitee-email @invitee-email}])
                               (set-collapse! true)
                               (set-invitee-email! ""))}
             "invite"]
