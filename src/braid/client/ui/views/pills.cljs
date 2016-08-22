@@ -84,7 +84,7 @@
   [user-id]
   (let [user (subscribe [:user user-id])
         open-group-id (subscribe [:open-group-id])
-        admin? (subscribe [:user-is-group-admin? user-id open-group-id])
+        admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
         user-status (subscribe [:user-status user-id])]
     (fn [user-id]
       [:div.card

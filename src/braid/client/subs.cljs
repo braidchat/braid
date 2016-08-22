@@ -70,9 +70,8 @@
 
 (reg-sub
   :user-is-group-admin?
-  (fn [state [_ & qvals] dvals]
-    (let [[user-id group-id] (concat (drop (count dvals) qvals) dvals)]
-      (contains? (set (get-in state [:groups group-id :admins])) user-id))))
+  (fn [state [_ user-id] [group-id]]
+    (contains? (set (get-in state [:groups group-id :admins])) user-id)))
 
 (reg-sub
   :current-user-is-group-admin?
