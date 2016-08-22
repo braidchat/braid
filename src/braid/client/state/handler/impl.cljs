@@ -140,7 +140,7 @@
   (helpers/subscribe-to-tag state tag-id))
 
 (defmethod handler :set-tag-description [state [_ {:keys [tag-id description local-only?]}]]
-  (when local-only?
+  (when-not local-only?
     (sync/chsk-send!
       [:braid.server/set-tag-description {:tag-id tag-id :description description}]))
   (helpers/set-tag-description state tag-id description))
