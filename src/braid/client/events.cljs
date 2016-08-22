@@ -231,7 +231,7 @@
                                                :description description}])}))))
 
 (reg-event-fx
-  :retract-tag
+  :remove-tag
   (fn [{state :db :as cofx} [_ {:keys [tag-id local-only?]}]]
     (merge
       {:db (helpers/remove-tag state tag-id)}
