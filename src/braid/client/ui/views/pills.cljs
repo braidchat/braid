@@ -85,6 +85,7 @@
   (let [user (subscribe [:user user-id])
         open-group-id (subscribe [:open-group-id])
         admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
+        viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])
         user-status (subscribe [:user-status user-id])]
     (fn [user-id]
       [:div.card
@@ -106,7 +107,13 @@
        [:div.actions
         ; [:a.pm "PM"]
         ; [:a.mute "Mute"]
-        [search-button-view (str "@" (@user :nickname))]]])))
+        [search-button-view (str "@" (@user :nickname))]
+        (when (and @viewer-admin? (not @admin?))
+          ; TODO: make this not ugly
+          [:button.make-admin
+           {:on-click (fn [_] (dispatch [:make-admin {:group-id @open-group-id
+                                                      :user-id user-id}]))}
+           "Make Admin"])]])))
 
 (defn user-pill-view
   [user-id]
