@@ -1,5 +1,5 @@
 (ns braid.client.ui.views.app
-  (:require [braid.client.state :refer [subscribe]]
+  (:require [re-frame.core :refer [subscribe]]
             [braid.client.ui.views.styles :refer [styles-view]]
             [braid.client.ui.views.main :refer [main-view]]
             [braid.client.ui.views.login :refer [login-view]]))
@@ -21,4 +21,6 @@
          [login-view]
 
          :app
-         [main-view])])))
+         [main-view]
+
+         [:p "wha?"])])))

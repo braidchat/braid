@@ -1,9 +1,8 @@
 (ns braid.client.ui.views.pages.thread
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [reaction]]
-            [braid.client.state :refer [subscribe]]
-            [braid.client.ui.views.thread :refer [thread-view]]
-            [braid.client.dispatcher :refer [dispatch!]]))
+            [re-frame.core :refer [dispatch subscribe]]
+            [braid.client.ui.views.thread :refer [thread-view]]))
 
 (defn single-thread-view
   []
@@ -17,6 +16,6 @@
        [:div.content
         (if-let [th @thread]
           [thread-view th]
-          (do (dispatch! :load-threads
-                         {:thread-ids [@thread-id]})
+          (do (dispatch [:load-threads
+                         {:thread-ids [@thread-id]}])
             [:div.loading]))]])))

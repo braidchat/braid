@@ -2,8 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [clojure.string :as string]
-            [braid.client.state :refer [subscribe]]
-            [braid.client.dispatcher :refer [dispatch!]]
+            [re-frame.core :refer [dispatch subscribe]]
             [braid.client.ui.views.pills :refer [tag-pill-view subscribe-button-view]]
             [braid.common.util :refer [valid-tag-name?]])
   (:import [goog.events KeyCodes]))
@@ -23,8 +22,8 @@
           [:button {:on-click
                     (fn [_]
                       (swap! editing? not)
-                      (dispatch! :set-tag-description {:tag-id (tag :id)
-                                                       :description @new-description}))}
+                      (dispatch [:set-tag-description {:tag-id (tag :id)
+                                                       :description @new-description}]))}
            "Save"]]
          [:button {:on-click (fn [_] (swap! editing? not))}
           "Edit description"])])))
@@ -44,15 +43,15 @@
         (fn [e]
           (when (= KeyCodes.ENTER e.keyCode)
             (let [text (.. e -target -value)]
-              (dispatch! :create-tag {:tag {:name text
-                                            :group-id (data :group-id)}}))
+              (dispatch [:create-tag {:tag {:name text
+                                            :group-id (data :group-id)}}]))
             (.preventDefault e)
             (aset (.. e -target) "value" "")))
         :placeholder "New Tag"}])))
 
 (defn delete-tag-view
   [tag]
-  [:button {:on-click (fn [_] (dispatch! :retract-tag (tag :id)))}
+  [:button {:on-click (fn [_] (dispatch [:remove-tag {:tag-id (tag :id)}]))}
    "Delete Tag"])
 
 (defn tag-info-view

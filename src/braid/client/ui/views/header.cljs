@@ -2,14 +2,14 @@
   (:require [reagent.ratom :refer-macros [reaction]]
             [braid.client.routes :as routes]
             [braid.client.helpers :refer [->color]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [subscribe]]
             [braid.client.ui.views.search-bar :refer [search-bar-view]]
             [braid.client.quests.views :refer [quests-header-view quests-menu-view]]))
 
 (defn current-user-button-view []
   (let [user-id (subscribe [:user-id])
-        user-avatar-url (subscribe [:user-avatar-url @user-id])
-        user-nickname (subscribe [:nickname @user-id])
+        user-avatar-url (subscribe [:user-avatar-url] [user-id])
+        user-nickname (subscribe [:nickname] [user-id])
         open-group-id (subscribe [:open-group-id])
         current-path (subscribe [:page-path])]
     (fn []

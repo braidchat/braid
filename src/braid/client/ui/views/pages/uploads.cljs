@@ -2,8 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [run!]]
             [clojure.string :as string]
-            [braid.client.state :refer [subscribe]]
-            [braid.client.dispatcher :refer [dispatch!]]
+            [re-frame.core :refer [dispatch subscribe]]
             [braid.client.routes :as routes]
             [braid.client.helpers :as helpers]
             [braid.client.ui.views.embed :refer [embed-view]]
@@ -40,8 +39,8 @@
              [:span "Tagged with " [thread/thread-tags-view @thread]]
              [:button
               {:on-click (fn [_]
-                           (dispatch! :load-threads
-                                      {:thread-ids [(upload :thread-id)]}))}
+                           (dispatch [:load-threads
+                                      {:thread-ids [(upload :thread-id)]}]))}
               "Load thread to see tags"])]])})))
 
 (defn uploads-view
@@ -50,10 +49,10 @@
         uploads (r/atom :initial)
         error (r/atom nil)
         ; TODO: will need to page this when it gets big?
-        get-uploads (run! (dispatch! :get-group-uploads
+        get-uploads (run! (dispatch [:get-group-uploads
                                      {:group-id @group-id
                                       :on-success (partial reset! uploads)
-                                      :on-error (partial reset! error)}))]
+                                      :on-error (partial reset! error)}]))]
     (fn []
       (let [_ @get-uploads]
         [:div.page.uploads

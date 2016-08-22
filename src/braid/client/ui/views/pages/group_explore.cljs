@@ -1,8 +1,7 @@
 (ns braid.client.ui.views.pages.group-explore
   (:require [reagent.core :as r]
             [clojure.string :as string]
-            [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.state :refer [subscribe]])
+            [re-frame.core :refer [dispatch subscribe]])
   (:import [goog.events KeyCodes]))
 
 (defn invitations-view
@@ -23,11 +22,11 @@
                [:br]
                [:button {:on-click
                          (fn [_]
-                           (dispatch! :accept-invite invite))}
+                           (dispatch [:accept-invite invite]))}
                 "Accept"]
                [:button {:on-click
                          (fn [_]
-                           (dispatch! :decline-invite invite))}
+                           (dispatch [:decline-invite invite]))}
                 "Decline"]])]
            [:div "No invitations."])])))
 
@@ -43,11 +42,11 @@
                 (fn [e]
                   (when (= KeyCodes.ENTER e.keyCode)
                     (.preventDefault e)
-                    (dispatch! :create-group {:name @new-group-name})
+                    (dispatch [:create-group {:name @new-group-name}])
                     (reset! new-group-name "")))}]
        [:button {:disabled (string/blank? @new-group-name)
                  :on-click (fn [_]
-                             (dispatch! :create-group {:name @new-group-name})
+                             (dispatch [:create-group {:name @new-group-name}])
                              (reset! new-group-name ""))}
         "Create"]])))
 

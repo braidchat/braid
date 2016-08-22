@@ -1,9 +1,8 @@
 (ns braid.client.ui.views.pages.search
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction run!]]
-            [braid.client.ui.views.thread :refer [thread-view]]
-            [braid.client.dispatcher :refer [dispatch!]]
-            [braid.client.state :refer [subscribe]]))
+            [re-frame.core :refer [dispatch subscribe]]
+            [braid.client.ui.views.thread :refer [thread-view]]))
 
 (defn search-page-view
   []
@@ -32,8 +31,10 @@
            [:div.title (str "Search for \"" @query "\"")]
            [:div.content
             [:p "Search timed out"]
-            [:button {:on-click (fn [_]
-                                  (dispatch! :search-history [(@page :search-query) @group-id]))}
+            [:button
+             {:on-click
+              (fn [_]
+                (dispatch [:search-history [(@page :search-query) @group-id]]))}
              "Try again"]]]
 
           (:done-results :loading)
@@ -60,16 +61,16 @@
                            (< (count @loaded-threads) (count (@page :thread-ids)))
                            (> 100 (- (.-scrollWidth div)
                                      (+ (.-scrollLeft div) (.-offsetWidth div)))))
-                     (dispatch! :set-page-loading true)
+                     (dispatch [:set-page-loading true])
                      (let [already-have (set (map :id @loaded-threads))
                            to-load (->> (@page :thread-ids)
                                         (remove already-have)
                                         (take 25))]
-                       (dispatch! :load-threads
+                       (dispatch [:load-threads
                                   {:thread-ids to-load
                                    :on-complete
                                    (fn []
-                                     (dispatch! :set-page-loading false))})))))
+                                     (dispatch [:set-page-loading false]))}])))))
                :on-wheel ; make the mouse wheel scroll horizontally
                (fn [e]
                  (let [target-classes (.. e -target -classList)

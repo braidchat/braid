@@ -1,9 +1,8 @@
 (ns braid.client.ui.views.pages.bots
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [reaction]]
-            [braid.client.state :refer [subscribe]]
+            [re-frame.core :refer [dispatch subscribe]]
             [braid.client.ui.views.pills :refer [user-pill-view]]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.ui.views.upload :refer [avatar-upload-view]]
             [braid.common.util :refer [bot-name-re]]))
 
@@ -30,11 +29,11 @@
               "Hide"]]
             [:button
              {:on-click (fn [_]
-                          (dispatch!
-                            :get-bot-info
-                            {:bot-id (bot :id)
-                             :on-complete (fn [info]
-                                            (reset! detailed-info info))}))}
+                          (dispatch
+                            [:get-bot-info
+                             {:bot-id (bot :id)
+                              :on-complete (fn [info]
+                                             (reset! detailed-info info))}]))}
              "See bot config"])])])))
 
 (defn group-bots-view []
@@ -78,7 +77,7 @@
                             (reset! error nil)
                             (reset! state :creating)
                             (swap! new-bot assoc :group-id @group-id)
-                            (dispatch! :new-bot
+                            (dispatch [:new-bot
                                        {:bot @new-bot
                                         :on-complete
                                         (fn [created]
@@ -87,7 +86,7 @@
                                                 (reset! state :created))
                                             (do
                                               (reset! error "Failed to create bot")
-                                              (reset! state :initial))))})
+                                              (reset! state :initial))))}])
                             (reset! state :creating)))}
             (when-let [err @error]
               [:div.error err])

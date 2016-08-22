@@ -1,6 +1,5 @@
 (ns braid.client.ui.views.error-banner
-  (:require [braid.client.state :refer [subscribe]]
-            [braid.client.dispatcher :refer [dispatch!]]))
+  (:require [re-frame.core :refer [subscribe dispatch]]))
 
 (defn error-banner-view []
   (let [errors (subscribe [:errors])]
@@ -13,5 +12,5 @@
             {:class cls}
             err
             [:span.close
-             {:on-click (fn [_] (dispatch! :clear-error err-key))}
+             {:on-click (fn [_] (dispatch [:clear-error err-key]))}
              "×"]]))])))

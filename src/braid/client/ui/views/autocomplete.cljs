@@ -1,10 +1,9 @@
 (ns braid.client.ui.views.autocomplete
   (:require [clj-fuzzy.metrics :as fuzzy]
-            [braid.client.store :as store]
+            [re-frame.core :refer [subscribe dispatch]]
             [braid.client.schema :as schema]
             [clojure.string :as string]
             [braid.client.helpers :refer [id->color debounce]]
-            [braid.client.dispatcher :refer [dispatch!]]
             [braid.client.emoji :as emoji]
             [goog.string :as gstring])
   (:import [goog.events KeyCodes]))
@@ -56,7 +55,8 @@
   [
    ; /<bot-name> -> autocompletes bots
    (fn [text]
-     (let [pattern #"^/(\w+)$"]
+     (let [pattern #"^/(\w+)$"
+           open-group (subscribe [:open-group-id])]
        (when-let [bot-name (second (re-find pattern text))]
          (into ()
                (comp (filter (fn [b] (fuzzy-matches? (b :nickname) bot-name)))
@@ -73,7 +73,7 @@
                                 [:img.avatar {:src (b :avatar)}]
                                 [:div.name (b :nickname)]
                                 [:div.extra "..."]])})))
-               (store/bots-in-open-group)))))
+               @(subscribe [:group-bots] [open-group])))))
 
    ; ... :emoji  -> autocomplete emoji
    (fn [text]
@@ -102,29 +102,31 @@
    (fn [text]
      (let [pattern #"\B@(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (->> (store/users-in-open-group)
-              (filter (fn [u]
-                        (fuzzy-matches? (u :nickname) query)))
-              (map (fn [user]
-                     {:key
-                      (fn [] (user :id))
-                      :action
-                      (fn [])
-                      :message-transform
-                      (fn [text]
-                        (string/replace text pattern (str "@" (user :nickname) " ")))
-                      :html
-                      (fn []
-                        [:div.user-match
-                          [:img.avatar {:src (user :avatar)}]
-                          [:div.name (user :nickname)]
-                          [:div.extra (user :status)]])}))))))
+         (let [group-id (subscribe [:open-group-id])]
+           (->> @(subscribe [:users-in-group @group-id])
+                (filter (fn [u]
+                          (fuzzy-matches? (u :nickname) query)))
+                (map (fn [user]
+                       {:key
+                        (fn [] (user :id))
+                        :action
+                        (fn [])
+                        :message-transform
+                        (fn [text]
+                          (string/replace text pattern (str "@" (user :nickname) " ")))
+                        :html
+                        (fn []
+                          [:div.user-match
+                           [:img.avatar {:src (user :avatar)}]
+                           [:div.name (user :nickname)]
+                           [:div.extra (user :status)]])})))))))
 
    ; ... #<tag>   -> autocompletes tag
    (fn [text]
      (let [pattern #"\B#(\S{0,})$"]
        (when-let [query (second (re-find pattern text))]
-         (let [group-tags (store/tags-in-open-group)
+         (let [open-group-id (subscribe [:open-group-id])
+               group-tags @(subscribe [:tags-in-group @open-group-id])
                exact-match? (some #(= query (:name %)) group-tags)]
            (->> group-tags
                 (filter (fn [t]
@@ -147,7 +149,7 @@
                                 :borderWidth "3px"
                                 :borderStyle "solid"
                                 :borderRadius "3px"}
-                               (when (store/is-subscribed-to-tag? (tag :id))
+                               (when @(subscribe [:user-subscribed-to-tag? (tag :id)])
                                  {:backgroundColor (id->color (tag :id))}))}]
                            [:div.name (tag :name)]
                            [:div.extra (or (tag :description)
@@ -155,11 +157,11 @@
                 (cons (when-not (or exact-match? (string/blank? query))
                         (let [tag (merge (schema/make-tag)
                                          {:name query
-                                          :group-id (store/open-group-id)})]
+                                          :group-id @open-group-id})]
                           {:key (constantly (tag :id))
                            :action
                            (fn []
-                             (dispatch! :create-tag {:tag tag}))
+                             (dispatch [:create-tag {:tag tag}]))
                            :message-transform
                            (fn [text]
                              (string/replace text pattern (str "#" (tag :name) " ")))
@@ -170,6 +172,6 @@
                                {:style {:backgroundColor (id->color (tag :id))}}]
                               [:div.name (str "Create tag " (tag :name))]
                               [:div.extra
-                               (:name (store/id->group (tag :group-id)))]])})))
+                               (:name @(subscribe [:group (tag :group-id)]))]])})))
                 (remove nil?)
                 reverse)))))])

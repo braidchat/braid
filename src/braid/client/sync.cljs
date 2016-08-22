@@ -1,11 +1,11 @@
 (ns braid.client.sync
-  (:require [taoensso.sente  :as sente :refer [cb-success?]]
+  (:require [re-frame.core :refer [dispatch]]
+            [taoensso.sente  :as sente :refer [cb-success?]]
             [taoensso.sente.packers.transit :as sente-transit]
             [taoensso.timbre :as timbre :refer-macros [debugf]]
             [goog.string :as gstring]
             [braid.client.store :as store]
-            [goog.string.format]
-            [braid.client.dispatcher :refer [dispatch!]]))
+            [goog.string.format]))
 
 ; Change to :debug to get detailed info in dev
 (timbre/set-level! :info)
@@ -47,8 +47,8 @@
     (do
       (debugf "Channel socket state change: %s" new-state)
       (if (not (:open? new-state))
-        (dispatch! :disconnected ["Disconnected" :warn])
-        (dispatch! :clear-error [:disconnected]))))
+        (dispatch [:disconnected ["Disconnected" :warn]])
+        (dispatch [:clear-error [:disconnected]]))))
   (event-handler [:socket/connected new-state]))
 
 (defmethod event-msg-handler :chsk/recv

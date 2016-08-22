@@ -44,29 +44,17 @@
 ; login
 
 (defn set-login-state [state login-state]
-  (assoc-in state [:login-state] login-state))
+  (assoc state :login-state login-state))
 
 ; window visibility and notifications
 
 (defn set-window-visibility
     [state visible?]
     (if visible?
-      (do
-        (set! (.-title js/document) "Chat")
-        (-> state
-            (assoc-in [:notifications :unread-count] 0)
-            (assoc-in [:notifications :window-visible?] visible?)))
+      (-> state
+          (assoc-in [:notifications :unread-count] 0)
+          (assoc-in [:notifications :window-visible?] visible?))
       (assoc-in state [:notifications :window-visible?] visible?)))
-
-(defn maybe-increment-unread [state]
-  (if-not (get-in state [:notifications :window-visible?])
-    (do
-      ; TODO this should be done with a subscription
-      ; TODO should store time when went away and recalculate unread-count instead of maintaing an unread-count in state
-      (set! (.-title js/document)
-            (str "Chat (" (inc (get-in state [:notifications :unread-count])) ")"))
-      (update-in state [:notifications :unread-count] inc))
-    state))
 
 ; error
 
@@ -228,21 +216,6 @@
 
 (defn show-thread [state thread-id]
   (update-in state [:user :open-thread-ids] #(conj % thread-id)))
-
-; pages
-
-(defn set-channel-results [state threads]
-  (-> state
-      (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-      (update-in [:page :thread-ids] (constantly (map :id threads)))))
-
-(defn add-channel-results [state threads]
-  (-> state
-      (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-      (update-in [:page :thread-ids] #(concat % (map :id threads)))))
-
-(defn set-pagination-remaining [state threads-count]
-  (update-in state [:pagination-remaining] (constantly threads-count)))
 
 ; tags
 
