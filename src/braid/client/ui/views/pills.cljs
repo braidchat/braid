@@ -69,11 +69,10 @@
 
 (defn user-pill
   [user-id]
-  (let [user (subscribe [:user user-id])
-        user-status (subscribe [:user-status user-id])]
+  (let [user (subscribe [:user user-id])]
     (fn [user-id]
       (let [color (id->color user-id)]
-        [:span.pill {:class (str (case @user-status :online "on" "off"))
+        [:span.pill {:class (str (case (@user :status) :online "on" "off"))
                      :tabIndex -1
                      :style {:background-color color
                              :color color
@@ -85,8 +84,7 @@
   (let [user (subscribe [:user user-id])
         open-group-id (subscribe [:open-group-id])
         admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
-        viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])
-        user-status (subscribe [:user-status user-id])]
+        viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
     (fn [user-id]
       [:div.card
        [:div.header {:style {:background-color (id->color user-id)}}
