@@ -571,7 +571,9 @@
 (reg-event-db
   :set-group-and-page
   (fn [state [_ [group-id page-id]]]
-    (helpers/set-group-and-page state group-id page-id)))
+    (if (some? (get-in state [:groups group-id]))
+      (helpers/set-group-and-page state group-id page-id)
+      (helpers/set-group-and-page state nil {:type :index}))))
 
 (reg-event-db
   :set-page-loading
