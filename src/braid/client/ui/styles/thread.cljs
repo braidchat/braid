@@ -121,7 +121,7 @@
        {:position "absolute"
         :left "100%"
         :margin-left (em 0.5)
-        :bottom "-0.5em"
+        :top "-0.5em"
         :background "white"
         :z-index 100
         :max-height (em 12)
