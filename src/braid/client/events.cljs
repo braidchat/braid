@@ -123,7 +123,7 @@
 (reg-event-fx
   :new-message
   (fn [{state :db :as cofx} [_ data]]
-    (if-not (string/blank? (data :content))
+    (when-not (string/blank? (data :content))
       (let [message (schema/make-message
                       {:user-id (helpers/current-user-id state)
                        :content (identify-mentions state (data :content))
@@ -141,10 +141,8 @@
            2000
            (fn [reply]
              (when (not= :braid/ok reply)
-               ; TODO
                (dispatch [:display-error [(str :failed-to-send (message :id))
                                           "Message failed to send!"]])
-               ; TODO
                (dispatch [:set-message-failed message]))))
          :db (-> state
                  (helpers/add-message message)
