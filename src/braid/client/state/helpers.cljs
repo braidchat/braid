@@ -19,9 +19,6 @@
 (defn current-user-id [state]
   (get-in state [:session :user-id]))
 
-(defn get-open-group-id [state]
-  (get state :open-group-id))
-
 ; SETTERS
 
 ; error
@@ -57,19 +54,10 @@
 
 ; threads and messages
 
-(defn set-threads [state threads]
-  (assoc-in state [:threads] (key-by-id threads)))
-
-(defn reset-new-thread-id [state]
-  (assoc-in state [:new-thread-id] (uuid/make-random-squuid)))
-
 (defn maybe-reset-new-thread-id [state thread-id]
   (if (= thread-id (:new-thread-id state))
-    (reset-new-thread-id state)
+    (assoc-in state [:new-thread-id] (uuid/make-random-squuid))
     state))
-
-(defn focus-thread [state thread-id]
-  (assoc-in state [:focused-thread-id] thread-id))
 
 (defn update-thread-last-open-at [state thread-id]
   (if-let [thread (get-in state [:threads thread-id])]
@@ -121,8 +109,3 @@
         (update-in [:threads] #(apply dissoc % group-threads))
         (update-in [:group-threads] (flip dissoc group-id))
         (update-in [:groups] (flip dissoc group-id)))))
-
-; invitations
-
-(defn remove-invite [state invite]
-  (update-in state [:invitations] (partial remove (partial = invite))))

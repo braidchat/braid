@@ -451,17 +451,22 @@
          (when-let [link (:link reply)]
            (complete link))))}))
 
+(reg-event-db
+  :remove-invite
+  (fn [state [_ invite]]
+    (update-in state [:invitations] (partial remove (partial = invite)))))
+
 (reg-event-fx
   :accept-invite
   (fn [{state :db :as cofx} [_ invite]]
     {:websocket-send (list [:braid.server/invitation-accept invite])
-     :db (helpers/remove-invite state invite)}))
+     :dispatch [:remove-invite invite]}))
 
 (reg-event-fx
   :decline-invite
   (fn [{state :db :as cofx} [_ invite]]
     {:websocket-send (list [:braid.server/invitation-decline invite])
-     :db (helpers/remove-invite state invite)}))
+     :dispatch [:remove-invite invite]}))
 
 (reg-event-fx
   :make-admin
@@ -694,7 +699,7 @@
                 {:groups-order (into [] (remove (partial = group-id))
                                      sidebar-order)})
               state))))
-     :redirect-to (when (= group-id (helpers/get-open-group-id state))
+     :redirect-to (when (= group-id (state :open-group-id))
                     "/")}))
 
 (reg-event-db
