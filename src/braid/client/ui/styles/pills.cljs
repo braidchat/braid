@@ -16,11 +16,10 @@
 
    [:.card
     (mixins/box-shadow)
-    {:display "none"
-     :position "absolute"
+    {:position "absolute"
      :z-index 5000
      :background "white"
-     :width (em 15)
+     :min-width (em 15)
      :top (m/* -1 offset)
      :left (m/* -1 offset)
      :padding offset
@@ -30,7 +29,14 @@
     [:.header
      {:padding offset
       :margin [[(m/* -1 offset) (m/* -1 offset) 0 (m/* -1 offset)]]
-      :color "white"}]
+      :height (em 1.75)
+      :color "white"
+      :display "flex"
+      :justify-content "space-between"
+      :align-items "center"}
+
+     [:.spacer
+      {:flex-grow 5}]]
 
     [:.info
      {:font-size (em 0.9)
@@ -59,8 +65,7 @@
 
     [:.count
      {:margin-left (em 1)
-      :display "inline-block"
-      :vertical-align "middle"}
+      :display "inline-block"}
      (mixins/mini-text)
 
      [:&::after
@@ -91,7 +96,6 @@
 
      [:.status
       {:display "inline-block"
-       :vertical-align "middle"
        :margin-left (em 0.5)}
       (mixins/mini-text)]
 
@@ -101,16 +105,14 @@
       [:.admin::before
        {:display "inline-block"
         :-webkit-font-smoothing "antialiased"}
-       (mixins/fontawesome \uf0e3)]]]
+       (mixins/fontawesome \uf0e3)]]
 
-    [:img.avatar
-     {:position "absolute"
-      :top offset
-      :right offset
-      :margin-top (px 1)
-      :border-radius (px 3)
-      :width (rem 2.5)
-      :height (rem 2.5)}]
+     [:img.avatar
+      {:margin-top (px 2)
+       :align-self "flex-start"
+       :border-radius (px 3)
+       :width (rem 2.5)
+       :height (rem 2.5)}]]
 
     [:.local-time
 
