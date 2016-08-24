@@ -135,7 +135,7 @@
               [:.badge
                {:font-size "0.8rem"}]])]]
 
-         braid.client.ui.styles.misc/tag
+         ;braid.client.ui.styles.misc/tag
 
          [:.page
           {:position "absolute"
