@@ -30,7 +30,7 @@
   ([state err-key msg]
    (display-error state err-key msg :error))
   ([state err-key msg cls]
-   (update-in state [:errors] #(conj % [err-key msg cls]))))
+   (update-in state [:errors] conj [err-key msg cls])))
 
 (defn clear-error [state err-key]
   (update-in state [:errors] #(into [] (remove (fn [[k _]] (= k err-key))) %)))
@@ -94,7 +94,7 @@
     state))
 
 (defn maybe-create-thread [state thread-id group-id]
-  (let [state (update-in state [:user :open-thread-ids] #(conj % thread-id))]
+  (let [state (update-in state [:user :open-thread-ids] conj thread-id)]
     (if-not (get-in state [:threads thread-id])
       (-> state
           (assoc-in [:threads thread-id] {:id thread-id
@@ -108,7 +108,7 @@
 (defn add-message [state message]
   (-> state
       (maybe-create-thread (message :thread-id) (message :group-id))
-      (update-in [:threads (message :thread-id) :messages] #(conj % message))
+      (update-in [:threads (message :thread-id) :messages] conj message)
       (update-thread-last-open-at (message :thread-id))
       (update-in [:threads (message :thread-id) :tag-ids]
                  (partial set/union (set (message :mentioned-tag-ids))))
@@ -118,10 +118,10 @@
 ; tags
 
 (defn subscribe-to-tag [state tag-id]
-  (update-in state [:user :subscribed-tag-ids] #(conj % tag-id)))
+  (update-in state [:user :subscribed-tag-ids] conj tag-id))
 
 (defn add-tags [state tags]
-  (update-in state [:tags] #(merge % (key-by-id tags))))
+  (update-in state [:tags] merge (key-by-id tags)))
 
 (defn set-subscribed-tag-ids [state tag-ids]
   (assoc-in state [:user :subscribed-tag-ids] (set tag-ids)))

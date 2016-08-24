@@ -712,7 +712,7 @@
 (reg-event-db
   :add-invite
   (fn [state [_ invite]]
-    (update-in state [:invitations] #(conj % invite))))
+    (update-in state [:invitations] conj invite)))
 
 (reg-event-db
   :update-user-status
@@ -743,4 +743,4 @@
 (reg-event-db
   :add-group-bot
   (fn [state [_ [group-id bot]]]
-    (update-in state [:groups group-id :bots] #(conj % bot))))
+    (update-in state [:groups group-id :bots] conj bot)))
