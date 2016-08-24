@@ -53,8 +53,7 @@
          (@tag :subscribers-count)]
         [:div.threads.count
          {:title (str (@tag :threads-count) " Conversations")}
-         (@tag :threads-count)]
-        [:div.spacer]]
+         (@tag :threads-count)]]
        [:div.info
         [:div.description
          (or (@tag :description) "If I had a description, it would be here.")]]
@@ -97,7 +96,6 @@
         [:div.badges
          (when @admin?
            [:div.admin {:title "admin"}])]
-        [:div.spacer]
         [:img.avatar {:src (@user :avatar)}]]
        [:div.info
         [:div.local-time (helpers/format-date (js/Date.))]

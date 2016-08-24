@@ -5,14 +5,19 @@
             [garden.arithmetic :as m]))
 
 (def offset (px 5))
+(def avatar-size (rem 2.5))
 
 (defn hover-card []
   [:&
-   {:position "relative"}
+   {:position "relative"
+    :display "inline-block"}
 
    [:&:hover
     [:.card
      {:display "block"}]]
+
+   [:.pill
+    mixins/pill-box]
 
    [:.card
     (mixins/box-shadow)
@@ -30,14 +35,8 @@
     [:.header
      {:padding offset
       :margin [[(m/* -1 offset) (m/* -1 offset) 0 (m/* -1 offset)]]
-      :height (em 1.75)
-      :color "white"
-      :display "flex"
-      :justify-content "space-between"
-      :align-items "center"}
-
-     [:.spacer
-      {:flex-grow 5}]]
+      :white-space "nowrap"
+      :color "white"}]
 
     [:.info
      {:font-size (em 0.9)
@@ -56,11 +55,6 @@
 (def tag
   [:.tag
    (hover-card)
-   {:display "inline-block"}
-
-   [:.pill
-    mixins/pill-box
-    {:outline "none"}]
 
    [:.card
 
@@ -86,14 +80,12 @@
 (def user
   [:.user
    (hover-card)
-   {:display "inline-block"}
-
-   [:.pill
-    mixins/pill-box]
 
    [:.card
 
     [:.header
+     ; reserve room for avatar, which is absolutely positioned
+     {:padding-right avatar-size}
 
      [:.status
       {:display "inline-block"
@@ -102,7 +94,7 @@
 
      [:.badges
       {:display "inline-block"
-       :margin-left (em 0.5)}
+       :margin [[0 (em 0.5)]]}
       [:.admin::before
        {:display "inline-block"
         :-webkit-font-smoothing "antialiased"}
@@ -110,10 +102,13 @@
 
      [:img.avatar
       {:margin-top (px 2)
-       :align-self "flex-start"
        :border-radius (px 3)
-       :width (rem 2.5)
-       :height (rem 2.5)}]]
+       :width avatar-size
+       :height avatar-size
+       :background "white"
+       :position "absolute"
+       :top offset
+       :right offset}]]
 
     [:.local-time
 
