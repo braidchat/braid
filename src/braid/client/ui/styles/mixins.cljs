@@ -27,7 +27,8 @@
     :vertical-align "middle"
     :cursor "pointer"
     :text-decoration "none"
-    :text-align "center"}
+    :text-align "center"
+    :outline "none"}
    (mini-text)
   [:&.on
    {:color [["white" "!important"]]}]

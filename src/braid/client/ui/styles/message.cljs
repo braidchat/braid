@@ -78,27 +78,8 @@
      :margin-top (rem 0.20)}
 
     [:a.external
-     {:text-decoration "none"
-      :color "white"
-      :padding "0em 0.25em"
-      :border-radius "0.25em"
-      :background "#607DE1"
-      :outline "none"}
-
-     [:&:hover
-      {:background "#4D69C9"}]
-
-     [:&:active
-      {:background "##2B3D79"}]
-
-     [:&:visited
-      {:background "#9B81DB"}
-
-      [:&:hover
-       {:background "#735EA7"}]
-
-      [:&:active
-       {:background "#463670"}]]
+     mixins/pill-box
+     {:background "#000000"}
 
      [:&:before
       (mixins/fontawesome \uf0c1)
