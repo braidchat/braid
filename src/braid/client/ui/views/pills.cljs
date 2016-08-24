@@ -40,7 +40,7 @@
                                         :query query})}
        "Search"])))
 
-(defn tag-car-view
+(defn tag-card-view
   [tag-id]
   (let [tag (subscribe [:tag tag-id])
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])]
@@ -53,7 +53,8 @@
          (@tag :subscribers-count)]
         [:div.threads.count
          {:title (str (@tag :threads-count) " Conversations")}
-         (@tag :threads-count)]]
+         (@tag :threads-count)]
+        [:div.spacer]]
        [:div.info
         [:div.description
          (or (@tag :description) "If I had a description, it would be here.")]]
@@ -65,7 +66,7 @@
   [tag-id]
   [:div.tag
    [tag-pill tag-id]
-   [tag-car-view tag-id]])
+   [tag-card-view tag-id]])
 
 (defn user-pill
   [user-id]
@@ -95,9 +96,10 @@
          ]
         [:div.badges
          (when @admin?
-           [:div.admin {:title "admin"}])]]
+           [:div.admin {:title "admin"}])]
+        [:div.spacer]
+        [:img.avatar {:src (@user :avatar)}]]
        [:div.info
-        [:img.avatar {:src (@user :avatar)}]
         [:div.local-time (helpers/format-date (js/Date.))]
         ; [:div.since "member since]
         [:div.description
