@@ -40,7 +40,7 @@
                                         :query query})}
        "Search"])))
 
-(defn tag-car-view
+(defn tag-card-view
   [tag-id]
   (let [tag (subscribe [:tag tag-id])
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])]
@@ -65,7 +65,7 @@
   [tag-id]
   [:div.tag
    [tag-pill tag-id]
-   [tag-car-view tag-id]])
+   [tag-card-view tag-id]])
 
 (defn user-pill
   [user-id]
