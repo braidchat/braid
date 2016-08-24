@@ -18,8 +18,20 @@
       {:display "none"}]]
 
     [:&.seen
-     {:transition [["opacity" "0.5s" "linear"]]
-      :opacity 0.6}]
+     {:transition [["opacity" "0.5s" "linear"]]}
+     ; cannot apply opacity to .message or .content or .dummy
+     ; b/c it creates a new stacking context
+     ; causing hover-cards to display under subsequent messages
+     ["> .info"
+      "> .avatar img"
+      "> .embed"
+      "> .content > img"
+      "> .content > .dummy > .user > .pill"
+      "> .content > .dummy > .tag > .pill"
+      "> .content > .dummy > .external"
+      {:opacity 0.6}]
+     ["> .content"
+      {:color "rgba(0,0,0,0.6)"}]]
 
     [:&.unseen {}]
 
