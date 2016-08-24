@@ -661,14 +661,20 @@
     {:dispatch-n (list [:set-login-state :app]
                    [:add-users (data :users)])
      :db (-> state
-             (helpers/set-session {:user-id (data :user-id)})
+             (assoc :session {:user-id (data :user-id)})
+             (assoc-in [:user :subscribed-tag-ids]
+               (set (data :user-subscribed-tag-ids)))
+             (assoc :groups (key-by-id (data :user-groups)))
+             (assoc :invitations (data :invitations))
+             (assoc :threads (key-by-id (data :user-threads)))
+             (assoc :group-threads
+               (into {}
+                     (map (fn [[g t]] [g (into #{} (map :id) t)]))
+                     (group-by :group-id (data :user-threads))))
+             (assoc-in [:user :open-thread-ids]
+               (set (map :id (data :user-threads))))
              (helpers/add-tags (data :tags))
-             (helpers/set-subscribed-tag-ids (data :user-subscribed-tag-ids))
              (helpers/set-preferences (data :user-preferences))
-             (helpers/set-groups (data :user-groups))
-             (helpers/set-invitations (data :invitations))
-             (helpers/set-threads (data :user-threads))
-             (helpers/set-open-threads (data :user-threads))
              (quest-helpers/set-quest-records (data :quest-records)))}))
 
 (reg-event-fx

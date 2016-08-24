@@ -45,11 +45,6 @@
 (defn set-page-error [state bool]
   (assoc-in state [:page :error?] bool))
 
-; session
-
-(defn set-session [state data]
-  (assoc-in state [:session] data))
-
 ; user
 
 (defn set-preferences [state prefs]
@@ -72,14 +67,6 @@
   (if (= thread-id (:new-thread-id state))
     (reset-new-thread-id state)
     state))
-
-(defn set-open-threads [state threads]
-  (-> state
-      (assoc-in [:group-threads] (into {}
-                                       (map (fn [[g t]]
-                                              [g (into #{} (map :id) t)]))
-                                       (group-by :group-id threads)))
-      (assoc-in [:user :open-thread-ids] (set (map :id threads)))))
 
 (defn focus-thread [state thread-id]
   (assoc-in state [:focused-thread-id] thread-id))
@@ -123,13 +110,7 @@
 (defn add-tags [state tags]
   (update-in state [:tags] merge (key-by-id tags)))
 
-(defn set-subscribed-tag-ids [state tag-ids]
-  (assoc-in state [:user :subscribed-tag-ids] (set tag-ids)))
-
 ; groups
-
-(defn set-groups [state groups]
-  (assoc-in state [:groups] (key-by-id groups)))
 
 (defn add-group [state group]
   (update-in state [:groups] (flip assoc (group :id) group)))
@@ -142,9 +123,6 @@
         (update-in [:groups] (flip dissoc group-id)))))
 
 ; invitations
-
-(defn set-invitations [state invitations]
-  (assoc-in state [:invitations] invitations))
 
 (defn remove-invite [state invite]
   (update-in state [:invitations] (partial remove (partial = invite))))
