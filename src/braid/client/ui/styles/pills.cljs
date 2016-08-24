@@ -5,14 +5,19 @@
             [garden.arithmetic :as m]))
 
 (def offset (px 5))
+(def avatar-size (rem 2.5))
 
 (defn hover-card []
   [:&
-   {:position "relative"}
+   {:position "relative"
+    :display "inline-block"}
 
    [:&:hover
     [:.card
      {:display "block"}]]
+
+   [:.pill
+    mixins/pill-box]
 
    [:.card
     (mixins/box-shadow)
@@ -20,7 +25,7 @@
      :position "absolute"
      :z-index 5000
      :background "white"
-     :width (em 15)
+     :min-width (em 15)
      :top (m/* -1 offset)
      :left (m/* -1 offset)
      :padding offset
@@ -30,6 +35,7 @@
     [:.header
      {:padding offset
       :margin [[(m/* -1 offset) (m/* -1 offset) 0 (m/* -1 offset)]]
+      :white-space "nowrap"
       :color "white"}]
 
     [:.info
@@ -49,18 +55,12 @@
 (def tag
   [:.tag
    (hover-card)
-   {:display "inline-block"}
-
-   [:.pill
-    mixins/pill-box
-    {:outline "none"}]
 
    [:.card
 
     [:.count
      {:margin-left (em 1)
-      :display "inline-block"
-      :vertical-align "middle"}
+      :display "inline-block"}
      (mixins/mini-text)
 
      [:&::after
@@ -80,37 +80,35 @@
 (def user
   [:.user
    (hover-card)
-   {:display "inline-block"}
-
-   [:.pill
-    mixins/pill-box]
 
    [:.card
 
     [:.header
+     ; reserve room for avatar, which is absolutely positioned
+     {:padding-right avatar-size}
 
      [:.status
       {:display "inline-block"
-       :vertical-align "middle"
        :margin-left (em 0.5)}
       (mixins/mini-text)]
 
      [:.badges
       {:display "inline-block"
-       :margin-left (em 0.5)}
+       :margin [[0 (em 0.5)]]}
       [:.admin::before
        {:display "inline-block"
         :-webkit-font-smoothing "antialiased"}
-       (mixins/fontawesome \uf0e3)]]]
+       (mixins/fontawesome \uf0e3)]]
 
-    [:img.avatar
-     {:position "absolute"
-      :top offset
-      :right offset
-      :margin-top (px 1)
-      :border-radius (px 3)
-      :width (rem 2.5)
-      :height (rem 2.5)}]
+     [:img.avatar
+      {:margin-top (px 2)
+       :border-radius (px 3)
+       :width avatar-size
+       :height avatar-size
+       :background "white"
+       :position "absolute"
+       :top offset
+       :right offset}]]
 
     [:.local-time
 

@@ -6,7 +6,6 @@
             [braid.client.ui.views.header :refer [header-view]]
             [braid.client.ui.views.pages.inbox :refer [inbox-page-view]]
             [braid.client.ui.views.pages.recent :refer [recent-page-view]]
-            [braid.client.ui.views.pages.users :refer [users-page-view]]
             [braid.client.ui.views.pages.search :refer [search-page-view]]
             [braid.client.ui.views.pages.tags :refer [tags-page-view]]
             [braid.client.ui.views.pages.me :refer [me-page-view]]
@@ -25,7 +24,6 @@
       (case (@page :type)
         :inbox [inbox-page-view]
         :recent [recent-page-view]
-        :users [users-page-view]
         :search [search-page-view]
         :tags [tags-page-view]
         :me [me-page-view]

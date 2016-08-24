@@ -40,7 +40,7 @@
                                         :query query})}
        "Search"])))
 
-(defn tag-car-view
+(defn tag-card-view
   [tag-id]
   (let [tag (subscribe [:tag tag-id])
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])]
@@ -65,15 +65,14 @@
   [tag-id]
   [:div.tag
    [tag-pill tag-id]
-   [tag-car-view tag-id]])
+   [tag-card-view tag-id]])
 
 (defn user-pill
   [user-id]
-  (let [user (subscribe [:user user-id])
-        user-status (subscribe [:user-status user-id])]
+  (let [user (subscribe [:user user-id])]
     (fn [user-id]
       (let [color (id->color user-id)]
-        [:span.pill {:class (str (case @user-status :online "on" "off"))
+        [:span.pill {:class (str (case (@user :status) :online "on" "off"))
                      :tabIndex -1
                      :style {:background-color color
                              :color color
@@ -84,8 +83,8 @@
   [user-id]
   (let [user (subscribe [:user user-id])
         open-group-id (subscribe [:open-group-id])
-        admin? (subscribe [:user-is-group-admin? user-id open-group-id])
-        user-status (subscribe [:user-status user-id])]
+        admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
+        viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
     (fn [user-id]
       [:div.card
        [:div.header {:style {:background-color (id->color user-id)}}
@@ -96,9 +95,9 @@
          ]
         [:div.badges
          (when @admin?
-           [:div.admin {:title "admin"}])]]
+           [:div.admin {:title "admin"}])]
+        [:img.avatar {:src (@user :avatar)}]]
        [:div.info
-        [:img.avatar {:src (@user :avatar)}]
         [:div.local-time (helpers/format-date (js/Date.))]
         ; [:div.since "member since]
         [:div.description
@@ -106,7 +105,13 @@
        [:div.actions
         ; [:a.pm "PM"]
         ; [:a.mute "Mute"]
-        [search-button-view (str "@" (@user :nickname))]]])))
+        [search-button-view (str "@" (@user :nickname))]
+        (when (and @viewer-admin? (not @admin?))
+          ; TODO: make this not ugly
+          [:button.make-admin
+           {:on-click (fn [_] (dispatch [:make-admin {:group-id @open-group-id
+                                                      :user-id user-id}]))}
+           "Make Admin"])]])))
 
 (defn user-pill-view
   [user-id]

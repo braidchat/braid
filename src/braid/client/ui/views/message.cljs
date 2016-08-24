@@ -21,20 +21,24 @@
               abridged-path (apply str (take-last path-char-limit path))]
           (str domain gap abridged-path))))))
 
+(defn link-pill-view [url]
+  [:a.external {:href url
+                :title url
+                :style {:background-color (helpers/url->color url)
+                        :border-color (helpers/url->color url)}
+                :on-click (fn [e] (.stopPropagation e))
+                :target "_blank"
+                ; rel to address vuln caused by target=_blank
+                ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+                :rel "noopener noreferrer"
+                :tabIndex -1}
+   (abridged-url url)])
+
 (def replacements
   {:urls
    {:pattern helpers/url-re
     :replace (fn [url]
-               [:a.external {:href url
-                             :title url
-                             :style {:background-color (helpers/url->color url)}
-                             :on-click (fn [e] (.stopPropagation e))
-                             :target "_blank"
-                             ; rel to address vuln caused by target=_blank
-                             ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
-                             :rel "noopener noreferrer"
-                             :tabIndex -1}
-                (abridged-url url)])}
+               [link-pill-view url])}
    :users
    {:pattern #"@([-0-9a-z]+)"
     :replace (fn [match]

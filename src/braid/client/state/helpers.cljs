@@ -119,9 +119,6 @@
 
 ; admins
 
-(defn make-user-admin [state group-id user-id]
-  (update-in state [:groups group-id :admins] #(conj % user-id)))
-
 (defn become-group-admin [state group-id]
   (-> state
       (update-in [:users (current-user-id state) :group-ids] #(vec (conj (set %) group-id)))

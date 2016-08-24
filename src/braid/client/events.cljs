@@ -429,7 +429,7 @@
 (reg-event-fx
   :make-admin
   (fn [{state :db :as cofx} [_ {:keys [group-id user-id local-only?] :as args}]]
-    {:db (helpers/make-user-admin state user-id group-id)
+    {:db (update-in state [:groups group-id :admins] conj user-id)
      :websocket-send (when-not local-only?
                        (list [:braid.server/make-user-admin args]))}))
 
@@ -571,7 +571,9 @@
 (reg-event-db
   :set-group-and-page
   (fn [state [_ [group-id page-id]]]
-    (helpers/set-group-and-page state group-id page-id)))
+    (if (some? (get-in state [:groups group-id]))
+      (helpers/set-group-and-page state group-id page-id)
+      (helpers/set-group-and-page state nil {:type :index}))))
 
 (reg-event-db
   :set-page-loading

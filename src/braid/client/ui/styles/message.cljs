@@ -18,8 +18,20 @@
       {:display "none"}]]
 
     [:&.seen
-     {:transition [["opacity" "0.5s" "linear"]]
-      :opacity 0.6}]
+     {:transition [["opacity" "0.5s" "linear"]]}
+     ; cannot apply opacity to .message or .content or .dummy
+     ; b/c it creates a new stacking context
+     ; causing hover-cards to display under subsequent messages
+     ["> .info"
+      "> .avatar img"
+      "> .embed"
+      "> .content > img"
+      "> .content > .dummy > .user > .pill"
+      "> .content > .dummy > .tag > .pill"
+      "> .content > .dummy > .external"
+      {:opacity 0.6}]
+     ["> .content"
+      {:color "rgba(0,0,0,0.6)"}]]
 
     [:&.unseen {}]
 
@@ -66,27 +78,8 @@
      :margin-top (rem 0.20)}
 
     [:a.external
-     {:text-decoration "none"
-      :color "white"
-      :padding "0em 0.25em"
-      :border-radius "0.25em"
-      :background "#607DE1"
-      :outline "none"}
-
-     [:&:hover
-      {:background "#4D69C9"}]
-
-     [:&:active
-      {:background "##2B3D79"}]
-
-     [:&:visited
-      {:background "#9B81DB"}
-
-      [:&:hover
-       {:background "#735EA7"}]
-
-      [:&:active
-       {:background "#463670"}]]
+     mixins/pill-box
+     {:background "#000000"}
 
      [:&:before
       (mixins/fontawesome \uf0c1)

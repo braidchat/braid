@@ -70,8 +70,8 @@
 
 (reg-sub
   :user-is-group-admin?
-  (fn [state _ [user-id group-id]]
-    (contains? (get-in state [:groups group-id :admins]) user-id)))
+  (fn [state [_ user-id] [group-id]]
+    (contains? (set (get-in state [:groups group-id :admins])) user-id)))
 
 (reg-sub
   :current-user-is-group-admin?
@@ -198,11 +198,6 @@
   :user-avatar-url
   (fn [state _ [user-id]]
     (get-in state [:users user-id :avatar])))
-
-(reg-sub
-  :user-status
-  (fn [state _ [user-id]]
-    (get-in state [:users user-id :status])))
 
 (reg-sub
   :search-query
