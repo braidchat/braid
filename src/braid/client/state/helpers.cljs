@@ -101,7 +101,7 @@
 ; groups
 
 (defn add-group [state group]
-  (update-in state [:groups] (flip assoc (group :id) group)))
+  (update-in state [:groups] assoc (group :id) group))
 
 (defn remove-group [state group-id]
   (let [group-threads (get-in state [:group-threads group-id])]
