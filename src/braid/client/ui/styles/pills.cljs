@@ -16,7 +16,8 @@
 
    [:.card
     (mixins/box-shadow)
-    {:position "absolute"
+    {:display "none"
+     :position "absolute"
      :z-index 5000
      :background "white"
      :min-width (em 15)
