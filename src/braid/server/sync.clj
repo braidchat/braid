@@ -189,6 +189,15 @@
         (when-let [cb ?reply-fn]
           (cb :braid/error))))))
 
+(defmethod event-msg-handler :braid.server/tag-thread
+  [{:as ev-msg :keys [?data user-id]}]
+  (let [{:keys [thread-id tag-id]} ?data]
+    (let [group-id (db/tag-group-id tag-id)]
+      (db/tag-thread! group-id thread-id tag-id)
+      (broadcast-thread thread-id []))
+    ; TODO do we need to notify-users and notify-bots
+    ))
+
 (defmethod event-msg-handler :braid.server/subscribe-to-tag
   [{:as ev-msg :keys [?data user-id]}]
   (db/user-subscribe-to-tag! user-id ?data))

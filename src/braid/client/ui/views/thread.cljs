@@ -27,7 +27,8 @@
              [:div.tag-option
               {:on-click (fn []
                            (close-list!)
-                           (dispatch [:add-tag-to-thread [(thread :id) (tag :id)]]))}
+                           (dispatch [:add-tag-to-thread {:thread-id (thread :id)
+                                                          :tag-id (tag :id)}]))}
               [:div.rect {:style {:background (helpers/->color (tag :id))}}]
               [:span {:style {:color (helpers/->color (tag :id))}}
                "#" (tag :name)]])

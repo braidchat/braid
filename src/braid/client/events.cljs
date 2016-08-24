@@ -754,6 +754,10 @@
   (fn [state [_ [group-id bot]]]
     (update-in state [:groups group-id :bots] conj bot)))
 
-(reg-event-db :add-tag-to-thread
-  (fn [state [_ [thread-id tag-id]]]
-    (update-in state [:threads thread-id :tag-ids] conj tag-id)))
+(reg-event-fx :add-tag-to-thread
+  (fn [{state :db :as cofx} [_ {:keys [thread-id tag-id local-only?]}]]
+    {:db (update-in state [:threads thread-id :tag-ids] conj tag-id)
+     :websocket-send (when-not local-only?
+                       (list
+                         [:braid.server/tag-thread {:thread-id thread-id
+                                                    :tag-id tag-id}]))}))
