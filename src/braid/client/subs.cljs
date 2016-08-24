@@ -200,11 +200,6 @@
     (get-in state [:users user-id :avatar])))
 
 (reg-sub
-  :user-status
-  (fn [state _ [user-id]]
-    (get-in state [:users user-id :status])))
-
-(reg-sub
   :search-query
   (fn [state _]
     (get-in state [:page :search-query])))
