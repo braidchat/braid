@@ -88,7 +88,7 @@
    ["> .threads"
     mixins/flex
     {:position "absolute"
-     :top (m/+ vars/top-bar-height vars/pad vars/pad)
+     :top vars/pad
      :right 0
      :bottom 0
      :left 0
