@@ -1,5 +1,6 @@
 (ns braid.client.events
   (:require [clojure.string :as string]
+            [clojure.set :as set]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]
             [braid.client.store :as store]
             [braid.client.sync :as sync]
@@ -7,7 +8,7 @@
             [braid.common.util :as util]
             [braid.client.router :as router]
             [braid.client.xhr :refer [edn-xhr]]
-            [braid.client.state.helpers :as helpers]
+            [braid.client.state.helpers :as helpers :refer [key-by-id]]
             [braid.client.quests.helpers :as quest-helpers]))
 
 ; TODO: handle callbacks declaratively too?
@@ -97,12 +98,14 @@
 (reg-event-db
   :clear-session
   (fn [state _]
-    (helpers/clear-session state)))
+    (assoc-in state [:session] nil)))
 
 (reg-event-db
   :new-message-text
   (fn [state [_ {:keys [thread-id content]}]]
-    (helpers/set-new-message state thread-id content)))
+    (if (get-in state [:threads thread-id])
+      (assoc-in state [:threads thread-id :new-message] content)
+      (assoc-in state [:new-thread-msg thread-id] content))))
 
 (reg-event-db
   :display-error
@@ -112,7 +115,10 @@
 (reg-event-db
   :set-message-failed
   (fn [state [_ message]]
-    (helpers/set-message-failed state message)))
+    (update-in state [:threads (message :thread-id) :messages]
+               (partial map (fn [msg] (if (= (message :id) (msg :id))
+                                        (assoc msg :failed? true)
+                                        msg))))))
 
 (reg-event-fx
   :new-message
@@ -164,12 +170,16 @@
 
      :db (-> state
              (helpers/clear-error (str :failed-to-send (message :id)))
-             (helpers/clear-message-failed message))}))
+             (update-in [:threads (message :thread-id) :messages]
+                        (partial map (fn [msg]
+                                       (if (= (message :id) (msg :id))
+                                         (dissoc msg :failed?)
+                                         msg)))))}))
 
 (reg-event-fx
   :hide-thread
   (fn [{state :db :as cofx} [_ {:keys [thread-id local-only?]}]]
-    {:db (helpers/hide-thread state thread-id)
+    {:db (update-in state [:user :open-thread-ids] disj thread-id)
      :websocket-send (when-not local-only?
                        (list [:braid.server/hide-thread thread-id]))}))
 
@@ -177,7 +187,7 @@
   :reopen-thread
   (fn [{state :db :as cofx} [_ thread-id]]
     {:websocket-send (list [:braid.server/show-thread thread-id])
-     :db (helpers/show-thread state thread-id)}))
+     :db (update-in state [:user :open-thread-ids] conj  thread-id)}))
 
 (reg-event-fx
   :unsub-thread
@@ -190,7 +200,7 @@
   (fn [{state :db :as cofx} [_ {:keys [tag local-only?]}]]
     (let [tag (merge (schema/make-tag) tag)]
       {:db (-> state
-               (helpers/add-tag tag)
+               (assoc-in [:tags (tag :id)] tag)
                (helpers/subscribe-to-tag (tag :id)))
        :websocket-send
        (when-not local-only?
@@ -207,7 +217,7 @@
   :unsubscribe-from-tag
   (fn [{state :db :as cofx} [_ tag-id]]
     {:websocket-send (list [:braid.server/unsubscribe-from-tag tag-id])
-     :db (helpers/unsubscribe-from-tag state tag-id)}))
+     :db (update-in state [:user :subscribed-tag-ids] disj tag-id)}))
 
 (reg-event-fx
   :subscribe-to-tag
@@ -219,7 +229,7 @@
 (reg-event-fx
   :set-tag-description
   (fn [{state :db :as cofx} [_ {:keys [tag-id description local-only?]}]]
-    {:db (helpers/set-tag-description state tag-id description)
+    {:db (assoc-in state [:tags tag-id :description] description)
      :websocket-send
      (when-not local-only?
        (list
@@ -229,7 +239,14 @@
 (reg-event-fx
   :remove-tag
   (fn [{state :db :as cofx} [_ {:keys [tag-id local-only?]}]]
-    {:db (helpers/remove-tag state tag-id)
+    {:db
+     (-> state
+         (update :threads
+                 (partial into {}
+                          (map (fn [[t-id t]]
+                                 [t-id
+                                  (update t :tag-ids disj tag-id)]))))
+         (update :tags dissoc tag-id))
      :websocket-send (when-not local-only?
                        (list [:braid.server/retract-tag tag-id]))}))
 
@@ -241,7 +258,9 @@
 (reg-event-fx
   :create-group
   (fn [{state :db :as cofx} [_ group]]
-    (let [group (schema/make-group group)]
+    (let [group (schema/make-group group)
+          group-id (group :id)
+          user-id (helpers/current-user-id state)]
       {:websocket-send
        (list
          [:braid.server/create-group group]
@@ -249,16 +268,18 @@
          (fn [reply]
            (when-let [msg (reply :error)]
              (.error js/console msg)
-             (dispatch [:display-error [(str :bad-group (group :id)) msg]])
-             (dispatch [:remove-group (group :id)]))))
+             (dispatch [:display-error [(str :bad-group group-id) msg]])
+             (dispatch [:remove-group group-id]))))
        :db (-> state
                (helpers/add-group group)
-               (helpers/become-group-admin (:id group)))})))
+               (update-in [:users user-id :group-ids]
+                          #(vec (conj (set %) group-id)))
+               (update-in [:groups group-id :admins] conj user-id))})))
 
 (reg-event-db
   :update-user-nickname
   (fn [state [_ {:keys [nickname user-id]}]]
-    (helpers/update-user-nickname state user-id nickname)))
+    (assoc-in state [:users user-id :nickname] nickname)))
 
 (reg-event-fx
   :set-user-nickname
@@ -274,6 +295,7 @@
                       {:nickname nickname
                        :user-id (helpers/current-user-id state)}]))))}))
 
+; TODO: merge set-user-avatar & update-user-avatar?
 (reg-event-fx
   :set-user-avatar
   (fn [{state :db :as cofx} [_ avatar-url]]
@@ -318,18 +340,22 @@
 
 (reg-event-db
   :set-search-results
-  (fn [state [_ [query reply]]]
-    (helpers/set-search-results state query reply)))
+  (fn [state [_ [query {:keys [threads thread-ids] :as reply}]]]
+    (-> state
+        (update-in [:threads] #(merge-with merge % (key-by-id threads)))
+        (update-in [:page] (fn [p] (if (= (p :search-query) query)
+                                     (assoc p :thread-ids thread-ids)
+                                     p))))))
 
 (reg-event-db
   :set-search-query
   (fn [state [_ query]]
-    (helpers/set-search-query state query)))
+    (assoc-in state [:page :search-query] query)))
 
 (reg-event-fx
   :search-history
   (fn [{state :db :as cofx} [_ [query group-id]]]
-    (if query
+    (when query
       {:websocket-send
        (list
          [:braid.server/search [query group-id]]
@@ -339,13 +365,20 @@
            (if (:thread-ids reply)
              (dispatch [:set-search-results [query reply]])
              (dispatch [:set-page-error true]))))
-       :db (helpers/set-page-error state false)}
-      {})))
+       :dispatch [:set-page-error false]})))
 
 (reg-event-db
   :add-threads
   (fn [state [_ threads]]
-    (helpers/add-threads state threads)))
+    (-> state
+        (update :threads #(merge-with merge % (key-by-id threads)))
+        (update :group-threads
+                #(merge-with
+                   set/union
+                   %
+                   (into {}
+                         (map (fn [[g t]] [g (into #{} (map :id) t)]))
+                         (group-by :group-id threads)))))))
 
 (reg-event-fx
   :load-recent-threads
@@ -385,16 +418,20 @@
 (reg-event-db
   :focus-thread
   (fn [state [_ thread-id]]
-    (helpers/focus-thread state thread-id)))
+    (assoc-in state [:focused-thread-id] thread-id)))
 
 (reg-event-fx
   :clear-inbox
   (fn [{state :db :as cofx} [_ _]]
     {:dispatch-n
      (into ()
-           (comp (map :id)
-                 (map (fn [id] [:hide-thread {:thread-id id :local-only? false}])))
-           (helpers/get-open-threads state))}))
+           (comp
+             (filter (fn [thread] (= (state :open-group-id) (thread :group-id))))
+             (map :id)
+             (map (fn [id] [:hide-thread {:thread-id id :local-only? false}])))
+           (-> (state :threads)
+               (select-keys (get-in state [:user :open-thread-ids]))
+               vals))}))
 
 (reg-event-fx
   :invite
@@ -441,14 +478,14 @@
 (reg-event-fx
   :set-group-intro
   (fn [{state :db :as cofx} [_ {:keys [group-id intro local-only?] :as args}]]
-    {:db (helpers/set-group-intro state group-id intro)
+    {:db (assoc-in state [:groups group-id :intro] intro)
      :websocket-send (when-not local-only?
                        (list [:braid.server/set-group-intro args]))}))
 
 (reg-event-fx
   :set-group-avatar
   (fn [{state :db :as cofx} [_ {:keys [group-id avatar local-only?] :as args}]]
-    {:db (helpers/set-group-avatar state group-id avatar)
+    {:db (assoc-in state [:groups group-id :avatar] avatar)
      :websocket-send (when-not local-only?
                        (list [:braid.server/set-group-avatar args]))}))
 
@@ -519,21 +556,24 @@
 (reg-event-db
   :set-login-state
   (fn [state [_ login-state]]
-    (helpers/set-login-state state login-state)))
+    (assoc state :login-state login-state)))
 
-(reg-event-db
+(reg-event-fx
   :start-socket
-  (fn [state [_ _]]
+  (fn [cofx [_ _]]
     ; TODO
     (sync/make-socket!)
     ; TODO
     (sync/start-router!)
-    (helpers/set-login-state state :ws-connect)))
+    {:dispatch [:set-login-state :ws-connect]}))
 
 (reg-event-fx
   :set-window-visibility
   (fn [{state :db :as cofx} [_ visible?]]
-    {:db (helpers/set-window-visibility state visible?)
+    {:db (-> state
+             (assoc-in [:notifications :window-visible?] visible?)
+             (update-in [:notifications :unread-count]
+                        (if visible? (constantly 0) identity)))
      :window-title (when visible? "Chat")}))
 
 (reg-event-fx
@@ -571,19 +611,19 @@
 (reg-event-db
   :set-group-and-page
   (fn [state [_ [group-id page-id]]]
-    (if (some? (get-in state [:groups group-id]))
-      (helpers/set-group-and-page state group-id page-id)
-      (helpers/set-group-and-page state nil {:type :index}))))
+    (if (or (nil? group-id) (some? (get-in state [:groups group-id])))
+      (assoc state :open-group-id group-id :page page-id)
+      (assoc state :open-group-id nil :page {:type :index}))))
 
 (reg-event-db
   :set-page-loading
   (fn [state [_ bool]]
-    (helpers/set-page-loading state bool)))
+    (assoc-in state [:page :loading?] bool)))
 
 (reg-event-db
   :set-page-error
   (fn [state [_ bool]]
-    (helpers/set-page-error state bool)))
+    (assoc-in state [:page :error?] bool)))
 
 (reg-event-fx
   :set-preference
@@ -594,7 +634,7 @@
 (reg-event-db
   :add-users
   (fn [state [_ users]]
-    (helpers/add-users state users)))
+    (update-in state [:users] merge (key-by-id users))))
 
 (reg-event-db
   :join-group
@@ -615,21 +655,21 @@
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))
 
-(reg-event-db
+(reg-event-fx
   :set-init-data
-  (fn [state [_ data]]
-    (-> state
-        (helpers/set-login-state :app)
-        (helpers/set-session {:user-id (data :user-id)})
-        (helpers/add-users (data :users))
-        (helpers/add-tags (data :tags))
-        (helpers/set-subscribed-tag-ids (data :user-subscribed-tag-ids))
-        (helpers/set-preferences (data :user-preferences))
-        (helpers/set-groups (data :user-groups))
-        (helpers/set-invitations (data :invitations))
-        (helpers/set-threads (data :user-threads))
-        (helpers/set-open-threads (data :user-threads))
-        (quest-helpers/set-quest-records (data :quest-records)))))
+  (fn [{state :db :as cofx} [_ data]]
+    {:dispatch-n (list [:set-login-state :app]
+                   [:add-users (data :users)])
+     :db (-> state
+             (helpers/set-session {:user-id (data :user-id)})
+             (helpers/add-tags (data :tags))
+             (helpers/set-subscribed-tag-ids (data :user-subscribed-tag-ids))
+             (helpers/set-preferences (data :user-preferences))
+             (helpers/set-groups (data :user-groups))
+             (helpers/set-invitations (data :invitations))
+             (helpers/set-threads (data :user-threads))
+             (helpers/set-open-threads (data :user-threads))
+             (quest-helpers/set-quest-records (data :quest-records)))}))
 
 (reg-event-fx
   :leave-group
@@ -654,7 +694,11 @@
 (reg-event-db
   :add-open-thread
   (fn [state [_ thread]]
-    (helpers/add-open-thread state thread)))
+    (-> state
+        (update-in [:threads (thread :id)] merge thread)
+        (update-in [:group-threads (thread :group-id)]
+                   #(conj (set %) (thread :id)))
+        (update-in [:user :open-thread-ids] conj (thread :id)))))
 
 (reg-event-fx
   :maybe-increment-unread
@@ -668,29 +712,35 @@
 (reg-event-db
   :add-invite
   (fn [state [_ invite]]
-    (helpers/add-invite state invite)))
+    (update-in state [:invitations] #(conj % invite))))
 
 (reg-event-db
   :update-user-status
   (fn [state [_ [user-id status]]]
-    (helpers/update-user-status state user-id status)))
+    (if (get-in state [:users user-id])
+      (assoc-in state [:users user-id :status] status)
+      state)))
 
 (reg-event-db
   :add-user
   (fn [state [_ user]]
-    (helpers/add-user state user)))
+    (update-in state [:users] assoc (:id user) user)))
 
 (reg-event-db
   :remove-user-from-group
   (fn [state [_ [group-id user-id]]]
-    (helpers/remove-user-from-group state user-id group-id)))
+    ; TODO: also remove user from collection if group-ids is now empty?
+    ; shouldn't make a difference
+    ; TODO: remove mentions of that user from the group?
+    (update-in state [:users user-id :group-ids]
+               (partial remove (partial = group-id)))))
 
 (reg-event-db
   :set-group-publicity
   (fn [state [_ [group-id publicity]]]
-    (helpers/set-group-publicity state group-id publicity)))
+    (assoc-in state [:groups group-id :public?] publicity)))
 
 (reg-event-db
   :add-group-bot
   (fn [state [_ [group-id bot]]]
-    (helpers/add-group-bot state group-id bot)))
+    (update-in state [:groups group-id :bots] #(conj % bot))))
