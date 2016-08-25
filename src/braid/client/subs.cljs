@@ -204,18 +204,6 @@
   (fn [state _]
     (get-in state [:page :search-query])))
 
-(defn tee [x]
-  (println x) x)
-
-(reg-sub-raw
-  :tags-for-thread
-  (fn [state [_ thread-id]]
-    (let [tag-ids (reaction (get-in @state [:threads thread-id :tag-ids]))
-          tags (reaction (doall
-                           (map (fn [thread-id]
-                                  (get-in @state [:tags thread-id])) @tag-ids)))]
-      tags)))
-
 (reg-sub
   :messages-for-thread
   (fn [state [_ thread-id]]
