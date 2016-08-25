@@ -237,13 +237,6 @@
     (get-in state [:threads thread-id :last-open-at])))
 
 (reg-sub
-  :thread-new-message
-  (fn [state _ [thread-id]]
-    (if-let [th (get-in state [:threads thread-id])]
-      (get th :new-message "")
-      (get-in state [:new-thread-msg thread-id] ""))))
-
-(reg-sub
   :errors
   (fn [state _]
     (get-in state [:errors])))
@@ -279,9 +272,9 @@
     (not-any? (fn [[k _]] (= :disconnected k)) (state :errors))))
 
 (reg-sub
-  :new-thread-id
+  :temp-thread
   (fn [state _]
-    (get state :new-thread-id)))
+    (get-in state [:temp-threads (state :open-group-id)])))
 
 (reg-sub
   :user-preference

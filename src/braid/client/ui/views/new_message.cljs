@@ -87,10 +87,10 @@
         thread-text-chan (chan)
         throttled-thread-text-chan (debounce thread-text-chan 500)
         thread-id (r/atom (config :thread-id))
-        thread-text (subscribe [:thread-new-message] [thread-id])
+        thread-text (config :new-message)
 
         ; delibrately closing over value of sub
-        state (r/atom {:text @thread-text
+        state (r/atom {:text thread-text
                        :force-close? false
                        :highlighted-result-index 0
                        :results nil})
@@ -133,9 +133,10 @@
         clear-force-close! (fn []
                              (swap! state assoc :force-close? false))
 
-        update-thread-text! (fn [thread-id text] (put! thread-text-chan
-                                                       {:thread-id thread-id
-                                                        :content text}))
+        update-thread-text! (fn [thread-id text]
+                              (put! thread-text-chan
+                                    {:thread-id thread-id
+                                     :content text}))
         set-text! (fn [text]
                     (let [text (.slice text 0 5000)]
                       (swap! state assoc :text text)
@@ -203,7 +204,6 @@
       {:display-name "autocomplete"
        :component-will-mount
        (fn [c]
-         (swap! state assoc :text @thread-text)
          (let [config (r/props c)]
            (go (loop []
                  (let [[text ch] (alts! [throttled-autocomplete-chan kill-chan])]
@@ -218,9 +218,10 @@
                                       thread-text-kill-chan])]
                    (if (= ch throttled-thread-text-chan)
                      (do
-                       (dispatch [:new-message-text v])
+                       (dispatch [:new-message-text (merge v {:group-id (config :group-id)}) v])
                        (recur))
-                     (dispatch [:new-message-text {:thread-id @thread-id
+                     (dispatch [:new-message-text {:group-id (config :group-id)
+                                                   :thread-id @thread-id
                                                    :content (@state :text)}])))))))
 
        :component-will-update

@@ -41,3 +41,11 @@
 (defn make-upload [data]
   (merge {:id (uuid/make-random-squuid)}
          data))
+
+(defn make-temp-thread []
+  {:id (uuid/make-random-squuid)
+   :tag-ids []
+   :mentioned-ids []
+   :new? true
+   :new-message ""
+   :messages []})
