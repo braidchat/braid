@@ -15,6 +15,18 @@
 
 (def max-file-size (* 10 1024 1024))
 
+(defn tag-option-view [tag-id thread-id close-list!]
+  (let [tag (subscribe [:tag tag-id])]
+    (fn [tag-id thread-id close-list!]
+      [:div.tag-option
+       {:on-click (fn []
+                    (close-list!)
+                    (dispatch [:add-tag-to-thread {:thread-id thread-id
+                                                   :tag-id tag-id}]))}
+       [:div.rect {:style {:background (helpers/->color tag-id)}}]
+       [:span {:style {:color (helpers/->color tag-id)}}
+        "#" (@tag :name)]])))
+
 (defn add-tag-list-view [thread close-list!]
   (let [group-tags (subscribe [:open-group-tags])
         thread-tags (subscribe [:tags-for-thread (thread :id)])]
@@ -26,14 +38,7 @@
            (doall
              (for [tag tags]
                ^{:key (tag :id)}
-               [:div.tag-option
-                {:on-click (fn []
-                             (close-list!)
-                             (dispatch [:add-tag-to-thread {:thread-id (thread :id)
-                                                            :tag-id (tag :id)}]))}
-                [:div.rect {:style {:background (helpers/->color (tag :id))}}]
-                [:span {:style {:color (helpers/->color (tag :id))}}
-                 "#" (tag :name)]]))
+               [tag-option-view (tag :id) (thread :id) close-list!]))
            [:div.name "All tags used already."])]))))
 
 (defn add-tag-button-view [thread]
@@ -239,6 +244,7 @@
               [:button {:on-click (fn [e]
                                     (reset! permalink-open? false))}
                "Done"]])
+           [:div (str (thread :id))]
            (when (not new?)
              [:div.controls
               (if @open?
