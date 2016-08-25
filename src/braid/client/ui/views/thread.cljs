@@ -48,19 +48,16 @@
          [add-tag-list-view thread close-list!])])))
 
 (defn thread-tags-view [thread]
-  (let [tags (subscribe [:tags-for-thread (thread :id)])
-        mentions (subscribe [:mentions-for-thread (thread :id)])]
-    (fn [thread]
-      [:div.tags
-       (doall
-         (for [user @mentions]
-           ^{:key (user :id)}
-           [user-pill-view (user :id)]))
-       (doall
-         (for [tag @tags]
-           ^{:key (tag :id)}
-           [tag-pill-view (tag :id)]))
-       [add-tag-button-view thread]])))
+  [:div.tags
+   (doall
+     (for [user-id (thread :mentioned-ids)]
+       ^{:key user-id}
+       [user-pill-view user-id]))
+   (doall
+     (for [tag-id (thread :tag-ids)]
+       ^{:key tag-id}
+       [tag-pill-view tag-id]))
+   [add-tag-button-view thread]])
 
 (defn messages-view [thread]
   ; Closing over thread-id, but the only time a thread's id changes is the new
