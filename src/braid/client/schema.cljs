@@ -42,8 +42,9 @@
   (merge {:id (uuid/make-random-squuid)}
          data))
 
-(defn make-temp-thread []
+(defn make-temp-thread [group-id]
   {:id (uuid/make-random-squuid)
+   :group-id group-id
    :tag-ids []
    :mentioned-ids []
    :new? true

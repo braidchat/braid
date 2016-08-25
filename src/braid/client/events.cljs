@@ -679,7 +679,7 @@
              (assoc :temp-threads (->> (data :user-groups)
                                        (map :id)
                                        (reduce (fn [memo group-id]
-                                                 (assoc memo group-id (schema/make-temp-thread))) {})))
+                                                 (assoc memo group-id (schema/make-temp-thread group-id))) {})))
              (helpers/add-tags (data :tags))
              (helpers/set-preferences (data :user-preferences))
              (quest-helpers/set-quest-records (data :quest-records)))}))

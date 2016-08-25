@@ -7,5 +7,4 @@
         open-group-id (subscribe [:open-group-id])]
     (fn []
       ^{:key (@temp-thread :id)}
-      [thread-view (merge {:group-id @open-group-id}
-                          @temp-thread)])))
+      [thread-view @temp-thread])))
