@@ -86,10 +86,12 @@
         thread-text-kill-chan (chan)
         thread-text-chan (chan)
         throttled-thread-text-chan (debounce thread-text-chan 500)
-        thread-id (r/atom (config :thread-id))
+        ; safe to close over thread-id
+        thread-id (config :thread-id)
+        ; safe to close over new-message
         thread-text (config :new-message)
 
-        ; delibrately closing over value of sub
+        ; deliberately closing over value of sub
         state (r/atom {:text thread-text
                        :force-close? false
                        :highlighted-result-index 0
@@ -140,11 +142,11 @@
         set-text! (fn [text]
                     (let [text (.slice text 0 5000)]
                       (swap! state assoc :text text)
-                      (update-thread-text! @thread-id text)))
+                      (update-thread-text! thread-id text)))
 
         update-text! (fn [f]
                        (swap! state update :text f)
-                       (update-thread-text! @thread-id (@state :text)))
+                       (update-thread-text! thread-id (@state :text)))
 
         choose-result!
         (fn [result]
@@ -221,12 +223,8 @@
                        (dispatch [:new-message-text (merge v {:group-id (config :group-id)}) v])
                        (recur))
                      (dispatch [:new-message-text {:group-id (config :group-id)
-                                                   :thread-id @thread-id
+                                                   :thread-id thread-id
                                                    :content (@state :text)}])))))))
-
-       :component-will-update
-       (fn [c [_ new-config]]
-         (reset! thread-id (new-config :thread-id)))
 
        :component-will-unmount
        (fn []
