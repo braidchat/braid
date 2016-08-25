@@ -292,8 +292,7 @@
 (reg-sub
   :open-group-tags
   (fn [state _]
-    (into ()
-          (comp
-            (filter (fn [tag] (= (get-in state [:open-group-id]) (tag :group-id)))))
-          (vals (get-in state [:tags])))))
+    (->> (state :tags)
+         vals
+         (filter (fn [tag] (= (get-in state [:open-group-id]) (tag :group-id)))))))
 
