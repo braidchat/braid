@@ -283,7 +283,6 @@
 
           [new-message-view {:thread-id (thread :id)
                              :group-id (thread :group-id)
-                             :new-thread? new?
                              :placeholder (if new?
                                             "Start a conversation..."
                                             "Reply...")
