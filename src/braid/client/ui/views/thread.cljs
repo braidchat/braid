@@ -28,10 +28,12 @@
         "#" (@tag :name)]])))
 
 (defn add-tag-list-view [thread close-list!]
-  (let [group-tags (subscribe [:open-group-tags])
-        thread-tags (subscribe [:tags-for-thread (thread :id)])]
-    (fn [thread]
-      (let [tags (->> (difference (set @group-tags) (set @thread-tags))
+  (let [group-tags (subscribe [:open-group-tags])]
+    (fn [thread close-list!]
+      (let [thread-tag-ids (set (thread :tag-ids))
+            tags (->> @group-tags
+                      (remove (fn [tag]
+                                (contains? thread-tag-ids (tag :id))))
                       (sort-by :name))]
         [:div.tag-list
          (if (seq tags)
