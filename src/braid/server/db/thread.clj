@@ -84,6 +84,17 @@
        (d/db conn)
        thread-id))
 
+(defn users-with-thread-open
+  [conn thread-id]
+  (d/q '[:find [?user-id ...]
+         :in $ ?thread-id
+         :where
+         [?user :user/id ?user-id]
+         [?user :user/open-thread ?thread]
+         [?thread :thread/id ?thread-id]]
+       (d/db conn)
+       thread-id))
+
 (defn user-can-see-thread?
   [conn user-id thread-id]
   (or

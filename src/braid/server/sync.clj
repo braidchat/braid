@@ -25,13 +25,13 @@
 (defn broadcast-thread
   "broadcasts thread to all subscribed users, except those in ids-to-skip"
   [thread-id ids-to-skip]
-  (let [subscribed-user-ids (db/users-subscribed-to-thread thread-id)
-          user-ids-to-send-to (-> (difference
-                                    (intersection
-                                      (set subscribed-user-ids)
-                                      (set (:any @connected-uids)))
-                                    (set ids-to-skip)))
-          thread (db/thread-by-id thread-id)]
+  (let [subscribed-user-ids (db/users-with-thread-open thread-id)
+        user-ids-to-send-to (-> (difference
+                                  (intersection
+                                    (set subscribed-user-ids)
+                                    (set (:any @connected-uids)))
+                                  (set ids-to-skip)))
+        thread (db/thread-by-id thread-id)]
       (doseq [uid user-ids-to-send-to]
         (let [user-tags (db/tag-ids-for-user uid)
               filtered-thread (update-in thread [:tag-ids]
