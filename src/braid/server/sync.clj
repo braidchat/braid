@@ -26,19 +26,19 @@
   "broadcasts thread to all subscribed users, except those in ids-to-skip"
   [thread-id ids-to-skip]
   (let [subscribed-user-ids (db/users-subscribed-to-thread thread-id)
-          user-ids-to-send-to (-> (difference
-                                    (intersection
-                                      (set subscribed-user-ids)
-                                      (set (:any @connected-uids)))
-                                    (set ids-to-skip)))
-          thread (db/thread-by-id thread-id)]
-      (doseq [uid user-ids-to-send-to]
-        (let [user-tags (db/tag-ids-for-user uid)
-              filtered-thread (update-in thread [:tag-ids]
-                                         (partial into #{} (filter user-tags)))
-              thread-with-last-opens (db/thread-add-last-open-at
-                                       filtered-thread uid)]
-          (chsk-send! uid [:braid.client/thread thread-with-last-opens])))))
+        user-ids-to-send-to (-> (difference
+                                  (intersection
+                                    (set subscribed-user-ids)
+                                    (set (:any @connected-uids)))
+                                  (set ids-to-skip)))
+        thread (db/thread-by-id thread-id)]
+    (doseq [uid user-ids-to-send-to]
+      (let [user-tags (db/tag-ids-for-user uid)
+            filtered-thread (update-in thread [:tag-ids]
+                                       (partial into #{} (filter user-tags)))
+            thread-with-last-opens (db/thread-add-last-open-at
+                                     filtered-thread uid)]
+        (chsk-send! uid [:braid.client/thread thread-with-last-opens])))))
 
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
