@@ -244,7 +244,6 @@
               [:button {:on-click (fn [e]
                                     (reset! permalink-open? false))}
                "Done"]])
-           [:div (str (thread :id))]
            (when (not new?)
              [:div.controls
               (if @open?
