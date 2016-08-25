@@ -199,9 +199,9 @@
 
   ; upsert-thread
   (when-not (d/entity (d/db conn) [:thread/id thread-id])
-    @(d/transact conn (concat [{:db/id (d/tempid :entities)
-                                :thread/id thread-id
-                                :thread/group [:group/id group-id]}])))
+    @(d/transact conn [{:db/id (d/tempid :entities)
+                        :thread/id thread-id
+                        :thread/group [:group/id group-id]}]))
 
   (let [; add tag to thread
         txs-for-tag [[:db/add [:thread/id thread-id]
