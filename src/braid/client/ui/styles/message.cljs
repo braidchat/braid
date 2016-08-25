@@ -79,7 +79,8 @@
 
     [:a.external
      mixins/pill-box
-     {:background "#000000"}
+     {:background "#000000"
+      :max-width "inherit !important"}
 
      [:&:before
       (mixins/fontawesome \uf0c1)
