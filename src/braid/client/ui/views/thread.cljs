@@ -286,6 +286,6 @@
                              :placeholder (if new?
                                             "Start a conversation..."
                                             "Reply...")
-                             :mentioned-user-ids (if new? (thread :mentioned-ids) ())
-                             :mentioned-tag-ids (if new? (thread :tag-ids) ())}]]]))))
+                             :mentioned-user-ids (thread :mentioned-ids)
+                             :mentioned-tag-ids (thread :tag-ids)}]]]))))
 
