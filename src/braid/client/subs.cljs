@@ -216,16 +216,6 @@
                                   (get-in @state [:tags thread-id])) @tag-ids)))]
       tags)))
 
-(reg-sub-raw
-  :mentions-for-thread
-  (fn [state [_ thread-id]]
-    (let [mention-ids (reaction (get-in @state [:threads thread-id :mentioned-ids]))
-          mentions (reaction (doall
-                               (map (fn [user-id]
-                                      (get-in @state [:users user-id]))
-                                    @mention-ids)))]
-      mentions)))
-
 (reg-sub
   :messages-for-thread
   (fn [state [_ thread-id]]
