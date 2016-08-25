@@ -23,15 +23,17 @@
                       (sort-by :name))]
         [:div.tag-list
          (if (seq tags)
-           (for [tag tags]
-             [:div.tag-option
-              {:on-click (fn []
-                           (close-list!)
-                           (dispatch [:add-tag-to-thread {:thread-id (thread :id)
-                                                          :tag-id (tag :id)}]))}
-              [:div.rect {:style {:background (helpers/->color (tag :id))}}]
-              [:span {:style {:color (helpers/->color (tag :id))}}
-               "#" (tag :name)]])
+           (doall
+             (for [tag tags]
+               ^{:key (tag :id)}
+               [:div.tag-option
+                {:on-click (fn []
+                             (close-list!)
+                             (dispatch [:add-tag-to-thread {:thread-id (thread :id)
+                                                            :tag-id (tag :id)}]))}
+                [:div.rect {:style {:background (helpers/->color (tag :id))}}]
+                [:span {:style {:color (helpers/->color (tag :id))}}
+                 "#" (tag :name)]]))
            [:div.name "All tags used already."])]))))
 
 (defn add-tag-button-view [thread]
