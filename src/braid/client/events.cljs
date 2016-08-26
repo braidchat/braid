@@ -642,13 +642,11 @@
 (reg-event-db
   :join-group
   (fn [state [_ {:keys [group tags]}]]
-    (let [state (-> state
-                    (helpers/add-tags tags)
-                    (helpers/add-group group))])
-    (reduce (fn [s tag]
-              (helpers/subscribe-to-tag s (tag :id)))
-            state
-            tags)))
+    (-> state
+        (helpers/add-tags tags)
+        (helpers/add-group group)
+        (update-in [:user :subscribed-tag-ids]
+                   set/union (set (map :id tags))))))
 
 (reg-event-fx
   :notify-if-client-out-of-date
