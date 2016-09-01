@@ -87,8 +87,11 @@
    :public? s/Bool
    :bots #{BotDisplay}})
 
+(def UserId
+  s/Uuid)
+
 (def User
-  {:id s/Uuid
+  {:id UserId
    :nickname s/Str
    :avatar s/Str
    :group-ids [s/Uuid]
@@ -124,9 +127,18 @@
       (debugf "Bad upload format: %s" (:error (ex-data e)))
       false)))
 
+(def QuestId
+  s/Keyword)
+
+(def QuestRecordId
+  s/Uuid)
+
 (def QuestRecord
-  {:quest-record/id s/Uuid
+  {:quest-record/id QuestId
    :quest-record/quest-id s/Keyword
-   :quest-record/user-id s/Uuid
+   :quest-record/user-id UserId
    :quest-record/progress s/Int
-   :quest-record/state s/Keyword})
+   :quest-record/state (s/enum :inactive
+                               :active
+                               :complete
+                               :skipped)})

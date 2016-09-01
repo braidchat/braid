@@ -2,7 +2,7 @@
   (:require [cljs-uuid-utils.core :as uuid]
             [schema.core :as s :include-macros true]
             [braid.common.schema :as app-schema]
-            [braid.client.quests.state :as quests]
+            [braid.client.quests.schema :as quests]
             [braid.client.invites.schema :as invites]))
 
 (def initial-state
@@ -54,7 +54,7 @@
             :subscribed-tag-ids #{s/Uuid}}
      :new-thread-id s/Uuid
      :focused-thread-id (s/maybe s/Uuid)}
-    quests/QuestsState
+    quests/QuestsAppState
     invites/InvitesAppState))
 
 (def check-app-state! (s/validator AppState))
