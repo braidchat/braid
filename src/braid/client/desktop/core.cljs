@@ -15,6 +15,8 @@
             braid.client.uploads.events
             braid.client.invites.subs
             braid.client.invites.events
+            braid.client.group-admin.subs
+            braid.client.group-admin.events
             [braid.client.quests.handler :as quests]))
 
 (enable-console-print!)

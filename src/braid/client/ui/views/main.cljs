@@ -11,7 +11,7 @@
             [braid.client.ui.views.pages.me :refer [me-page-view]]
             [braid.client.ui.views.pages.group-explore :refer [group-explore-page-view]]
             [braid.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
-            [braid.client.ui.views.pages.group-settings :refer [group-settings-view]]
+            [braid.client.group-admin.views.group-settings-page :refer [group-settings-page-view]]
             [braid.client.invites.views.invite-page :refer [invite-page-view]]
             [braid.client.bots.views.bots-page :refer [bots-page-view]]
             [braid.client.uploads.views.uploads-page :refer [uploads-page-view]]
@@ -32,7 +32,7 @@
         :bots [bots-page-view]
         :uploads [uploads-page-view]
         :thread [single-thread-view]
-        :settings [group-settings-view]
+        :settings [group-settings-page-view]
         :global-settings [global-settings-page-view]
         :changelog [changelog-view]
         :index (do (when-let [group-id (-> @(subscribe [:ordered-groups])
