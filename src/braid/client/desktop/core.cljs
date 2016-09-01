@@ -7,8 +7,8 @@
             [braid.client.router :as router]
             braid.client.subs
             braid.client.events
-            braid.client.quests.subscriptions
-            braid.client.quests.handlers
+            braid.client.quests.subs
+            braid.client.quests.events
             [braid.client.quests.handler :as quests]))
 
 (enable-console-print!)

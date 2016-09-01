@@ -1,4 +1,4 @@
-(ns braid.client.quests.handlers
+(ns braid.client.quests.events
   (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
             [cljs-uuid-utils.core :as uuid]
             [braid.client.quests.helpers :as helpers]
