@@ -1,10 +1,10 @@
-(ns braid.client.ui.views.group-invite
+(ns braid.client.invites.views.invite
   (:require [reagent.core :as r]
             [clojure.string :as string]
             [re-frame.core :refer [dispatch subscribe]])
   (:import [goog.events KeyCodes]))
 
-(defn group-invite-view
+(defn invite-view
   []
   (let [group-id (subscribe [:open-group-id])
         collapsed? (r/atom true)

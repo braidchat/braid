@@ -1,4 +1,4 @@
-(ns braid.client.ui.views.pages.bots
+(ns braid.client.bots.views.bots-page
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [reaction]]
             [re-frame.core :refer [dispatch subscribe]]
@@ -121,7 +121,7 @@
                                   (reset! state :initial))}
              "Done"]])]))))
 
-(defn bots-view []
+(defn bots-page-view []
   [:div.page.bots
    [:div.title "Bots"]
    [:div.content

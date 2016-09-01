@@ -5,10 +5,18 @@
             [braid.client.clj-highlighter :as highlighter]
             [braid.client.state.remote-handlers]
             [braid.client.router :as router]
-            braid.client.subs
-            braid.client.events
-            braid.client.quests.subscriptions
-            braid.client.quests.handlers
+            braid.client.core.subs
+            braid.client.core.events
+            braid.client.quests.subs
+            braid.client.quests.events
+            braid.client.bots.subs
+            braid.client.bots.events
+            braid.client.uploads.subs
+            braid.client.uploads.events
+            braid.client.invites.subs
+            braid.client.invites.events
+            braid.client.group-admin.subs
+            braid.client.group-admin.events
             [braid.client.quests.handler :as quests]))
 
 (enable-console-print!)
