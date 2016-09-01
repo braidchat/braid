@@ -15,7 +15,7 @@
             [braid.client.ui.styles.pages.channels]
             [braid.client.ui.styles.pages.settings]
             [braid.client.ui.styles.pages.me]
-            [braid.client.ui.styles.pages.bots]
+            braid.client.bots.views.bot-page-styles
             [braid.client.ui.styles.pages.uploads]
             [braid.client.ui.styles.vars :as vars]))
 
@@ -44,7 +44,7 @@
                braid.client.ui.styles.pages.channels/channels-page
                braid.client.ui.styles.pages.settings/settings-page
                braid.client.ui.styles.pages.me/me-page
-               braid.client.ui.styles.pages.bots/bots-page
+               braid.client.bots.views.bots-page-styles/bots-page
                braid.client.ui.styles.pages.uploads/uploads-page
                braid.client.ui.styles.login/login
                braid.client.ui.styles.pills/tag

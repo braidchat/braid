@@ -503,33 +503,6 @@
     {:websocket-send (list [:braid.server/set-group-publicity [group-id false]])}))
 
 (reg-event-fx
-  :new-bot
-  (fn [cofx [_ {:keys [bot on-complete]}]]
-    (let [bot (schema/make-bot bot)]
-      {:websocket-send
-       (list
-         [:braid.server/create-bot bot]
-         5000
-         (fn [reply]
-           (when (nil? (:braid/ok reply))
-             (dispatch [:display-error
-                        [(str "bot-" (bot :id) (rand))
-                         (get reply :braid/error
-                           "Something when wrong creating bot")]]))
-           (on-complete (:braid/ok reply))))})))
-
-(reg-event-fx
-  :get-bot-info
-  (fn [cofx [_ {:keys [bot-id on-complete]}]]
-    {:websocket-send
-     (list
-       [:braid.server/get-bot-info bot-id]
-       2000
-       (fn [reply]
-         (when-let [bot (:braid/ok reply)]
-           (on-complete bot))))}))
-
-(reg-event-fx
   :create-upload
   (fn [{state :db :as cofx} [_ {:keys [url thread-id group-id]}]]
     {:websocket-send (list [:braid.server/create-upload
@@ -746,8 +719,3 @@
   :set-group-publicity
   (fn [state [_ [group-id publicity]]]
     (assoc-in state [:groups group-id :public?] publicity)))
-
-(reg-event-db
-  :add-group-bot
-  (fn [state [_ [group-id bot]]]
-    (update-in state [:groups group-id :bots] conj bot)))

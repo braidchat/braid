@@ -46,13 +46,9 @@
     (order-groups groups group-order)))
 
 (reg-sub
-  :group-bots
-  (fn [state _ [group-id]]
-    (get-in state [:groups group-id :bots])))
-
-(reg-sub
   :user
   (fn [state [_ q-user-id] [d-user-id]]
+    ; TODO refactor so that bots isn't mixed up in here
     (let [user-id (or d-user-id q-user-id)]
       (if-let [u (get-in state [:users user-id])]
         u
