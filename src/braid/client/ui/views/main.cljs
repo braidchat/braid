@@ -14,7 +14,7 @@
             [braid.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
             [braid.client.ui.views.pages.group-settings :refer [group-settings-view]]
             [braid.client.bots.views.bots-page :refer [bots-page-view]]
-            [braid.client.ui.views.pages.uploads :refer [uploads-view]]
+            [braid.client.uploads.views.uploads-page :refer [uploads-page-view]]
             [braid.client.ui.views.pages.thread :refer [single-thread-view]]
             [braid.client.ui.views.pages.changelog :refer [changelog-view]]))
 
@@ -30,7 +30,7 @@
         :invite [invite-page-view]
         :group-explore [group-explore-page-view]
         :bots [bots-page-view]
-        :uploads [uploads-view]
+        :uploads [uploads-page-view]
         :thread [single-thread-view]
         :settings [group-settings-view]
         :global-settings [global-settings-page-view]

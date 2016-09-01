@@ -33,6 +33,3 @@
    :invitee-email (data :invitee-email)
    :group-id (data :group-id)})
 
-(defn make-upload [data]
-  (merge {:id (uuid/make-random-squuid)}
-         data))

@@ -11,6 +11,8 @@
             braid.client.quests.events
             braid.client.bots.subs
             braid.client.bots.events
+            braid.client.uploads.subs
+            braid.client.uploads.events
             [braid.client.quests.handler :as quests]))
 
 (enable-console-print!)

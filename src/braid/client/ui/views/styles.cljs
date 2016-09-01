@@ -15,8 +15,8 @@
             [braid.client.ui.styles.pages.channels]
             [braid.client.ui.styles.pages.settings]
             [braid.client.ui.styles.pages.me]
-            braid.client.bots.views.bot-page-styles
-            [braid.client.ui.styles.pages.uploads]
+            braid.client.bots.views.bots-page-styles
+            braid.client.uploads.views.uploads-page-styles
             [braid.client.ui.styles.vars :as vars]))
 
 (defn styles-view []
@@ -45,7 +45,7 @@
                braid.client.ui.styles.pages.settings/settings-page
                braid.client.ui.styles.pages.me/me-page
                braid.client.bots.views.bots-page-styles/bots-page
-               braid.client.ui.styles.pages.uploads/uploads-page
+               braid.client.uploads.views.uploads-page-styles/uploads-page
                braid.client.ui.styles.login/login
                braid.client.ui.styles.pills/tag
                braid.client.ui.styles.pills/user
