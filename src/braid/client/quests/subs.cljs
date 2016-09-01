@@ -1,4 +1,4 @@
-(ns braid.client.quests.subscriptions
+(ns braid.client.quests.subs
   (:require [re-frame.core :refer [reg-sub]]
             [braid.client.quests.helpers :as helpers]))
 

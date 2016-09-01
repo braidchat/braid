@@ -1,4 +1,4 @@
-(ns braid.client.events
+(ns braid.client.core.events
   (:require [clojure.string :as string]
             [clojure.set :as set]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]
@@ -432,41 +432,6 @@
                vals))}))
 
 (reg-event-fx
-  :invite
-  (fn [cofx [_ data]]
-    (let [invite (schema/make-invitation data)]
-      {:websocket-send (list [:braid.server/invite-to-group invite])})))
-
-(reg-event-fx
-  :generate-link
-  (fn [cofx [_ {:keys [group-id expires complete]}]]
-    {:websocket-send
-     (list
-       [:braid.server/generate-invite-link {:group-id group-id :expires expires}]
-       5000
-       (fn [reply]
-         ; indicate error if it fails?
-         (when-let [link (:link reply)]
-           (complete link))))}))
-
-(reg-event-db
-  :remove-invite
-  (fn [state [_ invite]]
-    (update-in state [:invitations] (partial remove (partial = invite)))))
-
-(reg-event-fx
-  :accept-invite
-  (fn [{state :db :as cofx} [_ invite]]
-    {:websocket-send (list [:braid.server/invitation-accept invite])
-     :dispatch [:remove-invite invite]}))
-
-(reg-event-fx
-  :decline-invite
-  (fn [{state :db :as cofx} [_ invite]]
-    {:websocket-send (list [:braid.server/invitation-decline invite])
-     :dispatch [:remove-invite invite]}))
-
-(reg-event-fx
   :make-admin
   (fn [{state :db :as cofx} [_ {:keys [group-id user-id local-only?] :as args}]]
     {:db (update-in state [:groups group-id :admins] conj user-id)
@@ -477,76 +442,6 @@
   :remove-from-group
   (fn [cofx [ _ {:keys [group-id user-id] :as args}]]
     {:websocket-send (list [:braid.server/remove-from-group args])}))
-
-(reg-event-fx
-  :set-group-intro
-  (fn [{state :db :as cofx} [_ {:keys [group-id intro local-only?] :as args}]]
-    {:db (assoc-in state [:groups group-id :intro] intro)
-     :websocket-send (when-not local-only?
-                       (list [:braid.server/set-group-intro args]))}))
-
-(reg-event-fx
-  :set-group-avatar
-  (fn [{state :db :as cofx} [_ {:keys [group-id avatar local-only?] :as args}]]
-    {:db (assoc-in state [:groups group-id :avatar] avatar)
-     :websocket-send (when-not local-only?
-                       (list [:braid.server/set-group-avatar args]))}))
-
-(reg-event-fx
-  :make-group-public!
-  (fn [cofx [_ group-id]]
-    {:websocket-send (list [:braid.server/set-group-publicity [group-id true]])}))
-
-(reg-event-fx
-  :make-group-private!
-  (fn [cofx [_ group-id]]
-    {:websocket-send (list [:braid.server/set-group-publicity [group-id false]])}))
-
-(reg-event-fx
-  :new-bot
-  (fn [cofx [_ {:keys [bot on-complete]}]]
-    (let [bot (schema/make-bot bot)]
-      {:websocket-send
-       (list
-         [:braid.server/create-bot bot]
-         5000
-         (fn [reply]
-           (when (nil? (:braid/ok reply))
-             (dispatch [:display-error
-                        [(str "bot-" (bot :id) (rand))
-                         (get reply :braid/error
-                           "Something when wrong creating bot")]]))
-           (on-complete (:braid/ok reply))))})))
-
-(reg-event-fx
-  :get-bot-info
-  (fn [cofx [_ {:keys [bot-id on-complete]}]]
-    {:websocket-send
-     (list
-       [:braid.server/get-bot-info bot-id]
-       2000
-       (fn [reply]
-         (when-let [bot (:braid/ok reply)]
-           (on-complete bot))))}))
-
-(reg-event-fx
-  :create-upload
-  (fn [{state :db :as cofx} [_ {:keys [url thread-id group-id]}]]
-    {:websocket-send (list [:braid.server/create-upload
-                            (schema/make-upload {:url url :thread-id thread-id})])
-     :dispatch [:new-message {:content url :thread-id thread-id :group-id group-id}]}))
-
-(reg-event-fx
-  :get-group-uploads
-  (fn [cofx [_ {:keys [group-id on-success on-error]}]]
-    {:websocket-send
-     (list
-       [:braid.server/uploads-in-group group-id]
-       5000
-       (fn [reply]
-         (if-let [uploads (:braid/ok reply)]
-           (on-success uploads)
-           (on-error (get reply :braid/error "Couldn't get uploads in group")))))}))
 
 (reg-event-fx
   :check-auth
@@ -717,11 +612,6 @@
          :window-title (str "Chat (" unread ")")}))))
 
 (reg-event-db
-  :add-invite
-  (fn [state [_ invite]]
-    (update-in state [:invitations] conj invite)))
-
-(reg-event-db
   :update-user-status
   (fn [state [_ [user-id status]]]
     (if (get-in state [:users user-id])
@@ -741,13 +631,3 @@
     ; TODO: remove mentions of that user from the group?
     (update-in state [:users user-id :group-ids]
                (partial remove (partial = group-id)))))
-
-(reg-event-db
-  :set-group-publicity
-  (fn [state [_ [group-id publicity]]]
-    (assoc-in state [:groups group-id :public?] publicity)))
-
-(reg-event-db
-  :add-group-bot
-  (fn [state [_ [group-id bot]]]
-    (update-in state [:groups group-id :bots] conj bot)))

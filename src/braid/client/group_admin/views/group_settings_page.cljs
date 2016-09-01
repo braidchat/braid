@@ -1,4 +1,4 @@
-(ns braid.client.ui.views.pages.group-settings
+(ns braid.client.group-admin.views.group-settings-page
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [reagent.core :as r]
             [re-frame.core :refer [dispatch subscribe]]
@@ -70,13 +70,13 @@
                               (dispatch [:make-group-public! (group :id)])))}
        "Make public"]])])
 
-(defn group-settings-view
+(defn group-settings-page-view
   []
   (let [group (subscribe [:active-group])
         group-id (reaction (:id @group))
         admin? (subscribe [:current-user-is-group-admin?] [group-id])]
     (fn []
-      [:div.page.settings
+      [:div.page.group-settings
        [:div.title (str "Settings for " (:name @group))]
        [:div.content
         [leave-group-view @group]
