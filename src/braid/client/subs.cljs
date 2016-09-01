@@ -267,11 +267,6 @@
     (get-in state [:users user-id :nickname])))
 
 (reg-sub
-  :invitations
-  (fn [state _]
-    (get-in state [:invitations])))
-
-(reg-sub
   :user-subscribed-tag-ids
   (fn [state _]
     (set (get-in state [:user :subscribed-tag-ids]))))
