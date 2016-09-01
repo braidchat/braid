@@ -1,4 +1,4 @@
-(ns braid.client.events
+(ns braid.client.core.events
   (:require [clojure.string :as string]
             [clojure.set :as set]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]

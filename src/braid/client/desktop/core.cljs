@@ -5,8 +5,8 @@
             [braid.client.clj-highlighter :as highlighter]
             [braid.client.state.remote-handlers]
             [braid.client.router :as router]
-            braid.client.subs
-            braid.client.events
+            braid.client.core.subs
+            braid.client.core.events
             braid.client.quests.subs
             braid.client.quests.events
             braid.client.bots.subs
