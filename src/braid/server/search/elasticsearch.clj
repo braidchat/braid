@@ -1,15 +1,29 @@
 (ns braid.server.search.elasticsearch
   (:require
+    [braid.server.conf :refer [config]]
+    [braid.server.db :as db]
     [clojure.data.json :as json]
-    [environ.core :refer [env]]
     [org.httpkit.client :as http]))
 
+(def elasticsearch-enabled? (some? (config :elasticsearch-url)))
+
+(defn tee [x] (println x) x)
+
 (defn search-for
-  [text]
-  (let [resp (-> @(http/get (str (env :elasticsearch-url) "/braid-messages/_search")
-                    {:body (json/write-str {:query {:match {:content text}}})})
-                 :body
-                 json/read-str)]
-    (when (get resp "hits")
-      (map #(java.util.UUID/fromString (get-in % ["_source" "thread-id"]))
-           (get-in resp ["hits" "hits"])))))
+  [{:keys [text group-id user-id]}]
+  (some->
+    @(http/get (str (config :elasticsearch-url)
+                    "/braid-messages/_search")
+       {:body (json/write-str {:query {:match {:content text}}})})
+    :body
+    json/read-str
+    (get-in ["hits" "hits"])
+    (->>
+      (into #{}
+            (comp
+              (map #(get-in % ["_source" "thread-id"]))
+              (map #(java.util.UUID/fromString %))
+              (filter #(= group-id (db/thread-group-id %)))
+              (map (fn [t-id] [t-id (db/thread-newest-message t-id)])))))
+    seq
+    set))

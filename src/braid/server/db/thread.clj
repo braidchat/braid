@@ -191,3 +191,13 @@
                       :user/subscribed-thread [:thread/id thread-id]]
                      [:db/retract [:user/id user-id]
                        :user/open-thread [:thread/id thread-id]]]))
+
+(defn thread-newest-message
+  [conn thread-id]
+  (d/q '[:find (max ?time) .
+         :in $ ?t-id
+         :where
+         [?t :thread/id ?t-id]
+         [?m :message/thread ?t]
+         [?m :message/created-at ?time]]
+       (d/db conn) thread-id))

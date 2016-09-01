@@ -15,6 +15,7 @@
                        :aws-domain
                        :aws-secret-key
                        :db-url
+                       :elasticsearch-url
                        :embedly-key
                        :environment
                        :github-client-id
