@@ -28,8 +28,4 @@
    :public? false
    :bots #{}})
 
-(defn make-invitation [data]
-  {:id (or (data :id) (uuid/make-random-squuid))
-   :invitee-email (data :invitee-email)
-   :group-id (data :group-id)})
 

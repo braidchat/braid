@@ -15,6 +15,7 @@
             [braid.client.ui.styles.pages.channels]
             [braid.client.ui.styles.pages.settings]
             [braid.client.ui.styles.pages.me]
+            braid.client.invites.views.invite-page-styles
             braid.client.bots.views.bots-page-styles
             braid.client.uploads.views.uploads-page-styles
             [braid.client.ui.styles.vars :as vars]))
@@ -44,6 +45,7 @@
                braid.client.ui.styles.pages.channels/channels-page
                braid.client.ui.styles.pages.settings/settings-page
                braid.client.ui.styles.pages.me/me-page
+               braid.client.invites.views.invite-page-styles/invite-page
                braid.client.bots.views.bots-page-styles/bots-page
                braid.client.uploads.views.uploads-page-styles/uploads-page
                braid.client.ui.styles.login/login
