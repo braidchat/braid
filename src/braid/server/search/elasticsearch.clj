@@ -5,9 +5,8 @@
     [clojure.data.json :as json]
     [org.httpkit.client :as http]))
 
-(def elasticsearch-enabled? (some? (config :elasticsearch-url)))
-
-(defn tee [x] (println x) x)
+(defn elasticsearch-enabled? []
+  (some? (config :elasticsearch-url)))
 
 (defn search-for
   [{:keys [text group-id user-id]}]
