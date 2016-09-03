@@ -1,7 +1,6 @@
 (ns braid.client.schema
   (:require [cljs-uuid-utils.core :as uuid]))
 
-
 (defn make-message [data]
   {:id (or (data :id) (uuid/make-random-squuid))
    :content (data :content)
@@ -28,19 +27,6 @@
    :avatar nil
    :public? false
    :bots #{}})
-
-(defn make-invitation [data]
-  {:id (or (data :id) (uuid/make-random-squuid))
-   :invitee-email (data :invitee-email)
-   :group-id (data :group-id)})
-
-(defn make-bot [data]
-  (merge {:id (uuid/make-random-squuid)}
-         data))
-
-(defn make-upload [data]
-  (merge {:id (uuid/make-random-squuid)}
-         data))
 
 (defn make-temp-thread [group-id]
   {:id (uuid/make-random-squuid)

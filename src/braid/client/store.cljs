@@ -1,7 +1,8 @@
 (ns braid.client.store
   (:require [schema.core :as s :include-macros true]
             [braid.common.schema :as app-schema]
-            [braid.client.quests.state :as quests]))
+            [braid.client.quests.schema :as quests]
+            [braid.client.invites.schema :as invites]))
 
 (def initial-state
   (merge
@@ -15,7 +16,6 @@
      :page {:type :inbox}
      :session nil
      :errors []
-     :invitations []
      :preferences {}
      :notifications {:window-visible? true
                      :unread-count 0}
@@ -23,7 +23,8 @@
             :subscribed-tag-ids #{}}
      :focused-thread-id nil
      :temp-threads {}}
-    quests/init-state))
+    quests/init-state
+    invites/init-state))
 
 (def AppState
   (merge
@@ -43,7 +44,6 @@
      :session (s/maybe {:user-id s/Uuid})
      :errors [[(s/one (s/cond-pre s/Keyword s/Str) "err-key") (s/one s/Str "msg")
                (s/one (s/enum :error :warn :info) "type")]]
-     :invitations [app-schema/Invitation]
      :preferences {s/Keyword s/Any}
      :notifications {:window-visible? s/Bool
                      :unread-count s/Int}
@@ -53,6 +53,7 @@
      :temp-threads {s/Uuid {:id s/Uuid
                             :tag-ids [s/Uuid]
                             :new-message s/Str}}}
-    quests/QuestsState))
+    quests/QuestsAppState
+    invites/InvitesAppState))
 
 (def check-app-state! (s/validator AppState))

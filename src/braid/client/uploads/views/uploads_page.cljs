@@ -1,4 +1,4 @@
-(ns braid.client.ui.views.pages.uploads
+(ns braid.client.uploads.views.uploads-page
   (:require [reagent.core :as r]
             [reagent.ratom :refer-macros [run!]]
             [clojure.string :as string]
@@ -43,12 +43,13 @@
                                       {:thread-ids [(upload :thread-id)]}]))}
               "Load thread to see tags"])]])})))
 
-(defn uploads-view
+(defn uploads-page-view
   []
   (let [group-id (subscribe [:open-group-id])
         uploads (r/atom :initial)
         error (r/atom nil)
         ; TODO: will need to page this when it gets big?
+        ; FIXME: breaks the re-frame style, should dispatch and subscribe independently
         get-uploads (run! (dispatch [:get-group-uploads
                                      {:group-id @group-id
                                       :on-success (partial reset! uploads)

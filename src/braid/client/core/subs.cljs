@@ -1,4 +1,4 @@
-(ns braid.client.subs
+(ns braid.client.core.subs
   (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
             [re-frame.core :refer [subscribe reg-sub reg-sub-raw]])
   (:import goog.Uri))
@@ -46,13 +46,9 @@
     (order-groups groups group-order)))
 
 (reg-sub
-  :group-bots
-  (fn [state _ [group-id]]
-    (get-in state [:groups group-id :bots])))
-
-(reg-sub
   :user
   (fn [state [_ q-user-id] [d-user-id]]
+    ; TODO refactor so that bots isn't mixed up in here
     (let [user-id (or d-user-id q-user-id)]
       (if-let [u (get-in state [:users user-id])]
         u
@@ -243,11 +239,6 @@
   :nickname
   (fn [state _ [user-id]]
     (get-in state [:users user-id :nickname])))
-
-(reg-sub
-  :invitations
-  (fn [state _]
-    (get-in state [:invitations])))
 
 (reg-sub
   :user-subscribed-tag-ids

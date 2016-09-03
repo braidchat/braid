@@ -5,6 +5,7 @@
 (defn changelog-view []
   (let [change-hiccup (r/atom nil)]
     (fn []
+      ; FIXME: circumvents re-frame, should use subscribe and dispatch
       (xhr/edn-xhr {:method :get
                     :uri "/changelog"
                     :on-complete
