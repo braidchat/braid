@@ -1,6 +1,7 @@
 (ns braid.client.ui.views.thread
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [clojure.string :as string]
+            [clojure.set :refer [difference]]
             [reagent.core :as r]
             [re-frame.core :refer [dispatch subscribe]]
             [cljs.core.async :refer [chan put!]]
@@ -14,28 +15,54 @@
 
 (def max-file-size (* 10 1024 1024))
 
+(defn tag-option-view [tag thread-id close-list!]
+  [:div.tag-option
+   {:on-click (fn []
+                (close-list!)
+                (dispatch [:add-tag-to-thread {:thread-id thread-id
+                                               :tag-id (tag :id)}]))}
+   [:div.rect {:style {:background (helpers/->color (tag :id))}}]
+   [:span {:style {:color (helpers/->color (tag :id))}}
+    "#" (tag :name)]])
+
+(defn add-tag-list-view [thread close-list!]
+  (let [group-tags (subscribe [:open-group-tags])]
+    (fn [thread close-list!]
+      (let [thread-tag-ids (set (thread :tag-ids))
+            tags (->> @group-tags
+                      (remove (fn [tag]
+                                (contains? thread-tag-ids (tag :id))))
+                      (sort-by :name))]
+        [:div.tag-list
+         (if (seq tags)
+           (doall
+             (for [tag tags]
+               ^{:key (tag :id)}
+               [tag-option-view tag (thread :id) close-list!]))
+           [:div.name "All tags used already."])]))))
+
+(defn add-tag-button-view [thread]
+  (let [show-list? (r/atom false)
+        close-list! (fn []
+                      (reset! show-list? false))]
+    (fn [thread]
+      [:div.add
+       [:span.pill {:on-click (fn [] (swap! show-list? not))}
+        (if @show-list? "×" "+")]
+       (when @show-list?
+         [add-tag-list-view thread close-list!])])))
+
 (defn thread-tags-view [thread]
-  (let [thread-id (r/atom (thread :id))
-        tags (subscribe [:tags-for-thread] [thread-id])
-        mentions (subscribe [:mentions-for-thread] [thread-id])]
-    (r/create-class
-      {:display-name "thread-tags-view"
-
-       :component-will-update
-       (fn [c [_ new-thread]]
-         (reset! thread-id (new-thread :id)))
-
-       :reagent-render
-       (fn [thread]
-         [:div.tags
-          (doall
-            (for [user @mentions]
-              ^{:key (user :id)}
-              [user-pill-view (user :id)]))
-          (doall
-            (for [tag @tags]
-              ^{:key (tag :id)}
-              [tag-pill-view (tag :id)]))])})))
+  [:div.tags
+   (doall
+     (for [user-id (thread :mentioned-ids)]
+       ^{:key user-id}
+       [user-pill-view user-id]))
+   (doall
+     (for [tag-id (thread :tag-ids)]
+       ^{:key tag-id}
+       [tag-pill-view tag-id]))
+   [add-tag-button-view thread]])
 
 (defn messages-view [thread]
   ; Closing over thread-id, but the only time a thread's id changes is the new
@@ -261,10 +288,10 @@
 
           [new-message-view {:thread-id (thread :id)
                              :group-id (thread :group-id)
-                             :new-thread? new?
                              :placeholder (if new?
                                             "Start a conversation..."
                                             "Reply...")
-                             :mentioned-user-ids (if new? (thread :mentioned-ids) ())
-                             :mentioned-tag-ids (if new? (thread :tag-ids) ())}]]]))))
+                             :new-message (thread :new-message)
+                             :mentioned-user-ids (thread :mentioned-ids)
+                             :mentioned-tag-ids (thread :tag-ids)}]]]))))
 

@@ -2,6 +2,7 @@
   (:require [datomic.api :as d]
             [clj-time.core :as t]
             [clj-time.coerce :refer [to-date-time to-long]]
+            [clojure.set :refer [difference]]
             [braid.server.db.common :refer :all]
             [braid.server.db.tag :as tag]))
 
@@ -79,6 +80,17 @@
          :where
          [?user :user/id ?user-id]
          [?user :user/subscribed-thread ?thread]
+         [?thread :thread/id ?thread-id]]
+       (d/db conn)
+       thread-id))
+
+(defn users-with-thread-open
+  [conn thread-id]
+  (d/q '[:find [?user-id ...]
+         :in $ ?thread-id
+         :where
+         [?user :user/id ?user-id]
+         [?user :user/open-thread ?thread]
          [?thread :thread/id ?thread-id]]
        (d/db conn)
        thread-id))
@@ -191,3 +203,30 @@
                       :user/subscribed-thread [:thread/id thread-id]]
                      [:db/retract [:user/id user-id]
                        :user/open-thread [:thread/id thread-id]]]))
+
+
+(defn tag-thread!
+  [conn group-id thread-id tag-id]
+
+  ; upsert-thread
+  (when-not (d/entity (d/db conn) [:thread/id thread-id])
+    @(d/transact conn [{:db/id (d/tempid :entities)
+                        :thread/id thread-id
+                        :thread/group [:group/id group-id]}]))
+
+  (let [; add tag to thread
+        txs-for-tag [[:db/add [:thread/id thread-id]
+                      :thread/tag [:tag/id tag-id]]]
+        ; open and subscribe thread for users subscribed to tag
+        ; ...unless they're already subscribed, which means they've seen it
+        txs-for-users (mapcat
+                        (fn [user-id]
+                          [[:db/add [:user/id user-id]
+                            :user/subscribed-thread [:thread/id thread-id]]
+                           [:db/add [:user/id user-id]
+                            :user/open-thread [:thread/id thread-id]]])
+                        (difference (set (tag/users-subscribed-to-tag conn tag-id))
+                                    (set (users-subscribed-to-thread conn thread-id))))]
+    @(d/transact conn
+       (concat txs-for-tag
+               txs-for-users))))

@@ -200,25 +200,6 @@
   (fn [state _]
     (get-in state [:page :search-query])))
 
-(reg-sub-raw
-  :tags-for-thread
-  (fn [state _ [thread-id]]
-    (let [tag-ids (reaction (get-in @state [:threads thread-id :tag-ids]))
-          tags (reaction (doall
-                           (map (fn [thread-id]
-                                  (get-in @state [:tags thread-id])) @tag-ids)))]
-      tags)))
-
-(reg-sub-raw
-  :mentions-for-thread
-  (fn [state _ [thread-id]]
-    (let [mention-ids (reaction (get-in @state [:threads thread-id :mentioned-ids]))
-          mentions (reaction (doall
-                               (map (fn [user-id]
-                                      (get-in @state [:users user-id]))
-                                    @mention-ids)))]
-      mentions)))
-
 (reg-sub
   :messages-for-thread
   (fn [state [_ thread-id]]
@@ -238,13 +219,6 @@
   :thread-last-open-at
   (fn [state [_ thread-id]]
     (get-in state [:threads thread-id :last-open-at])))
-
-(reg-sub
-  :thread-new-message
-  (fn [state _ [thread-id]]
-    (if-let [th (get-in state [:threads thread-id])]
-      (get th :new-message "")
-      (get-in state [:new-thread-msg thread-id] ""))))
 
 (reg-sub
   :errors
@@ -277,9 +251,9 @@
     (not-any? (fn [[k _]] (= :disconnected k)) (state :errors))))
 
 (reg-sub
-  :new-thread-id
+  :temp-thread
   (fn [state _]
-    (get state :new-thread-id)))
+    (get-in state [:temp-threads (state :open-group-id)])))
 
 (reg-sub
   :user-preference
@@ -293,3 +267,11 @@
          vals
          (filter #(= group-id (:group-id %)))
          doall)))
+
+(reg-sub
+  :open-group-tags
+  (fn [state _]
+    (->> (state :tags)
+         vals
+         (filter (fn [tag] (= (get-in state [:open-group-id]) (tag :group-id)))))))
+

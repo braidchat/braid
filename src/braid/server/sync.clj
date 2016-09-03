@@ -23,14 +23,13 @@
 ;; Handler helpers
 
 (defn broadcast-thread
-  "broadcasts thread to all subscribed users, except those in ids-to-skip"
+  "broadcasts thread to all users with the thread open, except those in ids-to-skip"
   [thread-id ids-to-skip]
-  (let [subscribed-user-ids (db/users-subscribed-to-thread thread-id)
-        user-ids-to-send-to (-> (difference
-                                  (intersection
-                                    (set subscribed-user-ids)
-                                    (set (:any @connected-uids)))
-                                  (set ids-to-skip)))
+  (let [user-ids (-> (difference
+                       (intersection
+                         (set (db/users-with-thread-open thread-id))
+                         (set (:any @connected-uids)))
+                       (set ids-to-skip)))
         thread (db/thread-by-id thread-id)]
     (doseq [uid user-ids-to-send-to]
       (let [user-tags (db/tag-ids-for-user uid)
@@ -188,6 +187,15 @@
         (timbre/warnf "Malformed new message: %s" (pr-str new-message))
         (when-let [cb ?reply-fn]
           (cb :braid/error))))))
+
+(defmethod event-msg-handler :braid.server/tag-thread
+  [{:as ev-msg :keys [?data user-id]}]
+  (let [{:keys [thread-id tag-id]} ?data]
+    (let [group-id (db/tag-group-id tag-id)]
+      (db/tag-thread! group-id thread-id tag-id)
+      (broadcast-thread thread-id []))
+    ; TODO do we need to notify-users and notify-bots
+    ))
 
 (defmethod event-msg-handler :braid.server/subscribe-to-tag
   [{:as ev-msg :keys [?data user-id]}]
