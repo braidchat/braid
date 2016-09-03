@@ -23,14 +23,13 @@
 ;; Handler helpers
 
 (defn broadcast-thread
-  "broadcasts thread to all subscribed users, except those in ids-to-skip"
+  "broadcasts thread to all users with the thread open, except those in ids-to-skip"
   [thread-id ids-to-skip]
-  (let [subscribed-user-ids (db/users-with-thread-open thread-id)
-        user-ids-to-send-to (-> (difference
-                                  (intersection
-                                    (set subscribed-user-ids)
-                                    (set (:any @connected-uids)))
-                                  (set ids-to-skip)))
+  (let [user-ids (-> (difference
+                       (intersection
+                         (set (db/users-with-thread-open thread-id))
+                         (set (:any @connected-uids)))
+                       (set ids-to-skip)))
         thread (db/thread-by-id thread-id)]
     (doseq [uid user-ids-to-send-to]
       (let [user-tags (db/tag-ids-for-user uid)
