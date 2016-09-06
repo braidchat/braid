@@ -3,6 +3,7 @@
     [braid.server.conf :refer [config]]
     [braid.server.db :as db]
     [clojure.data.json :as json]
+    [datomic.api :as d]
     [org.httpkit.client :as http]))
 
 (defn elasticsearch-enabled? []
@@ -10,19 +11,22 @@
 
 (defn search-for
   [{:keys [text group-id user-id]}]
-  (some->
-    @(http/get (str (config :elasticsearch-url)
-                    "/braid-messages/_search")
-       {:body (json/write-str {:query {:match {:content text}}})})
-    :body
-    json/read-str
-    (get-in ["hits" "hits"])
-    (->>
-      (into #{}
-            (comp
-              (map #(get-in % ["_source" "thread-id"]))
-              (map #(java.util.UUID/fromString %))
-              (filter #(= group-id (db/thread-group-id %)))
-              (map (fn [t-id] [t-id (db/thread-newest-message t-id)])))))
-    seq
-    set))
+  (let [resp (->
+               @(http/get (str (config :elasticsearch-url)
+                               ; TODO: page results properly
+                               "/braid-messages/_search?size=500")
+                  {:body (json/write-str {:query {:match {:content text}}})})
+               :body
+               json/read-str
+               (get "hits"))
+        more (- (get resp "total") (count (get resp "hits")))]
+    (->> (get resp "hits")
+         (map #(Long. (get % "_id")))
+         (d/pull-many (d/db db/conn) [{:message/thread [:thread/id]}])
+         (into #{}
+               (comp
+                 (map #(get-in % [:message/thread :thread/id]))
+                 (filter #(= group-id (db/thread-group-id %)))
+                 (map (fn [t-id] [t-id (db/thread-newest-message t-id)]))))
+         seq
+         set)))
