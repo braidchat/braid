@@ -69,7 +69,7 @@
                                tags
                                group-id)))
         text-search (when-not (string/blank? text)
-                      (if elastic/elasticsearch-enabled?
+                      (if (elastic/elasticsearch-enabled?)
                         (elastic/search-for {:text text
                                              :group-id group-id
                                              :user-id user-id})
