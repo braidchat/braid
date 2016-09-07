@@ -18,8 +18,7 @@
                   {:body (json/write-str {:query {:match {:content text}}})})
                :body
                json/read-str
-               (get "hits"))
-        more (- (get resp "total") (count (get resp "hits")))]
+               (get "hits"))]
     (->> (get resp "hits")
          (map #(Long. (get % "_id")))
          (d/pull-many (d/db db/conn) [{:message/thread [:thread/id]}])
