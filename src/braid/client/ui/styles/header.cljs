@@ -6,7 +6,7 @@
 
             [braid.client.quests.styles :refer [quests-header]]))
 
-(def header-height vars/avatar-size)
+(def header-height vars/top-bar-height)
 
 (defn header-text []
   {:text-transform "uppercase"

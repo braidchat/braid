@@ -1,6 +1,5 @@
 (ns braid.client.store
-  (:require [cljs-uuid-utils.core :as uuid]
-            [schema.core :as s :include-macros true]
+  (:require [schema.core :as s :include-macros true]
             [braid.common.schema :as app-schema]
             [braid.client.quests.schema :as quests]
             [braid.client.invites.schema :as invites]))
@@ -11,7 +10,6 @@
      :open-group-id nil
      :threads {}
      :group-threads {}
-     :new-thread-msg {}
      :users {}
      :tags {}
      :groups {}
@@ -23,8 +21,8 @@
                      :unread-count 0}
      :user {:open-thread-ids #{}
             :subscribed-tag-ids #{}}
-     :new-thread-id (uuid/make-random-squuid)
-     :focused-thread-id nil}
+     :focused-thread-id nil
+     :temp-threads {}}
     quests/init-state
     invites/init-state))
 
@@ -34,7 +32,6 @@
      :open-group-id (s/maybe s/Uuid)
      :threads {s/Uuid app-schema/MsgThread}
      :group-threads {s/Uuid #{s/Uuid}}
-     :new-thread-msg {s/Uuid s/Str}
      :users {s/Uuid app-schema/User}
      :tags {s/Uuid app-schema/Tag}
      :groups {s/Uuid app-schema/Group}
@@ -52,8 +49,10 @@
                      :unread-count s/Int}
      :user {:open-thread-ids #{s/Uuid}
             :subscribed-tag-ids #{s/Uuid}}
-     :new-thread-id s/Uuid
-     :focused-thread-id (s/maybe s/Uuid)}
+     :focused-thread-id (s/maybe s/Uuid)
+     :temp-threads {s/Uuid {:id s/Uuid
+                            :tag-ids [s/Uuid]
+                            :new-message s/Str}}}
     quests/QuestsAppState
     invites/InvitesAppState))
 

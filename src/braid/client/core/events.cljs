@@ -102,10 +102,10 @@
 
 (reg-event-db
   :new-message-text
-  (fn [state [_ {:keys [thread-id content]}]]
+  (fn [state [_ {:keys [group-id thread-id content]}]]
     (if (get-in state [:threads thread-id])
       (assoc-in state [:threads thread-id :new-message] content)
-      (assoc-in state [:new-thread-msg thread-id] content))))
+      (assoc-in state [:temp-threads group-id :new-message] content))))
 
 (reg-event-db
   :display-error
@@ -146,7 +146,7 @@
                (dispatch [:set-message-failed message]))))
          :db (-> state
                  (helpers/add-message message)
-                 (helpers/maybe-reset-new-thread-id (data :thread-id)))}))))
+                 (helpers/maybe-reset-temp-thread (data :thread-id)))}))))
 
 (reg-event-db
   :clear-error
@@ -569,6 +569,10 @@
                      (group-by :group-id (data :user-threads))))
              (assoc-in [:user :open-thread-ids]
                (set (map :id (data :user-threads))))
+             (assoc :temp-threads (->> (data :user-groups)
+                                       (map :id)
+                                       (reduce (fn [memo group-id]
+                                                 (assoc memo group-id (schema/make-temp-thread group-id))) {})))
              (helpers/add-tags (data :tags))
              (helpers/set-preferences (data :user-preferences))
              (quest-helpers/set-quest-records (data :quest-records)))}))
@@ -631,3 +635,13 @@
     ; TODO: remove mentions of that user from the group?
     (update-in state [:users user-id :group-ids]
                (partial remove (partial = group-id)))))
+
+(reg-event-fx :add-tag-to-thread
+  (fn [{state :db :as cofx} [_ {:keys [thread-id tag-id local-only?]}]]
+    (if (get-in state [:threads thread-id])
+      {:db (update-in state [:threads thread-id :tag-ids] conj tag-id)
+       :websocket-send (when-not local-only?
+                         (list
+                           [:braid.server/tag-thread {:thread-id thread-id
+                                                      :tag-id tag-id}]))}
+      {:db (update-in state [:temp-threads (state :open-group-id) :tag-ids] conj tag-id)})))

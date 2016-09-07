@@ -25,8 +25,6 @@
     :quest/video "/images/quests/conversation-new.gif"
     :quest/goal 3
     :quest/listener (fn [state [event data]]
-                      ; TODO: by the time this sees state, new-thread-id is out of date
-                      ; check if it's new by looking at the thread
                       (and
                         (= event :new-message)
                         (->>

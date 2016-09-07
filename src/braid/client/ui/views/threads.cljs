@@ -43,15 +43,15 @@
            (update-threads! (next-props :threads))))
 
        :reagent-render
-       (fn [{:keys [new-thread-args
+       (fn [{:keys [show-new-thread?
                     threads-opts]
              :or {threads-opts {}}}]
          [:div.threads
           (merge threads-opts
                  {:on-wheel scroll-horizontally})
 
-          (when new-thread-args
-            [new-thread-view new-thread-args])
+          (when show-new-thread?
+            [new-thread-view])
 
           (doall
             (for [thread @threads]

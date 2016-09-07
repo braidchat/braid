@@ -1,7 +1,7 @@
 (ns braid.client.state.helpers
   (:require [cljs-utils.core :refer [flip]]
             [clojure.set :as set]
-            [cljs-uuid-utils.core :as uuid]))
+            [braid.client.schema :as schema]))
 
 (defn key-by-id [coll]
   (into {} (map (juxt :id identity)) coll))
@@ -54,9 +54,9 @@
 
 ; threads and messages
 
-(defn maybe-reset-new-thread-id [state thread-id]
-  (if (= thread-id (:new-thread-id state))
-    (assoc-in state [:new-thread-id] (uuid/make-random-squuid))
+(defn maybe-reset-temp-thread [state thread-id]
+  (if (= thread-id (get-in state [:temp-threads (state :open-group-id) :id]))
+    (assoc-in state [:temp-threads (state :open-group-id)] (schema/make-temp-thread (state :open-group-id)))
     state))
 
 (defn update-thread-last-open-at [state thread-id]
@@ -109,3 +109,4 @@
         (update-in [:threads] #(apply dissoc % group-threads))
         (update-in [:group-threads] (flip dissoc group-id))
         (update-in [:groups] (flip dissoc group-id)))))
+
