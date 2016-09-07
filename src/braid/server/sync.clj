@@ -31,7 +31,7 @@
                          (set (:any @connected-uids)))
                        (set ids-to-skip)))
         thread (db/thread-by-id thread-id)]
-    (doseq [uid user-ids-to-send-to]
+    (doseq [uid user-ids]
       (let [user-tags (db/tag-ids-for-user uid)
             filtered-thread (update-in thread [:tag-ids]
                                        (partial into #{} (filter user-tags)))
