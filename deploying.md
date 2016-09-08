@@ -47,7 +47,7 @@ sudo ufw enable
 
 `sudo apt-get install postgresql nginx redis-server supervisor fail2ban`
 
-[Download & install Java 1.8 from Oracle](http://www.devsniper.com/install-jdk-8-on-ubuntu/)
+[Download & install Java 1.8 from Oracle](https://www.digitalocean.com/community/tutorials/how-to-install-java-on-ubuntu-with-apt-get)
 
 Download datomic (following instructions on my.datomic.com), unzip it somewhere
 
