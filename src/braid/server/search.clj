@@ -89,7 +89,7 @@
     (->> (if (every? some? [text-search tag-search])
            (intersection text-search tag-search)
            (first (remove nil? [text-search tag-search])))
-         (filter (partial db/user-can-see-thread? user-id))
+         (filter (comp (partial db/user-can-see-thread? user-id) first))
          ; sorting the ids so we can have a consistent order of results
          (sort-by second)
          (map first))))
