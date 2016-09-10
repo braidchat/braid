@@ -16,6 +16,52 @@
    :-webkit-font-smoothing "antialiased"
    :padding [[0 (m/* vars/pad 0.75)]] })
 
+(defn menu []
+  [:.options
+    (mixins/context-menu)
+
+    {:position "absolute"
+     :top 0
+     :right 0
+     :margin-top header-height
+     :z-index 110
+     :display "none"}
+
+    [:a
+     {:display "block"
+      :color "black"
+      :text-align "right"
+      :text-decoration "none"
+      :line-height "1.85em"
+      :white-space "nowrap"}
+
+     [:&:hover
+      {:color "#666"}]
+
+     [:&:after
+      {:margin-left "0.5em"}]
+
+     [:&.subscriptions:after
+      (mixins/fontawesome \uf02c)]
+
+     [:&.invite-friend:after
+      (mixins/fontawesome \uf1e0)]
+
+     [:&.edit-profile:after
+      (mixins/fontawesome \uf007)]
+
+     [:&.group-bots:after
+      (mixins/fontawesome \uf12e)]
+
+     [:&.group-uploads:after
+      (mixins/fontawesome \uf0ee)]
+
+     [:&.changelog:after
+      (mixins/fontawesome \uf1da)]
+
+     [:&.settings:after
+      (mixins/fontawesome \uf013)]]])
+
 (defn group-header []
   [:.group-header
 
@@ -99,8 +145,29 @@
       (mixins/fontawesome \uf110)
       mixins/spin]]]])
 
+(defn admin-header []
+  [:.admin-header
+   {:position "relative"}
+
+   [:.admin-icon
+    (header-text)
+    {:padding [[0 (em 1)]]
+     :color "#CCC"
+     :margin-left (em 1)}
+
+    [:&:before
+     (mixins/fontawesome \uf0e3)]]
+
+   (menu)
+
+   [".admin-icon:hover + .options"
+    ".options:hover"
+    {:display "inline-block"}]])
+
+
 (defn user-header []
   [:.user-header
+   {:position "relative"}
 
    [".bar:hover + .options"
     ".options:hover"
@@ -141,49 +208,7 @@
       {:-webkit-font-smoothing "antialiased"}
       (mixins/fontawesome \uf078)]]]
 
-   [:.options
-    (mixins/context-menu)
-    {:position "absolute"
-     :top 0
-     :right 0
-     :margin-top header-height
-     :z-index 110
-     :display "none"}
-
-    [:a
-     {:display "block"
-      :color "black"
-      :text-align "right"
-      :text-decoration "none"
-      :line-height "1.85em"}
-
-     [:&:hover
-      {:color "#666"}]
-
-     [:&:after
-      {:margin-left "0.5em"}]
-
-     [:&.subscriptions:after
-      (mixins/fontawesome \uf02c)]
-
-     [:&.invite-friend:after
-      (mixins/fontawesome \uf1e0)]
-
-     [:&.edit-profile:after
-      (mixins/fontawesome \uf007)]
-
-     [:&.group-bots:after
-      (mixins/fontawesome \uf12e)]
-
-     [:&.group-uploads:after
-      (mixins/fontawesome \uf0ee)]
-
-     [:&.changelog:after
-      (mixins/fontawesome \uf1da)]
-
-     [:&.settings:after
-      (mixins/fontawesome \uf013)]]]]
-  )
+   (menu)])
 
 (defn header [pad]
   [:.app
@@ -210,4 +235,5 @@
      [:.spacer
       {:flex-grow 2}]
      (quests-header header-text header-height)
-     (user-header)]]])
+     (user-header)
+     (admin-header)]]])
