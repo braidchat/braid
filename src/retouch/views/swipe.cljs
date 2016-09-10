@@ -9,12 +9,12 @@
     [:style
      (css
        [:.panels
-        {:height "100vh"
+        {:height "100%"
          :display "flex"
          :flex-flow "row"}
         [:.panel
          {:width "100vw"
-          :height "100vh"
+          :height "100%"
           :display "inline-block"
           :vertical-align "top" }]])]))
 

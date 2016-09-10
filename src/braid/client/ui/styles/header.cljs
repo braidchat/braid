@@ -82,6 +82,9 @@
     (header-text)
     {:min-width (em 5)}]
 
+   [:.buttons
+    {:display "inline-block"}]
+
    [:a
     {:width header-height
      :text-align "center"
@@ -90,6 +93,9 @@
     [:&:hover
      :&.active
      {:background "rgba(0,0,0,0.25)"}]
+
+    [:&.sidebar:after
+     (mixins/fontawesome \uf0c9)]
 
     [:&.inbox:after
      (mixins/fontawesome \uf01c)]

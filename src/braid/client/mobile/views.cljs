@@ -3,9 +3,11 @@
             [re-frame.core :refer [subscribe dispatch]]
             [braid.client.mobile.state]
             [braid.client.mobile.style :refer [styles]]
+            [braid.client.helpers :refer [->color]]
             [braid.client.ui.views.sidebar]
             [braid.client.ui.views.thread :refer [messages-view]]
             [braid.client.ui.views.new-message :refer [upload-button-view]]
+            [braid.client.ui.views.header :refer [group-name-view group-header-buttons-view]]
             [retouch.core :refer [drawer-view swipe-view]]))
 
 (defn new-message-view [thread-id]
@@ -34,11 +36,23 @@
    [messages-view thread]
    [new-message-view {:thread-id (thread :id)}]])
 
+(defn header-view []
+  (let [group-id (subscribe [:open-group-id])]
+    (fn []
+      [:div.group-header {:style {:background-color (->color @group-id)}}
+       [:a.sidebar {:on-click (fn []
+                                ; TODO open sidebar
+                                )}]
+       [group-name-view]
+       [group-header-buttons-view]
+       [:div.scroll-status]])))
+
 (defn inbox-view []
   (let [group-id (subscribe [:open-group-id])
         threads (subscribe [:open-threads] [group-id])]
     (fn []
       [:div.inbox.page
+       [header-view]
        [:div.threads
         [swipe-view @threads thread-view]]])))
 

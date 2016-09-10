@@ -6,6 +6,7 @@
             [braid.client.mobile.styles.login-flow]
             [braid.client.mobile.styles.drawer]
             [braid.client.ui.styles.vars :as vars]
+            [braid.client.ui.styles.header]
             [braid.client.ui.styles.imports]
             [braid.client.ui.styles.pills]
             [braid.client.ui.styles.thread]
@@ -33,21 +34,30 @@
           {:touch-action "none"}]
 
          [:.page
+          mixins/flex
           {:position "absolute"
            :top 0
            :left 0
            :right 0
            :bottom 0
-           :overflow "hidden"
            :z-index 50
-           :background "#CCC"}]
+           :background "#CCC"
+           :flex-direction "column"}]
+
+         (braid.client.ui.styles.header/group-header)
+         [:.group-header
+          ]
 
          [:.threads
+          {:flex-grow "1"
+           ; need to set some arbitrary height
+           ; for child elements to have 100% height
+           :height "1vh"}
 
           [:.thread
            mixins/flex
            {:width "100vw"
-            :height "100vh"
+            :height "100%"
             :background "white"
             :flex-direction "column"}
 
@@ -71,6 +81,7 @@
            (braid.client.ui.styles.thread/messages pad)
            [:.messages
             ;{:height "50vh"}
+            {:flex-grow 1}
             ]
 
            (braid.client.ui.styles.thread/new-message pad)
