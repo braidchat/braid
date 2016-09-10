@@ -91,35 +91,43 @@
          :login
          (case @stage
            :email
-           [:div.content.login.email
-            "Email"
-            [:input.email {:placeholder "you@awesome.com"
-                           :type "email"
-                           :key "email"
-                           :on-change (fn [e]
-                                        (reset! email (.. e -target -value)))}]
-            [:button.next {:on-click (fn [e]
-                                       (reset! stage :password))}]]
+           [:form.content.login.email
+            {:on-submit (fn [e]
+                          (.preventDefault e)
+                          (reset! stage :password))}
+            [:label.email "Email"
+             [:input.email {:placeholder "you@awesome.com"
+                            :type "email"
+                            :key "email"
+                            :auto-focus true
+                            :on-change (fn [e]
+                                         (reset! email (.. e -target -value)))}]]
+            [:button.next {:type "submit"}]]
 
            :password
-           [:div.content.login.password
-            "Password"
-            [:input.password {:placeholder "••••••"
-                              :type "password"
-                              :key "password"
-                              :on-change (fn [e]
-                                           (reset! password (.. e -target -value)))}]
-            [:button.next {:on-click (fn [e]
-                                       (dispatch [:auth
-                                                  {:email @email
-                                                   :password @password
-                                                   :on-complete (fn [])
-                                                   :on-error (fn [])}]))}]])
+           [:form.content.login.password
+            {:on-submit (fn [e]
+                          (.preventDefault e)
+                          (dispatch [:auth
+                                     {:email @email
+                                      :password @password
+                                      :on-complete (fn [])
+                                      :on-error (fn [])}]))}
+            [:label.password
+             "Password"
+             [:input.password {:placeholder "••••••"
+                               :type "password"
+                               :key "password"
+                               :auto-focus true
+                               :on-change (fn [e]
+                                            (reset! password (.. e -target -value)))}]]
+            [:button.next {:type "submit"}]])
 
          :register
          (if-not @email
            [:div.content.register.email
-            [:input.email {:placeholder "you@awesome.com"}]
+            [:input.email {:placeholder "you@awesome.com"
+                           :auto-focus true}]
             [:button.next {:on-click (fn [e]
                                        (reset! email (.. e -target -value))
                                        ; TODO
