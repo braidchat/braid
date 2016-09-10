@@ -4,18 +4,9 @@
             [braid.client.mobile.state]
             [braid.client.mobile.style :refer [styles]]
             [braid.client.ui.views.sidebar]
-            [braid.client.ui.views.thread]
+            [braid.client.ui.views.thread :refer [messages-view]]
             [braid.client.ui.views.new-message :refer [upload-button-view]]
             [retouch.core :refer [drawer-view swipe-view]]))
-
-(defn message-view [message]
-  [:div.message
-   [:a.avatar
-    [:img]]
-   [:div.info
-    [:div.nickname "username"]
-    [:div.time "4:35 PM"]]
-   [:div.content (:content message)]])
 
 (defn new-message-view [thread-id]
   (let [message (r/atom "")
@@ -32,10 +23,6 @@
                                                                  :thread-id thread-id
                                                                  :content message}]))}]])))
 
-(defn tag-view [tag-id]
-  (let [tag (subscribe [:get-tag tag-id])]
-    [:div.tag (@tag :name)]))
-
 (defn thread-view [thread]
   [:div.thread
    [:div.card
@@ -44,12 +31,7 @@
      [:div.close {:on-click (fn [_]
                               (dispatch [:hide-thread {:thread-id (thread :id)}]))}]]]
 
-   [:div.messages
-    (doall
-      (for [message (:messages thread)]
-        ^{:key (message :id)}
-        [message-view message]))]
-
+   [messages-view thread]
    [new-message-view {:thread-id (thread :id)}]])
 
 (defn inbox-view []
