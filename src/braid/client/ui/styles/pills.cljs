@@ -52,7 +52,7 @@
        :margin-right (em 1)}
       mixins/pill-button]]]])
 
-(def tag
+(defn tag []
   [:.tag
    (hover-card)
 
@@ -77,7 +77,7 @@
       [:&::after
        (mixins/fontawesome \uf0c0)]]]]])
 
-(def user
+(defn user []
   [:.user
    (hover-card)
 
