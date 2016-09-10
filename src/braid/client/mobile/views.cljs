@@ -84,7 +84,7 @@
                             :auto-focus true
                             :on-change (fn [e]
                                          (reset! email (.. e -target -value)))}]]
-            [:button.next {:type "submit"}]]
+            [:button.next {:type "submit"} "Next"]]
 
            :password
            [:form.content.login.password
@@ -103,7 +103,7 @@
                                :auto-focus true
                                :on-change (fn [e]
                                             (reset! password (.. e -target -value)))}]]
-            [:button.next {:type "submit"}]])
+            [:button.next {:type "submit"} "Next"]])
 
          :register
          (if-not @email
