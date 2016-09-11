@@ -50,4 +50,4 @@
   (dispatch [:set-group-and-page [(uuid group-id) {:type (keyword page-id)}]]))
 
 (defroute index-path "/" {}
-  (dispatch [:set-group-and-page [nil {:type :index}]]))
+  (dispatch [:redirect-to-first-group]))
