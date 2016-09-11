@@ -76,7 +76,7 @@
 (defn admin-header-view []
   (let [user-id (subscribe [:user-id])
         open-group-id (subscribe [:open-group-id])
-        admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])]
+        admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
     (fn []
       (when @admin?
         [:div.admin-header
