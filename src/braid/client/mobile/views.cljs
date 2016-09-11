@@ -9,7 +9,8 @@
             [braid.client.ui.views.thread :refer [messages-view]]
             [braid.client.ui.views.new-message :refer [upload-button-view]]
             [braid.client.ui.views.header :refer [group-name-view group-header-buttons-view]]
-            [retouch.core :refer [drawer-view swipe-view]]))
+            [retouch.core :refer [drawer-view swipe-view]])
+  (:import [goog.events KeyCodes]))
 
 (defn new-message-view [thread-id]
   (let [message (r/atom "")
@@ -19,12 +20,20 @@
        [upload-button-view {:thread-id thread-id
                             :group-id @group-id}]
        [:textarea {:value @message
-                   :on-change (fn [e]
-                                (reset! message (.. e -target -value)))
-                   :on-something (fn [_]
-                                   (dispatch [:new-message-text {:group-id @group-id
-                                                                 :thread-id thread-id
-                                                                 :content message}]))}]])))
+                   :on-change
+                   (fn [e]
+                     (reset! message (.. e -target -value)))
+                   :on-key-up
+                   (fn [e]
+                     (condp = (.-keyCode e)
+                       KeyCodes.ENTER
+                       (do
+                         (dispatch [:new-message {:group-id @group-id
+                                                  :thread-id thread-id
+                                                  :content @message}])
+
+                         (reset! message ""))
+                       nil))}]])))
 
 (defn thread-view [thread]
   [:div.thread
@@ -35,7 +44,7 @@
                               (dispatch [:hide-thread {:thread-id (thread :id)}]))}]]]
 
    [messages-view thread]
-   [new-message-view {:thread-id (thread :id)}]])
+   [new-message-view (thread :id)]])
 
 (defn header-view []
   (let [group-id (subscribe [:open-group-id])]
