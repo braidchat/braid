@@ -12,6 +12,7 @@
             [braid.client.ui.styles.thread]
             [braid.client.ui.styles.body]
             [braid.client.ui.styles.message]
+            [braid.client.ui.styles.embed]
             [braid.client.ui.styles.mixins :as mixins]))
 
 (def styles
@@ -90,6 +91,7 @@
            [:.messages
             ;{:height "50vh"}
             {:flex-grow 1}
+           (braid.client.ui.styles.embed/embed pad)
             ]
 
            (braid.client.ui.styles.thread/new-message pad)
