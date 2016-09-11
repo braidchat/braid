@@ -4,6 +4,7 @@
             [braid.client.mobile.state]
             [braid.client.mobile.style :refer [styles]]
             [braid.client.helpers :refer [->color]]
+            [braid.client.routes :as routes]
             [braid.client.ui.views.sidebar]
             [braid.client.ui.views.thread :refer [messages-view]]
             [braid.client.ui.views.new-message :refer [upload-button-view]]
@@ -40,12 +41,14 @@
   (let [group-id (subscribe [:open-group-id])]
     (fn []
       [:div.group-header {:style {:background-color (->color @group-id)}}
-       [:a.sidebar {:on-click (fn []
-                                ; TODO open sidebar
-                                )}]
+       [:a.open-sidebar {:on-click (fn []
+                                     ; TODO open sidebar
+                                     )}]
        [group-name-view]
-       [group-header-buttons-view]
-       [:div.scroll-status]])))
+       [:span.spacer]
+       [group-header-buttons-view [{:title "Inbox"
+                                    :route-fn routes/inbox-page-path
+                                    :class "inbox"}]]])))
 
 (defn inbox-view []
   (let [group-id (subscribe [:open-group-id])

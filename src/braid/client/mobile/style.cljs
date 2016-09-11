@@ -44,9 +44,17 @@
            :background "#CCC"
            :flex-direction "column"}]
 
-         (braid.client.ui.styles.header/group-header)
+         (braid.client.ui.styles.header/group-header "2.5rem")
          [:.group-header
-          ]
+          mixins/flex
+          {:justify-content "space-between"}
+
+          [:.group-name
+           {:padding 0}]
+
+          [:.spacer
+           {:flex-grow 2}]
+          [:.buttons]]
 
          [:.threads
           {:flex-grow "1"

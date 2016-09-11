@@ -47,18 +47,10 @@
              :title title}
          body]))))
 
-(def group-header-items
-  [{:title "Inbox"
-    :route-fn routes/inbox-page-path
-    :class "inbox"}
-   {:title "Recent"
-    :route-fn routes/recent-page-path
-    :class "recent"}])
-
-(defn group-header-buttons-view []
+(defn group-header-buttons-view [header-items]
   [:div.buttons
    (doall
-     (for [header-item group-header-items]
+     (for [header-item header-items]
        ^{:key (header-item :title)}
        [header-item-view header-item]))])
 
@@ -68,7 +60,13 @@
       [:div.group-header
        [:div.bar {:style {:background-color (->color @group-id)}}
         [group-name-view]
-        [group-header-buttons-view]
+        [group-header-buttons-view
+         [{:title "Inbox"
+           :route-fn routes/inbox-page-path
+           :class "inbox"}
+          {:title "Recent"
+           :route-fn routes/recent-page-path
+           :class "recent"}]]
         [search-bar-view]]
        [loading-indicator-view @group-id]])))
 
