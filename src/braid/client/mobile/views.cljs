@@ -20,6 +20,7 @@
        [upload-button-view {:thread-id thread-id
                             :group-id @group-id}]
        [:textarea {:value @message
+                   :placeholder "Reply..."
                    :on-change
                    (fn [e]
                      (reset! message (.. e -target -value)))
