@@ -292,6 +292,8 @@
                                             "Start a conversation..."
                                             "Reply...")
                              :new-message (thread :new-message)
-                             :mentioned-user-ids (thread :mentioned-ids)
-                             :mentioned-tag-ids (thread :tag-ids)}]]]))))
+                             :mentioned-user-ids (when new?
+                                                   (thread :mentioned-ids))
+                             :mentioned-tag-ids (when new?
+                                                  (thread :tag-ids))}]]]))))
 
