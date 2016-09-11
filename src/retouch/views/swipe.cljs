@@ -43,6 +43,8 @@
                              percent-dragged (/ (- scroll-x
                                                    (@state :scroll-x-start))
                                                 width)
+                             ; TODO should switch away from delta-n
+                             ; instead, just based off direction and location when let go
                              delta-n (cond
                                        (< percent-dragged -1.35) -2
                                        (< percent-dragged -0.15) -1
