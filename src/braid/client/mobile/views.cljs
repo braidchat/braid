@@ -12,15 +12,15 @@
             [retouch.core :refer [drawer-view swipe-view]])
   (:import [goog.events KeyCodes]))
 
-(defn new-message-view [thread-id]
+(defn new-message-view [config]
   (let [message (r/atom "")
         group-id (subscribe [:open-group-id])]
-    (fn [thread-id]
+    (fn [config]
       [:div.new.message
-       [upload-button-view {:thread-id thread-id
+       [upload-button-view {:thread-id (config :thread-id)
                             :group-id @group-id}]
        [:textarea {:value @message
-                   :placeholder "Reply..."
+                   :placeholder (config :placeholder)
                    :on-change
                    (fn [e]
                      (reset! message (.. e -target -value)))
@@ -30,7 +30,7 @@
                        KeyCodes.ENTER
                        (do
                          (dispatch [:new-message {:group-id @group-id
-                                                  :thread-id thread-id
+                                                  :thread-id (config :thread-id)
                                                   :content @message}])
 
                          (reset! message ""))
@@ -48,7 +48,11 @@
                                     (dispatch [:hide-thread {:thread-id (thread :id)}]))}])]]
 
        [messages-view thread]
-       [new-message-view (thread :id)]])))
+       [new-message-view {:thread-id (thread :id)
+                          :placeholder (if (thread :new?)
+                                         "Start a conversation..."
+                                         "Reply...")
+                          }]])))
 
 (defn header-view []
   (let [group-id (subscribe [:open-group-id])]
