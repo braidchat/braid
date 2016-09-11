@@ -5,6 +5,8 @@
             [braid.client.routes :as routes]
             [re-frame.core :as rf :refer [dispatch-sync dispatch]]
             [braid.client.state.remote-handlers]
+            braid.client.uploads.subs
+            braid.client.uploads.events
             braid.client.core.subs
             braid.client.core.events))
 
