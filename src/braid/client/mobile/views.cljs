@@ -16,8 +16,8 @@
         group-id (subscribe [:open-group-id])]
     (fn [thread-id]
       [:div.new.message
-       [upload-button-view {:thread-id "TODO"
-                            :group-id "TODO"}]
+       [upload-button-view {:thread-id thread-id
+                            :group-id @group-id}]
        [:textarea {:value @message
                    :on-change (fn [e]
                                 (reset! message (.. e -target -value)))
