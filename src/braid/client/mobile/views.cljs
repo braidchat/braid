@@ -108,7 +108,7 @@
                         (reset! method :login)
                         (reset! stage :email))}
            "Log In"]
-          [:button.register
+          #_[:button.register
            {:on-click (fn [_]
                         (reset! method :register))}
            "Register"]]
