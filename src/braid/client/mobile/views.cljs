@@ -36,15 +36,18 @@
                        nil))}]])))
 
 (defn thread-view [thread]
-  [:div.thread
-   [:div.card
-    [:div.head
-     [braid.client.ui.views.thread/thread-tags-view thread]
-     [:div.close {:on-click (fn [_]
-                              (dispatch [:hide-thread {:thread-id (thread :id)}]))}]]]
+  (let [open? (subscribe [:thread-open? (thread :id)])]
+    (fn [thread]
+      [:div.thread
+       [:div.card
+        [:div.head
+         [braid.client.ui.views.thread/thread-tags-view thread]
+         (when @open?
+           [:div.close {:on-click (fn [_]
+                                    (dispatch [:hide-thread {:thread-id (thread :id)}]))}])]]
 
-   [messages-view thread]
-   [new-message-view (thread :id)]])
+       [messages-view thread]
+       [new-message-view (thread :id)]])))
 
 (defn header-view []
   (let [group-id (subscribe [:open-group-id])]
@@ -61,12 +64,14 @@
 
 (defn inbox-view []
   (let [group-id (subscribe [:open-group-id])
-        threads (subscribe [:open-threads] [group-id])]
+        threads (subscribe [:open-threads] [group-id])
+        temp-thread (subscribe [:temp-thread])]
     (fn []
       [:div.inbox.page
        [header-view]
        [:div.threads
-        [swipe-view @threads thread-view]]])))
+        [swipe-view (conj @threads
+                          @temp-thread) thread-view]]])))
 
 (defn main-view []
   [:div.main
