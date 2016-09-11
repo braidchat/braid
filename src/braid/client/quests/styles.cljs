@@ -18,7 +18,7 @@
      {:display "inline-block"}]
 
     [:.quests-icon
-     (header-text)
+     (header-text header-height)
      {:padding 0
       :color "#CCC"}
 

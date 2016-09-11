@@ -83,7 +83,8 @@
     {:min-width (em 5)}]
 
    [:.buttons
-    {:display "inline-block"}]
+    {:display "inline-block"
+     :vertical-align "top"}]
 
    [:a
     {:width size
