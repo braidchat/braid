@@ -45,8 +45,8 @@
                                               (sort-by
                                                 (comp (partial apply max)
                                                       (partial map :created-at)
-                                                      :messages))
-                                              reverse))]
+                                                      :messages)
+                                                #(compare %2 %1))))]
             [:div.page.search
              [:div.title (str "Search for \"" @query "\"")]
              [:div.content
