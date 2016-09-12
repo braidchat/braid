@@ -35,15 +35,13 @@
           {:touch-action "none"}]
 
          [:.page
-          mixins/flex
           {:position "absolute"
            :top 0
            :left 0
            :right 0
            :bottom 0
            :z-index 50
-           :background "#CCC"
-           :flex-direction "column"}]
+           :background "#CCC" }]
 
          (braid.client.ui.styles.header/group-header "2.5rem")
          [:.group-header
@@ -55,13 +53,14 @@
 
           [:.spacer
            {:flex-grow 2}]
+
           [:.buttons]]
 
          [:.threads
-          {:flex-grow "1"
-           ; need to set some arbitrary height
-           ; for child elements to have 100% height
-           :height "1vh"}
+          {:padding-top "2.5rem"
+           :margin-top "-2.5rem"
+           :height "100%"
+           :box-sizing "border-box"}
 
           [:.thread
            mixins/flex
@@ -89,7 +88,6 @@
 
            (braid.client.ui.styles.thread/messages pad)
            [:.messages
-            ;{:height "50vh"}
             {:flex-grow 1}
            (braid.client.ui.styles.embed/embed pad)
             ]

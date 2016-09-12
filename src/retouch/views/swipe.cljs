@@ -17,11 +17,13 @@
          :overflow "scroll"}
         [:.panels
          {:height "100%"
-          :display "flex"
+          :min-width "100%"
+          :display #{:flex :-webkit-flex}
           :flex-flow "row"}
          [:.panel
-          {:width "100vw"
+          {:width "100%"
            :height "100%"
+           :flex-shrink 0
            :display "inline-block"
            :vertical-align "top" }]]])]))
 
