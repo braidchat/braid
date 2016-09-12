@@ -38,8 +38,10 @@
              "Try again"]]]
 
           (:done-results :loading)
-          (let [loaded-threads (reaction (vals (select-keys @threads (@page :thread-ids))))
-                sorted-threads (reaction (->> @loaded-threads ; sort-by last reply, newest first
+          (let [loaded-threads (reaction (vals (select-keys @threads
+                                                 (@page :thread-ids))))
+                sorted-threads (reaction (->> @loaded-threads
+                                              ; sort-by last reply, newest first
                                               (sort-by
                                                 (comp (partial apply max)
                                                       (partial map :created-at)
@@ -51,7 +53,8 @@
               [:div.description
                (if (= status :loading)
                  "Loading more results..."
-                 (str "Displaying " (count @loaded-threads) "/" (count (@page :thread-ids))))]]
+                 (str "Displaying " (count @loaded-threads) "/"
+                      (count (@page :thread-ids))))]]
              [:div.threads
               {:ref "threads-div"
                :on-scroll ; page in more results as the user scrolls
