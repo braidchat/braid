@@ -2,7 +2,8 @@
   (:require [schema.core :as s :include-macros true]
             [braid.common.schema :as app-schema]
             [braid.client.quests.schema :as quests]
-            [braid.client.invites.schema :as invites]))
+            [braid.client.invites.schema :as invites]
+            [braid.client.mobile.auth-flow.schema :as mobile-auth-flow]))
 
 (def initial-state
   (merge
@@ -24,7 +25,8 @@
      :focused-thread-id nil
      :temp-threads {}}
     quests/init-state
-    invites/init-state))
+    invites/init-state
+    mobile-auth-flow/init-state))
 
 (def AppState
   (merge
@@ -54,6 +56,7 @@
                             :tag-ids [s/Uuid]
                             :new-message s/Str}}}
     quests/QuestsAppState
-    invites/InvitesAppState))
+    invites/InvitesAppState
+    mobile-auth-flow/MobileAuthFlowAppState))
 
 (def check-app-state! (s/validator AppState))
