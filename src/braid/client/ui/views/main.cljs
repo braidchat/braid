@@ -34,14 +34,7 @@
         :thread [single-thread-view]
         :settings [group-settings-page-view]
         :global-settings [global-settings-page-view]
-        :changelog [changelog-view]
-        :index (do (when-let [group-id (-> @(subscribe [:ordered-groups])
-                                           first
-                                           :id)]
-                     (routes/go-to! (routes/inbox-page-path {:group-id group-id})))
-                   [:h1 "Redirecting..."])
-        (do (routes/go-to! (routes/index-path))
-            [:h1 "???"])))))
+        :changelog [changelog-view]))))
 
 (defn main-view []
   (let [group-id (subscribe [:open-group-id])]

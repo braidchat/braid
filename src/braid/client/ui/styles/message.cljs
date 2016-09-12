@@ -1,6 +1,7 @@
 (ns braid.client.ui.styles.message
   (:require [braid.client.ui.styles.vars :refer [avatar-size pad card-width]]
             [braid.client.ui.styles.mixins :as mixins]
+            [braid.client.ui.styles.pills :as pills]
             [garden.arithmetic :as m]
             [garden.units :refer [rem px]]))
 
@@ -76,6 +77,9 @@
      :box-sizing "border-box"
      :line-height "1.25em"
      :margin-top (rem 0.20)}
+
+    (pills/tag)
+    (pills/user)
 
     [:a.external
      mixins/pill-box

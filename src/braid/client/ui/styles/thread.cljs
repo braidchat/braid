@@ -4,6 +4,111 @@
             [braid.client.ui.styles.mixins :as mixins]
             [garden.units :refer [px em rem]]))
 
+(defn head [pad]
+  [:.head
+   {:min-height "3.5em"
+    :position "relative"
+    :width "100%"
+    :flex-shrink 0
+    :padding [[pad (m/* 2 pad) pad pad]]
+    :box-sizing "border-box"}
+
+   [:.tags
+
+    [:.add
+     {:position "relative"}
+
+     [:span.pill
+      mixins/pill-button
+      {:letter-spacing "normal !important"}]
+
+     [:.tag-list
+      {:position "absolute"
+       :left "100%"
+       :margin-left (em 0.5)
+       :top "-0.5em"
+       :background "white"
+       :z-index 100
+       :max-height (em 12)
+       :overflow-x "scroll"}
+      (mixins/box-shadow)]
+
+     [:.tag-option
+      {:cursor "pointer"
+       :white-space "nowrap"
+       :padding (em 0.25)}
+
+      [:&:hover
+       {:background "#eee"}]
+
+      [:.rect
+       {:width (em 1)
+        :height (em 2)
+        :display "inline-block"
+        :vertical-align "middle"
+        :border-radius (px 3)}]
+
+      [:span
+       {:margin (rem 0.25)
+        :display "inline-block"
+        :vertical-align "middle"}]]]
+
+    [:.user :.tag :.add
+     {:display "inline-block"
+      :vertical-align "middle"
+      :margin-bottom (rem 0.25)
+      :margin-right (rem 0.25)}]]
+
+   [:.permalink
+    [:button
+     mixins/pill-button]]
+
+   [:.controls
+    {:position "absolute"
+     :padding pad
+     :top 0
+     :right 0
+     :z-index 10
+     :color "#CCC"
+     :text-align "right"}
+
+    [:.control
+     {:cursor "pointer"}
+
+     [:&:hover
+      {:color "#333"}]
+
+     [:&.close
+      [:&:after
+       (mixins/fontawesome \uf00d)]]
+
+     [:&.unread
+      [:&:after
+       (mixins/fontawesome \uf0e2)]]
+
+     [:&.permalink
+      [:&:after (mixins/fontawesome \uf0c1)]]
+     [:&.mute
+      [:&:after (mixins/fontawesome \uf1f6)]]
+
+     [:&.hidden
+      {:margin-top (m/* pad 0.5)
+       :display "none"}
+
+      [:&:after
+       {:font-size "0.9em"
+        :margin-right "-0.15em"}]]]]
+
+   [".controls:hover > .hidden"
+    {:display "block"}]])
+
+
+(defn messages [pad]
+  [:.messages
+   {:position "relative"
+    :overflow-y "scroll"
+    :padding [[0 pad]]}])
+
 (defn thread [pad]
   [:.thread
    mixins/flex
@@ -61,7 +166,10 @@
      :max-height "100%"
      :background "white"
      :border-radius [[vars/border-radius
-                      vars/border-radius 0 0]]}]])
+                      vars/border-radius 0 0]]}]
+
+   (head pad)
+   (messages pad)])
 
 (defn notice [pad]
   [:.thread
@@ -98,111 +206,7 @@
      [:&:before
       (mixins/fontawesome \uf071)]]]])
 
-(defn head [pad]
-  [:.thread
-   [:.head
-    {:min-height "3.5em"
-     :position "relative"
-     :width "100%"
-     :flex-shrink 0
-     :padding [[pad (m/* 2 pad) pad pad]]
-     :box-sizing "border-box"}
 
-    [:.tags
-
-     [:.add
-      {:position "relative"}
-
-      [:span.pill
-       mixins/pill-button
-       {:letter-spacing "normal !important"}]
-
-      [:.tag-list
-       {:position "absolute"
-        :left "100%"
-        :margin-left (em 0.5)
-        :top "-0.5em"
-        :background "white"
-        :z-index 100
-        :max-height (em 12)
-        :overflow-x "scroll"}
-        (mixins/box-shadow)]
-
-        [:.tag-option
-         {:cursor "pointer"
-          :white-space "nowrap"
-          :padding (em 0.25)}
-
-         [:&:hover
-          {:background "#eee"}]
-
-         [:.rect
-          {:width (em 1)
-           :height (em 2)
-           :display "inline-block"
-           :vertical-align "middle"
-           :border-radius (px 3)}]
-
-         [:span
-          {:margin (rem 0.25)
-           :display "inline-block"
-           :vertical-align "middle"}]]]
-
-     [:.user :.tag :.add
-      {:display "inline-block"
-       :vertical-align "middle"
-       :margin-bottom (rem 0.25)
-       :margin-right (rem 0.25)}]]
-
-    [:.permalink
-     [:button
-      mixins/pill-button]]
-
-    [:.controls
-     {:position "absolute"
-      :padding pad
-      :top 0
-      :right 0
-      :z-index 10
-      :color "#CCC"
-      :text-align "right"}
-
-     [:.control
-      {:cursor "pointer"}
-
-      [:&:hover
-       {:color "#333"}]
-
-      [:&.close
-       [:&:after
-        (mixins/fontawesome \uf00d)]]
-
-      [:&.unread
-       [:&:after
-        (mixins/fontawesome \uf0e2)]]
-
-      [:&.permalink
-       [:&:after (mixins/fontawesome \uf0c1)]]
-      [:&.mute
-       [:&:after (mixins/fontawesome \uf1f6)]]
-
-      [:&.hidden
-       {:margin-top (m/* pad 0.5)
-        :display "none"}
-
-       [:&:after
-        {:font-size "0.9em"
-         :margin-right "-0.15em"}]]]]
-
-    [".controls:hover > .hidden"
-     {:display "block"}]]])
-
-(defn messages [pad]
-  [:.thread
-   [:.messages
-    {:position "relative"
-     :overflow-y "scroll"
-     :padding [[0 pad]]}]])
 
 (defn new-message [pad]
   [:.message.new

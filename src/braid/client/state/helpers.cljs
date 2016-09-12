@@ -9,6 +9,20 @@
 (defn key-by [k coll]
   (into {} (map (juxt k identity)) coll))
 
+(defn order-groups
+  "Helper function to impose an order on groups.
+  This is a seperate function (instead of inline in :ordered-groups because the
+  index route needs to be able to call this to find the first group"
+  [groups group-order]
+  (if (nil? group-order)
+    groups
+    (let [ordered? (comp boolean (set group-order) :id)
+          {ord true unord false} (group-by ordered? groups)
+          by-id (group-by :id groups)]
+      (concat
+        (map (comp first by-id) group-order)
+        unord))))
+
 ; ALL HELPERS BELOW SHOULD TAKE STATE AS FIRST ARG
 
 ; GETTERS
@@ -18,6 +32,9 @@
 
 (defn current-user-id [state]
   (get-in state [:session :user-id]))
+
+(defn ordered-groups [state]
+  (order-groups (vals (state :groups)) (get-in state [:preferences :groups-order])))
 
 ; SETTERS
 

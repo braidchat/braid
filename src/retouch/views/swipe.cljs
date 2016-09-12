@@ -1,111 +1,103 @@
 (ns retouch.views.swipe
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [reagent.core :as r]
             [reagent.ratom :include-macros true :refer-macros [reaction]]
             [garden.core :refer [css]]
-            [retouch.common :refer [easing-fn]]))
+            [retouch.common :refer [easing-fn]]
+            [cljs.core.async :as async :refer [<! put! chan alts!]]
+            [retouch.helpers :refer [debounce]]))
 
 (def style-view
   (fn []
     [:style
      (css
-       [:.panels
-        {:height "100vh"
-         :display "flex"
-         :flex-flow "row"}
-        [:.panel
-         {:width "100vw"
-          :height "100vh"
-          :display "inline-block"
-          :vertical-align "top" }]])]))
+       [:.container
+        {:height "100%"
+         :width "100%"
+         :overflow "scroll"}
+        [:.panels
+         {:height "100%"
+          :min-width "100%"
+          :display #{:flex :-webkit-flex}
+          :flex-flow "row"}
+         [:.panel
+          {:width "100%"
+           :height "100%"
+           :flex-shrink 0
+           :display "inline-block"
+           :vertical-align "top" }]]])]))
 
 (defn swipe-view [panel-items panel-view]
-  (let [state (r/atom {:pos-x 0})
+  (let [panel-count (r/atom (count panel-items))
+        state (atom {:container nil
+                     :dragging? false
+                     :scroll-x-start nil})
 
-        px->vw (fn [px]
-                 (* 100 (/ px (.-innerWidth js/window))))
+        scroll-chan (chan)
+        scroll-stop-chan (debounce scroll-chan 50)
 
-        drag-start! (fn [touch-x]
-                      (swap! state assoc
-                             :pos-x-start (@state :pos-x)
-                             :touch-x-start touch-x
-                             :touch-x touch-x
-                             :dragging? true))
+        scroll-stop! (fn []
+                       (let [container (@state :container)
+                             width (.-offsetWidth container)
+                             ;scrollWidth (.-scrollWidth container)
+                             scroll-x (.-scrollLeft container)
+                             start-n (/ (@state :scroll-x-start) width)
+                             percent-dragged (/ (- scroll-x
+                                                   (@state :scroll-x-start))
+                                                width)
+                             ; TODO should switch away from delta-n
+                             ; instead, just based off direction and location when let go
+                             delta-n (cond
+                                       (< percent-dragged -1.35) -2
+                                       (< percent-dragged -0.15) -1
+                                       (> percent-dragged 1.35) 2
+                                       (> percent-dragged 0.15) 1
+                                       :else 0)
+                             bound (fn [x xmin xmax]
+                                     (-> x
+                                         (min xmax)
+                                         (max xmin)))
+                             target-n (bound (+ start-n delta-n) 0 (dec @panel-count))
+                             target-x (* width target-n)]
 
-        drag-end! (fn []
-                    (let [w (.-innerWidth js/window)
-                          pos-n (- (/ (@state :pos-x-start) w))
-                          delta-n (let [percent-dragged (/ (- (@state :pos-x)
-                                                              (@state :pos-x-start))
-                                                           w)]
-                                    (cond
-                                      (< percent-dragged -0.15) 1
-                                      (> percent-dragged 0.15) -1
-                                      :else 0))
-                          bound (fn [x xmin xmax]
-                                  (-> x
-                                      (min xmax)
-                                      (max xmin)))
-                          max-n (dec (@state :panel-count))
-                          new-n (bound (+ pos-n delta-n) 0 max-n)
-                          snap-x (- (* w new-n))]
-
-                      (swap! state assoc
-                             :dragging? false
-                             :pos-x snap-x)))
-
-        set-touch-x! (fn [touch-x]
-                       (swap! state assoc
-                              :touch-x touch-x
-                              :pos-x (+ (@state :pos-x-start)
-                                        (- (@state :touch-x)
-                                           (@state :touch-x-start)))))
-
-        set-panel-count! (fn [panel-count]
-                           (swap! state assoc :panel-count panel-count))
-
-        get-dragging? (fn []
-                        (reaction (@state :dragging?)))
-
-        get-pos-x (fn [] (reaction (@state :pos-x)))
-
-        touch-start! (fn [e]
-                       (let [x (.-clientX (aget (.-touches e) 0))]
-                         (drag-start! x)))
-
-        touch-move! (fn [e]
-                      (let [x (.-clientX (aget (.-touches e) 0))
-                            dragging? (get-dragging?)]
-                        (when @dragging?
-                          (set-touch-x! x))))
+                        (set! (.-scrollLeft (@state :container)) target-x)))
 
         touch-end! (fn [e]
-                     (let [x (.-clientX (aget (.-changedTouches e) 0))
-                           dragging? (get-dragging?)]
-                       (when @dragging?
-                         (drag-end!))))]
+                     (swap! state assoc :dragging? false))
+
+        touch-start! (fn [e]
+                       (swap! state assoc
+                              :scroll-x-start (.-scrollLeft (@state :container))
+                              :dragging? true))
+
+        scroll! (fn [e]
+                  (put! scroll-chan true))
+
+        _ (go (loop []
+                (let [[_ ch] (alts! [scroll-stop-chan])]
+                  (when (= ch scroll-stop-chan)
+                    (when-not (@state :dragging?)
+                      (scroll-stop!)))
+                  (recur))))]
     (r/create-class
       {:component-did-mount
-       (fn []
+       (fn [component]
+         (.addEventListener js/document "touchend" touch-end!)
          (.addEventListener js/document "touchstart" touch-start!)
-         (.addEventListener js/document "touchmove" touch-move!)
-         (.addEventListener js/document "touchend" touch-end!))
+         (swap! state assoc :container (r/dom-node component)))
        :component-will-update
        (fn [this _]
-         (set-panel-count! (count (first (r/children this)))))
+         (reset! panel-count (count (first (r/children this)))))
        :component-will-unmount
        (fn []
-         (.removeEventListener js/document "touchstart" touch-start!)
-         (.removeEventListener js/document "touchmove" touch-move!)
-         (.removeEventListener js/document "touchend" touch-end!))
+         (.removeEventListener js/document "touchend" touch-end!)
+         (.removeEventListener js/document "touchstart" touch-start!))
        :reagent-render
        (fn [panel-items panel-view]
-         (let [x (get-pos-x)
-               dragging? (get-dragging?)]
-           [:div.panels {:style {:transform (str "translate3d(" @x "px,0,0)")
-                                 :transition (when-not @dragging?
-                                               (str "transform" " 0.25s " easing-fn))}}
-            [style-view]
-            (doall
-              (for [panel-item panel-items]
-                ^{:key (:id panel-item)}
-                [:div.panel [panel-view panel-item]]))]))})))
+         [:div.container {:on-scroll scroll!}
+          [:div.panels
+           [style-view]
+           (doall
+             (for [panel-item panel-items]
+               ^{:key (:id panel-item)}
+               [:div.panel [panel-view panel-item]]))]])})))

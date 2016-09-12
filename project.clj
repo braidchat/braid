@@ -81,7 +81,7 @@
                            :pretty-print false}}
 
                {:id "mobile-dev"
-                :figwheel true
+                :figwheel {:on-jsload "braid.client.mobile.core/reload"}
                 :source-paths ["src/braid/client"
                                "src/retouch"]
                 :compiler {:main braid.client.mobile.core

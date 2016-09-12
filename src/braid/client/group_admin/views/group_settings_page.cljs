@@ -14,8 +14,7 @@
                             (when (js/confirm "Are you sure you want to leave this group?")
                               (dispatch [:remove-from-group
                                          {:group-id (group :id)
-                                          :user-id @user-id}])
-                              (routes/go-to! (routes/index-path))))}
+                                          :user-id @user-id}])))}
        "Leave this group"])))
 
 (defn intro-message-view

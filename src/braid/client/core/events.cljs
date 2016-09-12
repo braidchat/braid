@@ -7,6 +7,7 @@
             [braid.client.schema :as schema]
             [braid.common.util :as util]
             [braid.client.router :as router]
+            [braid.client.routes :as routes]
             [braid.client.xhr :refer [edn-xhr]]
             [braid.client.state.helpers :as helpers :refer [key-by-id]]
             [braid.client.quests.helpers :as quest-helpers]))
@@ -441,7 +442,8 @@
 (reg-event-fx
   :remove-from-group
   (fn [cofx [ _ {:keys [group-id user-id] :as args}]]
-    {:websocket-send (list [:braid.server/remove-from-group args])}))
+    {:websocket-send (list [:braid.server/remove-from-group args])
+     :dispatch [:redirect-to-first-group]}))
 
 (reg-event-fx
   :check-auth
@@ -506,12 +508,21 @@
                               (dispatch [:set-login-state :login-form])
                               (dispatch [:clear-session]))}}))
 
-(reg-event-db
+(reg-event-fx
   :set-group-and-page
-  (fn [state [_ [group-id page-id]]]
+  (fn [{state :db :as cofx} [_ [group-id page-id]]]
     (if (or (nil? group-id) (some? (get-in state [:groups group-id])))
-      (assoc state :open-group-id group-id :page page-id)
-      (assoc state :open-group-id nil :page {:type :index}))))
+      {:db (assoc state :open-group-id group-id :page page-id)}
+      {:dispatch [:redirect-to-first-group]})))
+
+(reg-event-fx
+  :redirect-to-first-group
+  (fn [{state :db :as cofx} _]
+    {:redirect-to
+     (when-let [group-id (-> (helpers/ordered-groups state)
+                             first
+                             :id)]
+       (routes/inbox-page-path {:group-id group-id}))}))
 
 (reg-event-db
   :set-page-loading
@@ -594,8 +605,8 @@
                 {:groups-order (into [] (remove (partial = group-id))
                                      sidebar-order)})
               state))))
-     :redirect-to (when (= group-id (state :open-group-id))
-                    "/")}))
+     :dispatch [(when (= group-id (state :open-group-id))
+                 :redirect-to-first-group)]}))
 
 (reg-event-db
   :add-open-thread
