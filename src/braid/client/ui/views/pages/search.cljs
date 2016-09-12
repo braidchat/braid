@@ -59,10 +59,12 @@
                :on-scroll ; page in more results as the user scrolls
                (fn [e]
                  (let [div (.. e -target)]
-                   (when (and (= status :done-results)
+                   (when (and (= (.-className div) "threads")
+                           (= status :done-results)
                            (< (count loaded-threads) (count (@page :thread-ids)))
                            (> 100 (- (.-scrollWidth div)
-                                     (+ (.-scrollLeft div) (.-offsetWidth div)))))
+                                     (+ (.-scrollLeft div) (.-offsetWidth div)))
+                              0))
                      (dispatch [:set-page-loading true])
                      (let [already-have (set (map :id loaded-threads))
                            to-load (->> (@page :thread-ids)
