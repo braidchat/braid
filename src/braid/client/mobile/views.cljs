@@ -50,7 +50,6 @@
                                     (dispatch [:hide-thread {:thread-id (thread :id)}]))}])]]
 
        [messages-view thread]
-       (println thread)
        [new-message-view {:thread-id (thread :id)
                           :placeholder (if (thread :new?)
                                          "Start a conversation..."
