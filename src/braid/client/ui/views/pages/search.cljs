@@ -55,8 +55,7 @@
                  (str "Displaying " (count loaded-threads) "/"
                       (count (@page :thread-ids))))]]
              [:div.threads
-              {:ref "threads-div"
-               :on-scroll ; page in more results as the user scrolls
+              {:on-scroll ; page in more results as the user scrolls
                (fn [e]
                  (let [div (.. e -target)]
                    (when (and (= (.-className div) "threads")
