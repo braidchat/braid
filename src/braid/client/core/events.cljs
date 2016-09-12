@@ -508,10 +508,12 @@
                               (dispatch [:set-login-state :login-form])
                               (dispatch [:clear-session]))}}))
 
-(reg-event-db
+(reg-event-fx
   :set-group-and-page
-  (fn [state [_ [group-id page-id]]]
-    (assoc state :open-group-id group-id :page page-id)))
+  (fn [{state :db :as cofx} [_ [group-id page-id]]]
+    (if (or (nil? group-id) (some? (get-in state [:groups group-id])))
+      {:db (assoc state :open-group-id group-id :page page-id)}
+      {:dispatch [:redirect-to-first-group]})))
 
 (reg-event-fx
   :redirect-to-first-group
