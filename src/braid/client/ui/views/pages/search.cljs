@@ -38,31 +38,34 @@
              "Try again"]]]
 
           (:done-results :loading)
-          (let [loaded-threads (reaction (vals (select-keys @threads (@page :thread-ids))))
-                sorted-threads (reaction (->> @loaded-threads ; sort-by last reply, newest first
-                                              (sort-by
-                                                (comp (partial apply max)
-                                                      (partial map :created-at)
-                                                      :messages))
-                                              reverse))]
+          (let [loaded-threads (vals (select-keys @threads (@page :thread-ids)))
+                sorted-threads (->> loaded-threads
+                                    ; sort-by last reply, newest first
+                                    (sort-by
+                                      (comp (partial apply max)
+                                            (partial map :created-at)
+                                            :messages)
+                                      #(compare %2 %1)))]
             [:div.page.search
              [:div.title (str "Search for \"" @query "\"")]
              [:div.content
               [:div.description
                (if (= status :loading)
                  "Loading more results..."
-                 (str "Displaying " (count @loaded-threads) "/" (count (@page :thread-ids))))]]
+                 (str "Displaying " (count loaded-threads) "/"
+                      (count (@page :thread-ids))))]]
              [:div.threads
-              {:ref "threads-div"
-               :on-scroll ; page in more results as the user scrolls
+              {:on-scroll ; page in more results as the user scrolls
                (fn [e]
                  (let [div (.. e -target)]
-                   (when (and (= status :done-results)
-                           (< (count @loaded-threads) (count (@page :thread-ids)))
+                   (when (and (= (.-className div) "threads")
+                           (= status :done-results)
+                           (< (count loaded-threads) (count (@page :thread-ids)))
                            (> 100 (- (.-scrollWidth div)
-                                     (+ (.-scrollLeft div) (.-offsetWidth div)))))
+                                     (+ (.-scrollLeft div) (.-offsetWidth div)))
+                              0))
                      (dispatch [:set-page-loading true])
-                     (let [already-have (set (map :id @loaded-threads))
+                     (let [already-have (set (map :id loaded-threads))
                            to-load (->> (@page :thread-ids)
                                         (remove already-have)
                                         (take 25))]
@@ -82,7 +85,7 @@
                      (set! (.-scrollLeft this-elt)
                            (- (.-scrollLeft this-elt) (.-deltaY e))))))}
               (doall
-                (for [thread @sorted-threads]
+                (for [thread sorted-threads]
                   ^{:key (:id thread)}
                   [thread-view thread]))]])
 

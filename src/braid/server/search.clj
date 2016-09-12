@@ -91,5 +91,5 @@
            (first (remove nil? [text-search tag-search])))
          (filter (comp (partial db/user-can-see-thread? user-id) first))
          ; sorting the ids so we can have a consistent order of results
-         (sort-by second)
+         (sort-by second #(compare %2 %1))
          (map first))))
