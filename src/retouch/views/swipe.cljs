@@ -28,8 +28,8 @@
            :vertical-align "top" }]]])]))
 
 (defn swipe-view [panel-items panel-view]
-  (let [state (atom {:panel-count (count panel-items)
-                     :container nil
+  (let [panel-count (r/atom (count panel-items))
+        state (atom {:container nil
                      :dragging? false
                      :scroll-x-start nil})
 
@@ -57,7 +57,7 @@
                                      (-> x
                                          (min xmax)
                                          (max xmin)))
-                             target-n (bound (+ start-n delta-n) 0 (dec (@state :panel-count)))
+                             target-n (bound (+ start-n delta-n) 0 (dec @panel-count))
                              target-x (* width target-n)]
 
                         (set! (.-scrollLeft (@state :container)) target-x)))
@@ -87,7 +87,7 @@
          (swap! state assoc :container (r/dom-node component)))
        :component-will-update
        (fn [this _]
-         (swap! state assoc :panel-count (count (first (r/children this)))))
+         (reset! panel-count (count (first (r/children this)))))
        :component-will-unmount
        (fn []
          (.removeEventListener js/document "touchend" touch-end!)
