@@ -656,3 +656,8 @@
                            [:braid.server/tag-thread {:thread-id thread-id
                                                       :tag-id tag-id}]))}
       {:db (update-in state [:temp-threads (state :open-group-id) :tag-ids] conj tag-id)})))
+
+(reg-event-fx
+  :go-to
+  (fn [_ [_ route]]
+    {:redirect-to route}))

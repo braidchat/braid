@@ -3,7 +3,7 @@
             [garden.stylesheet :refer [at-import]]
             [garden.arithmetic :as m]
             [garden.units :refer [rem vw vh em]]
-            [braid.client.mobile.styles.login-flow]
+            [braid.client.mobile.auth-flow.styles]
             [braid.client.mobile.styles.drawer]
             [braid.client.ui.styles.vars :as vars]
             [braid.client.ui.styles.header]
@@ -28,7 +28,9 @@
           :vendors ["webkit"]}
 
          braid.client.ui.styles.imports/imports
-         (braid.client.mobile.styles.login-flow/login-flow)
+
+         (braid.client.mobile.auth-flow.styles/auth-flow)
+
          (braid.client.mobile.styles.drawer/drawer pad)
 
          [:body
@@ -44,6 +46,7 @@
            :background "#CCC" }]
 
          (braid.client.ui.styles.header/group-header "2.5rem")
+
          [:.group-header
           mixins/flex
           {:justify-content "space-between"}
@@ -87,14 +90,14 @@
               (mixins/fontawesome \uf00d)]]]
 
            (braid.client.ui.styles.thread/messages pad)
+
            [:.messages
             {:flex-grow 1}
-           (braid.client.ui.styles.embed/embed pad)
-            ]
 
-           (braid.client.ui.styles.thread/new-message pad)
-           ]]
+           (braid.client.ui.styles.embed/embed pad)]
 
+           (braid.client.ui.styles.thread/new-message pad)]]
 
          braid.client.ui.styles.body/body
+
          braid.client.ui.styles.message/message)))
