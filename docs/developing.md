@@ -25,10 +25,10 @@ To run Datomic:
 
 1. In a terminal session, cd into the directory and run the transactor:
 
-```bash
-cd ~/path/to/datomic-free-0.9.5201
-bin/transactor config/samples/free-transactor-template.properties
-```
+  ```bash
+  cd ~/path/to/datomic-free-0.9.5201
+  bin/transactor config/samples/free-transactor-template.properties
+  ```
 
 You will need to keep this process running during development. You can kill the process when you're not using it and restart it using the command above.
 
@@ -47,36 +47,36 @@ To get the server running:
 
 1. Clone the braid repo (you may want to change the URL to your fork):
 
-```bash
-git clone git@github.com:braidchat/braid.git
-```
+  ```bash
+  git clone git@github.com:braidchat/braid.git
+  ```
 
 2. Go into the project directory:
 
-```bash
-cd braid
-```
+  ```bash
+  cd braid
+  ```
 
 2. Run the REPL:
 
-```bash
-lein repl
-```
+  ```bash
+  lein repl
+  ```
 
 3. Inside the REPL, start the servers:
 
-```clojure
-(dev-main 5555)
-```
+  ```clojure
+  (dev-main 5555)
+  ```
 
 This will start the API server on port 5555, the desktop client server on 5556 and the mobile client server on 5557.
 
 4. Seed some data (first time only):
 
-```clojure
-(require 'braid.server.seed)
-(braid.server.seed/seed!)
-```
+  ```clojure
+  (require 'braid.server.seed)
+  (braid.server.seed/seed!)
+  ```
 
 Don't navigate to the website just yet.
 
@@ -87,15 +87,15 @@ In a seperate terminal session:
 
 1. Navigate to the project folder:
 
-```bash
-cd ~/path/to/braid
-```
+  ```bash
+  cd ~/path/to/braid
+  ```
 
 2. Run figwheel:
 
-```bash
-lein figwheel desktop-dev
-```
+  ```bash
+  lein figwheel desktop-dev
+  ```
 
 ## ...and you're good!
 
@@ -122,13 +122,13 @@ To work on the mobile client:
 
 1. Run `figwheel` with the `mobile-dev` build:
 
-```bash
-lein figwheel mobile-dev
-```
+  ```bash
+  lein figwheel mobile-dev
+  ```
 
 2. Navigate to the Mobile Client URL:
 
-`http://localhost:5556/`
+  `http://localhost:5556/`
 
 
 ### A Better Clojurescript REPL
@@ -137,14 +137,15 @@ By default, the Clojurescript REPL that starts with figwheel doesn't support com
 
 1. Install rlwrap:
 
-```bash
-brew install rlwrap
-```
+  ```bash
+  brew install rlwrap
+  ```
 
 2. Then, to start figwheel, use:
-```bash
-rlwrap lein figwheel
-```
+
+  ```bash
+  rlwrap lein figwheel
+  ```
 
 
 ### Running Tests
@@ -210,9 +211,9 @@ On Mac:
 1. Install Homebrew by following the instructions at: [http://brew.sh/]()
 2. Use Homebrew to install Leiningen:
 
-```bash
-brew install leiningen
-```
+  ```bash
+  brew install leiningen
+  ```
 
 For other platforms, see: [https://github.com/technomancy/leiningen/wiki/Packaging]()
 
