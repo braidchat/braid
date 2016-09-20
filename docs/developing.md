@@ -4,14 +4,14 @@ The following steps should get Braid running on your computer, ready for develop
 
 If you're interested in getting Braid running in production, read: [Deploying Braid](./deploying.md)
 
-To get Braid running locally, you will need to have 3 terminal sessions open:
+To get Braid running locally, **you will need to have 3 terminal sessions open**:
 
- 1. Datomic transactor
- 2. Braid REPL and server
- 3. Figwheel (JS + CSS compile and Hot Reload)
+ 1. The Datomic Transactor (database)
+ 2. The Braid REPL and Servers
+ 3. Figwheel (JS compiler and hot-reloader)
 
 
-## Datomic
+## 1. Datomic
 
 Datomic is Braid's database. Datomic Free is fine for development, but Datomic Pro Starter is reccommended for production.
 
@@ -33,7 +33,7 @@ To run Datomic:
 You will need to keep this process running during development. You can kill the process when you're not using it and restart it using the command above.
 
 
-## Braid Back-end
+## 2. Braid Servers
 
 The Braid Back-end spins up 3 processes:
 
@@ -81,9 +81,11 @@ This will start the API server on port 5555, the desktop client server on 5556 a
 Don't navigate to the website just yet.
 
 
-## Figwheel - JS compiling and hot-reload
+## 3. Figwheel
 
-In a seperate terminal session:
+[Figwheel](https://github.com/bhauman/lein-figwheel) is used during development to compile Clojurescript to Javascript, and to hot-reload the code in the browser (ie. no need to refresh the browser when making changes).
+
+In a new terminal session:
 
 1. Navigate to the project folder:
 
@@ -99,16 +101,21 @@ In a seperate terminal session:
 
 ## ...and you're good!
 
-Open your browser to: `http://localhost:5555`
+Open `http://localhost:5555` in your browser: 
+
+```bash
+open http://localhost:5555
+```
 
 Login with:
 
-  username: `foo@example.com`
-  password: `foo`
+> username: `foo@example.com`
+>
+> password: `foo`
 
 You should see a few messages and be able to reply.
 
-If you edit a `cljs` file in the repo, it should auto-update the page in the browser (no need for refreshing).
+If you edit a `.cljs` file in the repo, it should auto-update the page in the browser (no need for refreshing).
 
 Note: currently in dev mode (the default profile), you cannot invite users or upload avatars. We're working on it.
 
@@ -126,9 +133,11 @@ To work on the mobile client:
   lein figwheel mobile-dev
   ```
 
-2. Navigate to the Mobile Client URL:
+2. Open `http://localhost:5556/` in your browser:
 
-  `http://localhost:5556/`
+  ```bash
+  open http://localhost:5556/
+  ```
 
 
 ### A Better Clojurescript REPL
@@ -150,11 +159,15 @@ By default, the Clojurescript REPL that starts with figwheel doesn't support com
 
 ### Running Tests
 
-`lein test`
+```bash
+lein test
+```
 
 Or, if you have quickie:
 
-`lein with-profile test quickie "chat.*"`
+```bash
+lein with-profile test quickie "chat.*"
+```
 
 
 ### Permgen issues?
@@ -163,8 +176,11 @@ If you're experience the error: `java.lang.OutOfMemoryError: PermGen space`
 
 Try:
 
-1. Add the following to `project.clj` or `profiles.clj`
-`:jvm-opts ["-XX:MaxPermSize=128m" "-XX:+UseConcMarkSweepGC" "-XX:+CMSClassUnloadingEnabled"]`
+1. Add the following to `project.clj` or `profiles.clj`:
+
+  ```clojure
+  :jvm-opts ["-XX:MaxPermSize=128m" "-XX:+UseConcMarkSweepGC" "-XX:+CMSClassUnloadingEnabled"]`
+  ```
 
 2. If you have lots of plugins in your lein :user profile (`~/.lein/profiles.clj`), remove some
 
@@ -199,7 +215,11 @@ To run Datomic Pro locally, you will need to:
                                       :password "PASSWORD-HERE"}}}]}
 ```
 
-Henceforth, you will need to run lein with: `lein with-profile +datomic-pro repl`
+Henceforth, you will need to run lein with the profile:
+
+  ```bash
+  lein with-profile +datomic-pro repl
+  ```
 
 
 ### Getting Started w/ Clojure
