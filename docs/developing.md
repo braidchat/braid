@@ -177,7 +177,7 @@ Various configuration options can be set via environment variables. Braid uses [
 
 An easy way to set variables during development is to create a `profiles.clj` file.
 
-See (../profiles.sample.clj)[../profiles.sample.clj] for sample profile options and instructions.
+See [../profiles.sample.clj](../profiles.sample.clj) for sample profile options and instructions.
 
 
 ### Using Datomic Pro
