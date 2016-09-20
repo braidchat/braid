@@ -1,4 +1,8 @@
-# Dev
+# Installation
+
+The following steps should get Braid running on your computer, ready for development.
+
+If you're interested in getting Braid running in production, read: [Deploying Braid](./deploying.md)
 
 To get Braid running locally, you will need to have 3 terminal sessions open:
 1 - Datomic transactor
