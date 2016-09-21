@@ -3,9 +3,7 @@
 # Braid
 
 [![Github Issues](https://img.shields.io/github/issues/braidchat/meta.svg)](https://www.github.com/braidchat/meta/issues)
-
-[![Codeship](https://img.shields.io/codeship/6f05b0f0-9e72-0133-e93b-76efcd0f79bd.svg)]
-
+![Codeship](https://img.shields.io/codeship/6f05b0f0-9e72-0133-e93b-76efcd0f79bd.svg)]
 [![Braid Chat](https://img.shields.io/badge/braid-join_chat-green.svg)](https://braid.chat/groups/braid)
 
 
