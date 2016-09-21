@@ -45,13 +45,49 @@ Over the last few years, products like HipChat and Slack have brought chat-rooms
 <table>
   <tr>
     <td>
-"Following group chat all day feels like being in an all-day meeting with random participants and no agenda" - [Jason Fried](https://m.signalvnoise.com/is-group-chat-making-you-sweat-744659addf7d#.r6gxj6zae)
+      <blockquote>
+        <p>
+          Following group chat all day feels like being in an all-day meeting with random participants and no agenda
+        </p>
+        <footer>
+          -
+          <cite>
+            <a href="https://m.signalvnoise.com/is-group-chat-making-you-sweat-744659addf7d#.r6gxj6zae">
+              Jason Fried
+            </a>
+          </cite>
+        </footer>
+      </blockquote>
     </td>
     <td>
-"Reading the firehose of team chat is, categorically, not work, but it certainly *feels* like it" - [Josh Pigford](https://twitter.com/Shpigford/status/702871877442793472?ref_src=twsrc%5Etfw)
+      <blockquote>
+        <p>
+          Reading the firehose of team chat is, categorically, not work, but it certainly *feels* like it
+        </p>
+        <footer>
+          -
+          <cite>
+            <a href="https://twitter.com/Shpigford/status/702871877442793472?ref_src=twsrc%5Etfw">
+              Josh Pigford
+            </a>
+          </cite>
+        </footer>
+      </blockquote>
     </td>
     <td>
-"Just because it’s fun to hang out at the water cooler at work, it doesn’t mean I want to work there." - [Samuel Hulick](https://medium.com/better-people/slack-i-m-breaking-up-with-you-54600ace03ea#.iu832xu1g)
+      <blockquote>
+        <p>
+          Just because it’s fun to hang out at the water cooler at work, it doesn’t mean I want to work there.
+        </p>
+        <footer>
+          -
+          <cite>
+            <a href="https://medium.com/better-people/slack-i-m-breaking-up-with-you-54600ace03ea#.iu832xu1g">
+              Samuel Hulick
+            </a>
+          </cite>
+        </footer>
+      </blockquote>
    </td>
   </tr>
 </table>
@@ -66,7 +102,7 @@ Braid started out as a weekend experiment: what if, instead of multiple rooms, y
 
 ...each conversation would stick around only for as long as it was relevant, and could be tagged to direct it to the appropriate recipients (and to help with future retrieval). We made [a quick proof-of-concept](https://www.youtube.com/watch?v=pa2bUsChFqM), and quickly realized that we were on to something.
 
-Braid has s evolved quite a bit since then, so here's how it looks now:
+Braid has evolved quite a bit since then, so here's how it looks now:
 
 [![Braid Demo Video](http://img.youtube.com/vi/pa2bUsChFqM/0.jpg)](https://www.youtube.com/watch?v=pa2bUsChFqM)
 
@@ -77,12 +113,16 @@ Well... Yes. Yes it is.
 And it's *awesome*.
 
 
-## Demo
+## Live Demo
 
 [Give Braid a Try](https://braid.chat/groups/try)
 
 
 ## Features
+
+Braid has most of the features you'd expect from other chat clients and new ones are added every week.
+
+### Already Available:
 
  - archives + search
  - drag and drop file sharing
@@ -92,10 +132,9 @@ And it's *awesome*.
  - email digests
  - rich text formatting and emoji
  - integrations support
- - ...
+ - ...and more
 
-
-## What We're Working On
+### What We're Working On
 
  - federation and E2E encryption via [Matrix](http://matrix.org/)
  - group audio/video/screen streaming
