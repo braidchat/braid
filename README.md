@@ -19,13 +19,15 @@ Our goal is to develop Braid into an *open* platform that unites all of a group'
 ![Braid Animated Screenshot](http://www.braidchat.org/images/braid-screenshot-archer.png)
 
 
-If you work in a remote and distributed team ...you'll love Braid.
+If you work in a remote and distributed team...
 
-If you hate the idea of open-offices ...you'll love Braid.
+If you hate the idea of open-offices...
 
-If you hate getting your flow disrupted by useless interruptions ...you'll love Braid.
+If you get annoyed by when your flow is disrupted...
 
-If you want to stay informed about what you're team team is up to, but still get things done ...you'll love Braid.
+If you want to stay in sync with your team, but still get things done...
+
+...you'll love Braid.
 
 
 ## Motivation
