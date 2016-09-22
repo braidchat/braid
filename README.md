@@ -50,7 +50,7 @@ Over the last few years, products like HipChat and Slack have brought chat-rooms
           Following group chat all day feels like being in an all-day meeting with random participants and no agenda
         </p>
         <footer>
-          -
+          –
           <cite>
             <a href="https://m.signalvnoise.com/is-group-chat-making-you-sweat-744659addf7d#.r6gxj6zae">
               Jason Fried
@@ -65,7 +65,7 @@ Over the last few years, products like HipChat and Slack have brought chat-rooms
           Reading the firehose of team chat is, categorically, not work, but it certainly *feels* like it
         </p>
         <footer>
-          -
+          –
           <cite>
             <a href="https://twitter.com/Shpigford/status/702871877442793472?ref_src=twsrc%5Etfw">
               Josh Pigford
@@ -80,7 +80,7 @@ Over the last few years, products like HipChat and Slack have brought chat-rooms
           Just because it’s fun to hang out at the water cooler at work, it doesn’t mean I want to work there.
         </p>
         <footer>
-          -
+          –
           <cite>
             <a href="https://medium.com/better-people/slack-i-m-breaking-up-with-you-54600ace03ea#.iu832xu1g">
               Samuel Hulick
@@ -96,7 +96,7 @@ Over the last few years, products like HipChat and Slack have brought chat-rooms
 
 ### Beyond Chatrooms & Towards Productive Group Communication
 
-Multiple factors converge to make chat-rooms so bad at fostering productive group communication (you can read [our thoughts on the matter](./docs/the-problem-of-chat-rooms.md)), but, at its core, it comes down to chat-rooms being single-threaded: each room is a linear stream of messages. The "flat vs threaded" debate is an old one, and, unfortunately, the other end of the spectrum -- full threading -- [has it's own set of problems](https://blog.codinghorror.com/web-discussions-flat-by-design/). But perhaps we can find a happy middle...
+Multiple factors converge to make chat-rooms so bad at fostering productive group communication (you can read [our thoughts on the matter](./docs/the-problem-of-chat-rooms.md)), but, at its core, it comes down to chat-rooms being single-threaded: each room is a linear stream of messages. The "flat vs threaded" debate is an old one, and, unfortunately, the other end of the spectrum – full threading – [has it's own set of problems](https://blog.codinghorror.com/web-discussions-flat-by-design/). But perhaps we can find a happy middle...
 
 Braid started out as a weekend experiment: what if, instead of multiple rooms, you had *one* place where you can have *many* *short* conversations?
 
