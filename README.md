@@ -9,7 +9,7 @@
 
 Braid is a **group chat application** that promotes *productive* team communication, while still respecting each individual's need for focus.
 
-Instead of chatrooms, Braid takes a new approach, designed around conversations and tags.
+Instead of chatrooms, Braid takes a new approach: discrete conversations and tags.
 
 Braid's design fosters conversations that stay on topic and allows for deep integrations with other services (think "1:1 sync", not just "chat bots").
 
@@ -36,7 +36,7 @@ If you want to stay in sync with your team, but still get things done...
 
 Most existing group-chat apps are based on the concept of "rooms" or "channels". Each room consists of a stream of messages, and each group typically has multiple active rooms. The general approach hasn't changed much since it's [inception in the early 70s](https://en.wikipedia.org/wiki/Chat_room).
 
-Over the last few years, products like HipChat and Slack have brought chat-rooms into our offices, with claims of "finally killing the scourge that is email!", or "being less busy", but as [many](https://m.signalvnoise.com/is-group-chat-making-you-sweat-744659addf7d#.r6gxj6zae) [have](http://www.vocativ.com/320111/slack-backlash/) [pointed](https://medium.com/better-people/slack-i-m-breaking-up-with-you-54600ace03ea#.d72qcvqqg) [out](http://motherboard.vice.com/read/were-taking-a-break-from-slack-heres-why), the situation has become worse, not better:
+Over the last few years, products like HipChat and Slack have brought chat-rooms into our offices, with claims of *"finally killing the scourge that is email!"*, or *"being less busy"*, but as [many](https://m.signalvnoise.com/is-group-chat-making-you-sweat-744659addf7d#.r6gxj6zae) [have](http://www.vocativ.com/320111/slack-backlash/) [pointed](https://medium.com/better-people/slack-i-m-breaking-up-with-you-54600ace03ea#.d72qcvqqg) [out](http://motherboard.vice.com/read/were-taking-a-break-from-slack-heres-why), the situation has become worse, not better:
 
   - chatrooms require constant checking (or else you'll miss your chance to contribute to a conversation)
   - anyone can demand your attention at any time
@@ -98,7 +98,7 @@ Over the last few years, products like HipChat and Slack have brought chat-rooms
 
 ### Beyond Chatrooms & Towards Productive Group Communication
 
-Multiple factors converge to make chat-rooms so bad at fostering productive group communication (you can read [our thoughts on the matter](./docs/the-problem-of-chat-rooms.md)), but, at its core, it comes down to chat-rooms being single-threaded: each room is a linear stream of messages. The "flat vs threaded" debate is an old one, and, unfortunately, the other end of the spectrum – full threading – [has it's own set of problems](https://blog.codinghorror.com/web-discussions-flat-by-design/). But perhaps we can find a happy middle...
+Several factors converge to make chat-rooms bad at fostering productive group communication (you can read [our thoughts on the matter](./docs/the-problem-of-chat-rooms.md)), but, at its core, it comes down to chat-rooms being single-threaded: each room is a linear stream of messages. The "flat vs threaded" debate is an old one, and, unfortunately, the other end of the spectrum – full threading – [has it's own set of problems](https://blog.codinghorror.com/web-discussions-flat-by-design/). But perhaps we can find a happy middle...
 
 Braid started out as a weekend experiment: what if, instead of multiple rooms, you had *one* place where you can have *many* *short* conversations?
 
