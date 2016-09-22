@@ -1,4 +1,4 @@
-## Background
+## History
 
 ## Genesis (July 2015 -)
 
