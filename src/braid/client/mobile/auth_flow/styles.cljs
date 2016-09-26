@@ -1,9 +1,9 @@
-(ns braid.client.mobile.styles.login-flow
+(ns braid.client.mobile.auth-flow.styles
   (:require [braid.client.ui.styles.mixins :as mixins]
             [garden.units :refer [rem vw vh em]]))
 
-(defn login-flow []
-  [:.login-flow
+(defn auth-flow []
+  [:.auth-flow
    mixins/flex
    {:background "green"
     :position "absolute"
