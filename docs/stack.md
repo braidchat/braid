@@ -2,37 +2,46 @@
 
 ## Braid Web Client (front-end)
 
-| [Clojurescript](http://clojurescript.org/)    | Language |
-| [React](https://facebook.github.io/react/)    |          |
-| [Reagent](http://reagent-project.github.io/)  |          |
-| [Re-Frame](https://github.com/Day8/re-frame)  |          |
-| [Garden](https://github.com/noprompt/garden)  | CSS      |
-| [Secretary](https://github.com/gf3/secretary) | Routing  |
-| [Figwheel](https://github.com/bhauman/lein-figwheel) | Hot Code Reload |
+. | .
+--------------------------------------------- | --------
+[Clojurescript](http://clojurescript.org/)    | Language
+[React](https://facebook.github.io/react/)    |
+[Reagent](http://reagent-project.github.io/)  |
+[Re-Frame](https://github.com/Day8/re-frame)  |
+[Garden](https://github.com/noprompt/garden)  | CSS
+[Secretary](https://github.com/gf3/secretary) | Routing
+[Figwheel](https://github.com/bhauman/lein-figwheel) | Hot Code Reload
+
 
 
 ## Braid Native Clients
 
-| [Cordova](https://cordova.apache.org/) | Mobile Client Wrapper |
-| [Electron](http://electron.atom.io/)   | Desktop Client Wrapper |
+. | .
+-------------------------------------- | --------
+[Cordova](https://cordova.apache.org/) | Mobile Client Wrapper
+[Electron](http://electron.atom.io/)   | Desktop Client Wrapper
 
 
 ## Braid Server (back-end)
 
-| [Clojure](http://clojure.org/)                        | Language             |
-| [Datomic](http://www.datomic.com/)                    | Database             |
-| [Solr](https://lucene.apache.org/solr/)               | Search               |
-| [Onyx](http://www.onyxplatform.org/)                  | Stream Processing    |
-| [HTTPKit](http://www.http-kit.org/)                   | HTTP Server          |
-| [Compojure](https://github.com/weavejester/compojure) | HTTP Routing         |
-| [Mount](https://github.com/tolitius/mount)            | App State Management |
+. | .
+----------------------------------------------------- | --------
+[Clojure](http://clojure.org/)                        | Language             
+[Datomic](http://www.datomic.com/)                    | Database             
+[Solr](https://lucene.apache.org/solr/)               | Search               
+[Onyx](http://www.onyxplatform.org/)                  | Stream Processing    
+[HTTPKit](http://www.http-kit.org/)                   | HTTP Server          
+[Compojure](https://github.com/weavejester/compojure) | HTTP Routing         
+[Mount](https://github.com/tolitius/mount)            | App State Management 
 
 
 ## In Between:
 
-| [Websockets](https://en.wikipedia.org/wiki/WebSocket)  | Client+Server Communication     |
-| [Sente](https://github.com/ptaoussanis/sente)          | Client+Server Websocket Library |
-| [Transit](https://github.com/cognitect/transit-format) | Data Format                     |
+. | .
+------------------------------------------------------ | --------
+[Websockets](https://en.wikipedia.org/wiki/WebSocket)  | Client+Server Communication     
+[Sente](https://github.com/ptaoussanis/sente)          | Client+Server Websocket Library 
+[Transit](https://github.com/cognitect/transit-format) | Data Format                     
 
 
 
@@ -116,8 +125,6 @@ https://github.com/braidchat/meta/issues/377
 
 ### Why not React Native? Or Native apps?
 
-  why not React Native, native?
+to have something useable asap (can reuse majority of client code)
 
-    to have something useable asap (can reuse majority of client code)
-
-    may reconsider in future
+may reconsider in future
