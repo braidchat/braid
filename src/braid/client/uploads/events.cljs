@@ -11,7 +11,9 @@
   (fn [{state :db :as cofx} [_ {:keys [url thread-id group-id]}]]
     {:websocket-send (list [:braid.server/create-upload
                             (make-upload {:url url :thread-id thread-id})])
-     :dispatch [:new-message {:content url :thread-id thread-id :group-id group-id}]}))
+     :dispatch [:new-message {:content url
+                              :thread-id thread-id
+                              :group-id group-id}]}))
 
 (reg-event-fx
   :get-group-uploads
