@@ -1,4 +1,4 @@
-[![Braid](./docs/braid-icon-256.png)](https://www.github.com/braidchat/braid)
+<img src="./docs/braid-icon-256.png" height="128px">
 
 # Braid
 
