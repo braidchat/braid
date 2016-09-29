@@ -1,4 +1,4 @@
-(defproject chat "0.0.1"
+(defproject braid "0.0.1"
   :source-paths ["src"]
 
   :dependencies [;server
@@ -81,7 +81,8 @@
                            :pretty-print false}}
 
                {:id "mobile-dev"
-                :figwheel {:on-jsload "braid.client.mobile.core/reload"}
+                :figwheel {:on-jsload "braid.client.mobile.core/reload"
+                           :websocket-host "192.168.1.157"}
                 :source-paths ["src/braid/client"
                                "src/retouch"]
                 :compiler {:main braid.client.mobile.core

@@ -13,6 +13,6 @@
   (.requestPermission js/Notification (fn [perm] (cb perm))))
 
 (defn notify
-  [{:keys [title msg icon] :or {title "Braid.Chat"
+  [{:keys [title msg icon] :or {title "Braid"
                                 icon "https://braid.chat/images/braid.svg"}}]
   (js/Notification. title (clj->js {:body msg :icon icon})))
