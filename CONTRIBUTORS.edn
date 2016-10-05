@@ -1,0 +1,65 @@
+; Braid Contributors
+
+; Thank you to all our contributors!
+
+; This is an edn list that loosely follows:
+; https://github.com/kentcdodds/all-contributors
+
+; Also worth checking: Github's Network Members:
+; https://github.com/braidchat/braid/network/members
+
+[
+
+  {:name "Rafal D."
+   :github "@rafd"
+   :contributions ["project inception"]
+   :tags #{:code
+           :infrastructure
+           :documentation
+           :design
+           :tests
+           :answering-questions
+           :bug-reports
+           :pr-review
+           :project-management}}
+
+  {:name "James C."
+   :github "@jamesnvc"
+   :tags #{:code
+           :plugins
+           :infrastructure
+           :tests
+           :documentation
+           :answering-questions
+           :bug-reports
+           :pr-review}}
+
+  {:name "Brandon G."
+   :github "@10plusY"
+   :contributions ["port from Om to Reagent"
+                   "webrtc integration"]
+   :tags #{:code
+           :plugins}}
+
+  {:name "Sam J."
+   :github "@sjuraschka"
+   :contributions ["client UX and UI improvements"]
+   :tags #{:code
+           :design}}
+
+  {:github "@CommonCreative"
+   :tags #{:code}}
+
+  {:name "Dominic M."
+   :github "@SevereOverfl0w"
+   :tags #{:documentation}}
+
+  {:github "@sveri"
+   :contributions [""]
+   :tags #{:documentation}}
+
+]
+
+
+
+
