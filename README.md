@@ -143,20 +143,20 @@ Braid has most of the features you'd expect from other chat clients and new ones
 Bugs, feature requests and features are tracked at https://github.com/braidchat/meta/issues
 
 
-## Getting Started
-
-To get Braid working locally, see: [Developing Braid](./docs/dev/developing.md)
-
-If you want to deploy it in production, see [Deploying Braid](./docs/dev/deploying.md)
-
-If you just want to use Braid, but not set it up yourself, you can get a hosted account at: https://www.braidchat.com
-
-
 ## Contributing
 
 There are many ways to be involved, from coding new features to helping write user guides. See our [Contributing Guide](./docs/contributing.md) for more details.
 
 Thank you to [all of our contributors](./CONTRIBUTORS.edn)!
+
+
+## Getting Started
+
+To get Braid working locally, see: [Developing Braid](./docs/dev/how-to/getting-up-and-running-in-development.md)
+
+If you want to deploy it in production, see [Deploying Braid](./docs/dev/how-to/deploying-to-production.md)
+
+If you just want to use Braid, but not set it up yourself, you can get a hosted account at: https://www.braidchat.com
 
 
 ## Repositories

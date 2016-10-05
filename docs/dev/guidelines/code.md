@@ -1,16 +1,8 @@
-
-
-
-
 ## Branching Model
 
 ## Commit Messages
 
-
-
 ## Code Organization
-
-
 
 Tests for server
 
@@ -38,9 +30,6 @@ database       datomic free   datomic pro
 session store    in-memory     redis
 search            datomic     onyx + solr
 
-## Architecture
-
-
 
 
 
@@ -49,7 +38,3 @@ search            datomic     onyx + solr
 tags
 
 threads/conversations
-
-## Design
-
-    ...when possible, use analogies (ex. to email)

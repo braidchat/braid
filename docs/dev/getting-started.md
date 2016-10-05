@@ -16,6 +16,7 @@ Clone your fork locally
 Install Packages
 
 
+[./how-to/getting-up-and-running-in-development.md](./how-to/getting-up-and-running-in-development.md)
 
 
 
