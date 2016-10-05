@@ -156,7 +156,7 @@ If you just want to use Braid, but not set it up yourself, you can get a hosted 
 
 There are many ways to be involved, from coding new features to helping write user guides. See our [Contributing Guide](./docs/contributing.md) for more details.
 
-Thank you to [all of our contributors](./docs/contributors.edn)!
+Thank you to [all of our contributors](./CONTRIBUTORS.edn)!
 
 
 ## Repositories
