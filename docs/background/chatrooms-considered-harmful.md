@@ -1,5 +1,7 @@
 # Chat-rooms Considered Harmful
 
+(in progress)
+
 
  - incredibly easy to derail a conversation (usually with a related comment that starts a new tangent)
  - ...resulting in multiple simultaneous conversations in one room
