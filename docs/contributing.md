@@ -35,6 +35,13 @@ Try to take a moment to confirm it's a new issue by searching for it in [Braid M
 
 If it's a security issue, please do not post it publicly, and instead, report it to us via email (see our [Responsible Disclosure Policy](./responsible-disclosure-policy.md).
 
+When reporting an issue, the following information helps us track it down and fix it faster:
+
+  - steps to reproduce the issue
+  - expected vs observed behaviour
+  - relevant error messages and/or screenshots
+  - possible fixes
+
 
 ### Contributing Feature Ideas
 
