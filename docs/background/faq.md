@@ -6,7 +6,7 @@ A list of question or concerns raised by folks and responses.
 
 See [Motivation](https://github.com/braidchat/meta/wiki/Motivation)
 
-First prototype was a one-day hack but we loved it; shared it with some folks, they loved it; so here we are
+First prototype was a one-day hack but we loved it; shared it with some folks, they loved it; so here we are.
 
 ...different folks have different reasons for supporting Braid, ex. couldn't find an existing app that:
 
