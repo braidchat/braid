@@ -18,7 +18,13 @@ We want to make contributing to Braid as painless as possible (and, ideally, gra
 
 We want Braid to be useful to you, so we highly value your feedback.
 
-We track bugs and feature ideas using [Github's Issues feature under the Braid Meta repo](https://github.com/braidchat/meta/issues).
+Right now, we're especially looking for feedback on:
+
+  - the first-time user experience
+  - the first-time contributor experience
+  - the first-time developer experience
+
+You can give us feedback [Braid](http://braid.chat/group/braid) or via [Github Issues](https://github.com/braidchat/meta/issues).
 
 
 ### Reporting Issues
