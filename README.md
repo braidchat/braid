@@ -101,7 +101,7 @@ Braid started out as a weekend experiment: what if, instead of multiple rooms, y
 
 Braid has evolved quite a bit since then, so here's how it looks now:
 
-[![Braid Demo Video](http://img.youtube.com/vi/pa2bUsChFqM/0.jpg)](https://www.youtube.com/watch?v=pa2bUsChFqM)
+[![Braid Demo Video](http://img.youtube.com/vi/YeH-8_PUXPk/0.jpg)](https://www.youtube.com/watch?v=YeH-8_PUXPk)
 
 You may be thinking: "Isn't this pretty much like email ...except optionally real-time ...and with integrations ...and with shared tags?"
 
