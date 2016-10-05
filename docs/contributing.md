@@ -2,7 +2,7 @@
 
 Welcome! We're super excited that you are interested in contributing to Braid.
 
-There are a lot of ways you can be involved - not just coding - and all are valuable:
+There are a lot of ways you can be involved - not just coding - and all are valuable.
 
 
 ## Say Hello
