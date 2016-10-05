@@ -10,9 +10,7 @@ Braid's design fosters conversations that stay on topic and allows for deep inte
 
 Our goal is to develop Braid into an *open* platform that unites all of a group's communication streams.
 
-
 ![Braid Animated Screenshot](http://www.braidchat.org/images/braid-screenshot-archer.png)
-
 
 If you work in a remote and distributed team...
 
