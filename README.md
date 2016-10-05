@@ -35,7 +35,7 @@ Over the last few years, products like HipChat and Slack have brought chat-rooms
   - anyone can demand your attention at any time
   - conversations frequently devolve or get off-topic
   - it's difficult to find past conversations in a stream of interwoven chatter
-  - [...and much, much, more](./docs/background/the-problem-of-chat-rooms.md)
+  - [...and much, much, more](./docs/background/chat-rooms-considered-harmful.md)
 
 <table>
   <tr>
@@ -91,7 +91,7 @@ Over the last few years, products like HipChat and Slack have brought chat-rooms
 
 ### Beyond Chatrooms & Towards Productive Group Communication
 
-Several factors converge to make chat-rooms bad at fostering productive group communication (you can read [our thoughts on the matter](./docs/background/the-problem-of-chat-rooms.md)), but, at its core, it comes down to chat-rooms being single-threaded: each room is a linear stream of messages. The "flat vs threaded" debate is an old one, and, unfortunately, the other end of the spectrum – full threading – [has it's own set of problems](https://blog.codinghorror.com/web-discussions-flat-by-design/). But perhaps we can find a happy middle...
+Several factors converge to make chat-rooms bad at fostering productive group communication (you can read [our thoughts on the matter](./docs/background/chat-rooms-considered-harmful.md)), but, at its core, it comes down to chat-rooms being single-threaded: each room is a linear stream of messages. The "flat vs threaded" debate is an old one, and, unfortunately, the other end of the spectrum – full threading – [has it's own set of problems](https://blog.codinghorror.com/web-discussions-flat-by-design/). But perhaps we can find a happy middle...
 
 Braid started out as a weekend experiment: what if, instead of multiple rooms, you had *one* place where you can have *many* *short* conversations?
 
