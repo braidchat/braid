@@ -25,5 +25,4 @@ For now, we're focusing on improving the front-end experience, so the backend we
 
 ## Why clojure + clojurescript? Why not...
 
-We know and enjoy clojure(script), so far it's been good enough.
-
+Clojure(script) is a fantastic language that lets us be more productive. [Read More](../dev/stack.md)
