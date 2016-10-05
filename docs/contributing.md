@@ -1,27 +1,3 @@
-## Best Ways to Contribute Right Now:
-
- - view and comment on ideas via [the Issues on this repo](https://github.com/braidchat/meta/issues), +1's welcome
- - join the instance we have running and play around (ask for an invite on clojurians slack -- see below)
- - give us feedback on:
-     - how we can better lead the project
-     - the user first-time experience
-     - UI / UX
- - tackle one of the [#help-wanted issues](https://github.com/braidchat/meta/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted)
-
-## Feedback Channels:
- - clojurians.slack.com #braid-chat
- - #braid tag on our braid instance
- - [GH Issues](https://github.com/braidchat/meta/issues)
-
-
-## A Little Bit More Involved:
-  - try getting a local copy running
-  - provide feedback on:
-      - the dev first-time experience
-  - ...
-
-
-
 # Contributing
 
 Welcome! We're super excited that you are interested in contributing to Braid.
