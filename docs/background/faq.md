@@ -6,7 +6,7 @@ A list of question or concerns raised by folks and responses.
 
 See [Motivation](https://github.com/braidchat/meta/wiki/Motivation)
 
-First prototype was a one-day hack but we loved it; shared it with some folks, they loved it; so here we are
+First prototype was a one-day hack but we loved it; shared it with some folks, they loved it; so here we are.
 
 ...different folks have different reasons for supporting Braid, ex. couldn't find an existing app that:
 
@@ -25,5 +25,4 @@ For now, we're focusing on improving the front-end experience, so the backend we
 
 ## Why clojure + clojurescript? Why not...
 
-We know and enjoy clojure(script), so far it's been good enough.
-
+Clojure(script) is a fantastic language that lets us be more productive. [Read More](../dev/stack.md)

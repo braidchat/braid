@@ -1,4 +1,17 @@
-# The Problem of Chat Rooms
+# Chat-rooms Considered Harmful
+
+(in progress)
+
+
+ - incredibly easy to derail a conversation (usually with a related comment that starts a new tangent)
+ - ...resulting in multiple simultaneous conversations in one room
+   - ...making things hard to follow
+   - ...and demanding your full attention (if you don't respond at the right time, that part of the conversation is gone, and answering now would derail)
+   - resulting in a mix of many intertwined and never complete discussions
+
+ - over time large rooms develop a unproductive culture, degrade to attention seeking (trolling, memes), and ostracize those hoping for productive conversations
+
+ - fear-of-missing-out -> requiring constant checking
 
 
 Other people have said it well:

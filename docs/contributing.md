@@ -1,32 +1,8 @@
-## Best Ways to Contribute Right Now:
-
- - view and comment on ideas via [the Issues on this repo](https://github.com/braidchat/meta/issues), +1's welcome
- - join the instance we have running and play around (ask for an invite on clojurians slack -- see below)
- - give us feedback on:
-     - how we can better lead the project
-     - the user first-time experience
-     - UI / UX
- - tackle one of the [#help-wanted issues](https://github.com/braidchat/meta/issues?q=is%3Aopen+is%3Aissue+label%3Ahelp-wanted)
-
-## Feedback Channels:
- - clojurians.slack.com #braid-chat
- - #braid tag on our braid instance
- - [GH Issues](https://github.com/braidchat/meta/issues)
-
-
-## A Little Bit More Involved:
-  - try getting a local copy running
-  - provide feedback on:
-      - the dev first-time experience
-  - ...
-
-
-
 # Contributing
 
 Welcome! We're super excited that you are interested in contributing to Braid.
 
-There are a lot of ways you can be involved - not just coding - and all are valuable:
+There are a lot of ways you can be involved - not just coding - and all are valuable.
 
 
 ## Say Hello
@@ -42,16 +18,29 @@ We want to make contributing to Braid as painless as possible (and, ideally, gra
 
 We want Braid to be useful to you, so we highly value your feedback.
 
-We track bugs and feature ideas using [Github's Issues feature under the Braid Meta repo](https://github.com/braidchat/meta/issues).
+Right now, we're especially looking for feedback on:
+
+  - the first-time user experience
+  - the first-time contributor experience
+  - the first-time developer experience
+
+You can give us feedback [Braid](http://braid.chat/group/braid) or via [Github Issues](https://github.com/braidchat/meta/issues).
 
 
 ### Reporting Issues
 
 Found a bug or some other issue? Let us know on [Braid](http://braid.chat/group/braid) or create an issue on [Braid Meta](https://github.com/braidchat/meta/issues).
 
-Try to take a moment to confirm it's a new issue for searching for it in [Braid Meta](https://github.com/braidchat/meta/issues).
+Try to take a moment to confirm it's a new issue by searching for it in [Braid Meta](https://github.com/braidchat/meta/issues).
 
 If it's a security issue, please do not post it publicly, and instead, report it to us via email (see our [Responsible Disclosure Policy](./responsible-disclosure-policy.md).
+
+When reporting an issue, the following information helps us track it down and fix it faster:
+
+  - steps to reproduce the issue
+  - expected vs observed behaviour
+  - relevant error messages and/or screenshots
+  - possible fixes
 
 
 ### Contributing Feature Ideas

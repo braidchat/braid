@@ -1,4 +1,4 @@
-# Installation
+# Getting Started
 
 The following steps should get Braid running on your computer, ready for development.
 
@@ -101,7 +101,7 @@ In a new terminal session:
 
 ## ...and you're good!
 
-Open `http://localhost:5555` in your browser: 
+Open `http://localhost:5555` in your browser:
 
 ```bash
 open http://localhost:5555

@@ -1,35 +1,5 @@
-# Motivation
+# Towards Productive Communication
 
-For many years, group chat on the internet was dominated by IRC, mailing lists and forums.
-
-...more recently, Slack, which is largely inspired by IRC-clients but has a much better user on-boarding and day-to-day user experience, has been gaining many users inside of companies and online communities (such as Clojurians).
-
-
-## Issue 1: Chatrooms are Counter-productive
-
- - incredibly easy to derail a conversation (usually with a related comment that starts a new tangent)
- - ...resulting in multiple simultaneous conversations in one room
-   - ...making things hard to follow
-   - ...and demanding your full attention (if you don't respond at the right time, that part of the conversation is gone, and answering now would derail)
-   - resulting in a mix of many intertwined and never complete discussions
-
- - over time large rooms develop a unproductive culture, degrade to attention seeking (trolling, memes), and ostracize those hoping for productive conversations
-
- - fear-of-missing-out -> requiring constant checking
-
-
-## Issue 2: Communication Infrastructure Should be Open
-
-- not under risk of patron removing your rights
-    (ex. Reactiflux community hitting Slack user limit and moving to Discord)
-
-- extensibility: anyone can add features
-
-
-
-## Braid Goals
-
- - encourage productive conversations
    - target audience: teams and online communities
    - allow for both real-time and async experiences
        (ie. don't demand the group's full attention just to keep the conversation on track)
