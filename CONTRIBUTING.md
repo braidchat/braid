@@ -1,1 +1,1 @@
-See (./docs/contributing.md)[./docs/contributing.md]
+See [./docs/contributing.md](./docs/contributing.md)
