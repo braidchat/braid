@@ -31,7 +31,7 @@ You can give us feedback [Braid](http://braid.chat/group/braid) or via [Github I
 
 Found a bug or some other issue? Let us know on [Braid](http://braid.chat/group/braid) or create an issue on [Braid Meta](https://github.com/braidchat/meta/issues).
 
-Try to take a moment to confirm it's a new issue for searching for it in [Braid Meta](https://github.com/braidchat/meta/issues).
+Try to take a moment to confirm it's a new issue by searching for it in [Braid Meta](https://github.com/braidchat/meta/issues).
 
 If it's a security issue, please do not post it publicly, and instead, report it to us via email (see our [Responsible Disclosure Policy](./responsible-disclosure-policy.md).
 
