@@ -243,12 +243,9 @@
                                 :message "Your URL can't end with a -"}]
                          :type [{:valid? (not (blank? :type))
                                  :message "You need to select a group type"}]}
-            tee (fn [x]
-                  (println x) x)
             valid? (fn [field]
                      (->> (validations field)
                           (map :valid?)
-                          tee
                           (every? true?)))
             messages (fn [field]
                        (->> (validations field)
