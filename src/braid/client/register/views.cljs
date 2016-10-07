@@ -94,7 +94,7 @@
 
      [:.field::after
       (input-field-mixin)
-      {:content "\"!\""
+      {:content "\"\u26a0\""
        :color invalid-color
        :border "none"
        :display "inline-block"}]]
