@@ -27,8 +27,8 @@
   [:form.register
    {:display "flex"
     :flex-direction "column"
-    :height "100vh"
-    :padding [["3rem" 0 "1.5rem"]]
+    :min-height "100vh"
+    :padding [["1.5rem" 0]]
     :box-sizing "border-box"
     :justify-content "space-around"}
 
@@ -207,7 +207,7 @@
            {:background "#f3f3f3"}]
 
           [:body
-           {:height "100vh"
+           {:min-height "100vh"
             :font-family "Open Sans"
             :max-width "23em"
             :margin "0 auto"
