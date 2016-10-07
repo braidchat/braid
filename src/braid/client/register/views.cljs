@@ -177,10 +177,12 @@
      :white-space "nowrap"
      :letter-spacing "0.05em"
      :display "inline-block"
-     :transition "background 0.25s ease-in-out"}
+     :transition "background 0.25s ease-in-out"
+     :cursor "pointer"}
 
     ["&[disabled]"
-     {:background "#ccc"}]
+     {:background "#ccc"
+      :cursor "not-allowed"}]
 
     [:&::after
      {:content "\" ▶\""}]
