@@ -288,7 +288,8 @@
            (when (and (show-status? :name) (not (valid? :name)))
              [:div.error-message (first (messages :name))])
            [:div.explanation
-            [:p "Your group's name will show up in menus and headings. It doesn't need to be formal."]]]]
+            [:p "Your group's name will show up in menus and headings."]
+            [:p "It doesn't need to be formal and can always be changed later."]]]]
 
          [:div.option.group-url
           {:class (when (show-status? :url)
