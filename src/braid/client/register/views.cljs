@@ -87,6 +87,8 @@
        {:border-left "none"
         :display "inline-block"
         :vertical-align "top"
+        :background "#f6f6f6"
+        :color "#999"
         :border-radius [[0 border-radius border-radius 0]]}
 
        [:&::after
