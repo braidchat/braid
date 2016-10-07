@@ -232,15 +232,15 @@
                     :url (string/blank? (@fields :url))
                     :type (string/blank? (@fields :type))}
             validations {:name [{:valid? (not (blank? :name))
-                                 :message "Your group needs a name"}]
+                                 :message "Your group needs a name."}]
                          :url [{:valid? (not (blank? :url))
-                                :message "Your group needs a URL"}
+                                :message "Your group needs a URL."}
                                {:valid? (boolean (re-matches #"[a-z0-9-]*" (@fields :url)))
-                                :message "Your URL can only contain lowercase letters, numbers or dashes"}
+                                :message "Your URL can only contain lowercase letters, numbers or dashes."}
                                {:valid? (not (re-matches #"-.*" (@fields :url)))
-                                :message "Your URL can't start with a -"}
+                                :message "Your URL can't start with a dash."}
                                {:valid? (not (re-matches #".*-" (@fields :url)))
-                                :message "Your URL can't end with a -"}]
+                                :message "Your URL can't end with a dash."}]
                          :type [{:valid? (not (blank? :type))
                                  :message "You need to select a group type"}]}
             valid? (fn [field]
