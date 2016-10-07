@@ -1,7 +1,9 @@
 (ns braid.client.register.views
   (:require
+    [reagent.core :as r]
     [garden.core :refer [css]]
-    [garden.stylesheet :refer [at-import]]))
+    [garden.stylesheet :refer [at-import]]
+    [clojure.string :as string]))
 
 (def braid-color "#2bb8ba")
 
@@ -126,7 +128,11 @@
      :text-transform "uppercase"
      :white-space "nowrap"
      :letter-spacing "0.05em"
-     :display "inline-block"}
+     :display "inline-block"
+     :transition "background 0.25s ease-in-out"}
+
+    ["&[disabled]"
+     {:background "#ccc"}]
 
     [:&::after
      {:content "\" ▶\""}]
@@ -148,6 +154,7 @@
            :vendors ["webkit"]}
 
           (at-import "https://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,700")
+
           [:html
            {:background "#f3f3f3"}]
 
@@ -158,8 +165,7 @@
             :margin "0 auto"
             :line-height 1.5
             :background "white"
-            :padding [[0 "5rem"]]
-            }]
+            :padding [[0 "5rem"]]}]
 
           (form-styles))}}])
 
@@ -167,47 +173,78 @@
   [:h1 "Braid"])
 
 (defn form-view []
-  [:form.register
-   [header-view]
+  (let [fields (r/atom {:name nil
+                        :url nil
+                        :type nil})]
+    (fn []
+      (let [name-valid? (not (string/blank? (@fields :name)))
+            url-valid? (not (string/blank? (@fields :url)))
+            type-valid? (not (string/blank? (@fields :type)))
+            valid? (and
+                     name-valid?
+                     url-valid?
+                     type-valid?)]
+        (println valid?)
+        [:form.register
+         [header-view]
 
-   [:div.option.group-name
-    [:label
-     [:h2 "Group Name"]
-     [:input {:type "text"
-              ;:value "" ; TODO guess from email
-              :placeholder "Team Awesome"
-              :auto-focus true}]
-     [:div.explanation
-      [:p "Your group's name will show up in menus and headings. It doesn't need to be formal."]]]]
+         [:div.option.group-name
+          [:label
+           [:h2 "Group Name"]
+           [:input {:type "text"
+                    :placeholder "Team Awesome"
+                    :auto-focus true
+                    :value (@fields :name) ; TODO guess from email
+                    :on-change (fn [e]
+                                 (let [value (.. e -target -value)]
+                                   (swap! fields assoc :name value)))}]
+           [:div.explanation
+            [:p "Your group's name will show up in menus and headings. It doesn't need to be formal."]]]]
 
-   [:div.option.group-url
-    [:label
-     [:h2 "Group URL"]
-     [:div.domain
-      [:input {:type "text"
-              ;:value "" ; TODO guess from email
-               :placeholder "awesome"}]
-      [:span ".braid.chat"]]
-     [:div.explanation
-      [:p "Pick something short and recognizeable."]
-      [:p "Lowercase letters, numbers and dashes only."]]]]
+         [:div.option.group-url
+          [:label
+           [:h2 "Group URL"]
+           [:div.domain
+            [:input {:type "text"
+                     :placeholder "awesome"
+                     :value (@fields :url) ; TODO guess from email
+                     :on-change (fn [e]
+                                  (let [value (.. e -target -value)]
+                                    (swap! fields assoc :url value)))}]
+            [:span ".braid.chat"]]
+           [:div.explanation
+            [:p "Pick something short and recognizeable."]
+            [:p "Lowercase letters, numbers and dashes only."]]]]
 
-   [:div.option.group-type
-    [:h2 "Group Type"]
-    [:label
-     [:input {:type "radio" :name "type"}]
-     [:span "Public Group"]
-     [:div.explanation
-      [:p "Anyone can find and join your group through the Braid Group Directory."]
-      [:p "Unlimited everything. Free forever."]]]
-    [:label
-     [:input {:type "radio" :name "type" :default-checked true}]
-     [:span "Private Group"]
-     [:div.explanation
-      [:p "Invite-only and hidden from the Braid Group Directory."]
-      [:p "Free to evaluate, then pay-what-you-want."]]]]
+         [:div.option.group-type
+          [:h2 "Group Type"]
+          [:label
+           [:input {:type "radio"
+                    :name "type"
+                    :value "public"
+                    :checked (when (= "public" (@fields :type)))
+                    :on-click (fn [e]
+                                (let [value (.. e -target -value)]
+                                  (swap! fields assoc :type value)))}]
+           [:span "Public Group"]
+           [:div.explanation
+            [:p "Anyone can find and join your group through the Braid Group Directory."]
+            [:p "Unlimited everything. Free forever."]]]
+          [:label
+           [:input {:type "radio"
+                    :name "type"
+                    :value "private"
+                    :checked (when (= "private" (@fields :type)))
+                    :on-click (fn [e]
+                                (let [value (.. e -target -value)]
+                                  (swap! fields assoc :type value)))}]
+           [:span "Private Group"]
+           [:div.explanation
+            [:p "Invite-only and hidden from the Braid Group Directory."]
+            [:p "Free to evaluate, then pay-what-you-want."]]]]
 
-   [:button "Create your group"]])
+         [:button {:disabled (not valid?)}
+          "Create your group"]]))))
 
 (defn app-view []
   [:div.app
