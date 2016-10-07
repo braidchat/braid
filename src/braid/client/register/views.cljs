@@ -3,12 +3,17 @@
     [reagent.core :as r]
     [garden.core :refer [css]]
     [garden.stylesheet :refer [at-import]]
-    [clojure.string :as string]))
+    [clojure.string :as string])
+  (:import
+    [goog.events KeyCodes]))
 
 (def braid-color "#2bb8ba")
 
 (def small-spacing "0.5rem")
 (def border-radius "3px")
+
+(def invalid-color "#fd4734")
+(def valid-color "#2bb8ba")
 
 (defn input-field-mixin []
   {:font-size "1.25rem"
@@ -46,7 +51,8 @@
       :background-size "contain"}]]
 
    [:.option
-    {:margin [[small-spacing 0]]}
+    {:margin [[small-spacing 0]]
+     :position "relative"}
 
     [:h2
      {:font-size "1em"
@@ -55,10 +61,19 @@
     [:.explanation
      {:color "#999"
       :font-size "0.75em"
-      :margin [[small-spacing 0 0 0]]}]
+      :margin [[small-spacing 0 0 0]]}
 
-    [:p
-     {:margin "0"}]
+     [:p
+      {:margin "0"}]]
+
+    [:.error-message
+     {:position "absolute"
+      :top 0
+      :right 0
+      :text-align "right"
+      :line-height "1.5rem"
+      :font-size "0.75em"
+      :color invalid-color}]
 
     [:label
      {:display "block"}
@@ -73,9 +88,28 @@
      ["::-webkit-input-placeholder"
       {:color "#eee"}]]
 
+    [:&.invalid
+     ["input[type=text]"
+      {:border-color invalid-color}]
+
+     [:.field::after
+      (input-field-mixin)
+      {:content "\"!\""
+       :color invalid-color
+       :border "none"
+       :display "inline-block"}]]
+
+    [:&.valid
+     [:.field::after
+      (input-field-mixin)
+      {:content "\"\u2713\""
+       :color valid-color
+       :border "none"
+       :display "inline-block"}]]
+
     [:&.group-url
 
-     [:.domain
+     [:.field
       {:white-space "nowrap"}
 
       ["input[type=text]"
@@ -104,7 +138,20 @@
       {:margin [[small-spacing 0]]
        :border "1px solid #eee"
        :padding [["0.75rem" "1rem" "1.0rem"]]
-       :border-radius border-radius}
+       :border-radius border-radius
+       :position "relative"}
+
+      [:&.checked
+       [:&::after
+        (input-field-mixin)
+        {:content "\"\u2713\""
+         :color valid-color
+         :position "absolute"
+         :right "-2em"
+         :top "50%"
+         :margin-top "-1em"
+         :border "none"
+         :display "inline-block"}]]
 
       [:span
        {:display "inline-block"
@@ -114,6 +161,7 @@
       [:.explanation
        {:margin-left "1.5rem"
         :margin-top "0.25em"}
+
        [:p
         {:display "inline"
          :margin-right "0.25em"}]]]]]
@@ -173,56 +221,123 @@
   [:h1 "Braid"])
 
 (defn form-view []
-  (let [fields (r/atom {:name nil
-                        :url nil
-                        :type nil})]
+  (let [fields (r/atom {:name ""
+                        :url ""
+                        :type ""})
+        focused? (r/atom {:name nil
+                          :url nil
+                          :type nil})]
     (fn []
-      (let [name-valid? (not (string/blank? (@fields :name)))
-            url-valid? (not (string/blank? (@fields :url)))
-            type-valid? (not (string/blank? (@fields :type)))
-            valid? (and
-                     name-valid?
-                     url-valid?
-                     type-valid?)]
-        (println valid?)
+      (let [blank? {:name (string/blank? (@fields :name))
+                    :url (string/blank? (@fields :url))
+                    :type (string/blank? (@fields :type))}
+            validations {:name [{:valid? (not (blank? :name))
+                                 :message "Your group needs a name"}]
+                         :url [{:valid? (not (blank? :url))
+                                :message "Your group needs a URL"}
+                               {:valid? (boolean (re-matches #"[a-z0-9-]*" (@fields :url)))
+                                :message "Your URL can only contain lowercase letters, numbers or dashes"}
+                               {:valid? (not (re-matches #"-.*" (@fields :url)))
+                                :message "Your URL can't start with a -"}
+                               {:valid? (not (re-matches #".*-" (@fields :url)))
+                                :message "Your URL can't end with a -"}]
+                         :type [{:valid? (not (blank? :type))
+                                 :message "You need to select a group type"}]}
+            tee (fn [x]
+                  (println x) x)
+            valid? (fn [field]
+                     (->> (validations field)
+                          (map :valid?)
+                          tee
+                          (every? true?)))
+            messages (fn [field]
+                       (->> (validations field)
+                            (remove :valid?)
+                            (map :message)))
+            _ (println (valid? :url))
+            show-status? {:name (and
+                                  (not (@focused? :name))
+                                  (not (blank? :name)))
+                          :url (and
+                                 (not (@focused? :url))
+                                 (not (blank? :url)))
+                          :type (and
+                                  (not (@focused? :type))
+                                  (not (blank? :type)))}
+            all-valid? (and (valid? :name) (valid? :url) (valid? :type))]
         [:form.register
          [header-view]
 
          [:div.option.group-name
+          {:class (when (show-status? :name)
+                    (if (valid? :name)
+                      "valid" "invalid"))}
           [:label
            [:h2 "Group Name"]
-           [:input {:type "text"
-                    :placeholder "Team Awesome"
-                    :auto-focus true
-                    :value (@fields :name) ; TODO guess from email
-                    :on-change (fn [e]
-                                 (let [value (.. e -target -value)]
-                                   (swap! fields assoc :name value)))}]
+           [:div.field
+            [:input {:type "text"
+                     :placeholder "Team Awesome"
+                     :auto-focus true
+                     :value (@fields :name) ; TODO guess from email
+                     :on-focus (fn [_]
+                                 (swap! focused? assoc :name true))
+                     :on-blur (fn [_]
+                                (swap! focused? assoc :name false))
+                     :on-change (fn [e]
+                                  (let [value (.. e -target -value)]
+                                    (swap! fields assoc :name value)))}]]
+           (when (and (show-status? :name) (not (valid? :name)))
+             [:div.error-message (first (messages :name))])
            [:div.explanation
             [:p "Your group's name will show up in menus and headings. It doesn't need to be formal."]]]]
 
          [:div.option.group-url
+          {:class (when (show-status? :url)
+                    (if (valid? :url)
+                      "valid" "invalid"))}
           [:label
            [:h2 "Group URL"]
-           [:div.domain
+           [:div.field
             [:input {:type "text"
                      :placeholder "awesome"
+                     :autocomplete false
+                     :autocorrect false
+                     :autocapitalize false
+                     :spellcheck false
                      :value (@fields :url) ; TODO guess from email
+                     :on-focus (fn [_]
+                                 (swap! focused? assoc :url true))
+                     :on-blur (fn [_]
+                                (swap! focused? assoc :url false))
+                     :on-key-down (fn [e]
+                                    (when (and
+                                            (not (contains? #{KeyCodes.LEFT KeyCodes.RIGHT
+                                                              KeyCodes.UP KeyCodes.DOWN
+                                                              KeyCodes.TAB KeyCodes.BACKSPACE}
+                                                            (.. e -keyCode)))
+                                            (not (re-matches #"[a-z0-9-]" (.. e -key))))
+                                      (.preventDefault e)))
                      :on-change (fn [e]
                                   (let [value (.. e -target -value)]
                                     (swap! fields assoc :url value)))}]
             [:span ".braid.chat"]]
+           (when (and (show-status? :url) (not (valid? :url)))
+             [:div.error-message (first (messages :url))])
            [:div.explanation
             [:p "Pick something short and recognizeable."]
             [:p "Lowercase letters, numbers and dashes only."]]]]
 
          [:div.option.group-type
           [:h2 "Group Type"]
-          [:label
+          [:label {:class (when (= "public" (@fields :type)) "checked")}
            [:input {:type "radio"
                     :name "type"
                     :value "public"
                     :checked (when (= "public" (@fields :type)))
+                    :on-focus (fn [_]
+                                (swap! focused? assoc :type true))
+                    :on-blur (fn [_]
+                               (swap! focused? assoc :type false))
                     :on-click (fn [e]
                                 (let [value (.. e -target -value)]
                                   (swap! fields assoc :type value)))}]
@@ -230,11 +345,15 @@
            [:div.explanation
             [:p "Anyone can find and join your group through the Braid Group Directory."]
             [:p "Unlimited everything. Free forever."]]]
-          [:label
+          [:label {:class (when (= "private" (@fields :type)) "checked")}
            [:input {:type "radio"
                     :name "type"
                     :value "private"
                     :checked (when (= "private" (@fields :type)))
+                    :on-focus (fn [_]
+                                (swap! focused? assoc :type true))
+                    :on-blur (fn [_]
+                               (swap! focused? assoc :type false))
                     :on-click (fn [e]
                                 (let [value (.. e -target -value)]
                                   (swap! fields assoc :type value)))}]
@@ -243,7 +362,7 @@
             [:p "Invite-only and hidden from the Braid Group Directory."]
             [:p "Free to evaluate, then pay-what-you-want."]]]]
 
-         [:button {:disabled (not valid?)}
+         [:button {:disabled (not all-valid?)}
           "Create your group"]]))))
 
 (defn app-view []
