@@ -99,7 +99,16 @@
                            :output-to "resources/public/js/mobile/out/braid.js"
                            :output-dir "resources/public/js/mobile/out_prod"
                            :optimizations :advanced
-                           :pretty-print false}}]}
+                           :pretty-print false}}
+
+               {:id "register-dev"
+                :figwheel {:on-jsload "braid.client.register.core/reload"}
+                :source-paths ["src/braid/client"]
+                :compiler {:main braid.client.register.core
+                           :asset-path "/js/register/out"
+                           :output-to "resources/public/js/register/out/braid.js"
+                           :output-dir "resources/public/js/register/out"
+                           :verbose true}}]}
 
   :min-lein-version "2.5.0"
 

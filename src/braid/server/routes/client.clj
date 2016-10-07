@@ -67,6 +67,9 @@
       (github/build-authorize-link {:register? true
                                     :group-id (java.util.UUID/fromString group)})}})
 
+  (GET "/register" []
+    (get-html "register"))
+
   ; everything else
   (GET "/*" []
     (get-html "desktop")))
