@@ -129,7 +129,10 @@
         type-valid? (subscribe [:register/field-valid? :type])]
     (fn []
       (let [all-valid? (and @name-valid? @url-valid? @type-valid?)]
-        [:button {:disabled (not all-valid?)}
+        [:button {:class (when (not all-valid?) "disabled")
+                  :on-click (fn [e]
+                              (.preventDefault e)
+                              (dispatch [:touch-all-fields]))}
          "Create your group"]))))
 
 (defn form-view []

@@ -194,7 +194,7 @@
      :transition "background 0.25s ease-in-out"
      :cursor "pointer"}
 
-    ["&[disabled]"
+    [:&.disabled
      {:background "#ccc"
       :cursor "not-allowed"}]
 

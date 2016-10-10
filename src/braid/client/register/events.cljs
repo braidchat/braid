@@ -123,6 +123,13 @@
       (-> state
           (update-in [:fields field :validations-left] dec)))))
 
+(reg-event-db
+  :touch-all-fields
+  (fn [state _]
+    (update state :fields (fn [fields]
+                            (reduce (fn [memo [k v]]
+                                      (assoc memo k (assoc v :untouched? false))) {}  fields)))))
+
 (reg-event-fx
   :validate-field
   (fn [{state :db} [_ field]]
