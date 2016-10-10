@@ -69,6 +69,8 @@
                   :autocapitalize false
                   :spellcheck false
                   :value @value
+                  :on-focus (fn [_]
+                              (dispatch [:guess-group-url]))
                   :on-blur (fn [_]
                              (dispatch [:blur :url]))
                   :on-key-down (fn [e]

@@ -100,8 +100,30 @@
 (reg-event-fx
   :stop-typing
   (fn [{state :db} [_ field]]
-    {:db (assoc-in state [:fields field :typing?] false)
-     :dispatch [:validate-field field]}))
+    (when (get-in state [:fields field :typing?])
+      {:db (assoc-in state [:fields field :typing?] false)
+       :dispatch [:validate-field field]})))
+
+
+(defn slugify [text]
+  (when text
+    (-> text
+        string/trim
+        string/lower-case
+        (string/replace #"[ -+|,/?%#&\.\!:$'@]*" ""))))
+
+(reg-event-fx
+  :guess-group-url
+  (fn [{state :db} _]
+    (let [group-name (get-in state [:fields :name :value])
+          group-url (get-in state [:fields :url :value])]
+      {:db (if (string/blank? group-url)
+             (-> state
+                 (assoc-in [:fields :url :value] (slugify group-name))
+                 (assoc-in [:fields :url :untouched?] false))
+             state)
+       :dispatch-n [[:clear-errors :url]
+                    [:validate-field :url]]})))
 
 (reg-event-fx
   :update-value
