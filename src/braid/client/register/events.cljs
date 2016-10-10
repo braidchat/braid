@@ -69,16 +69,16 @@
   (fn [state [_ field]]
     (assoc-in state [:fields field :focused?] true)))
 
-(reg-event-fx
-  :blur
-  (fn [{state :db} [_ field]]
-    {:db (assoc-in state [:fields field :focused?] false)
-     :dispatch [:validate-field field]}))
-
 (reg-event-db
+  :blur
+  (fn [state [_ field]]
+    (assoc-in state [:fields field :focused?] false)))
+
+(reg-event-fx
   :update-value
-  (fn [state [_ field value]]
-    (assoc-in state [:fields field :value] value)))
+  (fn [{state :db} [_ field value]]
+    {:db (assoc-in state [:fields field :value] value)
+     :dispatch [:validate-field field]}))
 
 (reg-event-db
   :update-field-status
