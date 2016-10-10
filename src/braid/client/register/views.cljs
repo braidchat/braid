@@ -28,15 +28,12 @@
   [:h1 "Braid"])
 
 (defn group-name-field-view []
-  (let [valid? (subscribe [:register/field-valid? :name])
-        value (subscribe [:register/field-value :name])
-        show-status? (subscribe [:register/field-show-status? :name])
+  (let [value (subscribe [:register/field-value :name])
+        status (subscribe [:register/field-status :name])
         errors (subscribe [:register/field-errors :name])]
     (fn []
       [:div.option.group-name
-       {:class (when @show-status?
-                 (if @valid?
-                   "valid" "invalid"))}
+       {:class (name @status)}
        [:label
         [:h2 "Group Name"]
         [:div.field
@@ -51,22 +48,19 @@
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
                                  (dispatch [:update-value :name value])))}]]
-        (when (and @show-status? (not @valid?))
+        (when (= :invalid @status)
           [:div.error-message (first @errors)])
         [:div.explanation
          [:p "Your group's name will show up in menus and headings."]
          [:p "It doesn't need to be formal and can always be changed later."]]]])))
 
 (defn group-url-field-view []
-  (let [valid? (subscribe [:register/field-valid? :url])
-        value (subscribe [:register/field-value :url])
-        show-status? (subscribe [:register/field-show-status? :url])
+  (let [value (subscribe [:register/field-value :url])
+        status (subscribe [:register/field-status :url])
         errors (subscribe [:register/field-errors :url])]
     (fn []
       [:div.option.group-url
-       {:class (when @show-status?
-                 (if @valid?
-                   "valid" "invalid"))}
+       {:class (name @status)}
        [:label
         [:h2 "Group URL"]
         [:div.field
@@ -93,17 +87,14 @@
                                (let [value (.. e -target -value)]
                                  (dispatch [:update-value :url value])))}]
          [:span ".braid.chat"]]
-        (when (and @show-status? (not @valid?))
+        (when (= :invalid @status)
           [:div.error-message (first @errors)])
         [:div.explanation
          [:p "Pick something short and recognizeable."]
          [:p "Lowercase letters, numbers and dashes only."]]]])))
 
 (defn group-type-field-view []
-  (let [valid? (subscribe [:register/field-valid? :type])
-        value (subscribe [:register/field-value :type])
-        show-status? (subscribe [:register/field-show-status? :type])
-        errors (subscribe [:register/field-errors :type])]
+  (let [value (subscribe [:register/field-value :type])]
     (fn []
       [:div.option.group-type
        [:h2 "Group Type"]

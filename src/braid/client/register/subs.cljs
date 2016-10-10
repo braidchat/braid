@@ -19,10 +19,13 @@
     (get-in state [:fields field :errors])))
 
 (reg-sub
-  :register/field-show-status?
+  :register/field-status
   (fn [state [_ field]]
-    (and
-      (not (get-in state [:fields field :focused?]))
-      (not (string/blank? (get-in state [:fields field :value]))))))
+    (cond
+      (get-in state [:fields field :focused?]) :focused
+      (< 0 (get-in state [:fields field :validations-left])) :loading
+      (string/blank? (get-in state [:fields field :value])) :blank
+      (not (empty? (get-in state [:fields field :errors]))) :invalid
+      :else :valid)))
 
 
