@@ -78,6 +78,7 @@
                      (assoc memo field
                        {:value ""
                         :typing false
+                        :untouched? true
                         :validations-left 0
                         :errors []}))
                    {} fields))
@@ -85,10 +86,11 @@
 
 (reg-event-fx
   :blur
-  (fn [_ [_ field]]
-    ; use dispatch-debounce
-    ; to cancel possible other identical debounced dispatch
-    {:dispatch-debounce [field [:stop-typing field] 0]}))
+  (fn [{state :db} [_ field]]
+    {:db (assoc-in state [:fields field :untouched?] false)
+     ; use dispatch-debounce
+     ; to cancel possible other identical debounced dispatch
+     :dispatch-debounce [field [:stop-typing field] 0]}))
 
 (reg-event-db
   :clear-errors
@@ -106,7 +108,8 @@
   (fn [{state :db} [_ field value]]
     {:db (-> state
              (assoc-in [:fields field :value] value)
-             (assoc-in [:fields field :typing?] true))
+             (assoc-in [:fields field :typing?] true)
+             (assoc-in [:fields field :untouched?] false))
      :dispatch [:clear-errors field]
      :dispatch-debounce [field [:stop-typing field] 500]}))
 
