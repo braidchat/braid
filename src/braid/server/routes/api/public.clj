@@ -1,19 +1,15 @@
-(ns braid.server.routes.api
+(ns braid.server.routes.api.public
   (:require [clojure.string :as string]
             [compojure.core :refer [GET POST defroutes]]
             [compojure.coercions :refer [as-uuid]]
-            [clojure.java.io :as io]
             [braid.common.util :refer [valid-nickname?]]
             [braid.server.db :as db]
             [braid.server.invite :as invites]
             [braid.server.identicons :as identicons]
             [braid.server.crypto :refer [random-nonce]]
             [braid.server.sync :as sync]
-            [braid.server.s3 :as s3]
-            [braid.server.api.embedly :as embedly]
             [braid.server.api.github :as github]
-            [braid.server.conf :refer [config]]
-            [braid.server.markdown :refer [markdown->hiccup]]))
+            [braid.server.conf :refer [config]]))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
@@ -248,28 +244,3 @@
         {:status 400
          :body "Couldn't exchange token with github"})))
 
-(defroutes api-private-routes
-  (GET "/changelog" []
-    (edn-response {:braid/ok
-                   (-> (io/resource "CHANGELOG.md")
-                       slurp markdown->hiccup)}))
-
-  (GET "/extract" [url :as {ses :session}]
-    (if (some? (db/user-by-id (:user-id ses)))
-      (edn-response (embedly/extract url))
-      {:status 403
-       :headers {"Content-Type" "application/edn"}
-       :body (pr-str {:error "Unauthorized"})}))
-
-  (GET "/s3-policy" req
-    (if (some? (db/user-by-id (get-in req [:session :user-id])))
-      (if-let [policy (s3/generate-policy)]
-        {:status 200
-         :headers {"Content-Type" "application/edn"}
-         :body (pr-str policy)}
-        {:status 500
-         :headers {"Content-Type" "application/edn"}
-         :body (pr-str {:error "No S3 secret for upload"})})
-      {:status 403
-       :headers {"Content-Type" "application/edn"}
-       :body (pr-str {:error "Unauthorized"})})))
