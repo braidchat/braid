@@ -178,7 +178,23 @@
 
        [:p
         {:display "inline"
-         :margin-right "0.25em"}]]]]]
+         :margin-right "0.25em"}]]]
+
+     [:&.invalid
+
+      [:label
+       {:border-color invalid-color}]
+
+      [:.error-message::after
+       (input-field-mixin)
+       {:content "\"\u26a0\""
+        :color invalid-color
+        :position "absolute"
+        :right "-2em"
+        :top "50%"
+        :margin-top "-1em"
+        :border "none"
+        :display "inline-block"}]]]]
 
    [:button
     {:font-size "1.25em"

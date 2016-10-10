@@ -90,10 +90,15 @@
          [:p "Lowercase letters, numbers and dashes only."]]]])))
 
 (defn group-type-field-view []
-  (let [value (subscribe [:register/field-value :type])]
+  (let [value (subscribe [:register/field-value :type])
+        status (subscribe [:register/field-status :type])
+        errors (subscribe [:register/field-errors :type])]
     (fn []
       [:div.option.group-type
+       {:class (name @status)}
        [:h2 "Group Type"]
+       (when (= :invalid @status)
+         [:div.error-message (first @errors)])
        [:label {:class (when (= "public" @value) "checked")}
         [:input {:type "radio"
                  :name "type"

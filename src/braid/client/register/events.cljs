@@ -41,7 +41,7 @@
                            (cb "Your group URL is already taken; try another.")))}))]
    :type [(fn [type cb]
             (when (string/blank? type)
-              (cb "You need to select a group type")
+              (cb "You need to select a group type.")
               (cb nil)))]})
 
 (defonce timeouts
