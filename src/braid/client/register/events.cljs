@@ -166,3 +166,9 @@
     {:validate-n (for [field fields]
                    [field (get-in state [:fields field :value])])}))
 
+(reg-event-fx
+  :submit-form
+  (fn [{state :db} _]
+    (if-let [all-valid? (every? true? (map (fn [[_ v]] (empty? (v :errors))) (state :fields)))]
+      {} ; TODO submit data via ajax
+      {:dispatch [:touch-all-fields]})))

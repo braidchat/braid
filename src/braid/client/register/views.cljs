@@ -139,7 +139,7 @@
         [:button {:class (when (not all-valid?) "disabled")
                   :on-click (fn [e]
                               (.preventDefault e)
-                              (dispatch [:touch-all-fields]))}
+                              (dispatch [:submit-form]))}
          "Create your group"]))))
 
 (defn form-view []
