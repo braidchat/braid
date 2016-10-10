@@ -2,6 +2,8 @@
   (:require
     [reagent.core :as r]
     [re-frame.core :refer [dispatch-sync dispatch]]
+    [braid.client.register.events]
+    [braid.client.register.subs]
     [braid.client.register.views :refer [app-view]]))
 
 (enable-console-print!)
