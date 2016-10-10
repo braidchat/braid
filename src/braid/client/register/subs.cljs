@@ -22,7 +22,7 @@
   :register/field-status
   (fn [state [_ field]]
     (cond
-      (get-in state [:fields field :focused?]) :focused
+      (get-in state [:fields field :typing?]) :typing
       (string/blank? (get-in state [:fields field :value])) :blank
       (not (empty? (get-in state [:fields field :errors]))) :invalid
       (< 0 (get-in state [:fields field :validations-left])) :loading

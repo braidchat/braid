@@ -44,6 +44,23 @@
               (cb "You need to select a group type")
               (cb nil)))]})
 
+(defonce timeouts
+  (atom {}))
+
+(reg-fx :dispatch-debounce
+        (fn [[id event-vec n]]
+          (js/clearTimeout (@timeouts id))
+          (swap! timeouts assoc id
+                 (js/setTimeout (fn []
+                                  (dispatch event-vec)
+                                  (swap! timeouts dissoc id))
+                                n))))
+
+(reg-fx :stop-debounce
+        (fn [id]
+          (js/clearTimeout (@timeouts id))
+          (swap! timeouts dissoc id)))
+
 (reg-fx :validate-n
   (fn [to-validate]
     (doseq [[field field-value] to-validate]
@@ -60,27 +77,38 @@
            (reduce (fn [memo field]
                      (assoc memo field
                        {:value ""
-                        :focused? nil
+                        :typing false
                         :validations-left 0
                         :errors []}))
                    {} fields))
      :dispatch [:validate-all]}))
 
-(reg-event-db
-  :focus
-  (fn [state [_ field]]
-    (assoc-in state [:fields field :focused?] true)))
+(reg-event-fx
+  :blur
+  (fn [_ [_ field]]
+    ; use dispatch-debounce
+    ; to cancel possible other identical debounced dispatch
+    {:dispatch-debounce [field [:stop-typing field] 0]}))
 
 (reg-event-db
-  :blur
+  :clear-errors
   (fn [state [_ field]]
-    (assoc-in state [:fields field :focused?] false)))
+    (assoc-in state [:fields field :errors] [])))
+
+(reg-event-fx
+  :stop-typing
+  (fn [{state :db} [_ field]]
+    {:db (assoc-in state [:fields field :typing?] false)
+     :dispatch [:validate-field field]}))
 
 (reg-event-fx
   :update-value
   (fn [{state :db} [_ field value]]
-    {:db (assoc-in state [:fields field :value] value)
-     :dispatch [:validate-field field]}))
+    {:db (-> state
+             (assoc-in [:fields field :value] value)
+             (assoc-in [:fields field :typing?] true))
+     :dispatch [:clear-errors field]
+     :dispatch-debounce [field [:stop-typing field] 500]}))
 
 (reg-event-db
   :update-field-status
@@ -97,9 +125,7 @@
   (fn [{state :db} [_ field]]
     (let [validator-fns (validations field)
           field-value (get-in state [:fields field :value])]
-      {:db (-> state
-               (assoc-in [:fields field :errors] [])
-               (assoc-in [:fields field :validations-left] (count validator-fns)))
+      {:db (assoc-in state [:fields field :validations-left] (count validator-fns))
        :validate-n [[field field-value]]})))
 
 (reg-event-fx

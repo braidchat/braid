@@ -41,8 +41,6 @@
                   :placeholder "Team Awesome"
                   :auto-focus true
                   :value @value
-                  :on-focus (fn [_]
-                              (dispatch [:focus :name]))
                   :on-blur (fn [_]
                              (dispatch [:blur :name]))
                   :on-change (fn [e]
@@ -71,8 +69,6 @@
                   :autocapitalize false
                   :spellcheck false
                   :value @value
-                  :on-focus (fn [_]
-                              (dispatch [:focus :url]))
                   :on-blur (fn [_]
                              (dispatch [:blur :url]))
                   :on-key-down (fn [e]
@@ -103,8 +99,6 @@
                  :name "type"
                  :value "public"
                  :checked (when (= "public" @value))
-                 :on-focus (fn [_]
-                             (dispatch [:focus :type]))
                  :on-blur (fn [_]
                             (dispatch [:blur :type]))
                  :on-click (fn [e]
@@ -119,8 +113,6 @@
                  :name "type"
                  :value "private"
                  :checked (when (= "private" @value))
-                 :on-focus (fn [_]
-                             (dispatch [:focus :type]))
                  :on-blur (fn [_]
                             (dispatch [:blur :type]))
                  :on-click (fn [e]
