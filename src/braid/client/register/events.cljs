@@ -4,7 +4,9 @@
     [clojure.string :as string]))
 
 (defn ajax-request [config]
-  ((config :handler) true))
+  (js/setTimeout (fn []
+                   ((config :handler) true))
+                 1000))
 
 (def fields
   [:name :url :type])

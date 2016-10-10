@@ -113,6 +113,14 @@
        :border "none"
        :display "inline-block"}]]
 
+    [:&.loading
+     [:.field::after
+      (input-field-mixin)
+      {:content "\"\u2026\""
+       :color "#CCC"
+       :border "none"
+       :display "inline-block"}]]
+
     [:&.group-url
 
      [:.field
