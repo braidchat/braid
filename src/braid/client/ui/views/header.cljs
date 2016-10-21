@@ -66,7 +66,10 @@
            :class "inbox"}
           {:title "Recent"
            :route-fn routes/recent-page-path
-           :class "recent"}]]
+           :class "recent"}
+          {:title "Uploads"
+           :class "group-uploads"
+           :route-fn routes/uploads-path}]]
         [search-bar-view]]
        [loading-indicator-view @group-id]])))
 
@@ -101,9 +104,6 @@
    {:class "invite-friend"
     :route-fn routes/invite-page-path
     :body "Invite a Person"}
-   {:class "group-uploads"
-    :route-fn routes/uploads-path
-    :body "Uploads"}
    {:class "edit-profile"
     :route-fn routes/page-path
     :route-args {:page-id "me"}

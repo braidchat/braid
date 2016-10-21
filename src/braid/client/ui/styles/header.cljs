@@ -41,6 +41,8 @@
      [:&:after
       {:margin-left "0.5em"}]
 
+     ; USER
+
      [:&.subscriptions:after
       (mixins/fontawesome \uf02c)]
 
@@ -50,14 +52,13 @@
      [:&.edit-profile:after
       (mixins/fontawesome \uf007)]
 
-     [:&.group-bots:after
-      (mixins/fontawesome \uf12e)]
-
-     [:&.group-uploads:after
-      (mixins/fontawesome \uf0ee)]
-
      [:&.changelog:after
       (mixins/fontawesome \uf1da)]
+
+     ; ADMIN
+
+     [:&.group-bots:after
+      (mixins/fontawesome \uf12e)]
 
      [:&.settings:after
       (mixins/fontawesome \uf013)]]])
@@ -102,7 +103,10 @@
      (mixins/fontawesome \uf01c)]
 
     [:&.recent:after
-     (mixins/fontawesome \uf1da)]]
+     (mixins/fontawesome \uf1da)]
+
+    [:&.group-uploads:after
+     (mixins/fontawesome \uf0ee)]]
 
    [:.search-bar
     {:display "inline-block"
