@@ -26,6 +26,9 @@
         _ (db/user-add-to-group! (user-1 :id) (group-2 :id))
         _ (db/user-add-to-group! (user-2 :id) (group-2 :id))
 
+        _ (db/user-make-group-admin! (user-1 :id) (group-1 :id))
+        _ (db/user-make-group-admin! (user-2 :id) (group-2 :id))
+
         tag-1 (db/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
         tag-2 (db/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})
 
