@@ -6,17 +6,6 @@
             [braid.client.routes :as routes]
             [braid.client.ui.views.upload :refer [avatar-upload-view]]))
 
-(defn leave-group-view
-  [group]
-  (let [user-id (subscribe [:user-id])]
-    (fn [group]
-      [:button {:on-click (fn [_]
-                            (when (js/confirm "Are you sure you want to leave this group?")
-                              (dispatch [:remove-from-group
-                                         {:group-id (group :id)
-                                          :user-id @user-id}])))}
-       "Leave this group"])))
-
 (defn intro-message-view
   [group]
   (let [new-message (r/atom "")]
@@ -76,9 +65,9 @@
         admin? (subscribe [:current-user-is-group-admin?] [group-id])]
     (fn []
       [:div.page.group-settings
-       [:div.title (str "Settings for " (:name @group))]
-       [:div.content
-        [leave-group-view @group]
-        (when @admin? [intro-message-view @group])
-        (when @admin? [group-avatar-view @group])
-        (when @admin? [publicity-view @group])]])))
+       (when @admin?
+         [:div.title (str "Settings for " (:name @group))]
+         [:div.content
+          [intro-message-view @group]
+          [group-avatar-view @group]
+          [publicity-view @group]])])))
