@@ -153,7 +153,8 @@
        :border "1px solid #eee"
        :padding [["0.75rem" "1rem" "1.0rem"]]
        :border-radius border-radius
-       :position "relative"}
+       :position "relative"
+       :cursor "pointer"}
 
       [:&.checked
        [:&::after
