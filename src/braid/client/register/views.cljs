@@ -20,7 +20,7 @@
                           :animation
                           :flex-grow}
            :vendors ["webkit"]}
-          (at-import "https://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,700")
+          (at-import "https://fonts.googleapis.com/css?family=Open+Sans:400,700")
           (app-styles)
           (form-styles))}}])
 
