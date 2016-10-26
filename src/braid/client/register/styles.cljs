@@ -224,14 +224,15 @@
      :letter-spacing "0.05em"
      :display "inline-block"
      :transition "background 0.25s ease-in-out"
-     :cursor "pointer"}
+     :cursor "pointer"
+     :-webkit-font-smoothing "antialiased"}
 
     [:&.disabled
      {:background disabled-button-color
       :cursor "not-allowed"}]
 
     [:&::after
-     {:content "\" ▶\""}]
+     {:content "\" ≫\""}]
 
     [:&:focus
      {:outline "none"}]]])
