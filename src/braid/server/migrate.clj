@@ -5,6 +5,36 @@
             [clojure.set :as set]
             [clojure.edn :as edn]))
 
+(defn migrate-2016-10-26
+  "add slug to groups"
+  []
+  @(d/transact db/conn
+     [{:db/ident :group/slug
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/one
+       :db/unique :db.unique/identity
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}
+      ; retract :group/name uniqueness constraint
+      [:db/retract :group/name :db/unique :db.unique/identity]
+      [:db/add :db.part/db :db.alter/attribute :group/name]])
+
+  (let [slugify (fn [text]
+                  (-> text
+                      string/trim
+                      string/lower-case
+                      (string/replace #"[ -+|,/?%#&\.\!:$'@]*" "")))
+        groups (->> (d/q '[:find ?group ?group-name
+                           :in $
+                           :where
+                           [?group :group/name ?group-name]]
+                         (d/db db/conn)))
+        txs (->> groups
+                 (map (fn [[group group-name]]
+                        [:db/add group
+                         :group/slug (slugify group-name)])))]
+      @(d/transact db/conn (doall txs))))
+
 (defn migrate-2016-08-18
   "schema change for quests"
   []
