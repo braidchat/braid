@@ -1,24 +1,34 @@
 (ns braid.client.register.styles)
 
-(def braid-color "#2bb8ba")
-
 (def small-spacing "0.5rem")
 (def border-radius "3px")
 
-(def invalid-color "#fd4734")
-(def valid-color "#2bb8ba")
+(def accent-color          "#2bb8ba")
+(def page-background-color "#f3f3f3")
+(def form-background-color "#ffffff")
+(def primary-text-color    "#222222")
+(def secondary-text-color  "#999999")
+(def field-border-color    "#e0e0e0")
+(def invalid-color         "#fd4734")
+(def valid-color           "#2bb8ba")
+(def disabled-input-color  "#f6f6f6")
+(def placeholder-color     "#eeeeee")
+(def disabled-button-color "#cccccc")
 
 (defn input-field-mixin []
   {:font-size "1.25rem"
    :font-family "Open Sans"
    :padding "0.4em"
-   :border "1px solid #ddd"
+   :border [["1px" "solid" field-border-color]]
    :line-height 1.5
    :border-radius border-radius})
 
 (defn app-styles []
   [:html
-   {:background "#f3f3f3"}
+   {:background page-background-color
+    :border [["1px" "solid" field-border-color]]
+    :border-bottom "none"
+    :border-top "none"}
 
    [:body
     {:min-height "100vh"
@@ -33,14 +43,15 @@
   [:form.register
    {:display "flex"
     :flex-direction "column"
-    :min-height "100vh"
+    :height "100vh"
+    :max-height "60em"
     :padding [["1.5rem" 0]]
     :box-sizing "border-box"
     :justify-content "space-around"}
 
    [:h1
     {:margin 0
-     :color braid-color
+     :color accent-color
      :font-weight "normal"
      :font-size "1.75em"
      :margin-bottom "0.75rem"}
@@ -62,10 +73,11 @@
 
     [:h2
      {:font-size "1em"
+      :color primary-text-color
       :margin [[0 0 small-spacing 0]]}]
 
     [:.explanation
-     {:color "#999"
+     {:color secondary-text-color
       :font-size "0.75em"
       :margin [[small-spacing 0 0 0]]}
 
@@ -88,11 +100,14 @@
       (input-field-mixin)
 
       [:&:focus
-       {:border-color braid-color
+       {:border-color accent-color
         :outline "none"}]]
 
      ["::-webkit-input-placeholder"
-      {:color "#eee"}]]
+      {:color placeholder-color}]
+
+     ["&&::-moz-placeholder"
+      {:color placeholder-color}]]
 
     [:&.invalid
      ["input[type=text]"
@@ -117,7 +132,7 @@
      [:.field::after
       (input-field-mixin)
       {:content "\"\u2026\""
-       :color "#CCC"
+       :color secondary-text-color
        :border "none"
        :display "inline-block"}]]
 
@@ -137,8 +152,8 @@
        {:border-left "none"
         :display "inline-block"
         :vertical-align "top"
-        :background "#f6f6f6"
-        :color "#999"
+        :background disabled-input-color
+        :color secondary-text-color
         :border-radius [[0 border-radius border-radius 0]]}
 
        [:&::after
@@ -150,7 +165,7 @@
 
      [:label
       {:margin [[small-spacing 0]]
-       :border "1px solid #eee"
+       :border [["1px" "solid" field-border-color]]
        :padding [["0.75rem" "1rem" "1.0rem"]]
        :border-radius border-radius
        :position "relative"
@@ -200,7 +215,7 @@
    [:button
     {:font-size "1.25em"
      :padding "1rem"
-     :background braid-color
+     :background accent-color
      :border "none"
      :color "white"
      :border-radius border-radius
@@ -212,7 +227,7 @@
      :cursor "pointer"}
 
     [:&.disabled
-     {:background "#ccc"
+     {:background disabled-button-color
       :cursor "not-allowed"}]
 
     [:&::after
