@@ -6,19 +6,11 @@
             [braid.server.conf :as conf]
             [braid.server.db :as db :refer [conn]]
             [braid.common.schema :as schema]
-            [braid.server.search :as search]))
+            [braid.server.search :as search]
+            [braid.test.server.fixtures :as fixtures]))
 
 
-(use-fixtures :each
-              (fn [t]
-                (-> (mount/only #{#'conf/config #'db/conn})
-                    (mount/swap {#'conf/config
-                                 {:db-url "datomic:mem://chat-test"}})
-                    (mount/start))
-                (t)
-                (datomic.api/delete-database (conf/config :db-url))
-                (mount/stop)))
-
+(use-fixtures :each fixtures/drop-db)
 
 (deftest create-user
   (let [data {:id (db/uuid)
@@ -70,7 +62,7 @@
                       :password "barbaz"
                       :avatar "http://www.barbaz.com/1.jpg"}
         user-2 (db/create-user! user-2-data)
-        group (db/create-group! {:id (db/uuid) :name "aoeu"})
+        group (db/create-group! {:id (db/uuid) :slug "aoeu" :name "aoeu"})
         _ (db/user-add-to-group! (user-1 :id) (group :id))
         _ (db/user-add-to-group! (user-2 :id) (group :id))
         users (db/users-for-user (user-1 :id))]
@@ -83,8 +75,8 @@
       (is (nil? (db/user-with-email "zzzzz@zzzzzz.ru"))))))
 
 (deftest only-see-users-in-group
-  (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
-        group-2 (db/create-group! {:id (db/uuid) :name "g2"})
+  (let [group-1 (db/create-group! {:id (db/uuid) :slug "g1" :name "g1"})
+        group-2 (db/create-group! {:id (db/uuid) :slug "g2" :name "g2"})
         user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
@@ -144,84 +136,8 @@
     (testing "returns nil when email+password wrong"
       (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
 
-(deftest create-group
-  (let [data {:id (db/uuid)
-              :name "Lean Pixel"}
-        group (db/create-group! data)
-        user-id (db/uuid)
-        user-2-id (db/uuid)]
-    (testing "can create a group"
-      (is (= group (assoc data :admins #{} :intro nil :avatar nil
-                     :public? false :bots #{}))))
-    (testing "can set group intro"
-      (db/group-set! (group :id) :intro "the intro")
-      (is (= (db/group-by-id (group :id))
-             (assoc data :admins #{} :intro "the intro" :avatar nil
-               :public? false :bots #{}))))
-    (testing "can add a user to the group"
-      (let [user (db/create-user! {:id user-id
-                                   :email "foo@bar.com"
-                                   :password "foobar"
-                                   :avatar "http://www.foobar.com/1.jpg"})]
-        (is (= #{} (db/user-groups (user :id))))
-        (is (= #{} (db/group-users (group :id))))
-        (db/user-add-to-group! (user :id) (group :id))
-        (is (= #{(assoc data :admins #{} :intro "the intro" :avatar nil
-                   :public? false :bots #{})}
-               (db/user-groups (user :id))))
-        (is (= #{(dissoc user :group-ids)}
-               (set (map (fn [u] (dissoc user :group-ids))
-                    (db/group-users (group :id))))))))
-    (testing "groups have no admins by default"
-      (is (empty? (:admins (db/group-by-id (group :id))))))
-    (testing "Can add admin"
-      (db/user-make-group-admin! user-id (group :id))
-      (is (= #{user-id} (:admins (db/group-by-id (group :id)))))
-      (testing "and another admin"
-        (db/create-user! {:id user-2-id
-                          :email "bar@baz.com"
-                          :password "foobar"
-                          :avatar "http://www.foobar.com/1.jpg"})
-        (db/user-make-group-admin! user-2-id (group :id))
-        (is (= #{user-id user-2-id} (:admins (db/group-by-id (group :id)))))))
-    (testing "multiple groups, admin statuses"
-      (let [group-2 (db/create-group! {:id (db/uuid)
-                                       :name "another group"})
-            group-3 (db/create-group! {:id (db/uuid)
-                                       :name "third group"})]
-
-        (db/user-add-to-group! user-id (group-2 :id))
-        (db/user-make-group-admin! user-2-id (group-2 :id))
-
-        (db/user-make-group-admin! user-id (group-3 :id))
-        (db/user-add-to-group! user-2-id (group-3 :id))
-
-        (is (db/user-in-group? user-id (group-2 :id)))
-        (is (db/user-in-group? user-id (group-3 :id)))
-
-        (is (db/user-in-group? user-2-id (group-2 :id)))
-        (is (db/user-in-group? user-2-id (group-3 :id)))
-
-        (is (= #{(group :id) (group-2 :id) (group-3 :id)}
-               (into #{} (map :id) (db/user-groups user-id))
-               (into #{} (map :id) (db/user-groups user-2-id)))
-            "Both users are in all the groups")
-
-        (is (= #{user-2-id} (:admins (db/group-by-id (group-2 :id)))))
-        (is (= #{user-id} (:admins (db/group-by-id (group-3 :id)))))
-
-        (is (db/user-is-group-admin? user-id (group :id)))
-        (is (not (db/user-is-group-admin? user-id (group-2 :id))))
-        (is (db/user-is-group-admin? user-id (group-3 :id)))
-
-        (is (db/user-is-group-admin? user-2-id (group :id)))
-        (is (db/user-is-group-admin? user-2-id (group-2 :id)))
-        (is (not (db/user-is-group-admin? user-2-id (group-3 :id))))
-
-        ))))
-
 (deftest fetch-messages-test
-  (let [group (db/create-group! {:id (db/uuid) :name "group"})
+  (let [group (db/create-group! {:id (db/uuid) :slug "group" :name "group"})
         user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
@@ -272,7 +188,7 @@
                  :tag-ids #{} :mentioned-ids #{}}]))))))
 
 (deftest user-hide-thread
-  (let [group (db/create-group! {:id (db/uuid) :name "group"})
+  (let [group (db/create-group! {:id (db/uuid) :slug "group" :name "group"})
         user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
@@ -349,8 +265,10 @@
                                  :password "foobar"
                                  :avatar ""})
         group-1 (db/create-group! {:id (db/uuid)
+                                   :slug "leanpixel"
                                    :name "Lean Pixel"})
         group-2 (db/create-group! {:id (db/uuid)
+                                   :slug "penyopal"
                                    :name "Penyo Pal"})
         tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
@@ -406,7 +324,7 @@
                                  :email "bar@baz.com"
                                  :password "foobar"
                                  :avatar ""})
-        group (db/create-group! {:name "group 1" :id (db/uuid)})]
+        group (db/create-group! {:slug "group1" :name "group 1" :id (db/uuid)})]
     (db/user-add-to-group! (user-1 :id) (group :id))
     (is (empty? (db/invites-for-user (user-1 :id))))
     (is (empty? (db/invites-for-user (user-2 :id))))
@@ -425,7 +343,7 @@
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
-        group (db/create-group! {:id (db/uuid) :name "group 1"})
+        group (db/create-group! {:id (db/uuid) :slug "group1" :name "group 1"})
         thread-id (db/uuid)]
     (db/create-message! {:id (db/uuid) :thread-id thread-id
                          :group-id (group :id) :user-id (user-1 :id)
@@ -444,7 +362,7 @@
                                :email "foo@bar.com"
                                :password "foobar"
                                :avatar ""})
-        group (db/create-group! {:name "group" :id (db/uuid)})
+        group (db/create-group! {:slug "group" :name "group" :id (db/uuid)})
         group-tags (doall
                      (map db/create-tag!
                           [{:id (db/uuid) :name "t1" :group-id (group :id)}
@@ -500,9 +418,9 @@
           (is (= #{u1 u2} (set (db/user-search-preferences :favourite-color "blue")))))))))
 
 (deftest bots-test
-  (let [g1 (db/create-group! {:name "group 1" :id (db/uuid)})
-        g2 (db/create-group! {:name "group 2" :id (db/uuid)})
-        g3 (db/create-group! {:name "group 3" :id (db/uuid)})
+  (let [g1 (db/create-group! {:slug "group1" :name "group 1" :id (db/uuid)})
+        g2 (db/create-group! {:slug "group2" :name "group 2" :id (db/uuid)})
+        g3 (db/create-group! {:slug "group3" :name "group 3" :id (db/uuid)})
 
         b1 (db/create-bot! {:id (db/uuid)
                             :name "bot1"

@@ -9,8 +9,9 @@
   (some? (d/pull (d/db conn) '[:group/id] [:group/name group-name])))
 
 (defn create-group!
-  [conn {:keys [name id]}]
+  [conn {:keys [name slug id]}]
   (->> {:group/id id
+        :group/slug slug
         :group/name name}
        (create-entity! conn)
        db->group))

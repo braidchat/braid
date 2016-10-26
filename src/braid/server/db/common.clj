@@ -124,6 +124,7 @@
 
 (def group-pull-pattern
   [:group/id
+   :group/slug
    :group/name
    :group/settings
    {:group/admins [:user/id]}
@@ -133,6 +134,7 @@
   (let [settings (-> e (get :group/settings "{}") edn/read-string)]
     {:id (:group/id e)
      :name (:group/name e)
+     :slug (:group/slug e)
      :admins (into #{} (map :user/id) (:group/admins e))
      :intro (settings :intro)
      :avatar (settings :avatar)

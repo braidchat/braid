@@ -189,10 +189,15 @@
   :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
- {:db/ident :group/name
+ {:db/ident :group/slug
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/unique :db.unique/identity
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+ {:db/ident :group/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :group/user

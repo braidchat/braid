@@ -24,7 +24,7 @@
         thread-id (db/uuid)]
 
     (testing "new messages can create a thread"
-      (let [group (db/create-group! {:id (db/uuid) :name "group"})
+      (let [group (db/create-group! {:id (db/uuid) :slug "group" :name "group"})
             message-data {:id (db/uuid)
                           :group-id (group :id)
                           :user-id (user-1 :id)
@@ -43,7 +43,7 @@
           (is (contains? (set (db/subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))
 
     (testing "new message can add to an existing thread"
-      (let [group (db/create-group! {:id (db/uuid) :name "group2"})
+      (let [group (db/create-group! {:id (db/uuid) :slug "group2" :name "group2"})
             message-2-data {:id (db/uuid)
                             :group-id (group :id)
                             :user-id (user-1 :id)
@@ -68,7 +68,7 @@
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar ""})
-          group (db/create-group! {:id (db/uuid) :name "group"})]
+          group (db/create-group! {:id (db/uuid) :slug "group" :name "group"})]
 
       (testing "when the user sends a new message"
         (let [thread-id (db/uuid)
@@ -96,7 +96,7 @@
                                    :email "quux@bar.com"
                                    :password "foobar"
                                    :avatar ""})
-          group (db/create-group! {:id (db/uuid) :name "group"})
+          group (db/create-group! {:id (db/uuid) :slug "group" :name "group"})
           thread-id (db/uuid)
           message-1 (db/create-message! {:id (db/uuid)
                                          :group-id (group :id)
@@ -132,6 +132,7 @@
 
   (testing "given 2 users and 2 tags..."
     (let [group (db/create-group! {:id (db/uuid)
+                                   :slug "leanpixel"
                                    :name "Lean Pixel"})
           tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
           user-1 (db/create-user! {:id (db/uuid)
@@ -175,6 +176,7 @@
 
   (testing "given 2 users..."
     (let [group (db/create-group! {:id (db/uuid)
+                                   :slug "leanpixel"
                                    :name "Lean Pixel"})
           user-1 (db/create-user! {:id (db/uuid)
                                    :email "foo@bar.com"

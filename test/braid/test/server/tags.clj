@@ -19,6 +19,7 @@
 (deftest tags
   (testing "can create tag"
     (let [group (db/create-group! {:id (db/uuid)
+                                   :slug "leanpixel"
                                    :name "Lean Pixel"})
           tag-data {:id (db/uuid)
                     :name "acme"
@@ -45,6 +46,7 @@
                                :password "foobar"
                                :avatar ""})
         group (db/create-group! {:id (db/uuid)
+                                 :slug "leanpixel"
                                  :name "Lean Pixel"})
         tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
@@ -79,8 +81,10 @@
                                  :password "foobar"
                                  :avatar ""})
         group-1 (db/create-group! {:id (db/uuid)
+                                   :slug "leanpixel"
                                    :name "Lean Pixel"})
         group-2 (db/create-group! {:id (db/uuid)
+                                   :slug "penyopal"
                                    :name "Penyo Pal"})
         tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
@@ -100,8 +104,10 @@
                                :password "foobar"
                                :avatar ""})
         group-1 (db/create-group! {:id (db/uuid)
+                                   :slug "leanpixel"
                                    :name "Lean Pixel"})
         group-2 (db/create-group! {:id (db/uuid)
+                                   :slug "penyopal"
                                    :name "Penyo Pal"})
         tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})]

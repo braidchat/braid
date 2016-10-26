@@ -9,8 +9,8 @@
   (db/init! (config :db-url)))
 
 (defn seed! []
-  (let [group-1 (db/create-group! {:id (db/uuid) :name "Braid"})
-        group-2 (db/create-group! {:id (db/uuid) :name "Chat"})
+  (let [group-1 (db/create-group! {:id (db/uuid) :slug "braid" :name "Braid"})
+        group-2 (db/create-group! {:id (db/uuid) :slug "chat" :name "Chat"})
         user-1 (db/create-user! {:id (db/uuid)
                                  :email "foo@example.com"
                                  :nickname "foo"

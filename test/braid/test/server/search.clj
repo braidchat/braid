@@ -45,8 +45,8 @@
                                  :avatar ""})
         group-1-id (db/uuid)
         group-2-id (db/uuid)
-        group-1 (db/create-group! {:name "group1" :id group-1-id})
-        group-2 (db/create-group! {:name "group2" :id group-2-id})
+        group-1 (db/create-group! {:name "group1" :slug "group1" :id group-1-id})
+        group-2 (db/create-group! {:name "group2" :slug "group2" :id group-2-id})
         tag-1 (db/create-tag! {:id (db/uuid) :name "tag1" :group-id (group-1 :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "tag2" :group-id (group-2 :id)})
         tag-3 (db/create-tag! {:id (db/uuid) :name "tag3" :group-id (group-1 :id)})
@@ -98,12 +98,12 @@
       (is (= [thread-1-id]
              (search/search-threads-as (user-1 :id) ["hello" group-1-id])
              (search/search-threads-as (user-1 :id) ["HELLO" group-1-id])))
-      (is (= [thread-1-id thread-2-id]
-             (search/search-threads-as (user-1 :id) ["world" group-1-id])))
+      (is (= #{thread-1-id thread-2-id}
+             (set (search/search-threads-as (user-1 :id) ["world" group-1-id]))))
       (is (= () (search/search-threads-as (user-1 :id) ["something" group-1-id]))))
 
     (testing "can search by tag name"
-      (is (= [thread-1-id thread-2-id]
-             (search/search-threads-as (user-1 :id) ["#tag1" group-1-id])))
+      (is (= #{thread-1-id thread-2-id}
+             (set (search/search-threads-as (user-1 :id) ["#tag1" group-1-id]))))
       (is (= [thread-2-id]
              (search/search-threads-as (user-1 :id) ["#tag3 world" group-1-id]))))))

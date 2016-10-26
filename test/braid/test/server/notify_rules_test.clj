@@ -35,10 +35,13 @@
 
 (deftest notify-rules-work
   (let [g1 (db/create-group! {:id (db/uuid)
+                              :slug "group1"
                               :name "group1"})
         g2 (db/create-group! {:id (db/uuid)
+                              :slug "group2"
                               :name "group2"})
         g3 (db/create-group! {:id (db/uuid)
+                              :slug "group3"
                               :name "group3"})
 
         g1t1 (db/create-tag! {:id (db/uuid) :name "group1tag1" :group-id (g1 :id)})
