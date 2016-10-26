@@ -16,6 +16,15 @@
        (create-entity! conn)
        db->group))
 
+(defn group-with-slug-exists?
+  [conn slug]
+  (boolean (first (d/q '[:find [?g]
+                :in $ ?slug
+                :where
+                [?g :group/slug ?slug]]
+              (d/db conn)
+              slug))))
+
 (defn group-by-id
   [conn group-id]
   (-> (d/pull (d/db conn) group-pull-pattern [:group/id group-id])

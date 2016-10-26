@@ -8,34 +8,43 @@
 
 ; Unit Tests
 
-(deftest unit-tests
+(deftest create-group
+  (let [data {:id (db/uuid)
+              :slug "foobar"
+              :name "Foo Bar"}
+        group (db/create-group! data)]
 
-  (testing "create-group"
-    (let [data {:id (db/uuid)
-                :slug "foobar"
-                :name "Foo Bar"}
-          group (db/create-group! data)]
+    (testing "returns a group with correct fields"
+      (is (= group (merge {:id nil
+                           :name nil
+                           :slug nil
+                           :admins #{}
+                           :intro nil
+                           :avatar nil
+                           :public? false
+                           :bots #{}}
+                          data))))
 
-      (testing "returns a group with correct fields"
-        (is (= group (merge {:id nil
-                             :name nil
-                             :slug nil
-                             :admins #{}
-                             :intro nil
-                             :avatar nil
-                             :public? false
-                             :bots #{}}
-                            data))))
+    (testing "groups have no admins by default"
+      (is (empty? (:admins group))))
 
-      (testing "groups have no admins by default"
-        (is (empty? (:admins group))))
+    (testing "error if slug is not unique"
+      (is (thrown-with-msg?  Exception
+                            #"unique-conflict"
+                            (db/create-group! {:id (db/uuid)
+                                               :name "Dupe"
+                                               :slug (data :slug)}))))))
 
-      (testing "error if slug is not unique"
-        (is (thrown-with-msg?  Exception
-                              #"unique-conflict"
-                              (db/create-group! {:id (db/uuid)
-                                                 :name "Dupe"
-                                                 :slug (data :slug)})))))))
+(deftest group-with-slug-exists?
+  (db/create-group! {:id (db/uuid)
+                     :slug "existing-group"
+                     :name "Existing Group"})
+
+  (testing "returns true when a matching group exists"
+    (is (= (db/group-with-slug-exists? "existing-group") true)))
+
+  (testing "returns false when a matching group does not exist"
+    (is (= (db/group-with-slug-exists? "not-existing-group") false))))
 
 
 ; BDD Tests
