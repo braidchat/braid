@@ -31,24 +31,29 @@
            [:div "No invitations."])])))
 
 (defn create-group-view []
-  (let [new-group-name (r/atom "")]
+  (let [new-group-data (r/atom {:name ""
+                                :slug ""})]
     (fn []
       [:div
        [:h2 "Create a Group"]
-       [:input {:placeholder "Group Name"
-                :value @new-group-name
-                :on-change (fn [e] (reset! new-group-name (.. e -target -value)))
-                :on-keydown
-                (fn [e]
-                  (when (= KeyCodes.ENTER e.keyCode)
-                    (.preventDefault e)
-                    (dispatch [:create-group {:name @new-group-name}])
-                    (reset! new-group-name "")))}]
-       [:button {:disabled (string/blank? @new-group-name)
-                 :on-click (fn [_]
-                             (dispatch [:create-group {:name @new-group-name}])
-                             (reset! new-group-name ""))}
-        "Create"]])))
+       [:form {:on-submit (fn [e]
+                            (.preventDefault e)
+                            (dispatch [:request-create-group @new-group-data])
+                            (reset! new-group-data {:name ""
+                                                    :slug ""}))}
+        [:label "Group Name"
+         [:input {:value (@new-group-data :name)
+                  :on-change (fn [e]
+                               (swap! new-group-data assoc :name (.. e -target -value)))}]]
+        [:label "Group Domain"
+         [:input {:value (@new-group-data :slug)
+                  :on-change (fn [e]
+                               (swap! new-group-data assoc :slug (.. e -target -value)))}]]
+        [:button {:disabled
+                  ; TODO validate slug format and uniqueness
+                  (or (string/blank? (@new-group-data :name))
+                      (string/blank? (@new-group-data :slug)))}
+         "Create Group"]]])))
 
 (defn public-groups-view []
   [:div

@@ -4,10 +4,6 @@
             [braid.server.db.common :refer :all]
             [braid.server.db.user :as user]))
 
-(defn group-exists?
-  [conn group-name]
-  (some? (d/pull (d/db conn) '[:group/id] [:group/name group-name])))
-
 (defn create-group!
   [conn {:keys [name slug id]}]
   (->> {:group/id id

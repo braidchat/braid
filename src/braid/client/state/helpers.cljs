@@ -118,7 +118,9 @@
 ; groups
 
 (defn add-group [state group]
-  (update-in state [:groups] assoc (group :id) group))
+  (-> state
+      (update-in [:groups] assoc (group :id) group)
+      (update-in [:temp-threads] assoc (group :id) (schema/make-temp-thread (group :id)))))
 
 (defn remove-group [state group-id]
   (let [group-threads (get-in state [:group-threads group-id])]

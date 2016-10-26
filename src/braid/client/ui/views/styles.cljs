@@ -14,6 +14,7 @@
             [braid.client.ui.styles.page]
             [braid.client.ui.styles.pages.channels]
             [braid.client.ui.styles.pages.me]
+            [braid.client.ui.styles.pages.group-explore]
             braid.client.group-admin.views.group-settings-page-styles
             braid.client.invites.views.invite-page-styles
             braid.client.bots.views.bots-page-styles
@@ -42,9 +43,10 @@
                braid.client.ui.styles.misc/emojione
                braid.client.ui.styles.misc/error-banners
                braid.client.ui.styles.misc/page-headers
-               braid.client.ui.styles.pages.channels/channels-page
                braid.client.group-admin.views.group-settings-page-styles/group-settings-page
                braid.client.ui.styles.pages.me/me-page
+               braid.client.ui.styles.pages.channels/channels-page
+               braid.client.ui.styles.pages.group-explore/group-explore-page
                braid.client.invites.views.invite-page-styles/invite-page
                braid.client.bots.views.bots-page-styles/bots-page
                braid.client.uploads.views.uploads-page-styles/uploads-page

@@ -249,31 +249,33 @@
      :websocket-send (when-not local-only?
                        (list [:braid.server/retract-tag tag-id]))}))
 
-(reg-event-db
-  :remove-group
-  (fn [state [_ group-id]]
-    (helpers/remove-group state group-id)))
-
 (reg-event-fx
   :create-group
   (fn [{state :db :as cofx} [_ group]]
-    (let [group (schema/make-group group)
-          group-id (group :id)
-          user-id (helpers/current-user-id state)]
+    (let [user-id (helpers/current-user-id state)
+          group-id (group :id)]
+      {:db (-> state
+               (helpers/add-group group)
+               (update-in [:users user-id :group-ids]
+                          #(vec (conj (set %) group-id)))
+               (update-in [:groups group-id :admins] conj user-id))
+       :redirect-to (routes/inbox-page-path {:group-id group-id})})))
+
+(reg-event-fx
+  :request-create-group
+  (fn [{state :db :as cofx} [_ group]]
+    (let [group (schema/make-group group)]
       {:websocket-send
        (list
          [:braid.server/create-group group]
          1000
          (fn [reply]
-           (when-let [msg (reply :error)]
-             (.error js/console msg)
-             (dispatch [:display-error [(str :bad-group group-id) msg]])
-             (dispatch [:remove-group group-id]))))
-       :db (-> state
-               (helpers/add-group group)
-               (update-in [:users user-id :group-ids]
-                          #(vec (conj (set %) group-id)))
-               (update-in [:groups group-id :admins] conj user-id))})))
+           (if-let [msg (reply :error)]
+             (do
+               (.error js/console msg)
+               (dispatch [:display-error [(str :bad-group (group :id)) msg]]))
+             (do
+               (dispatch [:create-group group])))))})))
 
 (reg-event-db
   :update-user-nickname

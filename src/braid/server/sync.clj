@@ -303,19 +303,20 @@
 (defmethod event-msg-handler :braid.server/create-group
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (cond
-    (string/blank? (?data :name))
+    (or (string/blank? (?data :name))
+        (string/blank? (?data :slug)))
     (do
-      (timbre/warnf "User %s attempted to create group with a bad name '%s'"
-                    user-id (?data :name))
+      (timbre/warnf "User %s attempted to create group with blank parameters"
+                    user-id)
       (when ?reply-fn
-        (?reply-fn {:error "Bad group name"})))
+        (?reply-fn {:error "Blank group name or slug"})))
 
-    (db/group-exists? (?data :name))
+    (db/group-with-slug-exists? (?data :slug))
     (do
-      (timbre/warnf "User %s attempted to create group that already exsits %s"
-                    user-id (?data :name))
+      (timbre/warnf "User %s attempted to create a group with a slug that already exsits %s"
+                    user-id (?data :slug))
       (when ?reply-fn
-        (?reply-fn {:error "Group name already taken"})))
+        (?reply-fn {:error "Group slug already taken"})))
 
     :else
     (let [new-group (db/create-group! ?data)]
