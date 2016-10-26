@@ -12,7 +12,7 @@
      [{:db/ident :group/slug
        :db/valueType :db.type/string
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/identity
+       :db/unique :db.unique/value
        :db/id #db/id [:db.part/db]
        :db.install/_attribute :db.part/db}
       ; retract :group/name uniqueness constraint

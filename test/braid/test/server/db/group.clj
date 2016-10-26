@@ -28,7 +28,14 @@
                             data))))
 
       (testing "groups have no admins by default"
-        (is (empty? (:admins group)))))))
+        (is (empty? (:admins group))))
+
+      (testing "error if slug is not unique"
+        (is (thrown-with-msg?  Exception
+                              #"unique-conflict"
+                              (db/create-group! {:id (db/uuid)
+                                                 :name "Dupe"
+                                                 :slug (data :slug)})))))))
 
 
 ; BDD Tests
