@@ -3,13 +3,27 @@
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch reg-fx]]
     [clojure.string :as string]
     [ajax.core :refer [ajax-request ]]
-    [ajax.edn :refer [edn-request-format edn-response-format]]))
+    [ajax.edn :refer [edn-request-format edn-response-format]])
+  (:import
+    [goog Uri]
+    [goog.format EmailAddress]))
+
+(defn get-url-param [param]
+  (.getParameterValue (.parse Uri js/window.location) (name param)))
 
 (def fields
-  [:name :url :type])
+  [:email :name :url :type])
 
 (def validations
-  {:name [(fn [name cb]
+  {:email [(fn [email cb]
+             (if (string/blank? email)
+               (cb "You need to enter your email.")
+               (cb nil)))
+           (fn [email cb]
+             (if (not (.isValid (EmailAddress. email)))
+               (cb "This doesn't look like a valid email.")
+               (cb nil)))]
+   :name [(fn [name cb]
             (if (string/blank? name)
               (cb "Your group needs a name.")
               (cb nil)))]
@@ -74,16 +88,17 @@
 (reg-event-fx
   :register/initialize
   (fn [{state :db} _]
-    {:db (assoc state
-           :sending? false
-           :fields (reduce (fn [memo field]
-                             (assoc memo field
-                               {:value ""
-                                :typing false
-                                :untouched? true
-                                :validations-left 0
-                                :errors []}))
-                           {} fields))
+    {:db (-> state
+             (assoc
+               :sending? false
+               :fields (reduce (fn [memo field]
+                                 (assoc memo field
+                                   {:value (or (get-url-param field) "")
+                                    :typing false
+                                    :untouched? true
+                                    :validations-left 0
+                                    :errors []}))
+                               {} fields)))
      :dispatch [:validate-all]}))
 
 (reg-event-fx

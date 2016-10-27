@@ -50,7 +50,7 @@
    {:display "flex"
     :flex-direction "column"
     :height "100vh"
-    :max-height "60em"
+    :max-height "80em"
     :padding [["1.5rem" 0]]
     :box-sizing "border-box"
     :justify-content "space-around"}
@@ -103,6 +103,7 @@
      {:display "block"}
 
      ["input[type=text]"
+      "input[type=email]"
       (input-field-mixin)
 
       [:&:focus
@@ -117,6 +118,7 @@
 
     [:&.invalid
      ["input[type=text]"
+      "input[type=email]"
       {:border-color invalid-color}]
 
      [:.field::after
@@ -142,6 +144,11 @@
        :border "none"
        :display "inline-block"}]]
 
+    [:&.email
+     :&.group-name
+     [:input
+      {:width "15em"}]]
+
     [:&.group-url
 
      [:.field
@@ -150,7 +157,7 @@
       ["input[type=text]"
        {:text-align "right"
         :border-radius [[border-radius 0 0 border-radius]]
-        :width "7.5em"
+        :width "8.75em"
         :vertical-align "top" }]
 
       [:span
