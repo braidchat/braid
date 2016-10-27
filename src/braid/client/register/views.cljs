@@ -2,7 +2,7 @@
   (:require
     [reagent.core :as r]
     [re-frame.core :refer [dispatch subscribe]]
-    [braid.client.register.styles :refer [app-styles form-styles]]
+    [braid.client.register.styles :as styles]
     [garden.core :refer [css]]
     [garden.stylesheet :refer [at-import]])
   (:import
@@ -21,8 +21,9 @@
                           :flex-grow}
            :vendors ["webkit"]}
           (at-import "https://fonts.googleapis.com/css?family=Open+Sans:400,700")
-          (app-styles)
-          (form-styles))}}])
+          styles/anim-spin
+          (styles/app-styles)
+          (styles/form-styles))}}])
 
 (defn header-view []
   [:h1 "Braid"])
@@ -133,17 +134,18 @@
 (defn button-view []
   (let [name-valid? (subscribe [:register/field-valid? :name])
         url-valid? (subscribe [:register/field-valid? :url])
-        type-valid? (subscribe [:register/field-valid? :type])]
+        type-valid? (subscribe [:register/field-valid? :type])
+        sending? (subscribe [:register/sending?])]
     (fn []
       (let [all-valid? (and @name-valid? @url-valid? @type-valid?)]
-        [:button {:class (when (not all-valid?) "disabled")
-                  :on-click (fn [e]
-                              (.preventDefault e)
-                              (dispatch [:submit-form]))}
+        [:button {:class (str (when (not all-valid?) "disabled") " "
+                              (when @sending? "sending"))}
          "Create your group"]))))
 
 (defn form-view []
-  [:form.register
+  [:form.register {:on-submit (fn [e]
+                                (.preventDefault e)
+                                (dispatch [:submit-form]))}
    [header-view]
    [group-name-field-view]
    [group-url-field-view]

@@ -28,4 +28,8 @@
       (< 0 (get-in state [:fields field :validations-left])) :loading
       :else :valid)))
 
+(reg-sub
+  :register/sending?
+  (fn [state _]
+    (state :sending?)))
 

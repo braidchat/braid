@@ -1,4 +1,8 @@
-(ns braid.client.register.styles)
+(ns braid.client.register.styles
+  (:require
+    [braid.client.ui.styles.animations :as animations]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.icons :as icons]))
 
 (def small-spacing "0.5rem")
 (def border-radius "3px")
@@ -22,6 +26,8 @@
    :border [["1px" "solid" field-border-color]]
    :line-height 1.5
    :border-radius border-radius})
+
+(def anim-spin animations/anim-spin)
 
 (defn app-styles []
   [:html
@@ -227,13 +233,30 @@
      :cursor "pointer"
      :-webkit-font-smoothing "antialiased"}
 
+    [:&::after
+     {:content "\"≫\""
+      :display "inline-block"
+      :width "1.2em"
+      :height "1.2em"
+      :margin-left "0.25rem"}]
+
+    [:&:focus
+     {:outline "none"}]
+
     [:&.disabled
      {:background disabled-button-color
       :cursor "not-allowed"}]
 
-    [:&::after
-     {:content "\" ≫\""}]
+    [:&.sending
 
-    [:&:focus
-     {:outline "none"}]]])
+     [:&::after
+      mixins/spin
+      {:content "\"\""
+       :width "1.2em"
+       :height "1.2em"
+       :display "inline-block"
+       :vertical-align "top"
+       :margin-left "0.25rem"
+       :background-image (icons/spinner "#fff")
+       :background-size "contain"}]]]])
 

@@ -74,15 +74,16 @@
 (reg-event-fx
   :register/initialize
   (fn [{state :db} _]
-    {:db (assoc state :fields
-           (reduce (fn [memo field]
-                     (assoc memo field
-                       {:value ""
-                        :typing false
-                        :untouched? true
-                        :validations-left 0
-                        :errors []}))
-                   {} fields))
+    {:db (assoc state
+           :sending? false
+           :fields (reduce (fn [memo field]
+                             (assoc memo field
+                               {:value ""
+                                :typing false
+                                :untouched? true
+                                :validations-left 0
+                                :errors []}))
+                           {} fields))
      :dispatch [:validate-all]}))
 
 (reg-event-fx
@@ -171,5 +172,24 @@
   :submit-form
   (fn [{state :db} _]
     (if-let [all-valid? (every? true? (map (fn [[_ v]] (empty? (v :errors))) (state :fields)))]
-      {} ; TODO submit data via ajax
+      {:dispatch [:send-registration-request]}
       {:dispatch [:touch-all-fields]})))
+
+(reg-event-fx
+  :send-registration-request
+  (fn [{state :db} _]
+    (ajax-request {:uri (str "//" js/window.api_domain "/registration/register")
+                   :method :put
+                   :format (edn-request-format)
+                   :response-format (edn-response-format)
+                   :params {:slug (get-in state [:fields :url :value])
+                            :name (get-in state [:fields :name :value])
+                            :type (get-in state [:fields :type :value])}
+                   :handler (fn [[_ response]]
+                              (dispatch [:handle-registration-response response]))})
+    {:db (assoc state :sending? true)}))
+
+(reg-event-fx
+  :handle-registration-response
+  (fn [{state :db} [_ response]]
+    {:db (assoc state :sending? false)}))

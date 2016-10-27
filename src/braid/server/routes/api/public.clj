@@ -1,6 +1,6 @@
 (ns braid.server.routes.api.public
   (:require [clojure.string :as string]
-            [compojure.core :refer [GET POST defroutes]]
+            [compojure.core :refer [GET POST PUT defroutes]]
             [compojure.coercions :refer [as-uuid]]
             [braid.common.util :refer [valid-nickname?]]
             [braid.server.db :as db]
@@ -65,6 +65,10 @@
 
   (GET "/registration/check-slug-unique" req
     (edn-response (not (db/group-with-slug-exists? (get-in req [:params :slug])))))
+
+  (PUT "/registration/register" req
+    (Thread/sleep 1000)
+    (edn-response true))
 
   ; accept an email invite to join a group
   (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
