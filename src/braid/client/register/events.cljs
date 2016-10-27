@@ -1,12 +1,9 @@
 (ns braid.client.register.events
   (:require
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch reg-fx]]
-    [clojure.string :as string]))
-
-(defn ajax-request [config]
-  (js/setTimeout (fn []
-                   ((config :handler) true))
-                 1000))
+    [clojure.string :as string]
+    [ajax.core :refer [ajax-request ]]
+    [ajax.edn :refer [edn-request-format edn-response-format]]))
 
 (def fields
   [:name :url :type])
@@ -34,8 +31,12 @@
              (cb nil)))
          (fn [url cb]
            (ajax-request
-             {:path ""
-              :handler (fn [valid?]
+             {:uri (str "//" js/window.api_domain "/registration/check-slug-unique")
+              :method :get
+              :format (edn-request-format)
+              :response-format (edn-response-format)
+              :params {:slug url}
+              :handler (fn [[_ valid?]]
                          (if valid?
                            (cb nil)
                            (cb "Your group URL is already taken; try another.")))}))]
