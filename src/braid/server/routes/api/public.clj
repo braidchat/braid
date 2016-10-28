@@ -5,32 +5,14 @@
             [braid.common.util :refer [valid-nickname? valid-email?]]
             [braid.server.db :as db]
             [braid.server.invite :as invites]
-            [braid.server.identicons :as identicons]
-            [braid.server.crypto :refer [random-nonce]]
             [braid.server.sync :as sync]
             [braid.server.api.github :as github]
-            [braid.server.conf :refer [config]]))
+            [braid.server.conf :refer [config]]
+            [braid.server.events :as events]))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
    :body (pr-str clj-body)})
-
-(defn register-user
-  [email group-id]
-  (let [id (db/uuid)
-        avatar (identicons/id->identicon-data-url id)
-        ; XXX: copied from braid.common.util/nickname-rd
-        disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
-        nick (-> (first (string/split email #"@"))
-                 (string/replace disallowed-chars ""))
-        ; TODO: guard against duplicate nickname?
-        u (db/create-user! {:id id
-                            :email email
-                            :password (random-nonce 50)
-                            :avatar avatar
-                            :nickname nick})]
-    (sync/user-join-group! id group-id)
-    id))
 
 (defn join-group
   [user-id group-id]
@@ -112,7 +94,16 @@
 
         ; passed all validations
         :else
-        (edn-response true))))
+        (let [group (db/create-group! {:id (db/uuid)
+                                       :slug slug
+                                       :name name})
+              user (db/create-user! {:id (db/uuid)
+                                     :email email})]
+
+          (db/user-add-to-group! (user :id) (group :id))
+          (db/user-make-group-admin! (user :id) (group :id))
+
+          (edn-response true)))))
 
   ; accept an email invite to join a group
   (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
@@ -171,7 +162,7 @@
                 (assoc bad-resp
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
-                (let [id (register-user email group-id)
+                (let [id (events/register-user! email group-id)
                       referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
@@ -211,7 +202,7 @@
                 (assoc bad-resp
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
-                (let [id (register-user email group-id)
+                (let [id (events/register-user! email group-id)
                       referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
@@ -258,41 +249,41 @@
                :body ""}))
           (assoc fail :body "Invalid user")))))
 
-    ; OAuth dance
-    (GET "/oauth/github"  [code state :as req]
-      (println "GITHUB OAUTH" (pr-str code) (pr-str state))
-      (if-let [{tok :access_token scope :scope :as resp}
-               (github/exchange-token code state)]
-        (do (println "GITHUB TOKEN" tok)
-            ; check scope includes email permission? Or we could just see if
-            ; getting the email fails
-            (let [email (github/email-address tok)
-                  user (db/user-with-email email)]
-              (cond
-                (nil? email) {:status 401
-                              :headers {"Content-Type" "text/plain"}
-                              :body "Couldn't get email address from github"}
+  ; OAuth dance
+  (GET "/oauth/github"  [code state :as req]
+    (println "GITHUB OAUTH" (pr-str code) (pr-str state))
+    (if-let [{tok :access_token scope :scope :as resp}
+             (github/exchange-token code state)]
+      (do (println "GITHUB TOKEN" tok)
+          ; check scope includes email permission? Or we could just see if
+          ; getting the email fails
+          (let [email (github/email-address tok)
+                user (db/user-with-email email)]
+            (cond
+              (nil? email) {:status 401
+                            :headers {"Content-Type" "text/plain"}
+                            :body "Couldn't get email address from github"}
 
-                user {:status 302
-                      ; TODO: when we have mobile, redirect to correct site
-                      ; (maybe part of state?)
-                      :headers {"Location" (config :site-url)}
-                      :session (assoc (req :session) :user-id (user :id))}
+              user {:status 302
+                    ; TODO: when we have mobile, redirect to correct site
+                    ; (maybe part of state?)
+                    :headers {"Location" (config :site-url)}
+                    :session (assoc (req :session) :user-id (user :id))}
 
-                (:braid.server.api/register? resp)
-                (let [user-id (register-user email (:braid.server.api/group-id resp))]
-                  {:status 302
-                   ; TODO: when we have mobile, redirect to correct site
-                   ; (maybe part of state?)
-                   :headers {"Location" (config :site-url)}
-                   :session (assoc (req :session) :user-id user-id)})
+              (:braid.server.api/register? resp)
+              (let [user-id (events/register-user! email (:braid.server.api/group-id resp))]
+                {:status 302
+                 ; TODO: when we have mobile, redirect to correct site
+                 ; (maybe part of state?)
+                 :headers {"Location" (config :site-url)}
+                 :session (assoc (req :session) :user-id user-id)})
 
-                :else
-                {:status 401
-                 ; TODO: handle failure better
-                 :headers {"Content-Type" "text/plain"}
-                 :body "No such user"
-                 :session nil})))
-        {:status 400
-         :body "Couldn't exchange token with github"})))
+              :else
+              {:status 401
+               ; TODO: handle failure better
+               :headers {"Content-Type" "text/plain"}
+               :body "No such user"
+               :session nil})))
+      {:status 400
+       :body "Couldn't exchange token with github"})))
 
