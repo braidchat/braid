@@ -96,14 +96,15 @@
       (is (not (db/email-taken? "baz@quux.net"))))))
 
 (deftest set-nickname
-  (let [nickname "ol' fooy"]
+  (let [nickname "ol-fooy"]
 
     (testing "can set nickname"
-      (let [user-1 (db/create-user! {:id (db/uuid)
+      (let [email "foo@bar.com"
+            user-1 (db/create-user! {:id (db/uuid)
                                      :email "foo@bar.com"})]
         (db/set-nickname! (user-1 :id) nickname)
         (is (= nickname
-               (db/user-with-email (user-1 :email))))))
+               (:nickname (db/user-with-email email))))))
 
     (testing "fails when not unique"
       (let [user-2 (db/create-user! {:id (db/uuid)
@@ -122,17 +123,16 @@
       (is (= true (db/nickname-taken? nickname))))))
 
 (deftest user-with-email
-  (let [data {:email "foo@bar.com"
-              :id (db/uuid)}]
+  (let [id (db/uuid)
+        data {:email "foo@bar.com"
+              :id id}]
 
     (testing "returns nil when no matching user"
       (is (nil? (db/user-with-email (data :email)))))
 
     (testing "returns user when matching user"
       (db/create-user! data)
-      (Thread/sleep 100)
-      (is (= (data :email)
-             (:email (db/user-with-email (data :email))))))))
+      (is (= id (:id (db/user-with-email (data :email))))))))
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)
