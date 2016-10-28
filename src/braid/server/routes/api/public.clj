@@ -79,7 +79,8 @@
         (not (invites/verify-hmac hmac (str now token invite_id email)))
         (assoc fail :body "Invalid HMAC")
 
-        (string/blank? invite_id) (assoc fail :body "Invalid invitation ID")
+        (string/blank? invite_id)
+        (assoc fail :body "Invalid invitation ID")
 
         (not (valid-nickname? nickname))
         (assoc fail :body "Nickname must be 1-30 characters without whitespace")
