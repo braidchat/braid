@@ -5,8 +5,7 @@
             [braid.server.conf :refer [config]]
             [braid.server.cache :as cache]
             [braid.server.crypto :as crypto]
-            [braid.server.util :refer [map->query-str ->transit transit->form]]
-            [braid.server.identicons :as identicons])
+            [braid.server.util :refer [map->query-str ->transit transit->form]])
   (:import org.apache.commons.codec.binary.Base64))
 
 (defn redirect-uri
