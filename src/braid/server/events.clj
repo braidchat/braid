@@ -5,15 +5,17 @@
     [braid.server.db :as db]
     [braid.server.sync-helpers :as sync-helpers]))
 
+(defn add-user-to-recent-threads-in-group!
+  [user-id group-id]
+  (doseq [t (db/recent-threads {:user-id user-id :group-id group-id
+                                :num-threads 5})]
+    (db/user-show-thread! user-id (t :id))))
 
 (defn user-join-group!
   [user-id group-id]
   (db/user-add-to-group! user-id group-id)
   (db/user-subscribe-to-group-tags! user-id group-id)
-  ; add user to recent threads in group
-  (doseq [t (db/recent-threads {:user-id user-id :group-id group-id
-                                :num-threads 5})]
-    (db/user-show-thread! user-id (t :id)))
+  (add-user-to-recent-threads-in-group! user-id group-id)
   (sync-helpers/broadcast-group-change group-id [:braid.client/new-user (db/user-by-id user-id)]))
 
 (defn register-user!
