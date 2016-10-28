@@ -3,6 +3,7 @@
             [clojure.edn :as edn]
             [clojure.string :as string]
             [crypto.password.scrypt :as password]
+            [clavatar.core :refer [gravatar]]
             [braid.server.db.common :refer :all]
             [braid.server.quests.db :refer [activate-first-quests!]]
             [braid.common.util :refer [slugify]]))
@@ -21,12 +22,16 @@
       slugify))
 
 (defn create-user!
-  "creates a user, returns id"
+  "given an id and email, creates and returns a user;
+  the nickname and avatar are set based on the email"
   [conn {:keys [id email]}]
   (let [user (->>
                {:user/id id
                 :user/email email
-                :user/nickname (generate-nickname-from-email email)}
+                :user/nickname (generate-nickname-from-email email)
+                :user/avatar (gravatar email
+                               :rating :g
+                               :default :identicon)}
                (create-entity! conn)
                db->user)]
     (activate-first-quests! conn id)

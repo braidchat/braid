@@ -1,6 +1,5 @@
 (ns braid.server.events
   (:require
-    [clavatar.core :refer [gravatar]]
     [braid.server.db :as db]
     [braid.server.sync-helpers :as sync-helpers]))
 
@@ -21,10 +20,7 @@
   [email group-id]
   (let [; TODO: guard against duplicate nickname?
         user (db/create-user! {:id (db/uuid)
-                               :email email
-                               :avatar (gravatar email
-                                         :rating :g
-                                         :default :identicon)})]
+                               :email email})]
     (user-join-group! (user :id) group-id)
     (user :id)))
 

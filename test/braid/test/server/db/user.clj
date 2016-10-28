@@ -1,5 +1,6 @@
 (ns braid.test.server.db.user
   (:require
+    [clojure.string :as string]
     [clojure.test :refer :all]
     [braid.server.conf :as conf]
     [braid.server.db :as db]
@@ -53,6 +54,11 @@
       (is (thrown? java.util.concurrent.ExecutionException
                    (db/create-user! {:id (db/uuid)
                                      :email (str nickname "@quux.com")})))))
+
+  (testing "avatar is set to be a gravatar"
+    (let [user (db/create-user! {:id (db/uuid)
+                                 :email "zxc@example.com"})]
+      (is (string/includes? (:avatar user) "gravatar"))))
 
   (testing "create returns a user with appropriate fields"
     (let [user (db/create-user! {:id (db/uuid)
