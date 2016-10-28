@@ -9,132 +9,7 @@
             [braid.server.search :as search]
             [braid.test.server.fixtures :as fixtures]))
 
-
 (use-fixtures :each fixtures/drop-db)
-
-(deftest create-user
-  (let [data {:id (db/uuid)
-              :email "foo@bar.com"
-              :password "foobar"
-              :avatar "http://www.foobar.com/1.jpg"}
-        user (db/create-user! data)]
-    (testing "can check if an email has been used"
-      (is (db/email-taken? (:email data)))
-      (is (not (db/email-taken? "baz@quux.net"))))
-    (testing "create returns a user"
-      (is (= (dissoc user :group-ids)
-             (-> data
-                 (dissoc :password :email)
-                 (assoc :nickname "foo")))))
-    (testing "can set nickname"
-      (is (not (db/nickname-taken? "ol' fooy")))
-      (db/set-nickname! (user :id) "ol' fooy")
-      (is (db/nickname-taken? "ol' fooy"))
-      (is (= (-> (db/user-with-email "foo@bar.com")
-                 (dissoc :group-ids))
-             (-> data
-                 (dissoc :password :email)
-                 (assoc :nickname "ol' fooy")))))
-
-    (testing "user email must be unique"
-      (is (thrown? java.util.concurrent.ExecutionException
-                   (db/create-user! {:id (db/uuid)
-                                     :email (data :email)
-                                     :password "zzz"
-                                     :avatar "http://zzz.com/2.jpg"}))))
-    (testing "user nickname must be unique"
-      (let [other {:id (db/uuid)
-                   :email "baz@quux.com"
-                   :password "foobar"
-                   :avatar "foo@bar.com"}]
-        (is (some? (db/create-user! other)))
-        (is (thrown? java.util.concurrent.ExecutionException
-                     @(db/set-nickname! (other :id)  "ol' fooy")))))))
-
-(deftest fetch-users
-  (let [user-1-data {:id (db/uuid)
-                     :email "foo@bar.com"
-                     :password "foobar"
-                     :avatar "http://www.foobar.com/1.jpg"}
-        user-1 (db/create-user! user-1-data)
-        user-2-data  {:id (db/uuid)
-                      :email "bar@baz.com"
-                      :password "barbaz"
-                      :avatar "http://www.barbaz.com/1.jpg"}
-        user-2 (db/create-user! user-2-data)
-        group (db/create-group! {:id (db/uuid) :slug "aoeu" :name "aoeu"})
-        _ (db/user-add-to-group! (user-1 :id) (group :id))
-        _ (db/user-add-to-group! (user-2 :id) (group :id))
-        users (db/users-for-user (user-1 :id))]
-    (testing "returns all users"
-      (is (= (set (map (fn [u] (dissoc u :group-ids)) users))
-             (set (map (fn [u] (dissoc u :group-ids)) [user-1 user-2])))))
-    (testing "get user by email"
-      (is (= (dissoc user-1 :group-ids)
-             (dissoc (db/user-with-email (user-1-data :email)) :group-ids)))
-      (is (nil? (db/user-with-email "zzzzz@zzzzzz.ru"))))))
-
-(deftest only-see-users-in-group
-  (let [group-1 (db/create-group! {:id (db/uuid) :slug "g1" :name "g1"})
-        group-2 (db/create-group! {:id (db/uuid) :slug "g2" :name "g2"})
-        user-1 (db/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar "http://www.foobar.com/1.jpg"})
-        user-2 (db/create-user! {:id (db/uuid)
-                                 :email "bar@baz.com"
-                                 :password "barbaz"
-                                 :avatar "http://www.barbaz.com/1.jpg"})
-        user-3 (db/create-user! {:id (db/uuid)
-                                 :email "quux@baz.com"
-                                 :password "barbaz"
-                                 :avatar "http://www.barbaz.com/2.jpg"})]
-    (is (not (db/user-in-group? (user-1 :id) (group-1 :id))))
-    (db/user-add-to-group! (user-1 :id) (group-1 :id))
-    (is (db/user-in-group? (user-1 :id) (group-1 :id)))
-    (db/user-add-to-group! (user-2 :id) (group-1 :id))
-    (db/user-add-to-group! (user-2 :id) (group-2 :id))
-    (db/user-add-to-group! (user-3 :id) (group-2 :id))
-    (is (not (db/user-in-group? (user-1 :id) (group-2 :id))))
-    (is (= (set (map (fn [u] (dissoc u :group-ids))
-                     [user-1 user-2]))
-           (set (map (fn [u] (dissoc u :group-ids))
-                (db/users-for-user (user-1 :id))))))
-    (is (= (set (map (fn [u] (dissoc u :group-ids))
-                     [user-1 user-2 user-3]))
-           (set (map (fn [u] (dissoc u :group-ids))
-                (db/users-for-user (user-2 :id))))))
-    (is (= (set (map (fn [u] (dissoc u :group-ids))
-                     [user-2 user-3]))
-           (set (map (fn [u] (dissoc u :group-ids))
-                (db/users-for-user (user-3 :id))))))
-    (is (db/user-visible-to-user? (user-1 :id) (user-2 :id)))
-    (is (not (db/user-visible-to-user? (user-1 :id) (user-3 :id))))
-    (is (not (db/user-visible-to-user? (user-3 :id) (user-1 :id))))
-    (is (db/user-visible-to-user? (user-2 :id) (user-3 :id)))
-    (is (db/user-visible-to-user? (user-3 :id) (user-2 :id)))
-    (db/user-leave-group! (user-1 :id) (group-1 :id))
-    (is (not (db/user-in-group? (user-1 :id) (group-1 :id))))
-    (is (not (db/user-visible-to-user? (user-1 :id) (user-2 :id))))))
-
-(deftest authenticate-user
-  (let [user-1-data {:id (db/uuid)
-                     :email "fOo@bar.com"
-                     :password "foobar"
-                     :avatar ""}
-        _ (db/create-user! user-1-data)]
-
-    (testing "returns user-id when email+password matches"
-      (is (= (:id user-1-data) (db/authenticate-user (user-1-data :email) (user-1-data :password)))))
-
-    (testing "email is case-insensitive"
-      (is (= (:id user-1-data)
-             (db/authenticate-user "Foo@bar.com" (user-1-data :password))
-             (db/authenticate-user "foo@bar.com" (user-1-data :password))
-             (db/authenticate-user "FOO@BAR.COM" (user-1-data :password)))))
-
-    (testing "returns nil when email+password wrong"
-      (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
 
 (deftest fetch-messages-test
   (let [group (db/create-group! {:id (db/uuid) :slug "group" :name "group"})
@@ -384,7 +259,7 @@
 (deftest user-preferences
   (testing "Can set and retrieve preferences"
     (let [u (db/create-user! {:id (db/uuid)
-                              :email "foo@bar.com"
+                              :email "goo@bar.com"
                               :password "foobar"
                               :avatar ""})]
       (is (empty? (db/user-get-preferences (:id u))))

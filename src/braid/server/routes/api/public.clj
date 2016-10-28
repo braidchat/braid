@@ -2,7 +2,7 @@
   (:require [clojure.string :as string]
             [compojure.core :refer [GET POST PUT defroutes]]
             [compojure.coercions :refer [as-uuid]]
-            [braid.common.util :refer [valid-nickname?]]
+            [braid.common.util :refer [valid-nickname? valid-email?]]
             [braid.server.db :as db]
             [braid.server.invite :as invites]
             [braid.server.identicons :as identicons]
@@ -66,9 +66,53 @@
   (GET "/registration/check-slug-unique" req
     (edn-response (not (db/group-with-slug-exists? (get-in req [:params :slug])))))
 
-  (PUT "/registration/register" req
-    (Thread/sleep 1000)
-    (edn-response true))
+  (PUT "/registration/register" [email name slug type :as req]
+    (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
+      (cond
+        ; email validations
+
+        (string/blank? email)
+        (assoc fail :body "Must provide an Email")
+
+        (not (valid-email? email))
+        (assoc fail :body "Email format is incorrect")
+
+        (db/user-with-email email)
+        (assoc fail :body "A user is already registered with that email.")
+
+        ; group name validations
+
+        (string/blank? name)
+        (assoc fail :body "Must provide a Group Name")
+
+        ; group url (slug) validations
+
+        (string/blank? slug)
+        (assoc fail :body "Must provide an Group URL")
+
+        (not (re-matches #"[a-z0-9-]*" slug))
+        (assoc fail :body "Group URL can only contain lowercase letters, numbers or dashes.")
+
+        (re-matches #"-.*" slug)
+        (assoc fail :body "Group URL cannot start with a dash.")
+
+        (re-matches #".*-" slug)
+        (assoc fail :body "Group URL cannot end with a dash.")
+
+        (db/group-with-slug-exists? slug)
+        (assoc fail :body "A Group with this URL already exists.")
+
+        ; group type validations
+
+        (string/blank? type)
+        (assoc fail :body "Must provide a Group Type")
+
+        (not (contains? #{"public" "private"} type))
+        (assoc fail :body "Group type must be either public or private")
+
+        ; passed all validations
+        :else
+        (edn-response true))))
 
   ; accept an email invite to join a group
   (POST "/register" [token invite_id password email now hmac nickname avatar :as req]

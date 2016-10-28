@@ -43,3 +43,16 @@
    (defn uuid?
      [u]
      (instance? java.util.UUID u)))
+
+(defn valid-email? [email]
+  (let [pattern #"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"]
+    (and (string? email) (re-matches pattern email))))
+
+(defn slugify
+  "Converts text to a slug-safe representation"
+  [text]
+  (when text
+    (-> text
+        string/trim
+        string/lower-case
+        (string/replace #"[ -+|,/?%#&\.\!:$'@]*" ""))))

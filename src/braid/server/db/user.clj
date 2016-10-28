@@ -4,22 +4,38 @@
             [clojure.string :as string]
             [crypto.password.scrypt :as password]
             [braid.server.db.common :refer :all]
-            [braid.server.quests.db :refer [activate-first-quests!]]))
+            [braid.server.quests.db :refer [activate-first-quests!]]
+            [braid.common.util :refer [slugify]]))
 
 (defn email-taken?
   [conn email]
   (some? (d/entity (d/db conn) [:user/email email])))
 
+
+(defn generate-nickname-from-email
+  "Generates a nickname from an email string"
+  [email]
+  (-> email
+      (string/split #"@")
+      first
+      slugify))
+
 (defn create-user!
   "creates a user, returns id"
   [conn {:keys [id email avatar nickname password]}]
-  (let [user (->> {:user/id id
-                   :user/email email
-                   :user/avatar avatar
-                   :user/nickname (or nickname (-> email (string/split #"@") first))
-                   :user/password-token (password/encrypt password)}
-                  (create-entity! conn)
-                  db->user)]
+  (let [user (as->
+               {:user/id id
+                :user/email email
+                :user/nickname (or nickname (generate-nickname-from-email email))}
+               $
+               (if avatar
+                 (assoc $ :user/avatar avatar)
+                 $)
+               (if password
+                 (assoc $ :user/password-token (password/encrypt password))
+                 $)
+               (create-entity! conn $)
+               (db->user $))]
     (activate-first-quests! conn id)
     user))
 

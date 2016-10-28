@@ -2,8 +2,9 @@
   (:require
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch reg-fx]]
     [clojure.string :as string]
-    [ajax.core :refer [ajax-request ]]
-    [ajax.edn :refer [edn-request-format edn-response-format]])
+    [ajax.core :refer [ajax-request]]
+    [ajax.edn :refer [edn-request-format edn-response-format]]
+    [braid.common.util :refer [slugify]])
   (:import
     [goog Uri]
     [goog.format EmailAddress]))
@@ -121,14 +122,6 @@
       {:db (assoc-in state [:fields field :typing?] false)
        :dispatch [:validate-field field]})))
 
-
-(defn slugify [text]
-  (when text
-    (-> text
-        string/trim
-        string/lower-case
-        (string/replace #"[ -+|,/?%#&\.\!:$'@]*" ""))))
-
 (reg-event-fx
   :guess-group-url
   (fn [{state :db} _]
@@ -197,7 +190,8 @@
                    :method :put
                    :format (edn-request-format)
                    :response-format (edn-response-format)
-                   :params {:slug (get-in state [:fields :url :value])
+                   :params {:email (get-in state [:fields :email :value])
+                            :slug (get-in state [:fields :url :value])
                             :name (get-in state [:fields :name :value])
                             :type (get-in state [:fields :type :value])}
                    :handler (fn [[_ response]]
