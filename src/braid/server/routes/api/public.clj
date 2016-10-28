@@ -5,7 +5,6 @@
             [braid.common.util :refer [valid-nickname? valid-email?]]
             [braid.server.db :as db]
             [braid.server.invite :as invites]
-            [braid.server.sync :as sync]
             [braid.server.api.github :as github]
             [braid.server.conf :refer [config]]
             [braid.server.events :as events]))
@@ -17,7 +16,7 @@
 (defn join-group
   [user-id group-id]
   (when-not (db/user-in-group? user-id group-id)
-    (sync/user-join-group! user-id group-id)))
+    (events/user-join-group! user-id group-id)))
 
 (defroutes api-public-routes
   ; check if already logged in
@@ -140,7 +139,7 @@
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
-                (sync/user-join-group! (user :id) (invite :group-id))
+                (events/user-join-group! (user :id) (invite :group-id))
                 (db/retract-invitation! (invite :id)))
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}

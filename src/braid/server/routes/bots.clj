@@ -5,7 +5,7 @@
             [taoensso.timbre :as timbre]
             [braid.server.db :as db]
             [braid.common.schema :as schema]
-            [braid.server.sync :as sync])
+            [braid.server.sync-helpers :as sync-helpers])
   (:import [org.apache.commons.codec.binary Base64]))
 
 (defn basic-auth-req
@@ -70,7 +70,7 @@
           (do
             (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
             (db/create-message! msg)
-            (sync/broadcast-thread (msg :thread-id) [])
+            (sync-helpers/broadcast-thread (msg :thread-id) [])
             {:status 201
              :headers {"Content-Type" "text/plain"}
              :body "ok"})

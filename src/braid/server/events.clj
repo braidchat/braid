@@ -3,7 +3,18 @@
     [clavatar.core :refer [gravatar]]
     [braid.server.crypto :refer [random-nonce]]
     [braid.server.db :as db]
-    [braid.server.sync :as sync]))
+    [braid.server.sync-helpers :as sync-helpers]))
+
+
+(defn user-join-group!
+  [user-id group-id]
+  (db/user-add-to-group! user-id group-id)
+  (db/user-subscribe-to-group-tags! user-id group-id)
+  ; add user to recent threads in group
+  (doseq [t (db/recent-threads {:user-id user-id :group-id group-id
+                                :num-threads 5})]
+    (db/user-show-thread! user-id (t :id)))
+  (sync-helpers/broadcast-group-change group-id [:braid.client/new-user (db/user-by-id user-id)]))
 
 (defn register-user!
   [email group-id]
@@ -14,6 +25,6 @@
                                :avatar (gravatar email
                                          :rating :g
                                          :default :identicon)})]
-    (sync/user-join-group! (user :id) group-id)
+    (user-join-group! (user :id) group-id)
     (user :id)))
 
