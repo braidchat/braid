@@ -48,6 +48,9 @@
   (let [pattern #"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"]
     (and (string? email) (re-matches pattern email))))
 
+(defn remove-non-whitelist-characters [text]
+  (string/replace text (re-pattern #"[^a-z^A-Z^0-9^\-]*") ""))
+
 (defn slugify
   "Converts text to a slug-safe representation"
   [text]
@@ -55,4 +58,4 @@
     (-> text
         string/trim
         string/lower-case
-        (string/replace #"[ -+|,/?%#&\.\!:$'@]*" ""))))
+        remove-non-whitelist-characters)))
