@@ -22,20 +22,13 @@
 
 (defn create-user!
   "creates a user, returns id"
-  [conn {:keys [id email avatar password]}]
-  (let [user (as->
+  [conn {:keys [id email]}]
+  (let [user (->>
                {:user/id id
                 :user/email email
                 :user/nickname (generate-nickname-from-email email)}
-               $
-               (if avatar
-                 (assoc $ :user/avatar avatar)
-                 $)
-               (if password
-                 (assoc $ :user/password-token (password/encrypt password))
-                 $)
-               (create-entity! conn $)
-               (db->user $))]
+               (create-entity! conn)
+               db->user)]
     (activate-first-quests! conn id)
     user))
 
@@ -59,6 +52,11 @@
   [conn user-id avatar]
   @(d/transact conn [[:db/add [:user/id user-id] :user/avatar avatar]]))
 
+(defn set-user-password!
+  [conn user-id password]
+  @(d/transact conn [[:db/add [:user/id user-id]
+                      :user/password-token (password/encrypt password)]]))
+
 (defn authenticate-user
   "returns user-id if email and password are correct"
   [conn email password]
@@ -74,11 +72,6 @@
                   (.toLowerCase email))]
          (when (and user-id (password/check password password-token))
            user-id))))
-
-(defn set-user-password!
-  [conn user-id password]
-  @(d/transact conn [[:db/add [:user/id user-id]
-                      :user/password-token (password/encrypt password)]]))
 
 (defn user-by-id
   [conn id]

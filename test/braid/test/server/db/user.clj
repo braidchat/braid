@@ -31,16 +31,6 @@
                    (db/create-user! {:id (db/uuid)
                                      :email email})))))
 
-
-  (testing "if password is provided, a token is set"
-    ; TODO
-    )
-
-  (testing "if avatar is provided, it is set"
-    ; TODO
-
-    )
-
   (testing "nickname is set based on email"
     (let [nickname "billy"
           user (db/create-user! {:id (db/uuid)
@@ -194,20 +184,21 @@
     (is (not (db/user-visible-to-user? (user-1 :id) (user-2 :id))))))
 
 (deftest authenticate-user
-  (let [user-1-data {:id (db/uuid)
-                     :email "fOo@bar.com"
-                     :password "foobar"
-                     :avatar ""}
-        _ (db/create-user! user-1-data)]
+  (let [user-id (db/uuid)
+        password "foobar"
+        user {:id user-id
+              :email "fOo@bar.com"}
+        _ (db/create-user! user)
+        _ (db/set-user-password! user-id password)]
 
     (testing "returns user-id when email+password matches"
-      (is (= (:id user-1-data) (db/authenticate-user (user-1-data :email) (user-1-data :password)))))
+      (is (= user-id (db/authenticate-user (user :email) password))))
 
     (testing "email is case-insensitive"
-      (is (= (:id user-1-data)
-             (db/authenticate-user "Foo@bar.com" (user-1-data :password))
-             (db/authenticate-user "foo@bar.com" (user-1-data :password))
-             (db/authenticate-user "FOO@BAR.COM" (user-1-data :password)))))
+      (is (= user-id
+             (db/authenticate-user "Foo@bar.com" password)
+             (db/authenticate-user "foo@bar.com" password)
+             (db/authenticate-user "FOO@BAR.COM" password))))
 
     (testing "returns nil when email+password wrong"
-      (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
+      (is (nil? (db/authenticate-user (user :email) "zzz"))))))
