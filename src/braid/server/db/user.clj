@@ -12,14 +12,25 @@
   [conn email]
   (some? (d/entity (d/db conn) [:user/email email])))
 
+(defn nickname-taken?
+  [conn nickname]
+  (some? (d/entity (d/db conn) [:user/nickname nickname])))
+
+(defn generate-unique-nickname
+  "Recursively checks if nickname is taken; otherwise appends a random number and repeats"
+  [conn potential-nickname]
+  (if (nickname-taken? conn potential-nickname)
+    (generate-unique-nickname conn (str potential-nickname (rand-int 9)))
+    potential-nickname))
 
 (defn generate-nickname-from-email
   "Generates a nickname from an email string"
-  [email]
+  [conn email]
   (-> email
       (string/split #"@")
       first
-      slugify))
+      slugify
+      (->> (generate-unique-nickname conn))))
 
 (defn create-user!
   "given an id and email, creates and returns a user;
@@ -29,7 +40,7 @@
   (let [user (->>
                {:user/id id
                 :user/email email
-                :user/nickname (generate-nickname-from-email email)
+                :user/nickname (generate-nickname-from-email conn email)
                 :user/avatar (gravatar email
                                :rating :g
                                :default :identicon)}
@@ -44,10 +55,6 @@
         :user/is-bot? true}
        (create-entity! conn)
        :user/id))
-
-(defn nickname-taken?
-  [conn nickname]
-  (some? (d/entity (d/db conn) [:user/nickname nickname])))
 
 (defn set-nickname!
   "Set the user's nickname"

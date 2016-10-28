@@ -18,8 +18,7 @@
 
 (defn register-user!
   [email group-id]
-  (let [; TODO: guard against duplicate nickname?
-        user (db/create-user! {:id (db/uuid)
+  (let [user (db/create-user! {:id (db/uuid)
                                :email email})]
     (user-join-group! (user :id) group-id)
     (user :id)))

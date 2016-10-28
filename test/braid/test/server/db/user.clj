@@ -47,13 +47,13 @@
                                    :email email})]
       (is (= safe-nickname (:nickname (db/user-with-email email))))))
 
-  (testing "user nickname (as generated from email) must be unique"
+  (testing "if email-based nickname is not unique, a number is appended"
     (let [nickname "xxxxx"]
       (db/create-user! {:id (db/uuid)
                         :email (str nickname "@bar.com")})
-      (is (thrown? java.util.concurrent.ExecutionException
-                   (db/create-user! {:id (db/uuid)
-                                     :email (str nickname "@quux.com")})))))
+      (let [user-2 (db/create-user! {:id (db/uuid)
+                                     :email (str nickname "@quux.com")})]
+        (is (re-matches (re-pattern (str "^" nickname ".+")) (:nickname user-2) )))))
 
   (testing "avatar is set to be a gravatar"
     (let [user (db/create-user! {:id (db/uuid)
