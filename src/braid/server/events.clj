@@ -7,14 +7,13 @@
 
 (defn register-user!
   [email group-id]
-  (let [id (db/uuid)
-        ; TODO: guard against duplicate nickname?
-        u (db/create-user! {:id id
-                            :email email
-                            :password (random-nonce 50)
-                            :avatar (gravatar email
-                                      :rating :g
-                                      :default :identicon)})]
-    (sync/user-join-group! id group-id)
-    id))
+  (let [; TODO: guard against duplicate nickname?
+        user (db/create-user! {:id (db/uuid)
+                               :email email
+                               :password (random-nonce 50)
+                               :avatar (gravatar email
+                                         :rating :g
+                                         :default :identicon)})]
+    (sync/user-join-group! (user :id) group-id)
+    (user :id)))
 
