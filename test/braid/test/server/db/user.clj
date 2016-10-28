@@ -49,32 +49,21 @@
 
       (is (= nickname (user :nickname)))))
 
-  (testing "if provided, nickname is set as provided"
-    (let [nickname "check"
-          user (db/create-user! {:id (db/uuid)
-                                 :email "baz@bar.com"
-                                 :nickname nickname})]
+  (testing "nickname is slugified"
+    (let [raw-nickname "   !A-a "
+          safe-nickname "a-a"
+          email (str raw-nickname "@bas.com")
+          user-3 (db/create-user! {:id (db/uuid)
+                                   :email email})]
+      (is (= safe-nickname (:nickname (db/user-with-email email))))))
 
-      (is (= nickname (user :nickname)))))
-
-  (testing "user nickname must be unique"
-    (testing "when nickname is provided"
-      (let [nickname "abcde"]
-        (db/create-user! {:id (db/uuid)
-                          :email "a@bar.com"
-                          :nickname "abcde"})
-        (is (thrown? java.util.concurrent.ExecutionException
-                     (db/create-user! {:id (db/uuid)
-                                       :email "baz@quux.com"
-                                       :nickname "abcde"})))))
-
-    (testing "when nickname is generated from email"
-      (let [nickname "xxxxx"]
-        (db/create-user! {:id (db/uuid)
-                          :email (str nickname "@bar.com")})
-        (is (thrown? java.util.concurrent.ExecutionException
-                     (db/create-user! {:id (db/uuid)
-                                       :email (str nickname "@quux.com")}))))))
+  (testing "user nickname (as generated from email) must be unique"
+    (let [nickname "xxxxx"]
+      (db/create-user! {:id (db/uuid)
+                        :email (str nickname "@bar.com")})
+      (is (thrown? java.util.concurrent.ExecutionException
+                   (db/create-user! {:id (db/uuid)
+                                     :email (str nickname "@quux.com")})))))
 
   (testing "create returns a user with appropriate fields"
     (let [user (db/create-user! {:id (db/uuid)
@@ -110,7 +99,16 @@
       (let [user-2 (db/create-user! {:id (db/uuid)
                                      :email "baz@bas.com"})]
         (is (thrown? java.util.concurrent.ExecutionException
-                     @(db/set-nickname! (user-2 :id) nickname)))))))
+                     @(db/set-nickname! (user-2 :id) nickname)))))
+
+    (testing "nickname is slugified"
+      (let [raw-nickname "   @A-a "
+            safe-nickname "a-a"
+            email "asdf@bas.com"
+            user-3 (db/create-user! {:id (db/uuid)
+                                     :email email})]
+        (db/set-nickname! (user-3 :id) raw-nickname)
+        (is (= safe-nickname (:nickname (db/user-with-email email))))))))
 
 (deftest nickname-taken?
   (let [nickname "foo"]
