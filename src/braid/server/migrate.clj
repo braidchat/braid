@@ -5,6 +5,17 @@
             [clojure.set :as set]
             [clojure.edn :as edn]))
 
+(defn migrate-2016-10-28
+  "change all db.unique/identity to db.unique/value (to avoid accidental upserts)"
+  []
+  @(d/transact db/conn
+     (map (fn [id]
+            {:db/id id
+             :db/unique :db.unique/value
+             :db.alter/_attribute :db.part/db})
+             [:user/id :message/id :upload/id :thread/id
+              :tag/id :group/id :invite/id :bot/id :quest-record/id])))
+
 (defn migrate-2016-10-26
   "add slug to groups"
   []
