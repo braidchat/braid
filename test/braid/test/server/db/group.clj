@@ -72,6 +72,7 @@
       (is (= #{(dissoc user :group-ids)}
              (set (map (fn [u] (dissoc user :group-ids))
                        (db/group-users (group :id)))))))))
+
 (deftest user-group-admin
   (testing "can make a user a group admin"
     (let [group (db/create-group! {:id (db/uuid) :slug "c" :name "c"})
