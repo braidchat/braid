@@ -22,11 +22,11 @@
 
 (defn create-user!
   "creates a user, returns id"
-  [conn {:keys [id email avatar nickname password]}]
+  [conn {:keys [id email avatar password]}]
   (let [user (as->
                {:user/id id
                 :user/email email
-                :user/nickname (or nickname (generate-nickname-from-email email))}
+                :user/nickname (generate-nickname-from-email email)}
                $
                (if avatar
                  (assoc $ :user/avatar avatar)
@@ -53,7 +53,7 @@
 (defn set-nickname!
   "Set the user's nickname"
   [conn user-id nickname]
-  @(d/transact conn [[:db/add [:user/id user-id] :user/nickname nickname]]))
+  @(d/transact conn [[:db/add [:user/id user-id] :user/nickname (slugify nickname)]]))
 
 (defn set-user-avatar!
   [conn user-id avatar]

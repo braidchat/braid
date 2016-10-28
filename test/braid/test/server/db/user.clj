@@ -41,11 +41,10 @@
 
     )
 
-  (testing "if not provided, nickname is set based on email"
+  (testing "nickname is set based on email"
     (let [nickname "billy"
           user (db/create-user! {:id (db/uuid)
-                                 :email (str nickname "@bar.com")
-                                 :nickname nickname})]
+                                 :email (str nickname "@bar.com")})]
 
       (is (= nickname (user :nickname)))))
 
@@ -69,9 +68,6 @@
     (let [user (db/create-user! {:id (db/uuid)
                                  :email "foo@bar.com"})]
       (is (= #{:id :group-ids :avatar :nickname} (set (keys user)))))))
-
-
-
 
 (deftest email-taken?
   (let [data {:id (db/uuid)

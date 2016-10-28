@@ -105,7 +105,7 @@
           (edn-response true)))))
 
   ; accept an email invite to join a group
-  (POST "/register" [token invite_id password email now hmac nickname avatar :as req]
+  (POST "/register" [token invite_id password email now hmac avatar :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
         (string/blank? password) (assoc fail :body "Must provide a password")
@@ -115,12 +115,6 @@
 
         (string/blank? invite_id)
         (assoc fail :body "Invalid invitation ID")
-
-        (not (valid-nickname? nickname))
-        (assoc fail :body "Nickname must be 1-30 characters without whitespace")
-
-        (db/nickname-taken? nickname)
-        (assoc fail :body "nickname taken")
 
         ; TODO: be smarter about this
         (not (#{"image/jpeg" "image/png"} (:content-type avatar)))
@@ -134,7 +128,6 @@
                   user (db/create-user! {:id (db/uuid)
                                          :email email
                                          :avatar avatar-url
-                                         :nickname nickname
                                          :password password})
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]

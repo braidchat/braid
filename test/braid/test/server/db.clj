@@ -272,18 +272,11 @@
       (db/user-set-preference! (:id u) :email-frequency :weekly)
       (testing "can search by preferences"
         (let [u1 (:id (db/create-user! {:id (db/uuid)
-                                        :email "foo@baz.com"
-                                        :password "foobar"
-                                        :avatar ""
-                                        :nickname "zzz"}))
+                                        :email "foo@baz.com"}))
               u2 (:id (db/create-user! {:id (db/uuid)
-                                        :email "bar@bar.com"
-                                        :password "foobar"
-                                        :avatar ""}))
+                                        :email "bar@bar.com"}))
               u3 (:id (db/create-user! {:id (db/uuid)
-                                        :email "baz@bar.com"
-                                        :password "foobar"
-                                        :avatar ""}))]
+                                        :email "baz@bar.com"}))]
           (db/user-set-preference! u1 :email-frequency :daily)
           (db/user-set-preference! u1 :favourite-color "blue")
           (db/user-set-preference! u2 :email-frequency :weekly)
