@@ -1,6 +1,7 @@
 (ns braid.client.register.views
   (:require
     [reagent.core :as r]
+    [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]]
     [braid.client.register.styles :as styles]
     [garden.core :refer [css]]
@@ -108,10 +109,10 @@
                                                            KeyCodes.UP KeyCodes.DOWN
                                                            KeyCodes.TAB KeyCodes.BACKSPACE}
                                                          (.. e -keyCode)))
-                                         (not (re-matches #"[a-z0-9-]" (.. e -key))))
+                                         (not (re-matches #"[A-Za-z0-9-]" (.. e -key))))
                                    (.preventDefault e)))
                   :on-change (fn [e]
-                               (let [value (.. e -target -value)]
+                               (let [value (string/lower-case (.. e -target -value))]
                                  (dispatch [:update-value :url value])))}]
          [:span ".braid.chat"]]
         (when (= :invalid @status)
