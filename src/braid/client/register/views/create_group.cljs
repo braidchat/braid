@@ -1,4 +1,4 @@
-(ns braid.client.register.views.create_group
+(ns braid.client.register.views.create-group
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]])
@@ -118,8 +118,9 @@
                               (when @sending? "sending"))}
          "Create your group"]))))
 
-(defn group-create-view []
+(defn create-group-view []
   [:div
+   [:h2 "Start a New Group"]
    [group-name-field-view]
    [group-url-field-view]
    [group-type-field-view]

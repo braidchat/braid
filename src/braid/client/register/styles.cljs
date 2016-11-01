@@ -55,8 +55,11 @@
       :background-image "url(/images/braid-logo-color.svg)"
       :background-size "contain"}]]
 
+   [:h2
+    {:margin [["3rem" 0 "1.5rem"]]}]
+
    [:.option
-    {:margin [["2rem" 0]]
+    {:margin [[0 0 "2rem"]]
      :position "relative"}
 
     [:h2

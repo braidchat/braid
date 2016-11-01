@@ -3,7 +3,7 @@
     [re-frame.core :refer [dispatch subscribe]]))
 
 (defn auth-providers-view []
-  [:div.auth-providers
+  [:span.auth-providers
    [:a.github "Github"]
    [:a.google "Google"]
    [:a.facebook "Facebook"]])
@@ -34,12 +34,12 @@
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
         [:div.explanation
-         [:p "Or, register with: "]
-         [auth-providers-view]]]])))
+         [:p "Or, register with: "
+          [auth-providers-view]]]]])))
 
 (defn returning-email-field-view []
   [:div.option.email
-   [:h2 "Your Email"]
+   [:h2 "Email"]
    [:label
     [:div.field
      [:input {:type "email"
@@ -53,9 +53,9 @@
      [:p "Or, login with: "
       [auth-providers-view]]]]])
 
-(defn returning-password-field-view []
+(defn password-field-view []
   [:div.option.password
-   [:h2 "Your Password"]
+   [:h2 "Password"]
    [:label
     [:div.field
      [:input {:type "password"
@@ -64,27 +64,19 @@
     [:p "Don't remember your password?"
      [:a "Reset it."]]]])
 
-(defn new-password-field-view []
-  [:div.option.password
-   [:h2 "Your Password"]
-   [:label
-    [:div.field
-     [:input {:type "password"
-              :placeholder "•••••••••••"}]]]
-   [:div.explanation
-    [:p "At least 8 characters. More is better!"]]])
-
 (defn new-user-view []
   [:div
+   [:h2 "Create an Account"]
    [new-email-field-view]])
 
 (defn returning-user-view []
   [:div
+   [:h2 "Log In"]
    [returning-email-field-view]
-   [returning-password-field-view]])
+   [password-field-view]])
 
 (defn user-auth-view []
   [:div
-   (if false
+   (if true
      [new-user-view]
      [returning-user-view])])
