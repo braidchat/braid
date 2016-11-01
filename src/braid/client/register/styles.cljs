@@ -47,13 +47,16 @@
 
 (defn form-styles []
   [:form.register
-   {:display "flex"
-    :flex-direction "column"
-    :height "100vh"
+   {; temporary disable flex styles
+    ; during refactor
+    ;:display "flex"
+    ;:flex-direction "column"
+    ;:height "100vh"
+    ;:justify-content "space-around"
     :max-height "80em"
     :padding [["1.5rem" 0]]
     :box-sizing "border-box"
-    :justify-content "space-around"}
+    }
 
    [:h1
     {:margin 0

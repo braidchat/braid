@@ -2,10 +2,7 @@
   (:require
     [re-frame.core :refer [dispatch subscribe]]
     [braid.client.register.styles :as styles]
-    [braid.client.register.views.create_group :refer [group-name-field-view
-                                                      group-url-field-view
-                                                      group-type-field-view
-                                                      button-view]]
+    [braid.client.register.views.create_group :refer [group-create-view]]
     [braid.client.register.views.user :refer [email-field-view]]
     [garden.core :refer [css]]
     [garden.stylesheet :refer [at-import]]))
@@ -36,10 +33,7 @@
                                 (dispatch [:submit-form]))}
    [header-view]
    [email-field-view]
-   [group-name-field-view]
-   [group-url-field-view]
-   [group-type-field-view]
-   [button-view]])
+   [group-create-view]])
 
 (defn app-view []
   [:div.app

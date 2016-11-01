@@ -117,3 +117,10 @@
         [:button {:class (str (when (not all-valid?) "disabled") " "
                               (when @sending? "sending"))}
          "Create your group"]))))
+
+(defn group-create-view []
+  [:div
+   [group-name-field-view]
+   [group-url-field-view]
+   [group-type-field-view]
+   [button-view]])
