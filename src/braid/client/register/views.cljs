@@ -5,7 +5,8 @@
     [braid.client.register.views.create_group :refer [group-create-view]]
     [braid.client.register.views.user :refer [email-field-view]]
     [garden.core :refer [css]]
-    [garden.stylesheet :refer [at-import]]))
+    [garden.stylesheet :refer [at-import]]
+    [braid.client.register.styles.create-group :refer [create-group-styles]]))
 
 (defn style-view []
   [:style
@@ -22,7 +23,8 @@
           (at-import "https://fonts.googleapis.com/css?family=Open+Sans:400,700")
           styles/anim-spin
           (styles/app-styles)
-          (styles/form-styles))}}])
+          (styles/form-styles)
+          (create-group-styles))}}])
 
 (defn header-view []
   [:h1 "Braid"])
