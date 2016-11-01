@@ -9,6 +9,10 @@
 
    [:.option
 
+    [:&.group-name
+     [:input
+      {:width "15em"}]]
+
     [:&.group-url
 
      [:.field

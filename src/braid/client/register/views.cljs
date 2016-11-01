@@ -3,10 +3,11 @@
     [re-frame.core :refer [dispatch subscribe]]
     [braid.client.register.styles :as styles]
     [braid.client.register.views.create_group :refer [group-create-view]]
-    [braid.client.register.views.user :refer [email-field-view]]
+    [braid.client.register.views.user :refer [user-auth-view]]
     [garden.core :refer [css]]
     [garden.stylesheet :refer [at-import]]
-    [braid.client.register.styles.create-group :refer [create-group-styles]]))
+    [braid.client.register.styles.create-group :refer [create-group-styles]]
+    [braid.client.register.styles.user :refer [user-styles]]))
 
 (defn style-view []
   [:style
@@ -24,7 +25,8 @@
           styles/anim-spin
           (styles/app-styles)
           (styles/form-styles)
-          (create-group-styles))}}])
+          (create-group-styles)
+          (user-styles))}}])
 
 (defn header-view []
   [:h1 "Braid"])
@@ -34,7 +36,7 @@
                                 (.preventDefault e)
                                 (dispatch [:submit-form]))}
    [header-view]
-   [email-field-view]
+   [user-auth-view]
    [group-create-view]])
 
 (defn app-view []

@@ -30,3 +30,27 @@
         [:div.explanation
          [:p "You will use your email to sign in."]
          [:p "Double check to make sure it's correct."]]]])))
+
+
+(defn auth-providers-view []
+  [:div
+   [:div "Github"]
+   [:div "Google"]
+   [:div "Facebook"]
+   [:div "Twitter"]
+   [:div "Microsoft"]])
+
+(defn password-field-view []
+  [:div.option.password
+   [:h2 "Your Password"]
+   [:label
+    [:div.field
+     [:input {:type "password"}]]]])
+
+(defn user-auth-view []
+  [:div
+   [email-field-view]
+   (when true
+     [password-field-view])
+   (when true
+     [auth-providers-view])])

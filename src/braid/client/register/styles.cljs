@@ -86,6 +86,7 @@
 
      ["input[type=text]"
       "input[type=email]"
+      "input[type=password]"
       (vars/input-field-mixin)
 
       [:&:focus
@@ -124,12 +125,7 @@
       {:content "\"\u2026\""
        :color vars/secondary-text-color
        :border "none"
-       :display "inline-block"}]]
-
-    [:&.email
-     :&.group-name
-     [:input
-      {:width "15em"}]]]
+       :display "inline-block"}]]]
 
    [:button
     {:font-size "1.25em"
