@@ -2,7 +2,13 @@
   (:require
     [re-frame.core :refer [dispatch subscribe]]))
 
-(defn email-field-view []
+(defn auth-providers-view []
+  [:div.auth-providers
+   [:a.github "Github"]
+   [:a.google "Google"]
+   [:a.facebook "Facebook"]])
+
+(defn new-email-field-view []
   (let [value (subscribe [:register/field-value :email])
         status (subscribe [:register/field-status :email])
         errors (subscribe [:register/field-errors :email])]
@@ -28,29 +34,57 @@
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
         [:div.explanation
-         [:p "You will use your email to sign in."]
-         [:p "Double check to make sure it's correct."]]]])))
+         [:p "Or, register with: "]
+         [auth-providers-view]]]])))
 
+(defn returning-email-field-view []
+  [:div.option.email
+   [:h2 "Your Email"]
+   [:label
+    [:div.field
+     [:input {:type "email"
+              :placeholder "you@awesome.com"
+              :autocomplete true
+              :autocorrect false
+              :autocapitalize false
+              :spellcheck false
+              :auto-focus true}]]
+    [:div.explanation
+     [:p "Or, login with: "
+      [auth-providers-view]]]]])
 
-(defn auth-providers-view []
-  [:div
-   [:div "Github"]
-   [:div "Google"]
-   [:div "Facebook"]
-   [:div "Twitter"]
-   [:div "Microsoft"]])
-
-(defn password-field-view []
+(defn returning-password-field-view []
   [:div.option.password
    [:h2 "Your Password"]
    [:label
     [:div.field
-     [:input {:type "password"}]]]])
+     [:input {:type "password"
+              :placeholder "•••••••••••"}]]]
+   [:div.explanation
+    [:p "Don't remember your password?"
+     [:a "Reset it."]]]])
+
+(defn new-password-field-view []
+  [:div.option.password
+   [:h2 "Your Password"]
+   [:label
+    [:div.field
+     [:input {:type "password"
+              :placeholder "•••••••••••"}]]]
+   [:div.explanation
+    [:p "At least 8 characters. More is better!"]]])
+
+(defn new-user-view []
+  [:div
+   [new-email-field-view]])
+
+(defn returning-user-view []
+  [:div
+   [returning-email-field-view]
+   [returning-password-field-view]])
 
 (defn user-auth-view []
   [:div
-   [email-field-view]
-   (when true
-     [password-field-view])
-   (when true
-     [auth-providers-view])])
+   (if false
+     [new-user-view]
+     [returning-user-view])])
