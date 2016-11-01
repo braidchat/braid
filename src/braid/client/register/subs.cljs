@@ -33,3 +33,12 @@
   (fn [state _]
     (state :sending?)))
 
+(reg-sub
+  :register/user-mode
+  (fn [state _]
+    (state :user-mode)))
+
+(reg-sub
+  :register/action-mode
+  (fn [state _]
+    (state :action-mode)))

@@ -33,19 +33,19 @@
 (defn header-view []
   [:h1 "Braid"])
 
-(def mode :create-group)
-
 (defn form-view []
-  [:form.register {:on-submit (fn [e]
-                                (.preventDefault e)
-                                (dispatch [:submit-form]))}
-   [header-view]
-   [user-auth-view]
-   (case mode
-     :create-group [create-group-view]
-     :join-public-group [join-group-view :public]
-     :join-private-group [join-group-view :private]
-     :reset-password [reset-password-view])])
+  (let [action-mode (subscribe [:register/action-mode])]
+    (fn []
+      [:form.register {:on-submit (fn [e]
+                                    (.preventDefault e)
+                                    (dispatch [:submit-form]))}
+       [header-view]
+       [user-auth-view]
+       (case @action-mode
+         :create-group [create-group-view]
+         :join-public-group [join-group-view :public]
+         :join-private-group [join-group-view :private]
+         :reset-password [reset-password-view])])))
 
 (defn app-view []
   [:div.app

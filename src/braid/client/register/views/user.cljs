@@ -38,6 +38,10 @@
 (defn returning-user-view []
   [:div
    [:h2 "Log In"]
+   [:p "Don't have an account?"
+    [:a {:on-click (fn [_]
+                     (dispatch [:set-user-mode :register]))}
+     "Register"]]
    [returning-email-field-view]
    [password-field-view]])
 

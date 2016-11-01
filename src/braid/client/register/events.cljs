@@ -92,6 +92,8 @@
     {:db (-> state
              (assoc
                :sending? false
+               :user-mode :register
+               :action-mode :create-group
                :fields (reduce (fn [memo field]
                                  (assoc memo field
                                    {:value (or (get-url-param field) "")
@@ -202,3 +204,8 @@
   :handle-registration-response
   (fn [{state :db} [_ response]]
     {:db (assoc state :sending? false)}))
+
+(reg-event-fx
+  :set-user-mode
+  (fn [{state :db} [_ mode]]
+    {:db (assoc state :user-mode mode)}))
