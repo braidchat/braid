@@ -1,7 +1,8 @@
 (ns braid.client.register.styles.user
   (:require
     [braid.client.register.styles.vars :as vars]
-    [braid.client.ui.styles.fontawesome :as fontawesome]))
+    [braid.client.ui.styles.fontawesome :as fontawesome]
+    [braid.client.ui.styles.mixins :as mixins]))
 
 (defn user-styles []
 
@@ -28,8 +29,7 @@
        {:float "left"
         :height "3rem"
         :width "3rem"
-        :margin-right "0.5em"
-        :background "red"}]
+        :margin-right "0.5em"}]
 
       [:.info
        {:margin [["0.25rem" 0]]
@@ -43,6 +43,24 @@
 
        [:.email
         {}]]]]
+
+    [:.checking
+     :.authorizing
+     (vars/padded-with-border-mixin)
+     {:height "3rem"}
+
+     [:span
+      {:font-size "0.8em"
+       :color vars/secondary-text-color}]
+
+     [:&::before
+      mixins/spin
+      (fontawesome/mixin :spinner)
+      {:display "inline-block"
+       :margin-right "0.5em"
+       :font-size "2rem"
+       :vertical-align "middle"
+       :color vars/accent-color}]]
 
     [:.returning-user
      {:position "relative"}

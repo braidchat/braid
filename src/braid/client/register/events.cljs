@@ -96,7 +96,7 @@
                :user-auth-section {:user nil
                                    :checking? true
                                    :register? true
-                                   :oauth-in-progress? false}
+                                   :oauth-provider nil}
                :sending? false
                :user-mode :checking
                :action-mode :create-group
@@ -220,7 +220,7 @@
     {:db (-> state
              (assoc-in [:user-auth-section :user] data)
              (assoc-in [:user-auth-section :checking?] false)
-             (assoc-in [:user-auth-section :oauth-in-progress?] false))}))
+             (assoc-in [:user-auth-section :oauth-provider] nil))}))
 
 (reg-event-fx
   :register.user/switch-account
@@ -258,4 +258,4 @@
                                  :email "rafal.dittwald@gmail.com"
                                  :avatar "https://en.gravatar.com/userimage/612305/740d38e04f1c21f1fb27e76b5f63852a.jpeg"}]))
                    1000)
-    {:db (assoc-in state [:user-auth-section :oauth-in-progress?] true)}))
+    {:db (assoc-in state [:user-auth-section :oauth-provider] provider)}))

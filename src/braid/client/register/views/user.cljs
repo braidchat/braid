@@ -1,5 +1,6 @@
 (ns braid.client.register.views.user
   (:require
+    [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]]))
 
 (defn auth-providers-view []
@@ -105,12 +106,13 @@
          "Sign in with a different account"]]])))
 
 (defn checking-user-view []
-  [:div
-   "Checking..."])
+  [:div.checking
+   [:span "Authenticating..."]])
 
 (defn oauth-in-progress-view []
-  [:div
-   "Authorizing..."])
+  (let [provider (subscribe [:register.user/oauth-provider])]
+    [:div.authorizing
+     [:span "Authenticating with " (string/capitalize (name @provider)) "..."]]))
 
 (defn user-auth-view []
   (let [mode (subscribe [:register.user/user-auth-section-mode])]
