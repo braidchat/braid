@@ -55,7 +55,7 @@
    [:button.submit
     {:on-click (fn []
                  (dispatch [:register.user/remote-log-in]))}
-    "Log In"]])
+    "Log in to Braid"]])
 
 (defn new-password-field-view []
   [:div.option.password

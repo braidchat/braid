@@ -13,7 +13,12 @@
     :font-family vars/font-family
     :margin 0
     :line-height 1.5
-    :background vars/page-background-color}])
+    :background vars/page-background-color
+    :color vars/primary-text-color}
+
+    [:input
+     :button
+     {:font-family vars/font-family}]])
 
 (defn form-styles []
   [:form.register
@@ -135,16 +140,23 @@
      :text-transform "uppercase"
      :white-space "nowrap"
      :letter-spacing "0.05em"
-     :display "inline-block"
-     :transition "background 0.25s ease-in-out"
+     :transition "background 0.2s ease-in-out"
      :font-weight "bold"
      :cursor "pointer"
-     :-webkit-font-smoothing "antialiased"}
+     :text-align "left"
+     :-webkit-font-smoothing "antialiased"
+     :display "flex"
+     :justify-content "space-between"
+     :align-items "center"}
 
     [:&::after
-     (fontawesome/mixin :chevron-right)
-     {:display "inline-block"
-      :margin-left "0.5rem"}]
+     (fontawesome/mixin :chevron-right)]
+
+    [:&:hover
+     {:background "#2e9394"}]
+
+    [:&:active
+     {:background "#185556"}]
 
     [:&:focus
      {:outline "none"}]
