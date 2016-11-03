@@ -18,9 +18,6 @@
 
     [:.authed-user
 
-     [:p
-      {:text-align "center"}]
-
      [:.profile
       (vars/padded-with-border-mixin)
       {:height "3rem"}
@@ -42,7 +39,11 @@
          :font-weight "bold"}]
 
        [:.email
-        {}]]]]
+        {}]]]
+
+     [:p
+      {:text-align "center"
+       :margin-top "2rem"}]]
 
     [:.checking
      :.authorizing
