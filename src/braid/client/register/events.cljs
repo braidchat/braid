@@ -235,27 +235,41 @@
     {:db (assoc-in state [:user-auth-section :register?] bool)}))
 
 (reg-event-fx
+  :register.user/fake-remote-auth
+  (fn [{state :db} _]
+    (js/setTimeout (fn []
+                     (dispatch
+                       [:register.user/set-user
+                        {:id "1234"
+                         :nickname "rafd"
+                         :email "rafal.dittwald@gmail.com"
+                         :avatar "https://en.gravatar.com/userimage/612305/740d38e04f1c21f1fb27e76b5f63852a.jpeg"}]))
+                   1000)
+    {:db (assoc-in state [:user-auth-section :checking?] true)}))
+
+(reg-event-fx
   :register.user/remote-check-auth
   (fn [{state :db} _]
     ; TODO ajax request to check auth status
-    (js/setTimeout (fn []
-                     (dispatch [:register.user/set-user
-                                {:id "1234"
-                                 :nickname "rafd"
-                                 :email "rafal.dittwald@gmail.com"
-                                 :avatar "https://en.gravatar.com/userimage/612305/740d38e04f1c21f1fb27e76b5f63852a.jpeg"}]))
-                   1000)
+    (dispatch [:register.user/fake-remote-auth])
     {}))
 
 (reg-event-fx
   :register.user/remote-oauth
   (fn [{state :db} [_ provider]]
     ; TODO kick off oauth process
-    (js/setTimeout (fn []
-                     (dispatch [:register.user/set-user
-                                {:id "1234"
-                                 :nickname "rafd"
-                                 :email "rafal.dittwald@gmail.com"
-                                 :avatar "https://en.gravatar.com/userimage/612305/740d38e04f1c21f1fb27e76b5f63852a.jpeg"}]))
-                   1000)
+    (dispatch [:register.user/fake-remote-auth])
     {:db (assoc-in state [:user-auth-section :oauth-provider] provider)}))
+
+(reg-event-fx
+  :register.user/remote-log-in
+  (fn [{state :db} _]
+    ; TODO kick off login process
+    (dispatch [:register.user/fake-remote-auth])))
+
+(reg-event-fx
+  :register.user/remote-register
+  (fn [{state :db} _]
+    ; TODO kick off login process
+    (dispatch [:register.user/fake-remote-auth])))
+

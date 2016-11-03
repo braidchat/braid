@@ -51,7 +51,20 @@
                      (dispatch [:register.user/set-user-register? true]))}
      "Register"]]
    [returning-email-field-view]
-   [password-field-view]])
+   [password-field-view]
+   [:button.submit
+    {:on-click (fn []
+                 (dispatch [:register.user/remote-log-in]))}
+    "Log In"]])
+
+(defn new-password-field-view []
+  [:div.option.password
+   [:h2 "Password"]
+   [:label
+    [:div.field
+     [:input {:type "password"
+              :placeholder "•••••••••••"}]]]
+   [:p "At least 8 characters. More is better!"]])
 
 (defn new-email-field-view []
   (let [value (subscribe [:register/field-value :email])
@@ -60,7 +73,7 @@
     (fn []
       [:div.option.email
        {:class (name @status)}
-       [:h2 "Your Email"]
+       [:h2 "Email"]
        [:label
         [:div.field
          [:input {:type "email"
@@ -89,7 +102,12 @@
      {:on-click (fn [_]
                   (dispatch [:register.user/set-user-register? false]))}
      "Log In"]]
-   [new-email-field-view]])
+   [new-email-field-view]
+   [new-password-field-view]
+   [:button.submit
+    {:on-click (fn []
+                 (dispatch [:register.user/remote-register]))}
+    "Create a Braid Account"]])
 
 (defn authed-user-view []
   (let [user (subscribe [:register.user/user])]
