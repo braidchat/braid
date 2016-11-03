@@ -1,90 +1,22 @@
 (ns braid.client.register.events
   (:require
-    [re-frame.core :refer [reg-event-db reg-event-fx dispatch reg-fx]]
     [clojure.string :as string]
+    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
     [ajax.core :refer [ajax-request]]
     [ajax.edn :refer [edn-request-format edn-response-format]]
-    [braid.common.util :refer [slugify]])
+    [braid.common.util :refer [slugify]]
+    [braid.client.register.fx]
+    [braid.client.register.user-auth.events]
+    [braid.client.register.create-group.events]
+    [braid.client.register.validations :refer [validations]])
   (:import
-    [goog Uri]
-    [goog.format EmailAddress]))
+    [goog Uri]))
 
 (defn get-url-param [param]
   (.getParameterValue (.parse Uri js/window.location) (name param)))
 
 (def fields
   [:email :name :url :type])
-
-(def validations
-  {:email [(fn [email cb]
-             (if (string/blank? email)
-               (cb "You need to enter your email.")
-               (cb nil)))
-           (fn [email cb]
-             (if (not (.isValid (EmailAddress. email)))
-               (cb "This doesn't look like a valid email.")
-               (cb nil)))]
-   :name [(fn [name cb]
-            (if (string/blank? name)
-              (cb "Your group needs a name.")
-              (cb nil)))]
-   :url [(fn [url cb]
-           (if (string/blank? url)
-             (cb "Your group needs a URL.")
-             (cb nil)))
-         (fn [url cb]
-           (if (not (re-matches #"[a-z0-9-]*" url))
-             (cb "Your URL can only contain lowercase letters, numbers or dashes.")
-             (cb nil)))
-         (fn [url cb]
-           (if (re-matches #"-.*" url)
-             (cb "Your URL can't start with a dash.")
-             (cb nil)))
-         (fn [url cb]
-           (if (re-matches #".*-" url)
-             (cb "Your URL can't end with a dash.")
-             (cb nil)))
-         (fn [url cb]
-           (ajax-request
-             {:uri (str "//" js/window.api_domain "/registration/check-slug-unique")
-              :method :get
-              :format (edn-request-format)
-              :response-format (edn-response-format)
-              :params {:slug url}
-              :handler (fn [[_ valid?]]
-                         (if valid?
-                           (cb nil)
-                           (cb "Your group URL is already taken; try another.")))}))]
-   :type [(fn [type cb]
-            (when (string/blank? type)
-              (cb "You need to select a group type.")
-              (cb nil)))]})
-
-(defonce timeouts
-  (atom {}))
-
-(reg-fx :dispatch-debounce
-        (fn [[id event-vec n]]
-          (js/clearTimeout (@timeouts id))
-          (swap! timeouts assoc id
-                 (js/setTimeout (fn []
-                                  (dispatch event-vec)
-                                  (swap! timeouts dissoc id))
-                                n))))
-
-(reg-fx :stop-debounce
-        (fn [id]
-          (js/clearTimeout (@timeouts id))
-          (swap! timeouts dissoc id)))
-
-(reg-fx :validate-n
-  (fn [to-validate]
-    (doseq [[field field-value] to-validate]
-      (doseq [validator-fn (validations field)]
-        (validator-fn
-          field-value
-          (fn [error]
-            (dispatch [:update-field-status field error])))))))
 
 ; EVENTS
 
@@ -212,64 +144,4 @@
   (fn [{state :db} [_ response]]
     {:db (assoc state :sending? false)}))
 
-; USER AUTH SECTION
-
-(reg-event-fx
-  :register.user/set-user
-  (fn [{state :db} [_ data]]
-    {:db (-> state
-             (assoc-in [:user-auth-section :user] data)
-             (assoc-in [:user-auth-section :checking?] false)
-             (assoc-in [:user-auth-section :oauth-provider] nil))}))
-
-(reg-event-fx
-  :register.user/switch-account
-  (fn [{state :db} _]
-    ; TODO ajax request to log-out
-    {:dispatch-n [[:register.user/set-user nil]
-                  [:register.user/set-user-register? false]]}))
-
-(reg-event-fx
-  :register.user/set-user-register?
-  (fn [{state :db} [_ bool]]
-    {:db (assoc-in state [:user-auth-section :register?] bool)}))
-
-(reg-event-fx
-  :register.user/fake-remote-auth
-  (fn [{state :db} _]
-    (js/setTimeout (fn []
-                     (dispatch
-                       [:register.user/set-user
-                        {:id "1234"
-                         :nickname "rafd"
-                         :email "rafal.dittwald@gmail.com"
-                         :avatar "https://en.gravatar.com/userimage/612305/740d38e04f1c21f1fb27e76b5f63852a.jpeg"}]))
-                   1000)
-    {:db (assoc-in state [:user-auth-section :checking?] true)}))
-
-(reg-event-fx
-  :register.user/remote-check-auth
-  (fn [{state :db} _]
-    ; TODO ajax request to check auth status
-    (dispatch [:register.user/fake-remote-auth])
-    {}))
-
-(reg-event-fx
-  :register.user/remote-oauth
-  (fn [{state :db} [_ provider]]
-    ; TODO kick off oauth process
-    (dispatch [:register.user/fake-remote-auth])
-    {:db (assoc-in state [:user-auth-section :oauth-provider] provider)}))
-
-(reg-event-fx
-  :register.user/remote-log-in
-  (fn [{state :db} _]
-    ; TODO kick off login process
-    (dispatch [:register.user/fake-remote-auth])))
-
-(reg-event-fx
-  :register.user/remote-register
-  (fn [{state :db} _]
-    ; TODO kick off login process
-    (dispatch [:register.user/fake-remote-auth])))
 

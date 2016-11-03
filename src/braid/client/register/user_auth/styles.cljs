@@ -1,6 +1,6 @@
-(ns braid.client.register.styles.user
+(ns braid.client.register.user-auth.styles
   (:require
-    [braid.client.register.styles.vars :as vars]
+    [braid.client.register.styles-vars :as vars]
     [braid.client.ui.styles.fontawesome :as fontawesome]
     [braid.client.ui.styles.mixins :as mixins]))
 

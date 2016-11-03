@@ -2,5 +2,4 @@
 
 (defn join-group-view [k]
   [:div
-   [:h2 "Join <Group Name>"]
-   ])
+   [:h2 "Join <Group Name>"]])

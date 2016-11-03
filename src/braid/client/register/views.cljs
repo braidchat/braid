@@ -1,15 +1,15 @@
 (ns braid.client.register.views
   (:require
-    [re-frame.core :refer [dispatch subscribe]]
-    [braid.client.register.styles :as styles]
-    [braid.client.register.views.create-group :refer [create-group-view]]
-    [braid.client.register.views.join-group :refer [join-group-view]]
-    [braid.client.register.views.user :refer [user-auth-view]]
-    [braid.client.register.views.reset-password :refer [reset-password-view]]
+    [re-frame.core :refer [subscribe]]
     [garden.core :refer [css]]
     [garden.stylesheet :refer [at-import]]
-    [braid.client.register.styles.create-group :refer [create-group-styles]]
-    [braid.client.register.styles.user :refer [user-styles]]))
+    [braid.client.register.styles :as styles]
+    [braid.client.register.views.join-group :refer [join-group-view]]
+    [braid.client.register.views.reset-password :refer [reset-password-view]]
+    [braid.client.register.create-group.views :refer [create-group-view]]
+    [braid.client.register.create-group.styles :refer [create-group-styles]]
+    [braid.client.register.user-auth.views :refer [user-auth-view]]
+    [braid.client.register.user-auth.styles :refer [user-styles]]))
 
 (defn style-view []
   [:style

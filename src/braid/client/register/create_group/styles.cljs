@@ -1,6 +1,6 @@
-(ns braid.client.register.styles.create-group
+(ns braid.client.register.create-group.styles
   (:require
-    [braid.client.register.styles.vars :as vars]
+    [braid.client.register.styles-vars :as vars]
     [braid.client.ui.styles.fontawesome :as fontawesome]))
 
 (defn create-group-styles []

@@ -1,7 +1,7 @@
 (ns braid.client.register.core
   (:require
     [reagent.core :as r]
-    [re-frame.core :refer [dispatch-sync dispatch]]
+    [re-frame.core :refer [dispatch-sync]]
     [braid.client.register.events]
     [braid.client.register.subs]
     [braid.client.register.views :refer [app-view]]))

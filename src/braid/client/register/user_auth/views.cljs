@@ -1,4 +1,4 @@
-(ns braid.client.register.views.user
+(ns braid.client.register.user-auth.views
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]]))
@@ -87,7 +87,7 @@
                              (dispatch [:blur :email]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
-                                 (dispatch [:update-value :email value]))                              )}]]
+                                 (dispatch [:update-value :email value])))}]]
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
         [:p "Or, register with: "

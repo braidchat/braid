@@ -1,7 +1,9 @@
 (ns braid.client.register.subs
   (:require
+    [clojure.string :as string]
     [re-frame.core :refer [reg-sub]]
-    [clojure.string :as string]))
+    [braid.client.register.user-auth.subs]
+    [braid.client.register.create-group.subs]))
 
 (reg-sub
   :register/field-valid?
@@ -37,25 +39,3 @@
   :register/action-mode
   (fn [state _]
     (state :action-mode)))
-
-; USER AUTH SECTION
-
-(reg-sub
-  :register.user/user
-  (fn [state _]
-    (get-in state [:user-auth-section :user])))
-
-(reg-sub
-  :register.user/user-auth-section-mode
-  (fn [state _]
-    (cond
-      (get-in state [:user-auth-section :checking?]) :checking
-      (get-in state [:user-auth-section :user]) :authed
-      (get-in state [:user-auth-section :oauth-provider]) :oauth-in-progress
-      (get-in state [:user-auth-section :register?]) :register
-      :else :log-in)))
-
-(reg-sub
-  :register.user/oauth-provider
-  (fn [state _]
-    (get-in state [:user-auth-section :oauth-provider])))
