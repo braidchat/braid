@@ -5,18 +5,13 @@
 
 (defn auth-providers-view []
   [:span.auth-providers
-   [:button.github
-    {:on-click (fn []
-                 (dispatch [:register.user/remote-oauth :github]))}
-    "Github"]
-   [:button.google
-    {:on-click (fn []
-                 (dispatch [:register.user/remote-oauth :google]))}
-    "Google"]
-   [:button.facebook
-    {:on-click (fn []
-                 (dispatch [:register.user/remote-oauth :facebook]))}
-    "Facebook"]])
+   (for [provider [:github :google :facebook]]
+     [:button
+      {:class (name provider)
+       :on-click (fn [e]
+                   (.preventDefault e)
+                   (dispatch [:register.user/remote-oauth provider]))}
+      (string/capitalize (name provider))])])
 
 (defn returning-email-field-view []
   [:div.option.email
