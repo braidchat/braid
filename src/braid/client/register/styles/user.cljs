@@ -69,7 +69,9 @@
      ["> p"
       {:position "absolute"
        :top 0
-       :right 0}]]
+       :right 0
+       :margin 0
+       :line-height "2rem"}]]
 
     [:.new-user
      {:position "relative"}
@@ -77,7 +79,9 @@
      ["> p"
       {:position "absolute"
        :top 0
-       :right 0}]]
+       :right 0
+       :margin 0
+       :line-height "2rem"}]]
 
     [:.auth-providers
      {:display "inline"}
