@@ -45,7 +45,7 @@
 
 (defn returning-user-view []
   [:div.returning-user
-   [:h1 "Log In to Braid"]
+   [:h1 "Log in to Braid"]
    [:p "Don't have an account?"
     [:button {:on-click (fn [_]
                      (dispatch [:register.user/set-user-register? true]))}
