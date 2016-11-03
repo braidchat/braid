@@ -90,7 +90,7 @@
                                (dispatch [:update-value :type value])))}]
         [:span "Public Group"]
         [:div.explanation
-         [:p "Anyone can find and join your group through the Braid Group Directory."]
+         [:p "Anyone can find your group through the Braid Group Directory."]
          [:p "Unlimited everything. Free forever."]]]
        [:label {:class (when (= "private" @value) "checked")}
         [:input {:type "radio"
@@ -114,13 +114,14 @@
         sending? (subscribe [:register/sending?])]
     (fn []
       (let [all-valid? (and @name-valid? @url-valid? @type-valid?)]
-        [:button {:class (str (when (not all-valid?) "disabled") " "
-                              (when @sending? "sending"))}
-         "Create your group"]))))
+        [:button.submit
+         {:class (str (when (not all-valid?) "disabled") " "
+                      (when @sending? "sending"))}
+         "Create your Braid group"]))))
 
 (defn create-group-view []
-  [:div
-   [:h2 "Start a New Group"]
+  [:div.section
+   [:h1 "Start a New Braid Group"]
    [group-name-field-view]
    [group-url-field-view]
    [group-type-field-view]

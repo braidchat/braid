@@ -1,7 +1,7 @@
 (ns braid.client.register.styles.create-group
   (:require
-    [braid.client.register.styles.vars :as vars]))
-
+    [braid.client.register.styles.vars :as vars]
+    [braid.client.ui.styles.fontawesome :as fontawesome]))
 
 (defn create-group-styles []
 
@@ -21,12 +21,13 @@
       ["input[type=text]"
        {:text-align "right"
         :border-radius [[vars/border-radius 0 0 vars/border-radius]]
-        :width "8.75em"
+        :width "10em"
         :vertical-align "top" }]
 
       [:span
        (vars/input-field-mixin)
-       {:border-left "none"
+       {:width "inherit"
+        :border-left "none"
         :display "inline-block"
         :vertical-align "top"
         :background vars/disabled-input-color
@@ -41,20 +42,21 @@
     [:&.group-type
 
      [:label
+      (vars/padded-with-border-mixin)
       {:margin [[vars/small-spacing 0]]
-       :border [["1px" "solid" vars/field-border-color]]
        :padding [["0.75rem" "1rem" "1.0rem"]]
-       :border-radius vars/border-radius
        :position "relative"
        :cursor "pointer"}
 
       [:&.checked
+
        [:&::after
         (vars/input-field-mixin)
-        {:content "\"\u2713\""
+        (fontawesome/mixin :check-circle)
+        {:width "inherit"
          :color vars/valid-color
          :position "absolute"
-         :right "-2em"
+         :right "0.25em"
          :top "50%"
          :margin-top "-1em"
          :border "none"
@@ -70,21 +72,17 @@
         :margin-top "0.25em"}
 
        [:p
-        {:display "inline"
-         :margin-right "0.25em"}]]]
+        {:margin-right "0.25em"}]]]
 
      [:&.invalid
 
       [:label
        {:border-color vars/invalid-color}]
 
-      [:.error-message::after
+      [:.error-message::before
        (vars/input-field-mixin)
-       {:content "\"\u26a0\""
+       (fontawesome/mixin :warning)
+       {:width "inherit"
         :color vars/invalid-color
-        :position "absolute"
-        :right "-2em"
-        :top "50%"
-        :margin-top "-1em"
         :border "none"
-        :display "inline-block"}]]]]])
+        :vertical-align "middle"}]]]]])

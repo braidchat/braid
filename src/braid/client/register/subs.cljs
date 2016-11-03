@@ -34,11 +34,23 @@
     (state :sending?)))
 
 (reg-sub
-  :register/user-mode
-  (fn [state _]
-    (state :user-mode)))
-
-(reg-sub
   :register/action-mode
   (fn [state _]
     (state :action-mode)))
+
+; USER AUTH SECTION
+
+(reg-sub
+  :register.user/user
+  (fn [state _]
+    (get-in state [:user-auth-section :user])))
+
+(reg-sub
+  :register.user/user-auth-section-mode
+  (fn [state _]
+    (cond
+      (get-in state [:user-auth-section :checking?]) :checking
+      (get-in state [:user-auth-section :user]) :authed
+      (get-in state [:user-auth-section :oauth-in-progress?]) :oauth-in-progress
+      (get-in state [:user-auth-section :register?]) :register
+      :else :log-in)))

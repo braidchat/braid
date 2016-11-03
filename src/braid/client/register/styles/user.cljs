@@ -7,34 +7,88 @@
 
   [:form
 
-   [:.option
+   [:.user-auth
+
+    [:p
+     (vars/small-text-mixin)
+
+     [:button
+      (vars/small-button-mixin)]]
+
+    [:.authed-user
+
+     [:p
+      {:text-align "center"}]
+
+     [:.profile
+      (vars/padded-with-border-mixin)
+      {:height "3rem"}
+
+      [:.avatar
+       {:float "left"
+        :height "3rem"
+        :width "3rem"
+        :margin-right "0.5em"
+        :background "red"}]
+
+      [:.info
+       {:margin [["0.25rem" 0]]
+        :line-height "1.25rem"
+        :color vars/secondary-text-color
+        :font-size "0.8em"}
+
+       [:.nickname
+        {:color vars/primary-text-color
+         :font-weight "bold"}]
+
+       [:.email
+        {}]]]]
+
+    [:.returning-user
+     {:position "relative"}
+
+     ["> p"
+      {:position "absolute"
+       :top 0
+       :right 0}]]
+
+    [:.new-user
+     {:position "relative"}
+
+     ["> p"
+      {:position "absolute"
+       :top 0
+       :right 0}]]
 
     [:.auth-providers
      {:display "inline"}
 
-     [:a
-      {:margin "0 0.4em"}
+     [:button
+      {:margin "0 0.5em"}
 
-     [:&::before
-      {:margin-right "0.25em"}]
-
-     [:&.google
       [:&::before
-       (fontawesome/mixin :google)]]
+       {:margin "0 0.35em 0 0.15em"}]
 
-     [:&.github
-      [:&::before
-       (fontawesome/mixin :github)]]
+      [:&.google
+       [:&::before
+        (fontawesome/mixin :google)]]
 
-     [:&.facebook
-      [:&::before
-       (fontawesome/mixin :facebook)]]]]
+      [:&.github
+       [:&::before
+        (fontawesome/mixin :github)]]
 
-    [:&.password
-     [:input
-      {:width "15em"}]]
+      [:&.facebook
+       [:&::before
+        (fontawesome/mixin :facebook)]]]]
 
-    [:&.email
-     [:input
-      {:width "15em"}]]]])
+    [:.option
+
+
+     [:&.password
+      [:input
+       {:width "15em"}]]
+
+     [:&.email
+      [:input
+       {:width "15em"}]]]]])
 

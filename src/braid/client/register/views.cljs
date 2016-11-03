@@ -31,7 +31,7 @@
           (user-styles))}}])
 
 (defn header-view []
-  [:h1 "Braid"])
+  [:h1.header "Braid"])
 
 (defn form-view []
   (let [action-mode (subscribe [:register/action-mode])]

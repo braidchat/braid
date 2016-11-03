@@ -1,48 +1,29 @@
 (ns braid.client.register.styles
   (:require
+    [braid.client.ui.styles.fontawesome :as fontawesome]
     [braid.client.ui.styles.animations :as animations]
     [braid.client.ui.styles.mixins :as mixins]
-    [braid.client.ui.styles.icons :as icons]
     [braid.client.register.styles.vars :as vars]))
-
 
 (def anim-spin animations/anim-spin)
 
 (defn app-styles []
-  [:html
-   {:background vars/page-background-color
-    :border [["1px" "solid" vars/field-border-color]]
-    :border-bottom "none"
-    :border-top "none"}
-
-   [:body
-    {:min-height "100vh"
-     :font-family "Open Sans"
-     :max-width "23em"
-     :margin "0 auto"
-     :line-height 1.5
-     :background "white"
-     :padding [[0 "5rem"]]}]])
+  [:body
+   {:min-height "100vh"
+    :font-family vars/font-family
+    :margin 0
+    :line-height 1.5
+    :background vars/page-background-color}])
 
 (defn form-styles []
   [:form.register
-   {; temporary disable flex styles
-    ; during refactor
-    ;:display "flex"
-    ;:flex-direction "column"
-    ;:height "100vh"
-    ;:justify-content "space-around"
-    :max-height "80em"
-    :padding [["1.5rem" 0]]
-    :box-sizing "border-box"
-    }
 
-   [:h1
-    {:margin 0
-     :color vars/accent-color
+   [:h1.header
+    {:color vars/accent-color
      :font-weight "normal"
      :font-size "1.75em"
-     :margin-bottom "0.75rem"}
+     :text-align "center"
+     :margin "2rem 0"}
 
     [:&:before
      {:content "\"\""
@@ -55,8 +36,20 @@
       :background-image "url(/images/braid-logo-color.svg)"
       :background-size "contain"}]]
 
-   [:h2
-    {:margin [["3rem" 0 "1.5rem"]]}]
+   [:.section
+    {:background vars/form-background-color
+     :border [["1px" "solid" vars/field-border-color]]
+     :max-width "32em"
+     :padding "2rem"
+     :margin "0 auto"
+     :box-sizing "border-box"
+     :margin-bottom "2rem"
+     :border-radius vars/border-radius}
+
+    [:h1
+     {:margin [[0 0 "1.5rem"]]
+      :color vars/accent-color
+      :font-size "1.2em"}]]
 
    [:.option
     {:margin [[0 0 "2rem"]]
@@ -68,12 +61,7 @@
       :margin [[0 0 vars/small-spacing 0]]}]
 
     [:.explanation
-     {:color vars/secondary-text-color
-      :font-size "0.75em"
-      :margin [[vars/small-spacing 0 0 0]]}
-
-     [:p
-      {:margin "0"}]]
+     (vars/small-text-mixin)]
 
     [:.error-message
      {:position "absolute"
@@ -102,36 +90,43 @@
      ["&&::-moz-placeholder"
       {:color vars/placeholder-color}]]
 
+    [:.field
+     {:position "relative"}
+
+     [:&::after
+      (vars/input-field-mixin)
+      ; cancel out some input-field-mixin styles
+      {:width "inherit"
+       :border "none"
+       :margin "1px"}
+      {:position "absolute"
+       :top 0
+       :right "0.25em"}]]
+
     [:&.invalid
      ["input[type=text]"
       "input[type=email]"
       {:border-color vars/invalid-color}]
 
-     [:.field::after
-      (vars/input-field-mixin)
-      {:content "\"\u26a0\""
-       :color vars/invalid-color
-       :border "none"
-       :display "inline-block"}]]
+     [:.field
+      [:&::after
+       (fontawesome/mixin :warning)
+       {:color vars/invalid-color}]]]
 
     [:&.valid
      [:.field::after
-      (vars/input-field-mixin)
-      {:content "\"\u2713\""
-       :color vars/valid-color
-       :border "none"
-       :display "inline-block"}]]
+      (fontawesome/mixin :check-circle)
+      {:color vars/valid-color}]]
 
     [:&.loading
      [:.field::after
-      (vars/input-field-mixin)
-      {:content "\"\u2026\""
-       :color vars/secondary-text-color
-       :border "none"
-       :display "inline-block"}]]]
+      (fontawesome/mixin :spinner)
+      mixins/spin
+      {:color vars/secondary-text-color}]]]
 
-   [:button
+   [:button.submit
     {:font-size "1.25em"
+     :width "100%"
      :padding "1rem"
      :background vars/accent-color
      :border "none"
@@ -142,15 +137,14 @@
      :letter-spacing "0.05em"
      :display "inline-block"
      :transition "background 0.25s ease-in-out"
+     :font-weight "bold"
      :cursor "pointer"
      :-webkit-font-smoothing "antialiased"}
 
     [:&::after
-     {:content "\"≫\""
-      :display "inline-block"
-      :width "1.2em"
-      :height "1.2em"
-      :margin-left "0.25rem"}]
+     (fontawesome/mixin :chevron-right)
+     {:display "inline-block"
+      :margin-left "0.5rem"}]
 
     [:&:focus
      {:outline "none"}]
@@ -163,12 +157,6 @@
 
      [:&::after
       mixins/spin
-      {:content "\"\""
-       :width "1.2em"
-       :height "1.2em"
-       :display "inline-block"
-       :vertical-align "top"
-       :margin-left "0.25rem"
-       :background-image (icons/spinner "#fff")
-       :background-size "contain"}]]]])
+      (fontawesome/mixin :spinner)
+      {:display "inline-block"}]]]])
 

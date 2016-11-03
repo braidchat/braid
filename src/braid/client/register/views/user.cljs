@@ -4,9 +4,18 @@
 
 (defn auth-providers-view []
   [:span.auth-providers
-   [:a.github "Github"]
-   [:a.google "Google"]
-   [:a.facebook "Facebook"]])
+   [:button.github
+    {:on-click (fn []
+                 (dispatch [:register.user/remote-oauth :github]))}
+    "Github"]
+   [:button.google
+    {:on-click (fn []
+                 (dispatch [:register.user/remote-oauth :google]))}
+    "Google"]
+   [:button.facebook
+    {:on-click (fn []
+                 (dispatch [:register.user/remote-oauth :facebook]))}
+    "Facebook"]])
 
 (defn returning-email-field-view []
   [:div.option.email
@@ -20,9 +29,8 @@
               :autocapitalize false
               :spellcheck false
               :auto-focus true}]]
-    [:div.explanation
-     [:p "Or, login with: "
-      [auth-providers-view]]]]])
+    [:p "Or, login with: "
+     [auth-providers-view]]]])
 
 (defn password-field-view []
   [:div.option.password
@@ -31,16 +39,15 @@
     [:div.field
      [:input {:type "password"
               :placeholder "•••••••••••"}]]]
-   [:div.explanation
-    [:p "Don't remember your password?"
-     [:a "Reset it."]]]])
+   [:p "Don't remember?"
+    [:button "Reset your password"]]])
 
 (defn returning-user-view []
-  [:div
-   [:h2 "Log In"]
+  [:div.returning-user
+   [:h1 "Log In to Braid"]
    [:p "Don't have an account?"
-    [:a {:on-click (fn [_]
-                     (dispatch [:set-user-mode :register]))}
+    [:button {:on-click (fn [_]
+                     (dispatch [:register.user/set-user-register? true]))}
      "Register"]]
    [returning-email-field-view]
    [password-field-view]])
@@ -70,17 +77,48 @@
                                  (dispatch [:update-value :email value]))                              )}]]
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
-        [:div.explanation
-         [:p "Or, register with: "
-          [auth-providers-view]]]]])))
+        [:p "Or, register with: "
+         [auth-providers-view]]]])))
 
 (defn new-user-view []
-  [:div
-   [:h2 "Create an Account"]
+  [:div.new-user
+   [:h1 "Create a Braid Account"]
+   [:p "Already have one?"
+    [:button
+     {:on-click (fn [_]
+                  (dispatch [:register.user/set-user-register? false]))}
+     "Log In"]]
    [new-email-field-view]])
 
-(defn user-auth-view []
+(defn authed-user-view []
+  (let [user (subscribe [:register.user/user])]
+    (fn []
+      [:div.authed-user
+       [:div.profile
+        [:img.avatar {:src (@user :avatar)}]
+        [:div.info
+         [:div.nickname "@" (@user :nickname)]
+         [:div.email (@user :email)]]]
+       [:p "Not you?"
+        [:button {:on-click (fn []
+                              (dispatch [:register.user/switch-account]))}
+         "Sign in with a different account"]]])))
+
+(defn checking-user-view []
   [:div
-   (if true
-     [new-user-view]
-     [returning-user-view])])
+   "Checking..."])
+
+(defn oauth-in-progress-view []
+  [:div
+   "Authorizing..."])
+
+(defn user-auth-view []
+  (let [mode (subscribe [:register.user/user-auth-section-mode])]
+    (fn []
+      [:div.section.user-auth
+       (case @mode
+         :checking [checking-user-view]
+         :register [new-user-view]
+         :log-in [returning-user-view]
+         :authed [authed-user-view]
+         :oauth-in-progress [oauth-in-progress-view])])))
