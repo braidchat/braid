@@ -44,17 +44,21 @@
     [:button "Reset your password"]]])
 
 (defn returning-user-view []
-  [:div.returning-user
+  [:form.returning-user
+   {:on-submit
+    (fn [e]
+      (.preventDefault e)
+      (dispatch [:register.user/remote-log-in]))}
    [:h1 "Log in to Braid"]
    [:p "Don't have an account?"
-    [:button {:on-click (fn [_]
-                     (dispatch [:register.user/set-user-register? true]))}
+    [:button
+     {:on-click (fn [e]
+                  (.preventDefault e)
+                  (dispatch [:register.user/set-user-register? true]))}
      "Register"]]
    [returning-email-field-view]
    [password-field-view]
    [:button.submit
-    {:on-click (fn []
-                 (dispatch [:register.user/remote-log-in]))}
     "Log in to Braid"]])
 
 (defn new-password-field-view []
@@ -95,18 +99,21 @@
          [auth-providers-view]]]])))
 
 (defn new-user-view []
-  [:div.new-user
+  [:form.new-user
+   {:on-submit
+    (fn [e]
+      (.preventDefault e)
+      (dispatch [:register.user/remote-register]))}
    [:h1 "Create a Braid Account"]
    [:p "Already have one?"
     [:button
-     {:on-click (fn [_]
+     {:on-click (fn [e]
+                  (.preventDefault e)
                   (dispatch [:register.user/set-user-register? false]))}
      "Log In"]]
    [new-email-field-view]
    [new-password-field-view]
    [:button.submit
-    {:on-click (fn []
-                 (dispatch [:register.user/remote-register]))}
     "Create a Braid Account"]])
 
 (defn authed-user-view []

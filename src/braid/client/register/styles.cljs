@@ -21,7 +21,7 @@
      {:font-family vars/font-family}]])
 
 (defn form-styles []
-  [:form.register
+  [:.register
 
    [:h1.header
     {:color vars/accent-color

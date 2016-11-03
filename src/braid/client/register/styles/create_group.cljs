@@ -5,7 +5,7 @@
 
 (defn create-group-styles []
 
-  [:form
+  [:.register
 
    [:.option
 

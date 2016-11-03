@@ -6,7 +6,7 @@
 
 (defn user-styles []
 
-  [:form
+  [:.register
 
    [:.user-auth
 

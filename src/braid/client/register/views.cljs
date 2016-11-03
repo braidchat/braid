@@ -36,9 +36,7 @@
 (defn form-view []
   (let [action-mode (subscribe [:register/action-mode])]
     (fn []
-      [:form.register {:on-submit (fn [e]
-                                    (.preventDefault e)
-                                    (dispatch [:submit-form]))}
+      [:div.register
        [header-view]
        [user-auth-view]
        (case @action-mode

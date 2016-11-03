@@ -121,8 +121,12 @@
 
 (defn create-group-view []
   [:div.section
-   [:h1 "Start a New Braid Group"]
-   [group-name-field-view]
-   [group-url-field-view]
-   [group-type-field-view]
-   [button-view]])
+   [:form
+    {:on-submit (fn [e]
+                  (.preventDefault e)
+                  (dispatch [:submit-form]))}
+    [:h1 "Start a New Braid Group"]
+    [group-name-field-view]
+    [group-url-field-view]
+    [group-type-field-view]
+    [button-view]]])
