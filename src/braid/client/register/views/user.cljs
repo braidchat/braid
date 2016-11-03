@@ -30,7 +30,7 @@
               :autocapitalize false
               :spellcheck false
               :auto-focus true}]]
-    [:p "Or, login with: "
+    [:p "Or, log in with: "
      [auth-providers-view]]]])
 
 (defn password-field-view []
