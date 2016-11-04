@@ -3,6 +3,17 @@
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
 
 (reg-event-fx
+  :register.user/initialize
+  (fn [{state :db} _]
+    {:db (-> state
+             (assoc
+               :user-auth {:user nil
+                           :checking? true
+                           :register? true
+                           :oauth-provider nil}))
+     :dispatch [:register.user/remote-check-auth]}))
+
+(reg-event-fx
   :register.user/set-user
   (fn [{state :db} [_ data]]
     {:db (-> state

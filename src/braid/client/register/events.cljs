@@ -25,10 +25,6 @@
   (fn [{state :db} _]
     {:db (-> state
              (assoc
-               :user-auth {:user nil
-                           :checking? true
-                           :register? true
-                           :oauth-provider nil}
                :action {:mode :create-group
                         :sending? false}
                :fields (reduce (fn [memo field]
@@ -40,7 +36,7 @@
                                     :errors []}))
                                {} fields)))
      :dispatch-n [[:validate-all]
-                  [:register.user/remote-check-auth]]}))
+                  [:register.user/initialize]]}))
 
 (reg-event-fx
   :blur
