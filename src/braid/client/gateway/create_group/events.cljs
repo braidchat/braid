@@ -28,14 +28,7 @@
                     [:validate-field :url]]})))
 
 (reg-event-fx
-  :submit-form
-  (fn [{state :db} _]
-    (if-let [all-valid? (every? true? (map (fn [[_ v]] (empty? (v :errors))) (state :fields)))]
-      {:dispatch [:send-registration-request]}
-      {:dispatch [:touch-all-fields]})))
-
-(reg-event-fx
-  :send-registration-request
+  :action.create-group/remote-create-group
   (fn [{state :db} _]
     (ajax-request {:uri (str "//" js/window.api_domain "/registration/register")
                    :method :put

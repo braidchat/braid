@@ -15,36 +15,74 @@
       (string/capitalize (name provider))])])
 
 (defn returning-email-field-view []
-  [:div.option.email
-   [:h2 "Email"]
-   [:label
-    [:div.field
-     [:input {:type "email"
-              :placeholder "you@awesome.com"
-              :autocomplete true
-              :autocorrect false
-              :autocapitalize false
-              :spellcheck false
-              :auto-focus true}]]
-    [:p "Or, log in with: "
-     [auth-providers-view]]]])
+  (let [field-id :user-auth.login/email
+        value (subscribe [:gateway/field-value field-id])
+        status (subscribe [:gateway/field-status field-id])
+        errors (subscribe [:gateway/field-errors field-id])]
+    (fn []
+      [:div.option.email
+       {:class (name @status)}
+       [:h2 "Email"]
+       [:label
+        [:div.field
+         [:input {:type "email"
+                  :placeholder "you@awesome.com"
+                  :autocomplete true
+                  :autocorrect false
+                  :autocapitalize false
+                  :spellcheck false
+                  :auto-focus true
+                  :on-change (fn [e]
+                               (let [value (.. e -target -value)]
+                                 (dispatch [:update-value field-id value])))
+                  }]]
+        (when (= :invalid @status)
+          [:div.error-message (first @errors)])
+        [:p "Or, log in with: "
+         [auth-providers-view]]]])))
 
-(defn password-field-view []
-  [:div.option.password
-   [:h2 "Password"]
-   [:label
-    [:div.field
-     [:input {:type "password"
-              :placeholder "•••••••••••"}]]]
-   [:p "Don't remember?"
-    [:button "Reset your password"]]])
+(defn returning-password-field-view []
+  (let [field-id :user-auth.login/password
+        value (subscribe [:gateway/field-value field-id])
+        status (subscribe [:gateway/field-status field-id])
+        errors (subscribe [:gateway/field-errors field-id])]
+    (fn []
+      [:div.option.password
+       {:class (name @status)}
+       [:h2 "Password"]
+       [:label
+        [:div.field
+         [:input {:type "password"
+                  :placeholder "•••••••••••"
+                  :on-change (fn [e]
+                               (let [value (.. e -target -value)]
+                                 (dispatch [:update-value field-id value])))}]]]
+       (when (= :invalid @status)
+         [:div.error-message (first @errors)])
+       [:p "Don't remember?"
+        [:button
+         {:on-click (fn [])}
+         "Reset your password"]]])))
+
+(defn login-button-view []
+  (let [fields-valid?
+        (subscribe [:gateway/fields-valid?
+                    [:user-auth.login/email
+                     :user-auth.login/password]])]
+    (fn []
+      [:button.submit
+       {:class (when-not @fields-valid? "disabled")}
+       "Log in to Braid"])))
 
 (defn returning-user-view []
   [:form.returning-user
    {:on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:gateway.user/remote-log-in]))}
+      (dispatch [:gateway/submit-form
+                 {:validate-fields [:user-auth.login/email
+                                    :user-auth.login/password]
+                  :dispatch-when-valid [:gateway.user/remote-log-in]}]))}
    [:h1 "Log in to Braid"]
    [:p "Don't have an account?"
     [:button
@@ -53,23 +91,34 @@
                   (dispatch [:gateway.user/set-user-register? true]))}
      "Register"]]
    [returning-email-field-view]
-   [password-field-view]
-   [:button.submit
-    "Log in to Braid"]])
+   [returning-password-field-view]
+   [login-button-view]])
 
 (defn new-password-field-view []
-  [:div.option.password
-   [:h2 "Password"]
-   [:label
-    [:div.field
-     [:input {:type "password"
-              :placeholder "•••••••••••"}]]]
-   [:p "At least 8 characters. More is better!"]])
+  (let [field-id :user-auth.register/password
+        value (subscribe [:gateway/field-value field-id])
+        status (subscribe [:gateway/field-status field-id])
+        errors (subscribe [:gateway/field-errors field-id])]
+    (fn []
+      [:div.option.password
+       {:class (name @status)}
+       [:h2 "Password"]
+       [:label
+        [:div.field
+         [:input {:type "password"
+                  :placeholder "•••••••••••"
+                  :on-change (fn [e]
+                               (let [value (.. e -target -value)]
+                                 (dispatch [:update-value field-id value])))}]]]
+       (when (= :invalid @status)
+         [:div.error-message (first @errors)])
+       [:p "At least 8 characters. More is better!"]])))
 
 (defn new-email-field-view []
-  (let [value (subscribe [:gateway/field-value :email])
-        status (subscribe [:gateway/field-status :email])
-        errors (subscribe [:gateway/field-errors :email])]
+  (let [field-id :user-auth.register/email
+        value (subscribe [:gateway/field-value field-id])
+        status (subscribe [:gateway/field-status field-id])
+        errors (subscribe [:gateway/field-errors field-id])]
     (fn []
       [:div.option.email
        {:class (name @status)}
@@ -85,21 +134,34 @@
                   :auto-focus true
                   :value @value
                   :on-blur (fn [_]
-                             (dispatch [:blur :email]))
+                             (dispatch [:blur field-id]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
-                                 (dispatch [:update-value :email value])))}]]
+                                 (dispatch [:update-value field-id value])))}]]
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
         [:p "Or, register with: "
          [auth-providers-view]]]])))
+
+(defn register-button-view []
+  (let [fields-valid?
+        (subscribe [:gateway/fields-valid?
+                    [:user-auth.register/email
+                     :user-auth.register/password]])]
+    (fn []
+      [:button.submit
+       {:class (when-not @fields-valid? "disabled")}
+       "Create a Braid Account"])))
 
 (defn new-user-view []
   [:form.new-user
    {:on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:gateway.user/remote-register]))}
+      (dispatch [:gateway/submit-form
+                 {:validate-fields [:user-auth.login/email
+                                    :user-auth.login/password]
+                  :dispatch-when-valid [:gateway.user/remote-register]}]))}
    [:h1 "Create a Braid Account"]
    [:p "Already have one?"
     [:button
@@ -109,8 +171,7 @@
      "Log In"]]
    [new-email-field-view]
    [new-password-field-view]
-   [:button.submit
-    "Create a Braid Account"]])
+   [register-button-view]])
 
 (defn authed-user-view []
   (let [user (subscribe [:gateway.user/user])]

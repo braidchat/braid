@@ -6,9 +6,10 @@
     [goog.events KeyCodes]))
 
 (defn group-name-field-view []
-  (let [value (subscribe [:gateway/field-value :name])
-        status (subscribe [:gateway/field-status :name])
-        errors (subscribe [:gateway/field-errors :name])]
+  (let [field-id :action.create-group/group-name
+        value (subscribe [:gateway/field-value field-id])
+        status (subscribe [:gateway/field-status field-id])
+        errors (subscribe [:gateway/field-errors field-id])]
     (fn []
       [:div.option.group-name
        {:class (name @status)}
@@ -22,7 +23,7 @@
                              (dispatch [:blur :name]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
-                                 (dispatch [:update-value :name value])))}]]
+                                 (dispatch [:update-value field-id value])))}]]
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
         [:div.explanation
@@ -30,9 +31,10 @@
          [:p "It doesn't need to be formal and can always be changed later."]]]])))
 
 (defn group-url-field-view []
-  (let [value (subscribe [:gateway/field-value :url])
-        status (subscribe [:gateway/field-status :url])
-        errors (subscribe [:gateway/field-errors :url])]
+  (let [field-id :action.create-group/group-url
+        value (subscribe [:gateway/field-value field-id])
+        status (subscribe [:gateway/field-status field-id])
+        errors (subscribe [:gateway/field-errors field-id])]
     (fn []
       [:div.option.group-url
        {:class (name @status)}
@@ -49,7 +51,7 @@
                   :on-focus (fn [_]
                               (dispatch [:guess-group-url]))
                   :on-blur (fn [_]
-                             (dispatch [:blur :url]))
+                             (dispatch [:blur field-id]))
                   :on-key-down (fn [e]
                                  (when (and
                                          (not (contains? #{KeyCodes.LEFT KeyCodes.RIGHT
@@ -60,7 +62,7 @@
                                    (.preventDefault e)))
                   :on-change (fn [e]
                                (let [value (string/lower-case (.. e -target -value))]
-                                 (dispatch [:update-value :url value])))}]
+                                 (dispatch [:update-value field-id value])))}]
          [:span ".braid.chat"]]
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
@@ -69,9 +71,10 @@
          [:p "Lowercase letters, numbers and dashes only."]]]])))
 
 (defn group-type-field-view []
-  (let [value (subscribe [:gateway/field-value :type])
-        status (subscribe [:gateway/field-status :type])
-        errors (subscribe [:gateway/field-errors :type])]
+  (let [field-id :action.create-group/group-type
+        value (subscribe [:gateway/field-value field-id])
+        status (subscribe [:gateway/field-status field-id])
+        errors (subscribe [:gateway/field-errors field-id])]
     (fn []
       [:div.option.group-type
        {:class (name @status)}
@@ -84,10 +87,10 @@
                  :value "public"
                  :checked (when (= "public" @value))
                  :on-blur (fn [_]
-                            (dispatch [:blur :type]))
+                            (dispatch [:blur field-id]))
                  :on-click (fn [e]
                              (let [value (.. e -target -value)]
-                               (dispatch [:update-value :type value])))}]
+                               (dispatch [:update-value field-id value])))}]
         [:span "Public Group"]
         [:div.explanation
          [:p "Anyone can find your group through the Braid Group Directory."]
@@ -101,30 +104,35 @@
                             (dispatch [:blur :type]))
                  :on-click (fn [e]
                              (let [value (.. e -target -value)]
-                               (dispatch [:update-value :type value])))}]
+                               (dispatch [:update-value field-id value])))}]
         [:span "Private Group"]
         [:div.explanation
          [:p "Invite-only and hidden from the Braid Group Directory."]
          [:p "Free to evaluate, then pay-what-you-want."]]]])))
 
 (defn button-view []
-  (let [name-valid? (subscribe [:gateway/field-valid? :name])
-        url-valid? (subscribe [:gateway/field-valid? :url])
-        type-valid? (subscribe [:gateway/field-valid? :type])
+  (let [fields-valid? (subscribe [:gateway/fields-valid?
+                                  [:action.create-group/group-name
+                                   :action.create-group/group-url
+                                   :action.create-group/group-type]])
         sending? (subscribe [:gateway.action.create-group/sending?])]
     (fn []
-      (let [all-valid? (and @name-valid? @url-valid? @type-valid?)]
-        [:button.submit
-         {:class (str (when (not all-valid?) "disabled") " "
-                      (when @sending? "sending"))}
-         "Create your Braid group"]))))
+      [:button.submit
+       {:class (str (when (not @fields-valid?) "disabled") " "
+                    (when @sending? "sending"))}
+       "Create your Braid group"])))
 
 (defn create-group-view []
   [:div.section
    [:form
     {:on-submit (fn [e]
                   (.preventDefault e)
-                  (dispatch [:submit-form]))}
+                  (dispatch [:gateway/submit-form
+                             {:validate-fields
+                              [:action.create-group/group-name
+                               :action.create-group/group-url
+                               :action.create-group/group-type]
+                              :dispatch-when-valid [:action.create-group/remote-create-group]}]))}
     [:h1 "Start a New Braid Group"]
     [group-name-field-view]
     [group-url-field-view]

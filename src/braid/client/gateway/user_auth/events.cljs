@@ -71,3 +71,4 @@
   (fn [{state :db} _]
     ; TODO kick off login process
     (dispatch [:gateway.user/fake-remote-auth])))
+

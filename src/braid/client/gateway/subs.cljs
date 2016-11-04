@@ -39,3 +39,11 @@
   :gateway.action/mode
   (fn [state _]
     (get-in state [:action :mode])))
+
+(reg-sub
+  :gateway/fields-valid?
+  (fn [state [_ fields]]
+    (->> fields
+         (map (fn [field]
+                (empty? (get-in state [:fields field :errors]))))
+         (every? true?))))

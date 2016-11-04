@@ -1,6 +1,5 @@
 (ns braid.client.gateway.events
   (:require
-    [clojure.string :as string]
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
     [braid.client.gateway.fx]
     [braid.client.gateway.user-auth.events]
@@ -12,25 +11,22 @@
 (defn get-url-param [param]
   (.getParameterValue (.parse Uri js/window.location) (name param)))
 
-; TODO, should pull this from validations
-(def fields
-  [:email :name :url :type])
-
-; EVENTS
-
 (reg-event-fx
   :gateway/initialize
   (fn [{state :db} _]
-    {:db (-> state
-             (assoc
-               :fields (reduce (fn [memo field]
-                                 (assoc memo field
-                                   {:value (or (get-url-param field) "")
-                                    :typing false
-                                    :untouched? true
-                                    :validations-left 0
-                                    :errors []}))
-                               {} fields)))
+    {:db (assoc state
+           :fields (reduce (fn [memo field]
+                             (let [prefilled-value (get-url-param field)]
+                               (assoc memo field
+                                 {:value (or prefilled-value "")
+                                  :typing false
+                                  :untouched? (if prefilled-value
+                                                false
+                                                true)
+                                  :validations-left 0
+                                  :errors []})))
+                           {}
+                           (keys validations)))
      :dispatch-n [[:validate-all]
                   [:gateway.user/initialize]
                   [:gateway.action.create-group/initialize]]}))
@@ -75,13 +71,6 @@
       (-> state
           (update-in [:fields field :validations-left] dec)))))
 
-(reg-event-db
-  :touch-all-fields
-  (fn [state _]
-    (update state :fields (fn [fields]
-                            (reduce (fn [memo [k v]]
-                                      (assoc memo k (assoc v :untouched? false))) {}  fields)))))
-
 (reg-event-fx
   :validate-field
   (fn [{state :db} [_ field]]
@@ -93,7 +82,27 @@
 (reg-event-fx
   :validate-all
   (fn [{state :db} _]
-    {:validate-n (for [field fields]
-                   [field (get-in state [:fields field :value])])}))
+    {:dispatch-n (for [field (keys validations)]
+                   [:validate-field field])}))
 
+(defn touch-fields [state fields-to-touch]
+  (update state :fields
+          (fn [fields]
+            (reduce (fn [memo [field-id v]]
+                      (assoc memo field-id
+                        (if (contains? (set fields-to-touch) field-id)
+                          (assoc v :untouched? false)
+                          v)))
+                    {}
+                    fields))))
 
+(reg-event-fx
+  :gateway/submit-form
+  (fn [{state :db} [_ {:keys [validate-fields
+                              dispatch-when-valid]}]]
+    (if-let [all-valid? (->> validate-fields
+                             (map (fn [field]
+                                    (empty? (get-in state [:fields field :errors]))))
+                             (every? true?))]
+      {:dispatch dispatch-when-valid}
+      {:db (touch-fields state validate-fields)})))
