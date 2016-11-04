@@ -135,7 +135,7 @@
      [:span "Authenticating with " (string/capitalize (name @provider)) "..."]]))
 
 (defn user-auth-view []
-  (let [mode (subscribe [:register.user/user-auth-section-mode])]
+  (let [mode (subscribe [:register.user/user-auth-mode])]
     (fn []
       [:div.section.user-auth
        (case @mode

@@ -5,19 +5,19 @@
 (reg-sub
   :register.user/user
   (fn [state _]
-    (get-in state [:user-auth-section :user])))
+    (get-in state [:user-auth :user])))
 
 (reg-sub
-  :register.user/user-auth-section-mode
+  :register.user/user-auth-mode
   (fn [state _]
     (cond
-      (get-in state [:user-auth-section :checking?]) :checking
-      (get-in state [:user-auth-section :user]) :authed
-      (get-in state [:user-auth-section :oauth-provider]) :oauth-in-progress
-      (get-in state [:user-auth-section :register?]) :register
+      (get-in state [:user-auth :checking?]) :checking
+      (get-in state [:user-auth :user]) :authed
+      (get-in state [:user-auth :oauth-provider]) :oauth-in-progress
+      (get-in state [:user-auth :register?]) :register
       :else :log-in)))
 
 (reg-sub
   :register.user/oauth-provider
   (fn [state _]
-    (get-in state [:user-auth-section :oauth-provider])))
+    (get-in state [:user-auth :oauth-provider])))

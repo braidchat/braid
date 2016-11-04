@@ -31,11 +31,11 @@
       :else :valid)))
 
 (reg-sub
-  :register/sending?
+  :register.action.create-group/sending?
   (fn [state _]
-    (state :sending?)))
+    (get-in state [:action :sending?])))
 
 (reg-sub
-  :register/action-mode
+  :register.action/mode
   (fn [state _]
-    (state :action-mode)))
+    (get-in state [:action :mode])))

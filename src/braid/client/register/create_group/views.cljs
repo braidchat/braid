@@ -111,7 +111,7 @@
   (let [name-valid? (subscribe [:register/field-valid? :name])
         url-valid? (subscribe [:register/field-valid? :url])
         type-valid? (subscribe [:register/field-valid? :type])
-        sending? (subscribe [:register/sending?])]
+        sending? (subscribe [:register.action.create-group/sending?])]
     (fn []
       (let [all-valid? (and @name-valid? @url-valid? @type-valid?)]
         [:button.submit

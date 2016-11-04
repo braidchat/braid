@@ -34,12 +34,12 @@
   [:h1.header "Braid"])
 
 (defn form-view []
-  (let [action-mode (subscribe [:register/action-mode])]
+  (let [mode (subscribe [:register.action/mode])]
     (fn []
       [:div.register
        [header-view]
        [user-auth-view]
-       (case @action-mode
+       (case @mode
          :create-group [create-group-view]
          :join-public-group [join-group-view :public]
          :join-private-group [join-group-view :private]

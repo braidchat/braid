@@ -6,9 +6,9 @@
   :register.user/set-user
   (fn [{state :db} [_ data]]
     {:db (-> state
-           (assoc-in [:user-auth-section :user] data)
-           (assoc-in [:user-auth-section :checking?] false)
-           (assoc-in [:user-auth-section :oauth-provider] nil))}))
+           (assoc-in [:user-auth :user] data)
+           (assoc-in [:user-auth :checking?] false)
+           (assoc-in [:user-auth :oauth-provider] nil))}))
 
 (reg-event-fx
   :register.user/switch-account
@@ -20,7 +20,7 @@
 (reg-event-fx
   :register.user/set-user-register?
   (fn [{state :db} [_ bool]]
-    {:db (assoc-in state [:user-auth-section :register?] bool)}))
+    {:db (assoc-in state [:user-auth :register?] bool)}))
 
 (reg-event-fx
   :register.user/fake-remote-auth
@@ -33,7 +33,7 @@
                          :email "rafal.dittwald@gmail.com"
                          :avatar "https://en.gravatar.com/userimage/612305/740d38e04f1c21f1fb27e76b5f63852a.jpeg"}]))
       1000)
-    {:db (assoc-in state [:user-auth-section :checking?] true)}))
+    {:db (assoc-in state [:user-auth :checking?] true)}))
 
 (reg-event-fx
   :register.user/remote-check-auth
@@ -47,7 +47,7 @@
   (fn [{state :db} [_ provider]]
     ; TODO kick off oauth process
     (dispatch [:register.user/fake-remote-auth])
-    {:db (assoc-in state [:user-auth-section :oauth-provider] provider)}))
+    {:db (assoc-in state [:user-auth :oauth-provider] provider)}))
 
 (reg-event-fx
   :register.user/remote-log-in

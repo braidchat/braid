@@ -25,13 +25,12 @@
   (fn [{state :db} _]
     {:db (-> state
              (assoc
-               :user-auth-section {:user nil
-                                   :checking? true
-                                   :register? true
-                                   :oauth-provider nil}
-               :sending? false
-               :user-mode :checking
-               :action-mode :create-group
+               :user-auth {:user nil
+                           :checking? true
+                           :register? true
+                           :oauth-provider nil}
+               :action {:mode :create-group
+                        :sending? false}
                :fields (reduce (fn [memo field]
                                  (assoc memo field
                                    {:value (or (get-url-param field) "")
@@ -137,11 +136,11 @@
                             :type (get-in state [:fields :type :value])}
                    :handler (fn [[_ response]]
                               (dispatch [:handle-registration-response response]))})
-    {:db (assoc state :sending? true)}))
+    {:db (assoc-in state [:action :sending?] true)}))
 
 (reg-event-fx
   :handle-registration-response
   (fn [{state :db} [_ response]]
-    {:db (assoc state :sending? false)}))
+    {:db (assoc-in state [:action :sending?] false)}))
 
 
