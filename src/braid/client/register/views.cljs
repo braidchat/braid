@@ -43,7 +43,8 @@
          :create-group [create-group-view]
          :join-public-group [join-group-view :public]
          :join-private-group [join-group-view :private]
-         :reset-password [reset-password-view])])))
+         :reset-password [reset-password-view]
+         nil)])))
 
 (defn app-view []
   [:div.app

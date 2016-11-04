@@ -22,8 +22,6 @@
   (fn [{state :db} _]
     {:db (-> state
              (assoc
-               :action {:mode :create-group
-                        :sending? false}
                :fields (reduce (fn [memo field]
                                  (assoc memo field
                                    {:value (or (get-url-param field) "")
@@ -33,7 +31,8 @@
                                     :errors []}))
                                {} fields)))
      :dispatch-n [[:validate-all]
-                  [:register.user/initialize]]}))
+                  [:register.user/initialize]
+                  [:register.action.create-group/initialize]]}))
 
 (reg-event-fx
   :blur

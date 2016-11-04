@@ -7,6 +7,14 @@
     [braid.common.util :refer [slugify]]))
 
 (reg-event-fx
+  :register.action.create-group/initialize
+  (fn [{state :db}]
+    {:db (-> state
+             (assoc
+               :action {:mode :create-group
+                        :sending? false}))}))
+
+(reg-event-fx
   :guess-group-url
   (fn [{state :db} _]
     (let [group-name (get-in state [:fields :name :value])
