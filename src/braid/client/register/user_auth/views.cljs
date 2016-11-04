@@ -6,6 +6,7 @@
 (defn auth-providers-view []
   [:span.auth-providers
    (for [provider [:github :google :facebook]]
+     ^{:key provider}
      [:button
       {:class (name provider)
        :on-click (fn [e]
