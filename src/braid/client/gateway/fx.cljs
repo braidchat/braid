@@ -1,7 +1,7 @@
-(ns braid.client.register.fx
+(ns braid.client.gateway.fx
   (:require
     [re-frame.core :refer [dispatch reg-fx]]
-    [braid.client.register.validations :refer [validations]]))
+    [braid.client.gateway.validations :refer [validations]]))
 
 (defonce timeouts
   (atom {}))

@@ -1,14 +1,14 @@
-(ns braid.client.register.user-auth.subs
+(ns braid.client.gateway.user-auth.subs
   (:require
     [re-frame.core :refer [reg-sub]]))
 
 (reg-sub
-  :register.user/user
+  :gateway.user/user
   (fn [state _]
     (get-in state [:user-auth :user])))
 
 (reg-sub
-  :register.user/user-auth-mode
+  :gateway.user/user-auth-mode
   (fn [state _]
     (cond
       (get-in state [:user-auth :checking?]) :checking
@@ -18,6 +18,6 @@
       :else :log-in)))
 
 (reg-sub
-  :register.user/oauth-provider
+  :gateway.user/oauth-provider
   (fn [state _]
     (get-in state [:user-auth :oauth-provider])))

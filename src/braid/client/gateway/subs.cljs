@@ -1,27 +1,27 @@
-(ns braid.client.register.subs
+(ns braid.client.gateway.subs
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [reg-sub]]
-    [braid.client.register.user-auth.subs]
-    [braid.client.register.create-group.subs]))
+    [braid.client.gateway.user-auth.subs]
+    [braid.client.gateway.create-group.subs]))
 
 (reg-sub
-  :register/field-valid?
+  :gateway/field-valid?
   (fn [state [_ field]]
     (empty? (get-in state [:fields field :errors]))))
 
 (reg-sub
-  :register/field-value
+  :gateway/field-value
   (fn [state [_ field]]
     (get-in state [:fields field :value])))
 
 (reg-sub
-  :register/field-errors
+  :gateway/field-errors
   (fn [state [_ field]]
     (get-in state [:fields field :errors])))
 
 (reg-sub
-  :register/field-status
+  :gateway/field-status
   (fn [state [_ field]]
     (cond
       (get-in state [:fields field :typing?]) :typing
@@ -31,11 +31,11 @@
       :else :valid)))
 
 (reg-sub
-  :register.action.create-group/sending?
+  :gateway.action.create-group/sending?
   (fn [state _]
     (get-in state [:action :sending?])))
 
 (reg-sub
-  :register.action/mode
+  :gateway.action/mode
   (fn [state _]
     (get-in state [:action :mode])))

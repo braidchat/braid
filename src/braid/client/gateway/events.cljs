@@ -1,24 +1,25 @@
-(ns braid.client.register.events
+(ns braid.client.gateway.events
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
-    [braid.client.register.fx]
-    [braid.client.register.user-auth.events]
-    [braid.client.register.create-group.events]
-    [braid.client.register.validations :refer [validations]])
+    [braid.client.gateway.fx]
+    [braid.client.gateway.user-auth.events]
+    [braid.client.gateway.create-group.events]
+    [braid.client.gateway.validations :refer [validations]])
   (:import
     [goog Uri]))
 
 (defn get-url-param [param]
   (.getParameterValue (.parse Uri js/window.location) (name param)))
 
+; TODO, should pull this from validations
 (def fields
   [:email :name :url :type])
 
 ; EVENTS
 
 (reg-event-fx
-  :register/initialize
+  :gateway/initialize
   (fn [{state :db} _]
     {:db (-> state
              (assoc
@@ -31,8 +32,8 @@
                                     :errors []}))
                                {} fields)))
      :dispatch-n [[:validate-all]
-                  [:register.user/initialize]
-                  [:register.action.create-group/initialize]]}))
+                  [:gateway.user/initialize]
+                  [:gateway.action.create-group/initialize]]}))
 
 (reg-event-fx
   :blur

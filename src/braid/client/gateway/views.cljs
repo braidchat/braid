@@ -1,15 +1,15 @@
-(ns braid.client.register.views
+(ns braid.client.gateway.views
   (:require
     [re-frame.core :refer [subscribe]]
     [garden.core :refer [css]]
     [garden.stylesheet :refer [at-import]]
-    [braid.client.register.styles :as styles]
-    [braid.client.register.views.join-group :refer [join-group-view]]
-    [braid.client.register.views.reset-password :refer [reset-password-view]]
-    [braid.client.register.create-group.views :refer [create-group-view]]
-    [braid.client.register.create-group.styles :refer [create-group-styles]]
-    [braid.client.register.user-auth.views :refer [user-auth-view]]
-    [braid.client.register.user-auth.styles :refer [user-styles]]))
+    [braid.client.gateway.styles :as styles]
+    [braid.client.gateway.views.join-group :refer [join-group-view]]
+    [braid.client.gateway.views.reset-password :refer [reset-password-view]]
+    [braid.client.gateway.create-group.views :refer [create-group-view]]
+    [braid.client.gateway.create-group.styles :refer [create-group-styles]]
+    [braid.client.gateway.user-auth.views :refer [user-auth-view]]
+    [braid.client.gateway.user-auth.styles :refer [user-styles]]))
 
 (defn style-view []
   [:style
@@ -34,9 +34,9 @@
   [:h1.header "Braid"])
 
 (defn form-view []
-  (let [mode (subscribe [:register.action/mode])]
+  (let [mode (subscribe [:gateway.action/mode])]
     (fn []
-      [:div.register
+      [:div.gateway
        [header-view]
        [user-auth-view]
        (case @mode

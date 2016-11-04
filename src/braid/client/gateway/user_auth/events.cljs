@@ -1,9 +1,9 @@
-(ns braid.client.register.user-auth.events
+(ns braid.client.gateway.user-auth.events
   (:require
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
 
 (reg-event-fx
-  :register.user/initialize
+  :gateway.user/initialize
   (fn [{state :db} _]
     {:db (-> state
              (assoc
@@ -11,10 +11,10 @@
                            :checking? true
                            :register? true
                            :oauth-provider nil}))
-     :dispatch [:register.user/remote-check-auth]}))
+     :dispatch [:gateway.user/remote-check-auth]}))
 
 (reg-event-fx
-  :register.user/set-user
+  :gateway.user/set-user
   (fn [{state :db} [_ data]]
     {:db (-> state
            (assoc-in [:user-auth :user] data)
@@ -22,23 +22,23 @@
            (assoc-in [:user-auth :oauth-provider] nil))}))
 
 (reg-event-fx
-  :register.user/switch-account
+  :gateway.user/switch-account
   (fn [{state :db} _]
     ; TODO ajax request to log-out
-    {:dispatch-n [[:register.user/set-user nil]
-                  [:register.user/set-user-register? false]]}))
+    {:dispatch-n [[:gateway.user/set-user nil]
+                  [:gateway.user/set-user-register? false]]}))
 
 (reg-event-fx
-  :register.user/set-user-register?
+  :gateway.user/set-user-register?
   (fn [{state :db} [_ bool]]
     {:db (assoc-in state [:user-auth :register?] bool)}))
 
 (reg-event-fx
-  :register.user/fake-remote-auth
+  :gateway.user/fake-remote-auth
   (fn [{state :db} _]
     (js/setTimeout (fn []
                      (dispatch
-                       [:register.user/set-user
+                       [:gateway.user/set-user
                         {:id "1234"
                          :nickname "rafd"
                          :email "rafal.dittwald@gmail.com"
@@ -47,27 +47,27 @@
     {:db (assoc-in state [:user-auth :checking?] true)}))
 
 (reg-event-fx
-  :register.user/remote-check-auth
+  :gateway.user/remote-check-auth
   (fn [{state :db} _]
     ; TODO ajax request to check auth status
-    (dispatch [:register.user/fake-remote-auth])
+    (dispatch [:gateway.user/fake-remote-auth])
     {}))
 
 (reg-event-fx
-  :register.user/remote-oauth
+  :gateway.user/remote-oauth
   (fn [{state :db} [_ provider]]
     ; TODO kick off oauth process
-    (dispatch [:register.user/fake-remote-auth])
+    (dispatch [:gateway.user/fake-remote-auth])
     {:db (assoc-in state [:user-auth :oauth-provider] provider)}))
 
 (reg-event-fx
-  :register.user/remote-log-in
+  :gateway.user/remote-log-in
   (fn [{state :db} _]
     ; TODO kick off login process
-    (dispatch [:register.user/fake-remote-auth])))
+    (dispatch [:gateway.user/fake-remote-auth])))
 
 (reg-event-fx
-  :register.user/remote-register
+  :gateway.user/remote-register
   (fn [{state :db} _]
     ; TODO kick off login process
-    (dispatch [:register.user/fake-remote-auth])))
+    (dispatch [:gateway.user/fake-remote-auth])))

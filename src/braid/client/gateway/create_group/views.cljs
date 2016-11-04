@@ -1,4 +1,4 @@
-(ns braid.client.register.create-group.views
+(ns braid.client.gateway.create-group.views
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]])
@@ -6,9 +6,9 @@
     [goog.events KeyCodes]))
 
 (defn group-name-field-view []
-  (let [value (subscribe [:register/field-value :name])
-        status (subscribe [:register/field-status :name])
-        errors (subscribe [:register/field-errors :name])]
+  (let [value (subscribe [:gateway/field-value :name])
+        status (subscribe [:gateway/field-status :name])
+        errors (subscribe [:gateway/field-errors :name])]
     (fn []
       [:div.option.group-name
        {:class (name @status)}
@@ -30,9 +30,9 @@
          [:p "It doesn't need to be formal and can always be changed later."]]]])))
 
 (defn group-url-field-view []
-  (let [value (subscribe [:register/field-value :url])
-        status (subscribe [:register/field-status :url])
-        errors (subscribe [:register/field-errors :url])]
+  (let [value (subscribe [:gateway/field-value :url])
+        status (subscribe [:gateway/field-status :url])
+        errors (subscribe [:gateway/field-errors :url])]
     (fn []
       [:div.option.group-url
        {:class (name @status)}
@@ -69,9 +69,9 @@
          [:p "Lowercase letters, numbers and dashes only."]]]])))
 
 (defn group-type-field-view []
-  (let [value (subscribe [:register/field-value :type])
-        status (subscribe [:register/field-status :type])
-        errors (subscribe [:register/field-errors :type])]
+  (let [value (subscribe [:gateway/field-value :type])
+        status (subscribe [:gateway/field-status :type])
+        errors (subscribe [:gateway/field-errors :type])]
     (fn []
       [:div.option.group-type
        {:class (name @status)}
@@ -108,10 +108,10 @@
          [:p "Free to evaluate, then pay-what-you-want."]]]])))
 
 (defn button-view []
-  (let [name-valid? (subscribe [:register/field-valid? :name])
-        url-valid? (subscribe [:register/field-valid? :url])
-        type-valid? (subscribe [:register/field-valid? :type])
-        sending? (subscribe [:register.action.create-group/sending?])]
+  (let [name-valid? (subscribe [:gateway/field-valid? :name])
+        url-valid? (subscribe [:gateway/field-valid? :url])
+        type-valid? (subscribe [:gateway/field-valid? :type])
+        sending? (subscribe [:gateway.action.create-group/sending?])]
     (fn []
       (let [all-valid? (and @name-valid? @url-valid? @type-valid?)]
         [:button.submit

@@ -1,4 +1,4 @@
-(ns braid.client.register.validations
+(ns braid.client.gateway.validations
   (:require
     [clojure.string :as string]
     [ajax.core :refer [ajax-request]]

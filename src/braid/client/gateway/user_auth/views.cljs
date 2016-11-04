@@ -1,4 +1,4 @@
-(ns braid.client.register.user-auth.views
+(ns braid.client.gateway.user-auth.views
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]]))
@@ -11,7 +11,7 @@
       {:class (name provider)
        :on-click (fn [e]
                    (.preventDefault e)
-                   (dispatch [:register.user/remote-oauth provider]))}
+                   (dispatch [:gateway.user/remote-oauth provider]))}
       (string/capitalize (name provider))])])
 
 (defn returning-email-field-view []
@@ -44,13 +44,13 @@
    {:on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:register.user/remote-log-in]))}
+      (dispatch [:gateway.user/remote-log-in]))}
    [:h1 "Log in to Braid"]
    [:p "Don't have an account?"
     [:button
      {:on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:register.user/set-user-register? true]))}
+                  (dispatch [:gateway.user/set-user-register? true]))}
      "Register"]]
    [returning-email-field-view]
    [password-field-view]
@@ -67,9 +67,9 @@
    [:p "At least 8 characters. More is better!"]])
 
 (defn new-email-field-view []
-  (let [value (subscribe [:register/field-value :email])
-        status (subscribe [:register/field-status :email])
-        errors (subscribe [:register/field-errors :email])]
+  (let [value (subscribe [:gateway/field-value :email])
+        status (subscribe [:gateway/field-status :email])
+        errors (subscribe [:gateway/field-errors :email])]
     (fn []
       [:div.option.email
        {:class (name @status)}
@@ -99,13 +99,13 @@
    {:on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:register.user/remote-register]))}
+      (dispatch [:gateway.user/remote-register]))}
    [:h1 "Create a Braid Account"]
    [:p "Already have one?"
     [:button
      {:on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:register.user/set-user-register? false]))}
+                  (dispatch [:gateway.user/set-user-register? false]))}
      "Log In"]]
    [new-email-field-view]
    [new-password-field-view]
@@ -113,7 +113,7 @@
     "Create a Braid Account"]])
 
 (defn authed-user-view []
-  (let [user (subscribe [:register.user/user])]
+  (let [user (subscribe [:gateway.user/user])]
     (fn []
       [:div.authed-user
        [:div.profile
@@ -123,7 +123,7 @@
          [:div.email (@user :email)]]]
        [:p "Not you?"
         [:button {:on-click (fn []
-                              (dispatch [:register.user/switch-account]))}
+                              (dispatch [:gateway.user/switch-account]))}
          "Sign in with a different account"]]])))
 
 (defn checking-user-view []
@@ -131,12 +131,12 @@
    [:span "Authenticating..."]])
 
 (defn oauth-in-progress-view []
-  (let [provider (subscribe [:register.user/oauth-provider])]
+  (let [provider (subscribe [:gateway.user/oauth-provider])]
     [:div.authorizing
      [:span "Authenticating with " (string/capitalize (name @provider)) "..."]]))
 
 (defn user-auth-view []
-  (let [mode (subscribe [:register.user/user-auth-mode])]
+  (let [mode (subscribe [:gateway.user/user-auth-mode])]
     (fn []
       [:div.section.user-auth
        (case @mode

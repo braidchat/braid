@@ -102,13 +102,13 @@
                            :optimizations :advanced
                            :pretty-print false}}
 
-               {:id "register-dev"
-                :figwheel {:on-jsload "braid.client.register.core/reload"}
+               {:id "gateway-dev"
+                :figwheel {:on-jsload "braid.client.gateway.core/reload"}
                 :source-paths ["src/braid/client"]
-                :compiler {:main braid.client.register.core
-                           :asset-path "/js/register/out"
-                           :output-to "resources/public/js/register/out/braid.js"
-                           :output-dir "resources/public/js/register/out"
+                :compiler {:main braid.client.gateway.core
+                           :asset-path "/js/gateway/out"
+                           :output-to "resources/public/js/gateway/out/braid.js"
+                           :output-dir "resources/public/js/gateway/out"
                            :verbose true}}]}
 
   :min-lein-version "2.5.0"

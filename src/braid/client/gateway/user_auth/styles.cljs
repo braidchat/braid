@@ -1,12 +1,12 @@
-(ns braid.client.register.user-auth.styles
+(ns braid.client.gateway.user-auth.styles
   (:require
-    [braid.client.register.styles-vars :as vars]
+    [braid.client.gateway.styles-vars :as vars]
     [braid.client.ui.styles.fontawesome :as fontawesome]
     [braid.client.ui.styles.mixins :as mixins]))
 
 (defn user-styles []
 
-  [:.register
+  [:.gateway
 
    [:.user-auth
 

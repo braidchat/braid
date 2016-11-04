@@ -1,11 +1,11 @@
-(ns braid.client.register.create-group.styles
+(ns braid.client.gateway.create-group.styles
   (:require
-    [braid.client.register.styles-vars :as vars]
+    [braid.client.gateway.styles-vars :as vars]
     [braid.client.ui.styles.fontawesome :as fontawesome]))
 
 (defn create-group-styles []
 
-  [:.register
+  [:.gateway
 
    [:.option
 

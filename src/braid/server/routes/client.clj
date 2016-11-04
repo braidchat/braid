@@ -68,7 +68,7 @@
                                     :group-id (java.util.UUID/fromString group)})}})
 
   (GET "/register" []
-    (get-html "register"))
+    (get-html "gateway"))
 
   ; everything else
   (GET "/*" []

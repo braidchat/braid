@@ -1,4 +1,4 @@
-(ns braid.client.register.create-group.events
+(ns braid.client.gateway.create-group.events
   (:require
     [clojure.string :as string]
     [ajax.core :refer [ajax-request]]
@@ -7,7 +7,7 @@
     [braid.common.util :refer [slugify]]))
 
 (reg-event-fx
-  :register.action.create-group/initialize
+  :gateway.action.create-group/initialize
   (fn [{state :db}]
     {:db (-> state
              (assoc

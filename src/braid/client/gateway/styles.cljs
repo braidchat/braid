@@ -1,9 +1,9 @@
-(ns braid.client.register.styles
+(ns braid.client.gateway.styles
   (:require
     [braid.client.ui.styles.fontawesome :as fontawesome]
     [braid.client.ui.styles.animations :as animations]
     [braid.client.ui.styles.mixins :as mixins]
-    [braid.client.register.styles-vars :as vars]))
+    [braid.client.gateway.styles-vars :as vars]))
 
 (def anim-spin animations/anim-spin)
 
@@ -21,7 +21,7 @@
      {:font-family vars/font-family}]])
 
 (defn form-styles []
-  [:.register
+  [:.gateway
 
    [:h1.header
     {:color vars/accent-color

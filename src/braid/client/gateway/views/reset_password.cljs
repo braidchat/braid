@@ -1,4 +1,4 @@
-(ns braid.client.register.views.reset-password)
+(ns braid.client.gateway.views.reset-password)
 
 (defn password-field-view []
   [:div.option.password

@@ -1,4 +1,4 @@
-(ns braid.client.register.views.join-group)
+(ns braid.client.gateway.views.join-group)
 
 (defn join-group-view [k]
   [:div

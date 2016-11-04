@@ -1,4 +1,4 @@
-(ns braid.client.register.styles-vars
+(ns braid.client.gateway.styles-vars
   (:require
     [braid.client.ui.styles.fontawesome :as fontawesome]))
 
