@@ -27,4 +27,4 @@
         (validator-fn
           field-value
           (fn [error]
-            (dispatch [:update-field-status field error])))))))
+            (dispatch [:gateway/update-field-status field error])))))))

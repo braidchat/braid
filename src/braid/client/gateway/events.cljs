@@ -27,42 +27,42 @@
                                   :errors []})))
                            {}
                            (keys validations)))
-     :dispatch-n [[:validate-all]
+     :dispatch-n [[:gateway/validate-all]
                   [:gateway.user-auth/initialize]
                   [:gateway.action.create-group/initialize]]}))
 
 (reg-event-fx
-  :blur
+  :gateway/blur
   (fn [{state :db} [_ field]]
     {:db (assoc-in state [:fields field :untouched?] false)
      ; use dispatch-debounce
      ; to cancel possible other identical debounced dispatch
-     :dispatch-debounce [field [:stop-typing field] 0]}))
+     :dispatch-debounce [field [:gateway/stop-typing field] 0]}))
 
 (reg-event-db
-  :clear-errors
+  :gateway/clear-errors
   (fn [state [_ field]]
     (assoc-in state [:fields field :errors] [])))
 
 (reg-event-fx
-  :stop-typing
+  :gateway/stop-typing
   (fn [{state :db} [_ field]]
     (when (get-in state [:fields field :typing?])
       {:db (assoc-in state [:fields field :typing?] false)
-       :dispatch [:validate-field field]})))
+       :dispatch [:gateway/validate-field field]})))
 
 (reg-event-fx
-  :update-value
+  :gateway/update-value
   (fn [{state :db} [_ field value]]
     {:db (-> state
              (assoc-in [:fields field :value] value)
              (assoc-in [:fields field :typing?] true)
              (assoc-in [:fields field :untouched?] false))
-     :dispatch [:clear-errors field]
-     :dispatch-debounce [field [:stop-typing field] 500]}))
+     :dispatch [:gateway/clear-errors field]
+     :dispatch-debounce [field [:gateway/stop-typing field] 500]}))
 
 (reg-event-db
-  :update-field-status
+  :gateway/update-field-status
   (fn [state [_ field error]]
     (if error
       (-> state
@@ -72,7 +72,7 @@
           (update-in [:fields field :validations-left] dec)))))
 
 (reg-event-fx
-  :validate-field
+  :gateway/validate-field
   (fn [{state :db} [_ field]]
     (let [validator-fns (validations field)
           field-value (get-in state [:fields field :value])]
@@ -80,10 +80,10 @@
        :validate-n [[field field-value]]})))
 
 (reg-event-fx
-  :validate-all
+  :gateway/validate-all
   (fn [{state :db} _]
     {:dispatch-n (for [field (keys validations)]
-                   [:validate-field field])}))
+                   [:gateway/validate-field field])}))
 
 (defn touch-fields [state fields-to-touch]
   (update state :fields

@@ -7,7 +7,7 @@
     [goog.format EmailAddress]))
 
 (def validations
-  {:user-auth/email
+  {:gateway.user-auth/email
    [(fn [email cb]
       (if (string/blank? email)
         (cb "You need to enter an email.")
@@ -17,7 +17,7 @@
         (cb "This doesn't look like a valid email.")
         (cb nil)))]
 
-   :user-auth/password
+   :gateway.user-auth/password
    [(fn [password cb]
       (if (string/blank? password)
         (cb "You need to enter a password.")
@@ -27,13 +27,13 @@
         (cb "Your password is too short.")
         (cb nil)))]
 
-   :action.create-group/group-name
+   :gateway.action.create-group/group-name
    [(fn [name cb]
       (if (string/blank? name)
         (cb "Your group needs a name.")
         (cb nil)))]
 
-   :action.create-group/group-url
+   :gateway.action.create-group/group-url
    [(fn [url cb]
       (if (string/blank? url)
         (cb "Your group needs a URL.")
@@ -62,7 +62,7 @@
                       (cb nil)
                       (cb "Your group URL is already taken; try another.")))}))]
 
-   :action.create-group/group-type
+   :gateway.action.create-group/group-type
    [(fn [type cb]
       (when (string/blank? type)
         (cb "You need to select a group type.")

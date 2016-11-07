@@ -15,7 +15,7 @@
       (string/capitalize (name provider))])])
 
 (defn returning-email-field-view []
-  (let [field-id :user-auth/email
+  (let [field-id :gateway.user-auth/email
         value (subscribe [:gateway/field-value field-id])
         status (subscribe [:gateway/field-status field-id])
         errors (subscribe [:gateway/field-errors field-id])]
@@ -34,10 +34,10 @@
                   :auto-focus true
                   :value @value
                   :on-blur (fn [_]
-                             (dispatch [:blur field-id]))
+                             (dispatch [:gateway/blur field-id]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
-                                 (dispatch [:update-value field-id value])))
+                                 (dispatch [:gateway/update-value field-id value])))
                   }]]
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
@@ -45,7 +45,7 @@
          [auth-providers-view]]]])))
 
 (defn returning-password-field-view []
-  (let [field-id :user-auth/password
+  (let [field-id :gateway.user-auth/password
         value (subscribe [:gateway/field-value field-id])
         status (subscribe [:gateway/field-status field-id])
         errors (subscribe [:gateway/field-errors field-id])]
@@ -59,10 +59,10 @@
                   :placeholder "•••••••••••"
                   :value @value
                   :on-blur (fn [_]
-                             (dispatch [:blur field-id]))
+                             (dispatch [:gateway/blur field-id]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
-                                 (dispatch [:update-value field-id value])))}]]]
+                                 (dispatch [:gateway/update-value field-id value])))}]]]
        (when (= :invalid @status)
          [:div.error-message (first @errors)])
        [:p "Don't remember?"
@@ -73,8 +73,8 @@
 (defn login-button-view []
   (let [fields-valid?
         (subscribe [:gateway/fields-valid?
-                    [:user-auth/email
-                     :user-auth/password]])]
+                    [:gateway.user-auth/email
+                     :gateway.user-auth/password]])]
     (fn []
       [:button.submit
        {:class (when-not @fields-valid? "disabled")}
@@ -86,8 +86,8 @@
     (fn [e]
       (.preventDefault e)
       (dispatch [:gateway/submit-form
-                 {:validate-fields [:user-auth/email
-                                    :user-auth/password]
+                 {:validate-fields [:gateway.user-auth/email
+                                    :gateway.user-auth/password]
                   :dispatch-when-valid [:gateway.user-auth/remote-log-in]}]))}
    [:h1 "Log in to Braid"]
    [:p "Don't have an account?"
@@ -101,7 +101,7 @@
    [login-button-view]])
 
 (defn new-password-field-view []
-  (let [field-id :user-auth/password
+  (let [field-id :gateway.user-auth/password
         value (subscribe [:gateway/field-value field-id])
         status (subscribe [:gateway/field-status field-id])
         errors (subscribe [:gateway/field-errors field-id])]
@@ -115,16 +115,16 @@
                   :placeholder "•••••••••••"
                   :value @value
                   :on-blur (fn [_]
-                             (dispatch [:blur field-id]))
+                             (dispatch [:gateway/blur field-id]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
-                                 (dispatch [:update-value field-id value])))}]]]
+                                 (dispatch [:gateway/update-value field-id value])))}]]]
        (when (= :invalid @status)
          [:div.error-message (first @errors)])
        [:p "At least 8 characters. More is better!"]])))
 
 (defn new-email-field-view []
-  (let [field-id :user-auth/email
+  (let [field-id :gateway.user-auth/email
         value (subscribe [:gateway/field-value field-id])
         status (subscribe [:gateway/field-status field-id])
         errors (subscribe [:gateway/field-errors field-id])]
@@ -143,10 +143,10 @@
                   :auto-focus true
                   :value @value
                   :on-blur (fn [_]
-                             (dispatch [:blur field-id]))
+                             (dispatch [:gateway/blur field-id]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
-                                 (dispatch [:update-value field-id value])))}]]
+                                 (dispatch [:gateway/update-value field-id value])))}]]
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
         [:p "Or, register with: "
@@ -155,8 +155,8 @@
 (defn register-button-view []
   (let [fields-valid?
         (subscribe [:gateway/fields-valid?
-                    [:user-auth/email
-                     :user-auth/password]])]
+                    [:gateway.user-auth/email
+                     :gateway.user-auth/password]])]
     (fn []
       [:button.submit
        {:class (when-not @fields-valid? "disabled")}
@@ -168,8 +168,8 @@
     (fn [e]
       (.preventDefault e)
       (dispatch [:gateway/submit-form
-                 {:validate-fields [:user-auth/email
-                                    :user-auth/password]
+                 {:validate-fields [:gateway.user-auth/email
+                                    :gateway.user-auth/password]
                   :dispatch-when-valid [:gateway.user-auth/remote-register]}]))}
    [:h1 "Create a Braid Account"]
    [:p "Already have one?"

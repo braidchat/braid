@@ -17,15 +17,15 @@
 (reg-event-fx
   :gateway.action.create-group/guess-group-url
   (fn [{state :db} _]
-    (let [group-name (get-in state [:fields :name :value])
-          group-url (get-in state [:fields :url :value])]
+    (let [group-name (get-in state [:fields :gateway.action.create-group/name :value])
+          group-url (get-in state [:fields :gateway.action.create-group/url :value])]
       {:db (if (string/blank? group-url)
              (-> state
-                 (assoc-in [:fields :url :value] (slugify group-name))
-                 (assoc-in [:fields :url :untouched?] false))
+                 (assoc-in [:fields :gateway.action.create-group/url :value] (slugify group-name))
+                 (assoc-in [:fields :gateway.action.create-group/url :untouched?] false))
              state)
-       :dispatch-n [[:clear-errors :url]
-                    [:validate-field :url]]})))
+       :dispatch-n [[:gateway/clear-errors :gateway-action.create-group/url]
+                    [:gateway/validate-field :gateway-action.create-group/url]]})))
 
 (reg-event-fx
   :gateway.action.create-group/remote-create-group
@@ -34,10 +34,9 @@
                    :method :put
                    :format (edn-request-format)
                    :response-format (edn-response-format)
-                   :params {:email (get-in state [:fields :email :value])
-                            :slug (get-in state [:fields :url :value])
-                            :name (get-in state [:fields :name :value])
-                            :type (get-in state [:fields :type :value])}
+                   :params {:slug (get-in state [:fields :gateway.action.create-group/group-url :value])
+                            :name (get-in state [:fields :gateway.action.create-group/group-name :value])
+                            :type (get-in state [:fields :gateway.action.create-group/group-type :value])}
                    :handler (fn [[_ response]]
                               (dispatch [:gateway.action.create-group/handle-registration-response response]))})
     {:db (assoc-in state [:action :sending?] true)}))
