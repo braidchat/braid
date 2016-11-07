@@ -3,12 +3,12 @@
     [re-frame.core :refer [reg-sub]]))
 
 (reg-sub
-  :gateway.user/user
+  :gateway.user-auth/user
   (fn [state _]
     (get-in state [:user-auth :user])))
 
 (reg-sub
-  :gateway.user/user-auth-mode
+  :gateway.user-auth/user-auth-mode
   (fn [state _]
     (cond
       (get-in state [:user-auth :checking?]) :checking
@@ -18,6 +18,6 @@
       :else :log-in)))
 
 (reg-sub
-  :gateway.user/oauth-provider
+  :gateway.user-auth/oauth-provider
   (fn [state _]
     (get-in state [:user-auth :oauth-provider])))

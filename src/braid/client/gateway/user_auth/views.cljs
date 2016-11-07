@@ -11,7 +11,7 @@
       {:class (name provider)
        :on-click (fn [e]
                    (.preventDefault e)
-                   (dispatch [:gateway.user/remote-oauth provider]))}
+                   (dispatch [:gateway.user-auth/remote-oauth provider]))}
       (string/capitalize (name provider))])])
 
 (defn returning-email-field-view []
@@ -88,13 +88,13 @@
       (dispatch [:gateway/submit-form
                  {:validate-fields [:user-auth/email
                                     :user-auth/password]
-                  :dispatch-when-valid [:gateway.user/remote-log-in]}]))}
+                  :dispatch-when-valid [:gateway.user-auth/remote-log-in]}]))}
    [:h1 "Log in to Braid"]
    [:p "Don't have an account?"
     [:button
      {:on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:gateway.user/set-user-register? true]))}
+                  (dispatch [:gateway.user-auth/set-user-register? true]))}
      "Register"]]
    [returning-email-field-view]
    [returning-password-field-view]
@@ -170,20 +170,20 @@
       (dispatch [:gateway/submit-form
                  {:validate-fields [:user-auth/email
                                     :user-auth/password]
-                  :dispatch-when-valid [:gateway.user/remote-register]}]))}
+                  :dispatch-when-valid [:gateway.user-auth/remote-register]}]))}
    [:h1 "Create a Braid Account"]
    [:p "Already have one?"
     [:button
      {:on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:gateway.user/set-user-register? false]))}
+                  (dispatch [:gateway.user-auth/set-user-register? false]))}
      "Log In"]]
    [new-email-field-view]
    [new-password-field-view]
    [register-button-view]])
 
 (defn authed-user-view []
-  (let [user (subscribe [:gateway.user/user])]
+  (let [user (subscribe [:gateway.user-auth/user])]
     (fn []
       [:div.authed-user
        [:div.profile
@@ -193,7 +193,7 @@
          [:div.email (@user :email)]]]
        [:p "Not you?"
         [:button {:on-click (fn []
-                              (dispatch [:gateway.user/switch-account]))}
+                              (dispatch [:gateway.user-auth/switch-account]))}
          "Sign in with a different account"]]])))
 
 (defn checking-user-view []
@@ -201,12 +201,12 @@
    [:span "Authenticating..."]])
 
 (defn oauth-in-progress-view []
-  (let [provider (subscribe [:gateway.user/oauth-provider])]
+  (let [provider (subscribe [:gateway.user-auth/oauth-provider])]
     [:div.authorizing
      [:span "Authenticating with " (string/capitalize (name @provider)) "..."]]))
 
 (defn user-auth-view []
-  (let [mode (subscribe [:gateway.user/user-auth-mode])]
+  (let [mode (subscribe [:gateway.user-auth/user-auth-mode])]
     (fn []
       [:div.section.user-auth
        (case @mode

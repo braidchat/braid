@@ -28,7 +28,7 @@
                            {}
                            (keys validations)))
      :dispatch-n [[:validate-all]
-                  [:gateway.user/initialize]
+                  [:gateway.user-auth/initialize]
                   [:gateway.action.create-group/initialize]]}))
 
 (reg-event-fx
