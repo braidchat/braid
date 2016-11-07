@@ -31,7 +31,7 @@
       :else :valid)))
 
 (reg-sub
-  :gateway.action/mode
+  :gateway/action-mode
   (fn [state _]
     (get-in state [:action :mode])))
 

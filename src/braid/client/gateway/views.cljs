@@ -34,7 +34,7 @@
   [:h1.header "Braid"])
 
 (defn form-view []
-  (let [mode (subscribe [:gateway.action/mode])]
+  (let [mode (subscribe [:gateway/action-mode])]
     (fn []
       [:div.gateway
        [header-view]
