@@ -159,8 +159,8 @@
     (fn [e]
       (.preventDefault e)
       (dispatch [:gateway/submit-form
-                 {:validate-fields [:user-auth.login/email
-                                    :user-auth.login/password]
+                 {:validate-fields [:user-auth.register/email
+                                    :user-auth.register/password]
                   :dispatch-when-valid [:gateway.user/remote-register]}]))}
    [:h1 "Create a Braid Account"]
    [:p "Already have one?"
