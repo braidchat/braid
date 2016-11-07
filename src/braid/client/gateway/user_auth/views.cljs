@@ -32,6 +32,9 @@
                   :autocapitalize false
                   :spellcheck false
                   :auto-focus true
+                  :value @value
+                  :on-blur (fn [_]
+                             (dispatch [:blur field-id]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
                                  (dispatch [:update-value field-id value])))
