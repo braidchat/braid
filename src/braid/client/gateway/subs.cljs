@@ -1,6 +1,5 @@
 (ns braid.client.gateway.subs
   (:require
-    [clojure.string :as string]
     [re-frame.core :refer [reg-sub]]
     [braid.client.gateway.user-auth.subs]
     [braid.client.gateway.create-group.subs]))
