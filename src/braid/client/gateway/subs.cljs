@@ -31,11 +31,6 @@
       :else :valid)))
 
 (reg-sub
-  :gateway.action.create-group/sending?
-  (fn [state _]
-    (get-in state [:action :sending?])))
-
-(reg-sub
   :gateway.action/mode
   (fn [state _]
     (get-in state [:action :mode])))
