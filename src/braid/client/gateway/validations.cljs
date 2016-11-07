@@ -18,9 +18,13 @@
         (cb nil)))]
 
    :user-auth/password
-   [(fn [email cb]
-      (if (string/blank? email)
+   [(fn [password cb]
+      (if (string/blank? password)
         (cb "You need to enter a password.")
+        (cb nil)))
+    (fn [password cb]
+      (if (< (count password) 8)
+        (cb "Your password is too short.")
         (cb nil)))]
 
    :action.create-group/group-name
