@@ -111,6 +111,7 @@
     [:&.invalid
      ["input[type=text]"
       "input[type=email]"
+      "input[type=password]"
       {:border-color vars/invalid-color}]
 
      [:.field
