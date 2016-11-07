@@ -49,7 +49,7 @@
                   :spellcheck false
                   :value @value
                   :on-focus (fn [_]
-                              (dispatch [:guess-group-url]))
+                              (dispatch [:gateway.action.create-group/guess-group-url]))
                   :on-blur (fn [_]
                              (dispatch [:blur field-id]))
                   :on-key-down (fn [e]
@@ -132,7 +132,7 @@
                               [:action.create-group/group-name
                                :action.create-group/group-url
                                :action.create-group/group-type]
-                              :dispatch-when-valid [:action.create-group/remote-create-group]}]))}
+                              :dispatch-when-valid [:gateway.action.create-group/remote-create-group]}]))}
     [:h1 "Start a New Braid Group"]
     [group-name-field-view]
     [group-url-field-view]

@@ -15,7 +15,7 @@
                         :sending? false}))}))
 
 (reg-event-fx
-  :guess-group-url
+  :gateway.action.create-group/guess-group-url
   (fn [{state :db} _]
     (let [group-name (get-in state [:fields :name :value])
           group-url (get-in state [:fields :url :value])]
@@ -28,7 +28,7 @@
                     [:validate-field :url]]})))
 
 (reg-event-fx
-  :action.create-group/remote-create-group
+  :gateway.action.create-group/remote-create-group
   (fn [{state :db} _]
     (ajax-request {:uri (str "//" js/window.api_domain "/registration/register")
                    :method :put
@@ -39,10 +39,10 @@
                             :name (get-in state [:fields :name :value])
                             :type (get-in state [:fields :type :value])}
                    :handler (fn [[_ response]]
-                              (dispatch [:handle-registration-response response]))})
+                              (dispatch [:gateway.action.create-group/handle-registration-response response]))})
     {:db (assoc-in state [:action :sending?] true)}))
 
 (reg-event-fx
-  :handle-registration-response
+  :gateway.action.create-group/handle-registration-response
   (fn [{state :db} [_ response]]
     {:db (assoc-in state [:action :sending?] false)}))
