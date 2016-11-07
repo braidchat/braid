@@ -54,6 +54,9 @@
         [:div.field
          [:input {:type "password"
                   :placeholder "•••••••••••"
+                  :value @value
+                  :on-blur (fn [_]
+                             (dispatch [:blur field-id]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
                                  (dispatch [:update-value field-id value])))}]]]
@@ -107,6 +110,9 @@
         [:div.field
          [:input {:type "password"
                   :placeholder "•••••••••••"
+                  :value @value
+                  :on-blur (fn [_]
+                             (dispatch [:blur field-id]))
                   :on-change (fn [e]
                                (let [value (.. e -target -value)]
                                  (dispatch [:update-value field-id value])))}]]]
