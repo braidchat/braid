@@ -15,7 +15,7 @@
       (string/capitalize (name provider))])])
 
 (defn returning-email-field-view []
-  (let [field-id :user-auth.login/email
+  (let [field-id :user-auth/email
         value (subscribe [:gateway/field-value field-id])
         status (subscribe [:gateway/field-status field-id])
         errors (subscribe [:gateway/field-errors field-id])]
@@ -45,7 +45,7 @@
          [auth-providers-view]]]])))
 
 (defn returning-password-field-view []
-  (let [field-id :user-auth.login/password
+  (let [field-id :user-auth/password
         value (subscribe [:gateway/field-value field-id])
         status (subscribe [:gateway/field-status field-id])
         errors (subscribe [:gateway/field-errors field-id])]
@@ -73,8 +73,8 @@
 (defn login-button-view []
   (let [fields-valid?
         (subscribe [:gateway/fields-valid?
-                    [:user-auth.login/email
-                     :user-auth.login/password]])]
+                    [:user-auth/email
+                     :user-auth/password]])]
     (fn []
       [:button.submit
        {:class (when-not @fields-valid? "disabled")}
@@ -86,8 +86,8 @@
     (fn [e]
       (.preventDefault e)
       (dispatch [:gateway/submit-form
-                 {:validate-fields [:user-auth.login/email
-                                    :user-auth.login/password]
+                 {:validate-fields [:user-auth/email
+                                    :user-auth/password]
                   :dispatch-when-valid [:gateway.user/remote-log-in]}]))}
    [:h1 "Log in to Braid"]
    [:p "Don't have an account?"
@@ -101,7 +101,7 @@
    [login-button-view]])
 
 (defn new-password-field-view []
-  (let [field-id :user-auth.register/password
+  (let [field-id :user-auth/password
         value (subscribe [:gateway/field-value field-id])
         status (subscribe [:gateway/field-status field-id])
         errors (subscribe [:gateway/field-errors field-id])]
@@ -124,7 +124,7 @@
        [:p "At least 8 characters. More is better!"]])))
 
 (defn new-email-field-view []
-  (let [field-id :user-auth.register/email
+  (let [field-id :user-auth/email
         value (subscribe [:gateway/field-value field-id])
         status (subscribe [:gateway/field-status field-id])
         errors (subscribe [:gateway/field-errors field-id])]
@@ -155,8 +155,8 @@
 (defn register-button-view []
   (let [fields-valid?
         (subscribe [:gateway/fields-valid?
-                    [:user-auth.register/email
-                     :user-auth.register/password]])]
+                    [:user-auth/email
+                     :user-auth/password]])]
     (fn []
       [:button.submit
        {:class (when-not @fields-valid? "disabled")}
@@ -168,8 +168,8 @@
     (fn [e]
       (.preventDefault e)
       (dispatch [:gateway/submit-form
-                 {:validate-fields [:user-auth.register/email
-                                    :user-auth.register/password]
+                 {:validate-fields [:user-auth/email
+                                    :user-auth/password]
                   :dispatch-when-valid [:gateway.user/remote-register]}]))}
    [:h1 "Create a Braid Account"]
    [:p "Already have one?"

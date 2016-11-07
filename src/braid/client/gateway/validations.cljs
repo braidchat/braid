@@ -7,7 +7,7 @@
     [goog.format EmailAddress]))
 
 (def validations
-  {:user-auth.login/email
+  {:user-auth/email
    [(fn [email cb]
       (if (string/blank? email)
         (cb "You need to enter an email.")
@@ -17,23 +17,7 @@
         (cb "This doesn't look like a valid email.")
         (cb nil)))]
 
-   :user-auth.login/password
-   [(fn [email cb]
-      (if (string/blank? email)
-        (cb "You need to enter a password.")
-        (cb nil)))]
-
-   :user-auth.register/email
-   [(fn [email cb]
-      (if (string/blank? email)
-        (cb "You need to enter an email.")
-        (cb nil)))
-    (fn [email cb]
-      (if (not (.isValid (EmailAddress. email)))
-        (cb "This doesn't look like a valid email.")
-        (cb nil)))]
-
-   :user-auth.register/password
+   :user-auth/password
    [(fn [email cb]
       (if (string/blank? email)
         (cb "You need to enter a password.")

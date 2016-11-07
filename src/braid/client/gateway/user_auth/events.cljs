@@ -33,28 +33,10 @@
 (defn blank->nil [s]
   (when-not (string/blank? s) s))
 
-(defn move-email-between-forms [state]
-  (-> state
-      (assoc-in [:fields :user-auth.login/email :value]
-        (or (blank->nil (get-in state [:fields :user-auth.login/email :value]))
-            (blank->nil (get-in state [:fields :user-auth.register/email :value]))))
-      (assoc-in [:fields :user-auth.register/email :value]
-        (or (blank->nil (get-in state [:fields :user-auth.register/email :value]))
-            (blank->nil (get-in state [:fields :user-auth.login/email :value]))))))
-
-(defn clear-errors [state]
-  (-> state
-      (assoc-in [:fields :user-auth.login/email :untouched?] true)
-      (assoc-in [:fields :user-auth.login/password :untouched?] true)
-      (assoc-in [:fields :user-auth.register/email :untouched?] true)
-      (assoc-in [:fields :user-auth.register/password :untouched?] true)))
-
 (reg-event-fx
   :gateway.user/set-user-register?
   (fn [{state :db} [_ bool]]
     {:db (-> state
-             move-email-between-forms
-             clear-errors
              (assoc-in [:user-auth :register?] bool))}))
 
 (reg-event-fx
