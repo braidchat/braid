@@ -6,11 +6,6 @@
     [braid.client.gateway.create-group.subs]))
 
 (reg-sub
-  :gateway/field-valid?
-  (fn [state [_ field]]
-    (empty? (get-in state [:fields field :errors]))))
-
-(reg-sub
   :gateway/field-value
   (fn [state [_ field]]
     (get-in state [:fields field :value])))
