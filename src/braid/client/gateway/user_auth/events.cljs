@@ -1,5 +1,6 @@
 (ns braid.client.gateway.user-auth.events
   (:require
+    [clojure.string :as string]
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
 
 (reg-event-fx
@@ -28,10 +29,24 @@
     {:dispatch-n [[:gateway.user/set-user nil]
                   [:gateway.user/set-user-register? false]]}))
 
+
+(defn blank->nil [s]
+  (when-not (string/blank? s) s))
+
+(defn move-email-between-forms [state]
+  (-> state
+      (assoc-in [:fields :user-auth.login/email :value]
+        (or (blank->nil (get-in state [:fields :user-auth.login/email :value]))
+            (blank->nil (get-in state [:fields :user-auth.register/email :value]))))
+      (assoc-in [:fields :user-auth.register/email :value]
+        (or (blank->nil (get-in state [:fields :user-auth.register/email :value]))
+            (blank->nil (get-in state [:fields :user-auth.login/email :value]))))))
 (reg-event-fx
   :gateway.user/set-user-register?
   (fn [{state :db} [_ bool]]
-    {:db (assoc-in state [:user-auth :register?] bool)}))
+    {:db (-> state
+             move-email-between-forms
+             (assoc-in [:user-auth :register?] bool))}))
 
 (reg-event-fx
   :gateway.user/fake-remote-auth
