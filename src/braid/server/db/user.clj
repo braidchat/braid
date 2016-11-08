@@ -88,8 +88,8 @@
 
 (defn user-by-id
   [conn id]
-  (some-> (d/pull (d/db conn) user-pull-pattern [:user/id id])
-          db->user))
+  (some-> (d/pull (d/db conn) private-user-pull-pattern [:user/id id])
+          db->private-user))
 
 (defn user-id-exists?
   [conn id]

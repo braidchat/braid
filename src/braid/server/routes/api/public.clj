@@ -19,23 +19,24 @@
     (events/user-join-group! user-id group-id)))
 
 (defroutes api-public-routes
-  ; check if already logged in
-  (GET "/check" req
+
+  (PUT "/check" req
     (if-let [user-id (get-in req [:session :user-id])]
-      (if-let [user (db/user-id-exists? user-id)]
-        {:status 200 :body ""}
+      (if-let [user (db/user-by-id user-id)]
+        (edn-response user)
         {:status 401 :body "" :session nil})
       {:status 401 :body "" :session nil}))
 
-  ; log in
-  (POST "/auth" req
+  (PUT "/auth" req
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
                          (db/authenticate-user email password)))]
-      {:status 200 :session (assoc (req :session) :user-id user-id)}
-      {:status 401 :body (pr-str {:error true})}))
-  ; log out
-  (POST "/logout" req
+      {:status 200
+       :session (assoc (req :session) :user-id user-id)}
+      {:status 401
+       :body (pr-str {:error true})}))
+
+  (PUT "/logout" req
     {:status 200 :session nil})
 
   ; request a password reset

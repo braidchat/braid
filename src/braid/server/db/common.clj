@@ -23,7 +23,23 @@
   {:id (:user/id e)
    :nickname (:user/nickname e)
    :avatar (:user/avatar e)
+   :email (:user/email e)
    ; TODO currently leaking all group-ids to the client
+   :group-ids (map :group/id (:group/_user e))})
+
+(def private-user-pull-pattern
+  '[:user/id
+    :user/nickname
+    :user/avatar
+    :user/email
+    {:group/_user [:group/id]}])
+
+(defn db->private-user
+  [e]
+  {:id (:user/id e)
+   :nickname (:user/nickname e)
+   :avatar (:user/avatar e)
+   :email (:user/email e)
    :group-ids (map :group/id (:group/_user e))})
 
 (def message-pull-pattern

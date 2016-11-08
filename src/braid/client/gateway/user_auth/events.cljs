@@ -25,9 +25,8 @@
 (reg-event-fx
   :gateway.user-auth/switch-account
   (fn [{state :db} _]
-    ; TODO ajax request to log-out
-    {:dispatch-n [[:gateway.user-auth/set-user nil]
-                  [:gateway.user-auth/set-user-register? false]]}))
+    {:dispatch-n [[:gateway.user-auth/set-user-register? false]
+                  [:gateway.user-auth/remote-log-out]]}))
 
 
 (defn blank->nil [s]
@@ -40,24 +39,26 @@
              (assoc-in [:user-auth :register?] bool))}))
 
 (reg-event-fx
-  :gateway.user-auth/fake-remote-auth
-  (fn [{state :db} _]
-    (js/setTimeout (fn []
-                     (dispatch
-                       [:gateway.user-auth/set-user
-                        {:id "1234"
-                         :nickname "rafd"
-                         :email "rafal.dittwald@gmail.com"
-                         :avatar "https://en.gravatar.com/userimage/612305/740d38e04f1c21f1fb27e76b5f63852a.jpeg"}]))
-      1000)
-    {:db (assoc-in state [:user-auth :checking?] true)}))
-
-(reg-event-fx
   :gateway.user-auth/remote-check-auth
   (fn [{state :db} _]
-    ; TODO ajax request to check auth status
-    (dispatch [:gateway.user-auth/fake-remote-auth])
-    {}))
+    {:db (assoc-in state [:user-auth :checking?] true)
+     :edn-xhr {:uri "/check"
+               :method :put
+               :on-complete (fn [user]
+                              (dispatch [:gateway.user-auth/set-user user]))
+               :on-error (fn [_]
+                           (dispatch [:gateway.user-auth/set-user nil]))}}))
+
+(reg-event-fx
+  :gateway.user-auth/remote-log-out
+  (fn [{state :db} _]
+    {:db (assoc-in state [:user-auth :checking?] true)
+     :edn-xhr {:uri "/logout"
+               :method :put
+               :on-complete (fn [_]
+                              (dispatch [:gateway.user-auth/set-user nil]))
+               :on-error (fn [_]
+                           (dispatch [:gateway.user-auth/set-user nil]))}}))
 
 (reg-event-fx
   :gateway.user-auth/remote-oauth
@@ -69,8 +70,16 @@
 (reg-event-fx
   :gateway.user-auth/remote-log-in
   (fn [{state :db} _]
-    ; TODO kick off login process
-    (dispatch [:gateway.user-auth/fake-remote-auth])))
+    {:db (assoc-in state [:user-auth :checking?] true)
+     :edn-xhr {:uri "/auth"
+               :method :put
+               :params {:email (get-in state  [:fields :gateway.user-auth/email :value])
+                        :password (get-in state  [:fields :gateway.user-auth/password :value])}
+               :on-complete (fn [user]
+                              (dispatch [:gateway.user-auth/remote-check-auth]))
+               :on-error
+               (fn [_]
+                 (dispatch [:gateway.user-auth/set-user nil]))}}))
 
 (reg-event-fx
   :gateway.user-auth/remote-register

@@ -451,7 +451,7 @@
   :check-auth
   (fn [cofx _]
     {:edn-xhr {:uri "/check"
-               :method :get
+               :method :put
                :on-complete (fn [_] (dispatch [:start-socket]))
                :on-error (fn [_] (dispatch [:set-login-state :login-form]))}}))
 
@@ -482,7 +482,7 @@
   :auth
   (fn [cofx [_ data]]
     {:edn-xhr {:uri "/auth"
-               :method :post
+               :method :put
                :params {:email (data :email)
                         :password (data :password)}
                :on-complete (fn [_]
@@ -504,7 +504,7 @@
   :logout
   (fn [cofx [_ _]]
     {:edn-xhr {:uri "/logout"
-               :method :post
+               :method :put
                :params {:csrf-token (:csrf-token @sync/chsk-state)}
                :on-complete (fn [data]
                               (dispatch [:set-login-state :login-form])
