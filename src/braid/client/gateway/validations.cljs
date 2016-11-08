@@ -64,6 +64,6 @@
 
    :gateway.action.create-group/group-type
    [(fn [type cb]
-      (when (string/blank? type)
+      (if (string/blank? type)
         (cb "You need to select a group type.")
         (cb nil)))]})
