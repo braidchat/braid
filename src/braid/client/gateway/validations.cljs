@@ -1,8 +1,7 @@
 (ns braid.client.gateway.validations
   (:require
     [clojure.string :as string]
-    [ajax.core :refer [ajax-request]]
-    [ajax.edn :refer [edn-request-format edn-response-format]])
+    [braid.client.xhr :as xhr])
   (:import
     [goog.format EmailAddress]))
 
@@ -51,16 +50,16 @@
         (cb "Your URL can't end with a dash.")
         (cb nil)))
     (fn [url cb]
-      (ajax-request
-        {:uri (str "//" js/window.api_domain "/registration/check-slug-unique")
+      (xhr/edn-xhr
+        {:uri "/registration/check-slug-unique"
          :method :get
-         :format (edn-request-format)
-         :response-format (edn-response-format)
          :params {:slug url}
-         :handler (fn [[_ valid?]]
-                    (if valid?
-                      (cb nil)
-                      (cb "Your group URL is already taken; try another.")))}))]
+         :on-complete (fn [valid?]
+                        (if valid?
+                          (cb nil)
+                          (cb "Your group URL is already taken; try another.")))
+         :on-error (fn [_]
+                     (cb "There was an error checking your URL."))}))]
 
    :gateway.action.create-group/group-type
    [(fn [type cb]
