@@ -19,7 +19,7 @@
                              (let [prefilled-value (get-url-param field)]
                                (assoc memo field
                                  {:value (or prefilled-value "")
-                                  :typing false
+                                  :typing? false
                                   :untouched? (if prefilled-value
                                                 false
                                                 true)
