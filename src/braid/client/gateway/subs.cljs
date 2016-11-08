@@ -29,7 +29,10 @@
   (fn [state [_ fields]]
     (->> fields
          (map (fn [field]
-                (empty? (get-in state [:fields field :errors]))))
+                (and
+                  (empty? (get-in state [:fields field :errors]))
+                  (= 0 (get-in state [:fields field :validations-left]))
+                  (not (get-in state [:fields field :typing?])))))
          (every? true?))))
 
 (reg-sub
