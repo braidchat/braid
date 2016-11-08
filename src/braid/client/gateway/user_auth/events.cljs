@@ -42,8 +42,8 @@
   :gateway.user-auth/remote-check-auth
   (fn [{state :db} _]
     {:db (assoc-in state [:user-auth :checking?] true)
-     :edn-xhr {:uri "/check"
-               :method :put
+     :edn-xhr {:uri "/session"
+               :method :get
                :on-complete (fn [user]
                               (dispatch [:gateway.user-auth/set-user user]))
                :on-error (fn [_]
@@ -53,8 +53,8 @@
   :gateway.user-auth/remote-log-out
   (fn [{state :db} _]
     {:db (assoc-in state [:user-auth :checking?] true)
-     :edn-xhr {:uri "/logout"
-               :method :put
+     :edn-xhr {:uri "/session"
+               :method :delete
                :on-complete (fn [_]
                               (dispatch [:gateway.user-auth/set-user nil]))
                :on-error (fn [_]
@@ -71,10 +71,10 @@
   :gateway.user-auth/remote-log-in
   (fn [{state :db} _]
     {:db (assoc-in state [:user-auth :checking?] true)
-     :edn-xhr {:uri "/auth"
+     :edn-xhr {:uri "/session"
                :method :put
-               :params {:email (get-in state  [:fields :gateway.user-auth/email :value])
-                        :password (get-in state  [:fields :gateway.user-auth/password :value])}
+               :params {:email (get-in state [:fields :gateway.user-auth/email :value])
+                        :password (get-in state [:fields :gateway.user-auth/password :value])}
                :on-complete (fn [user]
                               (dispatch [:gateway.user-auth/remote-check-auth]))
                :on-error

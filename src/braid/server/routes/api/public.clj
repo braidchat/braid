@@ -20,23 +20,22 @@
 
 (defroutes api-public-routes
 
-  (PUT "/check" req
+  (GET "/session" req
     (if-let [user-id (get-in req [:session :user-id])]
       (if-let [user (db/user-by-id user-id)]
         (edn-response user)
         {:status 401 :body "" :session nil})
       {:status 401 :body "" :session nil}))
 
-  (PUT "/auth" req
-    (if-let [user-id (let [{:keys [email password]} (req :params)]
-                       (when (and email password)
-                         (db/authenticate-user email password)))]
+  (PUT "/session" [email password :as req]
+    (if-let [user-id (when (and email password)
+                       (db/authenticate-user email password))]
       {:status 200
        :session (assoc (req :session) :user-id user-id)}
       {:status 401
        :body (pr-str {:error true})}))
 
-  (PUT "/logout" req
+  (DELETE "/session" _
     {:status 200 :session nil})
 
   ; request a password reset

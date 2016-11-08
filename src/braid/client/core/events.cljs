@@ -450,8 +450,8 @@
 (reg-event-fx
   :check-auth
   (fn [cofx _]
-    {:edn-xhr {:uri "/check"
-               :method :put
+    {:edn-xhr {:uri "/session"
+               :method :get
                :on-complete (fn [_] (dispatch [:start-socket]))
                :on-error (fn [_] (dispatch [:set-login-state :login-form]))}}))
 
@@ -481,7 +481,7 @@
 (reg-event-fx
   :auth
   (fn [cofx [_ data]]
-    {:edn-xhr {:uri "/auth"
+    {:edn-xhr {:uri "/session"
                :method :put
                :params {:email (data :email)
                         :password (data :password)}
@@ -503,8 +503,8 @@
 (reg-event-fx
   :logout
   (fn [cofx [_ _]]
-    {:edn-xhr {:uri "/logout"
-               :method :put
+    {:edn-xhr {:uri "/session"
+               :method :delete
                :params {:csrf-token (:csrf-token @sync/chsk-state)}
                :on-complete (fn [data]
                               (dispatch [:set-login-state :login-form])
