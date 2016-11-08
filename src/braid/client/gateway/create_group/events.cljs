@@ -1,8 +1,6 @@
 (ns braid.client.gateway.create-group.events
   (:require
     [clojure.string :as string]
-    [ajax.core :refer [ajax-request]]
-    [ajax.edn :refer [edn-request-format edn-response-format]]
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
     [braid.common.util :refer [slugify]]))
 
@@ -30,16 +28,14 @@
 (reg-event-fx
   :gateway.action.create-group/remote-create-group
   (fn [{state :db} _]
-    (ajax-request {:uri (str "//" js/window.api_domain "/registration/register")
-                   :method :put
-                   :format (edn-request-format)
-                   :response-format (edn-response-format)
-                   :params {:slug (get-in state [:fields :gateway.action.create-group/group-url :value])
-                            :name (get-in state [:fields :gateway.action.create-group/group-name :value])
-                            :type (get-in state [:fields :gateway.action.create-group/group-type :value])}
-                   :handler (fn [[_ response]]
-                              (dispatch [:gateway.action.create-group/handle-registration-response response]))})
-    {:db (assoc-in state [:action :sending?] true)}))
+    {:db (assoc-in state [:action :sending?] true)
+     :edn-xhr {:method :put
+               :uri "/registration/register"
+               :params {:slug (get-in state [:fields :gateway.action.create-group/group-url :value])
+                        :name (get-in state [:fields :gateway.action.create-group/group-name :value])
+                        :type (get-in state [:fields :gateway.action.create-group/group-type :value])}
+               :on-complete (fn [response]
+                              (dispatch [:gateway.action.create-group/handle-registration-response response]))}}))
 
 (reg-event-fx
   :gateway.action.create-group/handle-registration-response

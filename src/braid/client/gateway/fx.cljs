@@ -1,7 +1,8 @@
 (ns braid.client.gateway.fx
   (:require
     [re-frame.core :refer [dispatch reg-fx]]
-    [braid.client.gateway.validations :refer [validations]]))
+    [braid.client.gateway.validations :refer [validations]]
+    [braid.client.xhr :as xhr]))
 
 (defonce timeouts
   (atom {}))
@@ -27,3 +28,6 @@
         field-value
         (fn [error]
           (dispatch [:gateway/update-field-status field error]))))))
+
+(reg-fx :edn-xhr xhr/edn-xhr)
+
