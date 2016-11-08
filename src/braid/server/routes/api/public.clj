@@ -18,6 +18,11 @@
   (when-not (db/user-in-group? user-id group-id)
     (events/user-join-group! user-id group-id)))
 
+(defn error-response [message]
+  {:status 400
+   :headers {"Content-Type" "text/plain"}
+   :body message})
+
 (defroutes api-public-routes
 
   (GET "/session" req
@@ -38,7 +43,30 @@
   (DELETE "/session" _
     {:status 200 :session nil})
 
-  ; request a password reset
+  (PUT "/users" [email password :as req]
+    (cond
+      (string/blank? email)
+      (error-response "You must provide an email.")
+
+      (not (valid-email? email))
+      (error-response "The email format is incorrect.")
+
+      (db/user-with-email email)
+      (error-response "A user is already registered with that email.")
+
+      (string/blank? password)
+      (error-response "You must provide a password.")
+
+      (< (count password) 8)
+      (error-response "The password is too short.")
+
+      :else
+      (let [user (db/create-user! {:id (db/uuid)
+                                   :email email})
+            _ (db/set-user-password! (user :id)
+                                     password)]
+        {:status 200
+         :session (assoc (req :session) :user-id (user :id))})))
   (POST "/request-reset" [email]
     (when-let [user (db/user-with-email email)]
       (invites/request-reset (assoc user :email email)))

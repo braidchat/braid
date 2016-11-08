@@ -84,6 +84,13 @@
 (reg-event-fx
   :gateway.user-auth/remote-register
   (fn [{state :db} _]
-    ; TODO kick off login process
-    (dispatch [:gateway.user-auth/fake-remote-auth])))
-
+    {:db (assoc-in state [:user-auth :checking?] true)
+     :edn-xhr {:uri "/users"
+               :method :put
+               :params {:email (get-in state [:fields :gateway.user-auth/email :value])
+                        :password (get-in state [:fields :gateway.user-auth/password :value])}
+               :on-complete (fn [user]
+                              (dispatch [:gateway.user-auth/remote-check-auth]))
+               :on-error
+               (fn [_]
+                 (dispatch [:gateway.user-auth/set-user nil]))}}))

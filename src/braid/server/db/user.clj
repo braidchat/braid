@@ -45,7 +45,7 @@
                                :rating :g
                                :default :identicon)}
                (create-entity! conn)
-               db->user)]
+               db->private-user)]
     (activate-first-quests! conn id)
     user))
 
