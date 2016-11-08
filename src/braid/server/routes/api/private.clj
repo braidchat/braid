@@ -19,14 +19,14 @@
                        markdown->hiccup)}))
 
   (GET "/extract" [url :as {session :session}]
-    (if (some? (db/user-by-id (:user-id session)))
+    (if (db/user-id-exists? (:user-id session))
       (edn-response (embedly/extract url))
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))
 
   (GET "/s3-policy" req
-    (if (some? (db/user-by-id (get-in req [:session :user-id])))
+    (if (db/user-id-exists? (get-in req [:session :user-id]))
       (if-let [policy (s3/generate-policy)]
         {:status 200
          :headers {"Content-Type" "application/edn"}
