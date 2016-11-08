@@ -77,7 +77,7 @@
     (let [validator-fns (validations field)
           field-value (get-in state [:fields field :value])]
       {:db (assoc-in state [:fields field :validations-left] (count validator-fns))
-       :validate-n [[field field-value]]})))
+       :validate [field field-value]})))
 
 (reg-event-fx
   :gateway/validate-all
