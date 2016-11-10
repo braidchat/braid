@@ -25,5 +25,4 @@
 (reg-sub
   :gateway.user-auth/error
   (fn [state _]
-    (println (get-in state [:user-auth :error]))
     (get-in state [:user-auth :error])))
