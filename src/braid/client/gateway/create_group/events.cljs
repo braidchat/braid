@@ -15,15 +15,15 @@
 (reg-event-fx
   :gateway.action.create-group/guess-group-url
   (fn [{state :db} _]
-    (let [group-name (get-in state [:fields :gateway.action.create-group/name :value])
-          group-url (get-in state [:fields :gateway.action.create-group/url :value])]
+    (let [group-name (get-in state [:fields :gateway.action.create-group/group-name :value])
+          group-url (get-in state [:fields :gateway.action.create-group/group-url :value])]
       {:db (if (string/blank? group-url)
              (-> state
-                 (assoc-in [:fields :gateway.action.create-group/url :value] (slugify group-name))
-                 (assoc-in [:fields :gateway.action.create-group/url :untouched?] false))
+                 (assoc-in [:fields :gateway.action.create-group/group-url :value] (slugify group-name))
+                 (assoc-in [:fields :gateway.action.create-group/group-url :untouched?] false))
              state)
-       :dispatch-n [[:gateway/clear-errors :gateway-action.create-group/url]
-                    [:gateway/validate-field :gateway-action.create-group/url]]})))
+       :dispatch-n [[:gateway/clear-errors :gateway.action.create-group/group-url]
+                    [:gateway/validate-field :gateway.action.create-group/group-url]]})))
 
 (reg-event-fx
   :gateway.action.create-group/remote-create-group
