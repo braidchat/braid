@@ -37,7 +37,7 @@
                        (db/authenticate-user email password))]
       {:status 200
        :session (assoc (req :session) :user-id user-id)}
-      (error-response 401 "Username and password do not match.")))
+      (error-response 401 :auth-fail)))
 
   (DELETE "/session" _
     {:status 200 :session nil})

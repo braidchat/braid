@@ -85,13 +85,15 @@
     (fn []
       (when @error
         (case @error
+          :auth-fail
+          [:div.error-message
+           "The email or password is incorrect. Please try again."]
           :email-exists
           [:div.error-message
            "A user is already registered with that email."
            [:button
             {:on-click (fn [e]
                          (.preventDefault e)
-                         (dispatch [:gateway.user-auth/clear-error])
                          (dispatch [:gateway.user-auth/set-user-register? false]))}
             "Log In"]]
 

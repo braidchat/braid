@@ -33,10 +33,14 @@
 (defn blank->nil [s]
   (when-not (string/blank? s) s))
 
+(defn clear-error [state]
+  (assoc-in state [:user-auth :error] nil))
+
 (reg-event-fx
   :gateway.user-auth/set-user-register?
   (fn [{state :db} [_ bool]]
     {:db (-> state
+             clear-error
              (assoc-in [:user-auth :register?] bool))}))
 
 (reg-event-fx
@@ -44,12 +48,6 @@
   (fn [{state :db} [_ k]]
     {:db (-> state
              (assoc-in [:user-auth :error] k))}))
-
-(reg-event-fx
-  :gateway.user-auth/clear-error
-  (fn [{state :db} [_ k]]
-    {:db (-> state
-             (assoc-in [:user-auth :error] nil))}))
 
 ; REMOTE
 
@@ -67,7 +65,9 @@
 (reg-event-fx
   :gateway.user-auth/remote-log-out
   (fn [{state :db} _]
-    {:db (assoc-in state [:user-auth :checking?] true)
+    {:db (-> state
+             clear-error
+             (assoc-in [:user-auth :checking?] true))
      :edn-xhr {:uri "/session"
                :method :delete
                :on-complete (fn [_]
@@ -80,12 +80,16 @@
   (fn [{state :db} [_ provider]]
     ; TODO kick off oauth process
     (dispatch [:gateway.user-auth/fake-remote-auth])
-    {:db (assoc-in state [:user-auth :oauth-provider] provider)}))
+    {:db (-> state
+             clear-error
+             (assoc-in [:user-auth :oauth-provider] provider))}))
 
 (reg-event-fx
   :gateway.user-auth/remote-log-in
   (fn [{state :db} _]
-    {:db (assoc-in state [:user-auth :checking?] true)
+    {:db (-> state
+             clear-error
+             (assoc-in [:user-auth :checking?] true))
      :edn-xhr {:uri "/session"
                :method :put
                :params {:email (get-in state [:fields :gateway.user-auth/email :value])
@@ -93,13 +97,17 @@
                :on-complete (fn [user]
                               (dispatch [:gateway.user-auth/remote-check-auth]))
                :on-error
-               (fn [_]
+               (fn [error]
+                 (when-let [k (get-in error [:response :error])]
+                   (dispatch [:gateway.user-auth/set-error k]))
                  (dispatch [:gateway.user-auth/set-user nil]))}}))
 
 (reg-event-fx
   :gateway.user-auth/remote-register
   (fn [{state :db} _]
-    {:db (assoc-in state [:user-auth :checking?] true)
+    {:db (-> state
+             clear-error
+             (assoc-in [:user-auth :checking?] true))
      :edn-xhr {:uri "/users"
                :method :put
                :params {:email (get-in state [:fields :gateway.user-auth/email :value])
@@ -109,6 +117,5 @@
                :on-error
                (fn [error]
                  (when-let [k (get-in error [:response :error])]
-
                    (dispatch [:gateway.user-auth/set-error k]))
                  (dispatch [:gateway.user-auth/set-user nil]))}}))
