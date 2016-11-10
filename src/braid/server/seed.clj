@@ -14,8 +14,8 @@
         group-2 (db/create-group! {:id (db/uuid) :slug "chat" :name "Chat"})
         user-1 (events/register-user! "foo@example.com" group-1)
         user-2 (events/register-user! "bar@example.com" group-1)
-        _ (db/set-user-password! user-1 "foo")
-        _ (db/set-user-password! user-2 "bar")
+        _ (db/set-user-password! user-1 "foofoofoo")
+        _ (db/set-user-password! user-2 "barbarbar")
 
         _ (db/user-add-to-group! (user-1 :id) (group-2 :id))
         _ (db/user-add-to-group! (user-2 :id) (group-2 :id))
