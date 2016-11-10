@@ -9,6 +9,7 @@
     {:db (-> state
              (assoc
                :user-auth {:user nil
+                           :error nil
                            :checking? true
                            :register? true
                            :oauth-provider nil}))
@@ -37,6 +38,20 @@
   (fn [{state :db} [_ bool]]
     {:db (-> state
              (assoc-in [:user-auth :register?] bool))}))
+
+(reg-event-fx
+  :gateway.user-auth/set-error
+  (fn [{state :db} [_ k]]
+    {:db (-> state
+             (assoc-in [:user-auth :error] k))}))
+
+(reg-event-fx
+  :gateway.user-auth/clear-error
+  (fn [{state :db} [_ k]]
+    {:db (-> state
+             (assoc-in [:user-auth :error] nil))}))
+
+; REMOTE
 
 (reg-event-fx
   :gateway.user-auth/remote-check-auth
@@ -92,5 +107,8 @@
                :on-complete (fn [user]
                               (dispatch [:gateway.user-auth/remote-check-auth]))
                :on-error
-               (fn [_]
+               (fn [error]
+                 (when-let [k (get-in error [:response :error])]
+
+                   (dispatch [:gateway.user-auth/set-error k]))
                  (dispatch [:gateway.user-auth/set-user nil]))}}))

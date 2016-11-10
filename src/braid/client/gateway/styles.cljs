@@ -171,5 +171,25 @@
      [:&::after
       mixins/spin
       (fontawesome/mixin :spinner)
-      {:display "inline-block"}]]]])
+      {:display "inline-block"}]]]
+
+[:form
+ [:.error-message
+  (merge
+    (vars/small-text-mixin)
+    {:color vars/invalid-color
+     :text-align "center"})
+
+  [:button
+   (merge
+     (vars/small-button-mixin)
+     {:color vars/invalid-color
+      :border-color vars/invalid-light-color})
+
+   [:&:active
+    {:background [[vars/invalid-light-color "!important"]]}]
+
+   [:&:hover
+    {:color [[vars/invalid-color "!important"]]
+     :border-color [[vars/invalid-color "!important"]]}]]]]])
 

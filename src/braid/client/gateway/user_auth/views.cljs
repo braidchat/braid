@@ -80,6 +80,25 @@
        {:class (when-not @fields-valid? "disabled")}
        "Log in to Braid"])))
 
+(defn error-view []
+  (let [error (subscribe [:gateway.user-auth/error])]
+    (fn []
+      (when @error
+        (case @error
+          :email-exists
+          [:div.error-message
+           "A user is already registered with that email."
+           [:button
+            {:on-click (fn [e]
+                         (.preventDefault e)
+                         (dispatch [:gateway.user-auth/clear-error])
+                         (dispatch [:gateway.user-auth/set-user-register? false]))}
+            "Log In"]]
+
+          ; catch-all
+          [:div.error-message
+           "An error occured. Please try again."])))))
+
 (defn returning-user-view []
   [:form.returning-user
    {:on-submit
@@ -98,7 +117,8 @@
      "Register"]]
    [returning-email-field-view]
    [returning-password-field-view]
-   [login-button-view]])
+   [login-button-view]
+   [error-view]])
 
 (defn new-password-field-view []
   (let [field-id :gateway.user-auth/password
@@ -180,7 +200,8 @@
      "Log In"]]
    [new-email-field-view]
    [new-password-field-view]
-   [register-button-view]])
+   [register-button-view]
+   [error-view]])
 
 (defn authed-user-view []
   (let [user (subscribe [:gateway.user-auth/user])]

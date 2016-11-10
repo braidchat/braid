@@ -18,10 +18,10 @@
   (when-not (db/user-in-group? user-id group-id)
     (events/user-join-group! user-id group-id)))
 
-(defn error-response [message]
-  {:status 400
-   :headers {"Content-Type" "text/plain"}
-   :body message})
+(defn error-response [status msg]
+  {:status status
+   :headers {"Content-Type" "application/edn; charset=utf-8"}
+   :body (pr-str {:error msg})})
 
 (defroutes api-public-routes
 
@@ -37,8 +37,7 @@
                        (db/authenticate-user email password))]
       {:status 200
        :session (assoc (req :session) :user-id user-id)}
-      {:status 401
-       :body (pr-str {:error true})}))
+      (error-response 401 "Username and password do not match.")))
 
   (DELETE "/session" _
     {:status 200 :session nil})
@@ -46,19 +45,19 @@
   (PUT "/users" [email password :as req]
     (cond
       (string/blank? email)
-      (error-response "You must provide an email.")
+      (error-response 400 "You must provide an email.")
 
       (not (valid-email? email))
-      (error-response "The email format is incorrect.")
+      (error-response 400 "The email format is incorrect.")
 
       (db/user-with-email email)
-      (error-response "A user is already registered with that email.")
+      (error-response 400 :email-exists)
 
       (string/blank? password)
-      (error-response "You must provide a password.")
+      (error-response 400 "You must provide a password.")
 
       (< (count password) 8)
-      (error-response "The password is too short.")
+      (error-response 400 "The password is too short.")
 
       :else
       (let [user (db/create-user! {:id (db/uuid)

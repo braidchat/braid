@@ -13,6 +13,7 @@
 (def secondary-text-color  "#999999")
 (def field-border-color    "#e0e0e0")
 (def invalid-color         "#fd4734")
+(def invalid-light-color   "#ff8477")
 (def valid-color           "#2bb8ba")
 (def disabled-input-color  "#f6f6f6")
 (def placeholder-color     "#eeeeee")

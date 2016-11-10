@@ -21,3 +21,9 @@
   :gateway.user-auth/oauth-provider
   (fn [state _]
     (get-in state [:user-auth :oauth-provider])))
+
+(reg-sub
+  :gateway.user-auth/error
+  (fn [state _]
+    (println (get-in state [:user-auth :error]))
+    (get-in state [:user-auth :error])))
