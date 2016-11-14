@@ -30,11 +30,13 @@
 
 (defroutes api-public-routes
 
+  ; get current logged in user
   (GET "/session" req
     (if-let [user (user-from-session req)]
       (edn-response user)
       {:status 401 :body "" :session nil}))
 
+  ; log in
   (PUT "/session" [email password :as req]
     (if-let [user-id (when (and email password)
                        (db/authenticate-user email password))]
@@ -42,9 +44,11 @@
        :session (assoc (req :session) :user-id user-id)}
       (error-response 401 :auth-fail)))
 
+  ; log out
   (DELETE "/session" _
     {:status 200 :session nil})
 
+  ; register a user
   (PUT "/users" [email password :as req]
     (cond
       (string/blank? email)
