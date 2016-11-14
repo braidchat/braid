@@ -2,7 +2,7 @@
   (:require [garden.stylesheet :refer [at-import at-font-face]]))
 
 (def fa-font-face
-  (let [version "4.5.0"
+  (let [version "4.7.0"
         fa-cdn-url (str "https://maxcdn.bootstrapcdn.com/font-awesome/" version)]
     (at-font-face
       {:font-family "FontAwesome"
