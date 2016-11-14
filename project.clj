@@ -109,7 +109,16 @@
                            :asset-path "/js/gateway/out"
                            :output-to "resources/public/js/gateway/out/braid.js"
                            :output-dir "resources/public/js/gateway/out"
-                           :verbose true}}]}
+                           :verbose true}}
+
+               {:id "gateway-release"
+                :source-paths ["src/braid/client"]
+                :compiler {:main braid.client.gateway.core
+                           :asset-path "/js/gateway/out"
+                           :output-to "resources/public/js/gateway/out/braid.js"
+                           :output-dir "resources/public/js/gateway/out_prod"
+                           :optimizations :advanced
+                           :pretty-print false}}]}
 
   :min-lein-version "2.5.0"
 
@@ -131,4 +140,4 @@
              :test [:dev]
              :uberjar [:prod
                        {:aot :all
-                        :prep-tasks ["compile" ["cljsbuild" "once" "desktop-release" "mobile-release"]]}]})
+                        :prep-tasks ["compile" ["cljsbuild" "once" "desktop-release" "mobile-release" "gateway-release"]]}]})
