@@ -64,16 +64,8 @@
        :color vars/accent-color}]]
 
     [:.returning-user
-     {:position "relative"}
-
-     ["> p"
-      {:position "absolute"
-       :top 0
-       :right 0
-       :margin 0
-       :line-height "2rem"}]]
-
-    [:.new-user
+     :.new-user
+     :.reset-password
      {:position "relative"}
 
      ["> p"

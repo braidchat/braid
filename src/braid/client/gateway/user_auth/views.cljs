@@ -67,7 +67,9 @@
          [:div.error-message (first @errors)])
        [:p "Don't remember?"
         [:button
-         {:on-click (fn [])}
+         {:on-click (fn [e]
+                      (.preventDefault e)
+                      (dispatch [:gateway.user-auth/set-mode :reset-password]))}
          "Reset your password"]]])))
 
 (defn login-button-view []
@@ -94,12 +96,53 @@
            [:button
             {:on-click (fn [e]
                          (.preventDefault e)
-                         (dispatch [:gateway.user-auth/set-user-register? false]))}
+                         (dispatch [:gateway.user-auth/set-mode :log-in]))}
             "Log In"]]
+          :no-such-email
+          [:div.error-message
+           "An account with that email does not exist."]
+
+          :password-reset-email-sent
+          [:div.message
+           "A password recovery email was sent. Please check your inbox."]
 
           ; catch-all
           [:div.error-message
            "An error occured. Please try again."])))))
+
+(defn password-reset-button-view []
+  (let [fields-valid?
+        (subscribe [:gateway/fields-valid?
+                    [:gateway.user-auth/email]])]
+    (fn []
+      [:button.submit
+       {:class (when-not @fields-valid? "disabled")}
+       "Reset Your Password"])))
+
+(defn reset-password-view []
+  [:form.reset-password
+   {:on-submit
+    (fn [e]
+      (.preventDefault e)
+      (dispatch [:gateway/submit-form
+                 {:validate-fields [:gateway.user-auth/email]
+                  :dispatch-when-valid [:gateway.user-auth/remote-request-password-reset]}]))}
+   [:h1 "Reset your password"]
+   [:p
+    [:button
+     {:on-click (fn [e]
+                  (.preventDefault e)
+                  (dispatch [:gateway.user-auth/set-mode :register]))}
+     "Register"]
+
+    [:button
+     {:on-click (fn [e]
+                  (.preventDefault e)
+                  (dispatch [:gateway.user-auth/set-mode :register]))}
+     "Log In"]]
+   [returning-email-field-view]
+   [password-reset-button-view]
+   [error-view]])
 
 (defn returning-user-view []
   [:form.returning-user
@@ -115,7 +158,7 @@
     [:button
      {:on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:gateway.user-auth/set-user-register? true]))}
+                  (dispatch [:gateway.user-auth/set-mode :register]))}
      "Register"]]
    [returning-email-field-view]
    [returning-password-field-view]
@@ -198,7 +241,7 @@
     [:button
      {:on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:gateway.user-auth/set-user-register? false]))}
+                  (dispatch [:gateway.user-auth/set-mode :log-in]))}
      "Log In"]]
    [new-email-field-view]
    [new-password-field-view]
@@ -235,6 +278,7 @@
        (case @mode
          :checking [checking-user-view]
          :register [new-user-view]
+         :reset-password [reset-password-view]
          :log-in [returning-user-view]
          :authed [authed-user-view]
          :oauth-in-progress [oauth-in-progress-view])])))

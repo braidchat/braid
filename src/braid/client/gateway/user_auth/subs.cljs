@@ -14,7 +14,8 @@
       (get-in state [:user-auth :checking?]) :checking
       (get-in state [:user-auth :user]) :authed
       (get-in state [:user-auth :oauth-provider]) :oauth-in-progress
-      (get-in state [:user-auth :register?]) :register
+      (= :register (get-in state [:user-auth :mode])) :register
+      (= :reset-password (get-in state [:user-auth :mode])) :reset-password
       :else :log-in)))
 
 (reg-sub

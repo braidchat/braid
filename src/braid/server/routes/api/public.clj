@@ -73,10 +73,12 @@
                                      password)]
         {:status 200
          :session (assoc (req :session) :user-id (user :id))})))
+
   (POST "/request-reset" [email]
-    (when-let [user (db/user-with-email email)]
-      (invites/request-reset (assoc user :email email)))
-    {:status 200 :body (pr-str {:ok true})})
+    (if-let [user (db/user-with-email email)]
+      (do (invites/request-reset (assoc user :email email))
+          (edn-response {:ok true}))
+      (error-response 400 :no-such-email)))
 
   (GET "/registration/check-slug-unique" req
     (edn-response (not (db/group-with-slug-exists? (get-in req [:params :slug])))))

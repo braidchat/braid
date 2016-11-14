@@ -174,6 +174,11 @@
       {:display "inline-block"}]]]
 
 [:form
+ [:.message
+  (merge
+    (vars/small-text-mixin)
+    {:text-align "center"})]
+
  [:.error-message
   (merge
     (vars/small-text-mixin)

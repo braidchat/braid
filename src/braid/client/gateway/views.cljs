@@ -5,7 +5,6 @@
     [garden.stylesheet :refer [at-import]]
     [braid.client.gateway.styles :as styles]
     [braid.client.gateway.views.join-group :refer [join-group-view]]
-    [braid.client.gateway.views.reset-password :refer [reset-password-view]]
     [braid.client.gateway.create-group.views :refer [create-group-view]]
     [braid.client.gateway.create-group.styles :refer [create-group-styles]]
     [braid.client.gateway.user-auth.views :refer [user-auth-view]]
@@ -43,7 +42,6 @@
          :create-group [create-group-view]
          :join-public-group [join-group-view :public]
          :join-private-group [join-group-view :private]
-         :reset-password [reset-password-view]
          nil)])))
 
 (defn app-view []

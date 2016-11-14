@@ -11,7 +11,7 @@
                :user-auth {:user nil
                            :error nil
                            :checking? true
-                           :register? true
+                           :mode :register ; :log-in , :reset-password
                            :oauth-provider nil}))
      :dispatch [:gateway.user-auth/remote-check-auth]}))
 
@@ -26,7 +26,7 @@
 (reg-event-fx
   :gateway.user-auth/switch-account
   (fn [{state :db} _]
-    {:dispatch-n [[:gateway.user-auth/set-user-register? false]
+    {:dispatch-n [[:gateway.user-auth/mode :log-in]
                   [:gateway.user-auth/remote-log-out]]}))
 
 
@@ -37,11 +37,11 @@
   (assoc-in state [:user-auth :error] nil))
 
 (reg-event-fx
-  :gateway.user-auth/set-user-register?
-  (fn [{state :db} [_ bool]]
+  :gateway.user-auth/set-mode
+  (fn [{state :db} [_ mode]]
     {:db (-> state
              clear-error
-             (assoc-in [:user-auth :register?] bool))}))
+             (assoc-in [:user-auth :mode] mode))}))
 
 (reg-event-fx
   :gateway.user-auth/set-error
@@ -119,3 +119,17 @@
                  (when-let [k (get-in error [:response :error])]
                    (dispatch [:gateway.user-auth/set-error k]))
                  (dispatch [:gateway.user-auth/set-user nil]))}}))
+
+(reg-event-fx
+  :gateway.user-auth/remote-request-password-reset
+  (fn [{state :db} _]
+    {:edn-xhr {:uri "/request-reset"
+               :method :post
+               :params {:email (get-in state [:fields :gateway.user-auth/email :value])}
+               :on-complete
+               (fn [_]
+                 (dispatch [:gateway.user-auth/set-error :password-reset-email-sent]))
+               :on-error
+               (fn [error]
+                 (when-let [k (get-in error [:response :error])]
+                   (dispatch [:gateway.user-auth/set-error k]))) }}))
