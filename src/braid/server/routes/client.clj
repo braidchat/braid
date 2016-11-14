@@ -17,6 +17,20 @@
      :api_domain (config :api-domain)}))
 
 (defroutes desktop-client-routes
+
+  ; used by forward-proxy for domain redirect
+  ; ie. slug.domain.com
+  ;       -> www.domain.com/groups/slug
+  ;       -> www.domain.com/group-uuid
+  (GET "/groups/:slug" [slug]
+    (if-let [group (db/group-by-slug slug)]
+      {:status 302
+       :headers {"Location" (str "/" (group :id) "/inbox")}
+       :body nil}
+      {:status 404
+       :headers {"Content-Type" "text/plain"}
+       :body "No such group exists."}))
+
   ; public group page
   (GET "/group/:group-name" [group-name :as req]
     (if-let [group (db/public-group-with-name group-name)]

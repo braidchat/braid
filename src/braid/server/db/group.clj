@@ -26,6 +26,11 @@
   (-> (d/pull (d/db conn) group-pull-pattern [:group/id group-id])
       db->group))
 
+(defn group-by-slug
+  [conn group-slug]
+  (when-let [g (d/pull (d/db conn) group-pull-pattern [:group/slug group-slug])]
+    (db->group g)))
+
 (defn group-users
   [conn group-id]
   (->> (d/q '[:find (pull ?u pull-pattern)
