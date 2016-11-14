@@ -122,6 +122,13 @@
                     (when @sending? "sending"))}
        "Create your Braid group"])))
 
+(defn error-view []
+  (let [error (subscribe [:gateway.action.create-group/error])]
+    (fn []
+      (when @error
+        [:div.error-message
+         "An error occured. Please try again."]))))
+
 (defn create-group-view []
   [:div.section
    [:form
@@ -137,4 +144,5 @@
     [group-name-field-view]
     [group-url-field-view]
     [group-type-field-view]
-    [button-view]]])
+    [button-view]
+    [error-view]]])

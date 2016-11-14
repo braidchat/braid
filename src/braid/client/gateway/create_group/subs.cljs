@@ -6,3 +6,8 @@
   :gateway.action.create-group/sending?
   (fn [state _]
     (get-in state [:action :sending?])))
+
+(reg-sub
+  :gateway.action.create-group/error
+  (fn [state _]
+    (get-in state [:action :error])))

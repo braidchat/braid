@@ -10,7 +10,8 @@
     {:db (-> state
              (assoc
                :action {:mode :create-group
-                        :sending? false}))}))
+                        :sending? false
+                        :error nil}))}))
 
 (reg-event-fx
   :gateway.action.create-group/guess-group-url
@@ -31,14 +32,27 @@
     {:db (assoc-in state [:action :sending?] true)
      :edn-xhr {:method :put
                :uri "/groups"
-               :params {:slug (get-in state [:fields :gateway.action.create-group/group-url :value])
-                        :name (get-in state [:fields :gateway.action.create-group/group-name :value])
-                        :type (get-in state [:fields :gateway.action.create-group/group-type :value])}
-               :on-complete (fn [response]
-                              (dispatch [:gateway.action.create-group/handle-registration-response response]))}}))
+               :params
+               {:slug (get-in state [:fields :gateway.action.create-group/group-url :value])
+                :name (get-in state [:fields :gateway.action.create-group/group-name :value])
+                :type (get-in state [:fields :gateway.action.create-group/group-type :value])}
+               :on-complete
+               (fn [response]
+                 (dispatch [:gateway.action.create-group/handle-registration-response response]))
+               :on-error
+               (fn [error]
+                 (when-let [k (get-in error [:response :error])]
+                   (dispatch [:gateway.action.create-group/handle-registration-error k])))}}))
 
 (reg-event-fx
   :gateway.action.create-group/handle-registration-response
   (fn [{state :db} [_ response]]
     (set! js/window.location (str "/" (response :group-id) "/inbox"))
     {:db (assoc-in state [:action :sending?] false)}))
+
+(reg-event-fx
+  :gateway.action.create-group/handle-registration-error
+  (fn [{state :db} [_ error]]
+    {:db (-> state
+             (assoc-in [:action :sending?] false)
+             (assoc-in [:action :error] error))}))
