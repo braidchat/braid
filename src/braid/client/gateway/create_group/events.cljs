@@ -30,7 +30,7 @@
   (fn [{state :db} _]
     {:db (assoc-in state [:action :sending?] true)
      :edn-xhr {:method :put
-               :uri "/registration/register"
+               :uri "/groups"
                :params {:slug (get-in state [:fields :gateway.action.create-group/group-url :value])
                         :name (get-in state [:fields :gateway.action.create-group/group-name :value])
                         :type (get-in state [:fields :gateway.action.create-group/group-type :value])}
@@ -40,4 +40,5 @@
 (reg-event-fx
   :gateway.action.create-group/handle-registration-response
   (fn [{state :db} [_ response]]
+    (set! js/window.location (str "/" (response :group-id) "/inbox"))
     {:db (assoc-in state [:action :sending?] false)}))

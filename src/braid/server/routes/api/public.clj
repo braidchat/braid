@@ -1,6 +1,6 @@
 (ns braid.server.routes.api.public
   (:require [clojure.string :as string]
-            [compojure.core :refer [GET POST PUT defroutes]]
+            [compojure.core :refer [GET POST PUT DELETE defroutes context]]
             [compojure.coercions :refer [as-uuid]]
             [braid.common.util :refer [valid-nickname? valid-email?]]
             [braid.server.db :as db]
@@ -8,6 +8,11 @@
             [braid.server.api.github :as github]
             [braid.server.conf :refer [config]]
             [braid.server.events :as events]))
+
+(defn user-from-session [req]
+  (when-let [user-id (get-in req [:session :user-id])]
+    (when-let [user (db/user-by-id user-id)]
+      user)))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
@@ -74,62 +79,55 @@
   (GET "/registration/check-slug-unique" req
     (edn-response (not (db/group-with-slug-exists? (get-in req [:params :slug])))))
 
-  (PUT "/registration/register" [email name slug type :as req]
-    (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
+  ; create a group
+  ; requires authentication
+  (PUT "/groups" [name slug type :as req]
+    (if-let [user (user-from-session req)]
       (cond
-        ; email validations
-
-        (string/blank? email)
-        (assoc fail :body "Must provide an Email")
-
-        (not (valid-email? email))
-        (assoc fail :body "Email format is incorrect")
-
-        (db/user-with-email email)
-        (assoc fail :body "A user is already registered with that email.")
-
         ; group name validations
 
         (string/blank? name)
-        (assoc fail :body "Must provide a Group Name")
+        (error-response 400 "Must provide a Group Name")
 
         ; group url (slug) validations
 
         (string/blank? slug)
-        (assoc fail :body "Must provide an Group URL")
+        (error-response 400 "Must provide an Group URL")
 
         (not (re-matches #"[a-z0-9-]*" slug))
-        (assoc fail :body "Group URL can only contain lowercase letters, numbers or dashes.")
+        (error-response 400 "Group URL can only contain lowercase letters, numbers or dashes.")
 
         (re-matches #"-.*" slug)
-        (assoc fail :body "Group URL cannot start with a dash.")
+        (error-response 400 "Group URL cannot start with a dash.")
 
         (re-matches #".*-" slug)
-        (assoc fail :body "Group URL cannot end with a dash.")
+        (error-response 400 "Group URL cannot end with a dash.")
 
         (db/group-with-slug-exists? slug)
-        (assoc fail :body "A Group with this URL already exists.")
+        (error-response 400 "A Group with this URL already exists.")
 
         ; group type validations
 
         (string/blank? type)
-        (assoc fail :body "Must provide a Group Type")
+        (error-response 400 "Must provide a Group Type")
 
         (not (contains? #{"public" "private"} type))
-        (assoc fail :body "Group type must be either public or private")
+        (error-response 400 "Group type must be either public or private")
 
         ; passed all validations
         :else
-        (let [group (db/create-group! {:id (db/uuid)
+        (let [group-id (db/uuid)
+              group (db/create-group! {:id group-id
                                        :slug slug
-                                       :name name})
-              user (db/create-user! {:id (db/uuid)
-                                     :email email})]
-
-          (db/user-add-to-group! (user :id) (group :id))
-          (db/user-make-group-admin! (user :id) (group :id))
-
-          (edn-response true)))))
+                                       :name name})]
+          (db/group-set! (group :id) :public? (case type
+                                                "public" true
+                                                "private" false))
+          (db/user-add-to-group! (user :id) group-id)
+          (db/user-subscribe-to-group-tags! (user :id) group-id)
+          (db/user-make-group-admin! (user :id) group-id)
+          (edn-response {:group-id group-id})))
+      (error-response 401 "")))
 
   ; accept an email invite to join a group
   (POST "/register" [token invite_id password email now hmac avatar :as req]

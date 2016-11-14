@@ -12,6 +12,8 @@
             [clojure.tools.nrepl.server :as nrepl]
             ; requiring router so mount sees state
             [braid.server.socket :refer [router]]
+            ; requiring sync, so it loads
+            [braid.server.sync]
             [braid.server.routes.socket :refer [sync-routes]]
             [braid.server.routes.client :refer [desktop-client-routes
                                                 mobile-client-routes
