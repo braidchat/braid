@@ -41,8 +41,9 @@
                   }]]
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
-        [:p "Or, log in with: "
-         [auth-providers-view]]]])))
+        ; TODO
+        #_[:p "Or, log in with: "
+           [auth-providers-view]]]])))
 
 (defn returning-password-field-view []
   (let [field-id :gateway.user-auth/password
@@ -214,7 +215,8 @@
                                  (dispatch [:gateway/update-value field-id value])))}]]
         (when (= :invalid @status)
           [:div.error-message (first @errors)])
-        [:p "Or, register with: "
+        ; TODO
+        #_[:p "Or, register with: "
          [auth-providers-view]]]])))
 
 (defn register-button-view []
