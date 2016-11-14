@@ -2,8 +2,8 @@
   (:require
     [re-frame.core :refer [subscribe]]
     [garden.core :refer [css]]
-    [garden.stylesheet :refer [at-import]]
     [braid.client.gateway.styles :as styles]
+    [braid.client.ui.styles.imports :refer [imports]]
     [braid.client.gateway.views.join-group :refer [join-group-view]]
     [braid.client.gateway.create-group.views :refer [create-group-view]]
     [braid.client.gateway.create-group.styles :refer [create-group-styles]]
@@ -22,7 +22,7 @@
                           :animation
                           :flex-grow}
            :vendors ["webkit"]}
-          (at-import "https://fonts.googleapis.com/css?family=Open+Sans:400,700")
+          imports
           styles/anim-spin
           (styles/app-styles)
           (styles/form-styles)
