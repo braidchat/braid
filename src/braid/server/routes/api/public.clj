@@ -31,10 +31,8 @@
 (defroutes api-public-routes
 
   (GET "/session" req
-    (if-let [user-id (get-in req [:session :user-id])]
-      (if-let [user (db/user-by-id user-id)]
-        (edn-response user)
-        {:status 401 :body "" :session nil})
+    (if-let [user (user-from-session req)]
+      (edn-response user)
       {:status 401 :body "" :session nil}))
 
   (PUT "/session" [email password :as req]
