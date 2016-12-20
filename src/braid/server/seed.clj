@@ -1,5 +1,6 @@
 (ns braid.server.seed
   (:require [braid.server.db :as db]
+            [braid.server.db.user :as user]
             [braid.server.conf :refer [config]]))
 
 (defn drop! []
@@ -11,16 +12,18 @@
 (defn seed! []
   (let [group-1 (db/create-group! {:id (db/uuid) :name "Braid"})
         group-2 (db/create-group! {:id (db/uuid) :name "Chat"})
-        user-1 (db/create-user! {:id (db/uuid)
-                                 :email "foo@example.com"
-                                 :nickname "foo"
-                                 :password "foo"
-                                 :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
-        user-2 (db/create-user! {:id (db/uuid)
-                                 :email "bar@example.com"
-                                 :nickname "bar"
-                                 :password "bar"
-                                 :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
+        user-1 (user/create-user! db/conn
+                                  {:id (db/uuid)
+                                   :email "foo@example.com"
+                                   :nickname "foo"
+                                   :password "foo"
+                                   :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
+        user-2 (user/create-user! db/conn
+                                  {:id (db/uuid)
+                                   :email "bar@example.com"
+                                   :nickname "bar"
+                                   :password "bar"
+                                   :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
         _ (db/user-add-to-group! (user-1 :id) (group-1 :id))
         _ (db/user-add-to-group! (user-2 :id) (group-1 :id))
         _ (db/user-add-to-group! (user-1 :id) (group-2 :id))

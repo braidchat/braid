@@ -3,6 +3,7 @@
             [mount.core :as mount]
             [braid.server.conf :as conf]
             [braid.server.db :as db]
+            [braid.server.db.user :as user]
             [braid.server.search :as search]))
 
 (use-fixtures :each
@@ -35,11 +36,11 @@
             :tags ["foo" "baz"]}))))
 
 (deftest searching-threads
-  (let [user-1 (db/create-user! {:id (db/uuid)
+  (let [user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
-        user-2 (db/create-user! {:id (db/uuid)
+        user-2 (user/create-user! db/conn {:id (db/uuid)
                                  :email "bar@foo.com"
                                  :password "foobar"
                                  :avatar ""})

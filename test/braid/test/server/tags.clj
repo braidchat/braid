@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [mount.core :as mount]
             [braid.server.conf :as conf]
-            [braid.server.db :as db]))
+            [braid.server.db :as db]
+            [braid.server.db.user :as user]))
 
 
 (use-fixtures :each
@@ -40,10 +41,10 @@
         ))))
 
 (deftest user-can-subscribe-to-tags
-  (let [user (db/create-user! {:id (db/uuid)
-                               :email "foo@bar.com"
-                               :password "foobar"
-                               :avatar ""})
+  (let [user (user/create-user! db/conn {:id (db/uuid)
+                                         :email "foo@bar.com"
+                                         :password "foobar"
+                                         :avatar ""})
         group (db/create-group! {:id (db/uuid)
                                  :name "Lean Pixel"})
         tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
@@ -66,15 +67,15 @@
           (is (= (set tags) #{})))))))
 
 (deftest user-can-only-see-tags-in-group
-  (let [user-1 (db/create-user! {:id (db/uuid)
+  (let [user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
-        user-2 (db/create-user! {:id (db/uuid)
+        user-2 (user/create-user! db/conn {:id (db/uuid)
                                  :email "quux@bar.com"
                                  :password "foobar"
                                  :avatar ""})
-        user-3 (db/create-user! {:id (db/uuid)
+        user-3 (user/create-user! db/conn {:id (db/uuid)
                                  :email "qaax@bar.com"
                                  :password "foobar"
                                  :avatar ""})
@@ -95,7 +96,7 @@
       (is (= #{tag-2 tag-3} (db/tags-for-user (user-3 :id)))))))
 
 (deftest user-can-only-subscribe-to-tags-in-group
-  (let [user (db/create-user! {:id (db/uuid)
+  (let [user (user/create-user! db/conn {:id (db/uuid)
                                :email "foo@bar.com"
                                :password "foobar"
                                :avatar ""})

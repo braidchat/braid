@@ -4,6 +4,7 @@
             [ring.middleware.transit :as transit]
             [taoensso.timbre :as timbre]
             [braid.server.db :as db]
+            [braid.server.db.user :as user]
             [braid.common.schema :as schema]
             [braid.server.sync :as sync])
   (:import [org.apache.commons.codec.binary Base64]))
@@ -93,7 +94,7 @@
         (if (db/user-in-group? user-id (bot :group-id))
           {:status 200
            :headers {"Content-Type" "text/plain"}
-           :body (:nickname (db/user-by-id user-id))}
+           :body (:nickname (user/user-by-id db/conn user-id))}
           {:status 403
            :headers {"Content-Type" "text/plain"}
            :body "Can't lookup user in a different group"})

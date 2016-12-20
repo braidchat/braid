@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [mount.core :as mount]
             [braid.server.conf :as conf]
-            [braid.server.db :as db]))
+            [braid.server.db :as db]
+            [braid.server.db.user :as user]))
 
 
 (use-fixtures :each
@@ -17,7 +18,7 @@
 
 
 (deftest create-message
-  (let [user-1 (db/create-user! {:id (db/uuid)
+  (let [user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar "http://www.foobar.com/1.jpg"})
@@ -64,7 +65,7 @@
 (deftest new-message-opens-and-subscribes
 
   (testing "given a user"
-    (let [user-1 (db/create-user! {:id (db/uuid)
+    (let [user-1 (user/create-user! db/conn {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar ""})
@@ -88,11 +89,11 @@
 (deftest new-message-opens-thread
 
   (testing "given a thread with 2 participants"
-    (let [user-1 (db/create-user! {:id (db/uuid)
+    (let [user-1 (user/create-user! db/conn {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar ""})
-          user-2 (db/create-user! {:id (db/uuid)
+          user-2 (user/create-user! db/conn {:id (db/uuid)
                                    :email "quux@bar.com"
                                    :password "foobar"
                                    :avatar ""})
@@ -134,12 +135,12 @@
     (let [group (db/create-group! {:id (db/uuid)
                                    :name "Lean Pixel"})
           tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
-          user-1 (db/create-user! {:id (db/uuid)
+          user-1 (user/create-user! db/conn {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar ""})
           _ (db/user-add-to-group! (user-1 :id) (group :id))
-          user-2 (db/create-user! {:id (db/uuid)
+          user-2 (user/create-user! db/conn {:id (db/uuid)
                                    :email "quux@bar.com"
                                    :password "foobar"
                                    :avatar ""})
@@ -176,12 +177,12 @@
   (testing "given 2 users..."
     (let [group (db/create-group! {:id (db/uuid)
                                    :name "Lean Pixel"})
-          user-1 (db/create-user! {:id (db/uuid)
+          user-1 (user/create-user! db/conn {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar ""})
           _ (db/user-add-to-group! (user-1 :id) (group :id))
-          user-2 (db/create-user! {:id (db/uuid)
+          user-2 (user/create-user! db/conn {:id (db/uuid)
                                    :email "quux@bar.com"
                                    :password "foobar"
                                    :avatar ""})

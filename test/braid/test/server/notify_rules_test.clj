@@ -4,6 +4,7 @@
             [braid.server.conf :as conf]
             [schema.core :as s]
             [braid.server.db :as db]
+            [braid.server.db.user :as user]
             [braid.common.schema :refer [rules-valid? check-rules!]]
             [braid.server.notify-rules :as rules]))
 
@@ -48,15 +49,15 @@
         g2t2 (db/create-tag! {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})
 
         user-id (db/uuid)
-        _ (db/create-user! {:id user-id
-                            :email "foo@bar.com"
-                            :avatar "zz"
-                            :password "foobar"})
+        _ (user/create-user! db/conn {:id user-id
+                                      :email "foo@bar.com"
+                                      :avatar "zz"
+                                      :password "foobar"})
 
-        sender (db/create-user! {:id (db/uuid)
-                                 :email "bar@bar.com"
-                                 :avatar "zz"
-                                 :password "foobar"})
+        sender (user/create-user! db/conn {:id (db/uuid)
+                                           :email "bar@bar.com"
+                                           :avatar "zz"
+                                           :password "foobar"})
 
         msg (fn [] {:id (db/uuid)
                     :group-id (g1 :id)
@@ -94,7 +95,7 @@
       (is (not (rules/notify? user-id [[:tag (:id g1t2)]] m))))
 
     (let [m1 (-> (msg)
-                (update :mentioned-tag-ids conj (:id g1t1)))
+                 (update :mentioned-tag-ids conj (:id g1t1)))
           m2 (-> (msg) (assoc :thread-id (m1 :thread-id)))]
       (db/create-message! m1)
       (db/create-message! m2)

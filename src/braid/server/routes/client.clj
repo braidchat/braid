@@ -6,6 +6,7 @@
             [braid.server.conf :refer [config]]
             [braid.server.digest :as digest]
             [braid.server.db :as db]
+            [braid.server.db.user :as user]
             [braid.server.invite :as invites]
             [braid.server.api.github :as github]))
 
@@ -48,7 +49,7 @@
   (GET "/reset" [user :<< as-uuid token :as req]
     (if-let [u (and user token
                  (invites/verify-reset-nonce {:id user} token)
-                 (db/user-by-id user))]
+                 (user/user-by-id db/conn user))]
       {:status 200
        :headers {"Content-Type" "text/html"}
        :body (invites/reset-page u token)}

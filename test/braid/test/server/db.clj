@@ -5,6 +5,7 @@
             [braid.test.server.test-utils :refer [fetch-messages]]
             [braid.server.conf :as conf]
             [braid.server.db :as db :refer [conn]]
+            [braid.server.db.user :as user]
             [braid.common.schema :as schema]
             [braid.server.search :as search]))
 
@@ -25,20 +26,20 @@
               :email "foo@bar.com"
               :password "foobar"
               :avatar "http://www.foobar.com/1.jpg"}
-        user (db/create-user! data)]
+        user (user/create-user! db/conn data)]
     (testing "can check if an email has been used"
-      (is (db/email-taken? (:email data)))
-      (is (not (db/email-taken? "baz@quux.net"))))
+      (is (user/email-taken? db/conn (:email data)))
+      (is (not (user/email-taken? db/conn "baz@quux.net"))))
     (testing "create returns a user"
       (is (= (dissoc user :group-ids)
              (-> data
                  (dissoc :password :email)
                  (assoc :nickname "foo")))))
     (testing "can set nickname"
-      (is (not (db/nickname-taken? "ol' fooy")))
-      (db/set-nickname! (user :id) "ol' fooy")
-      (is (db/nickname-taken? "ol' fooy"))
-      (is (= (-> (db/user-with-email "foo@bar.com")
+      (is (not (user/nickname-taken? db/conn "ol' fooy")))
+      (user/set-nickname! db/conn (user :id) "ol' fooy")
+      (is (user/nickname-taken? db/conn "ol' fooy"))
+      (is (= (-> (user/user-with-email db/conn "foo@bar.com")
                  (dissoc :group-ids))
              (-> data
                  (dissoc :password :email)
@@ -46,7 +47,7 @@
 
     (testing "user email must be unique"
       (is (thrown? java.util.concurrent.ExecutionException
-                   (db/create-user! {:id (db/uuid)
+                   (user/create-user! db/conn {:id (db/uuid)
                                      :email (data :email)
                                      :password "zzz"
                                      :avatar "http://zzz.com/2.jpg"}))))
@@ -55,45 +56,45 @@
                    :email "baz@quux.com"
                    :password "foobar"
                    :avatar "foo@bar.com"}]
-        (is (some? (db/create-user! other)))
+        (is (some? (user/create-user! db/conn other)))
         (is (thrown? java.util.concurrent.ExecutionException
-                     @(db/set-nickname! (other :id)  "ol' fooy")))))))
+                     @(user/set-nickname! db/conn (other :id)  "ol' fooy")))))))
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)
                      :email "foo@bar.com"
                      :password "foobar"
                      :avatar "http://www.foobar.com/1.jpg"}
-        user-1 (db/create-user! user-1-data)
+        user-1 (user/create-user! db/conn user-1-data)
         user-2-data  {:id (db/uuid)
                       :email "bar@baz.com"
                       :password "barbaz"
                       :avatar "http://www.barbaz.com/1.jpg"}
-        user-2 (db/create-user! user-2-data)
+        user-2 (user/create-user! db/conn user-2-data)
         group (db/create-group! {:id (db/uuid) :name "aoeu"})
         _ (db/user-add-to-group! (user-1 :id) (group :id))
         _ (db/user-add-to-group! (user-2 :id) (group :id))
-        users (db/users-for-user (user-1 :id))]
+        users (user/users-for-user db/conn (user-1 :id))]
     (testing "returns all users"
       (is (= (set (map (fn [u] (dissoc u :group-ids)) users))
              (set (map (fn [u] (dissoc u :group-ids)) [user-1 user-2])))))
     (testing "get user by email"
       (is (= (dissoc user-1 :group-ids)
-             (dissoc (db/user-with-email (user-1-data :email)) :group-ids)))
-      (is (nil? (db/user-with-email "zzzzz@zzzzzz.ru"))))))
+             (dissoc (user/user-with-email db/conn (user-1-data :email)) :group-ids)))
+      (is (nil? (user/user-with-email db/conn "zzzzz@zzzzzz.ru"))))))
 
 (deftest only-see-users-in-group
   (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
         group-2 (db/create-group! {:id (db/uuid) :name "g2"})
-        user-1 (db/create-user! {:id (db/uuid)
+        user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar "http://www.foobar.com/1.jpg"})
-        user-2 (db/create-user! {:id (db/uuid)
+        user-2 (user/create-user! db/conn {:id (db/uuid)
                                  :email "bar@baz.com"
                                  :password "barbaz"
                                  :avatar "http://www.barbaz.com/1.jpg"})
-        user-3 (db/create-user! {:id (db/uuid)
+        user-3 (user/create-user! db/conn {:id (db/uuid)
                                  :email "quux@baz.com"
                                  :password "barbaz"
                                  :avatar "http://www.barbaz.com/2.jpg"})]
@@ -107,42 +108,43 @@
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-1 user-2]))
            (set (map (fn [u] (dissoc u :group-ids))
-                (db/users-for-user (user-1 :id))))))
+                (user/users-for-user db/conn (user-1 :id))))))
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-1 user-2 user-3]))
            (set (map (fn [u] (dissoc u :group-ids))
-                (db/users-for-user (user-2 :id))))))
+                (user/users-for-user db/conn (user-2 :id))))))
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-2 user-3]))
            (set (map (fn [u] (dissoc u :group-ids))
-                (db/users-for-user (user-3 :id))))))
-    (is (db/user-visible-to-user? (user-1 :id) (user-2 :id)))
-    (is (not (db/user-visible-to-user? (user-1 :id) (user-3 :id))))
-    (is (not (db/user-visible-to-user? (user-3 :id) (user-1 :id))))
-    (is (db/user-visible-to-user? (user-2 :id) (user-3 :id)))
-    (is (db/user-visible-to-user? (user-3 :id) (user-2 :id)))
+                (user/users-for-user db/conn (user-3 :id))))))
+    (is (user/user-visible-to-user? db/conn (user-1 :id) (user-2 :id)))
+    (is (not (user/user-visible-to-user? db/conn (user-1 :id) (user-3 :id))))
+    (is (not (user/user-visible-to-user? db/conn (user-3 :id) (user-1 :id))))
+    (is (user/user-visible-to-user? db/conn (user-2 :id) (user-3 :id)))
+    (is (user/user-visible-to-user? db/conn (user-3 :id) (user-2 :id)))
     (db/user-leave-group! (user-1 :id) (group-1 :id))
     (is (not (db/user-in-group? (user-1 :id) (group-1 :id))))
-    (is (not (db/user-visible-to-user? (user-1 :id) (user-2 :id))))))
+    (is (not (user/user-visible-to-user? db/conn (user-1 :id) (user-2 :id))))))
 
 (deftest authenticate-user
   (let [user-1-data {:id (db/uuid)
                      :email "fOo@bar.com"
                      :password "foobar"
                      :avatar ""}
-        _ (db/create-user! user-1-data)]
+        _ (user/create-user! db/conn user-1-data)]
 
     (testing "returns user-id when email+password matches"
-      (is (= (:id user-1-data) (db/authenticate-user (user-1-data :email) (user-1-data :password)))))
+      (is (= (:id user-1-data)
+             (user/authenticate-user db/conn (user-1-data :email) (user-1-data :password)))))
 
     (testing "email is case-insensitive"
       (is (= (:id user-1-data)
-             (db/authenticate-user "Foo@bar.com" (user-1-data :password))
-             (db/authenticate-user "foo@bar.com" (user-1-data :password))
-             (db/authenticate-user "FOO@BAR.COM" (user-1-data :password)))))
+             (user/authenticate-user db/conn "Foo@bar.com" (user-1-data :password))
+             (user/authenticate-user db/conn "foo@bar.com" (user-1-data :password))
+             (user/authenticate-user db/conn "FOO@BAR.COM" (user-1-data :password)))))
 
     (testing "returns nil when email+password wrong"
-      (is (nil? (db/authenticate-user (user-1-data :email) "zzz"))))))
+      (is (nil? (user/authenticate-user db/conn (user-1-data :email) "zzz"))))))
 
 (deftest create-group
   (let [data {:id (db/uuid)
@@ -159,7 +161,7 @@
              (assoc data :admins #{} :intro "the intro" :avatar nil
                :public? false :bots #{}))))
     (testing "can add a user to the group"
-      (let [user (db/create-user! {:id user-id
+      (let [user (user/create-user! db/conn {:id user-id
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar "http://www.foobar.com/1.jpg"})]
@@ -178,7 +180,7 @@
       (db/user-make-group-admin! user-id (group :id))
       (is (= #{user-id} (:admins (db/group-by-id (group :id)))))
       (testing "and another admin"
-        (db/create-user! {:id user-2-id
+        (user/create-user! db/conn {:id user-2-id
                           :email "bar@baz.com"
                           :password "foobar"
                           :avatar "http://www.foobar.com/1.jpg"})
@@ -222,7 +224,7 @@
 
 (deftest fetch-messages-test
   (let [group (db/create-group! {:id (db/uuid) :name "group"})
-        user-1 (db/create-user! {:id (db/uuid)
+        user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar "http://www.foobar.com/1.jpg"})
@@ -273,7 +275,7 @@
 
 (deftest user-hide-thread
   (let [group (db/create-group! {:id (db/uuid) :name "group"})
-        user-1 (db/create-user! {:id (db/uuid)
+        user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
@@ -307,7 +309,7 @@
       (db/user-hide-thread! (user-1 :id) (message-2 :thread-id))
       (is (not (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id)))))
     (testing "thread is re-opened when it gets another message"
-      (let [user-2 (db/create-user! {:id (db/uuid) :email "bar@baz.com"
+      (let [user-2 (user/create-user! db/conn {:id (db/uuid) :email "bar@baz.com"
                                      :password "foobar" :avatar ""})]
         (db/create-message! {:id (db/uuid)
                              :group-id (group :id)
@@ -336,15 +338,15 @@
             (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id)))))))))
 
 (deftest user-thread-visibility
-  (let [user-1 (db/create-user! {:id (db/uuid)
+  (let [user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
-        user-2 (db/create-user! {:id (db/uuid)
+        user-2 (user/create-user! db/conn {:id (db/uuid)
                                  :email "quux@bar.com"
                                  :password "foobar"
                                  :avatar ""})
-        user-3 (db/create-user! {:id (db/uuid)
+        user-3 (user/create-user! db/conn {:id (db/uuid)
                                  :email "qaax@bar.com"
                                  :password "foobar"
                                  :avatar ""})
@@ -398,11 +400,11 @@
       (is (db/user-can-see-thread? (user-2 :id) thread-2-id)))))
 
 (deftest user-invite-to-group
-  (let [user-1 (db/create-user! {:id (db/uuid)
+  (let [user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
-        user-2 (db/create-user! {:id (db/uuid)
+        user-2 (user/create-user! db/conn {:id (db/uuid)
                                  :email "bar@baz.com"
                                  :password "foobar"
                                  :avatar ""})
@@ -421,7 +423,7 @@
       (is (empty? (db/invites-for-user (user-2 :id)))))))
 
 (deftest user-leaving-group
-  (let [user-1 (db/create-user! {:id (db/uuid)
+  (let [user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
@@ -440,7 +442,7 @@
       (is (empty? (:mentioned-ids (db/thread-by-id thread-id)))))))
 
 (deftest adding-user-to-group-subscribes-tags
-  (let [user (db/create-user! {:id (db/uuid)
+  (let [user (user/create-user! db/conn {:id (db/uuid)
                                :email "foo@bar.com"
                                :password "foobar"
                                :avatar ""})
@@ -465,39 +467,42 @@
 
 (deftest user-preferences
   (testing "Can set and retrieve preferences"
-    (let [u (db/create-user! {:id (db/uuid)
+    (let [u (user/create-user! db/conn {:id (db/uuid)
                               :email "foo@bar.com"
                               :password "foobar"
                               :avatar ""})]
-      (is (empty? (db/user-get-preferences (:id u))))
-      (db/user-set-preference! (:id u) :email-frequency :weekly)
+      (is (empty? (user/user-get-preferences db/conn (:id u))))
+      (user/user-set-preference! db/conn (:id u) :email-frequency :weekly)
       (is (= {:email-frequency :weekly}
-             (db/user-get-preferences (:id u))))
-      (is (= :weekly (db/user-get-preference (:id u) :email-frequency)))
-      (db/user-set-preference! (:id u) :email-frequency :daily)
-      (is (= :daily (db/user-get-preference (:id u) :email-frequency)))
-      (db/user-set-preference! (:id u) :email-frequency :weekly)
+             (user/user-get-preferences db/conn (:id u))))
+      (is (= :weekly (user/user-get-preference db/conn (:id u) :email-frequency)))
+      (user/user-set-preference! db/conn (:id u) :email-frequency :daily)
+      (is (= :daily (user/user-get-preference db/conn (:id u) :email-frequency)))
+      (user/user-set-preference! db/conn (:id u) :email-frequency :weekly)
       (testing "can search by preferences"
-        (let [u1 (:id (db/create-user! {:id (db/uuid)
+        (let [u1 (:id (user/create-user! db/conn {:id (db/uuid)
                                         :email "foo@baz.com"
                                         :password "foobar"
                                         :avatar ""
                                         :nickname "zzz"}))
-              u2 (:id (db/create-user! {:id (db/uuid)
+              u2 (:id (user/create-user! db/conn {:id (db/uuid)
                                         :email "bar@bar.com"
                                         :password "foobar"
                                         :avatar ""}))
-              u3 (:id (db/create-user! {:id (db/uuid)
+              u3 (:id (user/create-user! db/conn {:id (db/uuid)
                                         :email "baz@bar.com"
                                         :password "foobar"
                                         :avatar ""}))]
-          (db/user-set-preference! u1 :email-frequency :daily)
-          (db/user-set-preference! u1 :favourite-color "blue")
-          (db/user-set-preference! u2 :email-frequency :weekly)
-          (db/user-set-preference! u2 :favourite-color "blue")
-          (is (= #{u2 (u :id)} (set (db/user-search-preferences :email-frequency :weekly))))
-          (is (= [u1] (db/user-search-preferences :email-frequency :daily)))
-          (is (= #{u1 u2} (set (db/user-search-preferences :favourite-color "blue")))))))))
+          (user/user-set-preference! db/conn u1 :email-frequency :daily)
+          (user/user-set-preference! db/conn u1 :favourite-color "blue")
+          (user/user-set-preference! db/conn u2 :email-frequency :weekly)
+          (user/user-set-preference! db/conn u2 :favourite-color "blue")
+          (is (= #{u2 (u :id)} (set (user/user-search-preferences
+                                      db/conn :email-frequency :weekly))))
+          (is (= [u1] (user/user-search-preferences
+                        db/conn :email-frequency :daily)))
+          (is (= #{u1 u2} (set (user/user-search-preferences
+                                 db/conn :favourite-color "blue")))))))))
 
 (deftest bots-test
   (let [g1 (db/create-group! {:name "group 1" :id (db/uuid)})

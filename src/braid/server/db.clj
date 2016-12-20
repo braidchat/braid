@@ -53,8 +53,6 @@
                         (let [gargs (repeatedly (dec (count as)) gensym)]
                           `(~(vec gargs) (~fn-var conn ~@gargs))))))))))))
 
-(reexport-db-ns braid.server.db.user)
-
 (reexport-db-ns braid.server.db.message)
 
 (reexport-db-ns braid.server.db.group)

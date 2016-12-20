@@ -1,5 +1,6 @@
 (ns braid.server.migrate
   (:require [braid.server.db :as db]
+            [braid.server.db.user :as user]
             [datomic.api :as d]
             [clojure.string :as string]
             [clojure.set :as set]
@@ -243,7 +244,7 @@
       (let [u-id (:user/id p)
             u-prefs (edn/read-string (:user/preferences-old p))]
         (doseq [[k v] u-prefs]
-          (when k (db/user-set-preference! u-id k v)))))))
+          (when k (user/user-set-preference! db/conn u-id k v)))))))
 
 (defn migrate-2016-05-03
   "Add tag descriptions"

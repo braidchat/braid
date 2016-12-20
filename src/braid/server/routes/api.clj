@@ -5,6 +5,7 @@
             [clojure.java.io :as io]
             [braid.common.util :refer [valid-nickname?]]
             [braid.server.db :as db]
+            [braid.server.db.user :as user]
             [braid.server.invite :as invites]
             [braid.server.identicons :as identicons]
             [braid.server.crypto :refer [random-nonce]]
@@ -28,11 +29,11 @@
         nick (-> (first (string/split email #"@"))
                  (string/replace disallowed-chars ""))
         ; TODO: guard against duplicate nickname?
-        u (db/create-user! {:id id
-                            :email email
-                            :password (random-nonce 50)
-                            :avatar avatar
-                            :nickname nick})]
+        u (user/create-user! db/conn {:id id
+                                      :email email
+                                      :password (random-nonce 50)
+                                      :avatar avatar
+                                      :nickname nick})]
     (sync/user-join-group! id group-id)
     id))
 
@@ -45,7 +46,7 @@
   ; check if already logged in
   (GET "/check" req
     (if-let [user-id (get-in req [:session :user-id])]
-      (if-let [user (db/user-id-exists? user-id)]
+      (if-let [user (user/user-id-exists? db/conn user-id)]
         {:status 200 :body ""}
         {:status 401 :body "" :session nil})
       {:status 401 :body "" :session nil}))
@@ -54,7 +55,7 @@
   (POST "/auth" req
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
-                         (db/authenticate-user email password)))]
+                         (user/authenticate-user db/conn email password)))]
       {:status 200 :session (assoc (req :session) :user-id user-id)}
       {:status 401 :body (pr-str {:error true})}))
   ; log out
@@ -63,7 +64,7 @@
 
   ; request a password reset
   (POST "/request-reset" [email]
-    (when-let [user (db/user-with-email email)]
+    (when-let [user (user/user-with-email db/conn email)]
       (invites/request-reset (assoc user :email email)))
     {:status 200 :body (pr-str {:ok true})})
 
@@ -81,7 +82,7 @@
         (not (valid-nickname? nickname))
         (assoc fail :body "Nickname must be 1-30 characters without whitespace")
 
-        (db/nickname-taken? nickname)
+        (user/nickname-taken? db/conn nickname)
         (assoc fail :body "nickname taken")
 
         ; TODO: be smarter about this
@@ -93,11 +94,11 @@
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
             (let [avatar-url (invites/upload-avatar avatar)
-                  user (db/create-user! {:id (db/uuid)
-                                         :email email
-                                         :avatar avatar-url
-                                         :nickname nickname
-                                         :password password})
+                  user (user/create-user! db/conn {:id (db/uuid)
+                                                   :email email
+                                                   :avatar avatar-url
+                                                   :nickname nickname
+                                                   :password password})
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
@@ -119,7 +120,7 @@
             (assoc bad-resp :body "No such group or the request has been tampered with")
             (if (string/blank? email)
               (assoc bad-resp :body "Invalid email")
-              (if (db/user-with-email email)
+              (if (user/user-with-email db/conn email)
                 (assoc bad-resp
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
@@ -159,7 +160,7 @@
             (assoc bad-resp :body "No such group or the group is private")
             (if (string/blank? email)
               (assoc bad-resp :body "Invalid email")
-              (if (db/user-with-email email)
+              (if (user/user-with-email db/conn email)
                 (assoc bad-resp
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
@@ -198,12 +199,12 @@
         (assoc fail :body "Invalid HMAC")
 
         :else
-        (if-let [user (db/user-by-id user-id)]
+        (if-let [user (user/user-by-id db/conn user-id)]
           (if-let [err (:error (invites/verify-reset-nonce user token))]
             (assoc fail :body err)
             (let [referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
-              (db/set-user-password! (user :id) new-password)
+              (user/set-user-password! db/conn (user :id) new-password)
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
@@ -219,7 +220,7 @@
             ; check scope includes email permission? Or we could just see if
             ; getting the email fails
             (let [email (github/email-address tok)
-                  user (db/user-with-email email)]
+                  user (user/user-with-email db/conn email)]
               (cond
                 (nil? email) {:status 401
                               :headers {"Content-Type" "text/plain"}
@@ -255,14 +256,14 @@
                        slurp markdown->hiccup)}))
 
   (GET "/extract" [url :as {ses :session}]
-    (if (some? (db/user-by-id (:user-id ses)))
+    (if (some? (user/user-by-id db/conn (:user-id ses)))
       (edn-response (embedly/extract url))
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))
 
   (GET "/s3-policy" req
-    (if (some? (db/user-by-id (get-in req [:session :user-id])))
+    (if (some? (user/user-by-id db/conn (get-in req [:session :user-id])))
       (if-let [policy (s3/generate-policy)]
         {:status 200
          :headers {"Content-Type" "application/edn"}

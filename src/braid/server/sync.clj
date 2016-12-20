@@ -3,6 +3,7 @@
             [taoensso.truss :refer [have]]
             [clojure.string :as string]
             [braid.server.db :as db]
+            [braid.server.db.user :as user]
             [braid.server.search :as search]
             [braid.server.invite :as invites]
             [braid.server.digest :as digest]
@@ -47,7 +48,7 @@
                            (set (:any @connected-uids))
                            (into
                              #{} (map :id)
-                             (db/users-for-user user-id)))
+                             (user/users-for-user db/conn user-id)))
                          user-id)]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
@@ -99,7 +100,7 @@
                         "User %s attempted to mention disallowed user %s"
                         user-id mentioned-id)
                       false))
-              (or (boolean (db/user-visible-to-user? user-id mentioned-id))
+              (or (boolean (user/user-visible-to-user? db/conn user-id mentioned-id))
                   (do (timbre/warnf
                         "User %s attempted to mention disallowed user %s"
                         user-id mentioned-id)
@@ -115,7 +116,7 @@
                   (set subscribed-user-ids)
                   (set (:any @connected-uids)))]
     (doseq [uid subscribed-user-ids]
-      (when-let [rules (db/user-get-preference uid :notification-rules)]
+      (when-let [rules (user/user-get-preference db/conn uid :notification-rules)]
         (when (notify-rules/notify? uid rules new-message)
           (let [msg (update new-message :content
                             (partial parse-tags-and-mentions uid))]
@@ -130,7 +131,7 @@
                       [(-> (db/thread-by-id (msg :thread-id))
                            (update :messages update-msgs))])
                     (assoc :subject "Notification from Braid")
-                    (->> (email/send-message (db/user-email uid))))))))))))
+                    (->> (email/send-message (user/user-email db/conn uid))))))))))))
 
 (defn notify-bots [new-message]
   ; Notify bots mentioned in the message
@@ -151,7 +152,9 @@
   (doseq [t (db/recent-threads {:user-id user-id :group-id group-id
                                 :num-threads 5})]
     (db/user-show-thread! user-id (t :id)))
-  (broadcast-group-change group-id [:braid.client/new-user (db/user-by-id user-id)]))
+  (broadcast-group-change
+    group-id
+    [:braid.client/new-user (user/user-by-id db/conn user-id)]))
 
 ;; Handlers
 
@@ -209,7 +212,7 @@
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (valid-nickname? (?data :nickname))
     (try
-      (do (db/set-nickname! user-id (?data :nickname))
+      (do (user/set-nickname! db/conn user-id (?data :nickname))
           (broadcast-user-change user-id [:braid.client/name-change
                                           {:user-id user-id
                                            :nickname (?data :nickname)}])
@@ -221,7 +224,7 @@
 (defmethod event-msg-handler :braid.server/set-user-avatar
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (valid-url? ?data)
-    (do (db/set-user-avatar! user-id ?data)
+    (do (user/set-user-avatar! db/conn user-id ?data)
         (broadcast-user-change user-id [:braid.client/user-new-avatar
                                         {:user-id user-id
                                          :avatar ?data}])
@@ -234,13 +237,13 @@
   (if (string/blank? (?data :password))
     (when ?reply-fn (?reply-fn {:error "Password cannot be blank"}))
     (do
-      (db/set-user-password! user-id (?data :password))
+      (user/set-user-password! db/conn user-id (?data :password))
       (when ?reply-fn (?reply-fn {:ok true})))))
 
 (defmethod event-msg-handler :braid.server/set-preferences
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (doseq [[k v] ?data]
-    (db/user-set-preference! user-id k v))
+    (user/user-set-preference! db/conn user-id k v))
   (when ?reply-fn (?reply-fn :braid/ok)))
 
 (defmethod event-msg-handler :braid.server/hide-thread
@@ -352,7 +355,7 @@
   (if (db/user-in-group? user-id (?data :group-id))
     (let [data (assoc ?data :inviter-id user-id)
           invitation (db/create-invitation! data)]
-      (if-let [invited-user (db/user-with-email (invitation :invitee-email))]
+      (if-let [invited-user (user/user-with-email db/conn (invitation :invitee-email))]
         (chsk-send! (invited-user :id) [:braid.client/invitation-received invitation])
         (invites/send-invite invitation)))
     ; TODO: indicate permissions error to user?
@@ -379,7 +382,7 @@
       (chsk-send! user-id [:braid.client/joined-group
                            {:group (db/group-by-id (invite :group-id))
                             :tags (db/group-tags (invite :group-id))}])
-      (chsk-send! user-id [:braid.client/update-users (db/users-for-user user-id)]))
+      (chsk-send! user-id [:braid.client/update-users (user/users-for-user db/conn user-id)]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                   user-id (?data :id))))
 
@@ -493,11 +496,11 @@
         :user-groups (db/user-groups user-id)
         :user-threads (db/open-threads-for-user user-id)
         :user-subscribed-tag-ids (db/subscribed-tag-ids-for-user user-id)
-        :user-preferences (db/user-get-preferences user-id)
+        :user-preferences (user/user-get-preferences db/conn user-id)
         :users (into ()
                      (map #(assoc % :status
                              (if (connected (% :id)) :online :offline)))
-                     (db/users-for-user user-id))
+                     (user/users-for-user db/conn user-id))
         :invitations (db/invites-for-user user-id)
         :tags (db/tags-for-user user-id)
         :quest-records (db/get-active-quests-for-user-id user-id)}])))

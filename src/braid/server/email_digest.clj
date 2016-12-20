@@ -17,6 +17,7 @@
             [org.httpkit.client :as http]
             [taoensso.timbre :as timbre]
             [braid.server.db :as db]
+            [braid.server.db.user :as user]
             [braid.server.message-format :refer [parse-tags-and-mentions]]))
 
 ; finding data
@@ -38,7 +39,7 @@
 
 (defn updates-for-user-since
   [user-id cutoff]
-  (let [users (db/users-for-user user-id)
+  (let [users (user/users-for-user db/conn user-id)
         id->nick (into {} (map (juxt :id :nickname)) users)
         id->avatar (into {} (map (juxt :id :avatar)) users)
         pretty-time (comp
@@ -71,12 +72,12 @@
 (defn daily-update-users
   "Find all ids for users that want daily digest updates"
   []
-  (db/user-search-preferences :email-frequency :daily))
+  (user/user-search-preferences db/conn :email-frequency :daily))
 
 (defn weekly-update-users
   "Find all ids for users that want weekly digest updates"
   []
-  (db/user-search-preferences :email-frequency :weekly))
+  (user/user-search-preferences db/conn :email-frequency :weekly))
 
 ; build a message from a thread
 
@@ -111,7 +112,7 @@
         cutoff (time/minus (time/now) (time/days 1))]
     (doseq [uid user-ids]
       (when-let [threads (seq (updates-for-user-since uid cutoff))]
-        (let [email (db/user-email uid)]
+        (let [email (user/user-email db/conn uid)]
           (send-message email (create-message threads)))))))
 
 (defn daily-digest-job
@@ -137,7 +138,7 @@
         cutoff (time/minus (time/now) (time/days 7))]
     (doseq [uid user-ids]
       (when-let [threads (seq (updates-for-user-since uid cutoff))]
-        (let [email (db/user-email uid)]
+        (let [email (user/user-email db/conn uid)]
           (send-message email (create-message threads)))))))
 
 (defn weekly-digest-job
