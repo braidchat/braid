@@ -6,6 +6,7 @@
             [braid.server.conf :as conf]
             [braid.server.db :as db :refer [conn]]
             [braid.server.db.user :as user]
+            [braid.server.db.message :as message]
             [braid.common.schema :as schema]
             [braid.server.search :as search]))
 
@@ -235,14 +236,14 @@
                         :thread-id thread-1-id
                         :created-at (java.util.Date.)
                         :content "Hello?"}
-        message-1 (db/create-message! message-1-data)
+        message-1 (message/create-message! db/conn message-1-data)
         message-2-data {:id (db/uuid)
                         :group-id (group :id)
                         :user-id (user-1 :id)
                         :thread-id (message-1 :thread-id)
                         :created-at (java.util.Date.)
                         :content "Hello?"}
-        message-2 (db/create-message! message-2-data)
+        message-2 (message/create-message! db/conn message-2-data)
         messages (fetch-messages)]
     (testing "fetch-messages returns all messages"
       (is (= (set messages) #{message-1 message-2})))
@@ -260,7 +261,7 @@
                             :thread-id thread-2-id
                             :created-at (java.util.Date.)
                             :content "Blurrp"}
-            message-3 (db/create-message! message-3-data)]
+            message-3 (message/create-message! db/conn message-3-data)]
         (is (= (db/threads-by-id [thread-1-id thread-2-id])
                [{:id thread-1-id
                  :group-id (group :id)
@@ -279,24 +280,24 @@
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
-        message-1 (db/create-message! {:id (db/uuid)
-                                       :group-id (group :id)
-                                       :user-id (user-1 :id)
-                                       :thread-id (db/uuid)
-                                       :created-at (java.util.Date.)
-                                       :content "Hello?"})
-        message-1-b (db/create-message! {:id (db/uuid)
-                                         :group-id (group :id)
-                                         :user-id (user-1 :id)
-                                         :thread-id (db/uuid)
-                                         :created-at (java.util.Date.)
-                                         :content "Hello?"})
-        message-2 (db/create-message! {:id (db/uuid)
-                                       :group-id (group :id)
-                                       :user-id (user-1 :id)
-                                       :thread-id (db/uuid)
-                                       :created-at (java.util.Date.)
-                                       :content "Hello?"})]
+        message-1 (message/create-message! db/conn {:id (db/uuid)
+                                                    :group-id (group :id)
+                                                    :user-id (user-1 :id)
+                                                    :thread-id (db/uuid)
+                                                    :created-at (java.util.Date.)
+                                                    :content "Hello?"})
+        message-1-b (message/create-message! db/conn {:id (db/uuid)
+                                                      :group-id (group :id)
+                                                      :user-id (user-1 :id)
+                                                      :thread-id (db/uuid)
+                                                      :created-at (java.util.Date.)
+                                                      :content "Hello?"})
+        message-2 (message/create-message! db/conn {:id (db/uuid)
+                                                    :group-id (group :id)
+                                                    :user-id (user-1 :id)
+                                                    :thread-id (db/uuid)
+                                                    :created-at (java.util.Date.)
+                                                    :content "Hello?"})]
     (testing "thread 1 is open"
       (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id))))
                      (message-1 :thread-id))))
@@ -311,30 +312,30 @@
     (testing "thread is re-opened when it gets another message"
       (let [user-2 (user/create-user! db/conn {:id (db/uuid) :email "bar@baz.com"
                                      :password "foobar" :avatar ""})]
-        (db/create-message! {:id (db/uuid)
-                             :group-id (group :id)
-                             :user-id (user-2 :id)
-                             :thread-id (message-1 :thread-id)
-                             :created-at (java.util.Date.)
-                             :content "wake up"})
+        (message/create-message! db/conn {:id (db/uuid)
+                                          :group-id (group :id)
+                                          :user-id (user-2 :id)
+                                          :thread-id (message-1 :thread-id)
+                                          :created-at (java.util.Date.)
+                                          :content "wake up"})
         (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-1 :thread-id)))
         (testing "unless the user has unsubscribed from the thread"
           (db/user-unsubscribe-from-thread! (user-1 :id) (message-2 :thread-id))
-          (db/create-message! {:id (db/uuid)
-                               :group-id (group :id)
-                               :user-id (user-2 :id)
-                               :thread-id (message-2 :thread-id)
-                               :created-at (java.util.Date.)
-                               :content "wake up"})
+          (message/create-message! db/conn {:id (db/uuid)
+                                            :group-id (group :id)
+                                            :user-id (user-2 :id)
+                                            :thread-id (message-2 :thread-id)
+                                            :created-at (java.util.Date.)
+                                            :content "wake up"})
           (is (not (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id))))
           (testing "but they get re-subscribed if they get mentioned/another tag is added"
-            (db/create-message! {:id (db/uuid)
-                                 :group-id (group :id)
-                                 :user-id (user-2 :id)
-                                 :thread-id (message-2 :thread-id)
-                                 :created-at (java.util.Date.)
-                                 :content "wake up"
-                                 :mentioned-user-ids [(user-1 :id)]})
+            (message/create-message! db/conn {:id (db/uuid)
+                                              :group-id (group :id)
+                                              :user-id (user-2 :id)
+                                              :thread-id (message-2 :thread-id)
+                                              :created-at (java.util.Date.)
+                                              :content "wake up"
+                                              :mentioned-user-ids [(user-1 :id)]})
             (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id)))))))))
 
 (deftest user-thread-visibility
@@ -369,12 +370,12 @@
     (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
     (db/user-add-to-group! (user-3 :id) (group-2 :id))
     (db/user-subscribe-to-group-tags! (user-3 :id) (group-2 :id))
-    (db/create-message! {:thread-id thread-1-id :id (db/uuid) :content "zzz"
-                         :user-id (user-1 :id) :created-at (java.util.Date.)
-                         :mentioned-tag-ids [(tag-1 :id)] :group-id (group-1 :id)})
-    (db/create-message! {:thread-id thread-2-id :id (db/uuid) :content "zzz"
-                         :user-id (user-2 :id) :created-at (java.util.Date.)
-                         :mentioned-tag-ids [(tag-2 :id)] :group-id (group-2 :id)})
+    (message/create-message! db/conn {:thread-id thread-1-id :id (db/uuid) :content "zzz"
+                                      :user-id (user-1 :id) :created-at (java.util.Date.)
+                                      :mentioned-tag-ids [(tag-1 :id)] :group-id (group-1 :id)})
+    (message/create-message! db/conn {:thread-id thread-2-id :id (db/uuid) :content "zzz"
+                                      :user-id (user-2 :id) :created-at (java.util.Date.)
+                                      :mentioned-tag-ids [(tag-2 :id)] :group-id (group-2 :id)})
 
 
     (testing "user 1 can see thread 1 because they created it"
@@ -429,12 +430,12 @@
                                  :avatar ""})
         group (db/create-group! {:id (db/uuid) :name "group 1"})
         thread-id (db/uuid)]
-    (db/create-message! {:id (db/uuid) :thread-id thread-id
-                         :group-id (group :id) :user-id (user-1 :id)
-                         :created-at (java.util.Date.)
-                         :content "foobar"
-                         :mentioned-user-ids [(user-1 :id)]
-                         :mentioned-tag-ids []})
+    (message/create-message! db/conn {:id (db/uuid) :thread-id thread-id
+                                      :group-id (group :id) :user-id (user-1 :id)
+                                      :created-at (java.util.Date.)
+                                      :content "foobar"
+                                      :mentioned-user-ids [(user-1 :id)]
+                                      :mentioned-tag-ids []})
     (testing "user leaving group removes mentions of that user"
       (is (= #{(user-1 :id)}
              (:mentioned-ids (db/thread-by-id thread-id))))

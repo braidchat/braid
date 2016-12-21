@@ -4,6 +4,7 @@
             [clojure.string :as string]
             [braid.server.db :as db]
             [braid.server.db.user :as user]
+            [braid.server.db.message :as message]
             [braid.server.search :as search]
             [braid.server.invite :as invites]
             [braid.server.digest :as digest]
@@ -180,7 +181,7 @@
                         (assoc :created-at (java.util.Date.)))]
     (if (new-message-valid? new-message)
       (when (user-can-message? user-id new-message)
-        (db/create-message! new-message)
+        (message/create-message! db/conn new-message)
         (when-let [cb ?reply-fn]
           (cb :braid/ok))
         (broadcast-thread (new-message :thread-id) [])

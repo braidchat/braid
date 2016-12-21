@@ -67,4 +67,3 @@
     (->> (d/resolve-tempid db-after tempids (msg-data :db/id))
          (d/pull db-after message-pull-pattern)
          db->message)))
-

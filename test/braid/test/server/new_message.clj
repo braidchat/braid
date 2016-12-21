@@ -3,7 +3,8 @@
             [mount.core :as mount]
             [braid.server.conf :as conf]
             [braid.server.db :as db]
-            [braid.server.db.user :as user]))
+            [braid.server.db.user :as user]
+            [braid.server.db.message :as message]))
 
 
 (use-fixtures :each
@@ -32,7 +33,7 @@
                           :thread-id thread-id
                           :created-at (java.util.Date.)
                           :content "Hello?"}
-            message (db/create-message! message-data)]
+            message (message/create-message! db/conn message-data)]
 
         (testing "returns message"
           (is (= (dissoc message-data :group-id) message)))
@@ -51,7 +52,7 @@
                             :thread-id thread-id
                             :created-at (java.util.Date.)
                             :content "Goodbye."}
-            message-2 (db/create-message! message-2-data)]
+            message-2 (message/create-message! db/conn message-2-data)]
 
         (testing "returns message"
           (is (= (dissoc message-2-data :group-id) message-2)))
@@ -73,12 +74,12 @@
 
       (testing "when the user sends a new message"
         (let [thread-id (db/uuid)
-              _ (db/create-message! {:id (db/uuid)
-                                     :group-id (group :id)
-                                     :user-id (user-1 :id)
-                                     :thread-id thread-id
-                                     :created-at (java.util.Date.)
-                                     :content "Hello?"})]
+              _ (message/create-message! db/conn {:id (db/uuid)
+                                                  :group-id (group :id)
+                                                  :user-id (user-1 :id)
+                                                  :thread-id thread-id
+                                                  :created-at (java.util.Date.)
+                                                  :content "Hello?"})]
 
           (testing "then the user is subscribed to the thread"
             (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) thread-id)))
@@ -99,18 +100,18 @@
                                    :avatar ""})
           group (db/create-group! {:id (db/uuid) :name "group"})
           thread-id (db/uuid)
-          message-1 (db/create-message! {:id (db/uuid)
-                                         :group-id (group :id)
-                                         :user-id (user-1 :id)
-                                         :thread-id thread-id
-                                         :created-at (java.util.Date.)
-                                         :content "Hello?"})
-          message-2 (db/create-message! {:id (db/uuid)
-                                         :group-id (group :id)
-                                         :user-id (user-2 :id)
-                                         :thread-id thread-id
-                                         :created-at (java.util.Date.)
-                                         :content "Hello?"})]
+          message-1 (message/create-message! db/conn {:id (db/uuid)
+                                                      :group-id (group :id)
+                                                      :user-id (user-1 :id)
+                                                      :thread-id thread-id
+                                                      :created-at (java.util.Date.)
+                                                      :content "Hello?"})
+          message-2 (message/create-message! db/conn {:id (db/uuid)
+                                                      :group-id (group :id)
+                                                      :user-id (user-2 :id)
+                                                      :thread-id thread-id
+                                                      :created-at (java.util.Date.)
+                                                      :content "Hello?"})]
 
       (testing "when user-2 hides the thread"
         (db/user-hide-thread! (user-2 :id) thread-id)
@@ -119,12 +120,12 @@
           (is (not (contains? (set (map :id (db/open-threads-for-user (user-2 :id)))) thread-id)))))
 
       (testing "when user-1 sends another message in the thread"
-        (db/create-message! {:id (db/uuid)
-                             :group-id (group :id)
-                             :user-id (user-1 :id)
-                             :thread-id thread-id
-                             :created-at (java.util.Date.)
-                             :content "Hello?"})
+        (message/create-message! db/conn {:id (db/uuid)
+                                          :group-id (group :id)
+                                          :user-id (user-1 :id)
+                                          :thread-id thread-id
+                                          :created-at (java.util.Date.)
+                                          :content "Hello?"})
 
         (testing "then user-2 has the thread open again"
           (is (contains? (set (map :id (db/open-threads-for-user (user-2 :id)))) thread-id)))))))
@@ -150,13 +151,13 @@
         (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
 
         (testing "when a new message mentions the tag..."
-          (let [msg (db/create-message! {:id (db/uuid)
-                                         :group-id (group :id)
-                                         :user-id (user-2 :id)
-                                         :thread-id (db/uuid)
-                                         :created-at (java.util.Date.)
-                                         :content "Hello?"
-                                         :mentioned-tag-ids [(tag-1 :id)]})]
+          (let [msg (message/create-message! db/conn {:id (db/uuid)
+                                                      :group-id (group :id)
+                                                      :user-id (user-2 :id)
+                                                      :thread-id (db/uuid)
+                                                      :created-at (java.util.Date.)
+                                                      :content "Hello?"
+                                                      :mentioned-tag-ids [(tag-1 :id)]})]
 
             (testing "then the tag is added to the thread"
               (let [thread (db/thread-by-id (msg :thread-id))]
@@ -190,13 +191,13 @@
           thread-id (db/uuid)]
 
       (testing "when user-1 mentions user-2 in a message..."
-        (let [msg (db/create-message! {:id (db/uuid)
-                                       :group-id (group :id)
-                                       :user-id (user-1 :id)
-                                       :thread-id thread-id
-                                       :created-at (java.util.Date.)
-                                       :content "Hello?"
-                                       :mentioned-user-ids [(user-2 :id)]})]
+        (let [msg (message/create-message! db/conn {:id (db/uuid)
+                                                    :group-id (group :id)
+                                                    :user-id (user-1 :id)
+                                                    :thread-id thread-id
+                                                    :created-at (java.util.Date.)
+                                                    :content "Hello?"
+                                                    :mentioned-user-ids [(user-2 :id)]})]
 
           (testing "then user-2 is added to the thread"
             (is  (= #{(user-2 :id)}

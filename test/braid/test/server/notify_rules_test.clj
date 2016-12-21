@@ -5,6 +5,7 @@
             [schema.core :as s]
             [braid.server.db :as db]
             [braid.server.db.user :as user]
+            [braid.server.db.message :as message]
             [braid.common.schema :refer [rules-valid? check-rules!]]
             [braid.server.notify-rules :as rules]))
 
@@ -70,26 +71,26 @@
 
     (is (rules/notify? (db/uuid) [[:any :any]] (msg)) ":any :any always gets notified")
     (let [new-msg (msg)]
-      (db/create-message! new-msg)
+      (message/create-message! db/conn new-msg)
       (is (not (rules/notify? (db/uuid) [[:any (:id g1)]] new-msg))))
     (let [new-msg (update (msg) :mentioned-tag-ids conj (:id g1t1))]
-      (db/create-message! new-msg)
+      (message/create-message! db/conn new-msg)
       (is (rules/notify? (db/uuid) [[:any (:id g1)]]
                          new-msg)))
     (let [m1 (-> (msg)
                  (update :mentioned-user-ids conj user-id))]
-      (db/create-message! m1)
+      (message/create-message! db/conn m1)
       (is (not (rules/notify? user-id [[:mention (:id g1)]] m1))))
 
     (let [m2 (-> (msg)
                  (update :mentioned-user-ids conj user-id))]
-      (db/create-message! m2)
+      (message/create-message! db/conn m2)
       (is (rules/notify? user-id [[:mention :any]] m2)))
 
     (let [m (-> (msg)
                 (update :mentioned-user-ids conj user-id)
                 (update :mentioned-tag-ids conj (:id g1t1)))]
-      (db/create-message! m)
+      (message/create-message! db/conn m)
       (is (rules/notify? user-id [[:mention (:id g1)]] m))
       (is (rules/notify? user-id [[:tag (:id g1t1)]] m))
       (is (not (rules/notify? user-id [[:tag (:id g1t2)]] m))))
@@ -97,8 +98,8 @@
     (let [m1 (-> (msg)
                  (update :mentioned-tag-ids conj (:id g1t1)))
           m2 (-> (msg) (assoc :thread-id (m1 :thread-id)))]
-      (db/create-message! m1)
-      (db/create-message! m2)
+      (message/create-message! db/conn m1)
+      (message/create-message! db/conn m2)
       (is (rules/notify? (db/uuid) [[:any (:id g1)]] m2))
       (is (not (rules/notify? (db/uuid) [[:any (:id g2)]] m2))))))
 

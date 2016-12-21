@@ -5,6 +5,7 @@
             [taoensso.timbre :as timbre]
             [braid.server.db :as db]
             [braid.server.db.user :as user]
+            [braid.server.db.message :as message]
             [braid.common.schema :as schema]
             [braid.server.sync :as sync])
   (:import [org.apache.commons.codec.binary Base64]))
@@ -70,7 +71,7 @@
         (if (bot-can-message? bot-id msg)
           (do
             (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
-            (db/create-message! msg)
+            (message/create-message! db/conn msg)
             (sync/broadcast-thread (msg :thread-id) [])
             {:status 201
              :headers {"Content-Type" "text/plain"}
