@@ -9,6 +9,7 @@
             [braid.server.db.message :as message]
             [braid.server.db.tag :as tag]
             [braid.server.db.thread :as thread]
+            [braid.server.db.upload :as upload]
             [braid.server.db.user :as user]
             [braid.server.search :as search]
             [braid.server.invite :as invites]
@@ -489,13 +490,13 @@
                  db/conn
                  user-id
                  (thread/thread-group-id db/conn (upload :thread-id))))
-      (db/create-upload! upload))))
+      (upload/create-upload! db/conn upload))))
 
 (defmethod event-msg-handler :braid.server/uploads-in-group
   [{:as ev-msg :keys [?data user-id ?reply-fn]}]
   (when ?reply-fn
     (if (group/user-in-group? db/conn user-id ?data)
-      (?reply-fn {:braid/ok (db/uploads-in-group ?data)})
+      (?reply-fn {:braid/ok (upload/uploads-in-group db/conn ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
 
 (defmethod event-msg-handler :braid.server/start
