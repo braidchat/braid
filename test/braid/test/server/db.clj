@@ -8,6 +8,7 @@
             [braid.server.db.group :as group]
             [braid.server.db.invitation :as invitation]
             [braid.server.db.message :as message]
+            [braid.server.db.tag :as tag]
             [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]
             [braid.common.schema :as schema]
@@ -369,8 +370,8 @@
                                               :name "Lean Pixel"})
         group-2 (group/create-group! db/conn {:id (db/uuid)
                                               :name "Penyo Pal"})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
+        tag-1 (tag/create-tag! db/conn {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (tag/create-tag! db/conn {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
 
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)]
@@ -381,7 +382,7 @@
       (is (thread/user-can-see-thread? db/conn (user-3 :id) thread-1-id)))
 
     (group/user-add-to-group! db/conn (user-2 :id) (group-1 :id))
-    (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
+    (tag/user-subscribe-to-tag! db/conn (user-2 :id) (tag-1 :id))
     (group/user-add-to-group! db/conn (user-3 :id) (group-2 :id))
     (group/user-subscribe-to-group-tags! db/conn (user-3 :id) (group-2 :id))
     (message/create-message! db/conn {:thread-id thread-1-id :id (db/uuid) :content "zzz"
@@ -465,7 +466,7 @@
                                :avatar ""})
         group (group/create-group! db/conn {:name "group" :id (db/uuid)})
         group-tags (doall
-                     (map db/create-tag!
+                     (map (partial tag/create-tag! db/conn)
                           [{:id (db/uuid) :name "t1" :group-id (group :id)}
                            {:id (db/uuid) :name "t2" :group-id (group :id)}
                            {:id (db/uuid) :name "t3" :group-id (group :id)}]))]
@@ -475,11 +476,11 @@
              (set (group/group-tags db/conn (group :id))))))
     (group/user-add-to-group! db/conn (user :id) (group :id))
     (group/user-subscribe-to-group-tags! db/conn (user :id) (group :id))
-    (is (= (set (db/subscribed-tag-ids-for-user (user :id)))
-           (db/tag-ids-for-user (user :id))
+    (is (= (set (tag/subscribed-tag-ids-for-user db/conn (user :id)))
+           (tag/tag-ids-for-user db/conn (user :id))
            (set (map :id group-tags))))
     (testing "can remove tags"
-      (db/retract-tag! (:id (first group-tags)))
+      (tag/retract-tag! db/conn (:id (first group-tags)))
       (is (= 2 (count (group/group-tags db/conn (group :id))))))))
 
 (deftest user-preferences

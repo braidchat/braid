@@ -5,6 +5,7 @@
             [braid.server.db :as db]
             [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.tag :as tag]
             [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]))
 
@@ -153,7 +154,7 @@
   (testing "given 2 users and 2 tags..."
     (let [group (group/create-group! db/conn {:id (db/uuid)
                                               :name "Lean Pixel"})
-          tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
+          tag-1 (tag/create-tag! db/conn {:id (db/uuid) :name "acme1" :group-id (group :id)})
           user-1 (user/create-user! db/conn {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
@@ -166,7 +167,7 @@
           _ (group/user-add-to-group! db/conn (user-2 :id) (group :id))]
 
       (testing "given a user subscribed to a tag..."
-        (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
+        (tag/user-subscribe-to-tag! db/conn (user-1 :id) (tag-1 :id))
 
         (testing "when a new message mentions the tag..."
           (let [msg (message/create-message! db/conn {:id (db/uuid)

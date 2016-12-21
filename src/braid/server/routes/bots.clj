@@ -6,6 +6,7 @@
             [braid.server.db :as db]
             [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.tag :as tag]
             [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]
             [braid.common.schema :as schema]
@@ -47,7 +48,8 @@
                          (bot :id))
           nil)
 
-      (some (comp (partial not= (msg :group-id)) db/tag-group-id)
+      (some (comp (partial not= (msg :group-id))
+                  (partial tag/tag-group-id db/conn))
             (msg :mentioned-tag-ids))
       (do (timbre/debugf "Bot %s attempted to add tag from other group" (bot :id))
           nil)

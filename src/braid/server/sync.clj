@@ -6,6 +6,7 @@
             [braid.server.db.group :as group]
             [braid.server.db.invitation :as invitation]
             [braid.server.db.message :as message]
+            [braid.server.db.tag :as tag]
             [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]
             [braid.server.search :as search]
@@ -37,7 +38,7 @@
                        (set ids-to-skip)))
         thread (thread/thread-by-id db/conn thread-id)]
     (doseq [uid user-ids]
-      (let [user-tags (db/tag-ids-for-user uid)
+      (let [user-tags (tag/tag-ids-for-user db/conn uid)
             filtered-thread (update-in thread [:tag-ids]
                                        (partial into #{} (filter user-tags)))
             thread-with-last-opens (thread/thread-add-last-open-at
@@ -84,13 +85,13 @@
         (map
           (fn [tag-id]
             (and
-              (or (boolean (= (?data :group-id) (db/tag-group-id tag-id)))
+              (or (boolean (= (?data :group-id) (tag/tag-group-id db/conn tag-id)))
                   (do
                     (timbre/warnf
                       "User %s attempted to add a tag %s from a different group"
                       user-id tag-id)
                     false))
-              (or (boolean (db/user-in-tag-group? user-id tag-id))
+              (or (boolean (tag/user-in-tag-group? db/conn user-id tag-id))
                   (do
                     (timbre/warnf "User %s attempted to add a disallowed tag %s"
                                   user-id tag-id)
@@ -198,7 +199,7 @@
 (defmethod event-msg-handler :braid.server/tag-thread
   [{:as ev-msg :keys [?data user-id]}]
   (let [{:keys [thread-id tag-id]} ?data]
-    (let [group-id (db/tag-group-id tag-id)]
+    (let [group-id (tag/tag-group-id db/conn tag-id)]
       (thread/tag-thread! db/conn group-id thread-id tag-id)
       (broadcast-thread thread-id []))
     ; TODO do we need to notify-users and notify-bots
@@ -206,11 +207,11 @@
 
 (defmethod event-msg-handler :braid.server/subscribe-to-tag
   [{:as ev-msg :keys [?data user-id]}]
-  (db/user-subscribe-to-tag! user-id ?data))
+  (tag/user-subscribe-to-tag! db/conn user-id ?data))
 
 (defmethod event-msg-handler :braid.server/unsubscribe-from-tag
   [{:as ev-msg :keys [?data user-id]}]
-  (db/user-unsubscribe-from-tag! user-id ?data))
+  (tag/user-unsubscribe-from-tag! db/conn user-id ?data))
 
 (defmethod event-msg-handler :braid.server/set-nickname
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
@@ -274,10 +275,10 @@
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (group/user-in-group? db/conn user-id (?data :group-id))
     (if (valid-tag-name? (?data :name))
-      (let [new-tag (db/create-tag! (select-keys ?data [:id :name :group-id]))
+      (let [new-tag (tag/create-tag! db/conn (select-keys ?data [:id :name :group-id]))
             connected? (set (:any @connected-uids))]
         (doseq [u (group/group-users db/conn (:group-id new-tag))]
-          (db/user-subscribe-to-tag! (u :id) (new-tag :id))
+          (tag/user-subscribe-to-tag! db/conn (u :id) (new-tag :id))
           (when (and (not= user-id (u :id)) (connected? (u :id)))
             (chsk-send! (u :id) [:braid.client/create-tag new-tag])))
         (when ?reply-fn
@@ -294,18 +295,18 @@
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [{:keys [tag-id description]} ?data]
     (when (and tag-id description)
-      (let [group-id (db/tag-group-id tag-id)]
+      (let [group-id (tag/tag-group-id db/conn tag-id)]
         (when (group/user-is-group-admin? db/conn user-id group-id)
-          (db/tag-set-description! tag-id description)
+          (tag/tag-set-description! db/conn tag-id description)
           (broadcast-group-change
             group-id [:braid.client/tag-descrption-change [tag-id description]]))))))
 
 (defmethod event-msg-handler :braid.server/retract-tag
   [{:as ev-msg :keys [?data user-id]}]
   (let [tag-id (have util/uuid? ?data)
-        group-id (db/tag-group-id tag-id)]
+        group-id (tag/tag-group-id db/conn tag-id)]
     (when (group/user-is-group-admin? db/conn user-id group-id)
-      (db/retract-tag! tag-id)
+      (tag/retract-tag! db/conn tag-id)
       (broadcast-group-change group-id [:braid.client/retract-tag tag-id]))))
 
 (defmethod event-msg-handler :braid.server/create-group
@@ -333,7 +334,7 @@
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   ; this can take a while, so move it to a future
   (future
-    (let [user-tags (db/tag-ids-for-user user-id)
+    (let [user-tags (tag/tag-ids-for-user db/conn user-id)
           filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
           thread-ids (search/search-threads-as user-id ?data)
           threads (map (comp filter-tags thread/thread-by-idb/conn d)
@@ -351,7 +352,7 @@
 
 (defmethod event-msg-handler :braid.server/load-threads
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-  (let [user-tags (db/tag-ids-for-user user-id)
+  (let [user-tags (tag/tag-ids-for-user db/conn user-id)
         filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
         thread-ids (filter (partial thread/user-can-see-thread? db/conn user-id) ?data)
         threads (map filter-tags (thread/threads-by-id db/conn thread-ids))]
@@ -506,12 +507,12 @@
         :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
         :user-groups (group/user-groups db/conn user-id)
         :user-threads (thread/open-threads-for-user db/conn user-id)
-        :user-subscribed-tag-ids (db/subscribed-tag-ids-for-user user-id)
+        :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user db/conn user-id)
         :user-preferences (user/user-get-preferences db/conn user-id)
         :users (into ()
                      (map #(assoc % :status
                              (if (connected (% :id)) :online :offline)))
                      (user/users-for-user db/conn user-id))
         :invitations (invitation/invites-for-user db/conn user-id)
-        :tags (db/tags-for-user user-id)
+        :tags (tag/tags-for-user db/conn user-id)
         :quest-records (db/get-active-quests-for-user-id user-id)}])))

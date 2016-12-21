@@ -5,6 +5,7 @@
             [braid.server.db :as db]
             [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.tag :as tag]
             [braid.server.db.user :as user]
             [braid.server.search :as search]))
 
@@ -50,20 +51,20 @@
         group-2-id (db/uuid)
         group-1 (group/create-group! db/conn {:name "group1" :id group-1-id})
         group-2 (group/create-group! db/conn {:name "group2" :id group-2-id})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "tag1" :group-id (group-1 :id)})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "tag2" :group-id (group-2 :id)})
-        tag-3 (db/create-tag! {:id (db/uuid) :name "tag3" :group-id (group-1 :id)})
+        tag-1 (tag/create-tag! db/conn {:id (db/uuid) :name "tag1" :group-id (group-1 :id)})
+        tag-2 (tag/create-tag! db/conn {:id (db/uuid) :name "tag2" :group-id (group-2 :id)})
+        tag-3 (tag/create-tag! db/conn {:id (db/uuid) :name "tag3" :group-id (group-1 :id)})
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)
         thread-3-id (db/uuid)
         thread-4-id (db/uuid)]
 
     (group/user-add-to-group! db/conn (user-1 :id) (group-1 :id))
-    (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
-    (db/user-subscribe-to-tag! (user-1 :id) (tag-3 :id))
+    (tag/user-subscribe-to-tag! db/conn (user-1 :id) (tag-1 :id))
+    (tag/user-subscribe-to-tag! db/conn (user-1 :id) (tag-3 :id))
 
     (group/user-add-to-group! db/conn (user-2 :id) (group-2 :id))
-    (db/user-subscribe-to-tag! (user-2 :id) (tag-2 :id))
+    (tag/user-subscribe-to-tag! db/conn (user-2 :id) (tag-2 :id))
 
     ; this thread should be visible to user 1
     (message/create-message! db/conn {:thread-id thread-1-id :id (db/uuid)

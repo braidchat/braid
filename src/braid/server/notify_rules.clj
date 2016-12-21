@@ -2,11 +2,12 @@
   (:require [clojure.set :as set]
             [braid.common.schema :refer [check-new-message! check-rules!]]
             [braid.server.db :as db]
+            [braid.server.db.tag :as tag]
             [braid.server.db.thread :as thread]))
 
 (defn tag->group
   [tag-id]
-  (db/tag-group-id tag-id))
+  (tag/tag-group-id db/conn tag-id))
 
 (defn thread->tags
   [thread-id]

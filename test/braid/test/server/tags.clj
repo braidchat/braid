@@ -4,6 +4,7 @@
             [braid.server.conf :as conf]
             [braid.server.db :as db]
             [braid.server.db.group :as group]
+            [braid.server.db.tag :as tag]
             [braid.server.db.user :as user]))
 
 
@@ -26,14 +27,14 @@
                     :name "acme"
                     :group-id (group :id)}]
       (testing "create-tag!"
-        (let [tag (db/create-tag! tag-data)]
+        (let [tag (tag/create-tag! db/conn tag-data)]
           (testing "returns tag"
             (is (= tag (assoc tag-data
                          :description nil
                          :threads-count 0
                          :subscribers-count 0))))))
       (testing "set tag description"
-        (db/tag-set-description! (:id tag-data) "Some tag with stuff")
+        (tag/tag-set-description! db/conn (:id tag-data) "Some tag with stuff")
         (is (= (first (group/group-tags db/conn (:id group)))
                (assoc tag-data
                  :description "Some tag with stuff"
@@ -48,23 +49,23 @@
                                          :avatar ""})
         group (group/create-group! db/conn {:id (db/uuid)
                                             :name "Lean Pixel"})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
+        tag-1 (tag/create-tag! db/conn {:id (db/uuid) :name "acme1" :group-id (group :id)})
+        tag-2 (tag/create-tag! db/conn {:id (db/uuid) :name "acme2" :group-id (group :id)})]
     (group/user-add-to-group! db/conn (user :id) (group :id))
     (testing "user can subscribe to tags"
       (testing "user-subscribe-to-tag!"
-        (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
-        (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
+        (tag/user-subscribe-to-tag! db/conn (user :id) (tag-1 :id))
+        (tag/user-subscribe-to-tag! db/conn (user :id) (tag-2 :id)))
       (testing "get-user-subscribed-tags"
-        (let [tags (db/subscribed-tag-ids-for-user (user :id))]
+        (let [tags (tag/subscribed-tag-ids-for-user db/conn (user :id))]
           (testing "returns subscribed tags"
             (is (= (set tags) #{(tag-1 :id) (tag-2 :id)}))))))
     (testing "user can unsubscribe from tags"
       (testing "user-unsubscribe-from-tag!"
-        (db/user-unsubscribe-from-tag! (user :id) (tag-1 :id))
-        (db/user-unsubscribe-from-tag! (user :id) (tag-2 :id)))
+        (tag/user-unsubscribe-from-tag! db/conn (user :id) (tag-1 :id))
+        (tag/user-unsubscribe-from-tag! db/conn (user :id) (tag-2 :id)))
       (testing "is unsubscribed"
-        (let [tags (db/subscribed-tag-ids-for-user (user :id))]
+        (let [tags (tag/subscribed-tag-ids-for-user db/conn (user :id))]
           (is (= (set tags) #{})))))))
 
 (deftest user-can-only-see-tags-in-group
@@ -84,17 +85,17 @@
                                               :name "Lean Pixel"})
         group-2 (group/create-group! db/conn {:id (db/uuid)
                                               :name "Penyo Pal"})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
-        tag-3 (db/create-tag! {:id (db/uuid) :name "acme3" :group-id (group-2 :id)})]
+        tag-1 (tag/create-tag! db/conn {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (tag/create-tag! db/conn {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
+        tag-3 (tag/create-tag! db/conn {:id (db/uuid) :name "acme3" :group-id (group-2 :id)})]
     (group/user-add-to-group! db/conn (user-1 :id) (group-1 :id))
     (group/user-add-to-group! db/conn (user-2 :id) (group-1 :id))
     (group/user-add-to-group! db/conn (user-2 :id) (group-2 :id))
     (group/user-add-to-group! db/conn (user-3 :id) (group-2 :id))
     (testing "user can only see tags in their group(s)"
-      (is (= #{tag-1} (db/tags-for-user (user-1 :id))))
-      (is (= #{tag-1 tag-2 tag-3} (db/tags-for-user (user-2 :id))))
-      (is (= #{tag-2 tag-3} (db/tags-for-user (user-3 :id)))))))
+      (is (= #{tag-1} (tag/tags-for-user db/conn (user-1 :id))))
+      (is (= #{tag-1 tag-2 tag-3} (tag/tags-for-user db/conn (user-2 :id))))
+      (is (= #{tag-2 tag-3} (tag/tags-for-user db/conn (user-3 :id)))))))
 
 (deftest user-can-only-subscribe-to-tags-in-group
   (let [user (user/create-user! db/conn {:id (db/uuid)
@@ -105,14 +106,14 @@
                                               :name "Lean Pixel"})
         group-2 (group/create-group! db/conn {:id (db/uuid)
                                               :name "Penyo Pal"})
-        tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
-        tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})]
+        tag-1 (tag/create-tag! db/conn {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+        tag-2 (tag/create-tag! db/conn {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})]
     (group/user-add-to-group! db/conn (user :id) (group-1 :id))
     (testing "user can subscribe to tags"
       (testing "user-subscribe-to-tag!"
-        (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
-        (db/user-subscribe-to-tag! (user :id) (tag-2 :id)))
+        (tag/user-subscribe-to-tag! db/conn (user :id) (tag-1 :id))
+        (tag/user-subscribe-to-tag! db/conn (user :id) (tag-2 :id)))
       (testing "get-user-subscribed-tags"
-        (let [tags (db/subscribed-tag-ids-for-user (user :id))]
+        (let [tags (tag/subscribed-tag-ids-for-user db/conn (user :id))]
           (testing "returns subscribed tags"
             (is (= (set tags) #{(tag-1 :id)}))))))))

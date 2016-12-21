@@ -6,6 +6,7 @@
             [braid.server.db :as db]
             [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.tag :as tag]
             [braid.server.db.user :as user]
             [braid.common.schema :refer [rules-valid? check-rules!]]
             [braid.server.notify-rules :as rules]))
@@ -44,11 +45,11 @@
         g3 (group/create-group! db/conn {:id (db/uuid)
                                          :name "group3"})
 
-        g1t1 (db/create-tag! {:id (db/uuid) :name "group1tag1" :group-id (g1 :id)})
-        g1t2 (db/create-tag! {:id (db/uuid) :name "group1tag2" :group-id (g1 :id)})
+        g1t1 (tag/create-tag! db/conn {:id (db/uuid) :name "group1tag1" :group-id (g1 :id)})
+        g1t2 (tag/create-tag! db/conn {:id (db/uuid) :name "group1tag2" :group-id (g1 :id)})
 
-        g2t1 (db/create-tag! {:id (db/uuid) :name "group2tag1" :group-id (g2 :id)})
-        g2t2 (db/create-tag! {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})
+        g2t1 (tag/create-tag! db/conn {:id (db/uuid) :name "group2tag1" :group-id (g2 :id)})
+        g2t2 (tag/create-tag! db/conn {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})
 
         user-id (db/uuid)
         _ (user/create-user! db/conn {:id user-id

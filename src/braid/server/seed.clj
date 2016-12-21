@@ -2,6 +2,7 @@
   (:require [braid.server.db :as db]
             [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.tag :as tag]
             [braid.server.db.user :as user]
             [braid.server.conf :refer [config]]))
 
@@ -34,14 +35,14 @@
         _ (group/user-make-group-admin! db/conn (user-1 :id) (group-1 :id))
         _ (group/user-make-group-admin! db/conn (user-2 :id) (group-2 :id))
 
-        tag-1 (db/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
-        tag-2 (db/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})
+        tag-1 (tag/create-tag! db/conn {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
+        tag-2 (tag/create-tag! db/conn {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})
 
-        _ (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
-        _ (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
+        _ (tag/user-subscribe-to-tag! db/conn (user-1 :id) (tag-1 :id))
+        _ (tag/user-subscribe-to-tag! db/conn (user-2 :id) (tag-1 :id))
 
-        _ (db/user-subscribe-to-tag! (user-1 :id) (tag-2 :id))
-        _ (db/user-subscribe-to-tag! (user-2 :id) (tag-2 :id))
+        _ (tag/user-subscribe-to-tag! db/conn (user-1 :id) (tag-2 :id))
+        _ (tag/user-subscribe-to-tag! db/conn (user-2 :id) (tag-2 :id))
 
         msg (message/create-message! db/conn {:id (db/uuid)
                                               :group-id (group-1 :id)
@@ -69,10 +70,10 @@
                                             :created-at (java.util.Date.)
                                             :content "Yep"})
 
-        tag-3 (db/create-tag! {:id (db/uuid) :group-id (group-2 :id) :name "abcde"})
+        tag-3 (tag/create-tag! db/conn {:id (db/uuid) :group-id (group-2 :id) :name "abcde"})
 
-        _ (db/user-subscribe-to-tag! (user-1 :id) (tag-3 :id))
-        _ (db/user-subscribe-to-tag! (user-2 :id) (tag-3 :id))
+        _ (tag/user-subscribe-to-tag! db/conn (user-1 :id) (tag-3 :id))
+        _ (tag/user-subscribe-to-tag! db/conn (user-2 :id) (tag-3 :id))
 
         msg (message/create-message! db/conn {:id (db/uuid)
                                               :user-id (user-1 :id)
