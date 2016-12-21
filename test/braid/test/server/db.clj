@@ -8,6 +8,7 @@
             [braid.server.db.group :as group]
             [braid.server.db.invitation :as invitation]
             [braid.server.db.message :as message]
+            [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]
             [braid.common.schema :as schema]
             [braid.server.search :as search]))
@@ -250,7 +251,7 @@
     (testing "fetch-messages returns all messages"
       (is (= (set messages) #{message-1 message-2})))
     (testing "Can retrieve threads"
-      (is (= (db/thread-by-id thread-1-id)
+      (is (= (thread/thread-by-id db/conn thread-1-id)
              {:id thread-1-id
               :group-id (group :id)
               :messages (map #(dissoc % :thread-id :group-id)
@@ -264,7 +265,7 @@
                             :created-at (java.util.Date.)
                             :content "Blurrp"}
             message-3 (message/create-message! db/conn message-3-data)]
-        (is (= (db/threads-by-id [thread-1-id thread-2-id])
+        (is (= (thread/threads-by-id db/conn [thread-1-id thread-2-id])
                [{:id thread-1-id
                  :group-id (group :id)
                  :messages (map #(dissoc % :thread-id :group-id)
@@ -301,16 +302,21 @@
                                                     :created-at (java.util.Date.)
                                                     :content "Hello?"})]
     (testing "thread 1 is open"
-      (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id))))
+      (is (contains? (set (map :id (thread/open-threads-for-user db/conn (user-1 :id))))
                      (message-1 :thread-id))))
     (testing "thread 2 is open"
-      (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id))))
+      (is (contains?
+            (set (map :id (thread/open-threads-for-user db/conn (user-1 :id))))
+            (message-2 :thread-id))))
     (testing "user can hide thread"
-      (db/user-hide-thread! (user-1 :id) (message-1 :thread-id))
-      (is (not (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-1 :thread-id)))))
+      (thread/user-hide-thread! db/conn (user-1 :id) (message-1 :thread-id))
+      (is (not (contains? (set (map :id (thread/open-threads-for-user db/conn (user-1 :id))))
+                          (message-1 :thread-id)))))
     (testing "user can hide thread"
-      (db/user-hide-thread! (user-1 :id) (message-2 :thread-id))
-      (is (not (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id)))))
+      (thread/user-hide-thread! db/conn (user-1 :id) (message-2 :thread-id))
+      (is (not (contains?
+                 (set (map :id (thread/open-threads-for-user db/conn (user-1 :id))))
+                 (message-2 :thread-id)))))
     (testing "thread is re-opened when it gets another message"
       (let [user-2 (user/create-user! db/conn {:id (db/uuid) :email "bar@baz.com"
                                      :password "foobar" :avatar ""})]
@@ -320,16 +326,20 @@
                                           :thread-id (message-1 :thread-id)
                                           :created-at (java.util.Date.)
                                           :content "wake up"})
-        (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-1 :thread-id)))
+        (is (contains?
+              (set (map :id (thread/open-threads-for-user db/conn (user-1 :id))))
+              (message-1 :thread-id)))
         (testing "unless the user has unsubscribed from the thread"
-          (db/user-unsubscribe-from-thread! (user-1 :id) (message-2 :thread-id))
+          (thread/user-unsubscribe-from-thread! db/conn (user-1 :id) (message-2 :thread-id))
           (message/create-message! db/conn {:id (db/uuid)
                                             :group-id (group :id)
                                             :user-id (user-2 :id)
                                             :thread-id (message-2 :thread-id)
                                             :created-at (java.util.Date.)
                                             :content "wake up"})
-          (is (not (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id))))
+          (is (not (contains?
+                     (set (map :id (thread/open-threads-for-user db/conn (user-1 :id))))
+                     (message-2 :thread-id))))
           (testing "but they get re-subscribed if they get mentioned/another tag is added"
             (message/create-message! db/conn {:id (db/uuid)
                                               :group-id (group :id)
@@ -338,7 +348,9 @@
                                               :created-at (java.util.Date.)
                                               :content "wake up"
                                               :mentioned-user-ids [(user-1 :id)]})
-            (is (contains? (set (map :id (db/open-threads-for-user (user-1 :id)))) (message-2 :thread-id)))))))))
+            (is (contains?
+                  (set (map :id (thread/open-threads-for-user db/conn (user-1 :id))))
+                  (message-2 :thread-id)))))))))
 
 (deftest user-thread-visibility
   (let [user-1 (user/create-user! db/conn {:id (db/uuid)
@@ -364,9 +376,9 @@
         thread-2-id (db/uuid)]
 
     (testing "everyone can see threads because they haven't been created"
-      (is (db/user-can-see-thread? (user-1 :id) thread-1-id))
-      (is (db/user-can-see-thread? (user-2 :id) thread-1-id))
-      (is (db/user-can-see-thread? (user-3 :id) thread-1-id)))
+      (is (thread/user-can-see-thread? db/conn (user-1 :id) thread-1-id))
+      (is (thread/user-can-see-thread? db/conn (user-2 :id) thread-1-id))
+      (is (thread/user-can-see-thread? db/conn (user-3 :id) thread-1-id)))
 
     (group/user-add-to-group! db/conn (user-2 :id) (group-1 :id))
     (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
@@ -381,26 +393,26 @@
 
 
     (testing "user 1 can see thread 1 because they created it"
-      (is (db/user-can-see-thread? (user-1 :id) thread-1-id)))
+      (is (thread/user-can-see-thread? db/conn (user-1 :id) thread-1-id)))
     (testing "user 1 can't see thread 2"
-      (is (not (db/user-can-see-thread? (user-1 :id) thread-2-id))))
+      (is (not (thread/user-can-see-thread? db/conn (user-1 :id) thread-2-id))))
 
     (testing "user 2 can see thread 1 because they've already been subscribed"
-      (is (db/user-can-see-thread? (user-2 :id) thread-1-id)))
+      (is (thread/user-can-see-thread? db/conn (user-2 :id) thread-1-id)))
     (testing "user 2 can see thread 2 because they created it"
-      (is (db/user-can-see-thread? (user-2 :id) thread-2-id)))
+      (is (thread/user-can-see-thread? db/conn (user-2 :id) thread-2-id)))
 
     (testing "user 3 can't see thread 1"
-      (is (not (db/user-can-see-thread? (user-3 :id) thread-1-id))))
+      (is (not (thread/user-can-see-thread? db/conn (user-3 :id) thread-1-id))))
     (testing "user 3 can see thread 2 because they have the tag"
-      (is (db/user-can-see-thread? (user-3 :id) thread-2-id))
+      (is (thread/user-can-see-thread? db/conn (user-3 :id) thread-2-id))
       (testing "but they can't after leaving"
         (group/user-leave-group! db/conn (user-3 :id) (group-2 :id))
-        (is (not (db/user-can-see-thread? (user-3 :id) thread-2-id)))))
+        (is (not (thread/user-can-see-thread? db/conn (user-3 :id) thread-2-id)))))
     (testing "user can leave one group and still see threads in the other"
       (group/user-leave-group! db/conn (user-2 :id) (group-1 :id))
-      (is (not (db/user-can-see-thread? (user-2 :id) thread-1-id)))
-      (is (db/user-can-see-thread? (user-2 :id) thread-2-id)))))
+      (is (not (thread/user-can-see-thread? db/conn (user-2 :id) thread-1-id)))
+      (is (thread/user-can-see-thread? db/conn (user-2 :id) thread-2-id)))))
 
 (deftest user-invite-to-group
   (let [user-1 (user/create-user! db/conn {:id (db/uuid)
@@ -442,9 +454,9 @@
                                       :mentioned-tag-ids []})
     (testing "user leaving group removes mentions of that user"
       (is (= #{(user-1 :id)}
-             (:mentioned-ids (db/thread-by-id thread-id))))
+             (:mentioned-ids (thread/thread-by-id db/conn thread-id))))
       (group/user-leave-group! db/conn (user-1 :id) (group :id))
-      (is (empty? (:mentioned-ids (db/thread-by-id thread-id)))))))
+      (is (empty? (:mentioned-ids (thread/thread-by-id db/conn thread-id)))))))
 
 (deftest adding-user-to-group-subscribes-tags
   (let [user (user/create-user! db/conn {:id (db/uuid)

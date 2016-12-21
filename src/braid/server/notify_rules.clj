@@ -1,7 +1,8 @@
 (ns braid.server.notify-rules
   (:require [clojure.set :as set]
             [braid.common.schema :refer [check-new-message! check-rules!]]
-            [braid.server.db :as db]))
+            [braid.server.db :as db]
+            [braid.server.db.thread :as thread]))
 
 (defn tag->group
   [tag-id]
@@ -9,7 +10,7 @@
 
 (defn thread->tags
   [thread-id]
-  (:tag-ids (db/thread-by-id thread-id)))
+  (:tag-ids (thread/thread-by-id db/conn thread-id)))
 
 (defn thread->groups [thread-id]
   (into #{} (map tag->group) (thread->tags thread-id)))

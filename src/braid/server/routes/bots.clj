@@ -6,6 +6,7 @@
             [braid.server.db :as db]
             [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]
             [braid.common.schema :as schema]
             [braid.server.sync :as sync])
@@ -40,7 +41,7 @@
   [bot-id msg]
   (let [bot (db/bot-by-id bot-id)]
     (cond
-      (let [thread-group (db/thread-group-id (msg :thread-id))]
+      (let [thread-group (thread/thread-group-id db/conn (msg :thread-id))]
         (and (some? thread-group) (not= (bot :group-id) thread-group)))
       (do (timbre/debugf "Bot %s attempted to send to a thread in a different group"
                          (bot :id))
@@ -110,7 +111,7 @@
           bot (db/bot-by-id bot-id)]
       (if-let [thread-id (try (java.util.UUID/fromString thread-id)
                            (catch IllegalArgumentException _ nil))]
-        (if (= (bot :group-id) (db/thread-group-id thread-id))
+        (if (= (bot :group-id) (thread/thread-group-id db/conn thread-id))
           (do
             (db/bot-watch-thread! bot-id thread-id)
             {:status 201

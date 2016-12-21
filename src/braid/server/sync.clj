@@ -6,6 +6,7 @@
             [braid.server.db.group :as group]
             [braid.server.db.invitation :as invitation]
             [braid.server.db.message :as message]
+            [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]
             [braid.server.search :as search]
             [braid.server.invite :as invites]
@@ -31,16 +32,16 @@
   [thread-id ids-to-skip]
   (let [user-ids (-> (difference
                        (intersection
-                         (set (db/users-with-thread-open thread-id))
+                         (set (thread/users-with-thread-open db/conn thread-id))
                          (set (:any @connected-uids)))
                        (set ids-to-skip)))
-        thread (db/thread-by-id thread-id)]
+        thread (thread/thread-by-id db/conn thread-id)]
     (doseq [uid user-ids]
       (let [user-tags (db/tag-ids-for-user uid)
             filtered-thread (update-in thread [:tag-ids]
                                        (partial into #{} (filter user-tags)))
-            thread-with-last-opens (db/thread-add-last-open-at
-                                     filtered-thread uid)]
+            thread-with-last-opens (thread/thread-add-last-open-at
+                                     db/conn filtered-thread uid)]
         (chsk-send! uid [:braid.client/thread thread-with-last-opens])))))
 
 (defn broadcast-user-change
@@ -72,12 +73,12 @@
   (every?
       true?
       (concat
-        [(or (boolean (db/user-can-see-thread? user-id (?data :thread-id)))
+        [(or (boolean (thread/user-can-see-thread? db/conn user-id (?data :thread-id)))
              (do (timbre/warnf
                    "User %s attempted to add message to disallowed thread %s"
                    user-id (?data :thread-id))
                  false))
-         (or (boolean (if-let [cur-group (db/thread-group-id (?data :thread-id))]
+         (or (boolean (if-let [cur-group (thread/thread-group-id db/conn (?data :thread-id))]
                         (= (?data :group-id) cur-group)
                         true)))]
         (map
@@ -112,8 +113,8 @@
 
 (defn notify-users [new-message]
   (let [subscribed-user-ids (->>
-                              (db/users-subscribed-to-thread
-                                (new-message :thread-id))
+                              (thread/users-subscribed-to-thread
+                                db/conn (new-message :thread-id))
                               (remove (partial = (:user-id new-message))))
         online? (intersection
                   (set subscribed-user-ids)
@@ -131,7 +132,7 @@
                       (fn [m] (update m :content
                                       (partial parse-tags-and-mentions uid))))]
                 (-> (email/create-message
-                      [(-> (db/thread-by-id (msg :thread-id))
+                      [(-> (thread/thread-by-id db/conn (msg :thread-id))
                            (update :messages update-msgs))])
                     (assoc :subject "Notification from Braid")
                     (->> (email/send-message (user/user-email db/conn uid))))))))))))
@@ -152,9 +153,9 @@
   (group/user-add-to-group! db/conn user-id group-id)
   (group/user-subscribe-to-group-tags! db/conn user-id group-id)
   ; add user to recent threads in group
-  (doseq [t (db/recent-threads {:user-id user-id :group-id group-id
-                                :num-threads 5})]
-    (db/user-show-thread! user-id (t :id)))
+  (doseq [t (thread/recent-threads db/conn {:user-id user-id :group-id group-id
+                                            :num-threads 5})]
+    (thread/user-show-thread! db/conn user-id (t :id)))
   (broadcast-group-change
     group-id
     [:braid.client/new-user (user/user-by-id db/conn user-id)]))
@@ -198,7 +199,7 @@
   [{:as ev-msg :keys [?data user-id]}]
   (let [{:keys [thread-id tag-id]} ?data]
     (let [group-id (db/tag-group-id tag-id)]
-      (db/tag-thread! group-id thread-id tag-id)
+      (thread/tag-thread! db/conn group-id thread-id tag-id)
       (broadcast-thread thread-id []))
     ; TODO do we need to notify-users and notify-bots
     ))
@@ -251,22 +252,23 @@
 
 (defmethod event-msg-handler :braid.server/hide-thread
   [{:as ev-msg :keys [?data user-id]}]
-  (db/user-hide-thread! user-id ?data)
+  (thread/user-hide-thread! db/conn user-id ?data)
   (chsk-send! user-id [:braid.client/hide-thread ?data]))
 
 (defmethod event-msg-handler :braid.server/show-thread
   [{:as ev-msg :keys [?data user-id]}]
-  (db/user-show-thread! user-id ?data)
-  (chsk-send! user-id [:braid.client/show-thread (db/thread-by-id ?data)]))
+  (thread/user-show-thread! db/conn user-id ?data)
+  (chsk-send! user-id [:braid.client/show-thread
+                       (thread/thread-by-id db/conn ?data)]))
 
 (defmethod event-msg-handler :braid.server/unsub-thread
   [{:as ev-msg :keys [?data user-id]}]
-  (db/user-unsubscribe-from-thread! user-id ?data)
+  (thread/user-unsubscribe-from-thread! db/conn user-id ?data)
   (chsk-send! user-id [:braid.client/hide-thread ?data]))
 
 (defmethod event-msg-handler :braid.server/mark-thread-read
   [{:as ev-msg :keys [?data user-id]}]
-  (db/update-thread-last-open! ?data user-id))
+  (thread/update-thread-last-open! db/conn ?data user-id))
 
 (defmethod event-msg-handler :braid.server/create-tag
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
@@ -334,22 +336,25 @@
     (let [user-tags (db/tag-ids-for-user user-id)
           filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
           thread-ids (search/search-threads-as user-id ?data)
-          threads (map (comp filter-tags db/thread-by-id) (take 25 thread-ids))]
+          threads (map (comp filter-tags thread/thread-by-idb/conn d)
+                       (take 25 thread-ids))]
       (when ?reply-fn
         (?reply-fn {:threads threads :thread-ids thread-ids})))))
 
 (defmethod event-msg-handler :braid.server/load-recent-threads
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (when ?reply-fn
-    (?reply-fn {:braid/ok (db/recent-threads {:group-id ?data
-                                              :user-id user-id})})))
+    (?reply-fn {:braid/ok (thread/recent-threads
+                            db/conn
+                            {:group-id ?data
+                             :user-id user-id})})))
 
 (defmethod event-msg-handler :braid.server/load-threads
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [user-tags (db/tag-ids-for-user user-id)
         filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
-        thread-ids (filter (partial db/user-can-see-thread? user-id) ?data)
-        threads (map filter-tags (db/threads-by-id thread-ids))]
+        thread-ids (filter (partial thread/user-can-see-thread? db/conn user-id) ?data)
+        threads (map filter-tags (thread/threads-by-id db/conn thread-ids))]
     (when ?reply-fn
       (?reply-fn {:threads threads}))))
 
@@ -478,7 +483,10 @@
                  :uploaded-at (java.util.Date.)
                  :uploader-id user-id)]
     (when (and (upload-valid? upload)
-            (group/user-in-group? db/conn user-id (db/thread-group-id (upload :thread-id))))
+               (group/user-in-group?
+                 db/conn
+                 user-id
+                 (thread/thread-group-id db/conn (upload :thread-id))))
       (db/create-upload! upload))))
 
 (defmethod event-msg-handler :braid.server/uploads-in-group
@@ -497,7 +505,7 @@
        {:user-id user-id
         :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
         :user-groups (group/user-groups db/conn user-id)
-        :user-threads (db/open-threads-for-user user-id)
+        :user-threads (thread/open-threads-for-user db/conn user-id)
         :user-subscribed-tag-ids (db/subscribed-tag-ids-for-user user-id)
         :user-preferences (user/user-get-preferences db/conn user-id)
         :users (into ()

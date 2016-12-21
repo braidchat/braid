@@ -17,6 +17,7 @@
             [org.httpkit.client :as http]
             [taoensso.timbre :as timbre]
             [braid.server.db :as db]
+            [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]
             [braid.server.message-format :refer [parse-tags-and-mentions]]))
 
@@ -51,8 +52,9 @@
             (filter (partial last-message-after? cutoff))
             (map
               (fn [t]
-                (let [thread-last-open (to-date-time
-                                         (db/thread-last-open-at t user-id))]
+                (let [thread-last-open
+                      (to-date-time
+                        (thread/thread-last-open-at db/conn t user-id))]
                   (update t :messages
                           (partial map
                                    (fn [{sender-id :user-id :as m}]
@@ -67,7 +69,7 @@
                                          (assoc :sender (id->nick sender-id))
                                          (assoc :sender-avatar
                                            (id->avatar sender-id))))))))))
-          (db/open-threads-for-user user-id))))
+          (thread/open-threads-for-user db/conn user-id))))
 
 (defn daily-update-users
   "Find all ids for users that want daily digest updates"
