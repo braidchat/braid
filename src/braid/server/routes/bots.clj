@@ -4,6 +4,7 @@
             [ring.middleware.transit :as transit]
             [taoensso.timbre :as timbre]
             [braid.server.db :as db]
+            [braid.server.db.bot :as bot]
             [braid.server.db.group :as group]
             [braid.server.db.message :as message]
             [braid.server.db.tag :as tag]
@@ -23,7 +24,7 @@
                                  (string/split #":" 2))]
     (try
       (let [bot-id (java.util.UUID/fromString user)]
-        (and (db/bot-auth? bot-id pass) bot-id))
+        (and (bot/bot-auth? db/conn bot-id pass) bot-id))
       (catch IllegalArgumentException e
         nil))))
 
@@ -40,7 +41,7 @@
 ; TODO: when using clojure.spec, use spec to validate this
 (defn bot-can-message?
   [bot-id msg]
-  (let [bot (db/bot-by-id bot-id)]
+  (let [bot (bot/bot-by-id db/conn bot-id)]
     (cond
       (let [thread-group (thread/thread-group-id db/conn (msg :thread-id))]
         (and (some? thread-group) (not= (bot :group-id) thread-group)))
@@ -66,7 +67,7 @@
   ; TODO: allow updating/make this idempotent?
   (PUT "/message" req
     (let [bot-id (get req ::bot-id)
-          bot (db/bot-by-id bot-id)
+          bot (bot/bot-by-id db/conn bot-id)
           msg (assoc (req :body)
                 :user-id (bot :user-id)
                 :group-id (bot :group-id)
@@ -93,7 +94,7 @@
 
   (GET "/names/:user-id" [user-id :as req]
     (let [bot-id (get req ::bot-id)
-          bot (db/bot-by-id bot-id)]
+          bot (bot/bot-by-id db/conn bot-id)]
       (if-let [user-id (try (java.util.UUID/fromString user-id)
                          (catch IllegalArgumentException _ nil))]
         (if (group/user-in-group? db/conn user-id (bot :group-id))
@@ -110,12 +111,12 @@
   ; TODO: allow unsubscribed by sending DELETE
   (PUT "/subscribe/:thread-id" [thread-id :as req]
     (let [bot-id (get req ::bot-id)
-          bot (db/bot-by-id bot-id)]
+          bot (bot/bot-by-id db/conn bot-id)]
       (if-let [thread-id (try (java.util.UUID/fromString thread-id)
                            (catch IllegalArgumentException _ nil))]
         (if (= (bot :group-id) (thread/thread-group-id db/conn thread-id))
           (do
-            (db/bot-watch-thread! bot-id thread-id)
+            (bot/bot-watch-thread! db/conn bot-id thread-id)
             {:status 201
              :headers {"Content-Type" "text/plain"}
              :body "ok"})

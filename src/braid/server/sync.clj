@@ -3,6 +3,7 @@
             [taoensso.truss :refer [have]]
             [clojure.string :as string]
             [braid.server.db :as db]
+            [braid.server.db.bot :as bot]
             [braid.server.db.group :as group]
             [braid.server.db.invitation :as invitation]
             [braid.server.db.message :as message]
@@ -141,11 +142,11 @@
 (defn notify-bots [new-message]
   ; Notify bots mentioned in the message
   (when-let [bot-name (second (re-find #"^/(\w+)\b" (:content new-message)))]
-    (when-let [bot (db/bot-by-name-in-group bot-name (new-message :group-id))]
+    (when-let [bot (bot/bot-by-name-in-group db/conn bot-name (new-message :group-id))]
       (timbre/debugf "notifying bot %s" bot)
       (bots/send-notification bot new-message)))
   ; Notify bots subscribed to the thread
-  (doseq [bot (db/bots-watching-thread (new-message :thread-id))]
+  (doseq [bot (bot/bots-watching-thread db/conn (new-message :thread-id))]
     (timbre/debugf "notifying bot %s" bot)
     (bots/send-notification bot new-message)))
 
@@ -467,14 +468,14 @@
             (reply-fn {:braid/error "Bot needs an avatar image"}))
 
         :else
-        (let [created (db/create-bot! bot)]
+        (let [created (bot/create-bot! db/conn bot)]
           (reply-fn {:braid/ok created})
           (broadcast-group-change (bot :group-id)
                                   [:braid.client/new-bot [(bot :group-id) (bot->display created)]]))))))
 
 (defmethod event-msg-handler :braid.server/get-bot-info
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-  (let [bot (db/bot-by-id ?data)]
+  (let [bot (bot/bot-by-id db/conn ?data)]
     (when (and bot (group/user-is-group-admin? db/conn user-id (bot :group-id)) ?reply-fn)
       (?reply-fn {:braid/ok bot}))))
 

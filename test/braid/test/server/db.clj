@@ -5,6 +5,7 @@
             [braid.test.server.test-utils :refer [fetch-messages]]
             [braid.server.conf :as conf]
             [braid.server.db :as db :refer [conn]]
+            [braid.server.db.bot :as bot]
             [braid.server.db.group :as group]
             [braid.server.db.invitation :as invitation]
             [braid.server.db.message :as message]
@@ -527,21 +528,21 @@
         g2 (group/create-group! db/conn {:name "group 2" :id (db/uuid)})
         g3 (group/create-group! db/conn {:name "group 3" :id (db/uuid)})
 
-        b1 (db/create-bot! {:id (db/uuid)
-                            :name "bot1"
-                            :avatar ""
-                            :webhook-url ""
-                            :group-id (g1 :id)})
-        b2 (db/create-bot! {:id (db/uuid)
-                            :name "bot2"
-                            :avatar ""
-                            :webhook-url ""
-                            :group-id (g1 :id)})
-        b3 (db/create-bot! {:id (db/uuid)
-                            :name "bot3"
-                            :avatar ""
-                            :webhook-url ""
-                            :group-id (g2 :id)})
+        b1 (bot/create-bot! db/conn {:id (db/uuid)
+                                     :name "bot1"
+                                     :avatar ""
+                                     :webhook-url ""
+                                     :group-id (g1 :id)})
+        b2 (bot/create-bot! db/conn {:id (db/uuid)
+                                     :name "bot2"
+                                     :avatar ""
+                                     :webhook-url ""
+                                     :group-id (g1 :id)})
+        b3 (bot/create-bot! db/conn {:id (db/uuid)
+                                     :name "bot3"
+                                     :avatar ""
+                                     :webhook-url ""
+                                     :group-id (g2 :id)})
         bot->display (fn [b] (-> b
                                  (select-keys [:id :name :avatar :user-id])
                                  (rename-keys {:name :nickname})))]
@@ -550,15 +551,15 @@
     (is (schema/check-bot! b2))
     (is (schema/check-bot! b3))
     (testing "can create bots & retrieve by group"
-      (is (= #{b1 b2} (db/bots-in-group (g1 :id))))
+      (is (= #{b1 b2} (bot/bots-in-group db/conn (g1 :id))))
       (is (= (into #{} (map bot->display) [b1 b2])
              (:bots (group/group-by-id db/conn (g1 :id)))))
-      (is (= #{b3} (db/bots-in-group (g2 :id))))
-      (is (= #{} (db/bots-in-group (g3 :id))))
-      (is (= b1 (db/bot-by-name-in-group "bot1" (g1 :id))))
-      (is (nil? (db/bot-by-name-in-group "bot1" (g3 :id)))))
+      (is (= #{b3} (bot/bots-in-group db/conn (g2 :id))))
+      (is (= #{} (bot/bots-in-group db/conn (g3 :id))))
+      (is (= b1 (bot/bot-by-name-in-group db/conn "bot1" (g1 :id))))
+      (is (nil? (bot/bot-by-name-in-group db/conn "bot1" (g3 :id)))))
     (testing "can check bot auth"
-      (is (db/bot-auth? (b1 :id) (b1 :token)))
-      (is (db/bot-auth? (b2 :id) (b2 :token)))
-      (is (not (db/bot-auth? (b2 :id) "Foo")))
-      (is (not (db/bot-auth? (java.util.UUID/randomUUID) (b2 :token)))))))
+      (is (bot/bot-auth? db/conn (b1 :id) (b1 :token)))
+      (is (bot/bot-auth? db/conn (b2 :id) (b2 :token)))
+      (is (not (bot/bot-auth? db/conn (b2 :id) "Foo")))
+      (is (not (bot/bot-auth? db/conn (java.util.UUID/randomUUID) (b2 :token)))))))
