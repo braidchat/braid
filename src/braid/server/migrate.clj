@@ -2,6 +2,7 @@
   (:require [braid.server.db :as db]
             [braid.server.db.group :as group]
             [braid.server.db.user :as user]
+            [braid.server.quests.db :as quests]
             [datomic.api :as d]
             [clojure.string :as string]
             [clojure.set :as set]
@@ -47,7 +48,7 @@
                            (d/db db/conn))
                       (map first))]
     (doseq [user-id user-ids]
-      (db/activate-first-quests! user-id))))
+      (quests/activate-first-quests! db/conn user-id))))
 
 (defn migrate-2016-07-29
   "Add watched threads for bots"

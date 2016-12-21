@@ -24,6 +24,7 @@
             [braid.server.db.common :refer [bot->display]]
             [braid.server.util :refer [valid-url?]]
             [braid.server.sync-handler :refer [event-msg-handler]]
+            [braid.server.quests.db :as quests]
             [braid.server.quests.sync]
             [braid.server.socket :refer [chsk-send!
                                          connected-uids]]))
@@ -517,4 +518,4 @@
                      (user/users-for-user db/conn user-id))
         :invitations (invitation/invites-for-user db/conn user-id)
         :tags (tag/tags-for-user db/conn user-id)
-        :quest-records (db/get-active-quests-for-user-id user-id)}])))
+        :quest-records (quests/get-active-quests-for-user-id db/conn user-id)}])))
