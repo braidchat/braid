@@ -3,8 +3,9 @@
             [taoensso.truss :refer [have]]
             [clojure.string :as string]
             [braid.server.db :as db]
-            [braid.server.db.user :as user]
+            [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.user :as user]
             [braid.server.search :as search]
             [braid.server.invite :as invites]
             [braid.server.digest :as digest]
@@ -60,7 +61,7 @@
   (let [ids-to-send-to (intersection
                          (set (:any @connected-uids))
                          (into #{} (map :id)
-                               (db/group-users group-id)))]
+                               (group/group-users db/conn group-id)))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
@@ -96,7 +97,7 @@
         (map
           (fn [mentioned-id]
             (and
-              (or (boolean (db/user-in-group? user-id (?data :group-id)))
+              (or (boolean (group/user-in-group? db/conn user-id (?data :group-id)))
                   (do (timbre/warnf
                         "User %s attempted to mention disallowed user %s"
                         user-id mentioned-id)
@@ -147,8 +148,8 @@
 
 (defn user-join-group!
   [user-id group-id]
-  (db/user-add-to-group! user-id group-id)
-  (db/user-subscribe-to-group-tags! user-id group-id)
+  (group/user-add-to-group! db/conn user-id group-id)
+  (group/user-subscribe-to-group-tags! db/conn user-id group-id)
   ; add user to recent threads in group
   (doseq [t (db/recent-threads {:user-id user-id :group-id group-id
                                 :num-threads 5})]
@@ -268,11 +269,11 @@
 
 (defmethod event-msg-handler :braid.server/create-tag
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-  (if (db/user-in-group? user-id (?data :group-id))
+  (if (group/user-in-group? db/conn user-id (?data :group-id))
     (if (valid-tag-name? (?data :name))
       (let [new-tag (db/create-tag! (select-keys ?data [:id :name :group-id]))
             connected? (set (:any @connected-uids))]
-        (doseq [u (db/group-users (:group-id new-tag))]
+        (doseq [u (group/group-users db/conn (:group-id new-tag))]
           (db/user-subscribe-to-tag! (u :id) (new-tag :id))
           (when (and (not= user-id (u :id)) (connected? (u :id)))
             (chsk-send! (u :id) [:braid.client/create-tag new-tag])))
@@ -291,7 +292,7 @@
   (let [{:keys [tag-id description]} ?data]
     (when (and tag-id description)
       (let [group-id (db/tag-group-id tag-id)]
-        (when (db/user-is-group-admin? user-id group-id)
+        (when (group/user-is-group-admin? db/conn user-id group-id)
           (db/tag-set-description! tag-id description)
           (broadcast-group-change
             group-id [:braid.client/tag-descrption-change [tag-id description]]))))))
@@ -300,7 +301,7 @@
   [{:as ev-msg :keys [?data user-id]}]
   (let [tag-id (have util/uuid? ?data)
         group-id (db/tag-group-id tag-id)]
-    (when (db/user-is-group-admin? user-id group-id)
+    (when (group/user-is-group-admin? db/conn user-id group-id)
       (db/retract-tag! tag-id)
       (broadcast-group-change group-id [:braid.client/retract-tag tag-id]))))
 
@@ -314,7 +315,7 @@
       (when ?reply-fn
         (?reply-fn {:error "Bad group name"})))
 
-    (db/group-exists? (?data :name))
+    (group/group-exists? db/conn (?data :name))
     (do
       (timbre/warnf "User %s attempted to create group that already exsits %s"
                     user-id (?data :name))
@@ -322,8 +323,8 @@
         (?reply-fn {:error "Group name already taken"})))
 
     :else
-    (let [new-group (db/create-group! ?data)]
-      (db/user-make-group-admin! user-id (new-group :id)))))
+    (let [new-group (group/create-group! db/conn ?data)]
+      (group/user-make-group-admin! db/conn user-id (new-group :id)))))
 
 (defmethod event-msg-handler :braid.server/search
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
@@ -353,7 +354,7 @@
 
 (defmethod event-msg-handler :braid.server/invite-to-group
   [{:as ev-msg :keys [?data user-id]}]
-  (if (db/user-in-group? user-id (?data :group-id))
+  (if (group/user-in-group? db/conn user-id (?data :group-id))
     (let [data (assoc ?data :inviter-id user-id)
           invitation (db/create-invitation! data)]
       (if-let [invited-user (user/user-with-email db/conn (invitation :invitee-email))]
@@ -366,7 +367,7 @@
 
 (defmethod event-msg-handler :braid.server/generate-invite-link
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-  (if (db/user-in-group? user-id (?data :group-id))
+  (if (group/user-in-group? db/conn user-id (?data :group-id))
     (let [{:keys [group-id expires]} ?data]
       (?reply-fn {:link (invites/make-open-invite-link group-id expires)}))
     (do (timbre/warnf
@@ -381,8 +382,8 @@
       (user-join-group! user-id (invite :group-id))
       (db/retract-invitation! (invite :id))
       (chsk-send! user-id [:braid.client/joined-group
-                           {:group (db/group-by-id (invite :group-id))
-                            :tags (db/group-tags (invite :group-id))}])
+                           {:group (group/group-by-id db/conn (invite :group-id))
+                            :tags (group/group-tags db/conn (invite :group-id))}])
       (chsk-send! user-id [:braid.client/update-users (user/users-for-user db/conn user-id)]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                   user-id (?data :id))))
@@ -398,8 +399,8 @@
   [{:as ev-msg :keys [?data user-id]}]
   (let [{new-admin-id :user-id group-id :group-id} ?data]
     (when (and new-admin-id group-id
-            (db/user-is-group-admin? user-id group-id))
-      (db/user-make-group-admin! new-admin-id group-id)
+            (group/user-is-group-admin? db/conn user-id group-id))
+      (group/user-make-group-admin! db/conn new-admin-id group-id)
       (broadcast-group-change group-id
                               [:braid.client/new-admin [group-id new-admin-id]]))))
 
@@ -408,40 +409,40 @@
   (let [{group-id :group-id to-remove-id :user-id} ?data]
     (when (and group-id to-remove-id
             (or (= to-remove-id user-id)
-                (db/user-is-group-admin? user-id group-id)))
-      (db/user-leave-group! to-remove-id group-id)
+                (group/user-is-group-admin? db/conn user-id group-id)))
+      (group/user-leave-group! db/conn to-remove-id group-id)
       (broadcast-group-change group-id [:braid.client/user-left
                                         [group-id to-remove-id]])
       (chsk-send!
         to-remove-id
-        [:braid.client/left-group [group-id (:name (db/group-by-id group-id))]]))))
+        [:braid.client/left-group [group-id (:name (group/group-by-id db/conn group-id))]]))))
 
 (defmethod event-msg-handler :braid.server/set-group-intro
   [{:as ev-msg :keys [?data user-id]}]
   (let [{:keys [group-id intro]} ?data]
-    (when (and group-id (db/user-is-group-admin? user-id group-id))
-      (db/group-set! group-id :intro intro)
+    (when (and group-id (group/user-is-group-admin? db/conn user-id group-id))
+      (group/group-set! db/conn group-id :intro intro)
       (broadcast-group-change group-id [:braid.client/new-intro [group-id intro]]))))
 
 (defmethod event-msg-handler :braid.server/set-group-avatar
   [{:as ev-msg :keys [?data user-id]}]
   (let [{:keys [group-id avatar]} ?data]
-    (when (and group-id (db/user-is-group-admin? user-id group-id))
-      (db/group-set! group-id :avatar avatar)
+    (when (and group-id (group/user-is-group-admin? db/conn user-id group-id))
+      (group/group-set! db/conn group-id :avatar avatar)
       (broadcast-group-change group-id [:braid.client/group-new-avatar [group-id avatar]]))))
 
 (defmethod event-msg-handler :braid.server/set-group-publicity
   [{:as ev-msg :keys [?data user-id]}]
   (let [[group-id publicity] ?data]
-    (when (and group-id (db/user-is-group-admin? user-id group-id))
-      (db/group-set! group-id :public? publicity)
+    (when (and group-id (group/user-is-group-admin? db/conn user-id group-id))
+      (group/group-set! db/conn group-id :public? publicity)
       (broadcast-group-change group-id [:braid.client/publicity-changed [group-id publicity]]))))
 
 (defmethod event-msg-handler :braid.server/create-bot
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [bot ?data
         reply-fn (or ?reply-fn (constantly nil))]
-    (when (and (bot :group-id) (db/user-is-group-admin? user-id (bot :group-id)))
+    (when (and (bot :group-id) (group/user-is-group-admin? db/conn user-id (bot :group-id)))
       (cond
         (not (re-matches util/bot-name-re (bot :name)))
         (do (timbre/warnf "User %s tried to create bot with invalid name %s"
@@ -467,7 +468,7 @@
 (defmethod event-msg-handler :braid.server/get-bot-info
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [bot (db/bot-by-id ?data)]
-    (when (and bot (db/user-is-group-admin? user-id (bot :group-id)) ?reply-fn)
+    (when (and bot (group/user-is-group-admin? db/conn user-id (bot :group-id)) ?reply-fn)
       (?reply-fn {:braid/ok bot}))))
 
 (defmethod event-msg-handler :braid.server/create-upload
@@ -476,13 +477,13 @@
                  :uploaded-at (java.util.Date.)
                  :uploader-id user-id)]
     (when (and (upload-valid? upload)
-            (db/user-in-group? user-id (db/thread-group-id (upload :thread-id))))
+            (group/user-in-group? db/conn user-id (db/thread-group-id (upload :thread-id))))
       (db/create-upload! upload))))
 
 (defmethod event-msg-handler :braid.server/uploads-in-group
   [{:as ev-msg :keys [?data user-id ?reply-fn]}]
   (when ?reply-fn
-    (if (db/user-in-group? user-id ?data)
+    (if (group/user-in-group? db/conn user-id ?data)
       (?reply-fn {:braid/ok (db/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
 
@@ -494,7 +495,7 @@
       [:braid.client/init-data
        {:user-id user-id
         :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
-        :user-groups (db/user-groups user-id)
+        :user-groups (group/user-groups db/conn user-id)
         :user-threads (db/open-threads-for-user user-id)
         :user-subscribed-tag-ids (db/subscribed-tag-ids-for-user user-id)
         :user-preferences (user/user-get-preferences db/conn user-id)

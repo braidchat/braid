@@ -5,8 +5,9 @@
             [braid.test.server.test-utils :refer [fetch-messages]]
             [braid.server.conf :as conf]
             [braid.server.db :as db :refer [conn]]
-            [braid.server.db.user :as user]
+            [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.user :as user]
             [braid.common.schema :as schema]
             [braid.server.search :as search]))
 
@@ -72,9 +73,9 @@
                       :password "barbaz"
                       :avatar "http://www.barbaz.com/1.jpg"}
         user-2 (user/create-user! db/conn user-2-data)
-        group (db/create-group! {:id (db/uuid) :name "aoeu"})
-        _ (db/user-add-to-group! (user-1 :id) (group :id))
-        _ (db/user-add-to-group! (user-2 :id) (group :id))
+        group (group/create-group! db/conn {:id (db/uuid) :name "aoeu"})
+        _ (group/user-add-to-group! db/conn (user-1 :id) (group :id))
+        _ (group/user-add-to-group! db/conn (user-2 :id) (group :id))
         users (user/users-for-user db/conn (user-1 :id))]
     (testing "returns all users"
       (is (= (set (map (fn [u] (dissoc u :group-ids)) users))
@@ -85,8 +86,8 @@
       (is (nil? (user/user-with-email db/conn "zzzzz@zzzzzz.ru"))))))
 
 (deftest only-see-users-in-group
-  (let [group-1 (db/create-group! {:id (db/uuid) :name "g1"})
-        group-2 (db/create-group! {:id (db/uuid) :name "g2"})
+  (let [group-1 (group/create-group! db/conn {:id (db/uuid) :name "g1"})
+        group-2 (group/create-group! db/conn {:id (db/uuid) :name "g2"})
         user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
@@ -99,13 +100,13 @@
                                  :email "quux@baz.com"
                                  :password "barbaz"
                                  :avatar "http://www.barbaz.com/2.jpg"})]
-    (is (not (db/user-in-group? (user-1 :id) (group-1 :id))))
-    (db/user-add-to-group! (user-1 :id) (group-1 :id))
-    (is (db/user-in-group? (user-1 :id) (group-1 :id)))
-    (db/user-add-to-group! (user-2 :id) (group-1 :id))
-    (db/user-add-to-group! (user-2 :id) (group-2 :id))
-    (db/user-add-to-group! (user-3 :id) (group-2 :id))
-    (is (not (db/user-in-group? (user-1 :id) (group-2 :id))))
+    (is (not (group/user-in-group? db/conn (user-1 :id) (group-1 :id))))
+    (group/user-add-to-group! db/conn (user-1 :id) (group-1 :id))
+    (is (group/user-in-group? db/conn (user-1 :id) (group-1 :id)))
+    (group/user-add-to-group! db/conn (user-2 :id) (group-1 :id))
+    (group/user-add-to-group! db/conn (user-2 :id) (group-2 :id))
+    (group/user-add-to-group! db/conn (user-3 :id) (group-2 :id))
+    (is (not (group/user-in-group? db/conn (user-1 :id) (group-2 :id))))
     (is (= (set (map (fn [u] (dissoc u :group-ids))
                      [user-1 user-2]))
            (set (map (fn [u] (dissoc u :group-ids))
@@ -123,8 +124,8 @@
     (is (not (user/user-visible-to-user? db/conn (user-3 :id) (user-1 :id))))
     (is (user/user-visible-to-user? db/conn (user-2 :id) (user-3 :id)))
     (is (user/user-visible-to-user? db/conn (user-3 :id) (user-2 :id)))
-    (db/user-leave-group! (user-1 :id) (group-1 :id))
-    (is (not (db/user-in-group? (user-1 :id) (group-1 :id))))
+    (group/user-leave-group! db/conn (user-1 :id) (group-1 :id))
+    (is (not (group/user-in-group? db/conn (user-1 :id) (group-1 :id))))
     (is (not (user/user-visible-to-user? db/conn (user-1 :id) (user-2 :id))))))
 
 (deftest authenticate-user
@@ -150,15 +151,15 @@
 (deftest create-group
   (let [data {:id (db/uuid)
               :name "Lean Pixel"}
-        group (db/create-group! data)
+        group (group/create-group! db/conn data)
         user-id (db/uuid)
         user-2-id (db/uuid)]
     (testing "can create a group"
       (is (= group (assoc data :admins #{} :intro nil :avatar nil
                      :public? false :bots #{}))))
     (testing "can set group intro"
-      (db/group-set! (group :id) :intro "the intro")
-      (is (= (db/group-by-id (group :id))
+      (group/group-set! db/conn (group :id) :intro "the intro")
+      (is (= (group/group-by-id db/conn (group :id))
              (assoc data :admins #{} :intro "the intro" :avatar nil
                :public? false :bots #{}))))
     (testing "can add a user to the group"
@@ -166,65 +167,65 @@
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar "http://www.foobar.com/1.jpg"})]
-        (is (= #{} (db/user-groups (user :id))))
-        (is (= #{} (db/group-users (group :id))))
-        (db/user-add-to-group! (user :id) (group :id))
+        (is (= #{} (group/user-groups db/conn (user :id))))
+        (is (= #{} (group/group-users db/conn (group :id))))
+        (group/user-add-to-group! db/conn (user :id) (group :id))
         (is (= #{(assoc data :admins #{} :intro "the intro" :avatar nil
                    :public? false :bots #{})}
-               (db/user-groups (user :id))))
+               (group/user-groups db/conn (user :id))))
         (is (= #{(dissoc user :group-ids)}
                (set (map (fn [u] (dissoc user :group-ids))
-                    (db/group-users (group :id))))))))
+                    (group/group-users db/conn (group :id))))))))
     (testing "groups have no admins by default"
-      (is (empty? (:admins (db/group-by-id (group :id))))))
+      (is (empty? (:admins (group/group-by-id db/conn (group :id))))))
     (testing "Can add admin"
-      (db/user-make-group-admin! user-id (group :id))
-      (is (= #{user-id} (:admins (db/group-by-id (group :id)))))
+      (group/user-make-group-admin! db/conn user-id (group :id))
+      (is (= #{user-id} (:admins (group/group-by-id db/conn (group :id)))))
       (testing "and another admin"
         (user/create-user! db/conn {:id user-2-id
                           :email "bar@baz.com"
                           :password "foobar"
                           :avatar "http://www.foobar.com/1.jpg"})
-        (db/user-make-group-admin! user-2-id (group :id))
-        (is (= #{user-id user-2-id} (:admins (db/group-by-id (group :id)))))))
+        (group/user-make-group-admin! db/conn user-2-id (group :id))
+        (is (= #{user-id user-2-id} (:admins (group/group-by-id db/conn (group :id)))))))
     (testing "multiple groups, admin statuses"
-      (let [group-2 (db/create-group! {:id (db/uuid)
-                                       :name "another group"})
-            group-3 (db/create-group! {:id (db/uuid)
-                                       :name "third group"})]
+      (let [group-2 (group/create-group! db/conn {:id (db/uuid)
+                                                  :name "another group"})
+            group-3 (group/create-group! db/conn {:id (db/uuid)
+                                                  :name "third group"})]
 
-        (db/user-add-to-group! user-id (group-2 :id))
-        (db/user-make-group-admin! user-2-id (group-2 :id))
+        (group/user-add-to-group! db/conn user-id (group-2 :id))
+        (group/user-make-group-admin! db/conn user-2-id (group-2 :id))
 
-        (db/user-make-group-admin! user-id (group-3 :id))
-        (db/user-add-to-group! user-2-id (group-3 :id))
+        (group/user-make-group-admin! db/conn user-id (group-3 :id))
+        (group/user-add-to-group! db/conn user-2-id (group-3 :id))
 
-        (is (db/user-in-group? user-id (group-2 :id)))
-        (is (db/user-in-group? user-id (group-3 :id)))
+        (is (group/user-in-group? db/conn user-id (group-2 :id)))
+        (is (group/user-in-group? db/conn user-id (group-3 :id)))
 
-        (is (db/user-in-group? user-2-id (group-2 :id)))
-        (is (db/user-in-group? user-2-id (group-3 :id)))
+        (is (group/user-in-group? db/conn user-2-id (group-2 :id)))
+        (is (group/user-in-group? db/conn user-2-id (group-3 :id)))
 
         (is (= #{(group :id) (group-2 :id) (group-3 :id)}
-               (into #{} (map :id) (db/user-groups user-id))
-               (into #{} (map :id) (db/user-groups user-2-id)))
+               (into #{} (map :id) (group/user-groups db/conn user-id))
+               (into #{} (map :id) (group/user-groups db/conn user-2-id)))
             "Both users are in all the groups")
 
-        (is (= #{user-2-id} (:admins (db/group-by-id (group-2 :id)))))
-        (is (= #{user-id} (:admins (db/group-by-id (group-3 :id)))))
+        (is (= #{user-2-id} (:admins (group/group-by-id db/conn (group-2 :id)))))
+        (is (= #{user-id} (:admins (group/group-by-id db/conn (group-3 :id)))))
 
-        (is (db/user-is-group-admin? user-id (group :id)))
-        (is (not (db/user-is-group-admin? user-id (group-2 :id))))
-        (is (db/user-is-group-admin? user-id (group-3 :id)))
+        (is (group/user-is-group-admin? db/conn user-id (group :id)))
+        (is (not (group/user-is-group-admin? db/conn user-id (group-2 :id))))
+        (is (group/user-is-group-admin? db/conn user-id (group-3 :id)))
 
-        (is (db/user-is-group-admin? user-2-id (group :id)))
-        (is (db/user-is-group-admin? user-2-id (group-2 :id)))
-        (is (not (db/user-is-group-admin? user-2-id (group-3 :id))))
+        (is (group/user-is-group-admin? db/conn user-2-id (group :id)))
+        (is (group/user-is-group-admin? db/conn user-2-id (group-2 :id)))
+        (is (not (group/user-is-group-admin? db/conn user-2-id (group-3 :id))))
 
         ))))
 
 (deftest fetch-messages-test
-  (let [group (db/create-group! {:id (db/uuid) :name "group"})
+  (let [group (group/create-group! db/conn {:id (db/uuid) :name "group"})
         user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
@@ -275,7 +276,7 @@
                  :tag-ids #{} :mentioned-ids #{}}]))))))
 
 (deftest user-hide-thread
-  (let [group (db/create-group! {:id (db/uuid) :name "group"})
+  (let [group (group/create-group! db/conn {:id (db/uuid) :name "group"})
         user-1 (user/create-user! db/conn {:id (db/uuid)
                                  :email "foo@bar.com"
                                  :password "foobar"
@@ -340,21 +341,21 @@
 
 (deftest user-thread-visibility
   (let [user-1 (user/create-user! db/conn {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
+                                           :email "foo@bar.com"
+                                           :password "foobar"
+                                           :avatar ""})
         user-2 (user/create-user! db/conn {:id (db/uuid)
-                                 :email "quux@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
+                                           :email "quux@bar.com"
+                                           :password "foobar"
+                                           :avatar ""})
         user-3 (user/create-user! db/conn {:id (db/uuid)
-                                 :email "qaax@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-        group-1 (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-        group-2 (db/create-group! {:id (db/uuid)
-                                   :name "Penyo Pal"})
+                                           :email "qaax@bar.com"
+                                           :password "foobar"
+                                           :avatar ""})
+        group-1 (group/create-group! db/conn {:id (db/uuid)
+                                              :name "Lean Pixel"})
+        group-2 (group/create-group! db/conn {:id (db/uuid)
+                                              :name "Penyo Pal"})
         tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
 
@@ -366,10 +367,10 @@
       (is (db/user-can-see-thread? (user-2 :id) thread-1-id))
       (is (db/user-can-see-thread? (user-3 :id) thread-1-id)))
 
-    (db/user-add-to-group! (user-2 :id) (group-1 :id))
+    (group/user-add-to-group! db/conn (user-2 :id) (group-1 :id))
     (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
-    (db/user-add-to-group! (user-3 :id) (group-2 :id))
-    (db/user-subscribe-to-group-tags! (user-3 :id) (group-2 :id))
+    (group/user-add-to-group! db/conn (user-3 :id) (group-2 :id))
+    (group/user-subscribe-to-group-tags! db/conn (user-3 :id) (group-2 :id))
     (message/create-message! db/conn {:thread-id thread-1-id :id (db/uuid) :content "zzz"
                                       :user-id (user-1 :id) :created-at (java.util.Date.)
                                       :mentioned-tag-ids [(tag-1 :id)] :group-id (group-1 :id)})
@@ -393,10 +394,10 @@
     (testing "user 3 can see thread 2 because they have the tag"
       (is (db/user-can-see-thread? (user-3 :id) thread-2-id))
       (testing "but they can't after leaving"
-        (db/user-leave-group! (user-3 :id) (group-2 :id))
+        (group/user-leave-group! db/conn (user-3 :id) (group-2 :id))
         (is (not (db/user-can-see-thread? (user-3 :id) thread-2-id)))))
     (testing "user can leave one group and still see threads in the other"
-      (db/user-leave-group! (user-2 :id) (group-1 :id))
+      (group/user-leave-group! db/conn (user-2 :id) (group-1 :id))
       (is (not (db/user-can-see-thread? (user-2 :id) thread-1-id)))
       (is (db/user-can-see-thread? (user-2 :id) thread-2-id)))))
 
@@ -409,8 +410,8 @@
                                  :email "bar@baz.com"
                                  :password "foobar"
                                  :avatar ""})
-        group (db/create-group! {:name "group 1" :id (db/uuid)})]
-    (db/user-add-to-group! (user-1 :id) (group :id))
+        group (group/create-group! db/conn {:name "group 1" :id (db/uuid)})]
+    (group/user-add-to-group! db/conn (user-1 :id) (group :id))
     (is (empty? (db/invites-for-user (user-1 :id))))
     (is (empty? (db/invites-for-user (user-2 :id))))
     (let [invite-id (db/uuid)
@@ -428,7 +429,7 @@
                                  :email "foo@bar.com"
                                  :password "foobar"
                                  :avatar ""})
-        group (db/create-group! {:id (db/uuid) :name "group 1"})
+        group (group/create-group! db/conn {:id (db/uuid) :name "group 1"})
         thread-id (db/uuid)]
     (message/create-message! db/conn {:id (db/uuid) :thread-id thread-id
                                       :group-id (group :id) :user-id (user-1 :id)
@@ -439,7 +440,7 @@
     (testing "user leaving group removes mentions of that user"
       (is (= #{(user-1 :id)}
              (:mentioned-ids (db/thread-by-id thread-id))))
-      (db/user-leave-group! (user-1 :id) (group :id))
+      (group/user-leave-group! db/conn (user-1 :id) (group :id))
       (is (empty? (:mentioned-ids (db/thread-by-id thread-id)))))))
 
 (deftest adding-user-to-group-subscribes-tags
@@ -447,24 +448,24 @@
                                :email "foo@bar.com"
                                :password "foobar"
                                :avatar ""})
-        group (db/create-group! {:name "group" :id (db/uuid)})
+        group (group/create-group! db/conn {:name "group" :id (db/uuid)})
         group-tags (doall
                      (map db/create-tag!
                           [{:id (db/uuid) :name "t1" :group-id (group :id)}
                            {:id (db/uuid) :name "t2" :group-id (group :id)}
                            {:id (db/uuid) :name "t3" :group-id (group :id)}]))]
     (testing "some misc functions"
-      (is (= group (db/group-by-id (group :id))))
+      (is (= group (group/group-by-id db/conn (group :id))))
       (is (= (set group-tags)
-             (set (db/group-tags (group :id))))))
-    (db/user-add-to-group! (user :id) (group :id))
-    (db/user-subscribe-to-group-tags! (user :id) (group :id))
+             (set (group/group-tags db/conn (group :id))))))
+    (group/user-add-to-group! db/conn (user :id) (group :id))
+    (group/user-subscribe-to-group-tags! db/conn (user :id) (group :id))
     (is (= (set (db/subscribed-tag-ids-for-user (user :id)))
            (db/tag-ids-for-user (user :id))
            (set (map :id group-tags))))
     (testing "can remove tags"
       (db/retract-tag! (:id (first group-tags)))
-      (is (= 2 (count (db/group-tags (group :id))))))))
+      (is (= 2 (count (group/group-tags db/conn (group :id))))))))
 
 (deftest user-preferences
   (testing "Can set and retrieve preferences"
@@ -506,9 +507,9 @@
                                  db/conn :favourite-color "blue")))))))))
 
 (deftest bots-test
-  (let [g1 (db/create-group! {:name "group 1" :id (db/uuid)})
-        g2 (db/create-group! {:name "group 2" :id (db/uuid)})
-        g3 (db/create-group! {:name "group 3" :id (db/uuid)})
+  (let [g1 (group/create-group! db/conn {:name "group 1" :id (db/uuid)})
+        g2 (group/create-group! db/conn {:name "group 2" :id (db/uuid)})
+        g3 (group/create-group! db/conn {:name "group 3" :id (db/uuid)})
 
         b1 (db/create-bot! {:id (db/uuid)
                             :name "bot1"
@@ -534,7 +535,8 @@
     (is (schema/check-bot! b3))
     (testing "can create bots & retrieve by group"
       (is (= #{b1 b2} (db/bots-in-group (g1 :id))))
-      (is (= (into #{}  (map bot->display) [b1 b2]) (:bots (db/group-by-id (g1 :id)))))
+      (is (= (into #{} (map bot->display) [b1 b2])
+             (:bots (group/group-by-id db/conn (g1 :id)))))
       (is (= #{b3} (db/bots-in-group (g2 :id))))
       (is (= #{} (db/bots-in-group (g3 :id))))
       (is (= b1 (db/bot-by-name-in-group "bot1" (g1 :id))))

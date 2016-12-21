@@ -3,8 +3,9 @@
             [mount.core :as mount]
             [braid.server.conf :as conf]
             [braid.server.db :as db]
-            [braid.server.db.user :as user]
+            [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.user :as user]
             [braid.server.search :as search]))
 
 (use-fixtures :each
@@ -47,8 +48,8 @@
                                  :avatar ""})
         group-1-id (db/uuid)
         group-2-id (db/uuid)
-        group-1 (db/create-group! {:name "group1" :id group-1-id})
-        group-2 (db/create-group! {:name "group2" :id group-2-id})
+        group-1 (group/create-group! db/conn {:name "group1" :id group-1-id})
+        group-2 (group/create-group! db/conn {:name "group2" :id group-2-id})
         tag-1 (db/create-tag! {:id (db/uuid) :name "tag1" :group-id (group-1 :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "tag2" :group-id (group-2 :id)})
         tag-3 (db/create-tag! {:id (db/uuid) :name "tag3" :group-id (group-1 :id)})
@@ -57,11 +58,11 @@
         thread-3-id (db/uuid)
         thread-4-id (db/uuid)]
 
-    (db/user-add-to-group! (user-1 :id) (group-1 :id))
+    (group/user-add-to-group! db/conn (user-1 :id) (group-1 :id))
     (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
     (db/user-subscribe-to-tag! (user-1 :id) (tag-3 :id))
 
-    (db/user-add-to-group! (user-2 :id) (group-2 :id))
+    (group/user-add-to-group! db/conn (user-2 :id) (group-2 :id))
     (db/user-subscribe-to-tag! (user-2 :id) (tag-2 :id))
 
     ; this thread should be visible to user 1

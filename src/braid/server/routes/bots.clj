@@ -4,8 +4,9 @@
             [ring.middleware.transit :as transit]
             [taoensso.timbre :as timbre]
             [braid.server.db :as db]
-            [braid.server.db.user :as user]
+            [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.user :as user]
             [braid.common.schema :as schema]
             [braid.server.sync :as sync])
   (:import [org.apache.commons.codec.binary Base64]))
@@ -50,7 +51,7 @@
       (do (timbre/debugf "Bot %s attempted to add tag from other group" (bot :id))
           nil)
 
-      (some (fn [mentioned] (not (db/user-in-group? mentioned (msg :group-id))))
+      (some (fn [mentioned] (not (group/user-in-group? db/conn mentioned (msg :group-id))))
             (msg :mentioned-user-ids))
       (do (timbre/debugf "Bot %s attempted to mention a user from a different group"
                          (bot :id))
@@ -92,7 +93,7 @@
           bot (db/bot-by-id bot-id)]
       (if-let [user-id (try (java.util.UUID/fromString user-id)
                          (catch IllegalArgumentException _ nil))]
-        (if (db/user-in-group? user-id (bot :group-id))
+        (if (group/user-in-group? db/conn user-id (bot :group-id))
           {:status 200
            :headers {"Content-Type" "text/plain"}
            :body (:nickname (user/user-by-id db/conn user-id))}

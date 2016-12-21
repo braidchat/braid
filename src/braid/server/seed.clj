@@ -1,7 +1,8 @@
 (ns braid.server.seed
   (:require [braid.server.db :as db]
-            [braid.server.db.user :as user]
+            [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.user :as user]
             [braid.server.conf :refer [config]]))
 
 (defn drop! []
@@ -11,8 +12,8 @@
   (db/init! (config :db-url)))
 
 (defn seed! []
-  (let [group-1 (db/create-group! {:id (db/uuid) :name "Braid"})
-        group-2 (db/create-group! {:id (db/uuid) :name "Chat"})
+  (let [group-1 (group/create-group! db/conn {:id (db/uuid) :name "Braid"})
+        group-2 (group/create-group! db/conn {:id (db/uuid) :name "Chat"})
         user-1 (user/create-user! db/conn
                                   {:id (db/uuid)
                                    :email "foo@example.com"
@@ -25,13 +26,13 @@
                                    :nickname "bar"
                                    :password "bar"
                                    :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
-        _ (db/user-add-to-group! (user-1 :id) (group-1 :id))
-        _ (db/user-add-to-group! (user-2 :id) (group-1 :id))
-        _ (db/user-add-to-group! (user-1 :id) (group-2 :id))
-        _ (db/user-add-to-group! (user-2 :id) (group-2 :id))
+        _ (group/user-add-to-group! db/conn (user-1 :id) (group-1 :id))
+        _ (group/user-add-to-group! db/conn (user-2 :id) (group-1 :id))
+        _ (group/user-add-to-group! db/conn (user-1 :id) (group-2 :id))
+        _ (group/user-add-to-group! db/conn (user-2 :id) (group-2 :id))
 
-        _ (db/user-make-group-admin! (user-1 :id) (group-1 :id))
-        _ (db/user-make-group-admin! (user-2 :id) (group-2 :id))
+        _ (group/user-make-group-admin! db/conn (user-1 :id) (group-1 :id))
+        _ (group/user-make-group-admin! db/conn (user-2 :id) (group-2 :id))
 
         tag-1 (db/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
         tag-2 (db/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})

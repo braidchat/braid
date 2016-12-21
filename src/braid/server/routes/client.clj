@@ -6,6 +6,7 @@
             [braid.server.conf :refer [config]]
             [braid.server.digest :as digest]
             [braid.server.db :as db]
+            [braid.server.db.group :as group]
             [braid.server.db.user :as user]
             [braid.server.invite :as invites]
             [braid.server.api.github :as github]))
@@ -20,7 +21,7 @@
 (defroutes desktop-client-routes
   ; public group page
   (GET "/group/:group-name" [group-name :as req]
-    (if-let [group (db/public-group-with-name group-name)]
+    (if-let [group (group/public-group-with-name db/conn group-name)]
       (clostache/render-resource "templates/public_group_desktop.html.mustache"
                                  {:group-name (group :name)
                                   :group-id (group :id)

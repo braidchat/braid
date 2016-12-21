@@ -3,6 +3,7 @@
             [mount.core :as mount]
             [braid.server.conf :as conf]
             [braid.server.db :as db]
+            [braid.server.db.group :as group]
             [braid.server.db.user :as user]))
 
 
@@ -19,8 +20,8 @@
 
 (deftest tags
   (testing "can create tag"
-    (let [group (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
+    (let [group (group/create-group! db/conn {:id (db/uuid)
+                                              :name "Lean Pixel"})
           tag-data {:id (db/uuid)
                     :name "acme"
                     :group-id (group :id)}]
@@ -33,7 +34,7 @@
                          :subscribers-count 0))))))
       (testing "set tag description"
         (db/tag-set-description! (:id tag-data) "Some tag with stuff")
-        (is (= (first (db/group-tags (:id group)))
+        (is (= (first (group/group-tags db/conn (:id group)))
                (assoc tag-data
                  :description "Some tag with stuff"
                  :threads-count 0
@@ -45,11 +46,11 @@
                                          :email "foo@bar.com"
                                          :password "foobar"
                                          :avatar ""})
-        group (db/create-group! {:id (db/uuid)
-                                 :name "Lean Pixel"})
+        group (group/create-group! db/conn {:id (db/uuid)
+                                            :name "Lean Pixel"})
         tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group :id)})]
-    (db/user-add-to-group! (user :id) (group :id))
+    (group/user-add-to-group! db/conn (user :id) (group :id))
     (testing "user can subscribe to tags"
       (testing "user-subscribe-to-tag!"
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))
@@ -68,28 +69,28 @@
 
 (deftest user-can-only-see-tags-in-group
   (let [user-1 (user/create-user! db/conn {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
+                                           :email "foo@bar.com"
+                                           :password "foobar"
+                                           :avatar ""})
         user-2 (user/create-user! db/conn {:id (db/uuid)
-                                 :email "quux@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
+                                           :email "quux@bar.com"
+                                           :password "foobar"
+                                           :avatar ""})
         user-3 (user/create-user! db/conn {:id (db/uuid)
-                                 :email "qaax@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
-        group-1 (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-        group-2 (db/create-group! {:id (db/uuid)
-                                   :name "Penyo Pal"})
+                                           :email "qaax@bar.com"
+                                           :password "foobar"
+                                           :avatar ""})
+        group-1 (group/create-group! db/conn {:id (db/uuid)
+                                              :name "Lean Pixel"})
+        group-2 (group/create-group! db/conn {:id (db/uuid)
+                                              :name "Penyo Pal"})
         tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
         tag-3 (db/create-tag! {:id (db/uuid) :name "acme3" :group-id (group-2 :id)})]
-    (db/user-add-to-group! (user-1 :id) (group-1 :id))
-    (db/user-add-to-group! (user-2 :id) (group-1 :id))
-    (db/user-add-to-group! (user-2 :id) (group-2 :id))
-    (db/user-add-to-group! (user-3 :id) (group-2 :id))
+    (group/user-add-to-group! db/conn (user-1 :id) (group-1 :id))
+    (group/user-add-to-group! db/conn (user-2 :id) (group-1 :id))
+    (group/user-add-to-group! db/conn (user-2 :id) (group-2 :id))
+    (group/user-add-to-group! db/conn (user-3 :id) (group-2 :id))
     (testing "user can only see tags in their group(s)"
       (is (= #{tag-1} (db/tags-for-user (user-1 :id))))
       (is (= #{tag-1 tag-2 tag-3} (db/tags-for-user (user-2 :id))))
@@ -100,13 +101,13 @@
                                :email "foo@bar.com"
                                :password "foobar"
                                :avatar ""})
-        group-1 (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
-        group-2 (db/create-group! {:id (db/uuid)
-                                   :name "Penyo Pal"})
+        group-1 (group/create-group! db/conn {:id (db/uuid)
+                                              :name "Lean Pixel"})
+        group-2 (group/create-group! db/conn {:id (db/uuid)
+                                              :name "Penyo Pal"})
         tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
         tag-2 (db/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})]
-    (db/user-add-to-group! (user :id) (group-1 :id))
+    (group/user-add-to-group! db/conn (user :id) (group-1 :id))
     (testing "user can subscribe to tags"
       (testing "user-subscribe-to-tag!"
         (db/user-subscribe-to-tag! (user :id) (tag-1 :id))

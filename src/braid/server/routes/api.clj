@@ -5,6 +5,7 @@
             [clojure.java.io :as io]
             [braid.common.util :refer [valid-nickname?]]
             [braid.server.db :as db]
+            [braid.server.db.group :as group]
             [braid.server.db.user :as user]
             [braid.server.invite :as invites]
             [braid.server.identicons :as identicons]
@@ -39,7 +40,7 @@
 
 (defn join-group
   [user-id group-id]
-  (when-not (db/user-in-group? user-id group-id)
+  (when-not (group/user-in-group? db/conn user-id group-id)
     (sync/user-join-group! user-id group-id)))
 
 (defroutes api-public-routes
@@ -115,7 +116,7 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings db/conn group-id)]
           (if-not (invites/verify-hmac form-hmac (str now group-id))
             (assoc bad-resp :body "No such group or the request has been tampered with")
             (if (string/blank? email)
@@ -136,7 +137,7 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings db/conn group-id)]
           (if-not (invites/verify-hmac form-hmac (str now group-id))
             (assoc bad-resp :body "No such group or the request has been tampered with")
             (if-let [user-id (get-in req [:session :user-id])]
@@ -155,7 +156,7 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings db/conn group-id)]
           (if-not (get group-settings :public?)
             (assoc bad-resp :body "No such group or the group is private")
             (if (string/blank? email)
@@ -176,7 +177,7 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings db/conn group-id)]
           (if-not (:public? group-settings)
             (assoc bad-resp :body "No such group or the group is private")
             (if-let [user-id (get-in req [:session :user-id])]

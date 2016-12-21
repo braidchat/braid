@@ -3,8 +3,9 @@
             [mount.core :as mount]
             [braid.server.conf :as conf]
             [braid.server.db :as db]
-            [braid.server.db.user :as user]
-            [braid.server.db.message :as message]))
+            [braid.server.db.group :as group]
+            [braid.server.db.message :as message]
+            [braid.server.db.user :as user]))
 
 
 (use-fixtures :each
@@ -26,7 +27,7 @@
         thread-id (db/uuid)]
 
     (testing "new messages can create a thread"
-      (let [group (db/create-group! {:id (db/uuid) :name "group"})
+      (let [group (group/create-group! db/conn {:id (db/uuid) :name "group"})
             message-data {:id (db/uuid)
                           :group-id (group :id)
                           :user-id (user-1 :id)
@@ -45,7 +46,7 @@
           (is (contains? (set (db/subscribed-thread-ids-for-user (user-1 :id))) thread-id)))))
 
     (testing "new message can add to an existing thread"
-      (let [group (db/create-group! {:id (db/uuid) :name "group2"})
+      (let [group (group/create-group! db/conn {:id (db/uuid) :name "group2"})
             message-2-data {:id (db/uuid)
                             :group-id (group :id)
                             :user-id (user-1 :id)
@@ -70,7 +71,7 @@
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar ""})
-          group (db/create-group! {:id (db/uuid) :name "group"})]
+          group (group/create-group! db/conn {:id (db/uuid) :name "group"})]
 
       (testing "when the user sends a new message"
         (let [thread-id (db/uuid)
@@ -98,7 +99,7 @@
                                    :email "quux@bar.com"
                                    :password "foobar"
                                    :avatar ""})
-          group (db/create-group! {:id (db/uuid) :name "group"})
+          group (group/create-group! db/conn {:id (db/uuid) :name "group"})
           thread-id (db/uuid)
           message-1 (message/create-message! db/conn {:id (db/uuid)
                                                       :group-id (group :id)
@@ -133,19 +134,19 @@
 (deftest tag-mention-opens-thread-for-subscribers
 
   (testing "given 2 users and 2 tags..."
-    (let [group (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
+    (let [group (group/create-group! db/conn {:id (db/uuid)
+                                              :name "Lean Pixel"})
           tag-1 (db/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
           user-1 (user/create-user! db/conn {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar ""})
-          _ (db/user-add-to-group! (user-1 :id) (group :id))
+          _ (group/user-add-to-group! db/conn (user-1 :id) (group :id))
           user-2 (user/create-user! db/conn {:id (db/uuid)
                                    :email "quux@bar.com"
                                    :password "foobar"
                                    :avatar ""})
-          _ (db/user-add-to-group! (user-2 :id) (group :id))]
+          _ (group/user-add-to-group! db/conn (user-2 :id) (group :id))]
 
       (testing "given a user subscribed to a tag..."
         (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
@@ -176,18 +177,18 @@
 (deftest user-mention-subscribes-opens-thread-for-user
 
   (testing "given 2 users..."
-    (let [group (db/create-group! {:id (db/uuid)
-                                   :name "Lean Pixel"})
+    (let [group (group/create-group! db/conn {:id (db/uuid)
+                                              :name "Lean Pixel"})
           user-1 (user/create-user! db/conn {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
                                    :avatar ""})
-          _ (db/user-add-to-group! (user-1 :id) (group :id))
+          _ (group/user-add-to-group! db/conn (user-1 :id) (group :id))
           user-2 (user/create-user! db/conn {:id (db/uuid)
                                    :email "quux@bar.com"
                                    :password "foobar"
                                    :avatar ""})
-          _ (db/user-add-to-group! (user-2 :id) (group :id))
+          _ (group/user-add-to-group! db/conn (user-2 :id) (group :id))
           thread-id (db/uuid)]
 
       (testing "when user-1 mentions user-2 in a message..."

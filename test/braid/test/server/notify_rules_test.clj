@@ -4,8 +4,9 @@
             [braid.server.conf :as conf]
             [schema.core :as s]
             [braid.server.db :as db]
-            [braid.server.db.user :as user]
+            [braid.server.db.group :as group]
             [braid.server.db.message :as message]
+            [braid.server.db.user :as user]
             [braid.common.schema :refer [rules-valid? check-rules!]]
             [braid.server.notify-rules :as rules]))
 
@@ -36,12 +37,12 @@
            [:tag #uuid "57158d7e-8dd1-4834-9e6b-cb7985895621"]]))))
 
 (deftest notify-rules-work
-  (let [g1 (db/create-group! {:id (db/uuid)
-                              :name "group1"})
-        g2 (db/create-group! {:id (db/uuid)
-                              :name "group2"})
-        g3 (db/create-group! {:id (db/uuid)
-                              :name "group3"})
+  (let [g1 (group/create-group! db/conn {:id (db/uuid)
+                                         :name "group1"})
+        g2 (group/create-group! db/conn {:id (db/uuid)
+                                         :name "group2"})
+        g3 (group/create-group! db/conn {:id (db/uuid)
+                                         :name "group3"})
 
         g1t1 (db/create-tag! {:id (db/uuid) :name "group1tag1" :group-id (g1 :id)})
         g1t2 (db/create-tag! {:id (db/uuid) :name "group1tag2" :group-id (g1 :id)})
