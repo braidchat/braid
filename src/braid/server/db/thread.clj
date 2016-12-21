@@ -118,32 +118,6 @@
                 [?user :user/id ?user-id]]
               (d/db conn) thread-id user-id))))
 
-(defn threads-with-tag
-  "Find threads with a given tag that the user is allowed to see, ordered by
-  most recent message.
-  Paginates results, dropping `skip` threads and returning `limit`.
-  Returns the threads and a count of how many threads remain."
-  [conn user-id tag-id skip limit]
-  (let [all-thread-eids (d/q '[:find ?thread (max ?time)
-                               :in $ ?tag-id
-                               :where
-                               [?tag :tag/id ?tag-id]
-                               [?thread :thread/tag ?tag]
-                               [?msg :message/thread ?thread]
-                               [?msg :message/created-at ?time]]
-                             (d/db conn) tag-id)
-        thread-eids (->> all-thread-eids
-                         (sort-by second #(compare %2 %1))
-                         (map first)
-                         (drop skip)
-                         (take limit))]
-    {:threads (into ()
-                    (comp (map db->thread)
-                          (filter #(user-can-see-thread? conn user-id (% :id)))
-                          (map #(thread-add-last-open-at conn % user-id)))
-                    (d/pull-many (d/db conn) thread-pull-pattern thread-eids))
-     :remaining (- (count all-thread-eids) (+ skip (count thread-eids)))}))
-
 (defn open-threads-for-user
   [conn user-id]
   (let [visible-tags (tag/tag-ids-for-user conn user-id)]
