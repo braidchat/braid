@@ -53,8 +53,6 @@
                         (let [gargs (repeatedly (dec (count as)) gensym)]
                           `(~(vec gargs) (~fn-var conn ~@gargs))))))))))))
 
-(reexport-db-ns braid.server.db.invitation)
-
 (reexport-db-ns braid.server.db.thread)
 
 (reexport-db-ns braid.server.db.tag)

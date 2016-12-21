@@ -4,6 +4,7 @@
             [clojure.string :as string]
             [braid.server.db :as db]
             [braid.server.db.group :as group]
+            [braid.server.db.invitation :as invitation]
             [braid.server.db.message :as message]
             [braid.server.db.user :as user]
             [braid.server.search :as search]
@@ -356,7 +357,7 @@
   [{:as ev-msg :keys [?data user-id]}]
   (if (group/user-in-group? db/conn user-id (?data :group-id))
     (let [data (assoc ?data :inviter-id user-id)
-          invitation (db/create-invitation! data)]
+          invitation (invitation/create-invitation! db/conn data)]
       (if-let [invited-user (user/user-with-email db/conn (invitation :invitee-email))]
         (chsk-send! (invited-user :id) [:braid.client/invitation-received invitation])
         (invites/send-invite invitation)))
@@ -377,10 +378,10 @@
 
 (defmethod event-msg-handler :braid.server/invitation-accept
   [{:as ev-msg :keys [?data user-id]}]
-  (if-let [invite (db/invite-by-id (?data :id))]
+  (if-let [invite (invitation/invite-by-id db/conn (?data :id))]
     (do
       (user-join-group! user-id (invite :group-id))
-      (db/retract-invitation! (invite :id))
+      (invitation/retract-invitation! db/conn (invite :id))
       (chsk-send! user-id [:braid.client/joined-group
                            {:group (group/group-by-id db/conn (invite :group-id))
                             :tags (group/group-tags db/conn (invite :group-id))}])
@@ -390,8 +391,8 @@
 
 (defmethod event-msg-handler :braid.server/invitation-decline
   [{:as ev-msg :keys [?data user-id]}]
-  (if-let [invite (db/invite-by-id (?data :id))]
-    (db/retract-invitation! (invite :id))
+  (if-let [invite (invitation/invite-by-id db/conn (?data :id))]
+    (invitation/retract-invitation! db/conn (invite :id))
     (timbre/warnf "User %s attempted to decline nonexistant invitaiton %s"
                   user-id (?data :id))))
 
@@ -503,6 +504,6 @@
                      (map #(assoc % :status
                              (if (connected (% :id)) :online :offline)))
                      (user/users-for-user db/conn user-id))
-        :invitations (db/invites-for-user user-id)
+        :invitations (invitation/invites-for-user db/conn user-id)
         :tags (db/tags-for-user user-id)
         :quest-records (db/get-active-quests-for-user-id user-id)}])))

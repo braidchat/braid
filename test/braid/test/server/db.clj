@@ -6,6 +6,7 @@
             [braid.server.conf :as conf]
             [braid.server.db :as db :refer [conn]]
             [braid.server.db.group :as group]
+            [braid.server.db.invitation :as invitation]
             [braid.server.db.message :as message]
             [braid.server.db.user :as user]
             [braid.common.schema :as schema]
@@ -412,17 +413,19 @@
                                  :avatar ""})
         group (group/create-group! db/conn {:name "group 1" :id (db/uuid)})]
     (group/user-add-to-group! db/conn (user-1 :id) (group :id))
-    (is (empty? (db/invites-for-user (user-1 :id))))
-    (is (empty? (db/invites-for-user (user-2 :id))))
+    (is (empty? (invitation/invites-for-user db/conn (user-1 :id))))
+    (is (empty? (invitation/invites-for-user db/conn (user-2 :id))))
     (let [invite-id (db/uuid)
-          invite (db/create-invitation! {:id invite-id
-                                         :inviter-id (user-1 :id)
-                                         :invitee-email "bar@baz.com"
-                                         :group-id (group :id)})]
-      (is (= invite (db/invite-by-id invite-id)))
-      (is (seq (db/invites-for-user (user-2 :id))))
-      (db/retract-invitation! invite-id)
-      (is (empty? (db/invites-for-user (user-2 :id)))))))
+          invite (invitation/create-invitation!
+                   db/conn
+                   {:id invite-id
+                    :inviter-id (user-1 :id)
+                    :invitee-email "bar@baz.com"
+                    :group-id (group :id)})]
+      (is (= invite (invitation/invite-by-id db/conn invite-id)))
+      (is (seq (invitation/invites-for-user db/conn (user-2 :id))))
+      (invitation/retract-invitation! db/conn invite-id)
+      (is (empty? (invitation/invites-for-user db/conn (user-2 :id)))))))
 
 (deftest user-leaving-group
   (let [user-1 (user/create-user! db/conn {:id (db/uuid)

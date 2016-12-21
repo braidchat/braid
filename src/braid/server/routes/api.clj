@@ -6,6 +6,7 @@
             [braid.common.util :refer [valid-nickname?]]
             [braid.server.db :as db]
             [braid.server.db.group :as group]
+            [braid.server.db.invitation :as invitation]
             [braid.server.db.user :as user]
             [braid.server.invite :as invites]
             [braid.server.identicons :as identicons]
@@ -91,7 +92,7 @@
         (assoc fail :body "Invalid image")
 
         :else
-        (let [invite (db/invite-by-id (java.util.UUID/fromString invite_id))]
+        (let [invite (invitation/invite-by-id db/conn (java.util.UUID/fromString invite_id))]
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
             (let [avatar-url (invites/upload-avatar avatar)
@@ -104,7 +105,7 @@
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
                 (sync/user-join-group! (user :id) (invite :group-id))
-                (db/retract-invitation! (invite :id)))
+                (invitation/retract-invitation! db/conn (invite :id)))
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
