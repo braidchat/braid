@@ -2,7 +2,7 @@
   (:require [datomic.api :as d]
             [braid.server.db.common :refer [quest-record-pull-pattern]]))
 
-; getters
+; Queries
 
 (defn get-active-quests-for-user-id [conn user-id]
   (->> (d/q '[:find (pull ?qr pull-pattern)
@@ -16,7 +16,7 @@
             quest-record-pull-pattern)
        (map first)))
 
-; setters
+; Transactions
 
 (defn upsert-quest-record! [conn user-id quest-record]
   (let [db-id (if (d/entity (d/db conn) [:quest-record/id (quest-record :id)])

@@ -6,42 +6,15 @@
             [braid.server.db.common :refer :all]
             [braid.server.quests.db :refer [activate-first-quests!]]))
 
+;; Queries
+
 (defn email-taken?
   [conn email]
   (some? (d/entity (d/db conn) [:user/email email])))
 
-(defn create-user!
-  "creates a user, returns id"
-  [conn {:keys [id email avatar nickname password]}]
-  (let [user (->> {:user/id id
-                   :user/email email
-                   :user/avatar avatar
-                   :user/nickname (or nickname (-> email (string/split #"@") first))
-                   :user/password-token (password/encrypt password)}
-                  (create-entity! conn)
-                  db->user)]
-    (activate-first-quests! conn id)
-    user))
-
-(defn create-bot-user!
-  [conn {:keys [id]}]
-  (->> {:user/id id
-        :user/is-bot? true}
-       (create-entity! conn)
-       :user/id))
-
 (defn nickname-taken?
   [conn nickname]
   (some? (d/entity (d/db conn) [:user/nickname nickname])))
-
-(defn set-nickname!
-  "Set the user's nickname"
-  [conn user-id nickname]
-  @(d/transact conn [[:db/add [:user/id user-id] :user/nickname nickname]]))
-
-(defn set-user-avatar!
-  [conn user-id avatar]
-  @(d/transact conn [[:db/add [:user/id user-id] :user/avatar avatar]]))
 
 (defn authenticate-user
   "returns user-id if email and password are correct"
@@ -58,11 +31,6 @@
                   (.toLowerCase email))]
          (when (and user-id (password/check password password-token))
            user-id))))
-
-(defn set-user-password!
-  [conn user-id password]
-  @(d/transact conn [[:db/add [:user/id user-id]
-                      :user/password-token (password/encrypt password)]]))
 
 (defn user-by-id
   [conn id]
@@ -82,7 +50,6 @@
 (defn user-email
   [conn user-id]
   (:user/email (d/pull (d/db conn) [:user/email] [:user/id user-id])))
-
 
 (defn user-get-preferences
   [conn user-id]
@@ -117,17 +84,6 @@
          [?u :user/preferences ?p]
          [?p :user.preference/key ?key]]
        (d/db conn) user-id pref))
-
-(defn user-set-preference!
-  "Set a key to a value for the user's preferences.  This will throw if
-  permissions are changed in between reading & setting"
-  [conn user-id k v]
-  (if-let [e (user-preference-is-set? conn user-id k)]
-    @(d/transact conn [[:db/add e :user.preference/value (pr-str v)]])
-    @(d/transact conn [{:user.preference/key k
-                        :user.preference/value (pr-str v)
-                        :user/_preferences [:user/id user-id]
-                        :db/id #db/id [:entities]}])))
 
 (defn user-search-preferences
   "Find the ids of users that have the a given value for a given key set in
@@ -170,3 +126,54 @@
              [?g :group/user ?u2]]
            (d/db conn) user1-id user2-id)
       seq boolean))
+
+;; Transactions
+
+; Txns that need result
+
+(defn create-user!
+  "creates a user, returns id"
+  [conn {:keys [id email avatar nickname password]}]
+  (let [user (->> {:user/id id
+                   :user/email email
+                   :user/avatar avatar
+                   :user/nickname (or nickname (-> email (string/split #"@") first))
+                   :user/password-token (password/encrypt password)}
+                  (create-entity! conn)
+                  db->user)]
+    (activate-first-quests! conn id)
+    user))
+
+(defn create-bot-user!
+  [conn {:keys [id]}]
+  (->> {:user/id id
+        :user/is-bot? true}
+       (create-entity! conn)
+       :user/id))
+
+; Txns that fire-and-forget
+
+(defn set-nickname!
+  "Set the user's nickname"
+  [conn user-id nickname]
+  @(d/transact conn [[:db/add [:user/id user-id] :user/nickname nickname]]))
+
+(defn set-user-avatar!
+  [conn user-id avatar]
+  @(d/transact conn [[:db/add [:user/id user-id] :user/avatar avatar]]))
+
+(defn set-user-password!
+  [conn user-id password]
+  @(d/transact conn [[:db/add [:user/id user-id]
+                      :user/password-token (password/encrypt password)]]))
+
+(defn user-set-preference!
+  "Set a key to a value for the user's preferences.  This will throw if
+  permissions are changed in between reading & setting"
+  [conn user-id k v]
+  (if-let [e (user-preference-is-set? conn user-id k)]
+    @(d/transact conn [[:db/add e :user.preference/value (pr-str v)]])
+    @(d/transact conn [{:user.preference/key k
+                        :user.preference/value (pr-str v)
+                        :user/_preferences [:user/id user-id]
+                        :db/id #db/id [:entities]}])))

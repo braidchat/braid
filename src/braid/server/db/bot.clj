@@ -4,19 +4,7 @@
             [braid.server.db.user :as user]
             [braid.server.crypto :as crypto :refer [random-nonce]]))
 
-(defn create-bot!
-  [conn {:keys [id name avatar webhook-url group-id]}]
-  ; TODO: enforce name is unique in that group?
-  (let [fake-user (user/create-bot-user! conn {:id (d/squuid)})]
-    (->> {:bot/id id
-          :bot/name name
-          :bot/avatar avatar
-          :bot/webhook-url webhook-url
-          :bot/token (random-nonce 30)
-          :bot/group [:group/id group-id]
-          :bot/user [:user/id fake-user]}
-         (create-entity! conn)
-         db->bot)))
+;; Queries
 
 (defn bots-in-group
   [conn group-id]
@@ -50,13 +38,6 @@
   [conn bot-id]
   (db->bot (d/pull (d/db conn) bot-pull-pattern [:bot/id bot-id])))
 
-(defn bot-watch-thread!
-  [conn bot-id thread-id]
-  ; need to verify that thread is in bot's group
-  @(d/transact conn
-     [[:db/add [:bot/id bot-id]
-       :bot/watched [:thread/id thread-id]]]))
-
 (defn bots-watching-thread
   [conn thread-id]
   (some->> (d/q '[:find [(pull ?b pull-pattern) ...]
@@ -68,3 +49,26 @@
                   [?b :bot/group ?g]]
                 (d/db conn) bot-pull-pattern thread-id)
        (into #{} (map db->bot))))
+
+;; Transactions
+
+(defn create-bot!
+  [conn {:keys [id name avatar webhook-url group-id]}]
+  ; TODO: enforce name is unique in that group?
+  (let [fake-user (user/create-bot-user! conn {:id (d/squuid)})]
+    (->> {:bot/id id
+          :bot/name name
+          :bot/avatar avatar
+          :bot/webhook-url webhook-url
+          :bot/token (random-nonce 30)
+          :bot/group [:group/id group-id]
+          :bot/user [:user/id fake-user]}
+         (create-entity! conn)
+         db->bot)))
+
+(defn bot-watch-thread!
+  [conn bot-id thread-id]
+  ; need to verify that thread is in bot's group
+  @(d/transact conn
+     [[:db/add [:bot/id bot-id]
+       :bot/watched [:thread/id thread-id]]]))

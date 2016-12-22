@@ -4,16 +4,11 @@
             [braid.server.db.common :refer :all]
             [braid.server.db.user :as user]))
 
+;; Queries
+
 (defn group-exists?
   [conn group-name]
   (some? (d/pull (d/db conn) '[:group/id] [:group/name group-name])))
-
-(defn create-group!
-  [conn {:keys [name id]}]
-  (->> {:group/id id
-        :group/name name}
-       (create-entity! conn)
-       db->group))
 
 (defn group-by-id
   [conn group-id]
@@ -38,18 +33,6 @@
   (->> (d/pull (d/db conn) [:group/settings] [:group/id group-id])
        :group/settings
        ((fnil edn/read-string "{}"))))
-
-(defn group-set!
-  "Set a key to a value for the group's settings  This will throw if
-  settings are changed in between reading & setting"
-  [conn group-id k v]
-  (let [old-prefs (-> (d/pull (d/db conn) [:group/settings] [:group/id group-id])
-                      :group/settings)
-        new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
-                      (assoc k v)
-                      pr-str)]
-    @(d/transact conn [[:db.fn/cas [:group/id group-id]
-                        :group/settings old-prefs new-prefs]])))
 
 (defn public-group-with-name
   [conn group-name]
@@ -95,6 +78,38 @@
             (d/db conn)
             user-id group-id)))
 
+(defn user-is-group-admin?
+  [conn user-id group-id]
+  (some?
+    (d/q '[:find ?u .
+           :in $ ?user-id ?group-id
+           :where
+           [?g :group/id ?group-id]
+           [?u :user/id ?user-id]
+           [?g :group/admins ?u]]
+         (d/db conn) user-id group-id)))
+
+;; Transactions
+
+(defn create-group!
+  [conn {:keys [name id]}]
+  (->> {:group/id id
+        :group/name name}
+       (create-entity! conn)
+       db->group))
+
+(defn group-set!
+  "Set a key to a value for the group's settings  This will throw if
+  settings are changed in between reading & setting"
+  [conn group-id k v]
+  (let [old-prefs (-> (d/pull (d/db conn) [:group/settings] [:group/id group-id])
+                      :group/settings)
+        new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
+                      (assoc k v)
+                      pr-str)]
+    @(d/transact conn [[:db.fn/cas [:group/id group-id]
+                        :group/settings old-prefs new-prefs]])))
+
 (defn user-add-to-group! [conn user-id group-id]
   @(d/transact conn [[:db/add [:group/id group-id]
                       :group/user [:user/id user-id]]]))
@@ -138,17 +153,6 @@
                       :group/user [:user/id user-id]]
                      [:db/add [:group/id group-id]
                       :group/admins [:user/id user-id]]]))
-
-(defn user-is-group-admin?
-  [conn user-id group-id]
-  (some?
-    (d/q '[:find ?u .
-           :in $ ?user-id ?group-id
-           :where
-           [?g :group/id ?group-id]
-           [?u :user/id ?user-id]
-           [?g :group/admins ?u]]
-         (d/db conn) user-id group-id)))
 
 (defn user-subscribe-to-group-tags!
   "Subscribe the user to all current tags in the group"

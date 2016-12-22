@@ -4,6 +4,10 @@
             [braid.server.db.tag :as tag]
             [braid.server.db.thread :as thread]))
 
+;; Queries
+
+;; Transactions
+
 (defn create-message!
   [conn {:keys [thread-id group-id id content user-id created-at
                 mentioned-user-ids mentioned-tag-ids]}]

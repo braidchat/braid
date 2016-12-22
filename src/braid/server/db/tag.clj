@@ -2,26 +2,11 @@
   (:require [datomic.api :as d]
             [braid.server.db.common :refer :all]))
 
-(defn create-tag!
-  [conn attrs]
-  (->> {:tag/id (attrs :id)
-        :tag/name (attrs :name)
-        :tag/group [:group/id (attrs :group-id)]}
-       (create-entity! conn)
-       db->tag))
-
-(defn retract-tag!
-  [conn tag-id]
-  @(d/transact conn [[:db.fn/retractEntity [:tag/id tag-id]]]))
+;; Queries
 
 (defn tag-group-id [conn tag-id]
   (-> (d/pull (d/db conn) [{:tag/group [:group/id]}] [:tag/id tag-id])
       (get-in [:tag/group :group/id])))
-
-(defn tag-set-description!
-  [conn tag-id description]
-  @(d/transact conn [[:db/add [:tag/id tag-id]
-                      :tag/description description]]))
 
 (defn users-subscribed-to-tag
   [conn tag-id]
@@ -99,6 +84,36 @@
             (d/db conn)
             user-id tag-id)))
 
+(defn subscribed-tag-ids-for-user
+  [conn user-id]
+  (d/q '[:find [?tag-id ...]
+         :in $ ?user-id
+         :where
+         [?user :user/id ?user-id]
+         [?user :user/subscribed-tag ?tag]
+         [?tag :tag/id ?tag-id]]
+       (d/db conn)
+       user-id))
+
+;; Transactions
+
+(defn create-tag!
+  [conn attrs]
+  (->> {:tag/id (attrs :id)
+        :tag/name (attrs :name)
+        :tag/group [:group/id (attrs :group-id)]}
+       (create-entity! conn)
+       db->tag))
+
+(defn retract-tag!
+  [conn tag-id]
+  @(d/transact conn [[:db.fn/retractEntity [:tag/id tag-id]]]))
+
+(defn tag-set-description!
+  [conn tag-id description]
+  @(d/transact conn [[:db/add [:tag/id tag-id]
+                      :tag/description description]]))
+
 (defn user-subscribe-to-tag! [conn user-id tag-id]
   ; TODO: throw an exception/some sort of error condition if user tried to
   ; subscribe to a tag they can't?
@@ -110,14 +125,3 @@
   [conn user-id tag-id]
   @(d/transact conn [[:db/retract [:user/id user-id]
                       :user/subscribed-tag [:tag/id tag-id]]]))
-
-(defn subscribed-tag-ids-for-user
-  [conn user-id]
-  (d/q '[:find [?tag-id ...]
-         :in $ ?user-id
-         :where
-         [?user :user/id ?user-id]
-         [?user :user/subscribed-tag ?tag]
-         [?tag :tag/id ?tag-id]]
-       (d/db conn)
-       user-id))

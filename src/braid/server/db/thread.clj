@@ -6,26 +6,15 @@
             [braid.server.db.common :refer :all]
             [braid.server.db.tag :as tag]))
 
+;; Queries
+
+(declare thread-add-last-open-at)
+
 (defn thread-group-id
   [conn thread-id]
   (some-> (d/pull (d/db conn) [{:thread/group [:group/id]}]
                   [:thread/id thread-id])
           :thread/group :group/id))
-
-(defn update-thread-last-open!
-  [conn thread-id user-id]
-  (when (seq (d/q '[:find ?t
-                    :in $ ?user-id ?thread-id
-                    :where
-                    [?u :user/id ?user-id]
-                    [?t :thread/id ?thread-id]
-                    [?u :user/open-thread ?t]]
-                  (d/db conn) user-id thread-id))
-    ; TODO: should find a better way of handling this...
-    @(d/transact conn
-       [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
-    @(d/transact conn
-       [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
 
 (defn thread-by-id
   [conn thread-id]
@@ -38,18 +27,6 @@
        (map (fn [id] [:thread/id id]))
        (d/pull-many (d/db conn) thread-pull-pattern)
        (map db->thread)))
-
-(defn user-hide-thread!
-  [conn user-id thread-id]
-  @(d/transact
-     conn
-     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
-
-(defn user-show-thread!
-  [conn user-id thread-id]
-  @(d/transact
-     conn
-     [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
 
 (defn thread-last-open-at [conn thread user-id]
   (let [user-hides-at (->> (d/q
@@ -69,9 +46,6 @@
                               (map :created-at)
                               (map (fn [t] (.getTime t))))]
     (apply max (concat [0] user-hides-at user-messages-at))))
-
-(defn thread-add-last-open-at [conn thread user-id]
-  (assoc thread :last-open-at (thread-last-open-at conn thread user-id)))
 
 (defn users-subscribed-to-thread
   [conn thread-id]
@@ -171,13 +145,6 @@
        (d/db conn)
        user-id))
 
-(defn user-unsubscribe-from-thread!
-  [conn user-id thread-id]
-  @(d/transact conn [[:db/retract [:user/id user-id]
-                      :user/subscribed-thread [:thread/id thread-id]]
-                     [:db/retract [:user/id user-id]
-                       :user/open-thread [:thread/id thread-id]]]))
-
 (defn thread-newest-message
   [conn thread-id]
   (d/q '[:find (max ?time) .
@@ -188,15 +155,49 @@
          [?m :message/created-at ?time]]
        (d/db conn) thread-id))
 
+;; Transactions
+
+(defn update-thread-last-open!
+  [conn thread-id user-id]
+  (when (seq (d/q '[:find ?t
+                    :in $ ?user-id ?thread-id
+                    :where
+                    [?u :user/id ?user-id]
+                    [?t :thread/id ?thread-id]
+                    [?u :user/open-thread ?t]]
+                  (d/db conn) user-id thread-id))
+    ; TODO: should find a better way of handling this...
+    @(d/transact conn
+       [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
+    @(d/transact conn
+       [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
+
+(defn user-hide-thread!
+  [conn user-id thread-id]
+  @(d/transact
+     conn
+     [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
+
+(defn user-show-thread!
+  [conn user-id thread-id]
+  @(d/transact
+     conn
+     [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]]))
+
+(defn user-unsubscribe-from-thread!
+  [conn user-id thread-id]
+  @(d/transact conn [[:db/retract [:user/id user-id]
+                      :user/subscribed-thread [:thread/id thread-id]]
+                     [:db/retract [:user/id user-id]
+                       :user/open-thread [:thread/id thread-id]]]))
+
 (defn tag-thread!
   [conn group-id thread-id tag-id]
-
   ; upsert-thread
   (when-not (d/entity (d/db conn) [:thread/id thread-id])
     @(d/transact conn [{:db/id (d/tempid :entities)
                         :thread/id thread-id
                         :thread/group [:group/id group-id]}]))
-
   (let [; add tag to thread
         txs-for-tag [[:db/add [:thread/id thread-id]
                       :thread/tag [:tag/id tag-id]]]
@@ -213,3 +214,9 @@
     @(d/transact conn
        (concat txs-for-tag
                txs-for-users))))
+
+;; Misc
+
+(defn thread-add-last-open-at [conn thread user-id]
+  (assoc thread :last-open-at (thread-last-open-at conn thread user-id)))
+

@@ -2,15 +2,7 @@
   (:require [datomic.api :as d]
             [braid.server.db.common :refer :all]))
 
-(defn create-invitation!
-  [conn {:keys [id inviter-id invitee-email group-id]}]
-  (->> {:invite/id id
-        :invite/group [:group/id group-id]
-        :invite/from [:user/id inviter-id]
-        :invite/to invitee-email
-        :invite/created-at (java.util.Date.)}
-       (create-entity! conn)
-       db->invitation))
+;; Queries
 
 (defn invite-by-id
   [conn invite-id]
@@ -21,10 +13,6 @@
                    {:invite/group [:group/id :group/name]}]
                   [:invite/id invite-id])
           db->invitation))
-
-(defn retract-invitation!
-  [conn invite-id]
-  @(d/transact conn [[:db.fn/retractEntity [:invite/id invite-id]]]))
 
 (defn invites-for-user
   [conn user-id]
@@ -40,3 +28,18 @@
             (d/db conn) user-id)
        (map (comp db->invitation first))))
 
+;; Transactions
+
+(defn create-invitation!
+  [conn {:keys [id inviter-id invitee-email group-id]}]
+  (->> {:invite/id id
+        :invite/group [:group/id group-id]
+        :invite/from [:user/id inviter-id]
+        :invite/to invitee-email
+        :invite/created-at (java.util.Date.)}
+       (create-entity! conn)
+       db->invitation))
+
+(defn retract-invitation!
+  [conn invite-id]
+  @(d/transact conn [[:db.fn/retractEntity [:invite/id invite-id]]]))
