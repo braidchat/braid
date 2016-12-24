@@ -1,5 +1,6 @@
 (ns braid.server.db.message
   (:require [datomic.api :as d]
+            [braid.server.db :as db]
             [braid.server.db.common :refer :all]
             [braid.server.db.tag :as tag]
             [braid.server.db.thread :as thread]))
@@ -9,14 +10,14 @@
 ;; Transactions
 
 (defn create-message!
-  [conn {:keys [thread-id group-id id content user-id created-at
-                mentioned-user-ids mentioned-tag-ids]}]
+  [{:keys [thread-id group-id id content user-id created-at
+           mentioned-user-ids mentioned-tag-ids]}]
 
   ; upsert-thread
-  (when-not (d/entity (d/db conn) [:thread/id thread-id])
-    @(d/transact conn (concat [{:db/id (d/tempid :entities)
-                                :thread/id thread-id
-                                :thread/group [:group/id group-id]}])))
+  (when-not (d/entity (db/db) [:thread/id thread-id])
+    @(d/transact db/conn (concat [{:db/id (d/tempid :entities)
+                                   :thread/id thread-id
+                                   :thread/group [:group/id group-id]}])))
 
   (let [; for users subscribed to mentioned tags, open and subscribe them to
         ; the thread
@@ -32,7 +33,7 @@
                                               [:db/add [:user/id user-id]
                                                :user/open-thread
                                                [:thread/id thread-id]]])
-                                           (tag/users-subscribed-to-tag conn tag-id))))
+                                           (tag/users-subscribed-to-tag tag-id))))
                                mentioned-tag-ids)
         ; subscribe and open thread for users mentioned
         txs-for-user-mentions (mapcat
@@ -49,7 +50,7 @@
                                   (fn [user-id]
                                     [:db/add [:user/id user-id]
                                      :user/open-thread [:thread/id thread-id]])
-                                  (thread/users-subscribed-to-thread conn thread-id))
+                                  (thread/users-subscribed-to-thread thread-id))
         ; upsert message
         msg-data {:db/id (d/tempid :entities)
                   :message/id id
@@ -62,7 +63,7 @@
                          :user/open-thread [:thread/id thread-id]]
                         [:db/add [:user/id user-id]
                          :user/subscribed-thread [:thread/id thread-id]]]
-        {:keys [db-after tempids]} @(d/transact conn
+        {:keys [db-after tempids]} @(d/transact db/conn
                                       (concat [msg-data]
                                               subscribe-data
                                               txs-for-tag-subscribers

@@ -23,6 +23,8 @@
 (defstate conn
   :start (connect config))
 
+(defn db [] (d/db conn))
+
 (defn uuid
   []
   (d/squuid))
@@ -32,4 +34,4 @@
   ; TODO: If all txns go through this, can now use this place to check
   ; validity, maybe use with-db to speculatively execute & validate
   [txns]
-  (d/transact conn txns))
+  @(d/transact conn txns))
