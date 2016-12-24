@@ -105,23 +105,22 @@
        (create-entity! conn)
        db->tag))
 
-(defn retract-tag!
+(defn retract-tag-txn
   [conn tag-id]
-  @(d/transact conn [[:db.fn/retractEntity [:tag/id tag-id]]]))
+  [[:db.fn/retractEntity [:tag/id tag-id]]])
 
-(defn tag-set-description!
+(defn tag-set-description-txn
   [conn tag-id description]
-  @(d/transact conn [[:db/add [:tag/id tag-id]
-                      :tag/description description]]))
+  [[:db/add [:tag/id tag-id] :tag/description description]])
 
-(defn user-subscribe-to-tag! [conn user-id tag-id]
+(defn user-subscribe-to-tag-txn
+  [conn user-id tag-id]
   ; TODO: throw an exception/some sort of error condition if user tried to
   ; subscribe to a tag they can't?
-  (when (user-in-tag-group? conn user-id tag-id)
-    @(d/transact conn [[:db/add [:user/id user-id]
-                        :user/subscribed-tag [:tag/id tag-id]]])))
+  (if (user-in-tag-group? conn user-id tag-id)
+    [[:db/add [:user/id user-id] :user/subscribed-tag [:tag/id tag-id]]]
+    []))
 
-(defn user-unsubscribe-from-tag!
+(defn user-unsubscribe-from-tag-txn
   [conn user-id tag-id]
-  @(d/transact conn [[:db/retract [:user/id user-id]
-                      :user/subscribed-tag [:tag/id tag-id]]]))
+  [[:db/retract [:user/id user-id] :user/subscribed-tag [:tag/id tag-id]]])

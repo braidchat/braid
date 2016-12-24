@@ -66,9 +66,7 @@
          (create-entity! conn)
          db->bot)))
 
-(defn bot-watch-thread!
+(defn bot-watch-thread-txn
   [conn bot-id thread-id]
   ; need to verify that thread is in bot's group
-  @(d/transact conn
-     [[:db/add [:bot/id bot-id]
-       :bot/watched [:thread/id thread-id]]]))
+  [[:db/add [:bot/id bot-id] :bot/watched [:thread/id thread-id]]])

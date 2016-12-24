@@ -98,7 +98,7 @@
        (create-entity! conn)
        db->group))
 
-(defn group-set!
+(defn group-set-txn
   "Set a key to a value for the group's settings  This will throw if
   settings are changed in between reading & setting"
   [conn group-id k v]
@@ -107,65 +107,54 @@
         new-prefs (-> ((fnil edn/read-string "{}") old-prefs)
                       (assoc k v)
                       pr-str)]
-    @(d/transact conn [[:db.fn/cas [:group/id group-id]
-                        :group/settings old-prefs new-prefs]])))
+    [[:db.fn/cas [:group/id group-id] :group/settings old-prefs new-prefs]]))
 
-(defn user-add-to-group! [conn user-id group-id]
-  @(d/transact conn [[:db/add [:group/id group-id]
-                      :group/user [:user/id user-id]]]))
+(defn user-add-to-group-txn [conn user-id group-id]
+  [[:db/add [:group/id group-id] :group/user [:user/id user-id]]])
 
-(defn user-leave-group! [conn user-id group-id]
-  (let [unsub-txn (->> (d/q '[:find [?t ...]
-                              :in $ ?user-id ?group-id
-                              :where
-                              [?u :user/id ?user-id]
-                              [?g :group/id ?group-id]
-                              [?t :thread/group ?g]
-                              [?u :user/subscribed-thread ?t]]
-                            (d/db conn) user-id group-id)
-                       (map (fn [t]
-                              [:db/retract [:user/id user-id]
-                               :user/subscribed-thread t])))
-        unmention-txn (->> (d/q '[:find [?t ...]
-                                  :in $ ?user-id ?group-id
-                                  :where
-                                  [?u :user/id ?user-id]
-                                  [?g :group/id ?group-id]
-                                  [?t :thread/group ?g]
-                                  [?t :thread/mentioned ?u]]
-                                (d/db conn) user-id group-id)
-                           (map (fn [t]
-                                  [:db/retract t
-                                   :thread/mentioned [:user/id user-id]])))]
-    (when-let [order (user/user-get-preference conn user-id :groups-order)]
-      (user/user-set-preference!
-        conn
-        user-id :groups-order
-        (into [] (remove (partial = group-id)) order)))
-    @(d/transact conn (concat
-                        [[:db/retract [:group/id group-id]
-                          :group/user [:user/id user-id]]]
-                        unsub-txn
-                        unmention-txn))))
+(defn user-leave-group-txn
+  [conn user-id group-id]
+  (concat
+    [[:db/retract [:group/id group-id] :group/user [:user/id user-id]]]
+    ; unsubscribe from threads
+    (->>
+      (d/q '[:find [?t ...]
+             :in $ ?user-id ?group-id
+             :where
+             [?u :user/id ?user-id]
+             [?g :group/id ?group-id]
+             [?t :thread/group ?g]
+             [?u :user/subscribed-thread ?t]]
+           (d/db conn) user-id group-id)
+      (map (fn [t] [:db/retract [:user/id user-id] :user/subscribed-thread t])))
+    ; remove mentions
+    (->> (d/q '[:find [?t ...]
+                :in $ ?user-id ?group-id
+                :where
+                [?u :user/id ?user-id]
+                [?g :group/id ?group-id]
+                [?t :thread/group ?g]
+                [?t :thread/mentioned ?u]]
+              (d/db conn) user-id group-id)
+         (map (fn [t] [:db/retract t :thread/mentioned [:user/id user-id]])))
+    ; remove group from custom sort order
+    (if-let [order (user/user-get-preference conn user-id :groups-order)]
+      (user/user-set-preference-txn
+        conn user-id :groups-order (vec (remove (partial = group-id) order)))
+      [])))
 
-(defn user-make-group-admin! [conn user-id group-id]
-  @(d/transact conn [[:db/add [:group/id group-id]
-                      :group/user [:user/id user-id]]
-                     [:db/add [:group/id group-id]
-                      :group/admins [:user/id user-id]]]))
+(defn user-make-group-admin-txn [conn user-id group-id]
+  [[:db/add [:group/id group-id] :group/user [:user/id user-id]]
+   [:db/add [:group/id group-id] :group/admins [:user/id user-id]]])
 
-(defn user-subscribe-to-group-tags!
+(defn user-subscribe-to-group-tags-txn
   "Subscribe the user to all current tags in the group"
   [conn user-id group-id]
-  (->> (d/q '[:find ?tag
-              :in $ ?group-id
-              :where
-              [?tag :tag/group ?g]
-              [?g :group/id ?group-id]]
-            (d/db conn) group-id)
-       (map (fn [[tag]]
-              [:db/add [:user/id user-id]
-               :user/subscribed-tag tag]))
-       (d/transact conn)
-       deref))
-
+  (->>
+    (d/q '[:find ?tag
+           :in $ ?group-id
+           :where
+           [?tag :tag/group ?g]
+           [?g :group/id ?group-id]]
+         (d/db conn) group-id)
+    (map (fn [[tag]] [:db/add [:user/id user-id] :user/subscribed-tag tag]))))

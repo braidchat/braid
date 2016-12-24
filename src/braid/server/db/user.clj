@@ -2,7 +2,7 @@
   (:require [datomic.api :as d]
             [clojure.edn :as edn]
             [clojure.string :as string]
-            [crypto.password.scrypt :as password]
+            [crypto.password.scrypt :as scrypt]
             [braid.server.db.common :refer :all]
             [braid.server.quests.db :refer [activate-first-quests!]]))
 
@@ -153,27 +153,25 @@
 
 ; Txns that fire-and-forget
 
-(defn set-nickname!
+(defn set-nickname-txn
   "Set the user's nickname"
   [conn user-id nickname]
-  @(d/transact conn [[:db/add [:user/id user-id] :user/nickname nickname]]))
+  [[:db/add [:user/id user-id] :user/nickname nickname]])
 
-(defn set-user-avatar!
+(defn set-user-avatar-txn
   [conn user-id avatar]
-  @(d/transact conn [[:db/add [:user/id user-id] :user/avatar avatar]]))
+  [[:db/add [:user/id user-id] :user/avatar avatar]])
 
-(defn set-user-password!
+(defn set-user-password-txn
   [conn user-id password]
-  @(d/transact conn [[:db/add [:user/id user-id]
-                      :user/password-token (password/encrypt password)]]))
+  [[:db/add [:user/id user-id] :user/password-token (scrypt/encrypt password)]])
 
-(defn user-set-preference!
-  "Set a key to a value for the user's preferences.  This will throw if
-  permissions are changed in between reading & setting"
+(defn user-set-preference-txn
+  "Set a key to a value for the user's preferences."
   [conn user-id k v]
   (if-let [e (user-preference-is-set? conn user-id k)]
-    @(d/transact conn [[:db/add e :user.preference/value (pr-str v)]])
-    @(d/transact conn [{:user.preference/key k
-                        :user.preference/value (pr-str v)
-                        :user/_preferences [:user/id user-id]
-                        :db/id #db/id [:entities]}])))
+    [[:db/add e :user.preference/value (pr-str v)]]
+    [{:user.preference/key k
+      :user.preference/value (pr-str v)
+      :user/_preferences [:user/id user-id]
+      :db/id #db/id [:entities]}]))

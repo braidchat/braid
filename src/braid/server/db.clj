@@ -26,3 +26,10 @@
 (defn uuid
   []
   (d/squuid))
+
+(defn run-txns!
+  "Execute given transactions"
+  ; TODO: If all txns go through this, can now use this place to check
+  ; validity, maybe use with-db to speculatively execute & validate
+  [txns]
+  (d/transact conn txns))

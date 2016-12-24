@@ -40,6 +40,6 @@
        (create-entity! conn)
        db->invitation))
 
-(defn retract-invitation!
-  [conn invite-id]
-  @(d/transact conn [[:db.fn/retractEntity [:invite/id invite-id]]]))
+(defn retract-invitation-txn
+  [invite-id]
+  [[:db.fn/retractEntity [:invite/id invite-id]]])
