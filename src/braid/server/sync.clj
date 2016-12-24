@@ -182,7 +182,7 @@
                         (assoc :created-at (java.util.Date.)))]
     (if (new-message-valid? new-message)
       (when (user-can-message? user-id new-message)
-        (db/run-txns! (message/create-message! new-message))
+        (message/create-message! new-message)
         (when-let [cb ?reply-fn]
           (cb :braid/ok))
         (broadcast-thread (new-message :thread-id) [])
