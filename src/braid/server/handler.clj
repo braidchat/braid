@@ -41,7 +41,7 @@
 
 (defn assoc-cookie-conf [defaults]
   (-> defaults
-      (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
+      (assoc-in [:session :cookie-attrs :secure] false #_(= (env :environment) "prod"))
       (assoc-in [:session :cookie-attrs :max-age] (* 60 60 24 7))
       (assoc-in [:session :store] session-store)))
 

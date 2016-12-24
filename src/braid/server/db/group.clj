@@ -3,6 +3,7 @@
             [clojure.edn :as edn]
             [braid.server.db :as db]
             [braid.server.db.common :refer :all]
+            [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]))
 
 ;; Queries
@@ -162,3 +163,15 @@
            [?g :group/id ?group-id]]
          (db/db) group-id)
     (map (fn [[tag]] [:db/add [:user/id user-id] :user/subscribed-tag tag]))))
+
+(defn user-join-group-txns
+  [user-id group-id]
+  (concat
+    (user-add-to-group-txn user-id group-id)
+    (user-subscribe-to-group-tags-txn user-id group-id)
+    ; add user to recent threads in group
+    (mapcat
+      (fn [t] (thread/user-show-thread-txn user-id (t :id)))
+      (thread/recent-threads {:user-id user-id
+                              :group-id group-id
+                              :num-threads 5}))))

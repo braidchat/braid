@@ -47,8 +47,10 @@
                              [?u :user/id ?user-id]]
                            (d/db db/conn))
                       (map first))]
-    (doseq [user-id user-ids]
-      (quests/activate-first-quests! db/conn user-id))))
+    (db/run-txns!
+      (mapcat (fn [user-id]
+                (quests/activate-first-quests-txn user-id))
+              user-ids))))
 
 (defn migrate-2016-07-29
   "Add watched threads for bots"
@@ -180,9 +182,7 @@
                               (sort-by :message/created-at)
                               first
                               :message/user)
-                  author-grp (some->> author :user/id
-                                      (group/user-groups db/conn)
-                                      first :id)
+                  author-grp (some->> author :user/id group/user-groups first :id)
                   fallback-group (:group/id (d/pull (d/db db/conn) [:group/id] [:group/name "Braid"]))]
               (cond
                 (seq (th :thread/tag))
@@ -196,7 +196,7 @@
                 (let [grps (apply
                              set/intersection
                              (map (comp :id
-                                        (partial group/user-groups db/conn)
+                                        group/user-groups
                                         :user/id)
                                   (cons author (th :thread/mentioned))))
                       grp (or (first grps) author-grp fallback-group)]
@@ -441,7 +441,7 @@
   "Helper function for migrate-2015-07-29 - give a group name to create that
   group and add all existing users and tags to that group"
   [group-name]
-  (let [group (group/create-group! db/conn {:id (db/uuid) :name group-name})
+  (let [group (group/create-group! {:id (db/uuid) :name group-name})
         all-users (->> (d/q '[:find ?u :where [?u :user/id]] (d/db db/conn)) (map first))
         all-tags (->> (d/q '[:find ?t :where [?t :tag/id]] (d/db db/conn)) (map first))]
     @(d/transact db/conn (mapv (fn [u] [:db/add [:group/id (group :id)] :group/user u]) all-users))

@@ -5,7 +5,6 @@
             [clostache.parser :as clostache]
             [braid.server.conf :refer [config]]
             [braid.server.digest :as digest]
-            [braid.server.db :as db]
             [braid.server.db.group :as group]
             [braid.server.db.invitation :as invitation]
             [braid.server.db.user :as user]
@@ -22,7 +21,7 @@
 (defroutes desktop-client-routes
   ; public group page
   (GET "/group/:group-name" [group-name :as req]
-    (if-let [group (group/public-group-with-name db/conn group-name)]
+    (if-let [group (group/public-group-with-name group-name)]
       (clostache/render-resource "templates/public_group_desktop.html.mustache"
                                  {:group-name (group :name)
                                   :group-id (group :id)
@@ -34,7 +33,7 @@
   ; invite accept page
   (GET "/accept" [invite :<< as-uuid tok]
     (if (and invite tok)
-      (if-let [invite (invitation/invite-by-id db/conn invite)]
+      (if-let [invite (invitation/invite-by-id invite)]
         {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
         {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
@@ -51,7 +50,7 @@
   (GET "/reset" [user :<< as-uuid token :as req]
     (if-let [u (and user token
                  (invites/verify-reset-nonce {:id user} token)
-                 (user/user-by-id db/conn user))]
+                 (user/user-by-id user))]
       {:status 200
        :headers {"Content-Type" "text/html"}
        :body (invites/reset-page u token)}

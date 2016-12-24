@@ -24,7 +24,7 @@
                                  (string/split #":" 2))]
     (try
       (let [bot-id (java.util.UUID/fromString user)]
-        (and (bot/bot-auth? db/conn bot-id pass) bot-id))
+        (and (bot/bot-auth? bot-id pass) bot-id))
       (catch IllegalArgumentException e
         nil))))
 
@@ -41,21 +41,20 @@
 ; TODO: when using clojure.spec, use spec to validate this
 (defn bot-can-message?
   [bot-id msg]
-  (let [bot (bot/bot-by-id db/conn bot-id)]
+  (let [bot (bot/bot-by-id bot-id)]
     (cond
-      (let [thread-group (thread/thread-group-id db/conn (msg :thread-id))]
+      (let [thread-group (thread/thread-group-id (msg :thread-id))]
         (and (some? thread-group) (not= (bot :group-id) thread-group)))
       (do (timbre/debugf "Bot %s attempted to send to a thread in a different group"
                          (bot :id))
           nil)
 
-      (some (comp (partial not= (msg :group-id))
-                  (partial tag/tag-group-id db/conn))
+      (some (comp (partial not= (msg :group-id)) tag/tag-group-id)
             (msg :mentioned-tag-ids))
       (do (timbre/debugf "Bot %s attempted to add tag from other group" (bot :id))
           nil)
 
-      (some (fn [mentioned] (not (group/user-in-group? db/conn mentioned (msg :group-id))))
+      (some (fn [mentioned] (not (group/user-in-group? mentioned (msg :group-id))))
             (msg :mentioned-user-ids))
       (do (timbre/debugf "Bot %s attempted to mention a user from a different group"
                          (bot :id))
@@ -67,7 +66,7 @@
   ; TODO: allow updating/make this idempotent?
   (PUT "/message" req
     (let [bot-id (get req ::bot-id)
-          bot (bot/bot-by-id db/conn bot-id)
+          bot (bot/bot-by-id bot-id)
           msg (assoc (req :body)
                 :user-id (bot :user-id)
                 :group-id (bot :group-id)
@@ -76,7 +75,7 @@
         (if (bot-can-message? bot-id msg)
           (do
             (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
-            (message/create-message! db/conn msg)
+            (db/run-txns! (message/create-message! msg))
             (sync/broadcast-thread (msg :thread-id) [])
             {:status 201
              :headers {"Content-Type" "text/plain"}
@@ -94,13 +93,13 @@
 
   (GET "/names/:user-id" [user-id :as req]
     (let [bot-id (get req ::bot-id)
-          bot (bot/bot-by-id db/conn bot-id)]
+          bot (bot/bot-by-id bot-id)]
       (if-let [user-id (try (java.util.UUID/fromString user-id)
                          (catch IllegalArgumentException _ nil))]
-        (if (group/user-in-group? db/conn user-id (bot :group-id))
+        (if (group/user-in-group? user-id (bot :group-id))
           {:status 200
            :headers {"Content-Type" "text/plain"}
-           :body (:nickname (user/user-by-id db/conn user-id))}
+           :body (:nickname (user/user-by-id user-id))}
           {:status 403
            :headers {"Content-Type" "text/plain"}
            :body "Can't lookup user in a different group"})
@@ -111,12 +110,12 @@
   ; TODO: allow unsubscribed by sending DELETE
   (PUT "/subscribe/:thread-id" [thread-id :as req]
     (let [bot-id (get req ::bot-id)
-          bot (bot/bot-by-id db/conn bot-id)]
+          bot (bot/bot-by-id bot-id)]
       (if-let [thread-id (try (java.util.UUID/fromString thread-id)
                            (catch IllegalArgumentException _ nil))]
-        (if (= (bot :group-id) (thread/thread-group-id db/conn thread-id))
+        (if (= (bot :group-id) (thread/thread-group-id thread-id))
           (do
-            (bot/bot-watch-thread! db/conn bot-id thread-id)
+            (db/run-txns! (bot/bot-watch-thread! bot-id thread-id))
             {:status 201
              :headers {"Content-Type" "text/plain"}
              :body "ok"})

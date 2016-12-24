@@ -22,11 +22,11 @@
                (get "hits"))]
     (->> (get resp "hits")
          (map #(Long. (get % "_id")))
-         (d/pull-many (d/db db/conn) [{:message/thread [:thread/id]}])
+         (d/pull-many (db/db) [{:message/thread [:thread/id]}])
          (into #{}
                (comp
                  (map #(get-in % [:message/thread :thread/id]))
-                 (filter #(= group-id (thread/thread-group-id db/conn %)))
-                 (map (fn [t-id] [t-id (thread/thread-newest-message db/conn t-id)]))))
+                 (filter #(= group-id (thread/thread-group-id %)))
+                 (map (fn [t-id] [t-id (thread/thread-newest-message t-id)]))))
          seq
          set)))
