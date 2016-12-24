@@ -5,7 +5,7 @@
             [crypto.password.scrypt :as scrypt]
             [braid.server.db :as db]
             [braid.server.db.common :refer :all]
-            [braid.server.quests.db :refer [activate-first-quests!]]))
+            [braid.server.quests.db :refer [activate-first-quests-txn]]))
 
 ;; Queries
 
