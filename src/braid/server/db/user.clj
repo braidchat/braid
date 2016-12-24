@@ -175,4 +175,4 @@
     [{:user.preference/key k
       :user.preference/value (pr-str v)
       :user/_preferences [:user/id user-id]
-      :db/id #db/id [:entities]}]))
+      :db/id (d/tempid :entities)}]))
