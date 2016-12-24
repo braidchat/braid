@@ -75,7 +75,7 @@
         (if (bot-can-message? bot-id msg)
           (do
             (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
-            (db/run-txns! (message/create-message! msg))
+            (message/create-message! msg)
             (sync/broadcast-thread (msg :thread-id) [])
             {:status 201
              :headers {"Content-Type" "text/plain"}
@@ -115,7 +115,7 @@
                            (catch IllegalArgumentException _ nil))]
         (if (= (bot :group-id) (thread/thread-group-id thread-id))
           (do
-            (db/run-txns! (bot/bot-watch-thread! bot-id thread-id))
+            (db/run-txns! (bot/bot-watch-thread-txn bot-id thread-id))
             {:status 201
              :headers {"Content-Type" "text/plain"}
              :body "ok"})
