@@ -164,7 +164,7 @@
          (db/db) group-id)
     (map (fn [[tag]] [:db/add [:user/id user-id] :user/subscribed-tag tag]))))
 
-(defn user-join-group-txns
+(defn user-join-group-txn
   [user-id group-id]
   (concat
     (user-add-to-group-txn user-id group-id)

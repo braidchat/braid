@@ -392,7 +392,7 @@
     (do
       (db/run-txns!
         (concat
-          (group/user-join-group-txns user-id (invite :group-id))
+          (group/user-join-group-txn user-id (invite :group-id))
           (invitation/retract-invitation-txn (invite :id))))
       (broadcast-new-user-to-group user-id (invite :group-id))
       (chsk-send! user-id [:braid.client/joined-group

@@ -36,13 +36,15 @@
                               :password (random-nonce 50)
                               :avatar avatar
                               :nickname nick})]
-    (sync/user-join-group! id group-id)
+    (db/run-txns! (group/user-join-group-txn id group-id))
+    (sync/broadcast-new-user-to-group id group-id)
     id))
 
 (defn join-group
   [user-id group-id]
   (when-not (group/user-in-group? user-id group-id)
-    (sync/user-join-group! user-id group-id)))
+    (db/run-txns! (group/user-join-group-txn user-id group-id))
+    (sync/broadcast-new-user-to-group user-id group-id)))
 
 (defroutes api-public-routes
   ; check if already logged in
