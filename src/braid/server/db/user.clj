@@ -2,7 +2,7 @@
   (:require [datomic.api :as d]
             [clojure.edn :as edn]
             [clojure.string :as string]
-            [crypto.password.scrypt :as scrypt]
+            [crypto.password.scrypt :as password]
             [braid.server.db :as db]
             [braid.server.db.common :refer :all]
             [braid.server.quests.db :refer [activate-first-quests-txn]]))
@@ -165,7 +165,7 @@
 
 (defn set-user-password-txn
   [user-id password]
-  [[:db/add [:user/id user-id] :user/password-token (scrypt/encrypt password)]])
+  [[:db/add [:user/id user-id] :user/password-token (password/encrypt password)]])
 
 (defn user-set-preference-txn
   "Set a key to a value for the user's preferences."
