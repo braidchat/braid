@@ -558,21 +558,23 @@
         g2 (group/create-group! {:name "group 2" :id (db/uuid)})
         g3 (group/create-group! {:name "group 3" :id (db/uuid)})
 
-        b1 (bot/create-bot! {:id (db/uuid)
-                             :name "bot1"
-                             :avatar ""
-                             :webhook-url ""
-                             :group-id (g1 :id)})
-        b2 (bot/create-bot! {:id (db/uuid)
-                             :name "bot2"
-                             :avatar ""
-                             :webhook-url ""
-                             :group-id (g1 :id)})
-        b3 (bot/create-bot! {:id (db/uuid)
-                             :name "bot3"
-                             :avatar ""
-                             :webhook-url ""
-                             :group-id (g2 :id)})
+        [b1 b2 b3] (db/run-txns!
+                     (concat
+                       (bot/create-bot-txn {:id (db/uuid)
+                                            :name "bot1"
+                                            :avatar ""
+                                            :webhook-url ""
+                                            :group-id (g1 :id)})
+                       (bot/create-bot-txn {:id (db/uuid)
+                                            :name "bot2"
+                                            :avatar ""
+                                            :webhook-url ""
+                                            :group-id (g1 :id)})
+                       (bot/create-bot-txn {:id (db/uuid)
+                                            :name "bot3"
+                                            :avatar ""
+                                            :webhook-url ""
+                                            :group-id (g2 :id)})))
         bot->display (fn [b] (-> b
                                  (select-keys [:id :name :avatar :user-id])
                                  (rename-keys {:name :nickname})))]

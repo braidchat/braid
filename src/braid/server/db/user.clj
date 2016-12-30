@@ -150,14 +150,6 @@
         :user/password-token (password/encrypt password)}]
       (activate-first-quests-txn new-id))))
 
-(defn create-bot-user!
-  "Creates a new bot user, returns just the id of the new user"
-  [{:keys [id]}]
-  (->> {:user/id id
-        :user/is-bot? true}
-       (create-entity! db/conn)
-       :user/id))
-
 ; Txns that fire-and-forget
 
 (defn set-nickname-txn

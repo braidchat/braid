@@ -53,19 +53,27 @@
 
 ;; Transactions
 
-(defn create-bot!
+(defn create-bot-txn
   [{:keys [id name avatar webhook-url group-id]}]
   ; TODO: enforce name is unique in that group?
-  (let [fake-user (user/create-bot-user! {:id (d/squuid)})]
-    (->> {:bot/id id
-          :bot/name name
-          :bot/avatar avatar
-          :bot/webhook-url webhook-url
-          :bot/token (random-nonce 30)
-          :bot/group [:group/id group-id]
-          :bot/user [:user/id fake-user]}
-         (create-entity! db/conn)
-         db->bot)))
+  (let [fake-user-id (d/tempid :entities)
+        bot-id (d/tempid :entities)]
+    [{:db/id fake-user-id
+      :user/id (d/squuid)
+      :user/is-bot? true}
+     ^{:return
+       (fn [{:keys [db-after tempids]}]
+         (->> (d/resolve-tempid db-after tempids bot-id)
+              (d/entity db-after)
+              db->bot))}
+     {:db/id bot-id
+      :bot/id id
+      :bot/name name
+      :bot/avatar avatar
+      :bot/webhook-url webhook-url
+      :bot/token (random-nonce 30)
+      :bot/group [:group/id group-id]
+      :bot/user fake-user-id}]))
 
 (defn bot-watch-thread-txn
   [bot-id thread-id]

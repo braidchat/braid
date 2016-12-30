@@ -474,7 +474,7 @@
             (reply-fn {:braid/error "Bot needs an avatar image"}))
 
         :else
-        (let [created (bot/create-bot! bot)]
+        (let [[created] (db/run-txns! (bot/create-bot-txn bot))]
           (reply-fn {:braid/ok created})
           (broadcast-group-change
             (bot :group-id)
