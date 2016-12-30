@@ -441,7 +441,7 @@
   "Helper function for migrate-2015-07-29 - give a group name to create that
   group and add all existing users and tags to that group"
   [group-name]
-  (let [group (group/create-group! {:id (db/uuid) :name group-name})
+  (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :name group-name}))
         all-users (->> (d/q '[:find ?u :where [?u :user/id]] (d/db db/conn)) (map first))
         all-tags (->> (d/q '[:find ?t :where [?t :tag/id]] (d/db db/conn)) (map first))]
     @(d/transact db/conn (mapv (fn [u] [:db/add [:group/id (group :id)] :group/user u]) all-users))

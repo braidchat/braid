@@ -274,7 +274,8 @@
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (group/user-in-group? user-id (?data :group-id))
     (if (valid-tag-name? (?data :name))
-      (let [new-tag (tag/create-tag! (select-keys ?data [:id :name :group-id]))
+      (let [[new-tag] (db/run-txns!
+                      (tag/create-tag-txn (select-keys ?data [:id :name :group-id])))
             connected? (set (:any @connected-uids))
             users (group/group-users (:group-id new-tag))]
         (db/run-txns!
@@ -331,7 +332,7 @@
 
     :else
     ; TODO: way to do this in one transaction? Put a tempid in the ?data
-    (let [new-group (group/create-group! ?data)]
+    (let [[new-group] (db/run-txns! (group/create-group-txn ?data))]
       (db/run-txns! (group/user-make-group-admin-txn
                       user-id (new-group :id))))))
 
@@ -367,7 +368,7 @@
   [{:as ev-msg :keys [?data user-id]}]
   (if (group/user-in-group? user-id (?data :group-id))
     (let [data (assoc ?data :inviter-id user-id)
-          invitation (invitation/create-invitation! data)]
+          [invitation] (db/run-txns! (invitation/create-invitation-txn data))]
       (if-let [invited-user (user/user-with-email (invitation :invitee-email))]
         (chsk-send! (invited-user :id) [:braid.client/invitation-received invitation])
         (invites/send-invite invitation)))
@@ -495,7 +496,7 @@
                (group/user-in-group?
                  user-id
                  (thread/thread-group-id (upload :thread-id))))
-      (upload/create-upload! upload))))
+      (db/run-txns! (upload/create-upload-txn upload)))))
 
 (defmethod event-msg-handler :braid.server/uploads-in-group
   [{:as ev-msg :keys [?data user-id ?reply-fn]}]

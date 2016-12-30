@@ -110,12 +110,12 @@
                                            :avatar avatar-url
                                            :nickname nickname
                                            :password password})
-                    (group/user-join-group-txn (user :id) (invite :group-id))
+                    (group/user-join-group-txn user-id (invite :group-id))
                     (invitation/retract-invitation-txn (invite :id))))
-                (sync/broadcast-new-user-to-group (user :id) (invite :group-id)))
+                (sync/broadcast-new-user-to-group user-id (invite :group-id)))
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
-               :session (assoc (req :session) :user-id (user :id))
+               :session (assoc (req :session) :user-id user-id)
                :body ""}))))))
 
   ; join by invite link

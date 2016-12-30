@@ -1,7 +1,8 @@
 (ns braid.server.db.invitation
   (:require [datomic.api :as d]
             [braid.server.db :as db]
-            [braid.server.db.common :refer :all]))
+            [braid.server.db.common :refer [create-entity-txn
+                                            db->invitation]]))
 
 ;; Queries
 
@@ -31,15 +32,15 @@
 
 ;; Transactions
 
-(defn create-invitation!
+(defn create-invitation-txn
   [{:keys [id inviter-id invitee-email group-id]}]
-  (->> {:invite/id id
-        :invite/group [:group/id group-id]
-        :invite/from [:user/id inviter-id]
-        :invite/to invitee-email
-        :invite/created-at (java.util.Date.)}
-       (create-entity! db/conn)
-       db->invitation))
+  (create-entity-txn
+    {:invite/id id
+     :invite/group [:group/id group-id]
+     :invite/from [:user/id inviter-id]
+     :invite/to invitee-email
+     :invite/created-at (java.util.Date.)}
+    db->invitation))
 
 (defn retract-invitation-txn
   [invite-id]

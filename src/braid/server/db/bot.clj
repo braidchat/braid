@@ -1,7 +1,7 @@
 (ns braid.server.db.bot
   (:require [datomic.api :as d]
             [braid.server.db :as db]
-            [braid.server.db.common :refer [create-entity! bot-pull-pattern db->bot]]
+            [braid.server.db.common :refer [bot-pull-pattern db->bot]]
             [braid.server.db.user :as user]
             [braid.server.crypto :as crypto :refer [random-nonce]]))
 

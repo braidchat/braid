@@ -3,14 +3,17 @@
             [clojure.set :refer [rename-keys]]
             [clojure.edn :as edn]))
 
-(defn create-entity!
+(defn create-entity-txn
   "create entity with attrs, return entity"
-  [conn attrs]
-  (let [new-id (d/tempid :entities)
-        {:keys [db-after tempids]} @(d/transact conn
-                                      [(assoc attrs :db/id new-id)])]
-    (->> (d/resolve-tempid db-after tempids new-id)
-         (d/entity db-after))))
+  [attrs after-fn]
+  (let [new-id (d/tempid :entities)]
+    [(with-meta
+       (assoc attrs :db/id new-id)
+       {:return
+        (fn [{:keys [db-after tempids]}]
+          (->> (d/resolve-tempid db-after tempids new-id)
+               (d/entity db-after)
+               (after-fn)))})]))
 
 (def user-pull-pattern
   '[:user/id

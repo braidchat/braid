@@ -80,7 +80,7 @@
         [user-1 user-2] (db/run-txns!
                           (concat (user/create-user-txn user-1-data)
                                   (user/create-user-txn user-2-data)))
-        group (group/create-group! {:id (db/uuid) :name "aoeu"})
+        [group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :name "aoeu"}))
         _ (db/run-txns!
             (concat
               (group/user-add-to-group-txn (user-1 :id) (group :id))
@@ -95,22 +95,24 @@
       (is (nil? (user/user-with-email "zzzzz@zzzzzz.ru"))))))
 
 (deftest only-see-users-in-group
-  (let [group-1 (group/create-group! {:id (db/uuid) :name "g1"})
-        group-2 (group/create-group! {:id (db/uuid) :name "g2"})
-        [user-1 user-2 user-3] (db/run-txns!
-                                 (concat
-                                   (user/create-user-txn {:id (db/uuid)
-                                                          :email "foo@bar.com"
-                                                          :password "foobar"
-                                                          :avatar "http://www.foobar.com/1.jpg"})
-                                   (user/create-user-txn {:id (db/uuid)
-                                                          :email "bar@baz.com"
-                                                          :password "barbaz"
-                                                          :avatar "http://www.barbaz.com/1.jpg"})
-                                   (user/create-user-txn {:id (db/uuid)
-                                                          :email "quux@baz.com"
-                                                          :password "barbaz"
-                                                          :avatar "http://www.barbaz.com/2.jpg"})))]
+  (let [[group-1 group-2 user-1 user-2 user-3]
+        (db/run-txns!
+          (concat
+            (group/create-group-txn {:id (db/uuid) :name "g1"})
+            (group/create-group-txn {:id (db/uuid) :name "g2"})
+
+            (user/create-user-txn {:id (db/uuid)
+                                   :email "foo@bar.com"
+                                   :password "foobar"
+                                   :avatar "http://www.foobar.com/1.jpg"})
+            (user/create-user-txn {:id (db/uuid)
+                                   :email "bar@baz.com"
+                                   :password "barbaz"
+                                   :avatar "http://www.barbaz.com/1.jpg"})
+            (user/create-user-txn {:id (db/uuid)
+                                   :email "quux@baz.com"
+                                   :password "barbaz"
+                                   :avatar "http://www.barbaz.com/2.jpg"})))]
     (is (not (group/user-in-group? (user-1 :id) (group-1 :id))))
     (db/run-txns! (group/user-add-to-group-txn (user-1 :id) (group-1 :id)))
     (is (group/user-in-group? (user-1 :id) (group-1 :id)))
@@ -163,7 +165,7 @@
 (deftest create-group
   (let [data {:id (db/uuid)
               :name "Lean Pixel"}
-        group (group/create-group! data)
+        [group] (db/run-txns! (group/create-group-txn data))
         user-id (db/uuid)
         user-2-id (db/uuid)]
     (testing "can create a group"
@@ -204,10 +206,12 @@
         (db/run-txns! (group/user-make-group-admin-txn user-2-id (group :id)))
         (is (= #{user-id user-2-id} (:admins (group/group-by-id (group :id)))))))
     (testing "multiple groups, admin statuses"
-      (let [group-2 (group/create-group! {:id (db/uuid)
-                                                  :name "another group"})
-            group-3 (group/create-group! {:id (db/uuid)
-                                                  :name "third group"})]
+      (let [[group-2 group-3] (db/run-txns!
+                                (concat
+                                  (group/create-group-txn {:id (db/uuid)
+                                                           :name "another group"})
+                                  (group/create-group-txn {:id (db/uuid)
+                                                           :name "third group"})))]
 
         (db/run-txns!
           (concat
@@ -242,7 +246,7 @@
         ))))
 
 (deftest fetch-messages-test
-  (let [group (group/create-group! {:id (db/uuid) :name "group"})
+  (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :name "group"}))
         [user-1] (db/run-txns!
                    (user/create-user-txn {:id (db/uuid)
                                           :email "foo@bar.com"
@@ -294,12 +298,13 @@
                  :tag-ids #{} :mentioned-ids #{}}]))))))
 
 (deftest user-hide-thread
-  (let [group (group/create-group! {:id (db/uuid) :name "group"})
-        [user-1] (db/run-txns!
-                   (user/create-user-txn {:id (db/uuid)
-                                          :email "foo@bar.com"
-                                          :password "foobar"
-                                          :avatar ""}))
+  (let [[group user-1] (db/run-txns!
+                         (concat
+                           (group/create-group-txn {:id (db/uuid) :name "group"})
+                           (user/create-user-txn {:id (db/uuid)
+                                                  :email "foo@bar.com"
+                                                  :password "foobar"
+                                                  :avatar ""})))
         message-1 (message/create-message! {:id (db/uuid)
                                                     :group-id (group :id)
                                                     :user-id (user-1 :id)
@@ -373,25 +378,29 @@
                   (message-2 :thread-id)))))))))
 
 (deftest user-thread-visibility
-  (let [[user-1 user-2 user-3] (db/run-txns!
-                                 (concat (user/create-user-txn {:id (db/uuid)
-                                                                :email "foo@bar.com"
-                                                                :password "foobar"
-                                                                :avatar ""})
-                                         (user/create-user-txn {:id (db/uuid)
-                                                                :email "quux@bar.com"
-                                                                :password "foobar"
-                                                                :avatar ""})
-                                         (user/create-user-txn {:id (db/uuid)
-                                                                :email "qaax@bar.com"
-                                                                :password "foobar"
-                                                                :avatar ""})))
-        group-1 (group/create-group! {:id (db/uuid)
-                                              :name "Lean Pixel"})
-        group-2 (group/create-group! {:id (db/uuid)
-                                              :name "Penyo Pal"})
-        tag-1 (tag/create-tag! {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
-        tag-2 (tag/create-tag! {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})
+  (let [[user-1 user-2 user-3 group-1 group-2]
+        (db/run-txns!
+          (concat (user/create-user-txn {:id (db/uuid)
+                                         :email "foo@bar.com"
+                                         :password "foobar"
+                                         :avatar ""})
+                  (user/create-user-txn {:id (db/uuid)
+                                         :email "quux@bar.com"
+                                         :password "foobar"
+                                         :avatar ""})
+                  (user/create-user-txn {:id (db/uuid)
+                                         :email "qaax@bar.com"
+                                         :password "foobar"
+                                         :avatar ""})
+
+                  (group/create-group-txn {:id (db/uuid)
+                                           :name "Lean Pixel"})
+                  (group/create-group-txn {:id (db/uuid)
+                                           :name "Penyo Pal"})))
+        [tag-1 tag-2] (db/run-txns!
+                        (concat
+                          (tag/create-tag-txn {:id (db/uuid) :name "acme1" :group-id (group-1 :id)})
+                          (tag/create-tag-txn {:id (db/uuid) :name "acme2" :group-id (group-2 :id)})))
 
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)]
@@ -438,37 +447,42 @@
       (is (thread/user-can-see-thread? (user-2 :id) thread-2-id)))))
 
 (deftest user-invite-to-group
-  (let [[user-1 user-2] (db/run-txns!
-                          (concat
-                            (user/create-user-txn {:id (db/uuid)
-                                                   :email "foo@bar.com"
-                                                   :password "foobar"
-                                                   :avatar ""})
-                            (user/create-user-txn {:id (db/uuid)
-                                                   :email "bar@baz.com"
-                                                   :password "foobar"
-                                                   :avatar ""})))
-        group (group/create-group! {:name "group 1" :id (db/uuid)})]
+  (let [[user-1 user-2 group] (db/run-txns!
+                                (concat
+                                  (user/create-user-txn {:id (db/uuid)
+                                                         :email "foo@bar.com"
+                                                         :password "foobar"
+                                                         :avatar ""})
+                                  (user/create-user-txn {:id (db/uuid)
+                                                         :email "bar@baz.com"
+                                                         :password "foobar"
+                                                         :avatar ""})
+                                  (group/create-group-txn {:name "group 1"
+                                                           :id (db/uuid)})))]
     (db/run-txns! (group/user-add-to-group-txn (user-1 :id) (group :id)))
     (is (empty? (invitation/invites-for-user (user-1 :id))))
     (is (empty? (invitation/invites-for-user (user-2 :id))))
     (let [invite-id (db/uuid)
-          invite (invitation/create-invitation!
-                   {:id invite-id
-                    :inviter-id (user-1 :id)
-                    :invitee-email "bar@baz.com"
-                    :group-id (group :id)})]
+          [invite] (db/run-txns!
+                   (invitation/create-invitation-txn
+                     {:id invite-id
+                      :inviter-id (user-1 :id)
+                      :invitee-email "bar@baz.com"
+                      :group-id (group :id)}))]
       (is (= invite (invitation/invite-by-id invite-id)))
       (is (seq (invitation/invites-for-user (user-2 :id))))
       (db/run-txns! (invitation/retract-invitation-txn invite-id))
       (is (empty? (invitation/invites-for-user (user-2 :id)))))))
 
 (deftest user-leaving-group
-  (let [[user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                      :email "foo@bar.com"
-                                                      :password "foobar"
-                                                      :avatar ""}))
-        group (group/create-group! {:id (db/uuid) :name "group 1"})
+  (let [[user-1 group] (db/run-txns!
+                         (concat
+                           (user/create-user-txn {:id (db/uuid)
+                                                  :email "foo@bar.com"
+                                                  :password "foobar"
+                                                  :avatar ""})
+                           (group/create-group-txn {:id (db/uuid)
+                                                    :name "group 1"})))
         thread-id (db/uuid)]
     (message/create-message! {:id (db/uuid) :thread-id thread-id
                               :group-id (group :id) :user-id (user-1 :id)
@@ -483,16 +497,19 @@
       (is (empty? (:mentioned-ids (thread/thread-by-id thread-id)))))))
 
 (deftest adding-user-to-group-subscribes-tags
-  (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                    :email "foo@bar.com"
-                                                    :password "foobar"
-                                                    :avatar ""}))
-        group (group/create-group! {:name "group" :id (db/uuid)})
-        group-tags (doall
-                     (map tag/create-tag!
-                          [{:id (db/uuid) :name "t1" :group-id (group :id)}
-                           {:id (db/uuid) :name "t2" :group-id (group :id)}
-                           {:id (db/uuid) :name "t3" :group-id (group :id)}]))]
+  (let [[user group] (db/run-txns!
+                       (concat
+                         (user/create-user-txn {:id (db/uuid)
+                                                :email "foo@bar.com"
+                                                :password "foobar"
+                                                :avatar ""})
+                         (group/create-group-txn {:name "group" :id (db/uuid)})))
+        group-tags (db/run-txns!
+                     (mapcat
+                       tag/create-tag-txn
+                       [{:id (db/uuid) :name "t1" :group-id (group :id)}
+                        {:id (db/uuid) :name "t2" :group-id (group :id)}
+                        {:id (db/uuid) :name "t3" :group-id (group :id)}]))]
     (testing "some misc functions"
       (is (= group (group/group-by-id (group :id))))
       (is (= (set group-tags)
@@ -554,9 +571,11 @@
                                  :favourite-color "blue")))))))))
 
 (deftest bots-test
-  (let [g1 (group/create-group! {:name "group 1" :id (db/uuid)})
-        g2 (group/create-group! {:name "group 2" :id (db/uuid)})
-        g3 (group/create-group! {:name "group 3" :id (db/uuid)})
+  (let [[g1 g2 g3] (db/run-txns!
+                     (concat
+                       (group/create-group-txn {:name "group 1" :id (db/uuid)})
+                       (group/create-group-txn {:name "group 2" :id (db/uuid)})
+                       (group/create-group-txn {:name "group 3" :id (db/uuid)})))
 
         [b1 b2 b3] (db/run-txns!
                      (concat

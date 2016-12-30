@@ -2,7 +2,8 @@
   (:require [datomic.api :as d]
             [clojure.edn :as edn]
             [braid.server.db :as db]
-            [braid.server.db.common :refer :all]
+            [braid.server.db.common :refer [create-entity-txn db->group db->user db->tag
+                                            group-pull-pattern user-pull-pattern]]
             [braid.server.db.thread :as thread]
             [braid.server.db.user :as user]))
 
@@ -94,12 +95,12 @@
 
 ;; Transactions
 
-(defn create-group!
+(defn create-group-txn
   [{:keys [name id]}]
-  (->> {:group/id id
-        :group/name name}
-       (create-entity! db/conn)
-       db->group))
+  (create-entity-txn
+    {:group/id id
+     :group/name name}
+    db->group))
 
 (defn group-set-txn
   "Set a key to a value for the group's settings  This will throw if

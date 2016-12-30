@@ -1,7 +1,7 @@
 (ns braid.server.db.tag
   (:require [datomic.api :as d]
             [braid.server.db :as db]
-            [braid.server.db.common :refer :all]))
+            [braid.server.db.common :refer [create-entity-txn db->tag]]))
 
 ;; Queries
 
@@ -99,13 +99,13 @@
 
 ;; Transactions
 
-(defn create-tag!
+(defn create-tag-txn
   [attrs]
-  (->> {:tag/id (attrs :id)
-        :tag/name (attrs :name)
-        :tag/group [:group/id (attrs :group-id)]}
-       (create-entity! db/conn)
-       db->tag))
+  (create-entity-txn
+    {:tag/id (attrs :id)
+     :tag/name (attrs :name)
+     :tag/group [:group/id (attrs :group-id)]}
+    db->tag))
 
 (defn retract-tag-txn
   [tag-id]

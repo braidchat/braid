@@ -13,8 +13,10 @@
   (db/init! (config :db-url)))
 
 (defn seed! []
-  (let [group-1 (group/create-group! {:id (db/uuid) :name "Braid"})
-        group-2 (group/create-group! {:id (db/uuid) :name "Chat"})
+  (let [[group-1 group-2] (db/run-txns!
+                            (concat
+                              (group/create-group-txn {:id (db/uuid) :name "Braid"})
+                              (group/create-group-txn {:id (db/uuid) :name "Chat"})))
         [user-1 user-2]
         (db/run-txns!
           (concat
@@ -40,8 +42,10 @@
               (group/user-make-group-admin! (user-1 :id) (group-1 :id))
               (group/user-make-group-admin! (user-2 :id) (group-2 :id))))
 
-        tag-1 (tag/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
-        tag-2 (tag/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})
+        [tag-1 tag-2] (db/run-txns!
+                        (concat
+                          (tag/create-tag-txn {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
+                          (tag/create-tag-txn {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})))
 
         _ (db/run-txns!
             (concat
@@ -76,7 +80,7 @@
                                        :created-at (java.util.Date.)
                                        :content "Yep"})
 
-        tag-3 (tag/create-tag! {:id (db/uuid) :group-id (group-2 :id) :name "abcde"})
+        [tag-3] (db/run-txns! (tag/create-tag-txn {:id (db/uuid) :group-id (group-2 :id) :name "abcde"}))
 
         _ (db/run-txns!
             (concat

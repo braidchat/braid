@@ -50,11 +50,17 @@
                                                          :avatar ""})))
         group-1-id (db/uuid)
         group-2-id (db/uuid)
-        group-1 (group/create-group! {:name "group1" :id group-1-id})
-        group-2 (group/create-group! {:name "group2" :id group-2-id})
-        tag-1 (tag/create-tag! {:id (db/uuid) :name "tag1" :group-id (group-1 :id)})
-        tag-2 (tag/create-tag! {:id (db/uuid) :name "tag2" :group-id (group-2 :id)})
-        tag-3 (tag/create-tag! {:id (db/uuid) :name "tag3" :group-id (group-1 :id)})
+        [group-1 group-2]
+        (db/run-txns!
+          (concat
+            (group/create-group-txn {:name "group1" :id group-1-id})
+            (group/create-group-txn {:name "group2" :id group-2-id})))
+        [tag-1 tag-2 tag-3]
+        (db/run-txns!
+          (concat
+            (tag/create-tag-txn {:id (db/uuid) :name "tag1" :group-id (group-1 :id)})
+            (tag/create-tag-txn {:id (db/uuid) :name "tag2" :group-id (group-2 :id)})
+            (tag/create-tag-txn {:id (db/uuid) :name "tag3" :group-id (group-1 :id)})))
         thread-1-id (db/uuid)
         thread-2-id (db/uuid)
         thread-3-id (db/uuid)

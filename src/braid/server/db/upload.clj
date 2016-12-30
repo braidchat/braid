@@ -1,7 +1,8 @@
 (ns braid.server.db.upload
   (:require [datomic.api :as d]
             [braid.server.db :as db]
-            [braid.server.db.common :refer :all]))
+            [braid.server.db.common :refer [create-entity-txn db->upload
+                                            upload-pull-pattern]]))
 
 ;; Queries
 
@@ -19,12 +20,12 @@
 
 ;; Transactions
 
-(defn create-upload!
+(defn create-upload-txn
   [{:keys [id url thread-id uploader-id uploaded-at]}]
-  (->> {:upload/id id
-        :upload/url url
-        :upload/thread [:thread/id thread-id]
-        :upload/uploaded-by [:user/id uploader-id]
-        :upload/uploaded-at uploaded-at}
-       (create-entity! db/conn)
-       db->upload))
+  (create-entity-txn
+    {:upload/id id
+     :upload/url url
+     :upload/thread [:thread/id thread-id]
+     :upload/uploaded-by [:user/id uploader-id]
+     :upload/uploaded-at uploaded-at}
+    db->upload))

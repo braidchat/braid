@@ -38,18 +38,23 @@
            [:tag #uuid "57158d7e-8dd1-4834-9e6b-cb7985895621"]]))))
 
 (deftest notify-rules-work
-  (let [g1 (group/create-group! {:id (db/uuid)
-                                         :name "group1"})
-        g2 (group/create-group! {:id (db/uuid)
-                                         :name "group2"})
-        g3 (group/create-group! {:id (db/uuid)
-                                         :name "group3"})
+  (let [[g1 g2 g3] (db/run-txns!
+                     (concat
+                       (group/create-group-txn {:id (db/uuid)
+                                                :name "group1"})
+                       (group/create-group-txn {:id (db/uuid)
+                                                :name "group2"})
+                       (group/create-group-txn {:id (db/uuid)
+                                                :name "group3"})))
 
-        g1t1 (tag/create-tag! {:id (db/uuid) :name "group1tag1" :group-id (g1 :id)})
-        g1t2 (tag/create-tag! {:id (db/uuid) :name "group1tag2" :group-id (g1 :id)})
+        [g1t1 g1t2 g2t1 g2t2]
+        (db/run-txns!
+          (concat
+            (tag/create-tag-txn {:id (db/uuid) :name "group1tag1" :group-id (g1 :id)})
+            (tag/create-tag-txn {:id (db/uuid) :name "group1tag2" :group-id (g1 :id)})
 
-        g2t1 (tag/create-tag! {:id (db/uuid) :name "group2tag1" :group-id (g2 :id)})
-        g2t2 (tag/create-tag! {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})
+            (tag/create-tag-txn {:id (db/uuid) :name "group2tag1" :group-id (g2 :id)})
+            (tag/create-tag-txn {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})))
 
         user-id (db/uuid)
         [_ sender] (db/run-txns!
