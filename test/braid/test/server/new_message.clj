@@ -22,10 +22,10 @@
 
 
 (deftest create-message
-  (let [user-1 (user/create-user! {:id (db/uuid)
-                                   :email "foo@bar.com"
-                                   :password "foobar"
-                                   :avatar "http://www.foobar.com/1.jpg"})
+  (let [[user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
+                                                      :email "foo@bar.com"
+                                                      :password "foobar"
+                                                      :avatar "http://www.foobar.com/1.jpg"}))
         thread-id (db/uuid)]
 
     (testing "new messages can create a thread"
@@ -77,10 +77,10 @@
 (deftest new-message-opens-and-subscribes
 
   (testing "given a user"
-    (let [user-1 (user/create-user! {:id (db/uuid)
-                                     :email "foo@bar.com"
-                                     :password "foobar"
-                                     :avatar ""})
+    (let [[user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
+                                                        :email "foo@bar.com"
+                                                        :password "foobar"
+                                                        :avatar ""}))
           group (group/create-group! {:id (db/uuid) :name "group"})]
 
       (testing "when the user sends a new message"
@@ -105,14 +105,16 @@
 (deftest new-message-opens-thread
 
   (testing "given a thread with 2 participants"
-    (let [user-1 (user/create-user! {:id (db/uuid)
-                                     :email "foo@bar.com"
-                                     :password "foobar"
-                                     :avatar ""})
-          user-2 (user/create-user! {:id (db/uuid)
-                                     :email "quux@bar.com"
-                                     :password "foobar"
-                                     :avatar ""})
+    (let [[user-1 user-2] (db/run-txns!
+                            (concat
+                              (user/create-user-txn {:id (db/uuid)
+                                                     :email "foo@bar.com"
+                                                     :password "foobar"
+                                                     :avatar ""})
+                              (user/create-user-txn {:id (db/uuid)
+                                                     :email "quux@bar.com"
+                                                     :password "foobar"
+                                                     :avatar ""})))
           group (group/create-group! {:id (db/uuid) :name "group"})
           thread-id (db/uuid)
           message-1 (message/create-message! {:id (db/uuid)
@@ -155,14 +157,16 @@
     (let [group (group/create-group! {:id (db/uuid)
                                       :name "Lean Pixel"})
           tag-1 (tag/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
-          user-1 (user/create-user! {:id (db/uuid)
-                                     :email "foo@bar.com"
-                                     :password "foobar"
-                                     :avatar ""})
-          user-2 (user/create-user! {:id (db/uuid)
-                                     :email "quux@bar.com"
-                                     :password "foobar"
-                                     :avatar ""})]
+          [user-1 user-2] (db/run-txns!
+                            (concat
+                              (user/create-user-txn {:id (db/uuid)
+                                                     :email "foo@bar.com"
+                                                     :password "foobar"
+                                                     :avatar ""})
+                              (user/create-user-txn {:id (db/uuid)
+                                                     :email "quux@bar.com"
+                                                     :password "foobar"
+                                                     :avatar ""})))]
       (db/run-txns!
         (concat
           (group/user-add-to-group-txn (user-2 :id) (group :id))
@@ -198,14 +202,16 @@
   (testing "given 2 users..."
     (let [group (group/create-group! {:id (db/uuid)
                                       :name "Lean Pixel"})
-          user-1 (user/create-user! {:id (db/uuid)
-                                     :email "foo@bar.com"
-                                     :password "foobar"
-                                     :avatar ""})
-          user-2 (user/create-user! {:id (db/uuid)
-                                     :email "quux@bar.com"
-                                     :password "foobar"
-                                     :avatar ""})
+          [user-1 user-2] (db/run-txns!
+                            (concat
+                              (user/create-user-txn {:id (db/uuid)
+                                                     :email "foo@bar.com"
+                                                     :password "foobar"
+                                                     :avatar ""})
+                              (user/create-user-txn {:id (db/uuid)
+                                                     :email "quux@bar.com"
+                                                     :password "foobar"
+                                                     :avatar ""})))
            thread-id (db/uuid)]
 
       (db/run-txns!

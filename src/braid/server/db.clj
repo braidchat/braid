@@ -34,4 +34,8 @@
   ; TODO: If all txns go through this, can now use this place to check
   ; validity, maybe use with-db to speculatively execute & validate
   [txns]
-  @(d/transact conn txns))
+  (let [tx-result @(d/transact conn txns)
+        returns (->> txns
+                     (map (comp :return meta))
+                     (remove nil?))]
+    (map #(% tx-result) returns)))

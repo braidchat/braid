@@ -33,7 +33,7 @@
        (map (fn [quest-id]
               {:db/id (d/tempid :entities)
                :quest-record/id (d/squuid)
-               :quest-record/user [:user/id user-id]
+               :quest-record/user user-id
                :quest-record/quest-id quest-id
                :quest-record/progress 0
                :quest-record/state :active}))))

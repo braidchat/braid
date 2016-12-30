@@ -49,7 +49,7 @@
                       (map first))]
     (db/run-txns!
       (mapcat (fn [user-id]
-                (quests/activate-first-quests-txn user-id))
+                (quests/activate-first-quests-txn [:user/id user-id]))
               user-ids))))
 
 (defn migrate-2016-07-29

@@ -52,15 +52,16 @@
         g2t2 (tag/create-tag! {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})
 
         user-id (db/uuid)
-        _ (user/create-user! {:id user-id
-                                      :email "foo@bar.com"
-                                      :avatar "zz"
-                                      :password "foobar"})
-
-        sender (user/create-user! {:id (db/uuid)
-                                           :email "bar@bar.com"
-                                           :avatar "zz"
-                                           :password "foobar"})
+        [_ sender] (db/run-txns!
+                     (concat
+                       (user/create-user-txn {:id user-id
+                                              :email "foo@bar.com"
+                                              :avatar "zz"
+                                              :password "foobar"})
+                       (user/create-user-txn {:id (db/uuid)
+                                              :email "bar@bar.com"
+                                              :avatar "zz"
+                                              :password "foobar"})))
 
         msg (fn [] {:id (db/uuid)
                     :group-id (g1 :id)

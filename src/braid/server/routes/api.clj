@@ -29,14 +29,15 @@
         ; XXX: copied from braid.common.util/nickname-rd
         disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
         nick (-> (first (string/split email #"@"))
-                 (string/replace disallowed-chars ""))
-        ; TODO: guard against duplicate nickname?
-        u (user/create-user! {:id id
-                              :email email
-                              :password (random-nonce 50)
-                              :avatar avatar
-                              :nickname nick})]
-    (db/run-txns! (group/user-join-group-txn id group-id))
+                 (string/replace disallowed-chars ""))]
+    (db/run-txns!
+      (concat
+        (user/create-user-txn {:id id
+                               :email email
+                               :password (random-nonce 50)
+                               :avatar avatar
+                               :nickname nick})
+        (group/user-join-group-txn id group-id)))
     (sync/broadcast-new-user-to-group id group-id)
     id))
 
@@ -98,16 +99,17 @@
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
             (let [avatar-url (invites/upload-avatar avatar)
-                  user (user/create-user! {:id (db/uuid)
-                                           :email email
-                                           :avatar avatar-url
-                                           :nickname nickname
-                                           :password password})
+                  user-id (db/uuid)
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
                 (db/run-txns!
                   (concat
+                    (user/create-user-txn {:id user-id
+                                           :email email
+                                           :avatar avatar-url
+                                           :nickname nickname
+                                           :password password})
                     (group/user-join-group-txn (user :id) (invite :group-id))
                     (invitation/retract-invitation-txn (invite :id))))
                 (sync/broadcast-new-user-to-group (user :id) (invite :group-id)))

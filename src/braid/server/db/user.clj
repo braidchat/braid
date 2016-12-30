@@ -132,20 +132,26 @@
 
 ; Txns that need result
 
-(defn create-user!
-  "creates a user, returns id"
+(defn create-user-txn
+  "creates a user, returns the newly-created user"
   [{:keys [id email avatar nickname password]}]
-  (let [user (->> {:user/id id
-                   :user/email email
-                   :user/avatar avatar
-                   :user/nickname (or nickname (-> email (string/split #"@") first))
-                   :user/password-token (password/encrypt password)}
-                  (create-entity! db/conn)
-                  db->user)]
-    (db/run-txns! (activate-first-quests-txn id))
-    user))
+  (let [new-id (d/tempid :entities)]
+    ; TODO: guard against duplicate nickname?
+    (into
+      [^{:return (fn [{:keys [db-after tempids]}]
+                   (->> (d/resolve-tempid db-after tempids new-id)
+                        (d/entity db-after)
+                        db->user))}
+       {:db/id new-id
+        :user/id id
+        :user/email email
+        :user/avatar avatar
+        :user/nickname (or nickname (-> email (string/split #"@") first))
+        :user/password-token (password/encrypt password)}]
+      (activate-first-quests-txn new-id))))
 
 (defn create-bot-user!
+  "Creates a new bot user, returns just the id of the new user"
   [{:keys [id]}]
   (->> {:user/id id
         :user/is-bot? true}

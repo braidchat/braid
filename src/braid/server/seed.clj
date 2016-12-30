@@ -15,16 +15,21 @@
 (defn seed! []
   (let [group-1 (group/create-group! {:id (db/uuid) :name "Braid"})
         group-2 (group/create-group! {:id (db/uuid) :name "Chat"})
-        user-1 (user/create-user!  {:id (db/uuid)
-                                    :email "foo@example.com"
-                                    :nickname "foo"
-                                    :password "foo"
-                                    :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
-        user-2 (user/create-user!  {:id (db/uuid)
-                                    :email "bar@example.com"
-                                    :nickname "bar"
-                                    :password "bar"
-                                    :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
+        [user-1 user-2]
+        (db/run-txns!
+          (concat
+            (user/create-user-txn
+              {:id (db/uuid)
+               :email "foo@example.com"
+               :nickname "foo"
+               :password "foo"
+               :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
+            (user/create-user-txn
+              {:id (db/uuid)
+               :email "bar@example.com"
+               :nickname "bar"
+               :password "bar"
+               :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})))
         _ (db/run-txns!
             (concat
               (group/user-add-to-group-txn (user-1 :id) (group-1 :id))

@@ -39,14 +39,15 @@
             :tags ["foo" "baz"]}))))
 
 (deftest searching-threads
-  (let [user-1 (user/create-user! {:id (db/uuid)
-                                   :email "foo@bar.com"
-                                   :password "foobar"
-                                   :avatar ""})
-        user-2 (user/create-user! {:id (db/uuid)
-                                   :email "bar@foo.com"
-                                   :password "foobar"
-                                   :avatar ""})
+  (let [[user-1 user-2] (db/run-txns!
+                          (concat (user/create-user-txn {:id (db/uuid)
+                                                         :email "foo@bar.com"
+                                                         :password "foobar"
+                                                         :avatar ""})
+                                  (user/create-user-txn {:id (db/uuid)
+                                                         :email "bar@foo.com"
+                                                         :password "foobar"
+                                                         :avatar ""})))
         group-1-id (db/uuid)
         group-2-id (db/uuid)
         group-1 (group/create-group! {:name "group1" :id group-1-id})

@@ -44,10 +44,11 @@
         ))))
 
 (deftest user-can-subscribe-to-tags
-  (let [user (user/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
+  (let [[user] (db/run-txns!
+                 (user/create-user-txn {:id (db/uuid)
+                                        :email "foo@bar.com"
+                                        :password "foobar"
+                                        :avatar ""}))
         group (group/create-group! {:id (db/uuid)
                                     :name "Lean Pixel"})
         tag-1 (tag/create-tag! {:id (db/uuid) :name "acme1" :group-id (group :id)})
@@ -74,18 +75,20 @@
           (is (= (set tags) #{})))))))
 
 (deftest user-can-only-see-tags-in-group
-  (let [user-1 (user/create-user! {:id (db/uuid)
-                                   :email "foo@bar.com"
-                                   :password "foobar"
-                                   :avatar ""})
-        user-2 (user/create-user! {:id (db/uuid)
-                                   :email "quux@bar.com"
-                                   :password "foobar"
-                                   :avatar ""})
-        user-3 (user/create-user! {:id (db/uuid)
-                                   :email "qaax@bar.com"
-                                   :password "foobar"
-                                   :avatar ""})
+  (let [[user-1 user-2 user-3] (db/run-txns!
+                                 (concat
+                                   (user/create-user-txn {:id (db/uuid)
+                                                          :email "foo@bar.com"
+                                                          :password "foobar"
+                                                          :avatar ""})
+                                   (user/create-user-txn {:id (db/uuid)
+                                                          :email "quux@bar.com"
+                                                          :password "foobar"
+                                                          :avatar ""})
+                                   (user/create-user-txn {:id (db/uuid)
+                                                          :email "qaax@bar.com"
+                                                          :password "foobar"
+                                                          :avatar ""})))
         group-1 (group/create-group! {:id (db/uuid)
                                       :name "Lean Pixel"})
         group-2 (group/create-group! {:id (db/uuid)
@@ -105,10 +108,10 @@
       (is (= #{tag-2 tag-3} (tag/tags-for-user (user-3 :id)))))))
 
 (deftest user-can-only-subscribe-to-tags-in-group
-  (let [user (user/create-user! {:id (db/uuid)
-                                 :email "foo@bar.com"
-                                 :password "foobar"
-                                 :avatar ""})
+  (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
+                                                    :email "foo@bar.com"
+                                                    :password "foobar"
+                                                    :avatar ""}))
         group-1 (group/create-group! {:id (db/uuid)
                                       :name "Lean Pixel"})
         group-2 (group/create-group! {:id (db/uuid)
