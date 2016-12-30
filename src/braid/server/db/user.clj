@@ -130,8 +130,6 @@
 
 ;; Transactions
 
-; Txns that need result
-
 (defn create-user-txn
   "creates a user, returns the newly-created user"
   [{:keys [id email avatar nickname password]}]
@@ -149,8 +147,6 @@
         :user/nickname (or nickname (-> email (string/split #"@") first))
         :user/password-token (password/encrypt password)}]
       (activate-first-quests-txn new-id))))
-
-; Txns that fire-and-forget
 
 (defn set-nickname-txn
   "Set the user's nickname"
