@@ -36,7 +36,7 @@
                           :thread-id thread-id
                           :created-at (java.util.Date.)
                           :content "Hello?"}
-            message (message/create-message! message-data)]
+            [message] (db/run-txns! (message/create-message-txn message-data))]
 
         (testing "returns message"
           (is (= (dissoc message-data :group-id) message)))
@@ -59,7 +59,7 @@
                             :thread-id thread-id
                             :created-at (java.util.Date.)
                             :content "Goodbye."}
-            message-2 (message/create-message! message-2-data)]
+            [message-2] (db/run-txns! (message/create-message-txn message-2-data))]
 
         (testing "returns message"
           (is (= (dissoc message-2-data :group-id) message-2)))
@@ -86,14 +86,14 @@
                              (group/create-group-txn {:id (db/uuid) :name "group"})))]
 
       (testing "when the user sends a new message"
-        (let [thread-id (db/uuid)
-              _ (message/create-message! {:id (db/uuid)
-                                          :group-id (group :id)
-                                          :user-id (user-1 :id)
-                                          :thread-id thread-id
-                                          :created-at (java.util.Date.)
-                                          :content "Hello?"})]
-
+        (let [thread-id (db/uuid)]
+          (db/run-txns!
+            (message/create-message-txn {:id (db/uuid)
+                                         :group-id (group :id)
+                                         :user-id (user-1 :id)
+                                         :thread-id thread-id
+                                         :created-at (java.util.Date.)
+                                         :content "Hello?"}))
           (testing "then the user is subscribed to the thread"
             (is (contains?
                   (set (map :id (thread/open-threads-for-user (user-1 :id))))
@@ -120,18 +120,21 @@
                                     (group/create-group-txn {:id (db/uuid)
                                                              :name "group"})))
           thread-id (db/uuid)
-          message-1 (message/create-message! {:id (db/uuid)
-                                              :group-id (group :id)
-                                              :user-id (user-1 :id)
-                                              :thread-id thread-id
-                                              :created-at (java.util.Date.)
-                                              :content "Hello?"})
-          message-2 (message/create-message! {:id (db/uuid)
-                                              :group-id (group :id)
-                                              :user-id (user-2 :id)
-                                              :thread-id thread-id
-                                              :created-at (java.util.Date.)
-                                              :content "Hello?"})]
+          [message-1 message-2]
+          (db/run-txns!
+            (concat
+              (message/create-message-txn {:id (db/uuid)
+                                           :group-id (group :id)
+                                           :user-id (user-1 :id)
+                                           :thread-id thread-id
+                                           :created-at (java.util.Date.)
+                                           :content "Hello?"})
+              (message/create-message-txn {:id (db/uuid)
+                                           :group-id (group :id)
+                                           :user-id (user-2 :id)
+                                           :thread-id thread-id
+                                           :created-at (java.util.Date.)
+                                           :content "Hello?"})))]
 
       (testing "when user-2 hides the thread"
         (db/run-txns! (thread/user-hide-thread-txn (user-2 :id) thread-id))
@@ -142,12 +145,13 @@
                      thread-id)))))
 
       (testing "when user-1 sends another message in the thread"
-        (message/create-message! {:id (db/uuid)
-                                  :group-id (group :id)
-                                  :user-id (user-1 :id)
-                                  :thread-id thread-id
-                                  :created-at (java.util.Date.)
-                                  :content "Hello?"})
+        (db/run-txns! (message/create-message-txn
+                        {:id (db/uuid)
+                         :group-id (group :id)
+                         :user-id (user-1 :id)
+                         :thread-id thread-id
+                         :created-at (java.util.Date.)
+                         :content "Hello?"}))
 
         (testing "then user-2 has the thread open again"
           (is (contains?
@@ -181,13 +185,14 @@
         (db/run-txns! (tag/user-subscribe-to-tag-txn (user-1 :id) (tag-1 :id)))
 
         (testing "when a new message mentions the tag..."
-          (let [msg (message/create-message! {:id (db/uuid)
-                                              :group-id (group :id)
-                                              :user-id (user-2 :id)
-                                              :thread-id (db/uuid)
-                                              :created-at (java.util.Date.)
-                                              :content "Hello?"
-                                              :mentioned-tag-ids [(tag-1 :id)]})]
+          (let [[msg] (db/run-txns!
+                        (message/create-message-txn {:id (db/uuid)
+                                                     :group-id (group :id)
+                                                     :user-id (user-2 :id)
+                                                     :thread-id (db/uuid)
+                                                     :created-at (java.util.Date.)
+                                                     :content "Hello?"
+                                                     :mentioned-tag-ids [(tag-1 :id)]}))]
 
             (testing "then the tag is added to the thread"
               (let [thread (thread/thread-by-id (msg :thread-id))]
@@ -225,13 +230,14 @@
           (group/user-add-to-group-txn (user-2 :id) (group :id))
           (group/user-add-to-group-txn (user-1 :id) (group :id))))
       (testing "when user-1 mentions user-2 in a message..."
-        (let [msg (message/create-message! {:id (db/uuid)
-                                            :group-id (group :id)
-                                            :user-id (user-1 :id)
-                                            :thread-id thread-id
-                                            :created-at (java.util.Date.)
-                                            :content "Hello?"
-                                            :mentioned-user-ids [(user-2 :id)]})]
+        (let [[msg] (db/run-txns!
+                      (message/create-message-txn {:id (db/uuid)
+                                                   :group-id (group :id)
+                                                   :user-id (user-1 :id)
+                                                   :thread-id thread-id
+                                                   :created-at (java.util.Date.)
+                                                   :content "Hello?"
+                                                   :mentioned-user-ids [(user-2 :id)]}))]
 
           (testing "then user-2 is added to the thread"
             (is  (= #{(user-2 :id)}

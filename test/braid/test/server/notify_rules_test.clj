@@ -79,26 +79,26 @@
 
     (is (rules/notify? (db/uuid) [[:any :any]] (msg)) ":any :any always gets notified")
     (let [new-msg (msg)]
-      (message/create-message! new-msg)
+      (db/run-txns! (message/create-message-txn new-msg))
       (is (not (rules/notify? (db/uuid) [[:any (:id g1)]] new-msg))))
     (let [new-msg (update (msg) :mentioned-tag-ids conj (:id g1t1))]
-      (message/create-message! new-msg)
+      (db/run-txns! (message/create-message-txn new-msg))
       (is (rules/notify? (db/uuid) [[:any (:id g1)]]
                          new-msg)))
     (let [m1 (-> (msg)
                  (update :mentioned-user-ids conj user-id))]
-      (message/create-message! m1)
+      (db/run-txns! (message/create-message-txn m1))
       (is (not (rules/notify? user-id [[:mention (:id g1)]] m1))))
 
     (let [m2 (-> (msg)
                  (update :mentioned-user-ids conj user-id))]
-      (message/create-message! m2)
+      (db/run-txns! (message/create-message-txn m2))
       (is (rules/notify? user-id [[:mention :any]] m2)))
 
     (let [m (-> (msg)
                 (update :mentioned-user-ids conj user-id)
                 (update :mentioned-tag-ids conj (:id g1t1)))]
-      (message/create-message! m)
+      (db/run-txns! (message/create-message-txn m))
       (is (rules/notify? user-id [[:mention (:id g1)]] m))
       (is (rules/notify? user-id [[:tag (:id g1t1)]] m))
       (is (not (rules/notify? user-id [[:tag (:id g1t2)]] m))))
@@ -106,8 +106,10 @@
     (let [m1 (-> (msg)
                  (update :mentioned-tag-ids conj (:id g1t1)))
           m2 (-> (msg) (assoc :thread-id (m1 :thread-id)))]
-      (message/create-message! m1)
-      (message/create-message! m2)
+      (db/run-txns!
+        (concat
+          (message/create-message-txn m1)
+          (message/create-message-txn m2)))
       (is (rules/notify? (db/uuid) [[:any (:id g1)]] m2))
       (is (not (rules/notify? (db/uuid) [[:any (:id g2)]] m2))))))
 
