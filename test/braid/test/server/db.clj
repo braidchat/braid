@@ -625,3 +625,30 @@
       (is (bot/bot-auth? (b2 :id) (b2 :token)))
       (is (not (bot/bot-auth? (b2 :id) "Foo")))
       (is (not (bot/bot-auth? (java.util.UUID/randomUUID) (b2 :token)))))))
+
+(deftest update-thread-open-at
+  (let [[{user-id :id} {group-id :id}]
+        (db/run-txns!
+          (concat
+            (user/create-user-txn {:id (db/uuid)
+                                   :email "foo@bar.com"
+                                   :password "foobar"
+                                   :avatar ""})
+            (group/create-group-txn {:id (db/uuid)
+                                     :name "group 1"})))
+        thread-id (db/uuid)]
+    (db/run-txns!
+      (message/create-message-txn {:id (db/uuid)
+                                   :thread-id thread-id
+                                   :group-id group-id
+                                   :user-id user-id
+                                   :created-at (java.util.Date.)
+                                   :content "foobar"
+                                   :mentioned-user-ids [user-id]
+                                   :mentioned-tag-ids []}))
+    (testing  "can update when a thread was last opened by user"
+      (let [thread (thread/thread-by-id thread-id)
+            old-open (:last-open-at (thread/thread-add-last-open-at thread user-id))
+            _ (thread/update-thread-last-open! thread-id user-id)
+            new-open (:last-open-at (thread/thread-add-last-open-at thread user-id))]
+        (is (< old-open new-open))))))
