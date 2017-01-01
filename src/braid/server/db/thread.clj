@@ -159,7 +159,18 @@
 
 ;; Transactions
 
+(defn user-hide-thread-txn
+  [user-id thread-id]
+  [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
+
+(defn user-show-thread-txn
+  [user-id thread-id]
+  [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
+
 (defn update-thread-last-open!
+  "Bump the tx time of the user opening the thread.  Needs to explicitly be two
+  separate transactions, since redundant datoms are eliminated, meaning we
+  can't have a transaction that just changes the tx"
   [thread-id user-id]
   (when (seq (d/q '[:find ?t
                     :in $ ?user-id ?thread-id
@@ -168,19 +179,8 @@
                     [?t :thread/id ?thread-id]
                     [?u :user/open-thread ?t]]
                   (db/db) user-id thread-id))
-    ; TODO: should find a better way of handling this...
-    @(d/transact db/conn
-       [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
-    @(d/transact db/conn
-       [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])))
-
-(defn user-hide-thread-txn
-  [user-id thread-id]
-  [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
-
-(defn user-show-thread-txn
-  [user-id thread-id]
-  [[:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
+    (db/run-txns! (user-hide-thread-txn user-id thread-id))
+    (db/run-txns! (user-show-thread-txn user-id thread-id))))
 
 (defn user-unsubscribe-from-thread-txn
   [user-id thread-id]
