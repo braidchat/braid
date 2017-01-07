@@ -652,3 +652,52 @@
             _ (thread/update-thread-last-open! thread-id user-id)
             new-open (:last-open-at (thread/thread-add-last-open-at thread user-id))]
         (is (< old-open new-open))))))
+
+(deftest bot-thread-watching
+  (let [[{user-id :id} {group-1-id :id} {group-2-id :id} ]
+        (db/run-txns!
+          (concat
+            (user/create-user-txn {:id (db/uuid)
+                                   :email "foo@bar.com"
+                                   :password "foobar"
+                                   :avatar ""})
+            (group/create-group-txn {:id (db/uuid)
+                                     :name "group 1"})
+            (group/create-group-txn {:id (db/uuid)
+                                     :name "group 2"})))
+        [{bot-id :id :as bot}] (db/run-txns!
+                                 (bot/create-bot-txn {:id (db/uuid)
+                                                      :name "testbot"
+                                                      :avatar ""
+                                                      :webhook-url ""
+                                                      :group-id group-1-id}))
+        thread-1-id (db/uuid)
+        thread-2-id (db/uuid)]
+    (db/run-txns!
+      (concat
+        (group/user-join-group-txn user-id group-1-id)
+        (group/user-join-group-txn user-id group-2-id)))
+    (db/run-txns!
+      (concat
+        (message/create-message-txn {:id (db/uuid)
+                                     :thread-id thread-1-id
+                                     :group-id group-1-id
+                                     :user-id user-id
+                                     :created-at (java.util.Date.)
+                                     :content "foobar"
+                                     :mentioned-user-ids [user-id]
+                                     :mentioned-tag-ids []})
+        (message/create-message-txn {:id (db/uuid)
+                                     :thread-id thread-2-id
+                                     :group-id group-2-id
+                                     :user-id user-id
+                                     :created-at (java.util.Date.)
+                                     :content "foobar"
+                                     :mentioned-user-ids [user-id]
+                                     :mentioned-tag-ids []})))
+    (testing "Bots can only watch threads in their group"
+      (db/run-txns! (bot/bot-watch-thread-txn bot-id thread-1-id))
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (db/run-txns! (bot/bot-watch-thread-txn bot-id thread-2-id))))
+      (is (= #{bot} (bot/bots-watching-thread thread-1-id)))
+      (is (empty? (bot/bots-watching-thread thread-2-id))))))

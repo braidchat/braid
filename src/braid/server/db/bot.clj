@@ -45,9 +45,7 @@
                   :in $ pull-pattern ?thread-id
                   :where
                   [?t :thread/id ?thread-id]
-                  [?b :bot/watched ?t]
-                  [?t :thread/group ?g]
-                  [?b :bot/group ?g]]
+                  [?b :bot/watched ?t]]
                 (db/db) bot-pull-pattern thread-id)
        (into #{} (map db->bot))))
 
@@ -77,5 +75,10 @@
 
 (defn bot-watch-thread-txn
   [bot-id thread-id]
-  ; need to verify that thread is in bot's group
-  [[:db/add [:bot/id bot-id] :bot/watched [:thread/id thread-id]]])
+  [^{:braid.server.db/check
+     (fn [{:keys [db-after]}]
+       (assert
+         (= (get-in (d/entity db-after [:bot/id bot-id]) [:bot/group :group/id])
+            (get-in (d/entity db-after [:thread/id thread-id]) [:thread/group :group/id]))
+         (format "Bot %s tried to watch thread not in its group %s" bot-id thread-id)))}
+   [:db/add [:bot/id bot-id] :bot/watched [:thread/id thread-id]]])

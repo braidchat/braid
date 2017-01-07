@@ -134,7 +134,6 @@
   "creates a user, returns the newly-created user"
   [{:keys [id email avatar nickname password]}]
   (let [new-id (d/tempid :entities)]
-    ; TODO: guard against duplicate nickname?
     (into
       [^{:return (fn [{:keys [db-after tempids]}]
                    (->> (d/resolve-tempid db-after tempids new-id)
