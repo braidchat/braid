@@ -1,6 +1,7 @@
 (ns braid.server.db
   (:require [datomic.api :as d]
             [mount.core :refer [defstate]]
+            [braid.common.util :refer [extract]]
             [braid.server.conf :refer [config]]
             [braid.server.schema :refer [schema]]))
 
@@ -30,12 +31,26 @@
   (d/squuid))
 
 (defn run-txns!
-  "Execute given transactions"
-  ; TODO: If all txns go through this, can now use this place to check
-  ; validity, maybe use with-db to speculatively execute & validate
+  "Execute given transactions. Transactions may be annotated with metadata.
+  If the metadata map contains a function under the key `:return`, that
+  function will be called with the transaction result and the return value
+  added to the seq of return values
+  If the metadata map contains a function under the key
+  `:braid.server.db/check`, that function will be called with the transaction
+  result and if it fails an assert, the transaction will be aborted & an error
+  bubbled up via ex-info, with the assertion failure message under the key
+  `:braid.server.db/error`."
   [txns]
-  (let [tx-result @(d/transact conn txns)
-        returns (->> txns
-                     (map (comp :return meta))
-                     (remove nil?))]
-    (map #(% tx-result) returns)))
+  (let [[returns checks] ((juxt (partial extract :return)
+                                (partial extract ::check))
+                          (map meta txns))]
+    (when (seq checks)
+      (let [test-db (d/with (db) txns)]
+        (try
+          (doseq [check checks]
+            (check test-db))
+          (catch AssertionError e
+            (throw (ex-info "Transaction Failed"
+                            {::error (.getMessage e)}))))))
+    (let [tx-result @(d/transact conn txns)]
+      (map #(% tx-result) returns))))
