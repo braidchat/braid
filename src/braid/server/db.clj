@@ -32,16 +32,16 @@
 
 (defn run-txns!
   "Execute given transactions. Transactions may be annotated with metadata.
-  If the metadata map contains a function under the key `:return`, that
-  function will be called with the transaction result and the return value
-  added to the seq of return values
+  If the metadata map contains a function under the key
+  `:braid.server.db/return`, that function will be called with the transaction
+  result and the return value added to the seq of return values
   If the metadata map contains a function under the key
   `:braid.server.db/check`, that function will be called with the transaction
   result and if it fails an assert, the transaction will be aborted & an error
   bubbled up via ex-info, with the assertion failure message under the key
   `:braid.server.db/error`."
   [txns]
-  (let [[returns checks] ((juxt (partial extract :return)
+  (let [[returns checks] ((juxt (partial extract ::return)
                                 (partial extract ::check))
                           (map meta txns))]
     (when (seq checks)

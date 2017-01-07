@@ -59,7 +59,7 @@
     [{:db/id fake-user-id
       :user/id (d/squuid)
       :user/is-bot? true}
-     ^{:return
+     ^{:braid.server.db/return
        (fn [{:keys [db-after tempids]}]
          (->> (d/resolve-tempid db-after tempids bot-id)
               (d/entity db-after)

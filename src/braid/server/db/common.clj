@@ -9,7 +9,7 @@
   (let [new-id (d/tempid :entities)]
     [(with-meta
        (assoc attrs :db/id new-id)
-       {:return
+       {:braid.server.db/return
         (fn [{:keys [db-after tempids]}]
           (->> (d/resolve-tempid db-after tempids new-id)
                (d/entity db-after)

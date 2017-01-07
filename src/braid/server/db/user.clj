@@ -135,10 +135,11 @@
   [{:keys [id email avatar nickname password]}]
   (let [new-id (d/tempid :entities)]
     (into
-      [^{:return (fn [{:keys [db-after tempids]}]
-                   (->> (d/resolve-tempid db-after tempids new-id)
-                        (d/entity db-after)
-                        db->user))}
+      [^{:braid.server.db/return
+         (fn [{:keys [db-after tempids]}]
+           (->> (d/resolve-tempid db-after tempids new-id)
+                (d/entity db-after)
+                db->user))}
        {:db/id new-id
         :user/id id
         :user/email email

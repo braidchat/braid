@@ -27,7 +27,7 @@
           :thread/group [:group/id group-id]}]
         [])
       [; create message
-       ^{:return
+       ^{:braid.server.db/return
          (fn [{:keys [db-after tempids]}]
            (->> (d/resolve-tempid db-after tempids msg-id)
                 (d/pull db-after message-pull-pattern)
