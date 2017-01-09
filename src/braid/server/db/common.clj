@@ -4,7 +4,7 @@
             [clojure.edn :as edn]))
 
 (defn create-entity-txn
-  "create entity with attrs, return entity"
+  "create entity with attrs, return (after-fn entity)"
   [attrs after-fn]
   (let [new-id (d/tempid :entities)]
     [(with-meta
