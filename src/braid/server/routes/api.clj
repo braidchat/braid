@@ -5,6 +5,9 @@
             [clojure.java.io :as io]
             [braid.common.util :refer [valid-nickname?]]
             [braid.server.db :as db]
+            [braid.server.db.group :as group]
+            [braid.server.db.invitation :as invitation]
+            [braid.server.db.user :as user]
             [braid.server.invite :as invites]
             [braid.server.identicons :as identicons]
             [braid.server.crypto :refer [random-nonce]]
@@ -26,26 +29,29 @@
         ; XXX: copied from braid.common.util/nickname-rd
         disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
         nick (-> (first (string/split email #"@"))
-                 (string/replace disallowed-chars ""))
-        ; TODO: guard against duplicate nickname?
-        u (db/create-user! {:id id
-                            :email email
-                            :password (random-nonce 50)
-                            :avatar avatar
-                            :nickname nick})]
-    (sync/user-join-group! id group-id)
+                 (string/replace disallowed-chars ""))]
+    (db/run-txns!
+      (concat
+        (user/create-user-txn {:id id
+                               :email email
+                               :password (random-nonce 50)
+                               :avatar avatar
+                               :nickname nick})
+        (group/user-join-group-txn id group-id)))
+    (sync/broadcast-new-user-to-group id group-id)
     id))
 
 (defn join-group
   [user-id group-id]
-  (when-not (db/user-in-group? user-id group-id)
-    (sync/user-join-group! user-id group-id)))
+  (when-not (group/user-in-group? user-id group-id)
+    (db/run-txns! (group/user-join-group-txn user-id group-id))
+    (sync/broadcast-new-user-to-group user-id group-id)))
 
 (defroutes api-public-routes
   ; check if already logged in
   (GET "/check" req
     (if-let [user-id (get-in req [:session :user-id])]
-      (if-let [user (db/user-id-exists? user-id)]
+      (if-let [user (user/user-id-exists? user-id)]
         {:status 200 :body ""}
         {:status 401 :body "" :session nil})
       {:status 401 :body "" :session nil}))
@@ -54,7 +60,7 @@
   (POST "/auth" req
     (if-let [user-id (let [{:keys [email password]} (req :params)]
                        (when (and email password)
-                         (db/authenticate-user email password)))]
+                         (user/authenticate-user email password)))]
       {:status 200 :session (assoc (req :session) :user-id user-id)}
       {:status 401 :body (pr-str {:error true})}))
   ; log out
@@ -63,7 +69,7 @@
 
   ; request a password reset
   (POST "/request-reset" [email]
-    (when-let [user (db/user-with-email email)]
+    (when-let [user (user/user-with-email email)]
       (invites/request-reset (assoc user :email email)))
     {:status 200 :body (pr-str {:ok true})})
 
@@ -81,7 +87,7 @@
         (not (valid-nickname? nickname))
         (assoc fail :body "Nickname must be 1-30 characters without whitespace")
 
-        (db/nickname-taken? nickname)
+        (user/nickname-taken? nickname)
         (assoc fail :body "nickname taken")
 
         ; TODO: be smarter about this
@@ -89,23 +95,27 @@
         (assoc fail :body "Invalid image")
 
         :else
-        (let [invite (db/invite-by-id (java.util.UUID/fromString invite_id))]
+        (let [invite (invitation/invite-by-id (java.util.UUID/fromString invite_id))]
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
             (let [avatar-url (invites/upload-avatar avatar)
-                  user (db/create-user! {:id (db/uuid)
-                                         :email email
-                                         :avatar avatar-url
-                                         :nickname nickname
-                                         :password password})
+                  user-id (db/uuid)
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
-                (sync/user-join-group! (user :id) (invite :group-id))
-                (db/retract-invitation! (invite :id)))
+                (db/run-txns!
+                  (concat
+                    (user/create-user-txn {:id user-id
+                                           :email email
+                                           :avatar avatar-url
+                                           :nickname nickname
+                                           :password password})
+                    (group/user-join-group-txn user-id (invite :group-id))
+                    (invitation/retract-invitation-txn (invite :id))))
+                (sync/broadcast-new-user-to-group user-id (invite :group-id)))
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
-               :session (assoc (req :session) :user-id (user :id))
+               :session (assoc (req :session) :user-id user-id)
                :body ""}))))))
 
   ; join by invite link
@@ -114,12 +124,12 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings group-id)]
           (if-not (invites/verify-hmac form-hmac (str now group-id))
             (assoc bad-resp :body "No such group or the request has been tampered with")
             (if (string/blank? email)
               (assoc bad-resp :body "Invalid email")
-              (if (db/user-with-email email)
+              (if (user/user-with-email email)
                 (assoc bad-resp
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
@@ -135,7 +145,7 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings group-id)]
           (if-not (invites/verify-hmac form-hmac (str now group-id))
             (assoc bad-resp :body "No such group or the request has been tampered with")
             (if-let [user-id (get-in req [:session :user-id])]
@@ -154,12 +164,12 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings group-id)]
           (if-not (get group-settings :public?)
             (assoc bad-resp :body "No such group or the group is private")
             (if (string/blank? email)
               (assoc bad-resp :body "Invalid email")
-              (if (db/user-with-email email)
+              (if (user/user-with-email email)
                 (assoc bad-resp
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
@@ -175,7 +185,7 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings group-id)]
           (if-not (:public? group-settings)
             (assoc bad-resp :body "No such group or the group is private")
             (if-let [user-id (get-in req [:session :user-id])]
@@ -198,12 +208,12 @@
         (assoc fail :body "Invalid HMAC")
 
         :else
-        (if-let [user (db/user-by-id user-id)]
+        (if-let [user (user/user-by-id user-id)]
           (if-let [err (:error (invites/verify-reset-nonce user token))]
             (assoc fail :body err)
             (let [referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
-              (db/set-user-password! (user :id) new-password)
+              (db/run-txns! (user/set-user-password-txn (user :id) new-password))
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
@@ -219,7 +229,7 @@
             ; check scope includes email permission? Or we could just see if
             ; getting the email fails
             (let [email (github/email-address tok)
-                  user (db/user-with-email email)]
+                  user (user/user-with-email email)]
               (cond
                 (nil? email) {:status 401
                               :headers {"Content-Type" "text/plain"}
@@ -255,14 +265,14 @@
                        slurp markdown->hiccup)}))
 
   (GET "/extract" [url :as {ses :session}]
-    (if (some? (db/user-by-id (:user-id ses)))
+    (if (some? (user/user-by-id (:user-id ses)))
       (edn-response (embedly/extract url))
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))
 
   (GET "/s3-policy" req
-    (if (some? (db/user-by-id (get-in req [:session :user-id])))
+    (if (some? (user/user-by-id (get-in req [:session :user-id])))
       (if-let [policy (s3/generate-policy)]
         {:status 200
          :headers {"Content-Type" "application/edn"}

@@ -2,6 +2,7 @@
   (:require
     [braid.server.conf :refer [config]]
     [braid.server.db :as db]
+    [braid.server.db.thread :as thread]
     [clojure.data.json :as json]
     [datomic.api :as d]
     [org.httpkit.client :as http]))
@@ -21,11 +22,11 @@
                (get "hits"))]
     (->> (get resp "hits")
          (map #(Long. (get % "_id")))
-         (d/pull-many (d/db db/conn) [{:message/thread [:thread/id]}])
+         (d/pull-many (db/db) [{:message/thread [:thread/id]}])
          (into #{}
                (comp
                  (map #(get-in % [:message/thread :thread/id]))
-                 (filter #(= group-id (db/thread-group-id %)))
-                 (map (fn [t-id] [t-id (db/thread-newest-message t-id)]))))
+                 (filter #(= group-id (thread/thread-group-id %)))
+                 (map (fn [t-id] [t-id (thread/thread-newest-message t-id)]))))
          seq
          set)))

@@ -1,5 +1,9 @@
 (ns braid.server.seed
   (:require [braid.server.db :as db]
+            [braid.server.db.group :as group]
+            [braid.server.db.message :as message]
+            [braid.server.db.tag :as tag]
+            [braid.server.db.user :as user]
             [braid.server.conf :refer [config]]))
 
 (defn drop! []
@@ -9,78 +13,98 @@
   (db/init! (config :db-url)))
 
 (defn seed! []
-  (let [group-1 (db/create-group! {:id (db/uuid) :name "Braid"})
-        group-2 (db/create-group! {:id (db/uuid) :name "Chat"})
-        user-1 (db/create-user! {:id (db/uuid)
-                                 :email "foo@example.com"
-                                 :nickname "foo"
-                                 :password "foo"
-                                 :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
-        user-2 (db/create-user! {:id (db/uuid)
-                                 :email "bar@example.com"
-                                 :nickname "bar"
-                                 :password "bar"
-                                 :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
-        _ (db/user-add-to-group! (user-1 :id) (group-1 :id))
-        _ (db/user-add-to-group! (user-2 :id) (group-1 :id))
-        _ (db/user-add-to-group! (user-1 :id) (group-2 :id))
-        _ (db/user-add-to-group! (user-2 :id) (group-2 :id))
+  (let [[group-1 group-2] (db/run-txns!
+                            (concat
+                              (group/create-group-txn {:id (db/uuid) :name "Braid"})
+                              (group/create-group-txn {:id (db/uuid) :name "Chat"})))
+        [user-1 user-2]
+        (db/run-txns!
+          (concat
+            (user/create-user-txn
+              {:id (db/uuid)
+               :email "foo@example.com"
+               :nickname "foo"
+               :password "foo"
+               :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
+            (user/create-user-txn
+              {:id (db/uuid)
+               :email "bar@example.com"
+               :nickname "bar"
+               :password "bar"
+               :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})))
+        _ (db/run-txns!
+            (concat
+              (group/user-add-to-group-txn (user-1 :id) (group-1 :id))
+              (group/user-add-to-group-txn (user-2 :id) (group-1 :id))
+              (group/user-add-to-group-txn (user-1 :id) (group-2 :id))
+              (group/user-add-to-group-txn (user-2 :id) (group-2 :id))
 
-        _ (db/user-make-group-admin! (user-1 :id) (group-1 :id))
-        _ (db/user-make-group-admin! (user-2 :id) (group-2 :id))
+              (group/user-make-group-admin! (user-1 :id) (group-1 :id))
+              (group/user-make-group-admin! (user-2 :id) (group-2 :id))))
 
-        tag-1 (db/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
-        tag-2 (db/create-tag! {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})
+        [tag-1 tag-2] (db/run-txns!
+                        (concat
+                          (tag/create-tag-txn {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
+                          (tag/create-tag-txn {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})))
 
-        _ (db/user-subscribe-to-tag! (user-1 :id) (tag-1 :id))
-        _ (db/user-subscribe-to-tag! (user-2 :id) (tag-1 :id))
+        _ (db/run-txns!
+            (concat
+              (tag/user-subscribe-to-tag-txn (user-1 :id) (tag-1 :id))
+              (tag/user-subscribe-to-tag-txn (user-2 :id) (tag-1 :id))
+              (tag/user-subscribe-to-tag-txn (user-1 :id) (tag-2 :id))
+              (tag/user-subscribe-to-tag-txn (user-2 :id) (tag-2 :id))))
 
-        _ (db/user-subscribe-to-tag! (user-1 :id) (tag-2 :id))
-        _ (db/user-subscribe-to-tag! (user-2 :id) (tag-2 :id))
+        [msg1 msg2 msg3 msg4]
+        (db/run-txns!
+          (concat
+            (message/create-message-txn {:id (db/uuid)
+                                         :group-id (group-1 :id)
+                                         :user-id (user-1 :id)
+                                         :thread-id (db/uuid)
+                                         :created-at (java.util.Date.)
+                                         :content "Hello?"
+                                         :mentioned-tag-ids [(tag-1 :id)]})
+            (message/create-message-txn {:id (db/uuid)
+                                         :group-id (group-1 :id)
+                                         :thread-id (msg :thread-id)
+                                         :user-id (user-2 :id)
+                                         :created-at (java.util.Date.)
+                                         :content "Hi!"})
+            (message/create-message-txn {:id (db/uuid)
+                                         :thread-id (msg :thread-id)
+                                         :group-id (group-1 :id)
+                                         :user-id (user-1 :id)
+                                         :created-at (java.util.Date.)
+                                         :content "Oh, great, someone else is here."})
+            (message/create-message-txn {:id (db/uuid)
+                                         :group-id (group-1 :id)
+                                         :thread-id (msg :thread-id)
+                                         :user-id (user-2 :id)
+                                         :created-at (java.util.Date.)
+                                         :content "Yep"})))
 
-        msg (db/create-message! {:id (db/uuid)
-                                 :group-id (group-1 :id)
-                                 :user-id (user-1 :id)
-                                 :thread-id (db/uuid)
-                                 :created-at (java.util.Date.)
-                                 :content "Hello?"
-                                 :mentioned-tag-ids [(tag-1 :id)]})
-        _ (db/create-message! {:id (db/uuid)
-                               :group-id (group-1 :id)
-                               :thread-id (msg :thread-id)
-                               :user-id (user-2 :id)
-                               :created-at (java.util.Date.)
-                               :content "Hi!"})
-        _ (db/create-message! {:id (db/uuid)
-                               :thread-id (msg :thread-id)
-                               :group-id (group-1 :id)
-                               :user-id (user-1 :id)
-                               :created-at (java.util.Date.)
-                               :content "Oh, great, someone else is here."})
-        _ (db/create-message! {:id (db/uuid)
-                               :group-id (group-1 :id)
-                               :thread-id (msg :thread-id)
-                               :user-id (user-2 :id)
-                               :created-at (java.util.Date.)
-                               :content "Yep"})
+        [tag-3] (db/run-txns! (tag/create-tag-txn {:id (db/uuid) :group-id (group-2 :id) :name "abcde"}))
 
-        tag-3 (db/create-tag! {:id (db/uuid) :group-id (group-2 :id) :name "abcde"})
+        _ (db/run-txns!
+            (concat
+              (tag/user-subscribe-to-tag-txn (user-1 :id) (tag-3 :id))
+              (tag/user-subscribe-to-tag-txn (user-2 :id) (tag-3 :id))))
 
-        _ (db/user-subscribe-to-tag! (user-1 :id) (tag-3 :id))
-        _ (db/user-subscribe-to-tag! (user-2 :id) (tag-3 :id))
-
-        msg (db/create-message! {:id (db/uuid)
-                                 :user-id (user-1 :id)
-                                 :group-id (group-2 :id)
-                                 :thread-id (db/uuid)
-                                 :created-at (java.util.Date.)
-                                 :content "Hello?"
-                                 :mentioned-tag-ids [(tag-3 :id)]})
-        _ (db/create-message! {:id (db/uuid)
-                               :group-id (group-2 :id)
-                               :thread-id (msg :thread-id)
-                               :user-id (user-2 :id)
-                               :created-at (java.util.Date.)
-                               :content "Hi!"})]
+        [msg5 msg6]
+        (db/run-txns!
+          (concat
+            (message/create-message-txn {:id (db/uuid)
+                                         :user-id (user-1 :id)
+                                         :group-id (group-2 :id)
+                                         :thread-id (db/uuid)
+                                         :created-at (java.util.Date.)
+                                         :content "Hello?"
+                                         :mentioned-tag-ids [(tag-3 :id)]})
+            (message/create-message-txn {:id (db/uuid)
+                                         :group-id (group-2 :id)
+                                         :thread-id (msg :thread-id)
+                                         :user-id (user-2 :id)
+                                         :created-at (java.util.Date.)
+                                         :content "Hi!"})))]
     (println "users" user-1 user-2)
     (println "tags" tag-2 tag-2)))

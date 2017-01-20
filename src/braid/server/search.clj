@@ -1,6 +1,7 @@
 (ns braid.server.search
   (:require
     [braid.server.db :as db]
+    [braid.server.db.thread :as thread]
     [braid.server.search.elasticsearch :as elastic]
     [clojure.set :refer [intersection]]
     [clojure.string :as string]
@@ -52,7 +53,7 @@
   [user-id [query group-id]]
   ; TODO: pagination?
   (let [{:keys [text tags]} (parse-query query)
-        search-db (d/db db/conn)
+        search-db (db/db)
         tag-search (when (seq tags)
                      (set (d/q '[:find ?t-id (max ?time)
                                  :in $ [?tag-name ...] ?g-id
@@ -89,7 +90,7 @@
     (->> (if (every? some? [text-search tag-search])
            (intersection text-search tag-search)
            (first (remove nil? [text-search tag-search])))
-         (filter (comp (partial db/user-can-see-thread? user-id) first))
+         (filter (comp (partial thread/user-can-see-thread? user-id) first))
          ; sorting the ids so we can have a consistent order of results
          (sort-by second #(compare %2 %1))
          (map first))))

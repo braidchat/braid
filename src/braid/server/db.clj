@@ -1,13 +1,9 @@
 (ns braid.server.db
   (:require [datomic.api :as d]
             [mount.core :refer [defstate]]
+            [braid.common.util :refer [extract]]
             [braid.server.conf :refer [config]]
-            [clojure.edn :as edn]
-            [clojure.string :as string]
-            [braid.server.schema :refer [schema]]
-            [braid.server.quests.db]
-            [braid.server.db user message group invitation thread tag bot
-             upload]))
+            [braid.server.schema :refer [schema]]))
 
 (defn init!
   "set up schema"
@@ -28,45 +24,33 @@
 (defstate conn
   :start (connect config))
 
+(defn db [] (d/db conn))
+
 (defn uuid
   []
   (d/squuid))
 
-(defmacro reexport-db-ns
-  "Take a namespace for database functions and re-export it in this namespace.
-  This assumes that all the public functions in the namespace have the database
-  connection as the first argument, which will be automatically set to `conn`
-  in the wrapped functions"
-  [db-ns]
-  (let [pub-fns (ns-publics db-ns)]
-    `(do
-       ~@(doall
-           (for [[fn-name fn-var] pub-fns]
-             (let [{args :arglists :as info} (meta fn-var)]
-               `(defn ~fn-name
-                  ; preserve the same arglist as the original function, so one
-                  ; can see, for example :keys in the arglist
-                  {:arglists '~(map (comp vec rest) args)
-                   :doc ~(info :doc)}
-                  ~@(doall
-                      (for [as args]
-                        (let [gargs (repeatedly (dec (count as)) gensym)]
-                          `(~(vec gargs) (~fn-var conn ~@gargs))))))))))))
-
-(reexport-db-ns braid.server.db.user)
-
-(reexport-db-ns braid.server.db.message)
-
-(reexport-db-ns braid.server.db.group)
-
-(reexport-db-ns braid.server.db.invitation)
-
-(reexport-db-ns braid.server.db.thread)
-
-(reexport-db-ns braid.server.db.tag)
-
-(reexport-db-ns braid.server.db.bot)
-
-(reexport-db-ns braid.server.db.upload)
-
-(reexport-db-ns braid.server.quests.db)
+(defn run-txns!
+  "Execute given transactions. Transactions may be annotated with metadata.
+  If the metadata map contains a function under the key
+  `:braid.server.db/return`, that function will be called with the transaction
+  result and the return value added to the seq of return values
+  If the metadata map contains a function under the key
+  `:braid.server.db/check`, that function will be called with the transaction
+  result and if it fails an assert, the transaction will be aborted & an error
+  bubbled up via ex-info, with the assertion failure message under the key
+  `:braid.server.db/error`."
+  [txns]
+  (let [[returns checks] ((juxt (partial extract ::return)
+                                (partial extract ::check))
+                          (map meta txns))]
+    (when (seq checks)
+      (let [test-db (d/with (db) txns)]
+        (try
+          (doseq [check checks]
+            (check test-db))
+          (catch AssertionError e
+            (throw (ex-info "Transaction Failed"
+                            {::error (.getMessage e)}))))))
+    (let [tx-result @(d/transact conn txns)]
+      (map #(% tx-result) returns))))

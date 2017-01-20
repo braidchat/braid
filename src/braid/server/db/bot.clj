@@ -1,70 +1,84 @@
 (ns braid.server.db.bot
   (:require [datomic.api :as d]
-            [braid.server.db.common :refer [create-entity! bot-pull-pattern db->bot]]
+            [braid.server.db :as db]
+            [braid.server.db.common :refer [bot-pull-pattern db->bot]]
             [braid.server.db.user :as user]
             [braid.server.crypto :as crypto :refer [random-nonce]]))
 
-(defn create-bot!
-  [conn {:keys [id name avatar webhook-url group-id]}]
-  ; TODO: enforce name is unique in that group?
-  (let [fake-user (user/create-bot-user! conn {:id (d/squuid)})]
-    (->> {:bot/id id
-          :bot/name name
-          :bot/avatar avatar
-          :bot/webhook-url webhook-url
-          :bot/token (random-nonce 30)
-          :bot/group [:group/id group-id]
-          :bot/user [:user/id fake-user]}
-         (create-entity! conn)
-         db->bot)))
+;; Queries
 
 (defn bots-in-group
-  [conn group-id]
+  [group-id]
   (->> (d/q '[:find [(pull ?b pull-pattern) ...]
               :in $ pull-pattern ?group-id
               :where
               [?g :group/id ?group-id]
               [?b :bot/group ?g]]
-            (d/db conn) bot-pull-pattern group-id)
+            (db/db) bot-pull-pattern group-id)
        (into #{} (map db->bot))))
 
 (defn bot-by-name-in-group
-  [conn name group-id]
+  [name group-id]
   (some-> (d/q '[:find (pull ?b pull-pattern) .
                  :in $ pull-pattern ?group-id ?name
                  :where
                  [?g :group/id ?group-id]
                  [?b :bot/group ?g]
                  [?b :bot/name ?name]]
-               (d/db conn) bot-pull-pattern group-id name)
+               (db/db) bot-pull-pattern group-id name)
           db->bot))
 
 (defn bot-auth?
   "Check if token is correct for the bot with the given id"
-  [conn bot-id token]
-  (some-> (d/pull (d/db conn) [:bot/token] [:bot/id bot-id])
+  [bot-id token]
+  (some-> (d/pull (db/db) [:bot/token] [:bot/id bot-id])
           :bot/token
           (crypto/constant-comp token)))
 
 (defn bot-by-id
-  [conn bot-id]
-  (db->bot (d/pull (d/db conn) bot-pull-pattern [:bot/id bot-id])))
-
-(defn bot-watch-thread!
-  [conn bot-id thread-id]
-  ; need to verify that thread is in bot's group
-  @(d/transact conn
-     [[:db/add [:bot/id bot-id]
-       :bot/watched [:thread/id thread-id]]]))
+  [bot-id]
+  (db->bot (d/pull (db/db) bot-pull-pattern [:bot/id bot-id])))
 
 (defn bots-watching-thread
-  [conn thread-id]
+  [thread-id]
   (some->> (d/q '[:find [(pull ?b pull-pattern) ...]
                   :in $ pull-pattern ?thread-id
                   :where
                   [?t :thread/id ?thread-id]
-                  [?b :bot/watched ?t]
-                  [?t :thread/group ?g]
-                  [?b :bot/group ?g]]
-                (d/db conn) bot-pull-pattern thread-id)
+                  [?b :bot/watched ?t]]
+                (db/db) bot-pull-pattern thread-id)
        (into #{} (map db->bot))))
+
+;; Transactions
+
+(defn create-bot-txn
+  [{:keys [id name avatar webhook-url group-id]}]
+  ; TODO: enforce name is unique in that group?
+  (let [fake-user-id (d/tempid :entities)
+        bot-id (d/tempid :entities)]
+    [{:db/id fake-user-id
+      :user/id (d/squuid)
+      :user/is-bot? true}
+     ^{:braid.server.db/return
+       (fn [{:keys [db-after tempids]}]
+         (->> (d/resolve-tempid db-after tempids bot-id)
+              (d/entity db-after)
+              db->bot))}
+     {:db/id bot-id
+      :bot/id id
+      :bot/name name
+      :bot/avatar avatar
+      :bot/webhook-url webhook-url
+      :bot/token (random-nonce 30)
+      :bot/group [:group/id group-id]
+      :bot/user fake-user-id}]))
+
+(defn bot-watch-thread-txn
+  [bot-id thread-id]
+  [^{:braid.server.db/check
+     (fn [{:keys [db-after]}]
+       (assert
+         (= (get-in (d/entity db-after [:bot/id bot-id]) [:bot/group :group/id])
+            (get-in (d/entity db-after [:thread/id thread-id]) [:thread/group :group/id]))
+         (format "Bot %s tried to watch thread not in its group %s" bot-id thread-id)))}
+   [:db/add [:bot/id bot-id] :bot/watched [:thread/id thread-id]]])

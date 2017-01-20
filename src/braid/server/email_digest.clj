@@ -16,7 +16,8 @@
             [inliner.core :refer [inline-css]]
             [org.httpkit.client :as http]
             [taoensso.timbre :as timbre]
-            [braid.server.db :as db]
+            [braid.server.db.thread :as thread]
+            [braid.server.db.user :as user]
             [braid.server.message-format :refer [parse-tags-and-mentions]]))
 
 ; finding data
@@ -38,7 +39,7 @@
 
 (defn updates-for-user-since
   [user-id cutoff]
-  (let [users (db/users-for-user user-id)
+  (let [users (user/users-for-user user-id)
         id->nick (into {} (map (juxt :id :nickname)) users)
         id->avatar (into {} (map (juxt :id :avatar)) users)
         pretty-time (comp
@@ -50,8 +51,9 @@
             (filter (partial last-message-after? cutoff))
             (map
               (fn [t]
-                (let [thread-last-open (to-date-time
-                                         (db/thread-last-open-at t user-id))]
+                (let [thread-last-open
+                      (to-date-time
+                        (thread/thread-last-open-at t user-id))]
                   (update t :messages
                           (partial map
                                    (fn [{sender-id :user-id :as m}]
@@ -66,17 +68,17 @@
                                          (assoc :sender (id->nick sender-id))
                                          (assoc :sender-avatar
                                            (id->avatar sender-id))))))))))
-          (db/open-threads-for-user user-id))))
+          (thread/open-threads-for-user user-id))))
 
 (defn daily-update-users
   "Find all ids for users that want daily digest updates"
   []
-  (db/user-search-preferences :email-frequency :daily))
+  (user/user-search-preferences :email-frequency :daily))
 
 (defn weekly-update-users
   "Find all ids for users that want weekly digest updates"
   []
-  (db/user-search-preferences :email-frequency :weekly))
+  (user/user-search-preferences :email-frequency :weekly))
 
 ; build a message from a thread
 
@@ -111,7 +113,7 @@
         cutoff (time/minus (time/now) (time/days 1))]
     (doseq [uid user-ids]
       (when-let [threads (seq (updates-for-user-since uid cutoff))]
-        (let [email (db/user-email uid)]
+        (let [email (user/user-email uid)]
           (send-message email (create-message threads)))))))
 
 (defn daily-digest-job
@@ -137,7 +139,7 @@
         cutoff (time/minus (time/now) (time/days 7))]
     (doseq [uid user-ids]
       (when-let [threads (seq (updates-for-user-since uid cutoff))]
-        (let [email (db/user-email uid)]
+        (let [email (user/user-email uid)]
           (send-message email (create-message threads)))))))
 
 (defn weekly-digest-job
