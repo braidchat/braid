@@ -26,8 +26,7 @@
             [braid.server.sync-handler :refer [event-msg-handler]]
             [braid.server.quests.db :as quests]
             [braid.server.quests.sync]
-            [braid.server.socket :refer [chsk-send!
-                                         connected-uids]]))
+            [braid.server.socket :refer [chsk-send! connected-uids]]))
 
 ;; Handler helpers
 
