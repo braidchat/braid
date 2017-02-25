@@ -2,7 +2,6 @@
   (:require [reagent.core :as r]
             [re-frame.core :as rf :refer [dispatch-sync dispatch]]
             [braid.client.ui.views.app :refer [app-view]]
-            [braid.client.clj-highlighter :as highlighter]
             [braid.client.state.remote-handlers]
             [braid.client.router :as router]
             braid.client.core.subs
@@ -28,8 +27,6 @@
                      (fn [e]
                        (dispatch [:set-window-visibility
                                   (= "visible" (.-visibilityState js/document))])))
-
-  (highlighter/install-highlighter)
 
   (r/render [app-view] (. js/document (getElementById "app")))
 

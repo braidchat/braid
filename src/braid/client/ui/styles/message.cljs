@@ -2,6 +2,7 @@
   (:require [braid.client.ui.styles.vars :refer [avatar-size pad card-width]]
             [braid.client.ui.styles.mixins :as mixins]
             [braid.client.ui.styles.pills :as pills]
+            [braid.client.ui.styles.hljs :refer [hljs-styles]]
             [garden.arithmetic :as m]
             [garden.units :refer [rem px]]))
 
@@ -93,25 +94,26 @@
        :vertical-align "middle"
        :font-size "0.8em"}]]]
 
-    [:.prettyprint
-     {:background-color "#e2f5ff"
-      :color "black"}
-      [:.opn :.clo
-       {:color "#e28964"}]
-      [:.kwd
-       {:color "#785c28"}]
-      [:.str
-       {:color "green"}]
-      [:.typ
-       {:color "rgb(65, 125, 255)"}]]
+   [:pre
+    {:background-color "black"
+     :color "white"}
 
-    [:.multiline-code
+    hljs-styles
+
+    [:&.inline
+     {:padding "0.25em 0.5em"
+      :display "inline-block"}]
+
+    [:&.multiline
      {:display "block"
       :text-overflow "ellipsis"
       :white-space "pre"
       :word-break "normal"
       :width "100%"
-      :overflow-x "hidden"}
-      [:&:hover
-       {:text-overflow "initial"
-        :overflow-x "scroll"}]]])
+      :overflow-x "hidden"
+      :box-sizing "border-box"
+      :padding "0.5em"}
+
+     [:&:hover
+      {:text-overflow "initial"
+       :overflow-x "scroll"}]]]])

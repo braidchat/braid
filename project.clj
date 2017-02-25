@@ -36,7 +36,9 @@
                  [reagent "0.6.0-rc"]
                  [re-frame "0.8.0"]
                  [cljsjs/husl "6.0.1-0"]
+                 [cljsjs/highlight "9.6.0-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
+
                  ;shared
                  [org.clojure/tools.reader "1.0.0-beta3"]
                  [org.clojure/core.async "0.2.385" :exclusions [org.clojure/tools.reader]]
