@@ -3,6 +3,7 @@
             [compojure.coercions :refer [as-uuid]]
             [compojure.route :refer [resources]]
             [clostache.parser :as clostache]
+            [ring.util.response :refer [resource-response]]
             [braid.server.conf :refer [config]]
             [braid.server.digest :as digest]
             [braid.server.db.group :as group]
@@ -79,4 +80,15 @@
     (get-html "mobile")))
 
 (defroutes resource-routes
+  ; add cache-control headers to perma-cache braid.js
+  ; (since it uses a cache-busted url anyway)
+
+  (GET "/js/desktop/out/braid.js" []
+    (when-let [response (resource-response "public/js/desktop/out/braid.js")]
+     (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")))
+
+  (GET "/js/mobile/out/braid.js" []
+    (when-let [response (resource-response "public/js/desktop/out/braid.js")]
+      (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")))
+
   (resources "/"))

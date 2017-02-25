@@ -52,8 +52,7 @@
       (assoc-in [:security :anti-forgery] true)))
 
 (def static-site-defaults
-  {:static {:resources "public"}
-   :params {:urlencoded true
+  {:params {:urlencoded true
             :multipart  true
             :nested     true
             :keywordize true}
