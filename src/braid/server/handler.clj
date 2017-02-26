@@ -25,6 +25,8 @@
             ; requiring so mount sees state
             [braid.server.email-digest :refer [email-jobs]]))
 
+(def session-max-age (* 60 60 24 365))
+
 ; NOT using config here, b/c it won't have started when this runs
 (if (= (env :environment) "prod")
   (do
@@ -34,7 +36,7 @@
                                         :port 6379}})
     (let [carmine-store (ns-resolve 'taoensso.carmine.ring 'carmine-store)]
       (def session-store
-        (carmine-store '*redis-conf* {:expiration-secs (* 60 60 24 7)
+        (carmine-store '*redis-conf* {:expiration-secs session-max-age
                                       :key-prefix "braid"}))))
   (do
     (require 'ring.middleware.session.memory)
@@ -45,7 +47,7 @@
   (-> defaults
       (assoc-in [:session :cookie-name] "braid")
       (assoc-in [:session :cookie-attrs :secure] false #_(= (env :environment) "prod"))
-      (assoc-in [:session :cookie-attrs :max-age] (* 60 60 24 7))
+      (assoc-in [:session :cookie-attrs :max-age] session-max-age)
       (assoc-in [:session :store] session-store)))
 
 (defn assoc-csrf-conf [defaults]
