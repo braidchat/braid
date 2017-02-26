@@ -21,6 +21,7 @@
         {:keys [chsk ch-recv send-fn state]}
         (sente/make-channel-socket! "/chsk"
                                     {:host domain
+                                     :ws-kalive-ms 5000
                                      :path "/chsk"
                                      :packer packer})]
     (def chsk       chsk)
