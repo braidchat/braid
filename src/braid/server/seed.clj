@@ -13,10 +13,14 @@
   (db/init! (config :db-url)))
 
 (defn seed! []
-  (let [[group-1 group-2] (db/run-txns!
-                            (concat
-                              (group/create-group-txn {:id (db/uuid) :name "Braid"})
-                              (group/create-group-txn {:id (db/uuid) :name "Chat"})))
+  (let [_ (println "Create Groups")
+        [group-1 group-2]
+        (db/run-txns!
+          (concat
+            (group/create-group-txn {:id (db/uuid) :name "Braid"})
+            (group/create-group-txn {:id (db/uuid) :name "Chat"})))
+
+        _ (println "Create Users")
         [user-1 user-2]
         (db/run-txns!
           (concat
@@ -32,21 +36,25 @@
                :nickname "bar"
                :password "bar"
                :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})))
+
+        _ (println "Add Users to Groups and Make Users Admins")
         _ (db/run-txns!
             (concat
               (group/user-add-to-group-txn (user-1 :id) (group-1 :id))
               (group/user-add-to-group-txn (user-2 :id) (group-1 :id))
               (group/user-add-to-group-txn (user-1 :id) (group-2 :id))
               (group/user-add-to-group-txn (user-2 :id) (group-2 :id))
+              (group/user-make-group-admin-txn (user-1 :id) (group-1 :id))
+              (group/user-make-group-admin-txn (user-2 :id) (group-2 :id))))
 
-              (group/user-make-group-admin! (user-1 :id) (group-1 :id))
-              (group/user-make-group-admin! (user-2 :id) (group-2 :id))))
+        _ (println "Create Tags")
+        [tag-1 tag-2]
+        (db/run-txns!
+          (concat
+            (tag/create-tag-txn {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
+            (tag/create-tag-txn {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})))
 
-        [tag-1 tag-2] (db/run-txns!
-                        (concat
-                          (tag/create-tag-txn {:id (db/uuid) :group-id (group-1 :id) :name "braid"})
-                          (tag/create-tag-txn {:id (db/uuid) :group-id (group-1 :id) :name "watercooler"})))
-
+        _ (println "Subscribe Users to Tags")
         _ (db/run-txns!
             (concat
               (tag/user-subscribe-to-tag-txn (user-1 :id) (tag-1 :id))
@@ -54,31 +62,34 @@
               (tag/user-subscribe-to-tag-txn (user-1 :id) (tag-2 :id))
               (tag/user-subscribe-to-tag-txn (user-2 :id) (tag-2 :id))))
 
-        [msg1 msg2 msg3 msg4]
+        _ (println "Create Messages")
+        [msg-1]
+        (db/run-txns!
+          (message/create-message-txn {:id (db/uuid)
+                                       :group-id (group-1 :id)
+                                       :user-id (user-1 :id)
+                                       :thread-id (db/uuid)
+                                       :created-at (java.util.Date.)
+                                       :content "Hello?"
+                                       :mentioned-tag-ids [(tag-1 :id)]}))
+        [msg-2 msg-3 msg-4]
         (db/run-txns!
           (concat
             (message/create-message-txn {:id (db/uuid)
                                          :group-id (group-1 :id)
-                                         :user-id (user-1 :id)
-                                         :thread-id (db/uuid)
-                                         :created-at (java.util.Date.)
-                                         :content "Hello?"
-                                         :mentioned-tag-ids [(tag-1 :id)]})
-            (message/create-message-txn {:id (db/uuid)
-                                         :group-id (group-1 :id)
-                                         :thread-id (msg :thread-id)
+                                         :thread-id (msg-1 :thread-id)
                                          :user-id (user-2 :id)
                                          :created-at (java.util.Date.)
                                          :content "Hi!"})
             (message/create-message-txn {:id (db/uuid)
-                                         :thread-id (msg :thread-id)
+                                         :thread-id (msg-1 :thread-id)
                                          :group-id (group-1 :id)
                                          :user-id (user-1 :id)
                                          :created-at (java.util.Date.)
                                          :content "Oh, great, someone else is here."})
             (message/create-message-txn {:id (db/uuid)
                                          :group-id (group-1 :id)
-                                         :thread-id (msg :thread-id)
+                                         :thread-id (msg-1 :thread-id)
                                          :user-id (user-2 :id)
                                          :created-at (java.util.Date.)
                                          :content "Yep"})))
@@ -102,9 +113,7 @@
                                          :mentioned-tag-ids [(tag-3 :id)]})
             (message/create-message-txn {:id (db/uuid)
                                          :group-id (group-2 :id)
-                                         :thread-id (msg :thread-id)
+                                         :thread-id (msg-1 :thread-id)
                                          :user-id (user-2 :id)
                                          :created-at (java.util.Date.)
-                                         :content "Hi!"})))]
-    (println "users" user-1 user-2)
-    (println "tags" tag-2 tag-2)))
+                                         :content "Hi!"})))]))
