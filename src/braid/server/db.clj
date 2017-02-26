@@ -5,17 +5,20 @@
             [braid.server.conf :refer [config]]
             [braid.server.schema :refer [schema]]))
 
-(defn init!
-  "set up schema"
-  [db-url]
-  (when (d/create-database db-url)
-    @(d/transact (d/connect db-url)
+(defn install-schema! [db-url]
+ (d/transact (d/connect db-url)
                  (concat
                    ; partition for our data
                    [{:db/ident :entities
                      :db/id #db/id [:db.part/db]
                      :db.install/_partition :db.part/db}]
-                   schema))))
+                   schema)))
+
+(defn init!
+  "set up schema"
+  [db-url]
+  (when (d/create-database db-url)
+    @(install-schema! db-url)))
 
 (defn connect [{:keys [db-url]}]
   (init! db-url)
