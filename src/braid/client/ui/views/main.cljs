@@ -16,7 +16,8 @@
             [braid.client.bots.views.bots-page :refer [bots-page-view]]
             [braid.client.uploads.views.uploads-page :refer [uploads-page-view]]
             [braid.client.ui.views.pages.thread :refer [single-thread-view]]
-            [braid.client.ui.views.pages.changelog :refer [changelog-view]]))
+            [braid.client.ui.views.pages.changelog :refer [changelog-view]]
+            [braid.client.ui.views.reconnect-overlay :refer [reconnect-overlay-view]]))
 
 (defn page-view []
   (let [page (subscribe [:page])]
@@ -41,6 +42,7 @@
     (fn []
       [:div.main
        [error-banner-view]
+       [reconnect-overlay-view]
        [sidebar-view]
        (when @group-id
          [header-view])

@@ -80,21 +80,4 @@
    (option vars/top-bar-height)
 
    [:>.spacer
-    {:flex-grow 2}]
-
-   [:>.connection-state
-    {:text-align "center"
-     :font-size (em 1.5)
-     :margin-bottom (m// vars/pad 2)}
-
-    [:&.connected
-
-     [:&::before
-      {:color "green"}
-      (mixins/fontawesome \uf111)]]
-
-    [:&.disconnected
-
-     [:&::before
-      {:color "red"}
-      (mixins/fontawesome \uf1ce)]]]])
+    {:flex-grow 2}]])

@@ -97,11 +97,6 @@
     store/initial-state))
 
 (reg-event-db
-  :clear-session
-  (fn [state _]
-    (assoc-in state [:session] nil)))
-
-(reg-event-db
   :new-message-text
   (fn [state [_ {:keys [group-id thread-id content]}]]
     (if (get-in state [:threads thread-id])
@@ -447,8 +442,9 @@
 
 (reg-event-fx
   :check-auth
-  (fn [cofx _]
-    {:edn-xhr {:uri "/check"
+  (fn [{state :db} _]
+    {:db (assoc state :login-state :auth-check)
+     :edn-xhr {:uri "/check"
                :method :get
                :on-complete (fn [_] (dispatch [:start-socket]))
                :on-error (fn [_] (dispatch [:set-login-state :login-form]))}}))
@@ -461,10 +457,7 @@
 (reg-event-fx
   :start-socket
   (fn [cofx [_ _]]
-    ; TODO
-    (sync/make-socket!)
-    ; TODO
-    (sync/start-router!)
+    (sync/connect!)
     {:dispatch [:set-login-state :ws-connect]}))
 
 (reg-event-fx
@@ -505,8 +498,9 @@
                :method :post
                :params {:csrf-token (:csrf-token @sync/chsk-state)}
                :on-complete (fn [data]
-                              (dispatch [:set-login-state :login-form])
-                              (dispatch [:clear-session]))}}))
+                              (sync/disconnect!)
+                              (dispatch [:initialize-db])
+                              (dispatch [:set-login-state :login-form]))}}))
 
 (reg-event-fx
   :set-group-and-page
@@ -664,11 +658,28 @@
     {:redirect-to route}))
 
 (reg-event-fx
-  :core/disconnected
+  :core/websocket-disconnected
   (fn [{state :db} _]
-    {:db (assoc state :connection-state :disconnected)}))
+    {:db (assoc-in state [:websocket-state :connected?] false)}))
 
 (reg-event-fx
-  :core/connected
-  (fn  [{state :db} _]
-    {:db (assoc state :connection-state :connected)}))
+  :core/websocket-connected
+  (fn [{state :db} _]
+    {:db (assoc-in state [:websocket-state :connected?] true)}))
+
+(reg-event-fx
+  :core/websocket-needs-auth
+  (fn [{state :db} _]
+    {:dispatch-n [[:initialize-db]
+                  [:set-login-state :login-form]]}))
+
+(reg-event-fx
+  :core/websocket-update-next-reconnect
+  (fn [{state :db} [_ next-reconnect]]
+    {:db (assoc-in state [:websocket-state :next-reconnect] next-reconnect)}))
+
+(reg-event-fx
+  :core/reconnect
+  (fn [_ _]
+    (sync/reconnect!)
+    {}))

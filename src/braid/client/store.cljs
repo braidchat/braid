@@ -7,8 +7,9 @@
 
 (def initial-state
   (merge
-    {:login-state :auth-check ; :ws-connect :login-form :app
-     :connection-state :disconnected ; :connected
+    {:login-state :init ; :auth-check :ws-connect :login-form :app
+     :websocket-state {:connected? false
+                       :next-reconnect nil}
      :open-group-id nil
      :threads {}
      :group-threads {}

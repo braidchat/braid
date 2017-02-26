@@ -55,20 +55,24 @@
      :border-color "#666"
      :cursor "pointer"}]])
 
-(defn outline-button []
+(defn outline-button [{:keys [text-color border-color
+                              hover-text-color hover-border-color]}]
   [:&
    {:display "inline-block"
+    :background "none"
     :border-radius "0.25em"
-    :border "1px solid #ccc"
+    :border [["1px" "solid" border-color]]
     :text-decoration "none"
-    :color "#aaa"
-    :padding [[(em 0.1) (em 0.25)]]
+    :color text-color
+    :padding [[0 (em 0.25)]]
+    :line-height "1.5em"
+    :height "1.5em"
     :white-space "nowrap"
     :cursor "pointer"
     :text-align "center"}
    [:&:hover
-    {:color "#999"
-     :border-color "#aaa"}]])
+    {:color hover-text-color
+     :border-color hover-border-color}]])
 
 (defn fontawesome [unicode]
   {:font-family "fontawesome"
