@@ -171,7 +171,6 @@
        (when (< 0 (count @invitations))
          [:div.badge (count @invitations)])])))
 
-
 (defn global-settings-button-view []
   (let [page (subscribe [:page])]
     (fn []
@@ -179,8 +178,20 @@
        {:class (when (= (@page :type) :global-settings) "active")
         :href (routes/other-path {:page-id "global-settings"})}])))
 
+(defn connection-state-view
+  []
+  (let [state (subscribe [:core/connection-state])]
+    (fn []
+      [:div.connection-state
+       {:class (name @state)
+        :title (case @state
+                 :connected "Connected"
+                 :disconnected "Disconnected")}])))
+
 (defn sidebar-view []
   [:div.sidebar
    [groups-view]
    [group-explore-button-view]
+   [:div.spacer]
+   [connection-state-view]
    [global-settings-button-view]])
