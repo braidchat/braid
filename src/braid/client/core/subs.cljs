@@ -276,6 +276,6 @@
          (filter (fn [tag] (= (get-in state [:open-group-id]) (tag :group-id)))))))
 
 (reg-sub
-  :core/connection-state
+  :core/websocket-state
   (fn [state _]
-    (state :connection-state)))
+    (state :websocket-state)))

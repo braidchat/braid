@@ -1,3 +1,7 @@
+## 27 February 2017
+
+  - The Braid client will now detect abnormal disconnects (ex. wifi drops) and indicate when it is disconnected (and when the session cookie expires)
+
 ## 8 September 2016
 
   - It is now possible to tag a thread using the mouse & clicking the "+" button on a thread

@@ -11,6 +11,7 @@
             [braid.client.ui.styles.animations]
             [braid.client.ui.styles.embed]
             [braid.client.ui.styles.login]
+            [braid.client.ui.styles.reconnect-overlay]
             [braid.client.ui.styles.page]
             [braid.client.ui.styles.pages.channels]
             [braid.client.ui.styles.pages.me]
@@ -36,6 +37,7 @@
                braid.client.ui.styles.animations/anim-spin
                braid.client.ui.styles.body/body
                braid.client.ui.styles.message/message
+               braid.client.ui.styles.reconnect-overlay/reconnect-overlay
                braid.client.ui.styles.page/page
                braid.client.ui.styles.misc/layout
                braid.client.ui.styles.sidebar/sidebar

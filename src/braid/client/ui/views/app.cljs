@@ -23,4 +23,7 @@
          :app
          [main-view]
 
+         :init
+         [:div.status]
+
          [:p "wha?"])])))

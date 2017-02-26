@@ -42,16 +42,19 @@
   (debugf "Unhandled event: %s" event))
 
 (defmethod event-msg-handler :chsk/state
-  [{:as ev-msg [old-state new-state] :?data}]
-  (if (new-state :first-open?)
-    (do
-      (dispatch [:core/connected])
-      (debugf "Channel socket successfully established!"))
-    (do
-      (debugf "Channel socket state change: %s" new-state)
-      (if (not (:open? new-state))
-        (dispatch [:core/disconnected])
-        (dispatch [:core/connected]))))
+  [{[old-state new-state] :?data}]
+
+  (if (new-state :open?)
+    (if (= :taoensso.sente/nil-uid (new-state :uid))
+      ; reconnected, but session has expired
+      ; user needs to log in again
+      (dispatch [:core/websocket-needs-auth])
+      (dispatch [:core/websocket-connected]))
+    (dispatch [:core/websocket-disconnected]))
+
+  (when-let [next-reconnect (new-state :udt-next-reconnect)]
+    (dispatch [:core/websocket-update-next-reconnect next-reconnect]))
+
   (event-handler [:socket/connected new-state]))
 
 (defmethod event-msg-handler :chsk/recv
@@ -72,5 +75,15 @@
   (stop-router!)
   (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler*)))
 
+(defn disconnect! []
+  (sente/chsk-disconnect! chsk))
+
 (defn reconnect! []
   (sente/chsk-reconnect! chsk))
+
+(defn connect! []
+  (if-not chsk
+    (do
+      (make-socket!)
+      (start-router!))
+    (reconnect!)))

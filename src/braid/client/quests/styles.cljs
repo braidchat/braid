@@ -111,7 +111,10 @@
           {:align-self "center"
            :white-space "nowrap"}
           [:a
-           (mixins/outline-button)
+           (mixins/outline-button {:text-color "#aaa"
+                                   :border-color "#ccc"
+                                   :hover-text-color "#999"
+                                   :hover-border-color "aaa"})
            {:margin-left (em 0.5)}
 
            [:&.video
