@@ -275,3 +275,7 @@
          vals
          (filter (fn [tag] (= (get-in state [:open-group-id]) (tag :group-id)))))))
 
+(reg-sub
+  :core/connection-state
+  (fn [state _]
+    (state :connection-state)))

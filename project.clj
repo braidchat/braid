@@ -12,7 +12,7 @@
                  [ring-cors "0.1.8"]
                  [compojure "1.5.1"]
                  [environ "1.0.3"]
-                 [com.taoensso/timbre "4.5.1" :exclusions [org.clojure/tools.reader]]
+                 [com.taoensso/timbre "4.7.4" :exclusions [org.clojure/tools.reader]]
                  [crypto-password "0.2.0"]
                  [clj-time "0.12.0"]
                  [instaparse "1.4.2"]
@@ -43,7 +43,7 @@
                  [org.clojure/tools.reader "1.0.0-beta3"]
                  [org.clojure/core.async "0.2.385" :exclusions [org.clojure/tools.reader]]
                  [com.taoensso/truss "1.3.3"]
-                 [com.taoensso/sente "1.9.0-beta3" :exclusions [org.clojure/tools.reader taoensso.timbre]]
+                 [com.taoensso/sente "1.11.0" :exclusions [org.clojure/tools.reader taoensso.timbre]]
                  [prismatic/schema "1.1.2"]
 
                  ;mobile

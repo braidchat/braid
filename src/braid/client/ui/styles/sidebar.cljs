@@ -51,8 +51,7 @@
      :box-shadow [[0 (px 1) (px 4) 0 "rgba(0,0,0,0.5)"]]}]
 
    [:&.other
-    {:color "#999"
-     :margin-bottom (m// vars/pad 2)}
+    {:color "#999"}
 
     [:&:after
      {:font-size (em 1.25)
@@ -67,15 +66,35 @@
     [:&.global-settings:after
      (mixins/fontawesome \uf013)]]
 
-   badge]
-
-  )
+   badge])
 
 (def sidebar
   [:.sidebar
    {:background "#222"
     :padding vars/pad
     :overflow-x "visible"
-    :overflow-y "auto"}
+    :overflow-y "auto"
+    :display "flex"
+    :flex-direction "column"}
 
-   (option vars/top-bar-height)])
+   (option vars/top-bar-height)
+
+   [:>.spacer
+    {:flex-grow 2}]
+
+   [:>.connection-state
+    {:text-align "center"
+     :font-size (em 1.5)
+     :margin-bottom (m// vars/pad 2)}
+
+    [:&.connected
+
+     [:&::before
+      {:color "green"}
+      (mixins/fontawesome \uf111)]]
+
+    [:&.disconnected
+
+     [:&::before
+      {:color "red"}
+      (mixins/fontawesome \uf1ce)]]]])

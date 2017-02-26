@@ -21,6 +21,7 @@
         {:keys [chsk ch-recv send-fn state]}
         (sente/make-channel-socket! "/chsk"
                                     {:host domain
+                                     :ws-kalive-ms 5000
                                      :path "/chsk"
                                      :packer packer})]
     (def chsk       chsk)
@@ -43,12 +44,14 @@
 (defmethod event-msg-handler :chsk/state
   [{:as ev-msg [old-state new-state] :?data}]
   (if (new-state :first-open?)
-    (debugf "Channel socket successfully established!")
+    (do
+      (dispatch [:core/connected])
+      (debugf "Channel socket successfully established!"))
     (do
       (debugf "Channel socket state change: %s" new-state)
       (if (not (:open? new-state))
-        (dispatch [:disconnected ["Disconnected" :warn]])
-        (dispatch [:clear-error [:disconnected]]))))
+        (dispatch [:core/disconnected])
+        (dispatch [:core/connected]))))
   (event-handler [:socket/connected new-state]))
 
 (defmethod event-msg-handler :chsk/recv

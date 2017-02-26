@@ -12,6 +12,7 @@
       (sente/make-channel-socket! (get-sch-adapter)
                                   {:user-id-fn
                                    (fn [ob] (get-in ob [:session :user-id]))
+                                   :ws-kalive-ms 30000
                                    :packer packer})]
   (def ring-ajax-post                ajax-post-fn)
   (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)

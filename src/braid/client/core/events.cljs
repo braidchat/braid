@@ -662,3 +662,13 @@
   :go-to
   (fn [_ [_ route]]
     {:redirect-to route}))
+
+(reg-event-fx
+  :core/disconnected
+  (fn [{state :db} _]
+    {:db (assoc state :connection-state :disconnected)}))
+
+(reg-event-fx
+  :core/connected
+  (fn  [{state :db} _]
+    {:db (assoc state :connection-state :connected)}))
