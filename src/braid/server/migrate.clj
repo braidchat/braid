@@ -246,7 +246,7 @@
       (let [u-id (:user/id p)
             u-prefs (edn/read-string (:user/preferences-old p))]
         (doseq [[k v] u-prefs]
-          (when k (user/user-set-preference! db/conn u-id k v)))))))
+          (when k (db/run-txns! (user/user-set-preference-txn u-id k v))))))))
 
 (defn migrate-2016-05-03
   "Add tag descriptions"
