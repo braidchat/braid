@@ -6,6 +6,8 @@
             [garden.arithmetic :as m]
             [garden.units :refer [rem px]]))
 
+(def message-left-pad  (m/+ avatar-size (rem 0.5)))
+
 (def message
   [:.message
    {:position "relative"
@@ -73,7 +75,7 @@
     {:white-space "pre-wrap"
      :word-break "break-word"
      :display "inline-block"
-     :padding-left (m/+ avatar-size (rem 0.5))
+     :padding-left message-left-pad
      :width "100%"
      :box-sizing "border-box"
      :line-height "1.25em"
@@ -102,18 +104,30 @@
 
     [:&.inline
      {:padding "0.25em 0.5em"
-      :display "inline-block"}]
-
-    [:&.multiline
-     {:display "block"
+      :display "inline-block"
       :text-overflow "ellipsis"
-      :white-space "pre"
-      :word-break "normal"
-      :width "100%"
       :overflow-x "hidden"
-      :box-sizing "border-box"
-      :padding "0.5em"}
+      :max-width "100%"
+      :vertical-align "middle"
+      :margin 0}
 
      [:&:hover
       {:text-overflow "initial"
-       :overflow-x "scroll"}]]]])
+       :overflow-x "scroll"}]]
+
+    [:&.multiline
+     {:display "block"
+      :margin [[0 0 0 (m/* -1 (m/+ pad message-left-pad))]]
+      :width card-width}
+
+     [:>code
+      {:overflow-x "hidden"
+       :display "block"
+       :box-sizing "border-box"
+       :padding "1em"
+       :width "100%"
+       :text-overflow "ellipsis"}
+
+       [:&:hover
+        {:text-overflow "initial"
+         :overflow-x "scroll"}]]]]])
