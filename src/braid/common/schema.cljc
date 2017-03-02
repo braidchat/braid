@@ -1,8 +1,10 @@
 (ns braid.common.schema
-  (:require [schema.core :as s :include-macros true]
-            #?(:clj [taoensso.timbre :as timbre :refer [debugf]]
-               :cljs [taoensso.timbre :as timbre :refer-macros [debugf]]))
-  (:import #?(:clj [clojure.lang ExceptionInfo])))
+  (:require
+    [schema.core :as s :include-macros true]
+    #?(:clj [taoensso.timbre :as timbre :refer [debugf]]
+       :cljs [taoensso.timbre :as timbre :refer-macros [debugf]]))
+  (:import
+    #?(:clj [clojure.lang ExceptionInfo])))
 
 
 (def NewMessage

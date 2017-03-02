@@ -1,7 +1,8 @@
 (ns braid.test.server.markdown
-  (:require [clojure.test :refer :all]
-            [clojure.string :as string]
-            [braid.server.markdown :refer [markdown->hiccup]]))
+  (:require
+    [clojure.string :as string]
+    [clojure.test :refer :all]
+    [braid.server.markdown :refer [markdown->hiccup]]))
 
 (deftest basic-changelog-markdown
   (testing "Simple markdown parsing"

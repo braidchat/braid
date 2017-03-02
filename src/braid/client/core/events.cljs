@@ -1,16 +1,17 @@
 (ns braid.client.core.events
-  (:require [clojure.string :as string]
-            [clojure.set :as set]
-            [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]
-            [braid.client.store :as store]
-            [braid.client.sync :as sync]
-            [braid.client.schema :as schema]
-            [braid.common.util :as util]
-            [braid.client.router :as router]
-            [braid.client.routes :as routes]
-            [braid.client.xhr :refer [edn-xhr]]
-            [braid.client.state.helpers :as helpers :refer [key-by-id]]
-            [braid.client.quests.helpers :as quest-helpers]))
+  (:require
+    [clojure.set :as set]
+    [clojure.string :as string]
+    [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]
+    [braid.client.quests.helpers :as quest-helpers]
+    [braid.client.router :as router]
+    [braid.client.routes :as routes]
+    [braid.client.schema :as schema]
+    [braid.client.state.helpers :as helpers :refer [key-by-id]]
+    [braid.client.store :as store]
+    [braid.client.sync :as sync]
+    [braid.client.xhr :refer [edn-xhr]]
+    [braid.common.util :as util]))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))

@@ -1,5 +1,6 @@
 (ns braid.client.ui.styles.animations
-  (:require [garden.stylesheet :refer [at-keyframes]]))
+  (:require
+    [garden.stylesheet :refer [at-keyframes]]))
 
 (def anim-spin
   (at-keyframes :anim-spin

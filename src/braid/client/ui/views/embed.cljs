@@ -1,8 +1,9 @@
 (ns braid.client.ui.views.embed
-  (:require [reagent.core :as r]
-            [cljs.core.async :refer [put!]]
-            [braid.client.xhr :refer [edn-xhr]]
-            [braid.client.helpers :refer [->color url->color]]))
+  (:require
+    [cljs.core.async :refer [put!]]
+    [reagent.core :as r]
+    [braid.client.xhr :refer [edn-xhr]]
+    [braid.client.helpers :refer [->color url->color]]))
 
 (defn- arr->rgb [arr]
   ; until embedly provides color alpha, default to transparent background

@@ -1,8 +1,9 @@
 (ns retouch.views.drawer
-  (:require [reagent.core :as r]
-            [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [garden.core :refer [css]]
-            [retouch.common :refer [easing-fn]]))
+  (:require
+    [garden.core :refer [css]]
+    [reagent.core :as r]
+    [reagent.ratom :include-macros true :refer-macros [reaction]]
+    [retouch.common :refer [easing-fn]]))
 
 (def style-view
   (fn []

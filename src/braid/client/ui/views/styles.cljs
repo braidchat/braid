@@ -1,25 +1,26 @@
 (ns braid.client.ui.views.styles
-  (:require [garden.core :refer [css]]
-            [braid.client.ui.styles.message]
-            [braid.client.ui.styles.thread]
-            [braid.client.ui.styles.header]
-            [braid.client.ui.styles.body]
-            [braid.client.ui.styles.sidebar]
-            [braid.client.ui.styles.imports]
-            [braid.client.ui.styles.misc]
-            [braid.client.ui.styles.pills]
-            [braid.client.ui.styles.animations]
-            [braid.client.ui.styles.embed]
-            [braid.client.ui.styles.login]
-            [braid.client.ui.styles.reconnect-overlay]
-            [braid.client.ui.styles.page]
-            [braid.client.ui.styles.pages.channels]
-            [braid.client.ui.styles.pages.me]
-            braid.client.group-admin.views.group-settings-page-styles
-            braid.client.invites.views.invite-page-styles
-            braid.client.bots.views.bots-page-styles
-            braid.client.uploads.views.uploads-page-styles
-            [braid.client.ui.styles.vars :as vars]))
+  (:require
+    [garden.core :refer [css]]
+    [braid.client.ui.styles.animations]
+    [braid.client.ui.styles.embed]
+    [braid.client.ui.styles.body]
+    [braid.client.ui.styles.header]
+    [braid.client.ui.styles.imports]
+    [braid.client.ui.styles.login]
+    [braid.client.ui.styles.message]
+    [braid.client.ui.styles.misc]
+    [braid.client.ui.styles.page]
+    [braid.client.ui.styles.pages.channels]
+    [braid.client.ui.styles.pages.me]
+    [braid.client.ui.styles.pills]
+    [braid.client.ui.styles.reconnect-overlay]
+    [braid.client.ui.styles.sidebar]
+    [braid.client.ui.styles.thread]
+    [braid.client.ui.styles.vars :as vars]
+    [braid.client.bots.views.bots-page-styles]
+    [braid.client.group-admin.views.group-settings-page-styles]
+    [braid.client.invites.views.invite-page-styles]
+    [braid.client.uploads.views.uploads-page-styles]))
 
 (defn styles-view []
   [:style

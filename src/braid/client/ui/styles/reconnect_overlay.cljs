@@ -1,8 +1,8 @@
 (ns braid.client.ui.styles.reconnect-overlay
   (:require
     [garden.arithmetic :as m]
-    [braid.client.ui.styles.vars :as vars]
-    [braid.client.ui.styles.mixins :as mixins]))
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def reconnect-overlay
   [:.reconnect-overlay

@@ -1,8 +1,9 @@
 (ns braid.client.ui.styles.embed
-  (:require [garden.arithmetic :as m]
-            [garden.units :refer [rem]]
-            [braid.client.ui.styles.mixins :as mixins]
-            [braid.client.ui.styles.vars :as vars]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [rem]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]))
 
 (defn embed [pad]
   [:.embed

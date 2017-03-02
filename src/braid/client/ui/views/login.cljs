@@ -1,6 +1,7 @@
 (ns braid.client.ui.views.login
-  (:require [reagent.core :as r]
-            [re-frame.core :refer [dispatch]]))
+  (:require
+    [reagent.core :as r]
+    [re-frame.core :refer [dispatch]]))
 
 (defn login-view []
   (let [state (r/atom {:email ""

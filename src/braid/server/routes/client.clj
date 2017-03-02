@@ -1,16 +1,17 @@
 (ns braid.server.routes.client
-  (:require [compojure.core :refer [GET defroutes]]
-            [compojure.coercions :refer [as-uuid]]
-            [compojure.route :refer [resources]]
-            [clostache.parser :as clostache]
-            [ring.util.response :refer [resource-response]]
-            [braid.server.conf :refer [config]]
-            [braid.server.digest :as digest]
-            [braid.server.db.group :as group]
-            [braid.server.db.invitation :as invitation]
-            [braid.server.db.user :as user]
-            [braid.server.invite :as invites]
-            [braid.server.api.github :as github]))
+  (:require
+    [compojure.coercions :refer [as-uuid]]
+    [compojure.core :refer [GET defroutes]]
+    [compojure.route :refer [resources]]
+    [clostache.parser :as clostache]
+    [ring.util.response :refer [resource-response]]
+    [braid.server.api.github :as github]
+    [braid.server.conf :refer [config]]
+    [braid.server.digest :as digest]
+    [braid.server.db.group :as group]
+    [braid.server.db.invitation :as invitation]
+    [braid.server.db.user :as user]
+    [braid.server.invite :as invites]))
 
 (defn get-html [client]
   (clostache/render-resource

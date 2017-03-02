@@ -1,12 +1,14 @@
 (ns braid.client.ui.views.autocomplete
-  (:require [clj-fuzzy.metrics :as fuzzy]
-            [re-frame.core :refer [subscribe dispatch]]
-            [braid.client.schema :as schema]
-            [clojure.string :as string]
-            [braid.client.helpers :refer [id->color debounce]]
-            [braid.client.emoji :as emoji]
-            [goog.string :as gstring])
-  (:import [goog.events KeyCodes]))
+  (:require
+    [clojure.string :as string]
+    [clj-fuzzy.metrics :as fuzzy]
+    [goog.string :as gstring]
+    [re-frame.core :refer [subscribe dispatch]]
+    [braid.client.schema :as schema]
+    [braid.client.helpers :refer [id->color debounce]]
+    [braid.client.emoji :as emoji])
+  (:import
+    [goog.events KeyCodes]))
 
 ; fn that returns results that will be shown if pattern matches
 ;    inputs:

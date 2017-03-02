@@ -1,6 +1,7 @@
 (ns braid.server.conf
-  (:require [environ.core :refer [env]]
-            [mount.core :as mount :refer [defstate]]))
+  (:require
+    [environ.core :refer [env]]
+    [mount.core :as mount :refer [defstate]]))
 
 (defstate config
   :start

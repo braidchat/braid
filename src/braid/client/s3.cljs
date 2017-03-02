@@ -1,10 +1,12 @@
 (ns braid.client.s3
-  (:require [cljs-uuid-utils.core :as uuid]
-            [clojure.string :refer [split]]
-            [goog.events :as events]
-            [taoensso.timbre :as timbre :refer-macros [errorf]]
-            [braid.client.xhr :refer [edn-xhr ajax-xhr]])
-  (:import [goog.net XhrIo EventType]))
+  (:require
+    [clojure.string :refer [split]]
+    [cljs-uuid-utils.core :as uuid]
+    [goog.events :as events]
+    [taoensso.timbre :as timbre :refer-macros [errorf]]
+    [braid.client.xhr :refer [edn-xhr ajax-xhr]])
+  (:import
+    [goog.net XhrIo EventType]))
 
 (defn upload [file on-complete]
   (edn-xhr

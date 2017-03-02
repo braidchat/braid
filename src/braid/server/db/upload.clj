@@ -1,8 +1,9 @@
 (ns braid.server.db.upload
-  (:require [datomic.api :as d]
-            [braid.server.db :as db]
-            [braid.server.db.common :refer [create-entity-txn db->upload
-                                            upload-pull-pattern]]))
+  (:require
+    [datomic.api :as d]
+    [braid.server.db :as db]
+    [braid.server.db.common :refer [create-entity-txn db->upload
+                                    upload-pull-pattern]]))
 
 ;; Queries
 

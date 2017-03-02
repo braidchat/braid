@@ -1,8 +1,10 @@
 (ns braid.client.invites.views.invite
-  (:require [reagent.core :as r]
-            [clojure.string :as string]
-            [re-frame.core :refer [dispatch subscribe]])
-  (:import [goog.events KeyCodes]))
+  (:require
+    [clojure.string :as string]
+    [reagent.core :as r]
+    [re-frame.core :refer [dispatch subscribe]])
+  (:import
+    [goog.events KeyCodes]))
 
 (defn invite-view
   []

@@ -1,7 +1,8 @@
 (ns braid.server.db.tag
-  (:require [datomic.api :as d]
-            [braid.server.db :as db]
-            [braid.server.db.common :refer [create-entity-txn db->tag]]))
+  (:require
+    [datomic.api :as d]
+    [braid.server.db :as db]
+    [braid.server.db.common :refer [create-entity-txn db->tag]]))
 
 ;; Queries
 

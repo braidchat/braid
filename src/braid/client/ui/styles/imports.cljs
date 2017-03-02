@@ -1,5 +1,6 @@
 (ns braid.client.ui.styles.imports
-  (:require [garden.stylesheet :refer [at-import at-font-face]]))
+  (:require
+    [garden.stylesheet :refer [at-import at-font-face]]))
 
 (def fa-at-font-face
   (let [version "4.7.0"

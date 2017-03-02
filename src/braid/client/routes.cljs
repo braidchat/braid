@@ -1,7 +1,8 @@
 (ns braid.client.routes
-  (:require [secretary.core :as secretary :refer-macros [defroute]]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.router :as router]))
+  (:require
+    [re-frame.core :refer [dispatch subscribe]]
+    [secretary.core :as secretary :refer-macros [defroute]]
+    [braid.client.router :as router]))
 
 (defn go-to! [path]
   (router/go-to path))

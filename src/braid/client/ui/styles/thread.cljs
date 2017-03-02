@@ -1,8 +1,9 @@
 (ns braid.client.ui.styles.thread
-  (:require [braid.client.ui.styles.vars :as vars]
-            [garden.arithmetic :as m]
-            [braid.client.ui.styles.mixins :as mixins]
-            [garden.units :refer [px em rem]]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [px em rem]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]))
 
 (defn head [pad]
   [:.head

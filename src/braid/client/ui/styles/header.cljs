@@ -1,10 +1,10 @@
 (ns braid.client.ui.styles.header
-  (:require [garden.units :refer [em px rem]]
-            [garden.arithmetic :as m]
-            [braid.client.ui.styles.vars :as vars]
-            [braid.client.ui.styles.mixins :as mixins]
-
-            [braid.client.quests.styles :refer [quests-header]]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [em px rem]]
+    [braid.client.quests.styles :refer [quests-header]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def header-height vars/top-bar-height)
 

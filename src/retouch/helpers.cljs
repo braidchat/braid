@@ -1,6 +1,8 @@
 (ns retouch.helpers
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [cljs.core.async :refer [<! put! chan alts! timeout]]))
+  (:require-macros
+    [cljs.core.async.macros :refer [go]])
+  (:require
+    [cljs.core.async :refer [<! put! chan alts! timeout]]))
 
 (defn debounce
   "Given the input channel source and a debouncing time of msecs, return a new

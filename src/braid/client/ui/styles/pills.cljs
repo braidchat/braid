@@ -1,8 +1,9 @@
 (ns braid.client.ui.styles.pills
-  (:require [garden.units :refer [rem em px]]
-            [braid.client.ui.styles.mixins :as mixins]
-            [braid.client.ui.styles.vars :as vars]
-            [garden.arithmetic :as m]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [rem em px]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def offset (px 5))
 (def avatar-size (rem 2.5))

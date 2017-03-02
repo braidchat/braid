@@ -1,6 +1,7 @@
 (ns braid.client.ui.styles.page
-  (:require [garden.units :refer [rem]]
-            [braid.client.ui.styles.vars :as vars]))
+  (:require
+    [garden.units :refer [rem]]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def page
   [:.page

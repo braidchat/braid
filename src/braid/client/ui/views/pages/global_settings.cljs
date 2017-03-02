@@ -1,14 +1,16 @@
 (ns braid.client.ui.views.pages.global-settings
-  (:require [reagent.core :as r]
-            [reagent.ratom :refer-macros [reaction]]
-            [clojure.string :as string]
-            [braid.client.desktop.notify :as notify]
-            [braid.client.ui.views.pills :refer [tag-pill-view]]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.store :as store]
-            [braid.common.util :refer [valid-nickname?]]
-            [braid.client.ui.views.upload :refer [avatar-upload-view]])
-  (:import [goog.events KeyCodes]))
+  (:require
+    [clojure.string :as string]
+    [reagent.core :as r]
+    [reagent.ratom :refer-macros [reaction]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.desktop.notify :as notify]
+    [braid.client.store :as store]
+    [braid.client.ui.views.pills :refer [tag-pill-view]]
+    [braid.client.ui.views.upload :refer [avatar-upload-view]]
+    [braid.common.util :refer [valid-nickname?]])
+  (:import
+    [goog.events KeyCodes]))
 
 (defn nickname-view
   []

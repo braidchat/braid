@@ -1,5 +1,6 @@
 (ns braid.common.util
-  (:require [clojure.string :as string]))
+  (:require
+    [clojure.string :as string]))
 
 ; TODO: we should probably define this by a whitelist.  Unicode ranges?
 (def nickname-re

@@ -1,29 +1,30 @@
 (ns braid.server.handler
   (:gen-class)
-  (:require [org.httpkit.server :refer [run-server]]
-            [mount.core :as mount :refer [defstate]]
-            [compojure.core :refer [routes context]]
-            [ring.middleware.defaults :refer [wrap-defaults api-defaults
-                                              secure-site-defaults site-defaults]]
-            [ring.middleware.edn :refer [wrap-edn-params]]
-            [ring.middleware.cors :refer [wrap-cors]]
-            [ring.util.response :refer [get-header]]
-            [taoensso.timbre :as timbre]
-            [clojure.tools.nrepl.server :as nrepl]
-            ; requiring router so mount sees state
-            [braid.server.socket :refer [router]]
-            ; require so multimethods get registered
-            [braid.server.sync]
-            [braid.server.routes.socket :refer [sync-routes]]
-            [braid.server.routes.client :refer [desktop-client-routes
-                                                mobile-client-routes
-                                                resource-routes]]
-            [braid.server.routes.api :refer [api-private-routes
-                                             api-public-routes]]
-            [braid.server.routes.bots :refer [bot-routes]]
-            [environ.core :refer [env]]
-            ; requiring so mount sees state
-            [braid.server.email-digest :refer [email-jobs]]))
+  (:require
+    [clojure.tools.nrepl.server :as nrepl]
+    [compojure.core :refer [routes context]]
+    [environ.core :refer [env]]
+    [mount.core :as mount :refer [defstate]]
+    [org.httpkit.server :refer [run-server]]
+    [ring.middleware.cors :refer [wrap-cors]]
+    [ring.middleware.defaults :refer [wrap-defaults api-defaults
+                                      secure-site-defaults site-defaults]]
+    [ring.middleware.edn :refer [wrap-edn-params]]
+    [ring.util.response :refer [get-header]]
+    [taoensso.timbre :as timbre]
+    ; requiring so mount sees state
+    [braid.server.email-digest :refer [email-jobs]]
+    [braid.server.routes.api :refer [api-private-routes
+                                     api-public-routes]]
+    [braid.server.routes.bots :refer [bot-routes]]
+    [braid.server.routes.socket :refer [sync-routes]]
+    [braid.server.routes.client :refer [desktop-client-routes
+                                        mobile-client-routes
+                                        resource-routes]]
+    ; requiring router so mount sees state
+    [braid.server.socket :refer [router]]
+    ; require so multimethods get registered
+    [braid.server.sync]))
 
 (def session-max-age (* 60 60 24 365))
 
