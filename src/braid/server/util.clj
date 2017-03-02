@@ -1,9 +1,11 @@
 (ns braid.server.util
-  (:require [clojure.string :as string]
-            [cognitect.transit :as transit])
-  (:import java.net.URLEncoder
-           [java.io ByteArrayOutputStream ByteArrayInputStream]
-           org.apache.commons.validator.UrlValidator))
+  (:require
+    [clojure.string :as string]
+    [cognitect.transit :as transit])
+  (:import
+    java.net.URLEncoder
+    [java.io ByteArrayOutputStream ByteArrayInputStream]
+    org.apache.commons.validator.UrlValidator))
 
 (defn valid-url?
   "Check if the string is a valid http(s) url.  Note that this will *not*

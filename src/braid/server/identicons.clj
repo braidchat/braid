@@ -1,12 +1,14 @@
 (ns braid.server.identicons
-  (:require [braid.server.digest :refer [sha256-digest]])
-  (:import (java.awt.image BufferedImage
-                           AffineTransformOp)
-           java.awt.geom.AffineTransform
-           java.io.ByteArrayOutputStream
-           org.apache.commons.codec.binary.Base64OutputStream
-           java.awt.Color
-           javax.imageio.ImageIO))
+  (:require
+    [braid.server.digest :refer [sha256-digest]])
+  (:import
+    (java.awt.image BufferedImage
+                    AffineTransformOp)
+    java.awt.geom.AffineTransform
+    java.io.ByteArrayOutputStream
+    org.apache.commons.codec.binary.Base64OutputStream
+    java.awt.Color
+    javax.imageio.ImageIO))
 
 ;; General creating icons
 (defn new-icon

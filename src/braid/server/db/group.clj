@@ -1,11 +1,12 @@
 (ns braid.server.db.group
-  (:require [datomic.api :as d]
-            [clojure.edn :as edn]
-            [braid.server.db :as db]
-            [braid.server.db.common :refer [create-entity-txn db->group db->user db->tag
-                                            group-pull-pattern user-pull-pattern]]
-            [braid.server.db.thread :as thread]
-            [braid.server.db.user :as user]))
+  (:require
+    [clojure.edn :as edn]
+    [datomic.api :as d]
+    [braid.server.db :as db]
+    [braid.server.db.common :refer [create-entity-txn db->group db->user db->tag
+                                    group-pull-pattern user-pull-pattern]]
+    [braid.server.db.thread :as thread]
+    [braid.server.db.user :as user]))
 
 ;; Queries
 

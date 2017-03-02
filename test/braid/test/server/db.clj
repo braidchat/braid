@@ -1,20 +1,20 @@
 (ns braid.test.server.db
-  (:require [clojure.test :refer :all]
-            [clojure.set :refer [rename-keys]]
-            [mount.core :as mount]
-            [braid.test.server.test-utils :refer [fetch-messages]]
-            [braid.server.conf :as conf]
-            [braid.server.db :as db]
-            [braid.server.db.bot :as bot]
-            [braid.server.db.group :as group]
-            [braid.server.db.invitation :as invitation]
-            [braid.server.db.message :as message]
-            [braid.server.db.tag :as tag]
-            [braid.server.db.thread :as thread]
-            [braid.server.db.user :as user]
-            [braid.common.schema :as schema]
-            [braid.server.search :as search]))
-
+  (:require
+    [clojure.set :refer [rename-keys]]
+    [clojure.test :refer :all]
+    [mount.core :as mount]
+    [braid.server.conf :as conf]
+    [braid.server.db :as db]
+    [braid.server.db.bot :as bot]
+    [braid.server.db.group :as group]
+    [braid.server.db.invitation :as invitation]
+    [braid.server.db.message :as message]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.thread :as thread]
+    [braid.server.db.user :as user]
+    [braid.common.schema :as schema]
+    [braid.server.search :as search]
+    [braid.test.server.test-utils :refer [fetch-messages]]))
 
 (use-fixtures :each
               (fn [t]

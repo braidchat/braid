@@ -1,5 +1,6 @@
 (ns braid.client.schema
-  (:require [cljs-uuid-utils.core :as uuid]))
+  (:require
+    [cljs-uuid-utils.core :as uuid]))
 
 (defn make-message [data]
   {:id (or (data :id) (uuid/make-random-squuid))

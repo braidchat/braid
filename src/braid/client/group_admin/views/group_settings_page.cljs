@@ -1,10 +1,11 @@
 (ns braid.client.group-admin.views.group-settings-page
-  (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [reagent.core :as r]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.s3 :as s3]
-            [braid.client.routes :as routes]
-            [braid.client.ui.views.upload :refer [avatar-upload-view]]))
+  (:require
+    [reagent.core :as r]
+    [reagent.ratom :include-macros true :refer-macros [reaction]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.routes :as routes]
+    [braid.client.s3 :as s3]
+    [braid.client.ui.views.upload :refer [avatar-upload-view]]))
 
 (defn intro-message-view
   [group]

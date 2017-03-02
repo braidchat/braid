@@ -1,10 +1,11 @@
 (ns braid.client.ui.views.header
-  (:require [reagent.ratom :refer-macros [reaction]]
-            [braid.client.routes :as routes]
-            [braid.client.helpers :refer [->color]]
-            [re-frame.core :refer [subscribe]]
-            [braid.client.ui.views.search-bar :refer [search-bar-view]]
-            [braid.client.quests.views :refer [quests-header-view quests-menu-view]]))
+  (:require
+    [reagent.ratom :refer-macros [reaction]]
+    [re-frame.core :refer [subscribe]]
+    [braid.client.helpers :refer [->color]]
+    [braid.client.quests.views :refer [quests-header-view quests-menu-view]]
+    [braid.client.routes :as routes]
+    [braid.client.ui.views.search-bar :refer [search-bar-view]]))
 
 (defn loading-indicator-view [group-id]
   (let [page (subscribe [:page])]

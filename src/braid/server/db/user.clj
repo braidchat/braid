@@ -1,11 +1,12 @@
 (ns braid.server.db.user
-  (:require [datomic.api :as d]
-            [clojure.edn :as edn]
-            [clojure.string :as string]
-            [crypto.password.scrypt :as password]
-            [braid.server.db :as db]
-            [braid.server.db.common :refer :all]
-            [braid.server.quests.db :refer [activate-first-quests-txn]]))
+  (:require
+    [clojure.edn :as edn]
+    [clojure.string :as string]
+    [crypto.password.scrypt :as password]
+    [datomic.api :as d]
+    [braid.server.db :as db]
+    [braid.server.db.common :refer :all]
+    [braid.server.quests.db :refer [activate-first-quests-txn]]))
 
 ;; Queries
 

@@ -1,7 +1,9 @@
 (ns braid.client.core.subs
-  (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [re-frame.core :refer [subscribe reg-sub reg-sub-raw]])
-  (:import goog.Uri))
+  (:require
+    [reagent.ratom :include-macros true :refer-macros [reaction]]
+    [re-frame.core :refer [subscribe reg-sub reg-sub-raw]])
+  (:import
+    goog.Uri))
 
 (reg-sub
   :open-group-id

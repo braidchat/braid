@@ -1,6 +1,7 @@
 (ns braid.client.ui.styles.vars
-  (:require [garden.units :refer [rem px]]
-            [garden.arithmetic :as m]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [rem px]]))
 
 (def avatar-size (rem 2))
 

@@ -1,7 +1,8 @@
 (ns braid.client.state.helpers
-  (:require [cljs-utils.core :refer [flip]]
-            [clojure.set :as set]
-            [braid.client.schema :as schema]))
+  (:require
+    [clojure.set :as set]
+    [cljs-utils.core :refer [flip]]
+    [braid.client.schema :as schema]))
 
 (defn key-by-id [coll]
   (into {} (map (juxt :id identity)) coll))

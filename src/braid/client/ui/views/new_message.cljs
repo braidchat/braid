@@ -1,14 +1,17 @@
 (ns braid.client.ui.views.new-message
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [reagent.core :as r]
-            [reagent.ratom :refer-macros [run!]]
-            [re-frame.core :refer [dispatch subscribe]]
-            [cljs.core.async :as async :refer [<! put! chan alts!]]
-            [braid.client.store :as store]
-            [braid.client.s3 :as s3]
-            [braid.client.helpers :refer [debounce stop-event!]]
-            [braid.client.ui.views.autocomplete :refer [engines]])
-  (:import [goog.events KeyCodes]))
+  (:require-macros
+    [cljs.core.async.macros :refer [go]])
+  (:require
+    [reagent.core :as r]
+    [reagent.ratom :refer-macros [run!]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [cljs.core.async :as async :refer [<! put! chan alts!]]
+    [braid.client.helpers :refer [debounce stop-event!]]
+    [braid.client.s3 :as s3]
+    [braid.client.store :as store]
+    [braid.client.ui.views.autocomplete :refer [engines]])
+  (:import
+    [goog.events KeyCodes]))
 
 (defn- resize-textbox [el]
   (set! (.. el -style -height) "auto")

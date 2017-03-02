@@ -1,9 +1,10 @@
 (ns braid.client.quests.styles
-  (:require [garden.units :refer [em px rem]]
-            [garden.arithmetic :as m]
-            [garden.stylesheet :refer [at-keyframes]]
-            [braid.client.ui.styles.vars :as vars]
-            [braid.client.ui.styles.mixins :as mixins]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.stylesheet :refer [at-keyframes]]
+    [garden.units :refer [em px rem]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def quest-icon-size (rem 2.5))
 

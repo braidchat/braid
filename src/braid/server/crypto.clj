@@ -1,9 +1,11 @@
 (ns braid.server.crypto
-  (:require [clojure.string :as string])
-  (:import javax.crypto.Mac
-           javax.crypto.spec.SecretKeySpec
-           java.security.SecureRandom
-           [org.apache.commons.codec.binary Base64]))
+  (:require
+    [clojure.string :as string])
+  (:import
+    javax.crypto.Mac
+    javax.crypto.spec.SecretKeySpec
+    java.security.SecureRandom
+    [org.apache.commons.codec.binary Base64]))
 
 (defn random-nonce
   "url-safe random nonce"

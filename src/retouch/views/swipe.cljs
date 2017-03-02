@@ -1,11 +1,13 @@
 (ns retouch.views.swipe
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [reagent.core :as r]
-            [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [garden.core :refer [css]]
-            [retouch.common :refer [easing-fn]]
-            [cljs.core.async :as async :refer [<! put! chan alts!]]
-            [retouch.helpers :refer [debounce]]))
+  (:require-macros
+    [cljs.core.async.macros :refer [go]])
+  (:require
+    [cljs.core.async :as async :refer [<! put! chan alts!]]
+    [garden.core :refer [css]]
+    [reagent.core :as r]
+    [reagent.ratom :include-macros true :refer-macros [reaction]]
+    [retouch.common :refer [easing-fn]]
+    [retouch.helpers :refer [debounce]]))
 
 (def style-view
   (fn []

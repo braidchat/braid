@@ -1,13 +1,14 @@
 (ns braid.test.server.search
-  (:require [clojure.test :refer :all]
-            [mount.core :as mount]
-            [braid.server.conf :as conf]
-            [braid.server.db :as db]
-            [braid.server.db.group :as group]
-            [braid.server.db.message :as message]
-            [braid.server.db.tag :as tag]
-            [braid.server.db.user :as user]
-            [braid.server.search :as search]))
+  (:require
+    [clojure.test :refer :all]
+    [mount.core :as mount]
+    [braid.server.conf :as conf]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.message :as message]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.user :as user]
+    [braid.server.search :as search]))
 
 (use-fixtures :each
               (fn [t]

@@ -1,16 +1,18 @@
 (ns braid.client.mobile.views
-  (:require [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch]]
-            [braid.client.mobile.style :refer [styles]]
-            [braid.client.helpers :refer [->color]]
-            [braid.client.routes :as routes]
-            [braid.client.ui.views.sidebar]
-            [braid.client.ui.views.thread :refer [messages-view]]
-            [braid.client.ui.views.new-message :refer [upload-button-view]]
-            [braid.client.ui.views.header :refer [group-name-view group-header-buttons-view]]
-            [braid.client.mobile.auth-flow.views :refer [auth-flow-view]]
-            [retouch.core :refer [drawer-view swipe-view]])
-  (:import [goog.events KeyCodes]))
+  (:require
+    [reagent.core :as r]
+    [re-frame.core :refer [subscribe dispatch]]
+    [retouch.core :refer [drawer-view swipe-view]]
+    [braid.client.helpers :refer [->color]]
+    [braid.client.mobile.auth-flow.views :refer [auth-flow-view]]
+    [braid.client.mobile.style :refer [styles]]
+    [braid.client.routes :as routes]
+    [braid.client.ui.views.header :refer [group-name-view group-header-buttons-view]]
+    [braid.client.ui.views.new-message :refer [upload-button-view]]
+    [braid.client.ui.views.sidebar]
+    [braid.client.ui.views.thread :refer [messages-view]])
+  (:import
+    [goog.events KeyCodes]))
 
 (defn new-message-view [config]
   (let [message (r/atom "")

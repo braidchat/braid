@@ -1,12 +1,15 @@
 (ns braid.client.helpers
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [cljs.core.async :refer [<! put! chan alts! timeout]]
-            [clojure.string :as string]
-            [cljs-time.format :as f]
-            [cljs-time.core :as t]
-            [goog.style :as gstyle]
-            [cljsjs.husl])
-  (:import [goog Uri]))
+  (:require-macros
+    [cljs.core.async.macros :refer [go]])
+  (:require
+    [clojure.string :as string]
+    [cljs.core.async :refer [<! put! chan alts! timeout]]
+    [cljs-time.core :as t]
+    [cljs-time.format :as f]
+    [cljsjs.husl]
+    [goog.style :as gstyle])
+  (:import
+    [goog Uri]))
 
 (defn format-date
   "Turn a Date object into a nicely formatted string"

@@ -1,8 +1,9 @@
 (ns braid.server.notify-rules
-  (:require [clojure.set :as set]
-            [braid.common.schema :refer [check-new-message! check-rules!]]
-            [braid.server.db.tag :as tag]
-            [braid.server.db.thread :as thread]))
+  (:require
+    [clojure.set :as set]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.thread :as thread]
+    [braid.common.schema :refer [check-new-message! check-rules!]]))
 
 (defn tag->group
   [tag-id]

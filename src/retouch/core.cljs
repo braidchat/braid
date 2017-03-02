@@ -1,6 +1,7 @@
 (ns retouch.core
-  (:require [retouch.views.swipe]
-            [retouch.views.drawer]))
+  (:require
+    [retouch.views.drawer]
+    [retouch.views.swipe]))
 
 (def swipe-view retouch.views.swipe/swipe-view)
 

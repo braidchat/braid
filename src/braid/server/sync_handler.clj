@@ -1,5 +1,6 @@
 (ns braid.server.sync-handler
-  (:require [taoensso.timbre :as timbre :refer [debugf]]))
+  (:require
+    [taoensso.timbre :as timbre :refer [debugf]]))
 
 (defmulti event-msg-handler :id)
 

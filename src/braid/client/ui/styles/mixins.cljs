@@ -1,7 +1,8 @@
 (ns braid.client.ui.styles.mixins
-  (:require [garden.units :refer [px em]]
-            [garden.arithmetic :as m]
-            [braid.client.ui.styles.vars :as vars]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [px em]]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def flex
   {:display #{:flex :-webkit-flex}})

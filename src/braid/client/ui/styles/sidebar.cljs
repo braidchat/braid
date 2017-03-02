@@ -1,8 +1,9 @@
 (ns braid.client.ui.styles.sidebar
-  (:require [garden.units :refer [rem em px ex]]
-            [garden.arithmetic :as m]
-            [braid.client.ui.styles.mixins :as mixins]
-            [braid.client.ui.styles.vars :as vars]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [rem em px ex]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def badge
   [:.badge

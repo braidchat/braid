@@ -1,22 +1,23 @@
 (ns braid.client.desktop.core
-  (:require [reagent.core :as r]
-            [re-frame.core :as rf :refer [dispatch-sync dispatch]]
-            [braid.client.ui.views.app :refer [app-view]]
-            [braid.client.state.remote-handlers]
-            [braid.client.router :as router]
-            braid.client.core.subs
-            braid.client.core.events
-            braid.client.quests.subs
-            braid.client.quests.events
-            braid.client.bots.subs
-            braid.client.bots.events
-            braid.client.uploads.subs
-            braid.client.uploads.events
-            braid.client.invites.subs
-            braid.client.invites.events
-            braid.client.group-admin.subs
-            braid.client.group-admin.events
-            [braid.client.quests.handler :as quests]))
+  (:require
+    [reagent.core :as r]
+    [re-frame.core :as rf :refer [dispatch-sync dispatch]]
+    [braid.client.bots.events]
+    [braid.client.bots.subs]
+    [braid.client.core.events]
+    [braid.client.core.subs]
+    [braid.client.group-admin.events]
+    [braid.client.group-admin.subs]
+    [braid.client.invites.events]
+    [braid.client.invites.subs]
+    [braid.client.router :as router]
+    [braid.client.state.remote-handlers]
+    [braid.client.ui.views.app :refer [app-view]]
+    [braid.client.uploads.events]
+    [braid.client.uploads.subs]
+    [braid.client.quests.events]
+    [braid.client.quests.handler :as quests]
+    [braid.client.quests.subs]))
 
 (enable-console-print!)
 

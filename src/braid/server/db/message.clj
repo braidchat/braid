@@ -1,9 +1,10 @@
 (ns braid.server.db.message
-  (:require [datomic.api :as d]
-            [braid.server.db :as db]
-            [braid.server.db.common :refer [message-pull-pattern db->message]]
-            [braid.server.db.tag :as tag]
-            [braid.server.db.thread :as thread]))
+  (:require
+    [datomic.api :as d]
+    [braid.server.db :as db]
+    [braid.server.db.common :refer [message-pull-pattern db->message]]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.thread :as thread]))
 
 ;; Queries
 

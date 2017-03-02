@@ -1,10 +1,11 @@
 (ns braid.client.ui.styles.message
-  (:require [braid.client.ui.styles.vars :refer [avatar-size pad card-width]]
-            [braid.client.ui.styles.mixins :as mixins]
-            [braid.client.ui.styles.pills :as pills]
-            [braid.client.ui.styles.hljs :refer [hljs-styles]]
-            [garden.arithmetic :as m]
-            [garden.units :refer [rem px]]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [rem px]]
+    [braid.client.ui.styles.hljs :refer [hljs-styles]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.pills :as pills]
+    [braid.client.ui.styles.vars :refer [avatar-size pad card-width]]))
 
 (def message-left-pad  (m/+ avatar-size (rem 0.5)))
 
