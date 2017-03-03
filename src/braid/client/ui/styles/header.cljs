@@ -8,6 +8,15 @@
 
 (def header-height vars/top-bar-height)
 
+(defn bar []
+  [:&
+   {:background "black"
+    :color "white"
+    :height header-height
+    :border-radius vars/border-radius
+    :overflow "hidden"}
+   (mixins/box-shadow)])
+
 (defn header-text [size]
   {:text-transform "uppercase"
    :letter-spacing "0.1em"
@@ -17,9 +26,8 @@
    :padding [[0 (m/* vars/pad 0.75)]] })
 
 (defn menu []
-  [:.options
+  [:>.options
     (mixins/context-menu)
-
     {:position "absolute"
      :top 0
      :right 0
@@ -27,146 +35,149 @@
      :z-index 110
      :display "none"}
 
-    [:a
-     {:display "block"
-      :color "black"
-      :text-align "right"
-      :text-decoration "none"
-      :line-height "1.85em"
-      :white-space "nowrap"}
+    [:>.content
 
-     [:&:hover
-      {:color "#666"}]
+     [:>a
+      {:display "block"
+       :color "black"
+       :text-align "right"
+       :text-decoration "none"
+       :line-height "1.85em"
+       :white-space "nowrap"}
 
-     [:&:after
-      {:margin-left "0.5em"}]
+      [:&:hover
+       {:color "#666"}]
 
-     ; USER
+      [:&::after
+       {:margin-left "0.5em"}]
 
-     [:&.subscriptions:after
-      (mixins/fontawesome \uf02c)]
+      ; USER
 
-     [:&.invite-friend:after
-      (mixins/fontawesome \uf1e0)]
+      [:&.subscriptions::after
+       (mixins/fontawesome \uf02c)]
 
-     [:&.edit-profile:after
-      (mixins/fontawesome \uf007)]
+      [:&.invite-friend::after
+       (mixins/fontawesome \uf1e0)]
 
-     [:&.changelog:after
-      (mixins/fontawesome \uf1da)]
+      [:&.edit-profile::after
+       (mixins/fontawesome \uf007)]
 
-     ; ADMIN
+      [:&.changelog::after
+       (mixins/fontawesome \uf1da)]
 
-     [:&.group-bots:after
-      (mixins/fontawesome \uf12e)]
+      ; ADMIN
 
-     [:&.settings:after
-      (mixins/fontawesome \uf013)]]])
+      [:&.group-bots::after
+       (mixins/fontawesome \uf12e)]
+
+      [:&.settings::after
+       (mixins/fontawesome \uf013)]]]])
 
 (defn group-header [size]
-  [:.group-header
+  [:>.group-header
 
-   [:.bar
+   [:>.bar
+    (bar)
     {:display "inline-block"
-     :vertical-align "top"}]
+     :vertical-align "top"}
 
-   [:.group-name
-    :a
-    {:color "white"
-     :display "inline-block"
-     :vertical-align "top"
-     :height size
-     :line-height size
-     :-webkit-font-smoothing "antialiased"}]
-
-   [:.group-name
-    (header-text size)
-    {:min-width (em 5)}]
-
-   [:.buttons
-    {:display "inline-block"
-     :vertical-align "top"}]
-
-   [:a
-    {:width size
-     :text-align "center"
-     :text-decoration "none"}
-
-    [:&:hover
-     :&.active
-     {:background "rgba(0,0,0,0.25)"}]
-
-    [:&.open-sidebar:after
-     (mixins/fontawesome \uf0c9)]
-
-    [:&.inbox:after
-     (mixins/fontawesome \uf01c)]
-
-    [:&.recent:after
-     (mixins/fontawesome \uf1da)]
-
-    [:&.group-uploads:after
-     (mixins/fontawesome \uf0ee)]]
-
-   [:.search-bar
-    {:display "inline-block"
-     :position "relative"}
-
-    [:input
-     {:border 0
-      :padding-left vars/pad
-      :min-width "15em"
-      :width "25vw"
+    [:>.group-name
+     :>.buttons>a
+     {:color "white"
+      :display "inline-block"
+      :vertical-align "top"
       :height size
-      :outline "none"}]
+      :line-height size
+      :-webkit-font-smoothing "antialiased"}]
 
-    [:.action
-     [:&:after
-      {:top 0
-       :right (m/* vars/pad 0.75)
+    [:>.group-name
+     (header-text size)
+     {:min-width (em 5)}]
+
+    [:>.buttons
+     {:display "inline-block"
+      :vertical-align "top"}
+
+     [:>a
+      {:width size
+       :text-align "center"
+       :text-decoration "none"}
+
+      [:&:hover
+       :&.active
+       {:background "rgba(0,0,0,0.25)"}]
+
+      [:&.open-sidebar::after
+       (mixins/fontawesome \uf0c9)]
+
+      [:&.inbox::after
+       (mixins/fontawesome \uf01c)]
+
+      [:&.recent::after
+       (mixins/fontawesome \uf1da)]
+
+      [:&.group-uploads::after
+       (mixins/fontawesome \uf0ee)]]]
+
+    [:>.search-bar
+     {:display "inline-block"
+      :position "relative"}
+
+     [:>input
+      {:border 0
+       :padding-left vars/pad
+       :min-width "15em"
+       :width "25vw"
        :height size
-       :line-height size
-       :position "absolute"
-       :cursor "pointer"}]
+       :outline "none"}]
 
-     [:&.search:after
-      {:color "#ccc"
-       :pointer-events "none"}
-      (mixins/fontawesome \uf002)]
+     [:>.action
+      [:&:after
+       {:top 0
+        :right (m/* vars/pad 0.75)
+        :height size
+        :line-height size
+        :position "absolute"
+        :cursor "pointer"}]
 
-     [:&.clear:after
-      (mixins/fontawesome \uf057)]]]
+      [:&.search::after
+       {:color "#ccc"
+        :pointer-events "none"}
+       (mixins/fontawesome \uf002)]
 
-   [:.loading-indicator
+      [:&.clear::after
+       (mixins/fontawesome \uf057)]]]]
+
+   [:>.loading-indicator
     {:display "inline-block"
      :vertical-align "middle"}
 
-    [:&:before
+    [:&::before
      {:height size
       :line-height size
       :margin-left (em 0.5)
       :font-size (em 1.5)}]
 
     [:&.error
-     [:&:before
+     [:&::before
       (mixins/fontawesome\uf071)]]
 
     [:&.loading
-     [:&:before
+     [:&::before
       (mixins/fontawesome \uf110)
       mixins/spin]]]])
 
 (defn admin-header [size]
-  [:.admin-header
+  [:>.admin-header
    {:position "relative"}
 
-   [:.admin-icon
+   [:>.admin-icon
     (header-text size)
     {:padding [[0 (em 1)]]
      :color "#CCC"
      :margin-left (em 1)}
 
-    [:&:before
+    [:&::before
      (mixins/fontawesome \uf0e3)]]
 
    (menu)
@@ -177,17 +188,18 @@
 
 
 (defn user-header [size]
-  [:.user-header
+  [:>.user-header
    {:position "relative"}
 
    [".bar:hover + .options"
     ".options:hover"
     {:display "inline-block"}]
 
-   [:.bar
+   [:>.bar
+    (bar)
     {:margin-left vars/pad}
 
-    [:.user-info
+    [:>.user-info
      {:display "inline-block"
       :vertical-align "top"}
 
@@ -195,19 +207,19 @@
       :&.active
       {:background "rgba(0,0,0,0.25)"}]
 
-     [:.name
+     [:>.name
       (header-text size)
       {:color "white"
        :display "inline-block"
        :text-decoration "none"
        :vertical-align "top" }]
 
-     [:.avatar
+     [:>.avatar
       {:height header-height
        :width header-height
        :background "white"}]]
 
-    [:.more
+    [:>.more
      {:display "inline-block"
       :line-height header-height
       :vertical-align "top"
@@ -215,36 +227,28 @@
       :width header-height
       :text-align "center"}
 
-     [:&:after
+     [:&::after
       {:-webkit-font-smoothing "antialiased"}
       (mixins/fontawesome \uf078)]]]
 
    (menu)])
 
 (defn header [pad]
-  [:.app
-   [:.main
-    ["> .header"
-     {:position "absolute"
-      :top vars/pad
-      :left vars/sidebar-width
-      :margin-left vars/pad
-      :right vars/pad
-      :display "flex"
-      :justify-content "space-between"
-      :z-index 102}
+  [:>.header
+   {:position "absolute"
+    :top vars/pad
+    :left vars/sidebar-width
+    :margin-left vars/pad
+    :right vars/pad
+    :display "flex"
+    :justify-content "space-between"
+    :z-index 102}
 
-     [:.bar
-      {:background "black"
-       :color "white"
-       :height header-height
-       :border-radius vars/border-radius
-       :overflow "hidden"}
-      (mixins/box-shadow)]
+   (group-header header-height)
 
-     (group-header header-height)
-     [:.spacer
-      {:flex-grow 2}]
-     (quests-header header-text header-height)
-     (user-header header-height)
-     (admin-header header-height)]]])
+   [:>.spacer
+    {:flex-grow 2}]
+
+   (quests-header header-text header-height)
+   (user-header header-height)
+   (admin-header header-height)])
