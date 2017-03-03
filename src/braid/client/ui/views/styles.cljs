@@ -61,5 +61,6 @@
                (braid.client.ui.styles.thread/notice vars/pad)
                (braid.client.ui.styles.thread/drag-and-drop vars/pad)
                (braid.client.ui.styles.header/header vars/pad)
-               (braid.client.ui.styles.embed/embed vars/pad)
+               [:.message
+                (braid.client.ui.styles.embed/embed vars/pad)]
                )}}])

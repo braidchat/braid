@@ -16,7 +16,7 @@
   "View for embedly generic website info. Prefer to use embed-view with a url
   instead of this directly"
   [content]
-  [:div.content.loaded.website
+  [:div.website
    {:style {:background-color (url->color (content :original_url))}}
    (if-let [img (get-in content [:images 0])]
      [:img.image {:src (img :url)
@@ -73,17 +73,17 @@
 
        :reagent-render
        (fn [_ _]
-         [:div.embed
-          (if (:type @content)
-            [:div.content.loaded {:on-click (fn []
-                                              (.open js/window (:original_url @content)))}
-             (cond
-               (= "video" (get-in @content [:media :type]))
-               [video-embed-view @content]
-               (= "photo" (get-in @content [:media :type]))
-               [image-embed-view @content]
-               (@content :url)
-               [website-embed-view @content]
-               :else
-               nil)]
-            [:div.content.loading])])})))
+         (if (:type @content)
+           [:div.embed.loaded
+            {:on-click (fn []
+                         (.open js/window (:original_url @content)))}
+            (cond
+              (= "video" (get-in @content [:media :type]))
+              [video-embed-view @content]
+              (= "photo" (get-in @content [:media :type]))
+              [image-embed-view @content]
+              (@content :url)
+              [website-embed-view @content]
+              :else
+              nil)]
+           [:div.embed.loading]))})))
