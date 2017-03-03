@@ -49,7 +49,8 @@
                  ;mobile
                  [garden "1.3.2"]]
 
-  :main braid.server.handler
+  :main braid.server.core
+
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]]
             [lein-figwheel "0.5.4-7"]]
