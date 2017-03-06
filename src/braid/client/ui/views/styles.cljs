@@ -39,7 +39,6 @@
                braid.client.ui.styles.imports/imports
                (braid.client.ui.styles.misc/avatar-upload vars/pad)
                braid.client.ui.styles.misc/emojione
-               braid.client.ui.styles.misc/layout
                braid.client.ui.styles.misc/page-headers
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)

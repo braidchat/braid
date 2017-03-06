@@ -5,19 +5,6 @@
     [braid.client.ui.styles.mixins :as mixins]
     [braid.client.ui.styles.vars :as vars]))
 
-(def layout
-  [:.app
-
-    [:>.main
-
-     [:>.sidebar
-      {:position "fixed"
-       :left 0
-       :top 0
-       :bottom 0
-       :width vars/sidebar-width
-       :box-sizing "border-box"}] ]])
-
 (def emojione
   [:.emojione
    {:font-size "inherit"

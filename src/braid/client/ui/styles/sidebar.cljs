@@ -51,7 +51,13 @@
 
 (def sidebar
   [:>.sidebar
-   {:background "#222"
+   {:position "fixed"
+    :left 0
+    :top 0
+    :bottom 0
+    :width vars/sidebar-width
+    :box-sizing "border-box"
+    :background "#222"
     :padding vars/pad
     :overflow-x "visible"
     :overflow-y "auto"
