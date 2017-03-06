@@ -31,14 +31,17 @@
     :text-align "center"
     :outline "none"}
    (mini-text)
+
   [:&.on
    {:color [["white" "!important"]]}]
+
   [:&.off
    {:background-color [["white" "!important"]]}]])
 
 (def pill-button
   [:&
    pill-box
+
    [:&
     {:color "#888"
      :border [[(px 1) "solid" "#BBB"]]
@@ -71,6 +74,7 @@
     :white-space "nowrap"
     :cursor "pointer"
     :text-align "center"}
+
    [:&:hover
     {:color hover-text-color
      :border-color hover-border-color}]])
@@ -99,7 +103,7 @@
      :padding [[(m/* vars/pad 0.75)]]}]
 
    ; triangle
-   [:&:before
+   [:&::before
     (fontawesome \uf0d8)
     {:position "absolute"
      :top "-0.65em"
