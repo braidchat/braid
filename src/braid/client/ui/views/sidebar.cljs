@@ -127,7 +127,7 @@
        (doall
          (for [group @ordered-groups]
            ^{:key (group :id)}
-           [:a.group.option
+           [:a.group
             {:class (when (= (:id @active-group) (:id group)) "active")
              :style (merge
                       {:background-color (id->color (group :id))}
@@ -147,7 +147,7 @@
               (string/join "" (take 2 (group :name))))
             [badge-view (group :id)]]))
        (when-let [drag-grp (@drag-state :grp)]
-         [:a.group.option
+         [:a.group
           {:style (merge {:background-color (id->color (drag-grp :id))
                           :position "absolute"
                           :left (css->str style-vars/pad)
@@ -166,7 +166,7 @@
   (let [page (subscribe [:page])
         invitations (subscribe [:invitations])]
     (fn []
-      [:a.option.other.plus
+      [:a.plus
        {:class (when (= (@page :type) :group-explore) "active")
         :href (routes/other-path {:page-id "group-explore"})}
        (when (< 0 (count @invitations))
@@ -175,7 +175,7 @@
 (defn global-settings-button-view []
   (let [page (subscribe [:page])]
     (fn []
-      [:a.option.other.global-settings
+      [:a.global-settings
        {:class (when (= (@page :type) :global-settings) "active")
         :href (routes/other-path {:page-id "global-settings"})}])))
 

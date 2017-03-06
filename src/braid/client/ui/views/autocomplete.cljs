@@ -48,7 +48,7 @@
 
 (defn emoji-view
   [emoji]
-  [:div.emoji-match
+  [:div.emoji.match
     (emoji/shortcode->html (string/replace emoji #"[\(\)]" ":"))
     [:div.name emoji]
     [:div.extra "..."]])
@@ -71,7 +71,7 @@
                                                (str "/" (b :nickname) " ")))
                              :html
                              (constantly
-                               [:div.bot-match
+                               [:div.bot.match
                                 [:img.avatar {:src (b :avatar)}]
                                 [:div.name (b :nickname)]
                                 [:div.extra "..."]])})))
@@ -118,7 +118,7 @@
                           (string/replace text pattern (str "@" (user :nickname) " ")))
                         :html
                         (fn []
-                          [:div.user-match
+                          [:div.user.match
                            [:img.avatar {:src (user :avatar)}]
                            [:div.name (user :nickname)]
                            [:div.extra (user :status)]])})))))))
@@ -143,7 +143,7 @@
                           (string/replace text pattern (str "#" (tag :name) " ")))
                         :html
                         (fn []
-                          [:div.tag-match
+                          [:div.tag.match
                            [:div.color-block
                             {:style
                              (merge
@@ -169,7 +169,7 @@
                              (string/replace text pattern (str "#" (tag :name) " ")))
                            :html
                            (fn []
-                             [:div.tag-match
+                             [:div.tag.match
                               [:div.color-block
                                {:style {:backgroundColor (id->color (tag :id))}}]
                               [:div.name (str "Create tag " (tag :name))]

@@ -5,19 +5,4 @@
     [braid.client.ui.styles.vars :as vars]))
 
 (def me-page
-  [:.page.me
-
-   [:.nickname
-
-    [:.error
-     {:color "red"}]]
-
-   [:.group
-
-    [:.name
-     {:color "#999"
-      :margin-bottom (em 0.25)}]
-
-
-    [:.new-tag.error
-     {:border-color "red"}]]])
+  [:>.page.me])

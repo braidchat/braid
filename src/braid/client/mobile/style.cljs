@@ -87,7 +87,7 @@
               :color "#CCC"
               :padding vars/pad}
 
-             [:&:after
+             [:&::after
               (mixins/fontawesome \uf00d)]]]
 
            (braid.client.ui.styles.thread/messages pad)
@@ -95,7 +95,8 @@
            [:.messages
             {:flex-grow 1}
 
-           (braid.client.ui.styles.embed/embed pad)]
+            [:.message
+             (braid.client.ui.styles.embed/embed pad)]]
 
            (braid.client.ui.styles.thread/new-message pad)]]
 

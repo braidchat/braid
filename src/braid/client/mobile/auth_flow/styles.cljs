@@ -48,7 +48,7 @@
     [:&:active
      {:background "rgba(255,255,255,0.25)"}]
 
-    [:&.next:after
+    [:&.next::after
      (mixins/fontawesome \uf04b)
      {:margin-left (em 0.5)}]]
 

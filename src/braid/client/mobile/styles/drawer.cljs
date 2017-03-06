@@ -12,4 +12,4 @@
      :padding pad
      :box-sizing "border-box"}
 
-    (braid.client.ui.styles.sidebar/option "15vw")]])
+    (braid.client.ui.styles.sidebar/sidebar-button "15vw")]])

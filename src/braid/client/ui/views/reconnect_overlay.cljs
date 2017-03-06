@@ -22,7 +22,7 @@
                                   1000))}
            [:div.info
             [:h1 "Uh oh! Braid has disconnected from the server."]
-            [:div "Attempting to reconnect in " @seconds-to-reconnect " seconds... "
+            [:div.message "Attempting to reconnect in " @seconds-to-reconnect " seconds... "
              [:button
               {:on-click (fn [_]
                            (dispatch [:core/reconnect]))}

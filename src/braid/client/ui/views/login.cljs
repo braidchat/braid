@@ -19,7 +19,7 @@
 
     (fn [_]
       [:div.login
-       [:div
+       [:div.wrapper
         [:form {:on-submit
                 (fn [e]
                   (.preventDefault e)
@@ -75,6 +75,5 @@
                 "Send me a password reset email"])])]]
         [:div.alternatives
          "Or"
-         [:div.github
-          [:button {:on-click (fn [_] (set! (.-location js/window) "/github-login"))}
-           "Login with Github"]]]]])))
+         [:button.github {:on-click (fn [_] (set! (.-location js/window) "/github-login"))}
+          "Login with Github"]]]])))
