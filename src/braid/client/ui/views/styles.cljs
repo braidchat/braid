@@ -51,7 +51,6 @@
                braid.client.invites.views.invite-page-styles/invite-page
                braid.client.bots.views.bots-page-styles/bots-page
                braid.client.uploads.views.uploads-page-styles/uploads-page
-               braid.client.ui.styles.login/login
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
                braid.client.ui.styles.misc/status
@@ -61,7 +60,11 @@
                (braid.client.ui.styles.thread/notice vars/pad)
                (braid.client.ui.styles.thread/drag-and-drop vars/pad)
                [:.app
+                braid.client.ui.styles.login/login
+
                 [:>.main
-                 (braid.client.ui.styles.header/header vars/pad)]
-                [:.message
-                 (braid.client.ui.styles.embed/embed vars/pad)]])}}])
+                 (braid.client.ui.styles.header/header vars/pad)
+
+                 [:>.page>.threads>.thread>.card>.messages>.message
+
+                  (braid.client.ui.styles.embed/embed vars/pad)]]])}}])

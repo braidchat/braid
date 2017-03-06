@@ -22,7 +22,7 @@
     {:background "rgba(255,255,255,0.6)"}]])
 
 (def login
-  [:.login
+  [:>.login
    mixins/flex
    {:justify-content "center"
     :align-items "center"
@@ -30,7 +30,7 @@
     :background vars/dark-bg-color
     :color "white"}
 
-   [:&:before
+   [:&::before
     {:content "\"\""
      :background-image "url(/images/braid.svg)"
      :background-size "contain"
@@ -40,66 +40,71 @@
      :background-position "center right"
      :margin-right (rem 3)}]
 
-   [:form
-    [:fieldset
-     {:margin 0
-      :padding 0
-      :border "none"}
+   [:>.wrapper
 
-     [:label
-      {:display "block"
-       :font-size (em 1)}
+    [:>form
 
-      [:input
+     [:>fieldset
+      {:margin 0
+       :padding 0
+       :border "none"}
+
+      [:>label
        {:display "block"
-        :width (em 30)
-        :border "none"
-        :margin [[(em 0.5) 0 (em 1)]]
-        :padding (em 1)
-        :border-radius (em 0.5)
-        :font-size (em 1.5)
-        :box-sizing "border-box"
-        :outline "none"}]] ]
+        :font-size (em 1)}
 
-    [:button.submit
-     mixin-button-white
-     {:font-size (em 1.5)
-      :display "inline-block"
-      :margin-top (em 1)
-      :margin-right (em 1)}
+       [:>input
+        {:display "block"
+         :width (em 30)
+         :border "none"
+         :margin [[(em 0.5) 0 (em 1)]]
+         :padding (em 1)
+         :border-radius (em 0.5)
+         :font-size (em 1.5)
+         :box-sizing "border-box"
+         :outline "none"}]]
 
-     [:&:after
-      (mixins/fontawesome \uf138)
-      {:margin-left (em 0.5)}]]
+      [:>button.submit
+       mixin-button-white
+       {:font-size (em 1.5)
+        :display "inline-block"
+        :margin-top (em 1)
+        :margin-right (em 1)}
 
-    [:.spinner
-     {:display "inline-block"}
-     [:&:before
-      (mixins/fontawesome \uf110)
-      mixins/spin
-      {:font-size (em 2)}]]
+       [:&::after
+        (mixins/fontawesome \uf138)
+        {:margin-left (em 0.5)}]]
 
-    [:.error
-     {:display "inline-block"
-      :margin-top (em 1)
-      :vertical-align "bottom"}
+      [:>.spinner
+       {:display "inline-block"}
 
-     [:.message
-      {:margin [[0 0 (em 0.5)]]}]
+       [:&::before
+        (mixins/fontawesome \uf110)
+        mixins/spin
+        {:font-size (em 2)}]]
 
-     [:button.reset-password
+      [:>.error
+       {:display "inline-block"
+        :margin-top (em 1)
+        :vertical-align "bottom"}
+
+       [:>.message
+        {:margin [[0 0 (em 0.5)]]}]
+
+       [:>button.reset-password
+        mixin-button-white
+        {:font-size (em 1)}
+
+        [:&::after
+         (mixins/fontawesome \uf1d8)
+         {:margin-left (em 0.5)}]]]]]
+
+    [:>.alternatives
+     {:margin-top (em 1)}
+
+     [:>button.github
       mixin-button-white
-      {:font-size (em 1)}
 
-      [:&:after
-       (mixins/fontawesome \uf1d8)
-       {:margin-left (em 0.5)}]]]]
-
-   [:.alternatives
-    {:margin-top (em 1)}
-    [:.github
-     [:button
-      mixin-button-white
-      [:&:before
+      [:&::before
        (mixins/fontawesome \uf09b)
        {:font-size (em 3)}]]]]])
