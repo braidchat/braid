@@ -5,7 +5,7 @@
     [braid.client.ui.styles.vars :as vars]))
 
 (def reconnect-overlay
-  [:.reconnect-overlay
+  [:>.reconnect-overlay
    {:position "absolute"
     :bottom 0
     :left 0
@@ -30,8 +30,10 @@
      {:font-size "1em"
       :margin 0}]
 
-    [:button
-     (mixins/outline-button {:text-color "#fff"
-                             :border-color "#fff"
-                             :hover-text-color "#fff"
-                             :hover-border-color "fff"})]]])
+    [:>.message
+
+     [:>button
+      (mixins/outline-button {:text-color "#fff"
+                              :border-color "#fff"
+                              :hover-text-color "#fff"
+                              :hover-border-color "fff"})]]]])
