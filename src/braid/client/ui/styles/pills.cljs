@@ -17,10 +17,10 @@
     [:.card
      {:display "block"}]]
 
-   [:.pill
+   [:>.pill
     mixins/pill-box]
 
-   [:.card
+   [:>.card
     (mixins/box-shadow)
     {:display "none"
      :position "absolute"
@@ -33,22 +33,25 @@
      :border-radius (px 3)
      :overflow "hidden"}
 
-    [:.header
+    [:>.header
      {:padding offset
       :margin [[(m/* -1 offset) (m/* -1 offset) 0 (m/* -1 offset)]]
       :white-space "nowrap"
-      :color "white"}]
+      :color "white"}
 
-    [:.info
+     [:>.pill
+      mixins/pill-box]]
+
+    [:>.info
      {:font-size (em 0.9)
       :color vars/grey-text
       :margin [[offset 0]]}
 
-     [:.description
+     [:>.description
       {:margin [[offset 0]]}]]
 
-    [:.actions
-     [:a
+    [:>.actions
+     [:>a
       {:margin-bottom (px 2)
        :margin-right (em 1)}
       mixins/pill-button]]]])
@@ -57,51 +60,54 @@
   [:.tag
    (hover-card)
 
-   [:.card
+   [:>.card
 
-    [:.count
-     {:margin-left (em 1)
-      :display "inline-block"}
-     (mixins/mini-text)
+    [:>.header
 
-     [:&::after
+     [:>.count
+      {:margin-left (em 1)
+       :display "inline-block"}
+      (mixins/mini-text)
+
+      [:&::after
        {:margin-left (em 0.25)
         :-webkit-font-smoothing "antialiased"}]
 
-     [:&.threads
+      [:&.threads
 
-      [:&::after
-       (mixins/fontawesome \uf181)]]
+       [:&::after
+        (mixins/fontawesome \uf181)]]
 
-     [:&.subscribers
+      [:&.subscribers
 
-      [:&::after
-       (mixins/fontawesome \uf0c0)]]]]])
+       [:&::after
+        (mixins/fontawesome \uf0c0)]]]]]])
 
 (defn user []
   [:.user
    (hover-card)
 
-   [:.card
+   [:>.card
 
-    [:.header
+    [:>.header
      ; reserve room for avatar, which is absolutely positioned
      {:padding-right avatar-size}
 
-     [:.status
+     [:>.status
       {:display "inline-block"
        :margin-left (em 0.5)}
       (mixins/mini-text)]
 
-     [:.badges
+     [:>.badges
       {:display "inline-block"
        :margin [[0 (em 0.5)]]}
-      [:.admin::before
+
+      [:>.admin::before
        {:display "inline-block"
         :-webkit-font-smoothing "antialiased"}
        (mixins/fontawesome \uf0e3)]]
 
-     [:img.avatar
+     [:>img.avatar
       {:margin-top (px 2)
        :border-radius (px 3)
        :width avatar-size
@@ -111,7 +117,7 @@
        :top offset
        :right offset}]]
 
-    [:.local-time
+    [:>.local-time
 
      [:&::after
       (mixins/fontawesome \uf017)
