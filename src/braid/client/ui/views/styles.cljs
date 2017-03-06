@@ -37,7 +37,6 @@
                braid.client.ui.styles.imports/imports
                braid.client.ui.styles.animations/anim-spin
                braid.client.ui.styles.body/body
-               braid.client.ui.styles.message/message
                braid.client.ui.styles.reconnect-overlay/reconnect-overlay
                braid.client.ui.styles.page/page
                braid.client.ui.styles.misc/layout
@@ -65,6 +64,8 @@
                 [:>.main
                  (braid.client.ui.styles.header/header vars/pad)
 
-                 [:>.page>.threads>.thread>.card>.messages>.message
+                 [:>.page>.threads>.thread>.card>.messages
+               braid.client.ui.styles.message/message
 
-                  (braid.client.ui.styles.embed/embed vars/pad)]]])}}])
+               [:>.message
+                (braid.client.ui.styles.embed/embed vars/pad)]]]])}}])
