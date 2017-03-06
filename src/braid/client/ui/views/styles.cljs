@@ -38,7 +38,6 @@
                braid.client.ui.styles.animations/anim-spin
                braid.client.ui.styles.body/body
                braid.client.ui.styles.misc/layout
-               braid.client.ui.styles.sidebar/sidebar
                braid.client.ui.styles.misc/emojione
                braid.client.ui.styles.misc/page-headers
                braid.client.ui.styles.pages.channels/channels-page
@@ -61,6 +60,7 @@
                 [:>.main
                  (braid.client.ui.styles.header/header vars/pad)
 
+                 braid.client.ui.styles.sidebar/sidebar
                  braid.client.ui.styles.misc/error-banners
                  braid.client.ui.styles.reconnect-overlay/reconnect-overlay
                  braid.client.ui.styles.page/page
