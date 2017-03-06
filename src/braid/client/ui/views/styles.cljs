@@ -41,7 +41,6 @@
                braid.client.ui.styles.misc/emojione
                braid.client.ui.styles.misc/layout
                braid.client.ui.styles.misc/page-headers
-               braid.client.ui.styles.pages.me/me-page
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
                braid.client.invites.views.invite-page-styles/invite-page
@@ -61,6 +60,7 @@
                  braid.client.ui.styles.reconnect-overlay/reconnect-overlay
                  braid.client.ui.styles.page/page
                  braid.client.ui.styles.pages.tags/tags-page
+                 braid.client.ui.styles.pages.me/me-page
 
                  [:>.page
                   (braid.client.ui.styles.misc/threads vars/pad)
