@@ -43,10 +43,6 @@
                braid.client.ui.styles.misc/page-headers
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
-               braid.client.invites.views.invite-page-styles/invite-page
-               braid.client.bots.views.bots-page-styles/bots-page
-               braid.client.uploads.views.uploads-page-styles/uploads-page
-               braid.client.group-admin.views.group-settings-page-styles/group-settings-page
 
                [:.app
                 braid.client.ui.styles.login/login
@@ -59,8 +55,14 @@
                  braid.client.ui.styles.misc/error-banners
                  braid.client.ui.styles.reconnect-overlay/reconnect-overlay
                  braid.client.ui.styles.page/page
+
+                 ; page styles
                  braid.client.ui.styles.pages.tags/tags-page
                  braid.client.ui.styles.pages.me/me-page
+                 braid.client.group-admin.views.group-settings-page-styles/group-settings-page
+                 braid.client.uploads.views.uploads-page-styles/uploads-page
+                 braid.client.invites.views.invite-page-styles/invite-page
+                 braid.client.bots.views.bots-page-styles/bots-page
 
                  [:>.page
                   (braid.client.ui.styles.misc/threads vars/pad)

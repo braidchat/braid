@@ -5,20 +5,4 @@
     [braid.client.ui.styles.vars :as vars]))
 
 (def invite-page
-  [:.page.invite
-   [:.invite-form
-
-    [:autocomplete
-     {:background-color "#999"}
-
-     [:.results
-      {:list-style-type "none"
-       :padding-left (px 10)}
-
-      [:.result
-
-       [:&:hover
-        {:background "#eee"}]]
-
-      [:.active
-       {:font-weight "bold"}]]]] ])
+  [:>.page.invite])

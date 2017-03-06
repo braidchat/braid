@@ -5,9 +5,10 @@
     [braid.client.ui.styles.vars :as vars]))
 
 (def group-settings-page
-  [:.page.group-settings
-   [:.setting
-    [:&.avatar
-     [:.upload
-      [:.uploading-indicator
-       {:display "inline-block"}]]]]])
+  [:>.page.group-settings
+   [:>.content
+    [:>.setting
+     [:&.avatar
+      [:>.upload
+       [:>.uploading-indicator
+        {:display "inline-block"}]]]]]])
