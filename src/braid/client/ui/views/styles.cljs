@@ -48,11 +48,8 @@
                braid.client.uploads.views.uploads-page-styles/uploads-page
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
+               (braid.client.ui.styles.misc/avatar-upload vars/pad)
 
-               (braid.client.ui.styles.thread/thread vars/pad)
-               (braid.client.ui.styles.thread/new-message vars/pad)
-               (braid.client.ui.styles.thread/notice vars/pad)
-               (braid.client.ui.styles.thread/drag-and-drop vars/pad)
                [:.app
                 braid.client.ui.styles.login/login
                 braid.client.ui.styles.misc/status
@@ -68,8 +65,18 @@
                  [:>.page
                   (braid.client.ui.styles.misc/threads vars/pad)
 
-                  [:>.threads>.thread>.card>.messages
-                   braid.client.ui.styles.message/message
+                  [:>.threads
+                   (braid.client.ui.styles.thread/thread vars/pad)
+                   (braid.client.ui.styles.thread/notice vars/pad)
 
-                   [:>.message
-                    (braid.client.ui.styles.embed/embed vars/pad)]]]]])}}])
+                   [:>.thread
+
+                    [:>.card
+
+                     [:>.messages
+                      braid.client.ui.styles.message/message
+
+                      [:>.message
+                       (braid.client.ui.styles.embed/embed vars/pad)]]
+
+                     (braid.client.ui.styles.thread/new-message vars/pad)]]]]]])}}])

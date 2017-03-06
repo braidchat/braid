@@ -119,3 +119,20 @@
     mixins/spin
     {:display "inline-block"
      :margin-right (em 0.5)}]])
+
+(defn drag-and-drop [pad]
+  [:&
+
+   [:&.dragging
+    {:background-color "gray"
+     :border [[(px 5) "dashed" "black"]]}]
+
+   [:>.uploading-indicator
+    (mixins/fontawesome \uf110)
+    mixins/spin
+    {:font-size (em 1.5)
+     :text-align "center"}]])
+
+(defn avatar-upload [pad]
+  [:&
+   (drag-and-drop pad)])
