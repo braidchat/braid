@@ -7,9 +7,10 @@
 
 (def layout
   [:.app
-    [:.main
 
-     [:.sidebar
+    [:>.main
+
+     [:>.sidebar
       {:position "fixed"
        :left 0
        :top 0
@@ -30,76 +31,77 @@
     :vertical-align "middle"}])
 
 (def error-banners
-  [:.error-banners
+  [:>.error-banners
    {:z-index 9999
     :position "fixed"
     :top 0
     :right 0
     :width "100%"}
 
-   [:.error-banner
+   [:>.error-banner
     {:margin-bottom (rem 0.25)
      :font-size (em 2)
      :text-align "center"}
+
     [:&.error
      {:background-color "rgba(255, 5, 14, 0.6)"}]
+
     [:&.warn
      {:background-color "rgba(255, 190, 5, 0.6)"}]
+
     [:&.info
      {:background-color "rgba(5, 255, 70, 0.6)"}]
 
-     [:.close
+     [:>.close
       {:margin-left (em 1)
        :cursor "pointer"}]]])
 
 (def page-headers
-  [[".page > .title::before"
+  [[:.page>.title::before
     {:margin-right (em 0.5)}]
 
-   [".page.inbox > .title::before"
+   [:.page.inbox>.title::before
     (mixins/fontawesome \uf01c)]
 
-   [".page.recent > .title::before"
+   [:.page.recent>.title::before
     (mixins/fontawesome \uf1da)]
 
-   [".page.users > .title::before"
+   [:.page.users>.title::before
     (mixins/fontawesome \uf0c0)]
 
-   [".page.channels > .title::before"
+   [:.page.channels>.title::before
     (mixins/fontawesome \uf02c)]
 
-   [".page.settings > .title::before"
+   [:.page.settings>.title::before
     (mixins/fontawesome \uf013)]
 
-   [".page.search > .title::before"
+   [:.page.search>.title::before
     (mixins/fontawesome \uf002)]
 
-   [".page.me > .title::before"
+   [:.page.me>.title::before
     (mixins/fontawesome \uf007)]
 
-   [".page.userpage > .title::before"
+   [:.page.userpage>.title::before
     (mixins/fontawesome \uf007)]
 
-   [".page.channel > .title::before"
+   [:.page.channel>.title::before
     (mixins/fontawesome \uf02b)]])
 
 
 (defn threads [pad]
-  [:.page
-   ["> .threads"
-    mixins/flex
-    {:position "absolute"
-     :top vars/pad
-     :right 0
-     :bottom 0
-     :left 0
-     :padding-left vars/pad
-
-     :align-items "flex-end"
-     :overflow-x "scroll" }]])
+  [:>.threads
+   mixins/flex
+   {:position "absolute"
+    :top vars/pad
+    :right 0
+    :bottom 0
+    :left 0
+    :padding-left vars/pad
+    :align-items "flex-end"
+    :overflow-x "scroll" }])
 
 (def status
-  [".app > .status"
+  [:>.status
    mixins/flex
    {:position "absolute"
     :top 0
@@ -111,7 +113,8 @@
     :justify-content "center"
     :align-items "center"
     :font-size "2em"}
-   [:&:before
+
+   [:&::before
     (mixins/fontawesome \uf110)
     mixins/spin
     {:display "inline-block"
