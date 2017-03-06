@@ -29,7 +29,7 @@
          {:margin-left (em 0.25)}]
 
         [:&.threads-count
-         [:&:after
+         [:&::after
           (mixins/fontawesome \uf181)]]
 
         [:&.subscribers-count

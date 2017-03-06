@@ -23,7 +23,7 @@
      {:padding 0
       :color "#CCC"}
 
-     [:&:before
+     [:&::before
       (mixins/fontawesome \uf091)]
 
      ; make it easier to transition cursor to the menu
@@ -68,7 +68,7 @@
          {:display "flex"
           :justify-content "space-between"}
 
-         [:&:before
+         [:&::before
           {:content "attr(data-icon)"
            :font-family "FontAwesome"
            :display "block"

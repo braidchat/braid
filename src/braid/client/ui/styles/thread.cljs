@@ -82,24 +82,24 @@
       {:color "#333"}]
 
      [:&.close
-      [:&:after
+      [:&::after
        (mixins/fontawesome \uf00d)]]
 
      [:&.unread
-      [:&:after
+      [:&::after
        (mixins/fontawesome \uf0e2)]]
 
      [:&.permalink
-      [:&:after (mixins/fontawesome \uf0c1)]]
+      [:&::after (mixins/fontawesome \uf0c1)]]
 
      [:&.mute
-      [:&:after (mixins/fontawesome \uf1f6)]]
+      [:&::after (mixins/fontawesome \uf1f6)]]
 
      [:&.hidden
       {:margin-top (m/* pad 0.5)
        :display "none"}
 
-      [:&:after
+      [:&::after
        {:font-size "0.9em"
         :margin-right "-0.15em"}]]]
 

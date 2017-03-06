@@ -132,7 +132,7 @@
        :outline "none"}]
 
      [:>.action
-      [:&:after
+      [:&::after
        {:top 0
         :right (m/* vars/pad 0.75)
         :height size
