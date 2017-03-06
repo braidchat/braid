@@ -96,14 +96,14 @@
                                 ; TODO actually use some interesting logic here
                                 (remove (fn [t] (subscribed-to? (t :id))))))]
     (fn []
-      [:div.page.channels
+      [:div.page.tags
        [:div.title "Tags"]
 
        [:div.content
         [new-tag-view {:group-id @group-id}]
 
         (when (seq @subscribed-tags)
-          [:div
+          [:div.subscribed.tag-list
            [:h2 "Subscribed"]
            [:div.tags
             (doall
@@ -112,7 +112,7 @@
                 [tag-info-view tag]))]])
 
         (when (seq @recommended-tags)
-          [:div
+          [:div.recommended.tag-list
            [:h2 "Recommended"]
            [:div.tags
             (doall

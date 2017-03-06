@@ -10,7 +10,7 @@
     [braid.client.ui.styles.message]
     [braid.client.ui.styles.misc]
     [braid.client.ui.styles.page]
-    [braid.client.ui.styles.pages.channels]
+    [braid.client.ui.styles.pages.tags]
     [braid.client.ui.styles.pages.me]
     [braid.client.ui.styles.pills]
     [braid.client.ui.styles.reconnect-overlay]
@@ -34,21 +34,20 @@
                                :animation
                                :flex-grow}
                 :vendors ["webkit"]}
-               braid.client.ui.styles.imports/imports
                braid.client.ui.styles.animations/anim-spin
                braid.client.ui.styles.body/body
-               braid.client.ui.styles.misc/layout
+               braid.client.ui.styles.imports/imports
+               (braid.client.ui.styles.misc/avatar-upload vars/pad)
                braid.client.ui.styles.misc/emojione
+               braid.client.ui.styles.misc/layout
                braid.client.ui.styles.misc/page-headers
-               braid.client.ui.styles.pages.channels/channels-page
-               braid.client.group-admin.views.group-settings-page-styles/group-settings-page
                braid.client.ui.styles.pages.me/me-page
+               (braid.client.ui.styles.pills/tag)
+               (braid.client.ui.styles.pills/user)
                braid.client.invites.views.invite-page-styles/invite-page
                braid.client.bots.views.bots-page-styles/bots-page
                braid.client.uploads.views.uploads-page-styles/uploads-page
-               (braid.client.ui.styles.pills/tag)
-               (braid.client.ui.styles.pills/user)
-               (braid.client.ui.styles.misc/avatar-upload vars/pad)
+               braid.client.group-admin.views.group-settings-page-styles/group-settings-page
 
                [:.app
                 braid.client.ui.styles.login/login
@@ -61,9 +60,11 @@
                  braid.client.ui.styles.misc/error-banners
                  braid.client.ui.styles.reconnect-overlay/reconnect-overlay
                  braid.client.ui.styles.page/page
+                 braid.client.ui.styles.pages.tags/tags-page
 
                  [:>.page
                   (braid.client.ui.styles.misc/threads vars/pad)
+
 
                   [:>.threads
                    (braid.client.ui.styles.thread/thread vars/pad)
