@@ -79,10 +79,13 @@
              (cond
                (= "video" (get-in @content [:media :type]))
                [video-embed-view @content]
+
                (= "photo" (get-in @content [:media :type]))
                [image-embed-view @content]
+
                (@content :url)
                [website-embed-view @content]
+
                :else
                nil)]
             [:div.content.loading])])})))

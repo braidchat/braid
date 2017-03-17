@@ -14,6 +14,7 @@
             [braid.server.sync :as sync]
             [braid.server.s3 :as s3]
             [braid.server.api.embedly :as embedly]
+            [braid.server.api.link-extract :as link-extract]
             [braid.server.api.github :as github]
             [braid.server.conf :refer [config]]
             [braid.server.markdown :refer [markdown->hiccup]]))
@@ -266,7 +267,7 @@
 
   (GET "/extract" [url :as {ses :session}]
     (if (some? (user/user-by-id (:user-id ses)))
-      (edn-response (embedly/extract url))
+      (edn-response (link-extract/extract url))
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))

@@ -38,6 +38,8 @@
                  [cljsjs/husl "6.0.1-0"]
                  [cljsjs/highlight "9.6.0-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
+                 [hickory "0.7.0"]
+                 [org.clojure/core.memoize "0.5.8"]
 
                  ;shared
                  [org.clojure/tools.reader "1.0.0-beta3"]
@@ -58,7 +60,7 @@
   :clean-targets ^{:protect false}
   ["resources/public/js"]
 
-  :figwheel {:server-port 3559}
+  :figwheel {:server-port 4559}
 
   :cljsbuild {:builds
               [
