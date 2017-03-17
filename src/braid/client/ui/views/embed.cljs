@@ -54,7 +54,6 @@
 (defn embed-view [url embed-update-chan]
   (let [content (r/atom {})
         set-content! (fn [response]
-                       (println "Response" response)
                        (reset! content response))
         fetch-content! (fn [url]
                          (when (some? url)
