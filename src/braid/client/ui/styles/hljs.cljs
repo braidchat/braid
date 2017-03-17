@@ -15,7 +15,7 @@
 (def window "#4d5057")
 
 (def hljs-styles
-  [:.hljs
+  [:>.hljs
 
    [:.hljs-comment
     :.hljs-quote

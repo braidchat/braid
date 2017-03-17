@@ -1,6 +1,7 @@
 (ns braid.client.ui.views.pages.changelog
-  (:require [reagent.core :as r]
-            [braid.client.xhr :as xhr]))
+  (:require
+    [reagent.core :as r]
+    [braid.client.xhr :as xhr]))
 
 (defn changelog-view []
   (let [change-hiccup (r/atom nil)]

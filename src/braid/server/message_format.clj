@@ -1,7 +1,8 @@
 (ns braid.server.message-format
-  (:require [clojure.string :as string]
-            [braid.server.db.tag :as tag]
-            [braid.server.db.user :as user]))
+  (:require
+    [clojure.string :as string]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.user :as user]))
 
 (defn str->uuid
   [s]

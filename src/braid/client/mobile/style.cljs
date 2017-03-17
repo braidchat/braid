@@ -1,19 +1,20 @@
 (ns braid.client.mobile.style
-  (:require [garden.core :refer [css]]
-            [garden.stylesheet :refer [at-import]]
-            [garden.arithmetic :as m]
-            [garden.units :refer [rem vw vh em]]
-            [braid.client.mobile.auth-flow.styles]
-            [braid.client.mobile.styles.drawer]
-            [braid.client.ui.styles.vars :as vars]
-            [braid.client.ui.styles.header]
-            [braid.client.ui.styles.imports]
-            [braid.client.ui.styles.pills]
-            [braid.client.ui.styles.thread]
-            [braid.client.ui.styles.body]
-            [braid.client.ui.styles.message]
-            [braid.client.ui.styles.embed]
-            [braid.client.ui.styles.mixins :as mixins]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.core :refer [css]]
+    [garden.stylesheet :refer [at-import]]
+    [garden.units :refer [rem vw vh em]]
+    [braid.client.mobile.auth-flow.styles]
+    [braid.client.mobile.styles.drawer]
+    [braid.client.ui.styles.body]
+    [braid.client.ui.styles.embed]
+    [braid.client.ui.styles.header]
+    [braid.client.ui.styles.imports]
+    [braid.client.ui.styles.message]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.pills]
+    [braid.client.ui.styles.thread]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def styles
   (let [pad (rem 1) ; (vw 5)
@@ -86,7 +87,7 @@
               :color "#CCC"
               :padding vars/pad}
 
-             [:&:after
+             [:&::after
               (mixins/fontawesome \uf00d)]]]
 
            (braid.client.ui.styles.thread/messages pad)
@@ -94,7 +95,8 @@
            [:.messages
             {:flex-grow 1}
 
-           (braid.client.ui.styles.embed/embed pad)]
+            [:.message
+             (braid.client.ui.styles.embed/embed pad)]]
 
            (braid.client.ui.styles.thread/new-message pad)]]
 

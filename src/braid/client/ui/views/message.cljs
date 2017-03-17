@@ -1,18 +1,19 @@
 (ns braid.client.ui.views.message
-  (:require [reagent.core :as r]
-            [clojure.string :as string]
-            [re-frame.core :refer [dispatch subscribe]]
-            [cljsjs.highlight]
-            [cljsjs.highlight.langs.clojure]
-            [cljsjs.highlight.langs.javascript]
-            [cljsjs.highlight.langs.css]
-            [cljsjs.highlight.langs.sql]
-            [cljsjs.highlight.langs.yaml]
-            [braid.client.helpers :as helpers :refer [id->color ->color]]
-            [braid.client.ui.views.embed :refer [embed-view]]
-            [braid.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
-            [braid.client.emoji :as emoji]
-            [braid.client.routes :as routes]))
+  (:require
+    [clojure.string :as string]
+    [cljsjs.highlight]
+    [cljsjs.highlight.langs.clojure]
+    [cljsjs.highlight.langs.javascript]
+    [cljsjs.highlight.langs.css]
+    [cljsjs.highlight.langs.sql]
+    [cljsjs.highlight.langs.yaml]
+    [reagent.core :as r]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.emoji :as emoji]
+    [braid.client.helpers :as helpers :refer [id->color ->color]]
+    [braid.client.routes :as routes]
+    [braid.client.ui.views.embed :refer [embed-view]]
+    [braid.client.ui.views.pills :refer [tag-pill-view user-pill-view]]))
 
 (defn abridged-url
   "Given a full url, returns 'domain.com/*.png' where"

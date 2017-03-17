@@ -1,12 +1,14 @@
 (ns braid.client.ui.styles.sidebar
-  (:require [garden.units :refer [rem em px ex]]
-            [garden.arithmetic :as m]
-            [braid.client.ui.styles.mixins :as mixins]
-            [braid.client.ui.styles.vars :as vars]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [rem em px ex]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def badge
-  [:.badge
+  [:>.badge
    mixins/pill-box
+
    [:&
     {:font-size (rem 0.6)
      :background "#B53737 !important"
@@ -16,8 +18,8 @@
      :bottom (rem -0.5)
      :right (rem -0.5)}]])
 
-(defn option [size]
-  [:.option
+(defn sidebar-button [size]
+  [:&
    {:width size
     :height size
     :border-radius (m// vars/pad 3)
@@ -36,7 +38,7 @@
     {:opacity 1}
 
     (let [w (m// vars/pad 3)]
-      [:&:before
+      [:&::before
        {:content "\"\""
         :background "#eee"
         :width w
@@ -45,39 +47,47 @@
         :left (m/- vars/pad)
         :border-radius [[0 w w 0]]}])]
 
-   [:&.group
-    {:margin [[0 0 vars/pad 0]]
-     :color "#222"
-     :box-shadow [[0 (px 1) (px 4) 0 "rgba(0,0,0,0.5)"]]}]
-
-   [:&.other
-    {:color "#999"}
-
-    [:&:after
-     {:font-size (em 1.25)
-      :-webkit-font-smoothing "antialias"}]
-
-    [:&:hover
-     {:color "#FFF"}]
-
-    [:&.plus:after
-     (mixins/fontawesome \uf067)]
-
-    [:&.global-settings:after
-     (mixins/fontawesome \uf013)]]
-
    badge])
 
 (def sidebar
-  [:.sidebar
-   {:background "#222"
+  [:>.sidebar
+   {:position "fixed"
+    :left 0
+    :top 0
+    :bottom 0
+    :width vars/sidebar-width
+    :box-sizing "border-box"
+    :background "#222"
     :padding vars/pad
     :overflow-x "visible"
     :overflow-y "auto"
     :display "flex"
     :flex-direction "column"}
 
-   (option vars/top-bar-height)
+   [:>.groups
+    [:>.group
+     (sidebar-button vars/top-bar-height)
+     {:margin [[0 0 vars/pad 0]]
+      :color "#222"
+      :box-shadow [[0 (px 1) (px 4) 0 "rgba(0,0,0,0.5)"]]}]]
 
    [:>.spacer
-    {:flex-grow 2}]])
+    {:flex-grow 2}]
+
+   [:>.global-settings
+    :>.plus
+    (sidebar-button vars/top-bar-height)
+    {:color "#999"}
+
+    [:&::after
+     {:font-size (em 1.25)
+      :-webkit-font-smoothing "antialias"}]
+
+    [:&:hover
+     {:color "#FFF"}]
+
+    [:&.plus::after
+     (mixins/fontawesome \uf067)]
+
+    [:&.global-settings::after
+     (mixins/fontawesome \uf013)]]])

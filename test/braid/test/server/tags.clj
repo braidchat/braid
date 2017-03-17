@@ -1,12 +1,12 @@
 (ns braid.test.server.tags
-  (:require [clojure.test :refer :all]
-            [mount.core :as mount]
-            [braid.server.conf :as conf]
-            [braid.server.db :as db]
-            [braid.server.db.group :as group]
-            [braid.server.db.tag :as tag]
-            [braid.server.db.user :as user]))
-
+  (:require
+    [clojure.test :refer :all]
+    [mount.core :as mount]
+    [braid.server.conf :as conf]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.user :as user]))
 
 (use-fixtures :each
               (fn [t]

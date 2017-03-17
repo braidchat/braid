@@ -1,6 +1,7 @@
 (ns braid.client.ui.views.pages.me
-  (:require [braid.client.routes :as routes]
-            [re-frame.core :refer [dispatch subscribe]]))
+  (:require
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.routes :as routes]))
 
 (defn leave-group-view
   []

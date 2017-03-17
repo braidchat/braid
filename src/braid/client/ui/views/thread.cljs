@@ -1,17 +1,20 @@
 (ns braid.client.ui.views.thread
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [clojure.string :as string]
-            [clojure.set :refer [difference]]
-            [reagent.core :as r]
-            [re-frame.core :refer [dispatch subscribe]]
-            [cljs.core.async :refer [chan put!]]
-            [braid.client.routes :as routes]
-            [braid.client.helpers :as helpers]
-            [braid.client.s3 :as s3]
-            [braid.client.ui.views.pills :refer [user-pill-view tag-pill-view]]
-            [braid.client.ui.views.message :refer [message-view]]
-            [braid.client.ui.views.new-message :refer [new-message-view]])
-  (:import [goog.events KeyCodes]))
+  (:require-macros
+    [cljs.core.async.macros :refer [go]])
+  (:require
+    [clojure.set :refer [difference]]
+    [clojure.string :as string]
+    [cljs.core.async :refer [chan put!]]
+    [reagent.core :as r]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.helpers :as helpers]
+    [braid.client.routes :as routes]
+    [braid.client.s3 :as s3]
+    [braid.client.ui.views.message :refer [message-view]]
+    [braid.client.ui.views.new-message :refer [new-message-view]]
+    [braid.client.ui.views.pills :refer [user-pill-view tag-pill-view]])
+  (:import
+    [goog.events KeyCodes]))
 
 (def max-file-size (* 10 1024 1024))
 

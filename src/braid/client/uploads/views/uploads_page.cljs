@@ -1,13 +1,14 @@
 (ns braid.client.uploads.views.uploads-page
-  (:require [reagent.core :as r]
-            [reagent.ratom :refer-macros [run!]]
-            [clojure.string :as string]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.routes :as routes]
-            [braid.client.helpers :as helpers]
-            [braid.client.ui.views.embed :refer [embed-view]]
-            [braid.client.ui.views.pills :as pills]
-            [braid.client.ui.views.thread :as thread]))
+  (:require
+    [clojure.string :as string]
+    [reagent.core :as r]
+    [reagent.ratom :refer-macros [run!]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.helpers :as helpers]
+    [braid.client.routes :as routes]
+    [braid.client.ui.views.embed :refer [embed-view]]
+    [braid.client.ui.views.pills :as pills]
+    [braid.client.ui.views.thread :as thread]))
 
 (defn upload-view
   [upload]

@@ -1,10 +1,11 @@
 (ns braid.client.bots.views.bots-page
-  (:require [reagent.core :as r]
-            [reagent.ratom :refer-macros [reaction]]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.ui.views.pills :refer [user-pill-view]]
-            [braid.client.ui.views.upload :refer [avatar-upload-view]]
-            [braid.common.util :refer [bot-name-re]]))
+  (:require
+    [reagent.core :as r]
+    [reagent.ratom :refer-macros [reaction]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.ui.views.pills :refer [user-pill-view]]
+    [braid.client.ui.views.upload :refer [avatar-upload-view]]
+    [braid.common.util :refer [bot-name-re]]))
 
 (defn bot-view
   [bot]

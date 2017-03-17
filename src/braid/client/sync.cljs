@@ -1,11 +1,12 @@
 (ns braid.client.sync
-  (:require [re-frame.core :refer [dispatch]]
-            [taoensso.sente  :as sente :refer [cb-success?]]
-            [taoensso.sente.packers.transit :as sente-transit]
-            [taoensso.timbre :as timbre :refer-macros [debugf]]
-            [goog.string :as gstring]
-            [braid.client.store :as store]
-            [goog.string.format]))
+  (:require
+    [re-frame.core :refer [dispatch]]
+    [taoensso.sente :as sente :refer [cb-success?]]
+    [taoensso.sente.packers.transit :as sente-transit]
+    [taoensso.timbre :as timbre :refer-macros [debugf]]
+    [goog.string :as gstring]
+    [goog.string.format]
+    [braid.client.store :as store]))
 
 ; Change to :debug to get detailed info in dev
 (timbre/set-level! :info)

@@ -1,8 +1,9 @@
 (ns braid.client.ui.views.threads
-  (:require [reagent.core :as r]
-            [clojure.set :refer [difference]]
-            [braid.client.ui.views.thread :refer [thread-view]]
-            [braid.client.ui.views.new-thread :refer [new-thread-view]]))
+  (:require
+    [clojure.set :refer [difference]]
+    [reagent.core :as r]
+    [braid.client.ui.views.thread :refer [thread-view]]
+    [braid.client.ui.views.new-thread :refer [new-thread-view]]))
 
 (defn threads-view
   [props]

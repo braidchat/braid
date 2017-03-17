@@ -1,6 +1,7 @@
 (ns braid.client.uploads.events
-  (:require [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]
-            [cljs-uuid-utils.core :as uuid]))
+  (:require
+    [cljs-uuid-utils.core :as uuid]
+    [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]))
 
 (defn make-upload [data]
   (merge {:id (uuid/make-random-squuid)}

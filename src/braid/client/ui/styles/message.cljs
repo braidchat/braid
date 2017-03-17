@@ -1,13 +1,16 @@
 (ns braid.client.ui.styles.message
-  (:require [braid.client.ui.styles.vars :refer [avatar-size pad card-width]]
-            [braid.client.ui.styles.mixins :as mixins]
-            [braid.client.ui.styles.pills :as pills]
-            [braid.client.ui.styles.hljs :refer [hljs-styles]]
-            [garden.arithmetic :as m]
-            [garden.units :refer [rem px]]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [rem px]]
+    [braid.client.ui.styles.hljs :refer [hljs-styles]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.pills :as pills]
+    [braid.client.ui.styles.vars :refer [avatar-size pad card-width]]))
+
+(def message-left-pad  (m/+ avatar-size (rem 0.5)))
 
 (def message
-  [:.message
+  [:>.message
    {:position "relative"
     :margin [[0 0 pad]]}
 
@@ -32,48 +35,50 @@
       "> .content > .dummy > .tag > .pill"
       "> .content > .dummy > .external"
       {:opacity 0.6}]
+
      ["> .content"
       {:color "rgba(0,0,0,0.6)"}]]
 
     [:&.unseen {}]
 
-   ["> .avatar img"
-    {:cursor "pointer"
-     :width avatar-size
-     :height avatar-size
-     :display "inline-block"
-     :position "absolute"
-     :border-radius "20%"}]
+   [:>.avatar
+    [:>img
+     {:cursor "pointer"
+      :width avatar-size
+      :height avatar-size
+      :display "inline-block"
+      :position "absolute"
+      :border-radius "20%"}]]
 
-   ["> .info"
+   [:>.info
     {:height "1rem"
      :margin-left (m/+ avatar-size (rem 0.5))
      :overflow "hidden"
      :white-space "nowrap"}
 
-    [:.bot-notice
+    [:>.bot-notice
      {:background-color "#c0afc0"
       :border-radius (px 5)
       :padding (rem 0.25)
       :font-weight "bold"
       :color "#413f42"}]
 
-    [:.nickname
+    [:>.nickname
      {:display "inline"
       :font-weight "bold"
       :text-decoration "none"
       :color "#000"}]
 
-    [:.time
+    [:>.time
      {:display "inline"
       :margin-left "0.25rem"
       :color "#ccc"}]]
 
-   ["> .content"
+   [:>.content
     {:white-space "pre-wrap"
      :word-break "break-word"
      :display "inline-block"
-     :padding-left (m/+ avatar-size (rem 0.5))
+     :padding-left message-left-pad
      :width "100%"
      :box-sizing "border-box"
      :line-height "1.25em"
@@ -87,7 +92,7 @@
      {:background "#000000"
       :max-width "inherit !important"}
 
-     [:&:before
+     [:&::before
       (mixins/fontawesome \uf0c1)
       {:display "inline"
        :margin-right "0.25em"
@@ -102,18 +107,30 @@
 
     [:&.inline
      {:padding "0.25em 0.5em"
-      :display "inline-block"}]
-
-    [:&.multiline
-     {:display "block"
+      :display "inline-block"
       :text-overflow "ellipsis"
-      :white-space "pre"
-      :word-break "normal"
-      :width "100%"
       :overflow-x "hidden"
-      :box-sizing "border-box"
-      :padding "0.5em"}
+      :max-width "100%"
+      :vertical-align "middle"
+      :margin 0}
 
      [:&:hover
       {:text-overflow "initial"
-       :overflow-x "scroll"}]]]])
+       :overflow-x "scroll"}]]
+
+    [:&.multiline
+     {:display "block"
+      :margin [[0 0 0 (m/* -1 (m/+ pad message-left-pad))]]
+      :width card-width}
+
+     [:>code
+      {:overflow-x "hidden"
+       :display "block"
+       :box-sizing "border-box"
+       :padding "1em"
+       :width "100%"
+       :text-overflow "ellipsis"}
+
+       [:&:hover
+        {:text-overflow "initial"
+         :overflow-x "scroll"}]]]]])

@@ -1,24 +1,23 @@
 (ns braid.server.email-digest
-  (:require [mount.core :refer [defstate]]
-            [clojurewerkz.quartzite
-             [triggers :as t]
-             [jobs :as j :refer [defjob]]
-             [scheduler :as qs]]
-            [clojurewerkz.quartzite.schedule.cron :as cron]
-            [braid.server.scheduler :refer [scheduler]]
-            [clj-time
-             [core :as time]
-             [format :as format]
-             [coerce :refer [to-date-time]]]
-            [clojure.string :as string]
-            [braid.server.conf :refer [config]]
-            [clostache.parser :refer [render-resource]]
-            [inliner.core :refer [inline-css]]
-            [org.httpkit.client :as http]
-            [taoensso.timbre :as timbre]
-            [braid.server.db.thread :as thread]
-            [braid.server.db.user :as user]
-            [braid.server.message-format :refer [parse-tags-and-mentions]]))
+  (:require
+    [clojure.string :as string]
+    [clj-time.core :as time]
+    [clj-time.format :as format]
+    [clj-time.coerce :refer [to-date-time]]
+    [clojurewerkz.quartzite.jobs :as j :refer [defjob]]
+    [clojurewerkz.quartzite.schedule.cron :as cron]
+    [clojurewerkz.quartzite.scheduler :as qs]
+    [clojurewerkz.quartzite.triggers :as t]
+    [clostache.parser :refer [render-resource]]
+    [inliner.core :refer [inline-css]]
+    [mount.core :refer [defstate]]
+    [org.httpkit.client :as http]
+    [taoensso.timbre :as timbre]
+    [braid.server.conf :refer [config]]
+    [braid.server.db.thread :as thread]
+    [braid.server.db.user :as user]
+    [braid.server.message-format :refer [parse-tags-and-mentions]]
+    [braid.server.scheduler :refer [scheduler]]))
 
 ; finding data
 

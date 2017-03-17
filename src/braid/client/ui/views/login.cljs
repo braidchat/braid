@@ -1,6 +1,7 @@
 (ns braid.client.ui.views.login
-  (:require [reagent.core :as r]
-            [re-frame.core :refer [dispatch]]))
+  (:require
+    [reagent.core :as r]
+    [re-frame.core :refer [dispatch]]))
 
 (defn login-view []
   (let [state (r/atom {:email ""
@@ -18,7 +19,7 @@
 
     (fn [_]
       [:div.login
-       [:div
+       [:div.wrapper
         [:form {:on-submit
                 (fn [e]
                   (.preventDefault e)
@@ -74,6 +75,5 @@
                 "Send me a password reset email"])])]]
         [:div.alternatives
          "Or"
-         [:div.github
-          [:button {:on-click (fn [_] (set! (.-location js/window) "/github-login"))}
-           "Login with Github"]]]]])))
+         [:button.github {:on-click (fn [_] (set! (.-location js/window) "/github-login"))}
+          "Login with Github"]]]])))

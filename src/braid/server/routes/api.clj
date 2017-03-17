@@ -1,23 +1,23 @@
 (ns braid.server.routes.api
-  (:require [clojure.string :as string]
-            [compojure.core :refer [GET POST defroutes]]
-            [compojure.coercions :refer [as-uuid]]
-            [clojure.java.io :as io]
-            [braid.common.util :refer [valid-nickname?]]
-            [braid.server.db :as db]
-            [braid.server.db.group :as group]
-            [braid.server.db.invitation :as invitation]
-            [braid.server.db.user :as user]
-            [braid.server.invite :as invites]
-            [braid.server.identicons :as identicons]
-            [braid.server.crypto :refer [random-nonce]]
-            [braid.server.sync :as sync]
-            [braid.server.s3 :as s3]
-            [braid.server.api.embedly :as embedly]
-            [braid.server.api.link-extract :as link-extract]
-            [braid.server.api.github :as github]
-            [braid.server.conf :refer [config]]
-            [braid.server.markdown :refer [markdown->hiccup]]))
+  (:require
+    [braid.common.util :refer [valid-nickname?]]
+    [braid.server.api.github :as github]
+    [braid.server.api.link-extract :as link-extract]
+    [braid.server.conf :refer [config]]
+    [braid.server.crypto :refer [random-nonce]]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.invitation :as invitation]
+    [braid.server.db.user :as user]
+    [braid.server.identicons :as identicons]
+    [braid.server.invite :as invites]
+    [braid.server.markdown :refer [markdown->hiccup]]
+    [braid.server.s3 :as s3]
+    [braid.server.sync :as sync]
+    [clojure.java.io :as io]
+    [clojure.string :as string]
+    [compojure.coercions :refer [as-uuid]]
+    [compojure.core :refer [GET POST defroutes]]))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
@@ -31,14 +31,14 @@
         disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
         nick (-> (first (string/split email #"@"))
                  (string/replace disallowed-chars ""))]
+    ; TODO: is there a way to combine these two txns into one?
     (db/run-txns!
-      (concat
-        (user/create-user-txn {:id id
-                               :email email
-                               :password (random-nonce 50)
-                               :avatar avatar
-                               :nickname nick})
-        (group/user-join-group-txn id group-id)))
+      (user/create-user-txn {:id id
+                             :email email
+                             :password (random-nonce 50)
+                             :avatar avatar
+                             :nickname nick}))
+    (db/run-txns! (group/user-join-group-txn id group-id))
     (sync/broadcast-new-user-to-group id group-id)
     id))
 
@@ -104,13 +104,15 @@
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
+                ; TODO: is there a way to combine these two txns into one?
+                (db/run-txns!
+                  (user/create-user-txn {:id user-id
+                                         :email email
+                                         :avatar avatar-url
+                                         :nickname nickname
+                                         :password password}))
                 (db/run-txns!
                   (concat
-                    (user/create-user-txn {:id user-id
-                                           :email email
-                                           :avatar avatar-url
-                                           :nickname nickname
-                                           :password password})
                     (group/user-join-group-txn user-id (invite :group-id))
                     (invitation/retract-invitation-txn (invite :id))))
                 (sync/broadcast-new-user-to-group user-id (invite :group-id)))

@@ -1,6 +1,7 @@
 (ns braid.server.markdown
-  (:require [instaparse.core :as insta]
-            [clojure.string :as string]))
+  (:require
+    [clojure.string :as string]
+    [instaparse.core :as insta]))
 
 ; TODO: refactor this grammar to remove ambiguities - currently issues where
 ; PLAIN_TEXT is ambiguous, since you can have [:PLAIN_TEXT "foo"] or

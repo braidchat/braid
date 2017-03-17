@@ -1,18 +1,20 @@
 (ns braid.server.routes.bots
-  (:require [clojure.string :as string]
-            [compojure.core :refer [GET PUT defroutes]]
-            [ring.middleware.transit :as transit]
-            [taoensso.timbre :as timbre]
-            [braid.server.db :as db]
-            [braid.server.db.bot :as bot]
-            [braid.server.db.group :as group]
-            [braid.server.db.message :as message]
-            [braid.server.db.tag :as tag]
-            [braid.server.db.thread :as thread]
-            [braid.server.db.user :as user]
-            [braid.common.schema :as schema]
-            [braid.server.sync :as sync])
-  (:import [org.apache.commons.codec.binary Base64]))
+  (:require
+    [clojure.string :as string]
+    [compojure.core :refer [GET PUT defroutes]]
+    [ring.middleware.transit :as transit]
+    [taoensso.timbre :as timbre]
+    [braid.server.db :as db]
+    [braid.server.db.bot :as bot]
+    [braid.server.db.group :as group]
+    [braid.server.db.message :as message]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.thread :as thread]
+    [braid.server.db.user :as user]
+    [braid.common.schema :as schema]
+    [braid.server.sync :as sync])
+  (:import
+    [org.apache.commons.codec.binary Base64]))
 
 (defn basic-auth-req
   [request]

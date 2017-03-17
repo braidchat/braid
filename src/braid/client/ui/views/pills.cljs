@@ -1,9 +1,10 @@
 (ns braid.client.ui.views.pills
-  (:require [reagent.core :as r]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.routes :as routes]
-            [braid.client.helpers :refer [id->color]]
-            [braid.client.helpers :as helpers]))
+  (:require
+    [reagent.core :as r]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.helpers :refer [id->color]]
+    [braid.client.helpers :as helpers]
+    [braid.client.routes :as routes]))
 
 (defn subscribe-button-view
   [tag-id]

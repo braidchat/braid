@@ -1,5 +1,6 @@
 (ns braid.client.mobile.auth-flow.subs
-  (:require [re-frame.core :refer [reg-sub]]))
+  (:require
+    [re-frame.core :refer [reg-sub]]))
 
 (reg-sub
   :auth-flow-method

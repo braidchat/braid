@@ -1,8 +1,10 @@
 (ns braid.client.invites.views.invite
-  (:require [reagent.core :as r]
-            [clojure.string :as string]
-            [re-frame.core :refer [dispatch subscribe]])
-  (:import [goog.events KeyCodes]))
+  (:require
+    [clojure.string :as string]
+    [reagent.core :as r]
+    [re-frame.core :refer [dispatch subscribe]])
+  (:import
+    [goog.events KeyCodes]))
 
 (defn invite-view
   []
@@ -14,8 +16,8 @@
         link-expires (r/atom :never)
         invite-link (r/atom nil)]
     (fn []
-      [:div
-       [:div
+      [:div.invite
+       [:div.by-link
         [:h2 "Invite by link"]
         [:p "Anyone with this link will be able to join"]
         [:label "Link expires"
@@ -41,7 +43,7 @@
                    :on-focus (fn [e] (.. e -target select))
                    :read-only true
                    :value @invite-link}])]
-       [:div
+       [:div.by-email
         [:h2 "Invite By Email"]
         (if @collapsed?
           [:button.invite-open {:on-click

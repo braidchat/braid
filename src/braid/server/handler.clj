@@ -1,29 +1,18 @@
 (ns braid.server.handler
-  (:gen-class)
-  (:require [org.httpkit.server :refer [run-server]]
-            [mount.core :as mount :refer [defstate]]
-            [compojure.core :refer [routes context]]
-            [ring.middleware.defaults :refer [wrap-defaults api-defaults
-                                              secure-site-defaults site-defaults]]
-            [ring.middleware.edn :refer [wrap-edn-params]]
-            [ring.middleware.cors :refer [wrap-cors]]
-            [ring.util.response :refer [get-header]]
-            [taoensso.timbre :as timbre]
-            [clojure.tools.nrepl.server :as nrepl]
-            ; requiring router so mount sees state
-            [braid.server.socket :refer [router]]
-            ; require so multimethods get registered
-            [braid.server.sync]
-            [braid.server.routes.socket :refer [sync-routes]]
-            [braid.server.routes.client :refer [desktop-client-routes
-                                                mobile-client-routes
-                                                resource-routes]]
-            [braid.server.routes.api :refer [api-private-routes
-                                             api-public-routes]]
-            [braid.server.routes.bots :refer [bot-routes]]
-            [environ.core :refer [env]]
-            ; requiring so mount sees state
-            [braid.server.email-digest :refer [email-jobs]]))
+  (:require
+    [compojure.core :refer [routes context]]
+    [environ.core :refer [env]]
+    [ring.middleware.cors :refer [wrap-cors]]
+    [ring.middleware.defaults :refer [wrap-defaults api-defaults
+                                      secure-site-defaults site-defaults]]
+    [ring.middleware.edn :refer [wrap-edn-params]]
+    [braid.server.routes.api :refer [api-private-routes
+                                     api-public-routes]]
+    [braid.server.routes.bots :refer [bot-routes]]
+    [braid.server.routes.socket :refer [sync-routes]]
+    [braid.server.routes.client :refer [desktop-client-routes
+                                        mobile-client-routes
+                                        resource-routes]]))
 
 (def session-max-age (* 60 60 24 365))
 
@@ -97,71 +86,3 @@
                  :access-control-allow-credentials true
                  :access-control-allow-methods [:get :put :post :delete])
       wrap-edn-params))
-
-;; server
-
-(defn start-server!
-  [type port]
-  (let [app (case type
-              :api #'api-server-app
-              :desktop #'desktop-client-app
-              :mobile #'mobile-client-app)]
-    (run-server app {:port port})))
-
-(defn start-servers! []
-  (let [desktop-port (:port (mount/args))
-        mobile-port (inc desktop-port)
-        api-port (inc mobile-port)
-        desktop-server (do
-                         (println "starting desktop client on port " desktop-port)
-                         (start-server! :desktop desktop-port))
-        mobile-server (do (println "starting mobile client on port " mobile-port)
-                          (start-server! :mobile mobile-port))
-        api-server (do (println "starting api on port " api-port)
-                       (start-server! :api api-port))]
-    {:desktop desktop-server
-     :mobile mobile-server
-     :api api-server}))
-
-(defn stop-servers!
-  [srvs]
-  (doseq [[typ srv] srvs]
-    (println "stopping server " (name typ))
-    (srv :timeout 100)))
-
-(defstate servers
-  :start (start-servers!)
-  :stop (stop-servers! servers))
-
-;; nrepl
-
-(defstate nrepl
-  :start (nrepl/start-server :port (:repl-port (mount/args)))
-  :stop (nrepl/stop-server nrepl))
-
-;; exceptions in background thread handler
-
-(defn set-default-exception-handler
-  []
-  (Thread/setDefaultUncaughtExceptionHandler
-    (reify Thread$UncaughtExceptionHandler
-      (uncaughtException [_ thread ex]
-        (timbre/errorf "Uncaught exception %s on %s" ex (.getName thread))))))
-
-(defstate thread-handler
-  :start (set-default-exception-handler))
-
-;; main
-(defn dev-main
-  "Start things up, but don't start the email server or nrepl"
-  [port]
-  (->
-    (mount/except #{#'email-jobs #'nrepl})
-    (mount/with-args {:port port})
-    (mount/start)))
-
-(defn -main  [& args]
-  (let [port (Integer/parseInt (first args))
-        repl-port (Integer/parseInt (second args))]
-    (mount/start-with-args {:port port
-                            :repl-port repl-port})))

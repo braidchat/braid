@@ -1,20 +1,20 @@
 (ns braid.server.invite
-  (:require [org.httpkit.client :as http]
-            [clojure.string :as string]
-            [taoensso.timbre :as timbre]
-            [braid.server.conf :refer [config]]
-            [aws.sdk.s3 :as s3]
-            [taoensso.carmine :as car]
-            [image-resizer.core :as img]
-            [image-resizer.format :as img-format]
-            [clostache.parser :as clostache]
-            [clj-time.core :as t]
-            [clj-time.coerce :as c]
-            [braid.server.cache :refer [cache-set! cache-get cache-del!]]
-            [braid.server.crypto :refer [hmac constant-comp random-nonce]]
-            [braid.server.db.group :as group]
-            [environ.core :refer [env]]
-            [braid.server.conf :refer [config]]))
+  (:require
+    [clojure.string :as string]
+    [aws.sdk.s3 :as s3]
+    [clj-time.coerce :as c]
+    [clj-time.core :as t]
+    [clostache.parser :as clostache]
+    [environ.core :refer [env]]
+    [image-resizer.core :as img]
+    [image-resizer.format :as img-format]
+    [org.httpkit.client :as http]
+    [taoensso.timbre :as timbre]
+    [taoensso.carmine :as car]
+    [braid.server.cache :refer [cache-set! cache-get cache-del!]]
+    [braid.server.conf :refer [config]]
+    [braid.server.crypto :refer [hmac constant-comp random-nonce]]
+    [braid.server.db.group :as group]))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
   (println "WARNING: No :hmac-secret set, using an insecure default."))

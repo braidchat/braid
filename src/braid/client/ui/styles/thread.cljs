@@ -1,11 +1,13 @@
 (ns braid.client.ui.styles.thread
-  (:require [braid.client.ui.styles.vars :as vars]
-            [garden.arithmetic :as m]
-            [braid.client.ui.styles.mixins :as mixins]
-            [garden.units :refer [px em rem]]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [px em rem]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]
+    [braid.client.ui.styles.misc :refer [drag-and-drop]]))
 
 (defn head [pad]
-  [:.head
+  [:>.head
    {:min-height "3.5em"
     :position "relative"
     :width "100%"
@@ -13,16 +15,16 @@
     :padding [[pad (m/* 2 pad) pad pad]]
     :box-sizing "border-box"}
 
-   [:.tags
+   [:>.tags
 
-    [:.add
+    [:>.add
      {:position "relative"}
 
-     [:span.pill
+     [:>span.pill
       mixins/pill-button
       {:letter-spacing "normal !important"}]
 
-     [:.tag-list
+     [:>.tag-list
       {:position "absolute"
        :left "100%"
        :margin-left (em 0.5)
@@ -31,39 +33,40 @@
        :z-index 100
        :max-height (em 12)
        :overflow-x "scroll"}
-      (mixins/box-shadow)]
+      (mixins/box-shadow)
 
-     [:.tag-option
-      {:cursor "pointer"
-       :white-space "nowrap"
-       :padding (em 0.25)}
+      [:>.tag-option
+       {:cursor "pointer"
+        :white-space "nowrap"
+        :padding (em 0.25)}
 
-      [:&:hover
-       {:background "#eee"}]
+       [:&:hover
+        {:background "#eee"}]
 
-      [:.rect
-       {:width (em 1)
-        :height (em 2)
-        :display "inline-block"
-        :vertical-align "middle"
-        :border-radius (px 3)}]
+       [:>.rect
+        {:width (em 1)
+         :height (em 2)
+         :display "inline-block"
+         :vertical-align "middle"
+         :border-radius (px 3)}]
 
-      [:span
-       {:margin (rem 0.25)
-        :display "inline-block"
-        :vertical-align "middle"}]]]
+       [:>span
+        {:margin (rem 0.25)
+         :display "inline-block"
+         :vertical-align "middle"}]]]]
 
-    [:.user :.tag :.add
+    [:>.user :>.tag :>.add
      {:display "inline-block"
       :vertical-align "middle"
       :margin-bottom (rem 0.25)
       :margin-right (rem 0.25)}]]
 
-   [:.permalink
-    [:button
+   [:>.permalink
+
+    [:>button
      mixins/pill-button]]
 
-   [:.controls
+   [:>.controls
     {:position "absolute"
      :padding pad
      :top 0
@@ -72,53 +75,52 @@
      :color "#CCC"
      :text-align "right"}
 
-    [:.control
+    [:>.control
      {:cursor "pointer"}
 
      [:&:hover
       {:color "#333"}]
 
      [:&.close
-      [:&:after
+      [:&::after
        (mixins/fontawesome \uf00d)]]
 
      [:&.unread
-      [:&:after
+      [:&::after
        (mixins/fontawesome \uf0e2)]]
 
      [:&.permalink
-      [:&:after (mixins/fontawesome \uf0c1)]]
+      [:&::after (mixins/fontawesome \uf0c1)]]
+
      [:&.mute
-      [:&:after (mixins/fontawesome \uf1f6)]]
+      [:&::after (mixins/fontawesome \uf1f6)]]
 
      [:&.hidden
       {:margin-top (m/* pad 0.5)
        :display "none"}
 
-      [:&:after
+      [:&::after
        {:font-size "0.9em"
-        :margin-right "-0.15em"}]]]]
+        :margin-right "-0.15em"}]]]
 
-   [".controls:hover > .hidden"
-    {:display "block"}]])
-
+    [:&:hover
+     [:>.hidden
+      {:display "block"}]]]])
 
 (defn messages [pad]
-  [:.messages
+  [:>.messages
    {:position "relative"
     :overflow-y "scroll"
     :padding [[0 pad]]}])
 
 (defn thread [pad]
-  [:.thread
+  [:>.thread
    mixins/flex
    {:margin-right pad
-
     :min-width vars/card-width
     :width vars/card-width
     :box-sizing "border-box"
     :outline "none"
-
     :flex-direction "column"
     :height "100%"
     :z-index 101}
@@ -126,12 +128,13 @@
    [:&.new
     {:z-index 99}]
 
-   [:&:before ; switch to :after to align at top
+   ; switch to ::after to align at top
+   [:&::before
     {:content "\"\""
      :flex-grow 1}]
 
    [:&.archived :&.limbo :&.private
-    [:.head:before
+    [:>.head::before
      {:content "\"\""
       :display "block"
       :width "100%"
@@ -142,23 +145,23 @@
       :border-radius [[vars/border-radius
                        vars/border-radius 0 0]]}]
 
-      [:&.archived
-       [:.head:before
-        {:background vars/archived-thread-accent-color}]]
+    [:&.archived
+     [:.head::before
+      {:background vars/archived-thread-accent-color}]]
 
-      [:&.private
-       [:.head:before
-        {:background vars/private-thread-accent-color}]]
+    [:&.private
+     [:.head::before
+      {:background vars/private-thread-accent-color}]]
 
-      [:&.limbo
-       [:.head:before
-        {:background vars/limbo-thread-accent-color}]]]
+    [:&.limbo
+     [:.head::before
+      {:background vars/limbo-thread-accent-color}]]]
 
    [:&.focused
-    ["> .card"
+    [:>.card
      {:box-shadow [[0 (px 10) (px 10) (px 10) "#ccc"]]}]]
 
-   ["> .card"
+   [:>.card
     mixins/flex
     {:flex-direction "column"
      :box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
@@ -166,56 +169,56 @@
      :max-height "100%"
      :background "white"
      :border-radius [[vars/border-radius
-                      vars/border-radius 0 0]]}]
+                      vars/border-radius 0 0]]}
+    (drag-and-drop pad)
 
-   (head pad)
-   (messages pad)])
+    (head pad)
+    (messages pad)]])
 
 (defn notice [pad]
-  [:.thread
-   [:.notice
+  [:>.thread
+   [:>.notice
     {:box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
      :padding pad
      :margin-bottom pad}
 
-    [:&:before
+    [:&::before
      {:float "left"
       :font-size vars/avatar-size
       :margin-right (rem 0.5)
       :content "\"\""}]]
 
    [:&.private :&.limbo
-    ["> .card"
+    [:>.card
      {; needs to be a better way
       ; which is based on the height of the notice
       :max-height "85%"}]]
 
    [:&.private
-    [:.notice
+    [:>.notice
      {:background "#D2E7FF"
       :color vars/private-thread-accent-color}
 
-     [:&:before
+     [:&::before
       (mixins/fontawesome \uf21b)]]]
 
    [:&.limbo
-    [:.notice
+    [:>.notice
      {:background "#ffe4e4"
       :color vars/limbo-thread-accent-color}
 
-     [:&:before
+     [:&::before
       (mixins/fontawesome \uf071)]]]])
 
 
-
 (defn new-message [pad]
-  [:.message.new
+  [:>.message.new
    {:flex-shrink 0
     :padding pad
     :margin 0
     :position "relative"}
 
-   [:.plus
+   [:>.plus
     {:border-radius vars/border-radius
      :text-align "center"
      :line-height (em 2)
@@ -229,7 +232,7 @@
      :color "#e6e6e6"
      :box-shadow "0 0 1px 1px #e6e6e6"}
 
-    [:&:after
+    [:&::after
      {:position "absolute"
       :top "50%"
       :left 0
@@ -245,11 +248,13 @@
      {:color "#999"
       :box-shadow "0 0 1px 1px #999"}]
 
-    [:&.uploading:after
+    [:&.uploading::after
      (mixins/fontawesome \uf110)
      mixins/spin]]
 
-    [:textarea
+   [:>.autocomplete-wrapper
+
+    [:>textarea
      {:width "100%"
       :resize "none"
       :border "none"
@@ -257,10 +262,10 @@
       :min-height (em 3.5)
       :padding-left (rem 2.5)}
 
-      [:&:focus
-       {:outline "none"}]]
+     [:&:focus
+      {:outline "none"}]]
 
-    [:.autocomplete
+    [:>.autocomplete
      {:z-index 1000
       :box-shadow [[0 (px 1) (px 4) 0 "#ccc"]]
       :background "white"
@@ -271,45 +276,37 @@
       :position "absolute"
       :bottom (m/* pad 3)}
 
-      [:.result
-       {:padding "0.25em 0.5em"
-        :clear "both"}
-       [:.emojione :.avatar :.color-block
+     [:>.result
+      {:padding "0.25em 0.5em"
+       :clear "both"}
+
+      [:>.match
+
+       [:>.emojione
+        :>.avatar
+        :>.color-block
         {:display "block"
          :width "2em"
          :height "2em"
          :float "left"
          :margin "0.25em 0.5em 0.25em 0"}]
 
-       [:.color-block
+       [:>.color-block
         {:width "1em"}]
 
-       [:.name
+       [:>.name
         {:height "1em"
          :white-space "nowrap"}]
 
-       [:.extra
+       [:>.extra
         {:color "#ccc"
          :overflow-y "hidden"
-         :max-height "2.5em"}]
+         :max-height "2.5em"}]]
 
-       [:&:hover
-        {:background "#eee"}]
+      [:&:hover
+       {:background "#eee"}]
 
-       [:&.highlight
-        [:.name
-         {:font-weight "bold"}]]]]])
+      [:&.highlight
+       [:.name
+        {:font-weight "bold"}]]]]]])
 
-(defn drag-and-drop [pad]
-  [:.thread :.setting.avatar
-
-   [:&.dragging
-    {:background-color "gray"
-     :border [[(px 5) "dashed" "black"]]}]
-
-
-   [:.uploading-indicator
-    (mixins/fontawesome \uf110)
-    mixins/spin
-    {:font-size (em 1.5)
-     :text-align "center"}]])

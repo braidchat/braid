@@ -1,9 +1,10 @@
 (ns braid.server.db
-  (:require [datomic.api :as d]
-            [mount.core :refer [defstate]]
-            [braid.common.util :refer [extract]]
-            [braid.server.conf :refer [config]]
-            [braid.server.schema :refer [schema]]))
+  (:require
+    [datomic.api :as d]
+    [mount.core :refer [defstate]]
+    [braid.common.util :refer [extract]]
+    [braid.server.conf :refer [config]]
+    [braid.server.schema :refer [schema]]))
 
 (defn install-schema! [db-url]
  (d/transact (d/connect db-url)

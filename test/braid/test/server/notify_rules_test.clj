@@ -1,15 +1,16 @@
 (ns braid.test.server.notify-rules-test
-  (:require [clojure.test :refer :all]
-            [mount.core :as mount]
-            [braid.server.conf :as conf]
-            [schema.core :as s]
-            [braid.server.db :as db]
-            [braid.server.db.group :as group]
-            [braid.server.db.message :as message]
-            [braid.server.db.tag :as tag]
-            [braid.server.db.user :as user]
-            [braid.common.schema :refer [rules-valid? check-rules!]]
-            [braid.server.notify-rules :as rules]))
+  (:require
+    [clojure.test :refer :all]
+    [mount.core :as mount]
+    [schema.core :as s]
+    [braid.common.schema :refer [rules-valid? check-rules!]]
+    [braid.server.conf :as conf]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.message :as message]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.user :as user]
+    [braid.server.notify-rules :as rules]))
 
 (s/set-fn-validation! true)
 

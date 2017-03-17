@@ -1,12 +1,14 @@
 (ns braid.server.s3
-  (:require [clojure.data.json :as json]
-            [clojure.string :as string]
-            [braid.server.conf :refer [config]])
-  (:import javax.crypto.Mac
-           javax.crypto.spec.SecretKeySpec
-           sun.misc.BASE64Encoder
-           (org.joda.time DateTime DateTimeZone Period)
-           org.joda.time.format.ISODateTimeFormat))
+  (:require
+    [clojure.data.json :as json]
+    [clojure.string :as string]
+    [braid.server.conf :refer [config]])
+  (:import
+    javax.crypto.Mac
+    javax.crypto.spec.SecretKeySpec
+    sun.misc.BASE64Encoder
+    (org.joda.time DateTime DateTimeZone Period)
+    org.joda.time.format.ISODateTimeFormat))
 
 (defn base64-encode
   [input]

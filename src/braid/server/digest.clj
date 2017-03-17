@@ -1,7 +1,9 @@
 (ns braid.server.digest
-  (:require [clojure.java.io :as io])
-  (:import [java.security MessageDigest]
-           [org.apache.commons.codec.binary Base64]))
+  (:require
+    [clojure.java.io :as io])
+  (:import
+    [java.security MessageDigest]
+    [org.apache.commons.codec.binary Base64]))
 
 (defn sha256-digest
   "Byte array to sha256"

@@ -1,8 +1,9 @@
 (ns braid.server.api.embedly
-  (:require [org.httpkit.client :as http]
-            [taoensso.timbre :as timbre]
-            [braid.server.conf :refer [config]]
-            [clojure.data.json :as json]))
+  (:require
+    [clojure.data.json :as json]
+    [org.httpkit.client :as http]
+    [taoensso.timbre :as timbre]
+    [braid.server.conf :refer [config]]))
 
 (defn get-json
   "Don't call this directly, prefer `extract`"

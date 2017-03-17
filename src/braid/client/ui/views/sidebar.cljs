@@ -1,15 +1,16 @@
 (ns braid.client.ui.views.sidebar
-  (:require [clojure.string :as string]
-            [reagent.core :as r]
-            [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.helpers :refer [id->color location element-offset
-                                          get-style]]
-            [braid.client.routes :as routes]
-            [braid.client.ui.styles.vars :as style-vars]
-            [goog.events :as events]
-            [goog.style :as gstyle])
-  (:import [goog.events EventType]))
+  (:require
+    [clojure.string :as string]
+    [goog.events :as events]
+    [reagent.core :as r]
+    [reagent.ratom :include-macros true :refer-macros [reaction]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.helpers :refer [id->color location element-offset
+                                  get-style]]
+    [braid.client.routes :as routes]
+    [braid.client.ui.styles.vars :as style-vars])
+  (:import
+    [goog.events EventType]))
 
 (def v- (partial mapv -))
 
@@ -126,7 +127,7 @@
        (doall
          (for [group @ordered-groups]
            ^{:key (group :id)}
-           [:a.group.option
+           [:a.group
             {:class (when (= (:id @active-group) (:id group)) "active")
              :style (merge
                       {:background-color (id->color (group :id))}
@@ -146,7 +147,7 @@
               (string/join "" (take 2 (group :name))))
             [badge-view (group :id)]]))
        (when-let [drag-grp (@drag-state :grp)]
-         [:a.group.option
+         [:a.group
           {:style (merge {:background-color (id->color (drag-grp :id))
                           :position "absolute"
                           :left (css->str style-vars/pad)
@@ -165,7 +166,7 @@
   (let [page (subscribe [:page])
         invitations (subscribe [:invitations])]
     (fn []
-      [:a.option.other.plus
+      [:a.plus
        {:class (when (= (@page :type) :group-explore) "active")
         :href (routes/other-path {:page-id "group-explore"})}
        (when (< 0 (count @invitations))
@@ -174,7 +175,7 @@
 (defn global-settings-button-view []
   (let [page (subscribe [:page])]
     (fn []
-      [:a.option.other.global-settings
+      [:a.global-settings
        {:class (when (= (@page :type) :global-settings) "active")
         :href (routes/other-path {:page-id "global-settings"})}])))
 

@@ -1,10 +1,11 @@
 (ns braid.server.seed
-  (:require [braid.server.db :as db]
-            [braid.server.db.group :as group]
-            [braid.server.db.message :as message]
-            [braid.server.db.tag :as tag]
-            [braid.server.db.user :as user]
-            [braid.server.conf :refer [config]]))
+  (:require
+    [braid.server.conf :refer [config]]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.message :as message]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.user :as user]))
 
 (defn drop! []
   (datomic.api/delete-database (config :db-url)))

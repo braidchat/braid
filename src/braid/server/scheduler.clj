@@ -1,6 +1,7 @@
 (ns braid.server.scheduler
-  (:require [mount.core :as mount :refer [defstate]]
-            [clojurewerkz.quartzite.scheduler :as qs]))
+  (:require
+    [clojurewerkz.quartzite.scheduler :as qs]
+    [mount.core :as mount :refer [defstate]]))
 
 (defn stop-scheduler!
   [s]

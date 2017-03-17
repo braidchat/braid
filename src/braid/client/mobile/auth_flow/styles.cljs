@@ -1,6 +1,7 @@
 (ns braid.client.mobile.auth-flow.styles
-  (:require [braid.client.ui.styles.mixins :as mixins]
-            [garden.units :refer [rem vw vh em]]))
+  (:require
+    [garden.units :refer [rem vw vh em]]
+    [braid.client.ui.styles.mixins :as mixins]))
 
 (defn auth-flow []
   [:.auth-flow
@@ -47,7 +48,7 @@
     [:&:active
      {:background "rgba(255,255,255,0.25)"}]
 
-    [:&.next:after
+    [:&.next::after
      (mixins/fontawesome \uf04b)
      {:margin-left (em 0.5)}]]
 

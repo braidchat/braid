@@ -1,12 +1,13 @@
 (ns braid.server.migrate
-  (:require [braid.server.db :as db]
-            [braid.server.db.group :as group]
-            [braid.server.db.user :as user]
-            [braid.server.quests.db :as quests]
-            [datomic.api :as d]
-            [clojure.string :as string]
-            [clojure.set :as set]
-            [clojure.edn :as edn]))
+  (:require
+    [clojure.edn :as edn]
+    [clojure.set :as set]
+    [clojure.string :as string]
+    [datomic.api :as d]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.user :as user]
+    [braid.server.quests.db :as quests]))
 
 (defn migrate-2016-08-18
   "schema change for quests"
