@@ -61,7 +61,7 @@
   :clean-targets ^{:protect false}
   ["resources/public/js"]
 
-  :figwheel {:server-port 4559}
+  :figwheel {:server-port 3559}
 
   :cljsbuild {:builds
               [
