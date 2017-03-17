@@ -104,13 +104,15 @@
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
+                ; TODO: is there a way to combine these two txns into one?
+                (db/run-txns!
+                  (user/create-user-txn {:id user-id
+                                         :email email
+                                         :avatar avatar-url
+                                         :nickname nickname
+                                         :password password}))
                 (db/run-txns!
                   (concat
-                    (user/create-user-txn {:id user-id
-                                           :email email
-                                           :avatar avatar-url
-                                           :nickname nickname
-                                           :password password})
                     (group/user-join-group-txn user-id (invite :group-id))
                     (invitation/retract-invitation-txn (invite :id))))
                 (sync/broadcast-new-user-to-group user-id (invite :group-id)))
