@@ -84,8 +84,7 @@
                            :pretty-print false}}
 
                {:id "mobile-dev"
-                :figwheel {:on-jsload "braid.client.mobile.core/reload"
-                           :websocket-host "192.168.1.157"}
+                :figwheel {:on-jsload "braid.client.mobile.core/reload"}
                 :source-paths ["src/braid/client"
                                "src/retouch"]
                 :compiler {:main braid.client.mobile.core
