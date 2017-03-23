@@ -5,11 +5,18 @@
     [garden.units :refer [rem em px ex]]))
 
 (defn drawer [pad]
-  [:.drawer
+  [:>.drawer
 
-   [:.content
+   [:>.content
     {:width "100%"
      :padding pad
      :box-sizing "border-box"}
 
-    (braid.client.ui.styles.sidebar/sidebar-button "15vw")]])
+    [:>.sidebar
+
+     [:>.groups
+
+      [:>.group
+       (braid.client.ui.styles.sidebar/sidebar-button "15vw")
+       {:margin [[0 0 pad 0]]
+        :color "#222"}]]]]])

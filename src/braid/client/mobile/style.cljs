@@ -30,76 +30,86 @@
 
          braid.client.ui.styles.imports/imports
 
-         (braid.client.mobile.auth-flow.styles/auth-flow)
-
-         (braid.client.mobile.styles.drawer/drawer pad)
-
          [:body
-          {:touch-action "none"}]
+          {:touch-action "none"}
 
-         [:.page
-          {:position "absolute"
-           :top 0
-           :left 0
-           :right 0
-           :bottom 0
-           :z-index 50
-           :background "#CCC" }]
+          [:>#app
 
-         (braid.client.ui.styles.header/group-header "2.5rem")
+           [:>.app
+            braid.client.mobile.auth-flow.styles/auth-flow
 
-         [:.group-header
-          mixins/flex
-          {:justify-content "space-between"}
+            [:>.main
+             (braid.client.mobile.styles.drawer/drawer pad)
 
-          [:.group-name
-           {:padding 0}]
+             [:>.page
+              {:position "absolute"
+               :top 0
+               :left 0
+               :right 0
+               :bottom 0
+               :z-index 50
+               :background "#CCC"}
 
-          [:.spacer
-           {:flex-grow 2}]
+              (braid.client.ui.styles.header/group-header "2.5rem")
 
-          [:.buttons]]
+              [:>.group-header
+               [:>.bar
+                mixins/flex
+                {:justify-content "space-between"}
 
-         [:.threads
-          {:padding-top "2.5rem"
-           :margin-top "-2.5rem"
-           :height "100%"
-           :box-sizing "border-box"}
+                [:>.group-name
+                 {:padding 0}]
 
-          [:.thread
-           mixins/flex
-           {:width "100vw"
-            :height "100%"
-            :background "white"
-            :flex-direction "column"}
+                [:>.spacer
+                 {:flex-grow 2}]]]
 
-           (braid.client.ui.styles.thread/head pad)
+              [:>.threads
+               {:padding-top "2.5rem"
+                :margin-top "-2.5rem"
+                :height "100%"
+                :box-sizing "border-box"}
 
-           [:.head
-            [:.tags
-             (braid.client.ui.styles.pills/tag)
-             (braid.client.ui.styles.pills/user)]
+               [:>.container
 
-            [:.close
-             {:position "absolute"
-              :top 0
-              :right 0
-              :color "#CCC"
-              :padding vars/pad}
+                [:>.panels
 
-             [:&::after
-              (mixins/fontawesome \uf00d)]]]
+                 [:>.panel
 
-           (braid.client.ui.styles.thread/messages pad)
+                  [:>.thread
+                   mixins/flex
+                   {:width "100vw"
+                    :height "100%"
+                    :background "white"
+                    :flex-direction "column"}
 
-           [:.messages
-            {:flex-grow 1}
+                   [:>.card
+                    (braid.client.ui.styles.thread/head pad)
 
-            [:.message
-             (braid.client.ui.styles.embed/embed pad)]]
+                    [:>.head
 
-           (braid.client.ui.styles.thread/new-message pad)]]
+                     [:>.tags
+                      (braid.client.ui.styles.pills/tag)
+                      (braid.client.ui.styles.pills/user)]
 
-         braid.client.ui.styles.body/body
+                     [:>.close
+                      {:position "absolute"
+                       :top 0
+                       :right 0
+                       :color "#CCC"
+                       :padding vars/pad}
 
-         braid.client.ui.styles.message/message)))
+                      [:&::after
+                       (mixins/fontawesome \uf00d)]]]
+
+                    (braid.client.ui.styles.thread/messages pad)
+
+                    [:>.messages
+                     {:flex-grow 1}
+
+                     braid.client.ui.styles.message/message
+                     [:>.message
+                      (braid.client.ui.styles.embed/embed pad)]]
+
+                    (braid.client.ui.styles.thread/new-message pad)]]]]]]]]]]]
+
+         braid.client.ui.styles.body/body)))
