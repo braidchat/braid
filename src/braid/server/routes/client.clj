@@ -89,7 +89,7 @@
      (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")))
 
   (GET "/js/mobile/out/braid.js" []
-    (when-let [response (resource-response "public/js/desktop/out/braid.js")]
+    (when-let [response (resource-response "public/js/mobile/out/braid.js")]
       (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")))
 
   (resources "/"))
