@@ -111,5 +111,8 @@
          [auth-flow-view]
 
          :app
-         [main-view])])))
+         [main-view]
+
+         :init
+         [:div.status])])))
 
