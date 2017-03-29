@@ -13,12 +13,23 @@
   [host content]
   (let [url-re (re-pattern
                  (str "^http(?:s)?://(?:[^/])*" host ".*$"))]
-    (some-> content
-            (hs/select
-              (hs/and (hs/tag "img")
-                      (hs/attr "src" (partial re-matches url-re))))
+    (some-> (hs/select
+              (hs/descendant
+                (hs/and (hs/or (hs/tag "div") (hs/tag "section"))
+                        (hs/or (hs/id "main") (hs/id "body")))
+                (hs/and (hs/tag "img")
+                        (hs/or
+                          (hs/attr "src" #(string/starts-with? % "/"))
+                          (hs/attr "src" (partial re-matches url-re)))))
+              content)
             first
             (get-in [:attrs :src]))))
+
+(defn absolute-link
+  [url-base link]
+  (if (string/starts-with? link "/")
+    (str url-base link)
+    link))
 
 (defn extract'
   [url]
@@ -56,7 +67,7 @@
                                  content)
                                first
                                (get-in [:attrs :href])
-                               (->> (str url-base))))
+                               (->> (absolute-link url-base))))
                       "")
      :media {:type page-type}
      :type page-type
@@ -79,7 +90,8 @@
                [{:url url :colors [{:color [0 0 0]}]}]
 
                :else
-               (when-let [img (and content (find-img host content))]
+               (when-let [img (some->> content (find-img host)
+                                       (absolute-link url-base))]
                  [{:url img
                    :colors [{:color [0 0 0]}]}]))}))
 
