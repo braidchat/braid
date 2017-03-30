@@ -73,18 +73,16 @@
 
        :reagent-render
        (fn [_ _]
-         (if (:type @content)
+         (if-let [media-type (:type @content)]
            [:div.embed.loaded
             {:on-click (fn []
                          (.open js/window (:original_url @content)))}
             (cond
-              (= "video" (get-in @content [:media :type]))
+              (= "video" media-type)
               [video-embed-view @content]
 
-              (= "photo" (get-in @content [:media :type]))
+              (= "photo" media-type)
               [image-embed-view @content]
 
-              (@content :url) [website-embed-view @content]
-
-              :else [:p "dunno" (get-in @content [:media :type])])]
+              (@content :url) [website-embed-view @content])]
            [:div.embed.loading]))})))
