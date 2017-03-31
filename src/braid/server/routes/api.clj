@@ -31,14 +31,14 @@
         disallowed-chars #"[ \t\n\]\[!\"#$%&'()*+,.:;<=>?@\^`{|}~/]"
         nick (-> (first (string/split email #"@"))
                  (string/replace disallowed-chars ""))]
+    ; TODO: is there a way to combine these two txns into one?
     (db/run-txns!
-      (concat
-        (user/create-user-txn {:id id
-                               :email email
-                               :password (random-nonce 50)
-                               :avatar avatar
-                               :nickname nick})
-        (group/user-join-group-txn id group-id)))
+      (user/create-user-txn {:id id
+                             :email email
+                             :password (random-nonce 50)
+                             :avatar avatar
+                             :nickname nick}))
+    (db/run-txns! (group/user-join-group-txn id group-id))
     (sync/broadcast-new-user-to-group id group-id)
     id))
 
@@ -104,13 +104,15 @@
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
+                ; TODO: is there a way to combine these two txns into one?
+                (db/run-txns!
+                  (user/create-user-txn {:id user-id
+                                         :email email
+                                         :avatar avatar-url
+                                         :nickname nickname
+                                         :password password}))
                 (db/run-txns!
                   (concat
-                    (user/create-user-txn {:id user-id
-                                           :email email
-                                           :avatar avatar-url
-                                           :nickname nickname
-                                           :password password})
                     (group/user-join-group-txn user-id (invite :group-id))
                     (invitation/retract-invitation-txn (invite :id))))
                 (sync/broadcast-new-user-to-group user-id (invite :group-id)))

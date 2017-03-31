@@ -35,7 +35,7 @@ Over the last few years, products like HipChat and Slack have brought chat-rooms
   - anyone can demand your attention at any time
   - conversations frequently devolve or get off-topic
   - it's difficult to find past conversations in a stream of interwoven chatter
-  - [...and much, much, more](./docs/background/chat-rooms-considered-harmful.md)
+  - [...and much, much, more](./docs/background/chatrooms-considered-harmful.md)
 
 <table>
   <tr>
