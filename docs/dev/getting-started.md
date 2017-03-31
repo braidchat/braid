@@ -73,6 +73,6 @@ git push origin new-shiny-thing
 
 
 
-Add yourself to [CONTRIBUTORS.md](../CONTRIBUTORS.md)
+Add yourself to [CONTRIBUTORS.md](../CONTRIBUTORS.edn)
 
 
