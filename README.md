@@ -140,7 +140,9 @@ Braid has most of the features you'd expect from other chat clients and new ones
  - polishing the UX
  - improving the mobile apps
 
-Bugs, feature requests and features are tracked at https://github.com/braidchat/meta/issues
+Question, bugs, and feature requests are tracked at https://github.com/braidchat/braid/issues
+
+A full backlog of features is tracked at https://github.com/braidchat/planning/issues
 
 
 ## Contributing
