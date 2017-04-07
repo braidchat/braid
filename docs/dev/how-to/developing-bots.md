@@ -26,7 +26,7 @@ The fake user-id can probably be ignored by your bot, as any messages created by
 ## Receiving
 
 Bots are sent any messages in their group that begin with a forward-slash (`/`) and their name (e.g. `/giphybot`).
-The messages are sent as [MessagePack-encoded Transit][transit] via a `PUT` request to the webhook-url specificed for the bot.
+The messages are sent as [MessagePack-encoded Transit][transit] via a `PUT` request to the webhook-url specified for the bot.
 The `PUT` request to the bot includes a header `X-Braid-Signature` whose value is the HMAC-SHA256 of the request body, with the key being the bot token.
 The server ignores any response from the bot.
 
@@ -60,7 +60,7 @@ The server will return the following error codes:
 ### Subscribing
 
 A bot can subscribe to a thread by sending a `PUT` request to `/bots/subscribe/<thread-id>`, authenticated in the same way as sending.
-When subscribed to a thread, whenever a user replies to that thread, the bot will recieve the message in the same manner described above under "Receiving".
+When subscribed to a thread, whenever a user replies to that thread, the bot will receive the message in the same manner described above under "Receiving".
 The server will return the following error codes:
 
   - 201 if the subscription is successful
