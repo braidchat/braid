@@ -1,6 +1,6 @@
 # How Braid Bots work
 
-The current state of Braid bots is delibrately very simple.
+The current state of Braid bots is deliberately simple.
 We anticipate extending the API available to bots as we start to write more and see how they are used.
 
 For an example of a simple bot, see [giphybot][].
