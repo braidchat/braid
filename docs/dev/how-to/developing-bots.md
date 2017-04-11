@@ -47,7 +47,7 @@ Requests must be authenticated with HTTP Basic auth, where the username is the (
 
 ### Creating Messages
 
-To create a message, the bot can send a `PUT` request to `/bots/message` endpoint of the api server (e.g. `https://api.braid.chat`).
+To create a message, the bot can send a `POST` request to `/bots/message` endpoint of the api server (e.g. `https://api.braid.chat`).
 The message sent must be in the same format as the server sends --- MessagePack-encoded Transit, with the same schema as shown above.
 However, the `user-id`, `group-id`, and `created-at` fields can be omitted as the server will fill them in with the bot's faux user-id and, the group of the bot, and the current server time, respectively.
 The server will return the following error codes:

@@ -13,6 +13,7 @@
         hmac (crypto/hmac-bytes (bot :token) body)]
     (timbre/debugf "sending bot notification")
     (println
+      ; TODO: should this be a POST too?
       @(http/put (bot :webhook-url)
                  {:headers {"Content-Type" "application/transit+msgpack"
                             "X-Braid-Signature" hmac}

@@ -1,7 +1,7 @@
 (ns braid.server.routes.bots
   (:require
     [clojure.string :as string]
-    [compojure.core :refer [GET PUT defroutes]]
+    [compojure.core :refer [GET POST PUT defroutes]]
     [ring.middleware.transit :as transit]
     [taoensso.timbre :as timbre]
     [braid.server.db :as db]
@@ -65,7 +65,35 @@
       :else true)))
 
 (defroutes bot-routes'
-  ; TODO: allow updating/make this idempotent?
+  (POST "/message" req
+    (let [bot-id (get req ::bot-id)
+          bot (bot/bot-by-id bot-id)
+          msg (assoc (req :body)
+                :user-id (bot :user-id)
+                :group-id (bot :group-id)
+                :created-at (java.util.Date.))]
+      (if (schema/new-message-valid? msg)
+        (if (bot-can-message? bot-id msg)
+          (do
+            (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
+            (db/run-txns! (message/create-message-txn msg))
+            (sync/broadcast-thread (msg :thread-id) [])
+            {:status 201
+             :headers {"Content-Type" "text/plain"}
+             :body "ok"})
+          (do
+            (timbre/debugf "bot %s tried to create illegal message %s"
+                           bot-id msg)
+            {:status 403
+             :headers {"Content-Type" "text/plain"}
+             :body "not allowed to do that"}))
+        {:status 400
+         :headers {"Content-Type" "text/plain"}
+         ; TODO: when we have clojure.spec, use that to explain failure
+         :body "malformed message content"})))
+
+  ; TODO: switch bots to using POST instead, this doesn't make sense as PUT
+  ; XXX: Deprecated, use POST route instead
   (PUT "/message" req
     (let [bot-id (get req ::bot-id)
           bot (bot/bot-by-id bot-id)
@@ -73,6 +101,7 @@
                 :user-id (bot :user-id)
                 :group-id (bot :group-id)
                 :created-at (java.util.Date.))]
+      (timbre/warnf "Bot %s hitting deprecated PUT message endpoint" bot-id)
       (if (schema/new-message-valid? msg)
         (if (bot-can-message? bot-id msg)
           (do
