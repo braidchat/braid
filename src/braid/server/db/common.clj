@@ -92,6 +92,7 @@
    :bot/token
    :bot/avatar
    :bot/webhook-url
+   :bot/event-webhook-url
    {:bot/group [:group/id]}
    {:bot/user [:user/id]}])
 
@@ -102,6 +103,7 @@
    :name (:bot/name e)
    :avatar (:bot/avatar e)
    :webhook-url (:bot/webhook-url e)
+   :event-webhook-url (:bot/event-webhook-url e)
    :token (:bot/token e)})
 
 (def bot-display-pull-pattern

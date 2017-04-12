@@ -50,29 +50,57 @@
                 (db/db) bot-pull-pattern thread-id)
        (into #{} (map db->bot))))
 
+(defn bots-for-event
+  "Get all bots that want to be notified of events"
+  []
+  (->> (d/q '[:find [(pull ?b pull-pattern) ...]
+              :in $ pull-pattern
+              :where
+              [?b :bot/event-webhook-url]]
+            (db/db) bot-pull-pattern)
+       (into #{} (map db->bot))))
+
 ;; Transactions
 
 (defn create-bot-txn
-  [{:keys [id name avatar webhook-url group-id]}]
+  [{:keys [id name avatar webhook-url event-webhook-url group-id]}]
   ; TODO: enforce name is unique in that group?
   (let [fake-user-id (d/tempid :entities)
         bot-id (d/tempid :entities)]
     [{:db/id fake-user-id
       :user/id (d/squuid)
       :user/is-bot? true}
-     ^{:braid.server.db/return
+     (with-meta
+       (merge
+         {:db/id bot-id
+          :bot/id id
+          :bot/name name
+          :bot/avatar avatar
+          :bot/webhook-url webhook-url
+          :bot/token (random-nonce 30)
+          :bot/group [:group/id group-id]
+          :bot/user fake-user-id}
+         (when-let [ewu event-webhook-url]
+           {:bot/event-webhook-url event-webhook-url}))
+       {:braid.server.db/return
        (fn [{:keys [db-after tempids]}]
          (->> (d/resolve-tempid db-after tempids bot-id)
               (d/entity db-after)
-              db->bot))}
-     {:db/id bot-id
-      :bot/id id
-      :bot/name name
-      :bot/avatar avatar
-      :bot/webhook-url webhook-url
-      :bot/token (random-nonce 30)
-      :bot/group [:group/id group-id]
-      :bot/user fake-user-id}]))
+              db->bot))})
+     ]))
+
+(defn retract-bot-txn
+  [bot-id]
+  [[:db.fn/retractEntity [:bot/id bot-id]]])
+
+(defn update-bot-txn
+  [bot]
+  [(with-meta
+     bot
+     {:braid.server.db/return
+      (fn [{:keys [db-after]}]
+        (-> (d/entity db-after (bot :db/id))
+            db->bot))})])
 
 (defn bot-watch-thread-txn
   [bot-id thread-id]

@@ -9,6 +9,17 @@
     [braid.server.db.user :as user]
     [braid.server.quests.db :as quests]))
 
+(defn migrate-2017-04-11
+  "add bot change events"
+  []
+  @(d/transact
+     db/conn
+     [{:db/ident :bot/event-webhook-url
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}]))
+
 (defn migrate-2016-08-18
   "schema change for quests"
   []

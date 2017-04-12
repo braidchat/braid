@@ -266,6 +266,11 @@
   :db/cardinality :db.cardinality/one
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
+ {:db/ident :bot/event-webhook-url
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
  {:db/ident :bot/group
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
