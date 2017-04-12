@@ -7,7 +7,7 @@
   (:import
     java.io.ByteArrayInputStream))
 
-(defn send-notification
+(defn send-message-notification
   [bot message]
   (let [body (->transit message)
         hmac (crypto/hmac-bytes (bot :token) body)]
@@ -18,3 +18,15 @@
                  {:headers {"Content-Type" "application/transit+msgpack"
                             "X-Braid-Signature" hmac}
                   :body (ByteArrayInputStream. body)}))))
+
+(defn send-event-notification
+  [bot info]
+  (when-let [url (:event-webhook-url bot)]
+    (let [body (->transit info)
+          hmac (crypto/hmac-bytes (bot :token) body)]
+      (timbre/debugf "sending bot event notification")
+      (println
+        @(http/post url
+                    {:headers {"Content-Type" "application/transit+msgpack"
+                               "X-Braid-Signature" hmac}
+                     :body (ByteArrayInputStream. body)})))))
