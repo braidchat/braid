@@ -1,6 +1,7 @@
 (ns braid.client.xhr
-  (:require [ajax.core :refer [ajax-request json-request-format json-response-format]]
-            [ajax.edn :refer [edn-request-format edn-response-format]]))
+  (:require
+    [ajax.core :refer [ajax-request json-request-format json-response-format]]
+    [ajax.edn :refer [edn-request-format edn-response-format]]))
 
 (defn edn-xhr
   [args]

@@ -1,8 +1,8 @@
 (ns braid.client.ui.views.pages.recent
-  (:require [reagent.core :as r]
-            [reagent.ratom :refer-macros [run!]]
-            [re-frame.core :refer [subscribe]]
-            [braid.client.ui.views.threads :refer [threads-view]]))
+  (:require
+    [reagent.core :as r]
+    [re-frame.core :refer [subscribe]]
+    [braid.client.ui.views.threads :refer [threads-view]]))
 
 (defn recent-page-view
   []

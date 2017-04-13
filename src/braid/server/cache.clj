@@ -1,6 +1,7 @@
 (ns braid.server.cache
-  (:require [environ.core :refer [env]]
-            [taoensso.carmine :as car]))
+  (:require
+    [environ.core :refer [env]]
+    [taoensso.carmine :as car]))
 
 ; same as conf in handler, but w/e
 (def redis-conn {:pool {}

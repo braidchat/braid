@@ -1,39 +1,38 @@
 (ns braid.client.ui.styles.embed
-  (:require [garden.arithmetic :as m]
-            [garden.units :refer [rem]]
-            [braid.client.ui.styles.mixins :as mixins]
-            [braid.client.ui.styles.vars :as vars]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [rem]]
+    [braid.client.ui.styles.mixins :as mixins]
+    [braid.client.ui.styles.vars :as vars]))
 
 (defn embed [pad]
-  [:.embed
+  [:>.embed
    {:margin [[0 (m/* -1 pad)]]
     :padding [[pad 0 0]]
-    :overflow "hidden"}
+    :overflow "hidden"
+    :cursor "pointer"}
 
-   [:.content
-    {:cursor "pointer"}]
-
-   [:.website
+   [:>.website
     {:background "black"
      :padding (m/* 0.5 pad)
      :color "white"
      :-webkit-font-smoothing "antialiased"
      :overflow "hidden"}
 
-    [:.image
+    [:>.image
      {:width "75px"
       :height "75px"
       :float "left"
       :margin-right (m// pad 2)}]
 
-    [:.about
+    [:>.about
      {:overflow "hidden"}
 
-     [:.provider
+     [:>.provider
       {:font-size "0.9em"
        :margin-bottom "0.5em"}
 
-      [:.favicon
+      [:>.favicon
        {:display "inline-block"
         :width "1em"
         :height "1em"
@@ -44,27 +43,27 @@
         :white-space "nowrap"
         :max-width "10em"}]
 
-      [:.name
+      [:>.name
        {:display "inline-block"
         :line-height "1em"
         :text-transform "uppercase"
         :vertical-align "middle"}]]
 
-     [:.title
+     [:>.title
       {:font-weight "bold"}]
 
-     [:.url
+     [:>.url
       {:font-size "0.9em"
        :margin-top "0.5em"
        :white-space "nowrap"}]]]
 
-   [:.video
+   [:>.video
     {:position "relative"}
 
-    [:img
+    [:>img
      {:width "100%"}]
 
-    [:&:before
+    [:&::before
      (mixins/fontawesome \uf04b)
      (let [font-size (rem 3)]
        {:font-size font-size
@@ -79,16 +78,16 @@
         :opacity 0.75 })]
 
     [:&:hover
-     [:&:before
+     [:&::before
       {:opacity 1.0}]]]
 
-   [:.image
+   [:>.image
     {:position "relative"}
 
-    [:img
+    [:>img
      {:width "100%"}]
 
-    [:&:hover:before
+    [:&:hover::before
      (mixins/fontawesome \uf14c)
      (let [font-size (rem 3)]
        {:font-size font-size

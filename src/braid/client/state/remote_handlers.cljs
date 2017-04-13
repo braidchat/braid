@@ -1,9 +1,10 @@
 (ns braid.client.state.remote-handlers
-  (:require [re-frame.core :refer [dispatch]]
-            [braid.client.sync :as sync]
-            [braid.client.router :as router]
-            [braid.client.desktop.notify :as notify]
-            [braid.client.quests.remote-handlers]))
+  (:require
+    [re-frame.core :refer [dispatch]]
+    [braid.client.desktop.notify :as notify]
+    [braid.client.quests.remote-handlers]
+    [braid.client.router :as router]
+    [braid.client.sync :as sync]))
 
 (defmethod sync/event-handler :braid.client/thread
   [[_ data]]

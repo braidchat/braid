@@ -1,5 +1,6 @@
 (ns braid.common.util
-  (:require [clojure.string :as string]))
+  (:require
+    [clojure.string :as string]))
 
 ; TODO: we should probably define this by a whitelist.  Unicode ranges?
 (def nickname-re
@@ -34,6 +35,11 @@
   [f]
   (fn [& args]
     (apply f (reverse args))))
+
+(defn extract
+  "Like `map` but filter out nil results"
+  [f & colls]
+  (remove nil? (apply map f colls)))
 
 (def bot-name-re
   #"(?:\w|\d){1,30}")

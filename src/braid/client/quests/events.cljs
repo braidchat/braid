@@ -1,8 +1,9 @@
 (ns braid.client.quests.events
-  (:require [re-frame.core :refer [reg-event-db reg-event-fx]]
-            [cljs-uuid-utils.core :as uuid]
-            [braid.client.quests.helpers :as helpers]
-            [braid.client.quests.list :refer [quests-by-id]]))
+  (:require
+    [cljs-uuid-utils.core :as uuid]
+    [re-frame.core :refer [reg-event-db reg-event-fx]]
+    [braid.client.quests.helpers :as helpers]
+    [braid.client.quests.list :refer [quests-by-id]]))
 
 (defn make-quest-record [{:keys [quest-id]}]
   {:quest-record/id (uuid/make-random-squuid)

@@ -1,13 +1,16 @@
 (ns braid.client.store
-  (:require [schema.core :as s :include-macros true]
-            [braid.common.schema :as app-schema]
-            [braid.client.quests.schema :as quests]
-            [braid.client.invites.schema :as invites]
-            [braid.client.mobile.auth-flow.schema :as mobile-auth-flow]))
+  (:require
+    [schema.core :as s :include-macros true]
+    [braid.client.invites.schema :as invites]
+    [braid.client.mobile.auth-flow.schema :as mobile-auth-flow]
+    [braid.client.quests.schema :as quests]
+    [braid.common.schema :as app-schema]))
 
 (def initial-state
   (merge
-    {:login-state :auth-check ; :ws-connect :login-form :app
+    {:login-state :init ; :auth-check :ws-connect :login-form :app
+     :websocket-state {:connected? false
+                       :next-reconnect nil}
      :open-group-id nil
      :threads {}
      :group-threads {}

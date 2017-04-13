@@ -1,9 +1,11 @@
 (ns braid.client.router
-  (:require [secretary.core :as secretary]
-            [goog.history.EventType :as EventType]
-            [goog.events :as events])
-  (:import [goog.history Html5History]
-           [goog Uri]))
+  (:require
+    [goog.history.EventType :as EventType]
+    [goog.events :as events]
+    [secretary.core :as secretary])
+  (:import
+    [goog.history Html5History]
+    [goog Uri]))
 
 (defn init []
   (let [h (Html5History.)]

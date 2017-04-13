@@ -1,12 +1,19 @@
 (ns braid.client.ui.views.message
-  (:require [reagent.core :as r]
-            [clojure.string :as string]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.helpers :as helpers :refer [id->color ->color]]
-            [braid.client.ui.views.embed :refer [embed-view]]
-            [braid.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
-            [braid.client.emoji :as emoji]
-            [braid.client.routes :as routes]))
+  (:require
+    [clojure.string :as string]
+    [cljsjs.highlight]
+    [cljsjs.highlight.langs.clojure]
+    [cljsjs.highlight.langs.javascript]
+    [cljsjs.highlight.langs.css]
+    [cljsjs.highlight.langs.sql]
+    [cljsjs.highlight.langs.yaml]
+    [reagent.core :as r]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.emoji :as emoji]
+    [braid.client.helpers :as helpers :refer [id->color ->color]]
+    [braid.client.routes :as routes]
+    [braid.client.ui.views.embed :refer [embed-view]]
+    [braid.client.ui.views.pills :refer [tag-pill-view user-pill-view]]))
 
 (defn abridged-url
   "Given a full url, returns 'domain.com/*.png' where"
@@ -153,14 +160,23 @@
         text))
     text-or-node))
 
+(defn code-view-gen [class-name]
+  (fn [body]
+    [:pre
+     {:class class-name}
+     [:code
+      {:ref (fn [node]
+              (when node
+                (js/hljs.highlightBlock node)))}
+      body]]))
+
 (def extract-code-blocks
   (make-delimited-processor {:delimiter "```"
-                             :result-fn (fn [body]
-                                          [:code.prettyprint.multiline-code.lang-clj body])}))
+                             :result-fn (code-view-gen "multiline")}))
+
 (def extract-code-inline
   (make-delimited-processor {:delimiter "`"
-                             :result-fn (fn [body]
-                                          [:code.prettyprint.inline-code.lang-clj body])}))
+                             :result-fn (code-view-gen "inline")}))
 
 (def extract-emphasized
   (make-delimited-processor {:delimiter "*"
@@ -186,45 +202,36 @@
 (defn message-view [message embed-update-chan]
   (let [sender (subscribe [:user (message :user-id)])
         current-group (subscribe [:open-group-id])]
-    (r/create-class
-      {:component-did-mount
-       (fn []
-         ; TODO: use prettyPrintOne to only do the content of this node
-         ; TODO: also call on IDidUpdate?
-         ; TODO: don't call if don't have code?
-         (when-let [PR (aget js/window "PR")]
-           ((aget PR "prettyPrint"))))
-       :reagent-render
-       (fn [message embed-update-chan]
-         (let [sender-path (if (@sender :bot?)
-                             (routes/bots-path {:group-id @current-group})
-                             (routes/search-page-path {:group-id @current-group
-                                                       :query (str "@" (@sender :nickname))}))]
-           [:div.message {:class (str " " (when (:collapse? message) "collapse")
-                                      " " (if (:unseen? message) "unseen" "seen")
-                                      " " (when (:first-unseen? message) "first-unseen")
-                                      " " (when (:failed? message) "failed-to-send"))}
-            (when (:failed? message)
-              [:div.error
-               [:span "Message failed to send"]
-               [:button {:on-click
-                         (fn [_] (dispatch [:resend-message message]))}
-                "Resend"]])
-            [:a.avatar {:href sender-path
-                        :tabIndex -1}
-             [:img {:src (@sender :avatar)
-                    :style {:backgroundColor (id->color (@sender :id))}}]]
-            [:div.info
-             (when (@sender :bot?)
-               [:span.bot-notice "BOT"])
-             [:a.nickname {:tabIndex -1
-                           :href sender-path}
-              (@sender :nickname)]
-             [:span.time {:title (message :created-at)}
-              (helpers/format-date (message :created-at))]]
+    (fn [message embed-update-chan]
+      (let [sender-path (if (@sender :bot?)
+                          (routes/bots-path {:group-id @current-group})
+                          (routes/search-page-path {:group-id @current-group
+                                                    :query (str "@" (@sender :nickname))}))]
+        [:div.message {:class (str " " (when (:collapse? message) "collapse")
+                                   " " (if (:unseen? message) "unseen" "seen")
+                                   " " (when (:first-unseen? message) "first-unseen")
+                                   " " (when (:failed? message) "failed-to-send"))}
+         (when (:failed? message)
+           [:div.error
+            [:span "Message failed to send"]
+            [:button {:on-click
+                      (fn [_] (dispatch [:resend-message message]))}
+             "Resend"]])
+         [:a.avatar {:href sender-path
+                     :tabIndex -1}
+          [:img {:src (@sender :avatar)
+                 :style {:backgroundColor (id->color (@sender :id))}}]]
+         [:div.info
+          (when (@sender :bot?)
+            [:span.bot-notice "BOT"])
+          [:a.nickname {:tabIndex -1
+                        :href sender-path}
+           (@sender :nickname)]
+          [:span.time {:title (message :created-at)}
+           (helpers/format-date (message :created-at))]]
 
-            (into [:div.content] (format-message (message :content)))
+         (into [:div.content] (format-message (message :content)))
 
-            (when-let [url (first (helpers/extract-urls (message :content)))]
-              [embed-view url embed-update-chan])]))})))
+         (when-let [url (first (helpers/extract-urls (message :content)))]
+           [embed-view url embed-update-chan])]))))
 

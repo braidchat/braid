@@ -1,17 +1,28 @@
-(ns braid.server.routes.api.public
-  (:require [clojure.string :as string]
-            [compojure.core :refer [GET POST PUT DELETE defroutes context]]
-            [compojure.coercions :refer [as-uuid]]
-            [braid.common.util :refer [valid-nickname? valid-email?]]
-            [braid.server.db :as db]
-            [braid.server.invite :as invites]
-            [braid.server.api.github :as github]
-            [braid.server.conf :refer [config]]
-            [braid.server.events :as events]))
+(ns braid.server.routes.api
+  (:require
+    [clojure.java.io :as io]
+    [clojure.string :as string]
+    [compojure.coercions :refer [as-uuid]]
+    [compojure.core :refer [GET POST defroutes]]
+    [braid.common.util :refer [valid-nickname?]]
+    [braid.server.api.embedly :as embedly]
+    [braid.server.api.github :as github]
+    [braid.server.crypto :refer [random-nonce]]
+    [braid.server.conf :refer [config]]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.invitation :as invitation]
+    [braid.server.db.user :as user]
+    [braid.server.events :as events]
+    [braid.server.identicons :as identicons]
+    [braid.server.invite :as invites]
+    [braid.server.markdown :refer [markdown->hiccup]]
+    [braid.server.s3 :as s3]
+    [braid.server.sync :as sync]))
 
 (defn user-from-session [req]
   (when-let [user-id (get-in req [:session :user-id])]
-    (when-let [user (db/user-by-id user-id)]
+    (when-let [user (user/user-id-exists? user-id)]
       user)))
 
 (defn edn-response [clj-body]
@@ -39,7 +50,7 @@
   ; log in
   (PUT "/session" [email password :as req]
     (if-let [user-id (when (and email password)
-                       (db/authenticate-user email password))]
+                       (user/authenticate-user email password))]
       {:status 200
        :session (assoc (req :session) :user-id user-id)}
       (error-response 401 :auth-fail)))
@@ -75,7 +86,7 @@
          :session (assoc (req :session) :user-id (user :id))})))
 
   (POST "/request-reset" [email]
-    (if-let [user (db/user-with-email email)]
+    (if-let [user (user/user-with-email email)]
       (do (invites/request-reset (assoc user :email email))
           (edn-response {:ok true}))
       (error-response 400 :no-such-email)))
@@ -145,27 +156,38 @@
         (string/blank? invite_id)
         (assoc fail :body "Invalid invitation ID")
 
+        (not (valid-nickname? nickname))
+        (assoc fail :body "Nickname must be 1-30 characters without whitespace")
+
+        (user/nickname-taken? nickname)
+        (assoc fail :body "nickname taken")
+
         ; TODO: be smarter about this
         (not (#{"image/jpeg" "image/png"} (:content-type avatar)))
         (assoc fail :body "Invalid image")
 
         :else
-        (let [invite (db/invite-by-id (java.util.UUID/fromString invite_id))]
+        (let [invite (invitation/invite-by-id (java.util.UUID/fromString invite_id))]
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
             (let [avatar-url (invites/upload-avatar avatar)
-                  user (db/create-user! {:id (db/uuid)
-                                         :email email
-                                         :avatar avatar-url
-                                         :password password})
+                  user-id (db/uuid)
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
+                (db/run-txns!
+                  (user/create-user-txn {:id user-id
+                                         :email email
+                                         :avatar avatar-url
+                                         :nickname nickname
+                                         :password password}))
                 (events/user-join-group! (user :id) (invite :group-id))
-                (db/retract-invitation! (invite :id)))
+                (db/run-txns!
+                  (concat
+                    (invitation/retract-invitation-txn (invite :id)))))
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
-               :session (assoc (req :session) :user-id (user :id))
+               :session (assoc (req :session) :user-id user-id)
                :body ""}))))))
 
   ; join by invite link
@@ -174,12 +196,12 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings group-id)]
           (if-not (invites/verify-hmac form-hmac (str now group-id))
             (assoc bad-resp :body "No such group or the request has been tampered with")
             (if (string/blank? email)
               (assoc bad-resp :body "Invalid email")
-              (if (db/user-with-email email)
+              (if (user/user-with-email email)
                 (assoc bad-resp
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
@@ -195,7 +217,7 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings group-id)]
           (if-not (invites/verify-hmac form-hmac (str now group-id))
             (assoc bad-resp :body "No such group or the request has been tampered with")
             (if-let [user-id (get-in req [:session :user-id])]
@@ -214,12 +236,12 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings group-id)]
           (if-not (get group-settings :public?)
             (assoc bad-resp :body "No such group or the group is private")
             (if (string/blank? email)
               (assoc bad-resp :body "Invalid email")
-              (if (db/user-with-email email)
+              (if (user/user-with-email email)
                 (assoc bad-resp
                        :body (str "A user is already registered with that email.\n"
                                   "Log in and try joining"))
@@ -235,7 +257,7 @@
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (db/group-settings group-id)]
+              group-settings (group/group-settings group-id)]
           (if-not (:public? group-settings)
             (assoc bad-resp :body "No such group or the group is private")
             (if-let [user-id (get-in req [:session :user-id])]
@@ -258,53 +280,78 @@
         (assoc fail :body "Invalid HMAC")
 
         :else
-        (if-let [user (db/user-by-id user-id)]
+        (if-let [user (user/user-by-id user-id)]
           (if-let [err (:error (invites/verify-reset-nonce user token))]
             (assoc fail :body err)
             (let [referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
-              (db/set-user-password! (user :id) new-password)
+              (db/run-txns! (user/set-user-password-txn (user :id) new-password))
               {:status 302
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))
           (assoc fail :body "Invalid user")))))
 
-  ; OAuth dance
-  (GET "/oauth/github"  [code state :as req]
-    (println "GITHUB OAUTH" (pr-str code) (pr-str state))
-    (if-let [{tok :access_token scope :scope :as resp}
-             (github/exchange-token code state)]
-      (do (println "GITHUB TOKEN" tok)
-          ; check scope includes email permission? Or we could just see if
-          ; getting the email fails
-          (let [email (github/email-address tok)
-                user (db/user-with-email email)]
-            (cond
-              (nil? email) {:status 401
-                            :headers {"Content-Type" "text/plain"}
-                            :body "Couldn't get email address from github"}
+    ; OAuth dance
+    (GET "/oauth/github"  [code state :as req]
+      (println "GITHUB OAUTH" (pr-str code) (pr-str state))
+      (if-let [{tok :access_token scope :scope :as resp}
+               (github/exchange-token code state)]
+        (do (println "GITHUB TOKEN" tok)
+            ; check scope includes email permission? Or we could just see if
+            ; getting the email fails
+            (let [email (github/email-address tok)
+                  user (user/user-with-email email)]
+              (cond
+                (nil? email) {:status 401
+                              :headers {"Content-Type" "text/plain"}
+                              :body "Couldn't get email address from github"}
 
-              user {:status 302
-                    ; TODO: when we have mobile, redirect to correct site
-                    ; (maybe part of state?)
-                    :headers {"Location" (config :site-url)}
-                    :session (assoc (req :session) :user-id (user :id))}
+                user {:status 302
+                      ; TODO: when we have mobile, redirect to correct site
+                      ; (maybe part of state?)
+                      :headers {"Location" (config :site-url)}
+                      :session (assoc (req :session) :user-id (user :id))}
 
-              (:braid.server.api/register? resp)
-              (let [user-id (events/register-user! email (:braid.server.api/group-id resp))]
-                {:status 302
-                 ; TODO: when we have mobile, redirect to correct site
-                 ; (maybe part of state?)
-                 :headers {"Location" (config :site-url)}
-                 :session (assoc (req :session) :user-id user-id)})
+                (:braid.server.api/register? resp)
+                (let [user-id (events/register-user! email (:braid.server.api/group-id resp))]
+                  {:status 302
+                   ; TODO: when we have mobile, redirect to correct site
+                   ; (maybe part of state?)
+                   :headers {"Location" (config :site-url)}
+                   :session (assoc (req :session) :user-id user-id)})
 
-              :else
-              {:status 401
-               ; TODO: handle failure better
-               :headers {"Content-Type" "text/plain"}
-               :body "No such user"
-               :session nil})))
-      {:status 400
-       :body "Couldn't exchange token with github"})))
+                :else
+                {:status 401
+                 ; TODO: handle failure better
+                 :headers {"Content-Type" "text/plain"}
+                 :body "No such user"
+                 :session nil})))
+        {:status 400
+         :body "Couldn't exchange token with github"})))
 
+(defroutes api-private-routes
+  (GET "/changelog" []
+    (edn-response {:braid/ok
+                   (-> (io/resource "CHANGELOG.md")
+                       slurp markdown->hiccup)}))
+
+  (GET "/extract" [url :as {ses :session}]
+    (if (some? (user/user-by-id (:user-id ses)))
+      (edn-response (embedly/extract url))
+      {:status 403
+       :headers {"Content-Type" "application/edn"}
+       :body (pr-str {:error "Unauthorized"})}))
+
+  (GET "/s3-policy" req
+    (if (some? (user/user-by-id (get-in req [:session :user-id])))
+      (if-let [policy (s3/generate-policy)]
+        {:status 200
+         :headers {"Content-Type" "application/edn"}
+         :body (pr-str policy)}
+        {:status 500
+         :headers {"Content-Type" "application/edn"}
+         :body (pr-str {:error "No S3 secret for upload"})})
+      {:status 403
+       :headers {"Content-Type" "application/edn"}
+       :body (pr-str {:error "Unauthorized"})})))

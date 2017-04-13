@@ -1,12 +1,14 @@
 (ns braid.server.api.github
-  (:require [org.httpkit.client :as http]
-            [clojure.data.json :as json]
-            [clojure.string :as string]
-            [braid.server.conf :refer [config]]
-            [braid.server.cache :as cache]
-            [braid.server.crypto :as crypto]
-            [braid.server.util :refer [map->query-str ->transit transit->form]])
-  (:import org.apache.commons.codec.binary.Base64))
+  (:require
+    [clojure.data.json :as json]
+    [clojure.string :as string]
+    [org.httpkit.client :as http]
+    [braid.server.cache :as cache]
+    [braid.server.conf :refer [config]]
+    [braid.server.crypto :as crypto]
+    [braid.server.util :refer [map->query-str ->transit transit->form]])
+  (:import
+    org.apache.commons.codec.binary.Base64))
 
 (defn redirect-uri
   "This is a function instead of a var because we need to access config, which

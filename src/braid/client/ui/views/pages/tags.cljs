@@ -1,11 +1,13 @@
 (ns braid.client.ui.views.pages.tags
-  (:require [reagent.core :as r]
-            [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [clojure.string :as string]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.ui.views.pills :refer [tag-pill-view subscribe-button-view]]
-            [braid.common.util :refer [valid-tag-name?]])
-  (:import [goog.events KeyCodes]))
+  (:require
+    [clojure.string :as string]
+    [reagent.core :as r]
+    [reagent.ratom :include-macros true :refer-macros [reaction]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.ui.views.pills :refer [tag-pill-view subscribe-button-view]]
+    [braid.common.util :refer [valid-tag-name?]])
+  (:import
+    [goog.events KeyCodes]))
 
 (defn edit-description-view
   [tag]
@@ -94,14 +96,14 @@
                                 ; TODO actually use some interesting logic here
                                 (remove (fn [t] (subscribed-to? (t :id))))))]
     (fn []
-      [:div.page.channels
+      [:div.page.tags
        [:div.title "Tags"]
 
        [:div.content
         [new-tag-view {:group-id @group-id}]
 
         (when (seq @subscribed-tags)
-          [:div
+          [:div.subscribed.tag-list
            [:h2 "Subscribed"]
            [:div.tags
             (doall
@@ -110,7 +112,7 @@
                 [tag-info-view tag]))]])
 
         (when (seq @recommended-tags)
-          [:div
+          [:div.recommended.tag-list
            [:h2 "Recommended"]
            [:div.tags
             (doall

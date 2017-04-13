@@ -1,12 +1,13 @@
 (ns braid.client.ui.views.search-bar
-  (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [reagent.core :as r]
-            [clojure.string :as string]
-            [cljs.core.async :as async :refer [<! put! chan alts!]]
-            [re-frame.core :refer [dispatch]]
-            [braid.client.helpers :refer [debounce ->color]]
-            [re-frame.core :refer [subscribe]]
-            [braid.client.routes :as routes]))
+  (:require-macros
+    [cljs.core.async.macros :refer [go]])
+  (:require
+    [clojure.string :as string]
+    [cljs.core.async :as async :refer [<! put! chan alts!]]
+    [reagent.core :as r]
+    [re-frame.core :refer [subscribe dispatch]]
+    [braid.client.helpers :refer [debounce ->color]]
+    [braid.client.routes :as routes]))
 
 (defn search-bar-view
   []

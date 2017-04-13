@@ -1,5 +1,6 @@
 (ns braid.client.quests.handler
-  (:require [re-frame.core :as rf]))
+  (:require
+    [re-frame.core :as rf]))
 
 (defn install-quests-handler! []
   (rf/remove-post-event-callback :quest-handler)

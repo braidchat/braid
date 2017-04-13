@@ -1,7 +1,8 @@
 (ns braid.client.ui.styles.mixins
-  (:require [garden.units :refer [px em]]
-            [garden.arithmetic :as m]
-            [braid.client.ui.styles.vars :as vars]))
+  (:require
+    [garden.arithmetic :as m]
+    [garden.units :refer [px em]]
+    [braid.client.ui.styles.vars :as vars]))
 
 (def flex
   {:display #{:flex :-webkit-flex}})
@@ -30,14 +31,17 @@
     :text-align "center"
     :outline "none"}
    (mini-text)
+
   [:&.on
    {:color [["white" "!important"]]}]
+
   [:&.off
    {:background-color [["white" "!important"]]}]])
 
 (def pill-button
   [:&
    pill-box
+
    [:&
     {:color "#888"
      :border [[(px 1) "solid" "#BBB"]]
@@ -55,20 +59,25 @@
      :border-color "#666"
      :cursor "pointer"}]])
 
-(defn outline-button []
+(defn outline-button [{:keys [text-color border-color
+                              hover-text-color hover-border-color]}]
   [:&
    {:display "inline-block"
+    :background "none"
     :border-radius "0.25em"
-    :border "1px solid #ccc"
+    :border [["1px" "solid" border-color]]
     :text-decoration "none"
-    :color "#aaa"
-    :padding [[(em 0.1) (em 0.25)]]
+    :color text-color
+    :padding [[0 (em 0.25)]]
+    :line-height "1.5em"
+    :height "1.5em"
     :white-space "nowrap"
     :cursor "pointer"
     :text-align "center"}
+
    [:&:hover
-    {:color "#999"
-     :border-color "#aaa"}]])
+    {:color hover-text-color
+     :border-color hover-border-color}]])
 
 (defn fontawesome [unicode]
   {:font-family "fontawesome"
@@ -94,7 +103,7 @@
      :padding [[(m/* vars/pad 0.75)]]}]
 
    ; triangle
-   [:&:before
+   [:&::before
     (fontawesome \uf0d8)
     {:position "absolute"
      :top "-0.65em"

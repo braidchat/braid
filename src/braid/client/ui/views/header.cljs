@@ -1,10 +1,11 @@
 (ns braid.client.ui.views.header
-  (:require [reagent.ratom :refer-macros [reaction]]
-            [braid.client.routes :as routes]
-            [braid.client.helpers :refer [->color]]
-            [re-frame.core :refer [subscribe]]
-            [braid.client.ui.views.search-bar :refer [search-bar-view]]
-            [braid.client.quests.views :refer [quests-header-view quests-menu-view]]))
+  (:require
+    [reagent.ratom :refer-macros [reaction]]
+    [re-frame.core :refer [subscribe]]
+    [braid.client.helpers :refer [->color]]
+    [braid.client.quests.views :refer [quests-header-view quests-menu-view]]
+    [braid.client.routes :as routes]
+    [braid.client.ui.views.search-bar :refer [search-bar-view]]))
 
 (defn loading-indicator-view [group-id]
   (let [page (subscribe [:page])]
@@ -66,12 +67,18 @@
            :class "inbox"}
           {:title "Recent"
            :route-fn routes/recent-page-path
-           :class "recent"}]]
+           :class "recent"}
+          {:title "Uploads"
+           :class "group-uploads"
+           :route-fn routes/uploads-path}]]
         [search-bar-view]]
        [loading-indicator-view @group-id]])))
 
 (def admin-header-items
-  [{:class "group-bots"
+  [{:class "settings"
+    :route-fn routes/group-settings-path
+    :body "Group Settings"}
+   {:class "group-bots"
     :route-fn routes/bots-path
     :body "Bots"}])
 
@@ -98,9 +105,6 @@
    {:class "invite-friend"
     :route-fn routes/invite-page-path
     :body "Invite a Person"}
-   {:class "group-uploads"
-    :route-fn routes/uploads-path
-    :body "Uploads"}
    {:class "edit-profile"
     :route-fn routes/page-path
     :route-args {:page-id "me"}
@@ -108,10 +112,7 @@
    {:class "changelog"
     :route-fn routes/page-path
     :route-args {:page-id "changelog"}
-    :body "See Changelog"}
-   {:class "settings"
-    :route-fn routes/group-settings-path
-    :body "Settings"}])
+    :body "See Changelog"}])
 
 (defn user-header-view []
   (let [user-id (subscribe [:user-id])]

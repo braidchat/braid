@@ -1,5 +1,6 @@
 (ns braid.client.group-admin.events
-  (:require [re-frame.core :refer [reg-event-db reg-event-fx]]))
+  (:require
+    [re-frame.core :refer [reg-event-db reg-event-fx]]))
 
 (reg-event-fx
   :set-group-intro

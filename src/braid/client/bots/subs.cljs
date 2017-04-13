@@ -1,5 +1,6 @@
 (ns braid.client.bots.subs
-  (:require [re-frame.core :refer [reg-sub ]]))
+  (:require
+    [re-frame.core :refer [reg-sub]]))
 
 (reg-sub
   :group-bots

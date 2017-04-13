@@ -1,7 +1,8 @@
 (ns braid.client.mobile.auth-flow.views
-  (:require [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch]]
-            [braid.client.mobile.auth-flow.routes :refer [auth-flow-path]]))
+  (:require
+    [reagent.core :as r]
+    [re-frame.core :refer [subscribe dispatch]]
+    [braid.client.mobile.auth-flow.routes :refer [auth-flow-path]]))
 
 ; TODO
 (defn register-flow-view []

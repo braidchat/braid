@@ -1,5 +1,6 @@
 (ns braid.client.mobile.remote
-  (:require [cljs-uuid-utils.core :as uuid]))
+  (:require
+    [cljs-uuid-utils.core :as uuid]))
 
 (defn key-by-id [arr]
   (reduce (fn [memo i] (assoc memo (:id i) i)) {} arr))

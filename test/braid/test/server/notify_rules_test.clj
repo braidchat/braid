@@ -1,11 +1,16 @@
 (ns braid.test.server.notify-rules-test
-  (:require [clojure.test :refer :all]
-            [mount.core :as mount]
-            [braid.server.conf :as conf]
-            [schema.core :as s]
-            [braid.server.db :as db]
-            [braid.common.schema :refer [rules-valid? check-rules!]]
-            [braid.server.notify-rules :as rules]))
+  (:require
+    [clojure.test :refer :all]
+    [mount.core :as mount]
+    [schema.core :as s]
+    [braid.common.schema :refer [rules-valid? check-rules!]]
+    [braid.server.conf :as conf]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.message :as message]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.user :as user]
+    [braid.server.notify-rules :as rules]))
 
 (s/set-fn-validation! true)
 
@@ -34,32 +39,38 @@
            [:tag #uuid "57158d7e-8dd1-4834-9e6b-cb7985895621"]]))))
 
 (deftest notify-rules-work
-  (let [g1 (db/create-group! {:id (db/uuid)
-                              :slug "group1"
-                              :name "group1"})
-        g2 (db/create-group! {:id (db/uuid)
-                              :slug "group2"
-                              :name "group2"})
-        g3 (db/create-group! {:id (db/uuid)
-                              :slug "group3"
-                              :name "group3"})
+  (let [[g1 g2 g3] (db/run-txns!
+                     (concat
+                       (group/create-group-txn {:id (db/uuid)
+                                                :slug "group1"
+                                                :name "group1"})
+                       (group/create-group-txn {:id (db/uuid)
+                                                :slug "group2"
+                                                :name "group2"})
+                       (group/create-group-txn {:id (db/uuid)
+                                                :slug "group3"
+                                                :name "group3"})))
 
-        g1t1 (db/create-tag! {:id (db/uuid) :name "group1tag1" :group-id (g1 :id)})
-        g1t2 (db/create-tag! {:id (db/uuid) :name "group1tag2" :group-id (g1 :id)})
+        [g1t1 g1t2 g2t1 g2t2]
+        (db/run-txns!
+          (concat
+            (tag/create-tag-txn {:id (db/uuid) :name "group1tag1" :group-id (g1 :id)})
+            (tag/create-tag-txn {:id (db/uuid) :name "group1tag2" :group-id (g1 :id)})
 
-        g2t1 (db/create-tag! {:id (db/uuid) :name "group2tag1" :group-id (g2 :id)})
-        g2t2 (db/create-tag! {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})
+            (tag/create-tag-txn {:id (db/uuid) :name "group2tag1" :group-id (g2 :id)})
+            (tag/create-tag-txn {:id (db/uuid) :name "group2tag2" :group-id (g2 :id)})))
 
         user-id (db/uuid)
-        _ (db/create-user! {:id user-id
-                            :email "foo@bar.com"
-                            :avatar "zz"
-                            :password "foobar"})
-
-        sender (db/create-user! {:id (db/uuid)
-                                 :email "bar@bar.com"
-                                 :avatar "zz"
-                                 :password "foobar"})
+        [_ sender] (db/run-txns!
+                     (concat
+                       (user/create-user-txn {:id user-id
+                                              :email "foo@bar.com"
+                                              :avatar "zz"
+                                              :password "foobar"})
+                       (user/create-user-txn {:id (db/uuid)
+                                              :email "bar@bar.com"
+                                              :avatar "zz"
+                                              :password "foobar"})))
 
         msg (fn [] {:id (db/uuid)
                     :group-id (g1 :id)
@@ -72,35 +83,37 @@
 
     (is (rules/notify? (db/uuid) [[:any :any]] (msg)) ":any :any always gets notified")
     (let [new-msg (msg)]
-      (db/create-message! new-msg)
+      (db/run-txns! (message/create-message-txn new-msg))
       (is (not (rules/notify? (db/uuid) [[:any (:id g1)]] new-msg))))
     (let [new-msg (update (msg) :mentioned-tag-ids conj (:id g1t1))]
-      (db/create-message! new-msg)
+      (db/run-txns! (message/create-message-txn new-msg))
       (is (rules/notify? (db/uuid) [[:any (:id g1)]]
                          new-msg)))
     (let [m1 (-> (msg)
                  (update :mentioned-user-ids conj user-id))]
-      (db/create-message! m1)
+      (db/run-txns! (message/create-message-txn m1))
       (is (not (rules/notify? user-id [[:mention (:id g1)]] m1))))
 
     (let [m2 (-> (msg)
                  (update :mentioned-user-ids conj user-id))]
-      (db/create-message! m2)
+      (db/run-txns! (message/create-message-txn m2))
       (is (rules/notify? user-id [[:mention :any]] m2)))
 
     (let [m (-> (msg)
                 (update :mentioned-user-ids conj user-id)
                 (update :mentioned-tag-ids conj (:id g1t1)))]
-      (db/create-message! m)
+      (db/run-txns! (message/create-message-txn m))
       (is (rules/notify? user-id [[:mention (:id g1)]] m))
       (is (rules/notify? user-id [[:tag (:id g1t1)]] m))
       (is (not (rules/notify? user-id [[:tag (:id g1t2)]] m))))
 
     (let [m1 (-> (msg)
-                (update :mentioned-tag-ids conj (:id g1t1)))
+                 (update :mentioned-tag-ids conj (:id g1t1)))
           m2 (-> (msg) (assoc :thread-id (m1 :thread-id)))]
-      (db/create-message! m1)
-      (db/create-message! m2)
+      (db/run-txns!
+        (concat
+          (message/create-message-txn m1)
+          (message/create-message-txn m2)))
       (is (rules/notify? (db/uuid) [[:any (:id g1)]] m2))
       (is (not (rules/notify? (db/uuid) [[:any (:id g2)]] m2))))))
 

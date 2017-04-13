@@ -1,12 +1,14 @@
 (ns braid.client.ui.views.autocomplete
-  (:require [clj-fuzzy.metrics :as fuzzy]
-            [re-frame.core :refer [subscribe dispatch]]
-            [braid.client.schema :as schema]
-            [clojure.string :as string]
-            [braid.client.helpers :refer [id->color debounce]]
-            [braid.client.emoji :as emoji]
-            [goog.string :as gstring])
-  (:import [goog.events KeyCodes]))
+  (:require
+    [clojure.string :as string]
+    [clj-fuzzy.metrics :as fuzzy]
+    [goog.string :as gstring]
+    [re-frame.core :refer [subscribe dispatch]]
+    [braid.client.schema :as schema]
+    [braid.client.helpers :refer [id->color debounce]]
+    [braid.client.emoji :as emoji])
+  (:import
+    [goog.events KeyCodes]))
 
 ; fn that returns results that will be shown if pattern matches
 ;    inputs:
@@ -46,7 +48,7 @@
 
 (defn emoji-view
   [emoji]
-  [:div.emoji-match
+  [:div.emoji.match
     (emoji/shortcode->html (string/replace emoji #"[\(\)]" ":"))
     [:div.name emoji]
     [:div.extra "..."]])
@@ -69,7 +71,7 @@
                                                (str "/" (b :nickname) " ")))
                              :html
                              (constantly
-                               [:div.bot-match
+                               [:div.bot.match
                                 [:img.avatar {:src (b :avatar)}]
                                 [:div.name (b :nickname)]
                                 [:div.extra "..."]])})))
@@ -116,7 +118,7 @@
                           (string/replace text pattern (str "@" (user :nickname) " ")))
                         :html
                         (fn []
-                          [:div.user-match
+                          [:div.user.match
                            [:img.avatar {:src (user :avatar)}]
                            [:div.name (user :nickname)]
                            [:div.extra (user :status)]])})))))))
@@ -141,7 +143,7 @@
                           (string/replace text pattern (str "#" (tag :name) " ")))
                         :html
                         (fn []
-                          [:div.tag-match
+                          [:div.tag.match
                            [:div.color-block
                             {:style
                              (merge
@@ -167,7 +169,7 @@
                              (string/replace text pattern (str "#" (tag :name) " ")))
                            :html
                            (fn []
-                             [:div.tag-match
+                             [:div.tag.match
                               [:div.color-block
                                {:style {:backgroundColor (id->color (tag :id))}}]
                               [:div.name (str "Create tag " (tag :name))]

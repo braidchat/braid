@@ -1,16 +1,17 @@
 (ns braid.client.core.events
-  (:require [clojure.string :as string]
-            [clojure.set :as set]
-            [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]
-            [braid.client.store :as store]
-            [braid.client.sync :as sync]
-            [braid.client.schema :as schema]
-            [braid.common.util :as util]
-            [braid.client.router :as router]
-            [braid.client.routes :as routes]
-            [braid.client.xhr :refer [edn-xhr]]
-            [braid.client.state.helpers :as helpers :refer [key-by-id]]
-            [braid.client.quests.helpers :as quest-helpers]))
+  (:require
+    [clojure.set :as set]
+    [clojure.string :as string]
+    [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]
+    [braid.client.quests.helpers :as quest-helpers]
+    [braid.client.router :as router]
+    [braid.client.routes :as routes]
+    [braid.client.schema :as schema]
+    [braid.client.state.helpers :as helpers :refer [key-by-id]]
+    [braid.client.store :as store]
+    [braid.client.sync :as sync]
+    [braid.client.xhr :refer [edn-xhr]]
+    [braid.common.util :as util]))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
@@ -95,11 +96,6 @@
   :initialize-db
   (fn [_ _]
     store/initial-state))
-
-(reg-event-db
-  :clear-session
-  (fn [state _]
-    (assoc-in state [:session] nil)))
 
 (reg-event-db
   :new-message-text
@@ -449,8 +445,9 @@
 
 (reg-event-fx
   :check-auth
-  (fn [cofx _]
-    {:edn-xhr {:uri "/session"
+  (fn [{state :db} _]
+    {:db (assoc state :login-state :auth-check)
+     :edn-xhr {:uri "/session"
                :method :get
                :on-complete (fn [_] (dispatch [:start-socket]))
                :on-error (fn [_] (dispatch [:set-login-state :login-form]))}}))
@@ -463,10 +460,7 @@
 (reg-event-fx
   :start-socket
   (fn [cofx [_ _]]
-    ; TODO
-    (sync/make-socket!)
-    ; TODO
-    (sync/start-router!)
+    (sync/connect!)
     {:dispatch [:set-login-state :ws-connect]}))
 
 (reg-event-fx
@@ -507,8 +501,9 @@
                :method :delete
                :params {:csrf-token (:csrf-token @sync/chsk-state)}
                :on-complete (fn [data]
-                              (dispatch [:set-login-state :login-form])
-                              (dispatch [:clear-session]))}}))
+                              (sync/disconnect!)
+                              (dispatch [:initialize-db])
+                              (dispatch [:set-login-state :login-form]))}}))
 
 (reg-event-fx
   :set-group-and-page
@@ -664,3 +659,30 @@
   :go-to
   (fn [_ [_ route]]
     {:redirect-to route}))
+
+(reg-event-fx
+  :core/websocket-disconnected
+  (fn [{state :db} _]
+    {:db (assoc-in state [:websocket-state :connected?] false)}))
+
+(reg-event-fx
+  :core/websocket-connected
+  (fn [{state :db} _]
+    {:db (assoc-in state [:websocket-state :connected?] true)}))
+
+(reg-event-fx
+  :core/websocket-needs-auth
+  (fn [{state :db} _]
+    {:dispatch-n [[:initialize-db]
+                  [:set-login-state :login-form]]}))
+
+(reg-event-fx
+  :core/websocket-update-next-reconnect
+  (fn [{state :db} [_ next-reconnect]]
+    {:db (assoc-in state [:websocket-state :next-reconnect] next-reconnect)}))
+
+(reg-event-fx
+  :core/reconnect
+  (fn [_ _]
+    (sync/reconnect!)
+    {}))

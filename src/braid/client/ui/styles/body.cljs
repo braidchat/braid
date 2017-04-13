@@ -10,6 +10,7 @@
    ; prevent overscroll:
    {:height "100%"
     :overflow "hidden"}
+
    [:textarea :input
     {:font-family "inherit"
      :font-size "1em"}]])

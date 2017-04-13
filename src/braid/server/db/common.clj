@@ -1,16 +1,20 @@
 (ns braid.server.db.common
-  (:require [datomic.api :as d]
-            [clojure.set :refer [rename-keys]]
-            [clojure.edn :as edn]))
+  (:require
+    [clojure.edn :as edn]
+    [clojure.set :refer [rename-keys]]
+    [datomic.api :as d]))
 
-(defn create-entity!
-  "create entity with attrs, return entity"
-  [conn attrs]
-  (let [new-id (d/tempid :entities)
-        {:keys [db-after tempids]} @(d/transact conn
-                                      [(assoc attrs :db/id new-id)])]
-    (->> (d/resolve-tempid db-after tempids new-id)
-         (d/entity db-after))))
+(defn create-entity-txn
+  "create entity with attrs, return (after-fn entity)"
+  [attrs after-fn]
+  (let [new-id (d/tempid :entities)]
+    [(with-meta
+       (assoc attrs :db/id new-id)
+       {:braid.server.db/return
+        (fn [{:keys [db-after tempids]}]
+          (->> (d/resolve-tempid db-after tempids new-id)
+               (d/entity db-after)
+               (after-fn)))})]))
 
 (def user-pull-pattern
   '[:user/id

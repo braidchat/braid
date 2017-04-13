@@ -1,9 +1,13 @@
 (ns braid.server.migrate
-  (:require [braid.server.db :as db]
-            [datomic.api :as d]
-            [clojure.string :as string]
-            [clojure.set :as set]
-            [clojure.edn :as edn]))
+  (:require
+    [clojure.edn :as edn]
+    [clojure.set :as set]
+    [clojure.string :as string]
+    [datomic.api :as d]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.user :as user]
+    [braid.server.quests.db :as quests]))
 
 (defn migrate-2016-10-28
   "change all db.unique/identity to db.unique/value (to avoid accidental upserts)"
@@ -85,8 +89,10 @@
                              [?u :user/id ?user-id]]
                            (d/db db/conn))
                       (map first))]
-    (doseq [user-id user-ids]
-      (db/activate-first-quests! user-id))))
+    (db/run-txns!
+      (mapcat (fn [user-id]
+                (quests/activate-first-quests-txn [:user/id user-id]))
+              user-ids))))
 
 (defn migrate-2016-07-29
   "Add watched threads for bots"
@@ -218,9 +224,7 @@
                               (sort-by :message/created-at)
                               first
                               :message/user)
-                  author-grp (some-> author :user/id
-                                     db/user-groups
-                                     first :id)
+                  author-grp (some->> author :user/id group/user-groups first :id)
                   fallback-group (:group/id (d/pull (d/db db/conn) [:group/id] [:group/name "Braid"]))]
               (cond
                 (seq (th :thread/tag))
@@ -234,7 +238,7 @@
                 (let [grps (apply
                              set/intersection
                              (map (comp :id
-                                        db/user-groups
+                                        group/user-groups
                                         :user/id)
                                   (cons author (th :thread/mentioned))))
                       grp (or (first grps) author-grp fallback-group)]
@@ -284,7 +288,7 @@
       (let [u-id (:user/id p)
             u-prefs (edn/read-string (:user/preferences-old p))]
         (doseq [[k v] u-prefs]
-          (when k (db/user-set-preference! u-id k v)))))))
+          (when k (db/run-txns! (user/user-set-preference-txn u-id k v))))))))
 
 (defn migrate-2016-05-03
   "Add tag descriptions"
@@ -479,7 +483,7 @@
   "Helper function for migrate-2015-07-29 - give a group name to create that
   group and add all existing users and tags to that group"
   [group-name]
-  (let [group (db/create-group! {:id (db/uuid) :name group-name})
+  (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :name group-name}))
         all-users (->> (d/q '[:find ?u :where [?u :user/id]] (d/db db/conn)) (map first))
         all-tags (->> (d/q '[:find ?t :where [?t :tag/id]] (d/db db/conn)) (map first))]
     @(d/transact db/conn (mapv (fn [u] [:db/add [:group/id (group :id)] :group/user u]) all-users))

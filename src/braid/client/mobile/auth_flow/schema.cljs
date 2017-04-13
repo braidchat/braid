@@ -1,5 +1,6 @@
 (ns braid.client.mobile.auth-flow.schema
-  (:require [schema.core :as s :include-macros true]))
+  (:require
+    [schema.core :as s :include-macros true]))
 
 (def init-state
   {:auth-flow {:method nil

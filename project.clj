@@ -12,7 +12,7 @@
                  [ring-cors "0.1.8"]
                  [compojure "1.5.1"]
                  [environ "1.0.3"]
-                 [com.taoensso/timbre "4.5.1" :exclusions [org.clojure/tools.reader]]
+                 [com.taoensso/timbre "4.7.4" :exclusions [org.clojure/tools.reader]]
                  [crypto-password "0.2.0"]
                  [clj-time "0.12.0"]
                  [instaparse "1.4.2"]
@@ -37,18 +37,21 @@
                  [reagent "0.6.0-rc"]
                  [re-frame "0.8.0"]
                  [cljsjs/husl "6.0.1-0"]
+                 [cljsjs/highlight "9.6.0-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
+
                  ;shared
                  [org.clojure/tools.reader "1.0.0-beta3"]
                  [org.clojure/core.async "0.2.385" :exclusions [org.clojure/tools.reader]]
                  [com.taoensso/truss "1.3.3"]
-                 [com.taoensso/sente "1.9.0-beta3" :exclusions [org.clojure/tools.reader taoensso.timbre]]
+                 [com.taoensso/sente "1.11.0" :exclusions [org.clojure/tools.reader taoensso.timbre]]
                  [prismatic/schema "1.1.2"]
 
                  ;mobile
                  [garden "1.3.2"]]
 
-  :main braid.server.handler
+  :main braid.server.core
+
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]]
             [lein-figwheel "0.5.4-7"]]
@@ -57,7 +60,7 @@
   :clean-targets ^{:protect false}
   ["resources/public/js"]
 
-  :figwheel-options {:server-port 3559}
+  :figwheel {:server-port 3559}
 
   :cljsbuild {:builds
               [
@@ -82,8 +85,7 @@
                            :pretty-print false}}
 
                {:id "mobile-dev"
-                :figwheel {:on-jsload "braid.client.mobile.core/reload"
-                           :websocket-host "192.168.1.157"}
+                :figwheel {:on-jsload "braid.client.mobile.core/reload"}
                 :source-paths ["src/braid/client"
                                "src/retouch"]
                 :compiler {:main braid.client.mobile.core

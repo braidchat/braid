@@ -1,21 +1,11 @@
 (ns braid.client.group-admin.views.group-settings-page
-  (:require [reagent.ratom :include-macros true :refer-macros [reaction]]
-            [reagent.core :as r]
-            [re-frame.core :refer [dispatch subscribe]]
-            [braid.client.s3 :as s3]
-            [braid.client.routes :as routes]
-            [braid.client.ui.views.upload :refer [avatar-upload-view]]))
-
-(defn leave-group-view
-  [group]
-  (let [user-id (subscribe [:user-id])]
-    (fn [group]
-      [:button {:on-click (fn [_]
-                            (when (js/confirm "Are you sure you want to leave this group?")
-                              (dispatch [:remove-from-group
-                                         {:group-id (group :id)
-                                          :user-id @user-id}])))}
-       "Leave this group"])))
+  (:require
+    [reagent.core :as r]
+    [reagent.ratom :include-macros true :refer-macros [reaction]]
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.routes :as routes]
+    [braid.client.s3 :as s3]
+    [braid.client.ui.views.upload :refer [avatar-upload-view]]))
 
 (defn intro-message-view
   [group]
@@ -76,9 +66,9 @@
         admin? (subscribe [:current-user-is-group-admin?] [group-id])]
     (fn []
       [:div.page.group-settings
-       [:div.title (str "Settings for " (:name @group))]
-       [:div.content
-        [leave-group-view @group]
-        (when @admin? [intro-message-view @group])
-        (when @admin? [group-avatar-view @group])
-        (when @admin? [publicity-view @group])]])))
+       (when @admin?
+         [:div.title (str "Settings for " (:name @group))]
+         [:div.content
+          [intro-message-view @group]
+          [group-avatar-view @group]
+          [publicity-view @group]])])))

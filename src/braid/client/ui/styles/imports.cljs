@@ -1,9 +1,10 @@
 (ns braid.client.ui.styles.imports
-  (:require [garden.stylesheet :refer [at-import at-font-face]]))
+  (:require
+    [garden.stylesheet :refer [at-import at-font-face]]))
 
-(def fa-font-face
+(def fa-at-font-face
   (let [version "4.7.0"
-        fa-cdn-url (str "https://maxcdn.bootstrapcdn.com/font-awesome/" version)]
+        fa-cdn-url (str "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/" version)]
     (at-font-face
       {:font-family "FontAwesome"
        :src [(str "local('FontAwesome')")
@@ -16,5 +17,5 @@
        :font-style "normal"})))
 
 (def imports
-  [fa-font-face
+  [fa-at-font-face
    (at-import "https://fonts.googleapis.com/css?family=Open+Sans:400,300,400italic,700")])
