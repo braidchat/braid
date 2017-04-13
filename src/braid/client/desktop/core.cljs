@@ -21,6 +21,9 @@
 
 (enable-console-print!)
 
+(defn render []
+  (r/render [app-view] (.getElementById js/document "app")))
+
 (defn ^:export init []
   (dispatch-sync [:initialize-db])
 
@@ -29,7 +32,7 @@
                        (dispatch [:set-window-visibility
                                   (= "visible" (.-visibilityState js/document))])))
 
-  (r/render [app-view] (. js/document (getElementById "app")))
+  (render)
 
   (router/init)
 
@@ -41,4 +44,4 @@
   "Force a re-render. For use with figwheel"
   []
   (quests/install-quests-handler!)
-  (r/render [app-view] (.getElementById js/document "app")))
+  (render))
