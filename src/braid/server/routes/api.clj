@@ -1,14 +1,10 @@
 (ns braid.server.routes.api
   (:require
-    [clojure.java.io :as io]
-    [clojure.string :as string]
-    [compojure.coercions :refer [as-uuid]]
-    [compojure.core :refer [GET POST defroutes]]
     [braid.common.util :refer [valid-nickname?]]
-    [braid.server.api.embedly :as embedly]
     [braid.server.api.github :as github]
-    [braid.server.crypto :refer [random-nonce]]
+    [braid.server.api.link-extract :as link-extract]
     [braid.server.conf :refer [config]]
+    [braid.server.crypto :refer [random-nonce]]
     [braid.server.db :as db]
     [braid.server.db.group :as group]
     [braid.server.db.invitation :as invitation]
@@ -17,7 +13,11 @@
     [braid.server.invite :as invites]
     [braid.server.markdown :refer [markdown->hiccup]]
     [braid.server.s3 :as s3]
-    [braid.server.sync :as sync]))
+    [braid.server.sync :as sync]
+    [clojure.java.io :as io]
+    [clojure.string :as string]
+    [compojure.coercions :refer [as-uuid]]
+    [compojure.core :refer [GET POST defroutes]]))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
@@ -269,7 +269,7 @@
 
   (GET "/extract" [url :as {ses :session}]
     (if (some? (user/user-by-id (:user-id ses)))
-      (edn-response (embedly/extract url))
+      (edn-response (link-extract/extract url))
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))

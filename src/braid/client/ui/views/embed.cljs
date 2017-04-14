@@ -54,7 +54,7 @@
 (defn embed-view [url embed-update-chan]
   (let [content (r/atom {})
         set-content! (fn [response]
-                      (reset! content response))
+                       (reset! content response))
         fetch-content! (fn [url]
                          (when (some? url)
                            (edn-xhr {:method :get
@@ -73,17 +73,16 @@
 
        :reagent-render
        (fn [_ _]
-         (if (:type @content)
+         (if-let [media-type (:type @content)]
            [:div.embed.loaded
             {:on-click (fn []
                          (.open js/window (:original_url @content)))}
             (cond
-              (= "video" (get-in @content [:media :type]))
+              (= "video" media-type)
               [video-embed-view @content]
-              (= "photo" (get-in @content [:media :type]))
+
+              (= "photo" media-type)
               [image-embed-view @content]
-              (@content :url)
-              [website-embed-view @content]
-              :else
-              nil)]
+
+              (@content :url) [website-embed-view @content])]
            [:div.embed.loading]))})))
