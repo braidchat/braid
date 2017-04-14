@@ -124,5 +124,3 @@
 (defmethod sync/event-handler :braid.client/show-thread
   [[_ thread]]
   (dispatch [:add-open-thread thread]))
-
-
