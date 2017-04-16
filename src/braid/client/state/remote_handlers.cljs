@@ -63,6 +63,7 @@
 
 (defmethod sync/event-handler :braid.client/new-user
   [[_ [user new-group]]]
+  ; TODO: indicate to user to the group?
   (dispatch [:add-user (assoc user :status :online)]))
 
 (defmethod sync/event-handler :braid.client/user-left
