@@ -62,7 +62,7 @@
   (dispatch [:update-user-status [user-id :offline]]))
 
 (defmethod sync/event-handler :braid.client/new-user
-  [[_ user]]
+  [[_ [user new-group]]]
   (dispatch [:add-user (assoc user :status :online)]))
 
 (defmethod sync/event-handler :braid.client/user-left

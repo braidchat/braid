@@ -157,7 +157,7 @@
   [user-id group-id]
   (broadcast-group-change
     group-id
-    [:braid.client/new-user (user/user-by-id user-id)]))
+    [:braid.client/new-user [(user/user-by-id user-id) group-id]]))
 
 
 ;; Handlers
