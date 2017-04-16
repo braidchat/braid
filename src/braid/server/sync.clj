@@ -69,7 +69,7 @@
                          (into #{} (map :id) (group/group-users group-id)))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info)))
-  (doseq [bot (bot/bots-for-event)]
+  (doseq [bot (bot/bots-for-event group-id)]
     (bots/send-event-notification bot info)))
 
 ; TODO: when using clojure.spec, use spec to validate this

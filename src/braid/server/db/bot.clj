@@ -51,13 +51,15 @@
        (into #{} (map db->bot))))
 
 (defn bots-for-event
-  "Get all bots that want to be notified of events"
-  []
+  "Get all bots in the given group that want to be notified of events"
+  [group-id]
   (->> (d/q '[:find [(pull ?b pull-pattern) ...]
-              :in $ pull-pattern
+              :in $ pull-pattern ?group-id
               :where
-              [?b :bot/event-webhook-url]]
-            (db/db) bot-pull-pattern)
+              [?b :bot/event-webhook-url]
+              [?g :group/id ?group-id]
+              [?b :bot/group ?g]]
+            (db/db) bot-pull-pattern group-id)
        (into #{} (map db->bot))))
 
 ;; Transactions
