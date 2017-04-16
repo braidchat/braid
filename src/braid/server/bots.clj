@@ -22,6 +22,7 @@
 (defn send-event-notification
   [bot info]
   (when-let [url (:event-webhook-url bot)]
+    (timbre/debugf "Sending event notification %s to %s" info bot)
     (let [body (->transit info)
           hmac (crypto/hmac-bytes (bot :token) body)]
       (timbre/debugf "sending bot event notification")
