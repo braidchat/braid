@@ -88,8 +88,7 @@
                              {:bot-id (bot :id)
                               :on-complete (fn [info]
                                              (reset! detailed-info info))}]))}
-             "See bot config"]
-            )])])))
+             "See bot config"])])])))
 
 (defn group-bots-view []
   (let [group-id (subscribe [:open-group-id])
