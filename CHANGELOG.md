@@ -1,3 +1,10 @@
+## 16 April 2017
+
+  - Bot configurations are now editable after creation
+  - Bot message creation via PUT is now deprecated; use POST instead
+  - Bots can opt to receive group events
+  - :braid.client/group-add event now includes the id of the group that the user joined (in addition to the user)
+
 ## 27 February 2017
 
   - The Braid client will now detect abnormal disconnects (ex. wifi drops) and indicate when it is disconnected (and when the session cookie expires)
