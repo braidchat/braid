@@ -151,7 +151,11 @@
   ; Notify bots subscribed to the thread
   (doseq [bot (bot/bots-watching-thread (new-message :thread-id))]
     (timbre/debugf "notifying bot %s" bot)
-    (bots/send-message-notification bot new-message)))
+    (bots/send-message-notification bot new-message))
+  ; Notify bots subscribed to all messages
+  (doseq [bot (bot/bots-for-message (new-message :group-id))]
+    (when (thread/user-can-see-thread? (bot :user-id) (new-message :thread-id))
+      (bots/send-message-notification bot new-message))))
 
 (defn broadcast-new-user-to-group
   [user-id group-id]
