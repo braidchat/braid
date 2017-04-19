@@ -62,6 +62,18 @@
             (db/db) bot-pull-pattern group-id)
        (into #{} (map db->bot))))
 
+(defn bots-for-message
+  "Get all bots in the given group that are subscribed to all messages"
+  [group-id]
+  (->> (d/q '[:find [(pull ?b pull-pattern) ...]
+              :in $ pull-pattern ?group-id
+              :where
+              [?b :bot/notify-all-messages true]
+              [?g :group/id ?group-id]
+              [?b :bot/group ?g]]
+            (db/db) bot-pull-pattern group-id)
+       (into #{} (map db->bot))))
+
 ;; Transactions
 
 (defn create-bot-txn
@@ -73,7 +85,8 @@
         bot-id (d/tempid :entities)]
     [{:db/id fake-user-id
       :user/id (d/squuid)
-      :user/is-bot? true}
+      :user/is-bot? true
+      :group/_user [:group/id group-id]}
      (with-meta
        (merge
          {:db/id bot-id
