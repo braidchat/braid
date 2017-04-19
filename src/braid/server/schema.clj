@@ -287,6 +287,12 @@
   :db/cardinality :db.cardinality/many
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
+ {:db/ident :bot/notify-all-messages?
+  :db/doc "Indicates that this bot should recieve all visible messages in its group"
+  :db/valueType :db.type/boolean
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
  ; quest-records
  {:db/ident :quest-record/id

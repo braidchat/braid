@@ -65,7 +65,9 @@
 ;; Transactions
 
 (defn create-bot-txn
-  [{:keys [id name avatar webhook-url event-webhook-url group-id]}]
+  [{:keys [id name avatar webhook-url event-webhook-url group-id
+           notify-all-messages?]
+    :or {notify-all-messages? false}}]
   ; TODO: enforce name is unique in that group?
   (let [fake-user-id (d/tempid :entities)
         bot-id (d/tempid :entities)]
@@ -81,15 +83,15 @@
           :bot/webhook-url webhook-url
           :bot/token (random-nonce 30)
           :bot/group [:group/id group-id]
-          :bot/user fake-user-id}
+          :bot/user fake-user-id
+          :bot/notify-all-messages? notify-all-messages?}
          (when-let [ewu event-webhook-url]
            {:bot/event-webhook-url event-webhook-url}))
        {:braid.server.db/return
-       (fn [{:keys [db-after tempids]}]
-         (->> (d/resolve-tempid db-after tempids bot-id)
-              (d/entity db-after)
-              db->bot))})
-     ]))
+        (fn [{:keys [db-after tempids]}]
+          (->> (d/resolve-tempid db-after tempids bot-id)
+               (d/entity db-after)
+               db->bot))})]))
 
 (defn retract-bot-txn
   [bot-id]

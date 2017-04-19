@@ -38,6 +38,14 @@
                            (case k
                              (:id :user-id :group-id :token) v
 
+                             :notify-all-messages?
+                             [:input {:type "checkbox"
+                                      :checked (boolean (get @edited-info k))
+                                      :on-change
+                                      (fn [e]
+                                        (->> (.. e -target -checked)
+                                             (swap! edited-info assoc k)))}]
+
                              :avatar
                              [:div.dragging.new-avatar
                               {:class (when @dragging? "dragging")}
@@ -51,15 +59,19 @@
                              [:input
                               {:value (get @edited-info k)
                                :type "url"
-                               :on-change (fn [e] (swap! edited-info assoc k
-                                                         (.. e -target -value)))}]
+                               :on-change (fn [e]
+                                            (->> (.. e -target -value)
+                                                 (swap! edited-info assoc k)))}]
 
                              [:input
                               {:value (get @edited-info k)
                                :type "text"
-                               :on-change (fn [e] (swap! edited-info assoc k
-                                                         (.. e -target -value)))}])
-                           v)]]))
+                               :on-change (fn [e]
+                                            (->> (.. e -target -value)
+                                                 (swap! edited-info assoc k)))}])
+                           (if (= k :notify-all-messages?)
+                             (if v "Yes" "No")
+                             v))]]))
                info)
              [:button
               {:on-click (fn [_]
@@ -145,14 +157,23 @@
             (when-let [err @error]
               [:div.error err])
             [:label "Bot Name"
-             [:input {:type "text" :placeholder "name" :value (@new-bot :name)
+             [:input {:type "text"
+                      :placeholder "name"
+                      :value (or (@new-bot :name) "")
                       :on-change #(swap! new-bot assoc :name (.. % -target -value))}]]
             [:br]
             [:label "Webhook URL"
              [:input {:type "url"
                       :placeholder "https://example.com/bot_message"
-                      :value (@new-bot :webhook-url)
+                      :value (or (@new-bot :webhook-url) "")
                       :on-change #(swap! new-bot assoc :webhook-url (.. % -target -value))}]]
+            [:br]
+            [:label "Recieve all public messages"
+             [:input {:type "checkbox"
+                      :value (boolean (@new-bot :notify-all-messages?))
+                      :on-change (fn [e]
+                                   (->> (.. e -target -checked)
+                                        (swap! new-bot assoc :notify-all-messages?)))}]]
             [:br]
             [:div.dragging.new-avatar {:class (when @dragging? "dragging")}
              (when-let [avatar (@new-bot :avatar)]
@@ -165,7 +186,7 @@
              [:input
               {:type "url"
                :placeholder "https://example.com/bot_group_event"
-               :value (@new-bot :event-webhook-url)
+               :value (or (@new-bot :event-webhook-url) "")
                :on-change
                (fn [e] (let [url (.. e -target -value)]
                          (if (string/blank? url)

@@ -517,6 +517,7 @@
 
         :else
         (let [updating (select-keys bot [:name :avatar :webhook-url
+                                         :notify-all-messages?
                                          :event-webhook-url])
               updating (if (string/blank? (bot :event-webhook-url))
                          (dissoc updating :event-webhook-url)
