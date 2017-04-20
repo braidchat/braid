@@ -154,7 +154,7 @@
     (bots/send-message-notification bot new-message))
   ; Notify bots subscribed to all messages
   (doseq [bot (bot/bots-for-message (new-message :group-id))]
-    (when (thread/user-can-see-thread? (bot :user-id) (new-message :thread-id))
+    (when (thread/thread-has-tags? (new-message :thread-id))
       (bots/send-message-notification bot new-message))))
 
 (defn broadcast-new-user-to-group

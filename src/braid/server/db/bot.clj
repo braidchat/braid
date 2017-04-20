@@ -85,8 +85,7 @@
         bot-id (d/tempid :entities)]
     [{:db/id fake-user-id
       :user/id (d/squuid)
-      :user/is-bot? true
-      :group/_user [:group/id group-id]}
+      :user/is-bot? true}
      (with-meta
        (merge
          {:db/id bot-id
