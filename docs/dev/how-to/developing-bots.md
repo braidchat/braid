@@ -68,6 +68,46 @@ The server will return the following error codes:
   - 401 if HTTP Basic auth fails
   - 403 if the thread is in a different group from the bot
 
+### Group Events
+
+When creating a bot, if you give it an event webhook url, it will also receive all messages broadcast to the group.
+Events are vectors where the first element is a keyword indicating the event name and the second element is the event payload.
+
+The events sent are currently:
+
+```
+:braid.client/thread
+:braid.client/init-data
+:socket/connected
+:braid.client/create-tag
+:braid.client/joined-group
+:braid.client/update-users
+:braid.client/invitation-received
+:braid.client/name-change
+:braid.client/user-new-avatar
+:braid.client/left-group
+:braid.client/user-connected
+:braid.client/user-disconnected
+:braid.client/new-user
+:braid.client/user-left
+:braid.client/new-admin
+:braid.client/tag-descrption-change
+:braid.client/retract-tag
+:braid.client/new-intro
+:braid.client/group-new-avatar
+:braid.client/publicity-changed
+:braid.client/new-bot
+:braid.client/retract-bot
+:braid.client/edit-bot
+:braid.client/notify-message
+:braid.client/hide-thread
+:braid.client/show-thread
+```
+
+### All Messages
+
+When creating a bot, you can also check the "Receive all public messages" box, in which case the bot will be sent all messages in the group that are in a thread with at least one tag.
+
 ### Other Routes
 
 The bot can send a `GET` request to `/bots/names/<user-id>` to get the nickname for a user with the given id.
