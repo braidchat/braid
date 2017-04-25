@@ -62,7 +62,8 @@
   (dispatch [:update-user-status [user-id :offline]]))
 
 (defmethod sync/event-handler :braid.client/new-user
-  [[_ user]]
+  [[_ [user new-group]]]
+  ; TODO: indicate to user to the group?
   (dispatch [:add-user (assoc user :status :online)]))
 
 (defmethod sync/event-handler :braid.client/user-left
@@ -105,6 +106,14 @@
   [[_ [group-id bot]]]
   (dispatch [:add-group-bot [group-id bot]]))
 
+(defmethod sync/event-handler :braid.client/retract-bot
+  [[_ [group-id bot-id]]]
+  (dispatch [:remove-group-bot [group-id bot-id]]))
+
+(defmethod sync/event-handler :braid.client/edit-bot
+  [[_ [group-id bot]]]
+  (dispatch [:update-group-bot [group-id bot]]))
+
 (defmethod sync/event-handler :braid.client/notify-message
   [[_ message]]
   (notify/notify {:msg (:content message)}))
@@ -116,5 +125,3 @@
 (defmethod sync/event-handler :braid.client/show-thread
   [[_ thread]]
   (dispatch [:add-open-thread thread]))
-
-

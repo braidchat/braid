@@ -92,6 +92,8 @@
    :bot/token
    :bot/avatar
    :bot/webhook-url
+   :bot/event-webhook-url
+   :bot/notify-all-messages?
    {:bot/group [:group/id]}
    {:bot/user [:user/id]}])
 
@@ -102,6 +104,8 @@
    :name (:bot/name e)
    :avatar (:bot/avatar e)
    :webhook-url (:bot/webhook-url e)
+   :event-webhook-url (:bot/event-webhook-url e)
+   :notify-all-messages? (:bot/notify-all-messages? e)
    :token (:bot/token e)})
 
 (def bot-display-pull-pattern

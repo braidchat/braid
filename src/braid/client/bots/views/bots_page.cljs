@@ -1,5 +1,6 @@
 (ns braid.client.bots.views.bots-page
   (:require
+    [clojure.string :as string]
     [reagent.core :as r]
     [reagent.ratom :refer-macros [reaction]]
     [re-frame.core :refer [dispatch subscribe]]
@@ -11,21 +12,85 @@
   [bot]
   (let [group-id (subscribe [:open-group-id])
         admin? (subscribe [:current-user-is-group-admin?] [group-id])
-        detailed-info (r/atom nil)]
+        editing? (r/atom false)
+        edited-info (r/atom nil)
+        detailed-info (r/atom nil)
+        dragging? (r/atom false)]
     (fn [bot]
       [:div.bot
        [:img.avatar {:src (:avatar bot)}]
        (:nickname bot)
        (when @admin?
          [:div
+          [:button.dangerous
+           {:on-click (fn [_]
+                        (when (js/confirm "Permanently remove this bot?")
+                          (dispatch [:retract-bot {:bot-id (bot :id)}])))}
+           "Delete Bot"]
           (if-let [info @detailed-info]
             [:div
-             (into [:dl]
-                   (mapcat
-                     (fn [[k v]]
-                       [[:dt (name k)]
-                        [:dd v]]))
-                   info)
+             (into
+               [:dl]
+               (mapcat
+                 (fn [[k v]]
+                   [[:dt (name k)]
+                    [:dd (if @editing?
+                           (case k
+                             (:id :user-id :group-id :token) v
+
+                             :notify-all-messages?
+                             [:input {:type "checkbox"
+                                      :checked (boolean (get @edited-info k))
+                                      :on-change
+                                      (fn [e]
+                                        (->> (.. e -target -checked)
+                                             (swap! edited-info assoc k)))}]
+
+                             :avatar
+                             [:div.dragging.new-avatar
+                              {:class (when @dragging? "dragging")}
+                              (when-let [avatar (get @edited-info :avatar)]
+                                [:img {:src avatar}])
+                              [avatar-upload-view
+                               {:on-upload (fn [url] (swap! edited-info assoc :avatar url))
+                                :dragging-change (partial reset! dragging?)}]]
+
+                             (:webhook-url :event-webhook-url)
+                             [:input
+                              {:value (get @edited-info k)
+                               :type "url"
+                               :on-change (fn [e]
+                                            (->> (.. e -target -value)
+                                                 (swap! edited-info assoc k)))}]
+
+                             [:input
+                              {:value (get @edited-info k)
+                               :type "text"
+                               :on-change (fn [e]
+                                            (->> (.. e -target -value)
+                                                 (swap! edited-info assoc k)))}])
+                           (if (= k :notify-all-messages?)
+                             (if v "Yes" "No")
+                             v))]]))
+               info)
+             [:button
+              {:on-click (fn [_]
+                           (when-not @editing?
+                             (reset! edited-info @detailed-info))
+                           (swap! editing? not))}
+              (if @editing? "Cancel" "Edit")]
+             (when @editing?
+               [:button
+                {:on-click (fn [_]
+                             (dispatch
+                               [:edit-bot
+                                {:bot @edited-info
+                                 :on-complete
+                                 (fn [updated]
+                                   (when updated
+                                     (do (reset! detailed-info @edited-info)
+                                         (reset! editing? false))))}]))}
+                "Save"])
              [:button {:on-click (fn [_] (reset! detailed-info nil))}
               "Hide"]]
             [:button
@@ -92,18 +157,42 @@
             (when-let [err @error]
               [:div.error err])
             [:label "Bot Name"
-             [:input {:type "text" :placeholder "name" :value (@new-bot :name)
+             [:input {:type "text"
+                      :placeholder "name"
+                      :value (or (@new-bot :name) "")
                       :on-change #(swap! new-bot assoc :name (.. % -target -value))}]]
             [:br]
             [:label "Webhook URL"
-             [:input {:type "url" :placeholder "https://example.com/bot_message" :value (@new-bot :webhook-url)
+             [:input {:type "url"
+                      :placeholder "https://example.com/bot_message"
+                      :value (or (@new-bot :webhook-url) "")
                       :on-change #(swap! new-bot assoc :webhook-url (.. % -target -value))}]]
+            [:br]
+            [:label "Recieve all public messages"
+             [:input {:type "checkbox"
+                      :value (boolean (@new-bot :notify-all-messages?))
+                      :on-change (fn [e]
+                                   (->> (.. e -target -checked)
+                                        (swap! new-bot assoc :notify-all-messages?)))}]]
             [:br]
             [:div.dragging.new-avatar {:class (when @dragging? "dragging")}
              (when-let [avatar (@new-bot :avatar)]
                [:img {:src avatar}])
              [avatar-upload-view {:on-upload (fn [url] (swap! new-bot assoc :avatar url))
                                   :dragging-change (partial reset! dragging?)}]]
+
+            [:br]
+            [:label "Optional: Group event webhook url"
+             [:input
+              {:type "url"
+               :placeholder "https://example.com/bot_group_event"
+               :value (or (@new-bot :event-webhook-url) "")
+               :on-change
+               (fn [e] (let [url (.. e -target -value)]
+                         (if (string/blank? url)
+                           (swap! new-bot dissoc :event-webhook-url)
+                           (swap! new-bot assoc :event-webhook-url url))))}]]
+            [:br]
             [:input {:type "submit" :value "Add Bot" :disabled (not @bot-valid?)}]]
 
            :created
@@ -111,11 +200,15 @@
             [:p (str "New bot has been created! Here are the credentials you'll "
                      "need to connect")]
             [:label "Bot ID"
-             [:input {:type "text" :value (@new-bot :id)
+             [:input {:type "text"
+                      :value (@new-bot :id)
+                      :read-only true
                       :on-focus #(.. % -target select)}]]
 
             [:label "Bot Token"
-             [:input {:type "text" :value (@new-bot :token)
+             [:input {:type "text"
+                      :value (@new-bot :token)
+                      :read-only true
                       :on-focus #(.. % -target select)}]]
             [:button {:on-click (fn [_]
                                   (reset! new-bot {})
