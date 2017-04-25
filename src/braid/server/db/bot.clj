@@ -68,7 +68,7 @@
   (->> (d/q '[:find [(pull ?b pull-pattern) ...]
               :in $ pull-pattern ?group-id
               :where
-              [?b :bot/notify-all-messages true]
+              [?b :bot/notify-all-messages? true]
               [?g :group/id ?group-id]
               [?b :bot/group ?g]]
             (db/db) bot-pull-pattern group-id)
