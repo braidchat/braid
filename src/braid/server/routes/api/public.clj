@@ -1,10 +1,10 @@
-(ns braid.server.routes.api
+(ns braid.server.routes.api.public
   (:require
     [clojure.java.io :as io]
     [clojure.string :as string]
     [compojure.coercions :refer [as-uuid]]
-    [compojure.core :refer [GET POST defroutes]]
-    [braid.common.util :refer [valid-nickname?]]
+    [compojure.core :refer [GET PUT POST DELETE defroutes]]
+    [braid.common.util :refer [valid-nickname? valid-email?]]
     [braid.server.api.embedly :as embedly]
     [braid.server.api.github :as github]
     [braid.server.crypto :refer [random-nonce]]
@@ -14,7 +14,6 @@
     [braid.server.db.invitation :as invitation]
     [braid.server.db.user :as user]
     [braid.server.events :as events]
-    [braid.server.identicons :as identicons]
     [braid.server.invite :as invites]
     [braid.server.markdown :refer [markdown->hiccup]]
     [braid.server.s3 :as s3]
@@ -92,7 +91,7 @@
       (error-response 400 :no-such-email)))
 
   (GET "/registration/check-slug-unique" req
-    (edn-response (not (db/group-with-slug-exists? (get-in req [:params :slug])))))
+    (edn-response (not (group/group-with-slug-exists? (get-in req [:params :slug])))))
 
   ; create a group
   ; requires authentication
@@ -118,7 +117,7 @@
         (re-matches #".*-" slug)
         (error-response 400 "Group URL cannot end with a dash.")
 
-        (db/group-with-slug-exists? slug)
+        (group/group-with-slug-exists? slug)
         (error-response 400 "A Group with this URL already exists.")
 
         ; group type validations
@@ -136,17 +135,17 @@
                       (group/create-group-txn {:id group-id
                                             :slug slug
                                             :name name}))]
-          (db/group-set! (group :id) :public? (case type
-                                                "public" true
-                                                "private" false))
-          (db/run-txns! (group/user-add-to-group! (user :id) group-id))
-          (db/user-subscribe-to-group-tags! (user :id) group-id)
-          (db/user-make-group-admin! (user :id) group-id)
+          (db/run-txns! (group/group-set-txn (group :id) :public? (case type
+                                                                    "public" true
+                                                                    "private" false)))
+          (db/run-txns! (group/user-add-to-group-txn (user :id) group-id))
+          (db/run-txns! (group/user-subscribe-to-group-tags-txn (user :id) group-id))
+          (db/run-txns! (group/user-make-group-admin-txn (user :id) group-id))
           (edn-response {:group-id group-id})))
       (error-response 401 "")))
 
   ; accept an email invite to join a group
-  (POST "/register" [token invite_id password email now hmac avatar :as req]
+  (POST "/register" [token invite_id nickname password email now hmac avatar :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
         (string/blank? password) (assoc fail :body "Must provide a password")
@@ -182,7 +181,7 @@
                                          :avatar avatar-url
                                          :nickname nickname
                                          :password password}))
-                (events/user-join-group! (user :id) (invite :group-id))
+                (events/user-join-group! user-id (invite :group-id))
                 (db/run-txns!
                   (concat
                     (invitation/retract-invitation-txn (invite :id)))))

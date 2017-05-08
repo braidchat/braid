@@ -86,14 +86,16 @@
 
 (defn user-in-group?
   [user-id group-id]
-  (seq (d/q '[:find ?g
-              :in $ ?user-id ?group-id
-              :where
-              [?u :user/id ?user-id]
-              [?g :group/id ?group-id]
-              [?g :group/user ?u]]
-            (db/db)
-            user-id group-id)))
+  (-> (d/q '[:find ?g
+             :in $ ?user-id ?group-id
+             :where
+             [?u :user/id ?user-id]
+             [?g :group/id ?group-id]
+             [?g :group/user ?u]]
+           (db/db)
+           user-id group-id)
+      seq
+      boolean))
 
 (defn user-is-group-admin?
   [user-id group-id]

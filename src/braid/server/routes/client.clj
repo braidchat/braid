@@ -27,7 +27,7 @@
   ;       -> www.domain.com/groups/slug
   ;       -> www.domain.com/group-uuid
   (GET "/groups/:slug" [slug]
-    (if-let [group (db/group-by-slug slug)]
+    (if-let [group (group/group-by-slug slug)]
       {:status 302
        :headers {"Location" (str "/" (group :id) "/inbox")}
        :body nil}

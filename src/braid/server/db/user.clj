@@ -11,37 +11,37 @@
     [braid.server.quests.db :refer [activate-first-quests-txn]]))
 
 (defn email-taken?
-  [conn email]
-  (some? (d/entity (d/db conn) [:user/email email])))
+  [email]
+  (some? (d/entity (db/db) [:user/email email])))
 
 (defn nickname-taken?
-  [conn nickname]
-  (some? (d/entity (d/db conn) [:user/nickname nickname])))
+  [nickname]
+  (some? (d/entity (db/db) [:user/nickname nickname])))
 
 (defn generate-unique-nickname
   "Recursively checks if nickname is taken; otherwise appends a random number and repeats"
-  [conn potential-nickname]
-  (if (nickname-taken? conn potential-nickname)
-    (generate-unique-nickname conn (str potential-nickname (rand-int 9)))
+  [potential-nickname]
+  (if (nickname-taken? potential-nickname)
+    (generate-unique-nickname (str potential-nickname (rand-int 9)))
     potential-nickname))
 
 (defn generate-nickname-from-email
   "Generates a nickname from an email string"
-  [conn email]
+  [email]
   (-> email
       (string/split #"@")
       first
       slugify
-      (->> (generate-unique-nickname conn))))
+      generate-unique-nickname))
 
 (defn set-user-avatar!
-  [conn user-id avatar]
-  @(d/transact conn [[:db/add [:user/id user-id] :user/avatar avatar]]))
+  [user-id avatar]
+  @(d/transact (db/db) [[:db/add [:user/id user-id] :user/avatar avatar]]))
 
 (defn set-user-password!
-  [conn user-id password]
-  @(d/transact conn [[:db/add [:user/id user-id]
-                      :user/password-token (password/encrypt password)]]))
+  [user-id password]
+  @(d/transact (db/db) [[:db/add [:user/id user-id]
+                         :user/password-token (password/encrypt password)]]))
 
 (defn authenticate-user
   "returns user-id if email and password are correct"

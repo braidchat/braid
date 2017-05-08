@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [braid.server.db :as db]
             [braid.server.s3 :as s3]
+            [braid.server.db.user :as user]
             [braid.server.api.embedly :as embedly]
             [braid.server.api.github :as github]
             [braid.server.markdown :refer [markdown->hiccup]]))
@@ -19,14 +20,14 @@
                        markdown->hiccup)}))
 
   (GET "/extract" [url :as {session :session}]
-    (if (db/user-id-exists? (:user-id session))
+    (if (user/user-id-exists? (:user-id session))
       (edn-response (embedly/extract url))
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))
 
   (GET "/s3-policy" req
-    (if (db/user-id-exists? (get-in req [:session :user-id]))
+    (if (user/user-id-exists? (get-in req [:session :user-id]))
       (if-let [policy (s3/generate-policy)]
         {:status 200
          :headers {"Content-Type" "application/edn"}

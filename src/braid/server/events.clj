@@ -18,7 +18,7 @@
     (concat
       (group/user-add-to-group-txn user-id group-id)
       (group/user-subscribe-to-group-tags-txn user-id group-id)
-      (group/add-user-to-recent-threads-in-group-txn user-id group-id)))
+      (add-user-to-recent-threads-in-group! user-id group-id)))
   (sync-helpers/broadcast-group-change group-id [:braid.client/new-user (user/user-by-id user-id)]))
 
 (defn register-user!

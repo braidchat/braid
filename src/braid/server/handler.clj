@@ -6,8 +6,8 @@
     [ring.middleware.defaults :refer [wrap-defaults api-defaults
                                       secure-site-defaults site-defaults]]
     [ring.middleware.edn :refer [wrap-edn-params]]
-    [braid.server.routes.api :refer [api-private-routes
-                                     api-public-routes]]
+    [braid.server.routes.api.private :refer [api-private-routes]]
+    [braid.server.routes.api.public :refer [api-public-routes]]
     [braid.server.routes.bots :refer [bot-routes]]
     [braid.server.routes.socket :refer [sync-routes]]
     [braid.server.routes.client :refer [desktop-client-routes
