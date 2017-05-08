@@ -1,6 +1,6 @@
 # How Braid Bots work
 
-The current state of Braid bots is delibrately very simple.
+The current state of Braid bots is deliberately simple.
 We anticipate extending the API available to bots as we start to write more and see how they are used.
 
 For an example of a simple bot, see [giphybot][].
@@ -26,7 +26,7 @@ The fake user-id can probably be ignored by your bot, as any messages created by
 ## Receiving
 
 Bots are sent any messages in their group that begin with a forward-slash (`/`) and their name (e.g. `/giphybot`).
-The messages are sent as [MessagePack-encoded Transit][transit] via a `PUT` request to the webhook-url specificed for the bot.
+The messages are sent as [MessagePack-encoded Transit][transit] via a `PUT` request to the webhook-url specified for the bot.
 The `PUT` request to the bot includes a header `X-Braid-Signature` whose value is the HMAC-SHA256 of the request body, with the key being the bot token.
 The server ignores any response from the bot.
 
@@ -47,7 +47,7 @@ Requests must be authenticated with HTTP Basic auth, where the username is the (
 
 ### Creating Messages
 
-To create a message, the bot can send a `PUT` request to `/bots/message` endpoint of the api server (e.g. `https://api.braid.chat`).
+To create a message, the bot can send a `POST` request to `/bots/message` endpoint of the api server (e.g. `https://api.braid.chat`).
 The message sent must be in the same format as the server sends --- MessagePack-encoded Transit, with the same schema as shown above.
 However, the `user-id`, `group-id`, and `created-at` fields can be omitted as the server will fill them in with the bot's faux user-id and, the group of the bot, and the current server time, respectively.
 The server will return the following error codes:
@@ -60,13 +60,53 @@ The server will return the following error codes:
 ### Subscribing
 
 A bot can subscribe to a thread by sending a `PUT` request to `/bots/subscribe/<thread-id>`, authenticated in the same way as sending.
-When subscribed to a thread, whenever a user replies to that thread, the bot will recieve the message in the same manner described above under "Receiving".
+When subscribed to a thread, whenever a user replies to that thread, the bot will receive the message in the same manner described above under "Receiving".
 The server will return the following error codes:
 
   - 201 if the subscription is successful
   - 400 if the thread-id is malformed
   - 401 if HTTP Basic auth fails
   - 403 if the thread is in a different group from the bot
+
+### Group Events
+
+When creating a bot, if you give it an event webhook url, it will also receive all messages broadcast to the group.
+Events are vectors where the first element is a keyword indicating the event name and the second element is the event payload.
+
+The events sent are currently:
+
+```
+:braid.client/thread
+:braid.client/init-data
+:socket/connected
+:braid.client/create-tag
+:braid.client/joined-group
+:braid.client/update-users
+:braid.client/invitation-received
+:braid.client/name-change
+:braid.client/user-new-avatar
+:braid.client/left-group
+:braid.client/user-connected
+:braid.client/user-disconnected
+:braid.client/new-user
+:braid.client/user-left
+:braid.client/new-admin
+:braid.client/tag-descrption-change
+:braid.client/retract-tag
+:braid.client/new-intro
+:braid.client/group-new-avatar
+:braid.client/publicity-changed
+:braid.client/new-bot
+:braid.client/retract-bot
+:braid.client/edit-bot
+:braid.client/notify-message
+:braid.client/hide-thread
+:braid.client/show-thread
+```
+
+### All Messages
+
+When creating a bot, you can also check the "Receive all public messages" box, in which case the bot will be sent all messages in the group that are in a thread with at least one tag.
 
 ### Other Routes
 

@@ -1,6 +1,6 @@
 <img src="./docs/images/braid-icon-256.png" height="128px" alt="Braid Logo">
 
-# Braid [![Github Issues](https://img.shields.io/github/issues/braidchat/meta.svg)](https://www.github.com/braidchat/meta/issues) ![Codeship](https://img.shields.io/codeship/6f05b0f0-9e72-0133-e93b-76efcd0f79bd.svg) [![Braid Chat](https://img.shields.io/badge/braid-join_chat-green.svg)](https://braid.chat/group/braid)
+# Braid [![Github Issues](https://img.shields.io/github/issues/braidchat/planning.svg)](https://www.github.com/braidchat/planning/issues) ![Codeship](https://img.shields.io/codeship/6f05b0f0-9e72-0133-e93b-76efcd0f79bd.svg) [![Braid Chat](https://img.shields.io/badge/braid-join_chat-green.svg)](https://braid.chat/group/braid)
 
 Braid is a **group chat application** that promotes *productive* team communication, while still respecting each individual's need for focus.
 

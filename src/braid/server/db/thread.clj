@@ -94,6 +94,15 @@
                 [?user :user/id ?user-id]]
               (db/db) thread-id user-id))))
 
+(defn thread-has-tags?
+  [thread-id]
+  (seq (d/q '[:find ?tag
+              :in $ ?thread-id
+              :where
+              [?thread :thread/id ?thread-id]
+              [?thread :thread/tag ?tag]]
+            (db/db) thread-id)))
+
 (defn open-threads-for-user
   [user-id]
   (let [visible-tags (tag/tag-ids-for-user user-id)]

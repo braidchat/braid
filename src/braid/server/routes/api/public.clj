@@ -5,10 +5,10 @@
     [compojure.coercions :refer [as-uuid]]
     [compojure.core :refer [GET PUT POST DELETE defroutes]]
     [braid.common.util :refer [valid-nickname? valid-email?]]
-    [braid.server.api.embedly :as embedly]
     [braid.server.api.github :as github]
-    [braid.server.crypto :refer [random-nonce]]
+    [braid.server.api.link-extract :as link-extract]
     [braid.server.conf :refer [config]]
+    [braid.server.crypto :refer [random-nonce]]
     [braid.server.db :as db]
     [braid.server.db.group :as group]
     [braid.server.db.invitation :as invitation]
@@ -338,7 +338,7 @@
 
   (GET "/extract" [url :as {ses :session}]
     (if (some? (user/user-by-id (:user-id ses)))
-      (edn-response (embedly/extract url))
+      (edn-response (link-extract/extract url))
       {:status 403
        :headers {"Content-Type" "application/edn"}
        :body (pr-str {:error "Unauthorized"})}))
