@@ -27,11 +27,11 @@ PR early, to start a discussion (and avoid major refactoring)
 
 Issues
 
-https://github.com/braidchat/meta/issues
+https://github.com/braidchat/planning/issues
 
  Check for open issues or open a fresh issue to start a discussion around a feature idea or a bug
 
- There is a [Help Wanted](https://github.com/braidchat/meta/issues?q=is%3Aissue+is%3Aopen+label%3Ahelp-wanted) tag for issues that should be ideal for people who are not very familiar with the codebase yet.
+ There is a [Help Wanted](https://github.com/braidchat/planning/issues?q=is%3Aissue+is%3Aopen+label%3Ahelp-wanted) tag for issues that should be ideal for people who are not very familiar with the codebase yet.
 
 
 ## Support
