@@ -31,7 +31,7 @@
 
 (defn join-group
   [user-id group-id]
-  (when-not (db/user-in-group? user-id group-id)
+  (when-not (group/user-in-group? user-id group-id)
     (events/user-join-group! user-id group-id)))
 
 (defn error-response [status msg]
@@ -68,7 +68,7 @@
       (not (valid-email? email))
       (error-response 400 "The email format is incorrect.")
 
-      (db/user-with-email email)
+      (user/user-with-email email)
       (error-response 400 :email-exists)
 
       (string/blank? password)
@@ -78,10 +78,10 @@
       (error-response 400 "The password is too short.")
 
       :else
-      (let [user (db/create-user! {:id (db/uuid)
-                                   :email email})
-            _ (db/set-user-password! (user :id)
-                                     password)]
+      (let [user (db/run-txns! (user/create-user-txn {:id (db/uuid)
+                                                      :email email}))
+            _ (db/run-txns! (user/set-user-password-txn (user :id)
+                                                        password))]
         {:status 200
          :session (assoc (req :session) :user-id (user :id))})))
 
@@ -132,13 +132,14 @@
         ; passed all validations
         :else
         (let [group-id (db/uuid)
-              group (db/create-group! {:id group-id
-                                       :slug slug
-                                       :name name})]
+              group (db/run-txns!
+                      (group/create-group-txn {:id group-id
+                                            :slug slug
+                                            :name name}))]
           (db/group-set! (group :id) :public? (case type
                                                 "public" true
                                                 "private" false))
-          (db/user-add-to-group! (user :id) group-id)
+          (db/run-txns! (group/user-add-to-group! (user :id) group-id))
           (db/user-subscribe-to-group-tags! (user :id) group-id)
           (db/user-make-group-admin! (user :id) group-id)
           (edn-response {:group-id group-id})))

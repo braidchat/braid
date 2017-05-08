@@ -8,14 +8,6 @@
     [braid.server.db.thread :as thread]
     [braid.server.db.user :as user]))
 
-(defn create-group!
-  [conn {:keys [name slug id]}]
-  (->> {:group/id id
-        :group/slug slug
-        :group/name name}
-       (create-entity! conn)
-       db->group))
-
 (defn group-exists?
   [group-name]
   (some? (d/pull (db/db) '[:group/id] [:group/name group-name])))
@@ -117,9 +109,10 @@
 ;; Transactions
 
 (defn create-group-txn
-  [{:keys [name id]}]
+  [{:keys [name slug id]}]
   (create-entity-txn
     {:group/id id
+     :group/slug slug
      :group/name name}
     db->group))
 

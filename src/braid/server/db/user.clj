@@ -34,35 +34,6 @@
       slugify
       (->> (generate-unique-nickname conn))))
 
-(defn create-user!
-  "given an id and email, creates and returns a user;
-  the nickname and avatar are set based on the email;
-  the id, email, and resulting nickname must be unique"
-  [conn {:keys [id email]}]
-  (let [user (->>
-               {:user/id id
-                :user/email email
-                :user/nickname (generate-nickname-from-email conn email)
-                :user/avatar (gravatar email
-                               :rating :g
-                               :default :identicon)}
-               (create-entity! conn)
-               db->private-user)]
-    (activate-first-quests! conn id)
-    user))
-
-(defn create-bot-user!
-  [conn {:keys [id]}]
-  (->> {:user/id id
-        :user/is-bot? true}
-       (create-entity! conn)
-       :user/id))
-
-(defn set-nickname!
-  "Set the user's nickname"
-  [conn user-id nickname]
-  @(d/transact conn [[:db/add [:user/id user-id] :user/nickname (slugify nickname)]]))
-
 (defn set-user-avatar!
   [conn user-id avatar]
   @(d/transact conn [[:db/add [:user/id user-id] :user/avatar avatar]]))
@@ -90,7 +61,7 @@
 
 (defn user-by-id
   [id]
-  (some-> (d/pull (d/db conn) private-user-pull-pattern [:user/id id])
+  (some-> (d/pull (d/db) private-user-pull-pattern [:user/id id])
           db->private-user))
 
 (defn user-id-exists?
@@ -186,7 +157,9 @@
 ;; Transactions
 
 (defn create-user-txn
-  "creates a user, returns the newly-created user"
+  "given an id and email, creates and returns a user;
+  the nickname and avatar are set based on the email;
+  the id, email, and resulting nickname must be unique"
   [{:keys [id email avatar nickname password]}]
   (let [new-id (d/tempid :entities)]
     (into
@@ -194,19 +167,20 @@
          (fn [{:keys [db-after tempids]}]
            (->> (d/resolve-tempid db-after tempids new-id)
                 (d/entity db-after)
-                db->user))}
+                db->private-user))}
        {:db/id new-id
         :user/id id
         :user/email email
-        :user/avatar avatar
-        :user/nickname (or nickname (-> email (string/split #"@") first))
-        :user/password-token (password/encrypt password)}]
+        :user/avatar (gravatar email
+                       :rating :g
+                       :default :identicon)
+        :user/nickname (generate-nickname-from-email email)}]
       (activate-first-quests-txn new-id))))
 
 (defn set-nickname-txn
   "Set the user's nickname"
   [user-id nickname]
-  [[:db/add [:user/id user-id] :user/nickname nickname]])
+  [[:db/add [:user/id user-id] :user/nickname (slugify nickname)]])
 
 (defn set-user-avatar-txn
   [user-id avatar]

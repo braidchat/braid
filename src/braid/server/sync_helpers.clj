@@ -3,6 +3,11 @@
     [taoensso.timbre :as timbre :refer [debugf]]
     [clojure.set :refer [difference intersection]]
     [braid.server.db :as db]
+    [braid.server.db.bot :as bot]
+    [braid.server.db.group :as group]
+    [braid.server.db.tag :as tag]
+    [braid.server.db.thread :as thread]
+    [braid.server.db.user :as user]
     [braid.server.bots :as bots]
     [braid.server.notify-rules :as notify-rules]
     [braid.server.email-digest :as email]
@@ -14,15 +19,15 @@
   [thread-id ids-to-skip]
   (let [user-ids (-> (difference
                        (intersection
-                         (set (db/users-with-thread-open thread-id))
+                         (set (thread/users-with-thread-open thread-id))
                          (set (:any @connected-uids)))
                        (set ids-to-skip)))
-        thread (db/thread-by-id thread-id)]
+        thread (thread/thread-by-id thread-id)]
     (doseq [uid user-ids]
-      (let [user-tags (db/tag-ids-for-user uid)
+      (let [user-tags (tag/tag-ids-for-user uid)
             filtered-thread (update-in thread [:tag-ids]
                                        (partial into #{} (filter user-tags)))
-            thread-with-last-opens (db/thread-add-last-open-at
+            thread-with-last-opens (thread/thread-add-last-open-at
                                      filtered-thread uid)]
         (chsk-send! uid [:braid.client/thread thread-with-last-opens])))))
 
@@ -34,7 +39,7 @@
                            (set (:any @connected-uids))
                            (into
                              #{} (map :id)
-                             (db/users-for-user user-id)))
+                             (user/users-for-user user-id)))
                          user-id)]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
@@ -45,7 +50,7 @@
   (let [ids-to-send-to (intersection
                          (set (:any @connected-uids))
                          (into #{} (map :id)
-                               (db/group-users group-id)))]
+                               (group/group-users group-id)))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info))))
 
@@ -55,24 +60,24 @@
   (every?
       true?
       (concat
-        [(or (boolean (db/user-can-see-thread? user-id (?data :thread-id)))
+        [(or (boolean (thread/user-can-see-thread? user-id (?data :thread-id)))
              (do (timbre/warnf
                    "User %s attempted to add message to disallowed thread %s"
                    user-id (?data :thread-id))
                  false))
-         (or (boolean (if-let [cur-group (db/thread-group-id (?data :thread-id))]
+         (or (boolean (if-let [cur-group (thread/thread-group-id (?data :thread-id))]
                         (= (?data :group-id) cur-group)
                         true)))]
         (map
           (fn [tag-id]
             (and
-              (or (boolean (= (?data :group-id) (db/tag-group-id tag-id)))
+              (or (boolean (= (?data :group-id) (tag/tag-group-id tag-id)))
                   (do
                     (timbre/warnf
                       "User %s attempted to add a tag %s from a different group"
                       user-id tag-id)
                     false))
-              (or (boolean (db/user-in-tag-group? user-id tag-id))
+              (or (boolean (tag/user-in-tag-group? user-id tag-id))
                   (do
                     (timbre/warnf "User %s attempted to add a disallowed tag %s"
                                   user-id tag-id)
@@ -81,12 +86,12 @@
         (map
           (fn [mentioned-id]
             (and
-              (or (boolean (db/user-in-group? user-id (?data :group-id)))
+              (or (boolean (group/user-in-group? user-id (?data :group-id)))
                   (do (timbre/warnf
                         "User %s attempted to mention disallowed user %s"
                         user-id mentioned-id)
                       false))
-              (or (boolean (db/user-visible-to-user? user-id mentioned-id))
+              (or (boolean (user/user-visible-to-user? user-id mentioned-id))
                   (do (timbre/warnf
                         "User %s attempted to mention disallowed user %s"
                         user-id mentioned-id)
@@ -95,14 +100,14 @@
 
 (defn notify-users [new-message]
   (let [subscribed-user-ids (->>
-                              (db/users-subscribed-to-thread
+                              (thread/users-subscribed-to-thread
                                 (new-message :thread-id))
                               (remove (partial = (:user-id new-message))))
         online? (intersection
                   (set subscribed-user-ids)
                   (set (:any @connected-uids)))]
     (doseq [uid subscribed-user-ids]
-      (when-let [rules (db/user-get-preference uid :notification-rules)]
+      (when-let [rules (user/user-get-preference uid :notification-rules)]
         (when (notify-rules/notify? uid rules new-message)
           (let [msg (update new-message :content
                             (partial parse-tags-and-mentions uid))]
@@ -114,18 +119,18 @@
                       (fn [m] (update m :content
                                       (partial parse-tags-and-mentions uid))))]
                 (-> (email/create-message
-                      [(-> (db/thread-by-id (msg :thread-id))
+                      [(-> (thread/thread-by-id (msg :thread-id))
                            (update :messages update-msgs))])
                     (assoc :subject "Notification from Braid")
-                    (->> (email/send-message (db/user-email uid))))))))))))
+                    (->> (email/send-message (user/user-email uid))))))))))))
 
 (defn notify-bots [new-message]
   ; Notify bots mentioned in the message
   (when-let [bot-name (second (re-find #"^/(\w+)\b" (:content new-message)))]
-    (when-let [bot (db/bot-by-name-in-group bot-name (new-message :group-id))]
+    (when-let [bot (bot/bot-by-name-in-group bot-name (new-message :group-id))]
       (timbre/debugf "notifying bot %s" bot)
       (bots/send-notification bot new-message)))
   ; Notify bots subscribed to the thread
-  (doseq [bot (db/bots-watching-thread (new-message :thread-id))]
+  (doseq [bot (bot/bots-watching-thread (new-message :thread-id))]
     (timbre/debugf "notifying bot %s" bot)
     (bots/send-notification bot new-message)))

@@ -19,6 +19,7 @@
     [braid.server.db.upload :as upload]
     [braid.server.db.user :as user]
     [braid.server.email-digest :as email]
+    [braid.server.events :as events]
     [braid.server.invite :as invites]
     [braid.server.message-format :refer [parse-tags-and-mentions]]
     [braid.server.notify-rules :as notify-rules]
