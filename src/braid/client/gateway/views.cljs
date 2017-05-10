@@ -33,16 +33,14 @@
   [:h1.header "Braid"])
 
 (defn form-view []
-  (let [mode (subscribe [:gateway/action-mode])]
-    (fn []
-      [:div.gateway
-       [header-view]
-       [user-auth-view]
-       (case @mode
-         :create-group [create-group-view]
-         :join-public-group [join-group-view :public]
-         :join-private-group [join-group-view :private]
-         nil)])))
+  [:div.gateway
+   [header-view]
+   [user-auth-view]
+   (case @(subscribe [:gateway/action-mode])
+     :create-group [create-group-view]
+     :join-public-group [join-group-view :public]
+     :join-private-group [join-group-view :private]
+     nil)])
 
 (defn app-view []
   [:div.app
