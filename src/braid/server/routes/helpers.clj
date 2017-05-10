@@ -11,3 +11,7 @@
   {:status status
    :headers {"Content-Type" "application/edn; charset=utf-8"}
    :body (pr-str {:error msg})})
+
+(defn edn-response [clj-body]
+  {:headers {"Content-Type" "application/edn; charset=utf-8"}
+   :body (pr-str clj-body)})

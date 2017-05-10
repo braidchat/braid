@@ -16,13 +16,9 @@
     [braid.server.events :as events]
     [braid.server.invite :as invites]
     [braid.server.markdown :refer [markdown->hiccup]]
-    [braid.server.routes.helpers :refer [current-user error-response]]
+    [braid.server.routes.helpers :refer [current-user error-response edn-response]]
     [braid.server.s3 :as s3]
     [braid.server.sync :as sync]))
-
-(defn edn-response [clj-body]
-  {:headers {"Content-Type" "application/edn; charset=utf-8"}
-   :body (pr-str clj-body)})
 
 (defn join-group
   [user-id group-id]

@@ -10,11 +10,7 @@
     [braid.server.api.link-extract :as link-extract]
     [braid.server.api.github :as github]
     [braid.server.markdown :refer [markdown->hiccup]]
-    [braid.server.routes.helpers :refer [current-user error-response]]))
-
-(defn edn-response [clj-body]
-  {:headers {"Content-Type" "application/edn; charset=utf-8"}
-   :body (pr-str clj-body)})
+    [braid.server.routes.helpers :refer [current-user error-response edn-response]]))
 
 (defroutes api-private-routes
 
