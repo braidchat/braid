@@ -1,8 +1,8 @@
 (ns braid.server.db.user
   (:require
-    [clavatar.core :refer [gravatar]]
     [clojure.edn :as edn]
     [clojure.string :as string]
+    [clavatar.core :refer [gravatar]]
     [crypto.password.scrypt :as password]
     [datomic.api :as d]
     [braid.common.util :refer [slugify]]
@@ -34,15 +34,6 @@
       slugify
       generate-unique-nickname))
 
-(defn set-user-avatar!
-  [user-id avatar]
-  @(d/transact (db/db) [[:db/add [:user/id user-id] :user/avatar avatar]]))
-
-(defn set-user-password!
-  [user-id password]
-  @(d/transact (db/db) [[:db/add [:user/id user-id]
-                         :user/password-token (password/encrypt password)]]))
-
 (defn authenticate-user
   "returns user-id if email and password are correct"
   [email password]
@@ -55,7 +46,7 @@
                     [(.toLowerCase ^String ?stored-email) ?email]
                     [?e :user/password-token ?password-token]]
                   (db/db)
-                  (.toLowerCase email))]
+                  (string/lower-case email))]
          (when (and user-id (password/check password password-token))
            user-id))))
 
@@ -71,7 +62,7 @@
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
   [email]
-  (some-> (d/pull (db/db) user-pull-pattern [:user/email email])
+  (some-> (d/pull (db/db) user-pull-pattern [:user/email (string/lower-case email)])
           db->user))
 
 (defn user-email
@@ -160,7 +151,7 @@
   "given an id and email, creates and returns a user;
   the nickname and avatar are set based on the email;
   the id, email, and resulting nickname must be unique"
-  [{:keys [id email avatar nickname password]}]
+  [{:keys [id email password]}]
   (let [new-id (d/tempid :entities)]
     (into
       [^{:braid.server.db/return
@@ -170,10 +161,10 @@
                 db->private-user))}
        {:db/id new-id
         :user/id id
-        :user/email email
+        :user/email (string/lower-case email)
         :user/avatar (gravatar email
-                       :rating :g
-                       :default :identicon)
+                               :rating :g
+                               :default :identicon)
         :user/nickname (generate-nickname-from-email email)}]
       (activate-first-quests-txn new-id))))
 

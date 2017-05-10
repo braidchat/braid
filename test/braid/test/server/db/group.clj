@@ -1,12 +1,12 @@
 (ns braid.test.server.db.group
-  (:require [clojure.test :refer :all]
-            [braid.server.conf :as conf]
-            [braid.server.db :as db]
-            [braid.server.db.group :as group]
-            [braid.server.db.user :as user]
-            [braid.test.server.fixtures :as fixtures]))
+  (:require
+    [clojure.test :refer :all]
+    [braid.server.db :as db]
+    [braid.server.db.group :as group]
+    [braid.server.db.user :as user]
+    [braid.test.fixtures.db :refer [drop-db]]))
 
-(use-fixtures :each fixtures/drop-db)
+(use-fixtures :each drop-db)
 
 ; Unit Tests
 
@@ -14,7 +14,7 @@
   (let [data {:id (db/uuid)
               :slug "foobar"
               :name "Foo Bar"}
-        group (db/run-txns! (group/create-group-txn data))]
+        [group] (db/run-txns! (group/create-group-txn data))]
 
     (testing "returns a group with correct fields"
       (is (= group (merge {:id nil
@@ -55,16 +55,16 @@
 
 (deftest set-group-intro
   (testing "can set an existing group's intro"
-    (let [group (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "a" :name "a"}))
+    (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "a" :name "a"}))
           intro "the intro"]
       (db/run-txns! (group/group-set-txn (group :id) :intro intro))
       (is (= (:intro (group/group-by-id (group :id))) intro)))))
 
 (deftest add-user-to-group
   (testing "can add a user to a group"
-    (let [group (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "b" :name "b"}))
+    (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "b" :name "b"}))
           user-id (db/uuid)
-          user (db/run-txns! (user/create-user-txn {:id user-id
+          [user] (db/run-txns! (user/create-user-txn {:id user-id
                                                     :email "foo@bar.com"
                                                     :password "foobar"
                                                     :avatar "http://www.foobar.com/1.jpg"}))]
@@ -79,13 +79,13 @@
 
 (deftest user-group-admin
   (testing "can make a user a group admin"
-    (let [group (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "c" :name "c"}))
-          user-1 (db/run-txns! (user/create-user-txn {:id (db/uuid)
+    (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "c" :name "c"}))
+          [user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
                                                       :email "foo@bar.com"
                                                       :password "foobar"
                                                       :avatar "http://www.foobar.com/1.jpg"}))
           _ (db/run-txns! (group/user-add-to-group-txn (user-1 :id) (group :id)))
-          user-2 (db/run-txns! (user/create-user-txn {:id (db/uuid)
+          [user-2] (db/run-txns! (user/create-user-txn {:id (db/uuid)
                                                       :email "bar@baz.com"
                                                       :password "foobar"
                                                       :avatar "http://www.foobar.com/1.jpg"}))
@@ -101,18 +101,18 @@
 
 (deftest integration-tests
   (testing "multiple groups, admin statuses"
-    (let [user-1 (db/run-txns! (user/create-user-txn {:id (db/uuid)
+    (let [[user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
                                                        :email "foo@bar.com"
                                                        :password "foobar"
                                                        :avatar "http://www.foobar.com/1.jpg"}))
-          user-2 (db/run-txns! (user/create-user-txn {:id (db/uuid)
+          [user-2] (db/run-txns! (user/create-user-txn {:id (db/uuid)
                                                        :email "bar@baz.com"
                                                        :password "foobar"
                                                        :avatar "http://www.foobar.com/1.jpg"}))
-          group-1 (db/run-txns! (group/create-group-txn {:id (db/uuid)
+          [group-1] (db/run-txns! (group/create-group-txn {:id (db/uuid)
                                                          :slug "third-group"
                                                          :name "third group"}))
-          group-2 (db/run-txns! (group/create-group-txn {:id (db/uuid)
+          [group-2] (db/run-txns! (group/create-group-txn {:id (db/uuid)
                                                          :slug "another-group"
                                                          :name "another group"}))]
 

@@ -2,8 +2,6 @@
   (:require
     [clojure.set :refer [rename-keys]]
     [clojure.test :refer :all]
-    [mount.core :as mount]
-    [braid.server.conf :as conf]
     [braid.server.db :as db]
     [braid.server.db.bot :as bot]
     [braid.server.db.group :as group]
@@ -14,93 +12,39 @@
     [braid.server.db.user :as user]
     [braid.common.schema :as schema]
     [braid.server.search :as search]
+    [braid.test.fixtures.db :refer [drop-db]]
     [braid.test.server.test-utils :refer [fetch-messages]]))
 
-(use-fixtures :each
-              (fn [t]
-                (-> (mount/only #{#'conf/config #'db/conn})
-                    (mount/swap {#'conf/config
-                                 {:db-url "datomic:mem://chat-test"}})
-                    (mount/start))
-                (t)
-                (datomic.api/delete-database (conf/config :db-url))
-                (mount/stop)))
-
-
-(deftest create-user
-  (let [data {:id (db/uuid)
-              :email "foo@bar.com"
-              :password "foobar"
-              :avatar "http://www.foobar.com/1.jpg"}
-        user (first (db/run-txns! (user/create-user-txn data)))]
-    (testing "can check if an email has been used"
-      (is (user/email-taken? (:email data)))
-      (is (not (user/email-taken? "baz@quux.net"))))
-    (testing "create returns a user"
-      (is (= (dissoc user :group-ids)
-             (-> data
-                 (dissoc :password :email)
-                 (assoc :nickname "foo")))))
-    (testing "can set nickname"
-      (is (not (user/nickname-taken? "ol' fooy")))
-      (db/run-txns! (user/set-nickname-txn (user :id) "ol' fooy"))
-      (is (user/nickname-taken? "ol' fooy"))
-      (is (= (-> (user/user-with-email "foo@bar.com")
-                 (dissoc :group-ids))
-             (-> data
-                 (dissoc :password :email)
-                 (assoc :nickname "ol' fooy")))))
-
-    (testing "user email must be unique"
-      (is (thrown? java.util.concurrent.ExecutionException
-                   (db/run-txns!
-                     (user/create-user-txn {:id (db/uuid)
-                                            :email (data :email)
-                                            :password "zzz"
-                                            :avatar "http://zzz.com/2.jpg"})))))
-    (testing "user nickname must be unique"
-      (let [other {:id (db/uuid)
-                   :email "baz@quux.com"
-                   :password "foobar"
-                   :avatar "foo@bar.com"}]
-        (is (some? (db/run-txns! (user/create-user-txn other))))
-        (is (thrown? java.util.concurrent.ExecutionException
-                     (db/run-txns!
-                       (user/set-nickname-txn (other :id)  "ol' fooy"))))))))
+(use-fixtures :each drop-db)
 
 (deftest fetch-users
   (let [user-1-data {:id (db/uuid)
-                     :email "foo@bar.com"
-                     :password "foobar"
-                     :avatar "http://www.foobar.com/1.jpg"}
+                     :email "foo@bar.com"}
         user-2-data  {:id (db/uuid)
-                      :email "bar@baz.com"
-                      :password "barbaz"
-                      :avatar "http://www.barbaz.com/1.jpg"}
+                      :email "bar@baz.com"}
         [user-1 user-2] (db/run-txns!
                           (concat (user/create-user-txn user-1-data)
                                   (user/create-user-txn user-2-data)))
-        [group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :name "aoeu"}))
+        [group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :name "aoeu" :slug "aoeu"}))
         _ (db/run-txns!
             (concat
               (group/user-add-to-group-txn (user-1 :id) (group :id))
               (group/user-add-to-group-txn (user-2 :id) (group :id))))
         users (user/users-for-user (user-1 :id))]
     (testing "returns all users"
-      (is (= (set (map (fn [u] (dissoc u :group-ids)) users))
-             (set (map (fn [u] (dissoc u :group-ids)) [user-1 user-2])))))
+      (is (= (set (map :id users))
+             (set (map :id [user-1 user-2])))))
     (testing "get user by email"
-      (is (= (dissoc user-1 :group-ids)
-             (dissoc (user/user-with-email (user-1-data :email)) :group-ids)))
+      (is (= (:id user-1)
+             (:id (user/user-with-email (user-1-data :email)))))
       (is (nil? (user/user-with-email "zzzzz@zzzzzz.ru"))))))
 
 (deftest only-see-users-in-group
   (let [[group-1 group-2 user-1 user-2 user-3]
         (db/run-txns!
           (concat
-            (group/create-group-txn {:id (db/uuid) :name "g1"})
-            (group/create-group-txn {:id (db/uuid) :name "g2"})
-
+            (group/create-group-txn {:id (db/uuid) :slug "g1" :name "g1"})
+            (group/create-group-txn {:id (db/uuid) :slug "g2" :name "g2"})
             (user/create-user-txn {:id (db/uuid)
                                    :email "foo@bar.com"
                                    :password "foobar"
@@ -122,18 +66,12 @@
         (group/user-add-to-group-txn (user-2 :id) (group-2 :id))
         (group/user-add-to-group-txn (user-3 :id) (group-2 :id))))
     (is (not (group/user-in-group? (user-1 :id) (group-2 :id))))
-    (is (= (set (map (fn [u] (dissoc u :group-ids))
-                     [user-1 user-2]))
-           (set (map (fn [u] (dissoc u :group-ids))
-                (user/users-for-user (user-1 :id))))))
-    (is (= (set (map (fn [u] (dissoc u :group-ids))
-                     [user-1 user-2 user-3]))
-           (set (map (fn [u] (dissoc u :group-ids))
-                (user/users-for-user (user-2 :id))))))
-    (is (= (set (map (fn [u] (dissoc u :group-ids))
-                     [user-2 user-3]))
-           (set (map (fn [u] (dissoc u :group-ids))
-                (user/users-for-user (user-3 :id))))))
+    (is (= (set (map :id [user-1 user-2]))
+           (set (map :id (user/users-for-user (user-1 :id))))))
+    (is (= (set (map :id [user-1 user-2 user-3]))
+           (set (map :id (user/users-for-user (user-2 :id))))))
+    (is (= (set (map :id [user-2 user-3]))
+           (set (map :id (user/users-for-user (user-3 :id))))))
     (is (user/user-visible-to-user? (user-1 :id) (user-2 :id)))
     (is (not (user/user-visible-to-user? (user-1 :id) (user-3 :id))))
     (is (not (user/user-visible-to-user? (user-3 :id) (user-1 :id))))
@@ -144,106 +82,25 @@
     (is (not (user/user-visible-to-user? (user-1 :id) (user-2 :id))))))
 
 (deftest authenticate-user
-  (let [user-1-data {:id (db/uuid)
-                     :email "fOo@bar.com"
-                     :password "foobar"
-                     :avatar ""}]
-    (db/run-txns! (user/create-user-txn user-1-data))
+  (let [user {:id (db/uuid)
+              :email "fOo@bar.com"}
+        password "asdf"]
+
+    (db/run-txns! (user/create-user-txn user))
+    (db/run-txns! (user/set-user-password-txn (user :id) password))
+
     (testing "returns user-id when email+password matches"
-      (is (= (:id user-1-data)
-             (user/authenticate-user (user-1-data :email) (user-1-data :password)))))
+      (is (= (:id user)
+             (user/authenticate-user (user :email) password))))
 
     (testing "email is case-insensitive"
-      (is (= (:id user-1-data)
-             (user/authenticate-user "Foo@bar.com" (user-1-data :password))
-             (user/authenticate-user "foo@bar.com" (user-1-data :password))
-             (user/authenticate-user "FOO@BAR.COM" (user-1-data :password)))))
+      (is (= (:id user)
+             (user/authenticate-user "Foo@bar.com" password)
+             (user/authenticate-user "foo@bar.com" password)
+             (user/authenticate-user "FOO@BAR.COM" password))))
 
     (testing "returns nil when email+password wrong"
-      (is (nil? (user/authenticate-user (user-1-data :email) "zzz"))))))
-
-(deftest create-group
-  (let [data {:id (db/uuid)
-              :name "Lean Pixel"}
-        [group] (db/run-txns! (group/create-group-txn data))
-        user-id (db/uuid)
-        user-2-id (db/uuid)]
-    (testing "can create a group"
-      (is (= group (assoc data :admins #{} :intro nil :avatar nil
-                     :public? false :bots #{}))))
-    (testing "can set group intro"
-      (db/run-txns! (group/group-set-txn (group :id) :intro "the intro"))
-      (is (= (group/group-by-id (group :id))
-             (assoc data :admins #{} :intro "the intro" :avatar nil
-               :public? false :bots #{}))))
-    (testing "can add a user to the group"
-      (let [[user] (db/run-txns! (user/create-user-txn
-                                   {:id user-id
-                                    :email "foo@bar.com"
-                                    :password "foobar"
-                                    :avatar "http://www.foobar.com/1.jpg"}))]
-        (is (= #{} (group/user-groups (user :id))))
-        (is (= #{} (group/group-users (group :id))))
-        (db/run-txns! (group/user-add-to-group-txn (user :id) (group :id)))
-        (is (= #{(assoc data :admins #{} :intro "the intro" :avatar nil
-                   :public? false :bots #{})}
-               (group/user-groups (user :id))))
-        (is (= #{(dissoc user :group-ids)}
-               (set (map (fn [u] (dissoc user :group-ids))
-                    (group/group-users (group :id))))))))
-    (testing "groups have no admins by default"
-      (is (empty? (:admins (group/group-by-id (group :id))))))
-    (testing "Can add admin"
-      (db/run-txns! (group/user-make-group-admin-txn user-id (group :id)))
-      (is (= #{user-id} (:admins (group/group-by-id (group :id)))))
-      (testing "and another admin"
-        (db/run-txns!
-          (user/create-user-txn
-            {:id user-2-id
-             :email "bar@baz.com"
-             :password "foobar"
-             :avatar "http://www.foobar.com/1.jpg"}))
-        (db/run-txns! (group/user-make-group-admin-txn user-2-id (group :id)))
-        (is (= #{user-id user-2-id} (:admins (group/group-by-id (group :id)))))))
-    (testing "multiple groups, admin statuses"
-      (let [[group-2 group-3] (db/run-txns!
-                                (concat
-                                  (group/create-group-txn {:id (db/uuid)
-                                                           :name "another group"})
-                                  (group/create-group-txn {:id (db/uuid)
-                                                           :name "third group"})))]
-
-        (db/run-txns!
-          (concat
-            (group/user-add-to-group-txn user-id (group-2 :id))
-            (group/user-make-group-admin-txn user-2-id (group-2 :id))
-
-            (group/user-make-group-admin-txn user-id (group-3 :id))
-            (group/user-add-to-group-txn user-2-id (group-3 :id))))
-
-        (is (group/user-in-group? user-id (group-2 :id)))
-        (is (group/user-in-group? user-id (group-3 :id)))
-
-        (is (group/user-in-group? user-2-id (group-2 :id)))
-        (is (group/user-in-group? user-2-id (group-3 :id)))
-
-        (is (= #{(group :id) (group-2 :id) (group-3 :id)}
-               (into #{} (map :id) (group/user-groups user-id))
-               (into #{} (map :id) (group/user-groups user-2-id)))
-            "Both users are in all the groups")
-
-        (is (= #{user-2-id} (:admins (group/group-by-id (group-2 :id)))))
-        (is (= #{user-id} (:admins (group/group-by-id (group-3 :id)))))
-
-        (is (group/user-is-group-admin? user-id (group :id)))
-        (is (not (group/user-is-group-admin? user-id (group-2 :id))))
-        (is (group/user-is-group-admin? user-id (group-3 :id)))
-
-        (is (group/user-is-group-admin? user-2-id (group :id)))
-        (is (group/user-is-group-admin? user-2-id (group-2 :id)))
-        (is (not (group/user-is-group-admin? user-2-id (group-3 :id))))
-
-        ))))
+      (is (nil? (user/authenticate-user (user :email) "zzz"))))))
 
 (deftest fetch-messages-test
   (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "group" :name "group"}))
@@ -265,10 +122,8 @@
                         :thread-id (message-1-data :thread-id)
                         :created-at (java.util.Date.)
                         :content "Hello?"}
-        [message-1 message-2]
-        (db/run-txns!
-          (concat (message/create-message-txn message-1-data)
-                  (message/create-message-txn message-2-data)))
+        [message-1] (db/run-txns! (message/create-message-txn message-1-data))
+        [message-2] (db/run-txns! (message/create-message-txn message-2-data))
         messages (fetch-messages)]
     (testing "fetch-messages returns all messages"
       (is (= (set messages) #{message-1 message-2})))
@@ -598,16 +453,19 @@
                                             :name "bot1"
                                             :avatar ""
                                             :webhook-url ""
+                                            :event-webhook-url ""
                                             :group-id (g1 :id)})
                        (bot/create-bot-txn {:id (db/uuid)
                                             :name "bot2"
                                             :avatar ""
                                             :webhook-url ""
+                                            :event-webhook-url ""
                                             :group-id (g1 :id)})
                        (bot/create-bot-txn {:id (db/uuid)
                                             :name "bot3"
                                             :avatar ""
                                             :webhook-url ""
+                                            :event-webhook-url ""
                                             :group-id (g2 :id)})))
         bot->display (fn [b] (-> b
                                  (select-keys [:id :name :avatar :user-id])
@@ -639,6 +497,7 @@
                                    :password "foobar"
                                    :avatar ""})
             (group/create-group-txn {:id (db/uuid)
+                                     :slug "group-1"
                                      :name "group 1"})))
         thread-id (db/uuid)]
     (db/run-txns!
@@ -658,7 +517,7 @@
         (is (< old-open new-open))))))
 
 (deftest bot-thread-watching
-  (let [[{user-id :id} {group-1-id :id} {group-2-id :id} ]
+  (let [[{user-id :id} {group-1-id :id} {group-2-id :id}]
         (db/run-txns!
           (concat
             (user/create-user-txn {:id (db/uuid)
@@ -666,8 +525,10 @@
                                    :password "foobar"
                                    :avatar ""})
             (group/create-group-txn {:id (db/uuid)
+                                     :slug "group 1"
                                      :name "group 1"})
             (group/create-group-txn {:id (db/uuid)
+                                     :slug "group 2"
                                      :name "group 2"})))
         [{bot-id :id :as bot}] (db/run-txns!
                                  (bot/create-bot-txn {:id (db/uuid)

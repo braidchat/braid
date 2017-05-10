@@ -1,29 +1,19 @@
 (ns braid.test.server.notify-rules-test
   (:require
     [clojure.test :refer :all]
-    [mount.core :as mount]
     [schema.core :as s]
     [braid.common.schema :refer [rules-valid? check-rules!]]
-    [braid.server.conf :as conf]
     [braid.server.db :as db]
     [braid.server.db.group :as group]
     [braid.server.db.message :as message]
     [braid.server.db.tag :as tag]
     [braid.server.db.user :as user]
-    [braid.server.notify-rules :as rules]))
+    [braid.server.notify-rules :as rules]
+    [braid.test.fixtures.db :refer [drop-db]]))
 
 (s/set-fn-validation! true)
 
-
-(use-fixtures :each
-              (fn [t]
-                (-> (mount/only #{#'conf/config #'db/conn})
-                    (mount/swap {#'conf/config
-                                 {:db-url "datomic:mem://chat-test"}})
-                    (mount/start))
-                (t)
-                (datomic.api/delete-database (conf/config :db-url))
-                (mount/stop)))
+(use-fixtures :each drop-db)
 
 (deftest rules-schema
   (testing "schema can validate rules format"
@@ -110,10 +100,8 @@
     (let [m1 (-> (msg)
                  (update :mentioned-tag-ids conj (:id g1t1)))
           m2 (-> (msg) (assoc :thread-id (m1 :thread-id)))]
-      (db/run-txns!
-        (concat
-          (message/create-message-txn m1)
-          (message/create-message-txn m2)))
+      (db/run-txns! (message/create-message-txn m1))
+      (db/run-txns! (message/create-message-txn m2))
       (is (rules/notify? (db/uuid) [[:any (:id g1)]] m2))
       (is (not (rules/notify? (db/uuid) [[:any (:id g2)]] m2))))))
 

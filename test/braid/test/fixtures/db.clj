@@ -1,4 +1,4 @@
-(ns braid.test.server.fixtures
+(ns braid.test.fixtures.db
   (:require
     [mount.core :as mount]
     [braid.server.db :as db]

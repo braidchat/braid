@@ -1,25 +1,15 @@
 (ns braid.test.server.new-message
   (:require
     [clojure.test :refer :all]
-    [mount.core :as mount]
-    [braid.server.conf :as conf]
     [braid.server.db :as db]
     [braid.server.db.group :as group]
     [braid.server.db.message :as message]
     [braid.server.db.tag :as tag]
     [braid.server.db.thread :as thread]
-    [braid.server.db.user :as user]))
+    [braid.server.db.user :as user]
+    [braid.test.fixtures.db :refer [drop-db]]))
 
-(use-fixtures :each
-              (fn [t]
-                (-> (mount/only #{#'conf/config #'db/conn})
-                    (mount/swap {#'conf/config
-                                 {:db-url "datomic:mem://chat-test"}})
-                    (mount/start))
-                (t)
-                (datomic.api/delete-database (conf/config :db-url))
-                (mount/stop)))
-
+(use-fixtures :each drop-db)
 
 (deftest create-message
   (let [[user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
@@ -121,21 +111,20 @@
                                                              :slug "group"
                                                              :name "group"})))
           thread-id (db/uuid)
-          [message-1 message-2]
-          (db/run-txns!
-            (concat
-              (message/create-message-txn {:id (db/uuid)
-                                           :group-id (group :id)
-                                           :user-id (user-1 :id)
-                                           :thread-id thread-id
-                                           :created-at (java.util.Date.)
-                                           :content "Hello?"})
-              (message/create-message-txn {:id (db/uuid)
-                                           :group-id (group :id)
-                                           :user-id (user-2 :id)
-                                           :thread-id thread-id
-                                           :created-at (java.util.Date.)
-                                           :content "Hello?"})))]
+          message-1 (db/run-txns!
+                      (message/create-message-txn {:id (db/uuid)
+                                                   :group-id (group :id)
+                                                   :user-id (user-1 :id)
+                                                   :thread-id thread-id
+                                                   :created-at (java.util.Date.)
+                                                   :content "Hello?"}))
+          message-2 (db/run-txns!
+                      (message/create-message-txn {:id (db/uuid)
+                                                   :group-id (group :id)
+                                                   :user-id (user-2 :id)
+                                                   :thread-id thread-id
+                                                   :created-at (java.util.Date.)
+                                                   :content "Hello?"}))]
 
       (testing "when user-2 hides the thread"
         (db/run-txns! (thread/user-hide-thread-txn (user-2 :id) thread-id))

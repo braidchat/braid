@@ -129,8 +129,8 @@
   (when-let [bot-name (second (re-find #"^/(\w+)\b" (:content new-message)))]
     (when-let [bot (bot/bot-by-name-in-group bot-name (new-message :group-id))]
       (timbre/debugf "notifying bot %s" bot)
-      (bots/send-notification bot new-message)))
+      (bots/send-message-notification bot new-message)))
   ; Notify bots subscribed to the thread
   (doseq [bot (bot/bots-watching-thread (new-message :thread-id))]
     (timbre/debugf "notifying bot %s" bot)
-    (bots/send-notification bot new-message)))
+    (bots/send-message-notification bot new-message)))

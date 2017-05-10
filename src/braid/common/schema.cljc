@@ -70,7 +70,10 @@
    :name s/Str
    :avatar s/Str
    :webhook-url s/Str
+   :notify-all-messages? s/Bool
+   :event-webhook-url s/Str
    :token s/Str})
+
 (def check-bot! (s/validator Bot))
 
 (def BotDisplay

@@ -13,12 +13,12 @@
   (some? (d/pull (db/db) '[:group/id] [:group/name group-name])))
 
 (defn group-with-slug-exists?
-  [conn slug]
+  [slug]
   (boolean (first (d/q '[:find [?g]
                 :in $ ?slug
                 :where
                 [?g :group/slug ?slug]]
-              (d/db conn)
+              (db/db)
               slug))))
 
 (defn group-by-id
@@ -27,8 +27,8 @@
       db->group))
 
 (defn group-by-slug
-  [conn group-slug]
-  (when-let [g (d/pull (d/db conn) group-pull-pattern [:group/slug group-slug])]
+  [group-slug]
+  (when-let [g (d/pull (db/db) group-pull-pattern [:group/slug group-slug])]
     (db->group g)))
 
 (defn group-users

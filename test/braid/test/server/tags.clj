@@ -1,23 +1,13 @@
 (ns braid.test.server.tags
   (:require
     [clojure.test :refer :all]
-    [mount.core :as mount]
-    [braid.server.conf :as conf]
     [braid.server.db :as db]
     [braid.server.db.group :as group]
     [braid.server.db.tag :as tag]
-    [braid.server.db.user :as user]))
+    [braid.server.db.user :as user]
+    [braid.test.fixtures.db :refer [drop-db]]))
 
-(use-fixtures :each
-              (fn [t]
-                (-> (mount/only #{#'conf/config #'db/conn})
-                    (mount/swap {#'conf/config
-                                 {:db-url "datomic:mem://chat-test"}})
-                    (mount/start))
-                (t)
-                (datomic.api/delete-database (conf/config :db-url))
-                (mount/stop)))
-
+(use-fixtures :each drop-db)
 
 (deftest tags
   (testing "can create tag"

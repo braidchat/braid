@@ -77,7 +77,7 @@
           (do
             (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
             (db/run-txns! (message/create-message-txn msg))
-            (sync/broadcast-thread (msg :thread-id) [])
+            (sync-helpers/broadcast-thread (msg :thread-id) [])
             {:status 201
              :headers {"Content-Type" "text/plain"}
              :body "ok"})
