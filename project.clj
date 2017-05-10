@@ -35,7 +35,7 @@
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.2"]
                  [reagent "0.6.0-rc"]
-                 [re-frame "0.8.0"]
+                 [re-frame "0.9.2"]
                  [cljsjs/husl "6.0.1-0"]
                  [cljsjs/highlight "9.6.0-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
