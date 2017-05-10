@@ -10,59 +10,63 @@
     [braid.server.api.link-extract :as link-extract]
     [braid.server.api.github :as github]
     [braid.server.markdown :refer [markdown->hiccup]]
-    [braid.server.routes.helpers :refer [current-user error-response edn-response]]))
+    [braid.server.routes.helpers :refer [current-user current-user-id logged-in?
+                                         error-response edn-response]]))
 
 (defroutes api-private-routes
 
   ; create a group
   (PUT "/groups" [name slug type :as req]
-    (if-let [user (current-user req)]
-      (cond
-        ; group name validations
+    (cond
+      ; logged in?
+      (logged-in? req)
+      (error-response 401 "Must be logged in.")
 
-        (string/blank? name)
-        (error-response 400 "Must provide a Group Name")
+      ; group name validations
 
-        ; group url (slug) validations
+      (string/blank? name)
+      (error-response 400 "Must provide a Group Name")
 
-        (string/blank? slug)
-        (error-response 400 "Must provide an Group URL")
+      ; group url (slug) validations
 
-        (not (re-matches #"[a-z0-9-]*" slug))
-        (error-response 400 "Group URL can only contain lowercase letters, numbers or dashes.")
+      (string/blank? slug)
+      (error-response 400 "Must provide an Group URL")
 
-        (re-matches #"-.*" slug)
-        (error-response 400 "Group URL cannot start with a dash.")
+      (not (re-matches #"[a-z0-9-]*" slug))
+      (error-response 400 "Group URL can only contain lowercase letters, numbers or dashes.")
 
-        (re-matches #".*-" slug)
-        (error-response 400 "Group URL cannot end with a dash.")
+      (re-matches #"-.*" slug)
+      (error-response 400 "Group URL cannot start with a dash.")
 
-        (group/group-with-slug-exists? slug)
-        (error-response 400 "A Group with this URL already exists.")
+      (re-matches #".*-" slug)
+      (error-response 400 "Group URL cannot end with a dash.")
 
-        ; group type validations
+      (group/group-with-slug-exists? slug)
+      (error-response 400 "A Group with this URL already exists.")
 
-        (string/blank? type)
-        (error-response 400 "Must provide a Group Type")
+      ; group type validations
 
-        (not (contains? #{"public" "private"} type))
-        (error-response 400 "Group type must be either public or private")
+      (string/blank? type)
+      (error-response 400 "Must provide a Group Type")
 
-        ; passed all validations
-        :else
-        (let [group-id (db/uuid)
-              group (db/run-txns!
-                      (group/create-group-txn {:id group-id
-                                               :slug slug
-                                               :name name}))]
-          (db/run-txns! (group/group-set-txn (group :id) :public? (case type
-                                                                    "public" true
-                                                                    "private" false)))
-          (db/run-txns! (group/user-add-to-group-txn (user :id) group-id))
-          (db/run-txns! (group/user-subscribe-to-group-tags-txn (user :id) group-id))
-          (db/run-txns! (group/user-make-group-admin-txn (user :id) group-id))
-          (edn-response {:group-id group-id})))
-      (error-response 401 "")))
+      (not (contains? #{"public" "private"} type))
+      (error-response 400 "Group type must be either public or private")
+
+      ; passed all validations
+      :else
+      (let [user (current-user-id req)
+            group-id (db/uuid)
+            group (db/run-txns!
+                    (group/create-group-txn {:id group-id
+                                             :slug slug
+                                             :name name}))]
+        (db/run-txns! (group/group-set-txn (group :id) :public? (case type
+                                                                  "public" true
+                                                                  "private" false)))
+        (db/run-txns! (group/user-add-to-group-txn (user :id) group-id))
+        (db/run-txns! (group/user-subscribe-to-group-tags-txn (user :id) group-id))
+        (db/run-txns! (group/user-make-group-admin-txn (user :id) group-id))
+        (edn-response {:group-id group-id}))))
 
   (GET "/changelog" []
     (edn-response {:braid/ok

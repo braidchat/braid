@@ -2,10 +2,19 @@
   (:require
     [braid.server.db.user :as user]))
 
+(defn logged-in? [req]
+  (when-let [user-id (get-in req [:session :user-id])]
+    (user/user-id-exists? user-id)))
+
 (defn current-user [req]
   (when-let [user-id (get-in req [:session :user-id])]
     (when (user/user-id-exists? user-id)
       (user/user-by-id user-id))))
+
+(defn current-user-id [req]
+  (when-let [user-id (get-in req [:session :user-id])]
+    (when (user/user-id-exists? user-id)
+      user-id)))
 
 (defn error-response [status msg]
   {:status status
