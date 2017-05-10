@@ -21,8 +21,8 @@
 
 (defn user-from-session [req]
   (when-let [user-id (get-in req [:session :user-id])]
-    (when-let [user (user/user-id-exists? user-id)]
-      user)))
+    (when (user/user-id-exists? user-id)
+      (user/user-by-id user-id))))
 
 (defn edn-response [clj-body]
   {:headers {"Content-Type" "application/edn; charset=utf-8"}
