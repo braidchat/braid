@@ -52,7 +52,7 @@
 
 (defn user-by-id
   [id]
-  (some-> (d/pull (d/db) private-user-pull-pattern [:user/id id])
+  (some-> (d/pull (db/db) private-user-pull-pattern [:user/id id])
           db->private-user))
 
 (defn user-id-exists?
