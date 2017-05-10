@@ -34,8 +34,8 @@
 
         _ (println "Set Passwords")
         _ (db/run-txns! (concat
-                          (user/set-user-password-txn user-1 "foofoofoo")
-                          (user/set-user-password-txn user-2 "barbarbar")))
+                          (user/set-user-password-txn (user-1 :id) "foofoofoo")
+                          (user/set-user-password-txn (user-2 :id) "barbarbar")))
 
         _ (println "Add Users to Groups and Make Users Admins")
         _ (db/run-txns!
