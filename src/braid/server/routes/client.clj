@@ -102,11 +102,17 @@
   ; (since it uses a cache-busted url anyway)
 
   (GET "/js/desktop/out/braid.js" []
-    (when-let [response (resource-response "public/js/desktop/out/braid.js")]
-     (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")))
+    (if-let [response (resource-response "public/js/desktop/out/braid.js")]
+     (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")
+     {:status 200
+      :headers {"Content-Type" "application/javascript"}
+      :body "alert('The desktop js files are missing. please compile them with cljsbuild or figwheel.');"}))
 
   (GET "/js/mobile/out/braid.js" []
-    (when-let [response (resource-response "public/js/mobile/out/braid.js")]
-      (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")))
+    (if-let [response (resource-response "public/js/mobile/out/braid.js")]
+      (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")
+      {:status 200
+       :headers {"Content-Type" "application/javascript"}
+       :body "alert('The mobile js files are missing. Please compile them with cljsbuild or figwheel.');"}))
 
   (resources "/"))
