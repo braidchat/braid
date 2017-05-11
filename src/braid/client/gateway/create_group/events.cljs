@@ -2,7 +2,8 @@
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
-    [braid.common.util :refer [slugify]]))
+    [braid.common.util :refer [slugify]]
+    [braid.client.gateway.helpers :as helpers]))
 
 (reg-event-fx
   :gateway.action.create-group/initialize
@@ -12,7 +13,8 @@
                :create-group
                {:disabled? true
                 :sending? false
-                :error nil}))}))
+                :error nil}))
+     :dispatch [:gateway.create-group/validate-all]}))
 
 (reg-event-fx
   :gateway.action.create-group/ready
@@ -29,8 +31,8 @@
                  (assoc-in [:fields :gateway.action.create-group/group-url :value] (slugify group-name))
                  (assoc-in [:fields :gateway.action.create-group/group-url :untouched?] false))
              state)
-       :dispatch-n [[:gateway/clear-errors :gateway.action.create-group/group-url]
-                    [:gateway/validate-field :gateway.action.create-group/group-url]]})))
+       :dispatch-n [[:gateway.create-group/clear-errors :gateway.action.create-group/group-url]
+                    [:gateway.create-group/validate-field :gateway.action.create-group/group-url]]})))
 
 (reg-event-fx
   :gateway.action.create-group/remote-create-group
@@ -62,3 +64,5 @@
     {:db (-> state
              (assoc-in [:create-group :sending?] false)
              (assoc-in [:create-group :error] error))}))
+
+(helpers/reg-form-event-fxs :gateway.create-group)

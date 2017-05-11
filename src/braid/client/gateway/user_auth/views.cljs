@@ -16,9 +16,9 @@
 
 (defn returning-email-field-view []
   (let [field-id :gateway.user-auth/email
-        value @(subscribe [:gateway/field-value field-id])
-        status @(subscribe [:gateway/field-status field-id])
-        errors @(subscribe [:gateway/field-errors field-id])]
+        value @(subscribe [:gateway.user-auth/field-value field-id])
+        status @(subscribe [:gateway.user-auth/field-status field-id])
+        errors @(subscribe [:gateway.user-auth/field-errors field-id])]
     [:div.option.email
      {:class (name status)}
      [:h2 "Email"]
@@ -26,17 +26,17 @@
       [:div.field
        [:input {:type "email"
                 :placeholder "you@awesome.com"
-                :autocomplete true
-                :autocorrect false
-                :autocapitalize false
+                :auto-complete true
+                :auto-correct false
+                :auto-capitalize false
                 :spellcheck false
                 :auto-focus true
                 :value value
                 :on-blur (fn [_]
-                           (dispatch [:gateway/blur field-id]))
+                           (dispatch [:gateway.user-auth/blur field-id]))
                 :on-change (fn [e]
                              (let [value (.. e -target -value)]
-                               (dispatch [:gateway/update-value field-id value])))
+                               (dispatch [:gateway.user-auth/update-value field-id value])))
                 }]]
       (when (= :invalid status)
         [:div.error-message (first errors)])
@@ -46,9 +46,9 @@
 
 (defn returning-password-field-view []
   (let [field-id :gateway.user-auth/password
-        value @(subscribe [:gateway/field-value field-id])
-        status @(subscribe [:gateway/field-status field-id])
-        errors @(subscribe [:gateway/field-errors field-id])]
+        value @(subscribe [:gateway.user-auth/field-value field-id])
+        status @(subscribe [:gateway.user-auth/field-status field-id])
+        errors @(subscribe [:gateway.user-auth/field-errors field-id])]
     [:div.option.password
      {:class (name status)}
      [:h2 "Password"]
@@ -58,10 +58,10 @@
                 :placeholder "•••••••••••"
                 :value value
                 :on-blur (fn [_]
-                           (dispatch [:gateway/blur field-id]))
+                           (dispatch [:gateway.user-auth/blur field-id]))
                 :on-change (fn [e]
                              (let [value (.. e -target -value)]
-                               (dispatch [:gateway/update-value field-id value])))}]]]
+                               (dispatch [:gateway.user-auth/update-value field-id value])))}]]]
      (when (= :invalid status)
        [:div.error-message (first errors)])
      [:p "Don't remember?"
@@ -73,7 +73,7 @@
 
 (defn login-button-view []
   (let [fields-valid?
-        @(subscribe [:gateway/fields-valid?
+        @(subscribe [:gateway.user-auth/fields-valid?
                      [:gateway.user-auth/email
                       :gateway.user-auth/password]])]
     [:button.submit
@@ -109,7 +109,7 @@
 
 (defn password-reset-button-view []
   (let [fields-valid?
-        @(subscribe [:gateway/fields-valid?
+        @(subscribe [:gateway.user-auth/fields-valid?
                      [:gateway.user-auth/email]])]
     [:button.submit
      {:class (when-not fields-valid? "disabled")}
@@ -117,10 +117,11 @@
 
 (defn reset-password-view []
   [:form.reset-password
-   {:on-submit
+   {:no-validate true
+    :on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:gateway/submit-form
+      (dispatch [:gateway.user-auth/submit-form
                  {:validate-fields [:gateway.user-auth/email]
                   :dispatch-when-valid [:gateway.user-auth/remote-request-password-reset]}]))}
    [:h1 "Reset your password"]
@@ -142,10 +143,11 @@
 
 (defn returning-user-view []
   [:form.returning-user
-   {:on-submit
+   {:no-validate true
+    :on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:gateway/submit-form
+      (dispatch [:gateway.user-auth/submit-form
                  {:validate-fields [:gateway.user-auth/email
                                     :gateway.user-auth/password]
                   :dispatch-when-valid [:gateway.user-auth/remote-log-in]}]))}
@@ -163,9 +165,9 @@
 
 (defn new-password-field-view []
   (let [field-id :gateway.user-auth/new-password
-        value @(subscribe [:gateway/field-value field-id])
-        status @(subscribe [:gateway/field-status field-id])
-        errors @(subscribe [:gateway/field-errors field-id])]
+        value @(subscribe [:gateway.user-auth/field-value field-id])
+        status @(subscribe [:gateway.user-auth/field-status field-id])
+        errors @(subscribe [:gateway.user-auth/field-errors field-id])]
     [:div.option.password
      {:class (name status)}
      [:h2 "Password"]
@@ -175,19 +177,19 @@
                 :placeholder "•••••••••••"
                 :value value
                 :on-blur (fn [_]
-                           (dispatch [:gateway/blur field-id]))
+                           (dispatch [:gateway.user-auth/blur field-id]))
                 :on-change (fn [e]
                              (let [value (.. e -target -value)]
-                               (dispatch [:gateway/update-value field-id value])))}]]]
+                               (dispatch [:gateway.user-auth/update-value field-id value])))}]]]
      (when (= :invalid status)
        [:div.error-message (first errors)])
      [:p "At least 8 characters. More is better!"]]))
 
 (defn new-email-field-view []
   (let [field-id :gateway.user-auth/email
-        value @(subscribe [:gateway/field-value field-id])
-        status @(subscribe [:gateway/field-status field-id])
-        errors @(subscribe [:gateway/field-errors field-id])]
+        value @(subscribe [:gateway.user-auth/field-value field-id])
+        status @(subscribe [:gateway.user-auth/field-status field-id])
+        errors @(subscribe [:gateway.user-auth/field-errors field-id])]
     [:div.option.email
      {:class (name status)}
      [:h2 "Email"]
@@ -195,17 +197,17 @@
       [:div.field
        [:input {:type "email"
                 :placeholder "you@awesome.com"
-                :autocomplete true
-                :autocorrect false
-                :autocapitalize false
+                :auto-complete true
+                :auto-correct false
+                :auto-capitalize false
                 :spellcheck false
                 :auto-focus true
                 :value value
                 :on-blur (fn [_]
-                           (dispatch [:gateway/blur field-id]))
+                           (dispatch [:gateway.user-auth/blur field-id]))
                 :on-change (fn [e]
                              (let [value (.. e -target -value)]
-                               (dispatch [:gateway/update-value field-id value])))}]]
+                               (dispatch [:gateway.user-auth/update-value field-id value])))}]]
       (when (= :invalid status)
         [:div.error-message (first errors)])
       ; TODO
@@ -214,7 +216,7 @@
 
 (defn register-button-view []
   (let [fields-valid?
-        @(subscribe [:gateway/fields-valid?
+        @(subscribe [:gateway.user-auth/fields-valid?
                      [:gateway.user-auth/email
                       :gateway.user-auth/new-password]])]
     [:button.submit
@@ -223,10 +225,11 @@
 
 (defn new-user-view []
   [:form.new-user
-   {:on-submit
+   {:no-validate true
+    :on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:gateway/submit-form
+      (dispatch [:gateway.user-auth/submit-form
                  {:validate-fields [:gateway.user-auth/email
                                     :gateway.user-auth/new-password]
                   :dispatch-when-valid [:gateway.user-auth/remote-register]}]))}

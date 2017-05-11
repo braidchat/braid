@@ -1,7 +1,8 @@
 (ns braid.client.gateway.user-auth.events
   (:require
     [clojure.string :as string]
-    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
+    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
+    [braid.client.gateway.helpers :as helpers]))
 
 (reg-event-fx
   :gateway.user-auth/initialize
@@ -12,8 +13,10 @@
                            :error nil
                            :checking? true
                            :mode mode ; :register :log-in , :reset-password
+                           :should-validate? false
                            :oauth-provider nil}))
-     :dispatch [:gateway.user-auth/remote-check-auth]}))
+     :dispatch-n [[:gateway.user-auth/remote-check-auth]
+                  [:gateway.user-auth/validate-all]]}))
 
 (reg-event-fx
   :gateway.user-auth/set-user
@@ -133,3 +136,5 @@
                (fn [error]
                  (when-let [k (get-in error [:response :error])]
                    (dispatch [:gateway.user-auth/set-error k]))) }}))
+
+(helpers/reg-form-event-fxs :gateway.user-auth)

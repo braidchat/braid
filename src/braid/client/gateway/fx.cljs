@@ -21,13 +21,5 @@
     (js/clearTimeout (@timeouts id))
     (swap! timeouts dissoc id)))
 
-(reg-fx :validate
-  (fn [[field field-value]]
-    (doseq [validator-fn (validations field)]
-      (validator-fn
-        field-value
-        (fn [error]
-          (dispatch [:gateway/update-field-status field error]))))))
-
 (reg-fx :edn-xhr xhr/edn-xhr)
 

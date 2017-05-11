@@ -7,9 +7,9 @@
 
 (defn group-name-field-view []
   (let [field-id :gateway.action.create-group/group-name
-        value @(subscribe [:gateway/field-value field-id])
-        status @(subscribe [:gateway/field-status field-id])
-        errors @(subscribe [:gateway/field-errors field-id])]
+        value @(subscribe [:gateway.create-group/field-value field-id])
+        status @(subscribe [:gateway.create-group/field-status field-id])
+        errors @(subscribe [:gateway.create-group/field-errors field-id])]
     [:div.option.group-name
      {:class (name status)}
      [:label
@@ -19,10 +19,10 @@
                 :placeholder "Team Awesome"
                 :value value
                 :on-blur (fn [_]
-                           (dispatch [:gateway/blur field-id]))
+                           (dispatch [:gateway.create-group/blur field-id]))
                 :on-change (fn [e]
                              (let [value (.. e -target -value)]
-                               (dispatch [:gateway/update-value field-id value])))}]]
+                               (dispatch [:gateway.create-group/update-value field-id value])))}]]
       (when (= :invalid status)
         [:div.error-message (first errors)])
       [:div.explanation
@@ -31,9 +31,9 @@
 
 (defn group-url-field-view []
   (let [field-id :gateway.action.create-group/group-url
-        value @(subscribe [:gateway/field-value field-id])
-        status @(subscribe [:gateway/field-status field-id])
-        errors @(subscribe [:gateway/field-errors field-id])]
+        value @(subscribe [:gateway.create-group/field-value field-id])
+        status @(subscribe [:gateway.create-group/field-status field-id])
+        errors @(subscribe [:gateway.create-group/field-errors field-id])]
     [:div.option.group-url
      {:class (name status)}
      [:label
@@ -49,7 +49,7 @@
                 :on-focus (fn [_]
                             (dispatch [:gateway.action.create-group/guess-group-url]))
                 :on-blur (fn [_]
-                           (dispatch [:gateway/blur field-id]))
+                           (dispatch [:gateway.create-group/blur field-id]))
                 :on-key-down (fn [e]
                                (when (and
                                        (not (contains? #{KeyCodes.LEFT KeyCodes.RIGHT
@@ -60,7 +60,7 @@
                                  (.preventDefault e)))
                 :on-change (fn [e]
                              (let [value (string/lower-case (.. e -target -value))]
-                               (dispatch [:gateway/update-value field-id value])))}]
+                               (dispatch [:gateway.create-group/update-value field-id value])))}]
        [:span ".braid.chat"]]
       (when (= :invalid status)
         [:div.error-message (first errors)])
@@ -70,9 +70,9 @@
 
 (defn group-type-field-view []
   (let [field-id :gateway.action.create-group/group-type
-        value @(subscribe [:gateway/field-value field-id])
-        status @(subscribe [:gateway/field-status field-id])
-        errors @(subscribe [:gateway/field-errors field-id])]
+        value @(subscribe [:gateway.create-group/field-value field-id])
+        status @(subscribe [:gateway.create-group/field-status field-id])
+        errors @(subscribe [:gateway.create-group/field-errors field-id])]
     [:div.option.group-type
      {:class (name status)}
      [:h2 "Group Type"]
@@ -84,10 +84,10 @@
                :value "public"
                :checked (when (= "public" value))
                :on-blur (fn [_]
-                          (dispatch [:gateway/blur field-id]))
+                          (dispatch [:gateway.create-group/blur field-id]))
                :on-click (fn [e]
                            (let [value (.. e -target -value)]
-                             (dispatch [:gateway/update-value field-id value])))}]
+                             (dispatch [:gateway.create-group/update-value field-id value])))}]
       [:span "Public Group"]
       [:div.explanation
        [:p "Anyone can find your group through the Braid Group Directory."]
@@ -98,17 +98,17 @@
                :value "private"
                :checked (when (= "private" value))
                :on-blur (fn [_]
-                          (dispatch [:gateway/blur :type]))
+                          (dispatch [:gateway.create-group/blur :type]))
                :on-click (fn [e]
                            (let [value (.. e -target -value)]
-                             (dispatch [:gateway/update-value field-id value])))}]
+                             (dispatch [:gateway.create-group/update-value field-id value])))}]
       [:span "Private Group"]
       [:div.explanation
        [:p "Invite-only and hidden from the Braid Group Directory."]
        [:p "Free to evaluate, then pay-what-you-want."]]]]))
 
 (defn button-view []
-  (let [fields-valid? @(subscribe [:gateway/fields-valid?
+  (let [fields-valid? @(subscribe [:gateway.create-group/fields-valid?
                                   [:gateway.action.create-group/group-name
                                    :gateway.action.create-group/group-url
                                    :gateway.action.create-group/group-type]])
@@ -130,7 +130,7 @@
      [:form
       {:on-submit (fn [e]
                     (.preventDefault e)
-                    (dispatch [:gateway/submit-form
+                    (dispatch [:gateway.create-group/submit-form
                                {:validate-fields
                                 [:gateway.action.create-group/group-name
                                  :gateway.action.create-group/group-url

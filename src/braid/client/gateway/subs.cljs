@@ -5,37 +5,6 @@
     [braid.client.gateway.create-group.subs]))
 
 (reg-sub
-  :gateway/field-value
-  (fn [state [_ field]]
-    (get-in state [:fields field :value])))
-
-(reg-sub
-  :gateway/field-errors
-  (fn [state [_ field]]
-    (get-in state [:fields field :errors])))
-
-(reg-sub
-  :gateway/field-status
-  (fn [state [_ field]]
-    (cond
-      (get-in state [:fields field :typing?]) :typing
-      (get-in state [:fields field :untouched?]) :untouched
-      (not (empty? (get-in state [:fields field :errors]))) :invalid
-      (< 0 (get-in state [:fields field :validations-left])) :loading
-      :else :valid)))
-
-(reg-sub
-  :gateway/fields-valid?
-  (fn [state [_ fields]]
-    (->> fields
-         (map (fn [field]
-                (and
-                  (empty? (get-in state [:fields field :errors]))
-                  (= 0 (get-in state [:fields field :validations-left]))
-                  (not (get-in state [:fields field :typing?])))))
-         (every? true?))))
-
-(reg-sub
   :gateway/action
   (fn [state _]
     (get-in state [:action])))

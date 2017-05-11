@@ -1,6 +1,7 @@
 (ns braid.client.gateway.user-auth.subs
   (:require
-    [re-frame.core :refer [reg-sub]]))
+    [re-frame.core :refer [reg-sub]]
+    [braid.client.gateway.helpers :as helpers]))
 
 (reg-sub
   :gateway.user-auth/user
@@ -27,3 +28,5 @@
   :gateway.user-auth/error
   (fn [state _]
     (get-in state [:user-auth :error])))
+
+(helpers/reg-form-subs :gateway.user-auth)
