@@ -125,19 +125,21 @@
        "An error occured. Please try again."])))
 
 (defn create-group-view []
-  [:div.section
-   [:form
-    {:on-submit (fn [e]
-                  (.preventDefault e)
-                  (dispatch [:gateway/submit-form
-                             {:validate-fields
-                              [:gateway.action.create-group/group-name
-                               :gateway.action.create-group/group-url
-                               :gateway.action.create-group/group-type]
-                              :dispatch-when-valid [:gateway.action.create-group/remote-create-group]}]))}
-    [:h1 "Start a New Braid Group"]
-    [group-name-field-view]
-    [group-url-field-view]
-    [group-type-field-view]
-    [button-view]
-    [error-view]]])
+  (let [disabled? (not @(subscribe [:gateway.user-auth/user]))]
+    [:div.section.create-group {:class (when disabled? "disabled")}
+     [:form
+      {:on-submit (fn [e]
+                    (.preventDefault e)
+                    (dispatch [:gateway/submit-form
+                               {:validate-fields
+                                [:gateway.action.create-group/group-name
+                                 :gateway.action.create-group/group-url
+                                 :gateway.action.create-group/group-type]
+                                :dispatch-when-valid [:gateway.action.create-group/remote-create-group]}]))}
+      [:fieldset {:disabled disabled?}
+       [:h1 "Start a New Braid Group"]
+       [group-name-field-view]
+       [group-url-field-view]
+       [group-type-field-view]
+       [button-view]
+       [error-view]]]]))

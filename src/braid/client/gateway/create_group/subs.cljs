@@ -5,9 +5,10 @@
 (reg-sub
   :gateway.action.create-group/sending?
   (fn [state _]
-    (get-in state [:action :sending?])))
+    (get-in state [:create-group :sending?])))
 
 (reg-sub
   :gateway.action.create-group/error
   (fn [state _]
-    (get-in state [:action :error])))
+    (get-in state [:create-group :error])))
+

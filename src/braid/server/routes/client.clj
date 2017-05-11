@@ -13,12 +13,13 @@
     [braid.server.db.user :as user]
     [braid.server.invite :as invites]))
 
-(defn get-html [client]
+(defn get-html [client vars]
   (clostache/render-resource
     (str "public/" client ".html")
-    {:algo "sha256"
-     :js (str (digest/from-file (str "public/js/" client "/out/braid.js")))
-     :api_domain (config :api-domain)}))
+    (merge {:algo "sha256"
+            :js (str (digest/from-file (str "public/js/" client "/out/braid.js")))
+            :api_domain (config :api-domain)}
+           vars)))
 
 (defroutes desktop-client-routes
 
@@ -85,17 +86,20 @@
       (github/build-authorize-link {:register? true
                                     :group-id (java.util.UUID/fromString group)})}})
 
-  (GET "/register" []
-    (get-html "gateway"))
+  (GET "/actions/create-group" []
+    (get-html "gateway" {:gateway_action "create-group"}))
+
+  (GET "/actions/log-in" []
+    (get-html "gateway" {:gateway_action "log-in"}))
 
   ; everything else
   (GET "/*" []
-    (get-html "desktop")))
+    (get-html "desktop" {})))
 
 (defroutes mobile-client-routes
   ; TODO: add mobile routse for public joining & password resets
   (GET "/*" []
-    (get-html "mobile")))
+    (get-html "mobile" {})))
 
 (defroutes resource-routes
   ; add cache-control headers to perma-cache braid.js

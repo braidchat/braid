@@ -13,23 +13,32 @@
 
 (reg-event-fx
   :gateway/initialize
+  (fn [_ _]
+    {:db {:action (keyword (aget js/window "gateway_action"))
+          :fields (reduce (fn [memo field]
+                            (let [prefilled-value (get-url-param field)]
+                              (assoc memo field
+                                {:value (or prefilled-value "")
+                                 :typing? false
+                                 :untouched? (if prefilled-value
+                                               false
+                                               true)
+                                 :validations-left 0
+                                 :errors []})))
+                          {}
+                          (keys validations))}
+     :dispatch-n [[:gateway/initialize-action]]}))
+
+(reg-event-fx
+  :gateway/initialize-action
   (fn [{state :db} _]
-    {:db (assoc state
-           :fields (reduce (fn [memo field]
-                             (let [prefilled-value (get-url-param field)]
-                               (assoc memo field
-                                 {:value (or prefilled-value "")
-                                  :typing? false
-                                  :untouched? (if prefilled-value
-                                                false
-                                                true)
-                                  :validations-left 0
-                                  :errors []})))
-                           {}
-                           (keys validations)))
-     :dispatch-n [[:gateway/validate-all]
-                  [:gateway.user-auth/initialize]
-                  [:gateway.action.create-group/initialize]]}))
+    (case (state :action)
+      :create-group
+      {:dispatch-n [[:gateway.user-auth/initialize :register]
+                    [:gateway.action.create-group/initialize]]}
+
+      :log-in
+      {:dispatch-n [[:gateway.user-auth/initialize :log-in]]})))
 
 (reg-event-fx
   :gateway/blur
@@ -106,3 +115,4 @@
                              (every? true?))]
       {:dispatch dispatch-when-valid}
       {:db (touch-fields state validate-fields)})))
+

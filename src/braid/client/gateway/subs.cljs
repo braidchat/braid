@@ -36,6 +36,6 @@
          (every? true?))))
 
 (reg-sub
-  :gateway/action-mode
+  :gateway/action
   (fn [state _]
-    (get-in state [:action :mode])))
+    (get-in state [:action])))

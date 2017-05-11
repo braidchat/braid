@@ -5,13 +5,13 @@
 
 (reg-event-fx
   :gateway.user-auth/initialize
-  (fn [{state :db} _]
+  (fn [{state :db} [_ mode]]
     {:db (-> state
              (assoc
                :user-auth {:user nil
                            :error nil
                            :checking? true
-                           :mode :register ; :log-in , :reset-password
+                           :mode mode ; :register :log-in , :reset-password
                            :oauth-provider nil}))
      :dispatch [:gateway.user-auth/remote-check-auth]}))
 
@@ -26,7 +26,7 @@
 (reg-event-fx
   :gateway.user-auth/switch-account
   (fn [{state :db} _]
-    {:dispatch-n [[:gateway.user-auth/mode :log-in]
+    {:dispatch-n [[:gateway.user-auth/set-mode :log-in]
                   [:gateway.user-auth/remote-log-out]]}))
 
 

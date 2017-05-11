@@ -9,9 +9,15 @@
   (fn [{state :db}]
     {:db (-> state
              (assoc
-               :action {:mode :create-group
-                        :sending? false
-                        :error nil}))}))
+               :create-group
+               {:disabled? true
+                :sending? false
+                :error nil}))}))
+
+(reg-event-fx
+  :gateway.action.create-group/ready
+  (fn [{state :db} _]
+    {:db (assoc-in state [:create-group :disabled?] false)}))
 
 (reg-event-fx
   :gateway.action.create-group/guess-group-url
@@ -29,7 +35,7 @@
 (reg-event-fx
   :gateway.action.create-group/remote-create-group
   (fn [{state :db} _]
-    {:db (assoc-in state [:action :sending?] true)
+    {:db (assoc-in state [:create-group :sending?] true)
      :edn-xhr {:method :put
                :uri "/groups"
                :params
@@ -48,11 +54,11 @@
   :gateway.action.create-group/handle-registration-response
   (fn [{state :db} [_ response]]
     (set! js/window.location (str "/" (response :group-id) "/inbox"))
-    {:db (assoc-in state [:action :sending?] false)}))
+    {:db (assoc-in state [:create-group :sending?] false)}))
 
 (reg-event-fx
   :gateway.action.create-group/handle-registration-error
   (fn [{state :db} [_ error]]
     {:db (-> state
-             (assoc-in [:action :sending?] false)
-             (assoc-in [:action :error] error))}))
+             (assoc-in [:create-group :sending?] false)
+             (assoc-in [:create-group :error] error))}))

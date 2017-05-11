@@ -6,6 +6,7 @@
     [braid.client.ui.styles.imports :refer [imports]]
     [braid.client.gateway.views.join-group :refer [join-group-view]]
     [braid.client.gateway.create-group.views :refer [create-group-view]]
+    [braid.client.gateway.log-in.views :refer [log-in-view]]
     [braid.client.gateway.create-group.styles :refer [create-group-styles]]
     [braid.client.gateway.user-auth.views :refer [user-auth-view]]
     [braid.client.gateway.user-auth.styles :refer [user-styles]]))
@@ -36,10 +37,11 @@
   [:div.gateway
    [header-view]
    [user-auth-view]
-   (case @(subscribe [:gateway/action-mode])
+   (case @(subscribe [:gateway/action])
      :create-group [create-group-view]
      :join-public-group [join-group-view :public]
      :join-private-group [join-group-view :private]
+     :log-in [log-in-view]
      nil)])
 
 (defn app-view []
