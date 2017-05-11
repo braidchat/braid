@@ -111,7 +111,7 @@
      :edn-xhr {:uri "/users"
                :method :put
                :params {:email (get-in state [:fields :gateway.user-auth/email :value])
-                        :password (get-in state [:fields :gateway.user-auth/password :value])}
+                        :password (get-in state [:fields :gateway.user-auth/new-password :value])}
                :on-complete (fn [user]
                               (dispatch [:gateway.user-auth/remote-check-auth]))
                :on-error

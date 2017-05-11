@@ -20,6 +20,12 @@
    [(fn [password cb]
       (if (string/blank? password)
         (cb "You need to enter a password.")
+        (cb nil)))]
+
+   :gateway.user-auth/new-password
+   [(fn [password cb]
+      (if (string/blank? password)
+        (cb "You need to enter a password.")
         (cb nil)))
     (fn [password cb]
       (if (< (count password) 8)
