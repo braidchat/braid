@@ -13,4 +13,4 @@
   (fn [state _]
     (get-in state [:create-group :error])))
 
-(helpers/reg-form-subs :gateway.create-group)
+(helpers/reg-form-subs :gateway.create-group :create-group)

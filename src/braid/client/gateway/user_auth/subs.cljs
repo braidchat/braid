@@ -29,4 +29,4 @@
   (fn [state _]
     (get-in state [:user-auth :error])))
 
-(helpers/reg-form-subs :gateway.user-auth)
+(helpers/reg-form-subs :gateway.user-auth :user-auth)

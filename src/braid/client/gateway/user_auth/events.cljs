@@ -2,7 +2,8 @@
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
-    [braid.client.gateway.helpers :as helpers]))
+    [braid.client.gateway.helpers :as helpers]
+    [braid.client.gateway.user-auth.validations :refer [validations]]))
 
 (reg-event-fx
   :gateway.user-auth/initialize
@@ -14,7 +15,9 @@
                            :checking? true
                            :mode mode ; :register :log-in , :reset-password
                            :should-validate? false
-                           :oauth-provider nil}))
+                           :oauth-provider nil
+                           :validations validations
+                           :fields (helpers/init-fields validations)}))
      :dispatch-n [[:gateway.user-auth/remote-check-auth]
                   [:gateway.user-auth/validate-all]]}))
 
@@ -95,8 +98,8 @@
              (assoc-in [:user-auth :checking?] true))
      :edn-xhr {:uri "/session"
                :method :put
-               :params {:email (get-in state [:fields :gateway.user-auth/email :value])
-                        :password (get-in state [:fields :gateway.user-auth/password :value])}
+               :params {:email (get-in state [:user-auth :fields :gateway.user-auth/email :value])
+                        :password (get-in state [:user-auth :fields :gateway.user-auth/password :value])}
                :on-complete (fn [user]
                               (dispatch [:gateway.user-auth/remote-check-auth]))
                :on-error
@@ -113,8 +116,8 @@
              (assoc-in [:user-auth :checking?] true))
      :edn-xhr {:uri "/users"
                :method :put
-               :params {:email (get-in state [:fields :gateway.user-auth/email :value])
-                        :password (get-in state [:fields :gateway.user-auth/new-password :value])}
+               :params {:email (get-in state [:user-auth :fields :gateway.user-auth/email :value])
+                        :password (get-in state [:user-auth :fields :gateway.user-auth/new-password :value])}
                :on-complete (fn [user]
                               (dispatch [:gateway.user-auth/remote-check-auth]))
                :on-error
@@ -128,7 +131,7 @@
   (fn [{state :db} _]
     {:edn-xhr {:uri "/request-reset"
                :method :post
-               :params {:email (get-in state [:fields :gateway.user-auth/email :value])}
+               :params {:email (get-in state [:user-auth :fields :gateway.user-auth/email :value])}
                :on-complete
                (fn [_]
                  (dispatch [:gateway.user-auth/set-error :password-reset-email-sent]))
@@ -137,4 +140,4 @@
                  (when-let [k (get-in error [:response :error])]
                    (dispatch [:gateway.user-auth/set-error k]))) }}))
 
-(helpers/reg-form-event-fxs :gateway.user-auth)
+(helpers/reg-form-event-fxs :gateway.user-auth :user-auth)

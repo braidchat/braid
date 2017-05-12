@@ -1,38 +1,10 @@
-(ns braid.client.gateway.validations
+(ns braid.client.gateway.create-group.validations
   (:require
     [clojure.string :as string]
-    [braid.client.xhr :as xhr])
-  (:import
-    [goog.format EmailAddress]))
+    [braid.client.xhr :as xhr]))
 
 (def validations
-  {:gateway.user-auth/email
-   [(fn [email cb]
-      (if (string/blank? email)
-        (cb "You need to enter an email.")
-        (cb nil)))
-    (fn [email cb]
-      (if (not (.isValid (EmailAddress. email)))
-        (cb "This doesn't look like a valid email.")
-        (cb nil)))]
-
-   :gateway.user-auth/password
-   [(fn [password cb]
-      (if (string/blank? password)
-        (cb "You need to enter a password.")
-        (cb nil)))]
-
-   :gateway.user-auth/new-password
-   [(fn [password cb]
-      (if (string/blank? password)
-        (cb "You need to enter a password.")
-        (cb nil)))
-    (fn [password cb]
-      (if (< (count password) 8)
-        (cb "Your password is too short.")
-        (cb nil)))]
-
-   :gateway.action.create-group/group-name
+  {:gateway.action.create-group/group-name
    [(fn [name cb]
       (if (string/blank? name)
         (cb "Your group needs a name.")

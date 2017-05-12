@@ -1,7 +1,6 @@
 (ns braid.client.gateway.fx
   (:require
     [re-frame.core :refer [dispatch reg-fx]]
-    [braid.client.gateway.validations :refer [validations]]
     [braid.client.xhr :as xhr]))
 
 (defonce timeouts

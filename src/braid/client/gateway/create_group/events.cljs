@@ -3,17 +3,20 @@
     [clojure.string :as string]
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
     [braid.common.util :refer [slugify]]
-    [braid.client.gateway.helpers :as helpers]))
+    [braid.client.gateway.helpers :as helpers]
+    [braid.client.gateway.create-group.validations :refer [validations]]))
 
 (reg-event-fx
   :gateway.action.create-group/initialize
   (fn [{state :db}]
     {:db (-> state
              (assoc
-               :create-group
-               {:disabled? true
-                :sending? false
-                :error nil}))
+               :create-group {:disabled? true
+                              :sending? false
+                              :error nil
+                              :validations validations
+                              :should-validate? false
+                              :fields (helpers/init-fields validations)}))
      :dispatch [:gateway.create-group/validate-all]}))
 
 (reg-event-fx
@@ -24,8 +27,8 @@
 (reg-event-fx
   :gateway.action.create-group/guess-group-url
   (fn [{state :db} _]
-    (let [group-name (get-in state [:fields :gateway.action.create-group/group-name :value])
-          group-url (get-in state [:fields :gateway.action.create-group/group-url :value])]
+    (let [group-name (get-in state [:create-group :fields :gateway.action.create-group/group-name :value])
+          group-url (get-in state [:create-group :fields :gateway.action.create-group/group-url :value])]
       {:db (if (string/blank? group-url)
              (-> state
                  (assoc-in [:fields :gateway.action.create-group/group-url :value] (slugify group-name))
@@ -41,9 +44,9 @@
      :edn-xhr {:method :put
                :uri "/groups"
                :params
-               {:slug (get-in state [:fields :gateway.action.create-group/group-url :value])
-                :name (get-in state [:fields :gateway.action.create-group/group-name :value])
-                :type (get-in state [:fields :gateway.action.create-group/group-type :value])}
+               {:slug (get-in state [:create-group :fields :gateway.action.create-group/group-url :value])
+                :name (get-in state [:create-group :fields :gateway.action.create-group/group-name :value])
+                :type (get-in state [:create-group :fields :gateway.action.create-group/group-type :value])}
                :on-complete
                (fn [response]
                  (dispatch [:gateway.action.create-group/handle-registration-response response]))
@@ -65,4 +68,4 @@
              (assoc-in [:create-group :sending?] false)
              (assoc-in [:create-group :error] error))}))
 
-(helpers/reg-form-event-fxs :gateway.create-group)
+(helpers/reg-form-event-fxs :gateway.create-group :create-group)
