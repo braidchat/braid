@@ -32,31 +32,6 @@
                 "Decline"]])]
            [:div "No invitations."])])))
 
-(defn create-group-view []
-  (let [new-group-data (r/atom {:name ""
-                                :slug ""})]
-    (fn []
-      [:div
-       [:h2 "Create a Group"]
-       [:form {:on-submit (fn [e]
-                            (.preventDefault e)
-                            (dispatch [:request-create-group @new-group-data])
-                            (reset! new-group-data {:name ""
-                                                    :slug ""}))}
-        [:label "Group Name"
-         [:input {:value (@new-group-data :name)
-                  :on-change (fn [e]
-                               (swap! new-group-data assoc :name (.. e -target -value)))}]]
-        [:label "Group Domain"
-         [:input {:value (@new-group-data :slug)
-                  :on-change (fn [e]
-                               (swap! new-group-data assoc :slug (.. e -target -value)))}]]
-        [:button {:disabled
-                  ; TODO validate slug format and uniqueness
-                  (or (string/blank? (@new-group-data :name))
-                      (string/blank? (@new-group-data :slug)))}
-         "Create Group"]]])))
-
 (defn public-groups-view []
   [:div
    [:h2 "Public Groups"]
@@ -67,6 +42,6 @@
   [:div.page.group-explore
    [:div.title "Group Explore"]
    [:div.content
-    [create-group-view]
+    [:a {:href "/gateway/create-group"} "Create a Group"]
     [invitations-view]
     [public-groups-view]]])

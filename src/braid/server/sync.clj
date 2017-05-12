@@ -320,30 +320,6 @@
       (db/run-txns! (tag/retract-tag-txn tag-id))
       (broadcast-group-change group-id [:braid.client/retract-tag tag-id]))))
 
-(defmethod event-msg-handler :braid.server/create-group
-  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-  (cond
-    (or (string/blank? (?data :name))
-        (string/blank? (?data :slug)))
-    (do
-      (timbre/warnf "User %s attempted to create group with blank parameters"
-                    user-id)
-      (when ?reply-fn
-        (?reply-fn {:error "Blank group name or slug"})))
-
-    (group/group-with-slug-exists? (?data :slug))
-    (do
-      (timbre/warnf "User %s attempted to create a group with a slug that already exsits %s"
-                    user-id (?data :slug))
-      (when ?reply-fn
-        (?reply-fn {:error "Group slug already taken"})))
-
-    :else
-    ; TODO: way to do this in one transaction? Put a tempid in the ?data
-    (let [[new-group] (db/run-txns! (group/create-group-txn ?data))]
-      (db/run-txns! (group/user-make-group-admin-txn
-                      user-id (new-group :id))))))
-
 (defmethod event-msg-handler :braid.server/search
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   ; this can take a while, so move it to a future
