@@ -44,13 +44,13 @@
       (string/blank? slug)
       (error-response 400 "Must provide an Group URL")
 
-      (not (re-matches #"[a-z0-9-]*" slug))
+      (not (re-matches #"[a-z0-9-]+" slug))
       (error-response 400 "Group URL can only contain lowercase letters, numbers or dashes.")
 
-      (re-matches #"-.*" slug)
+      (string/starts-with? "-" slug)
       (error-response 400 "Group URL cannot start with a dash.")
 
-      (re-matches #".*-" slug)
+      (string/ends-with? "-" slug)
       (error-response 400 "Group URL cannot end with a dash.")
 
       (group/group-with-slug-exists? slug)
