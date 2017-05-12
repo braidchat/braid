@@ -12,6 +12,7 @@
   :gateway.user-auth/user-auth-mode
   (fn [state _]
     (cond
+      (nil? (get-in state [:user-auth])) :checking
       (get-in state [:user-auth :checking?]) :checking
       (get-in state [:user-auth :user]) :authed
       (get-in state [:user-auth :oauth-provider]) :oauth-in-progress
