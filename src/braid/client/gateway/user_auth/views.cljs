@@ -5,15 +5,16 @@
 
 (defn auth-providers-view []
   [:span.auth-providers
-   (for [provider [:github :google :facebook]]
-     ^{:key provider}
-     [:button
-      {:type "button"
-       :class (name provider)
-       :on-click (fn [e]
-                   (.preventDefault e)
-                   (dispatch [:gateway.user-auth/remote-oauth provider]))}
-      (string/capitalize (name provider))])])
+   (doall
+     (for [provider [:github :google :facebook]]
+       ^{:key provider}
+       [:button
+        {:type "button"
+         :class (name provider)
+         :on-click (fn [e]
+                     (.preventDefault e)
+                     (dispatch [:gateway.user-auth/remote-oauth provider]))}
+        (string/capitalize (name provider))]))])
 
 (defn returning-email-field-view []
   (let [field-id :gateway.user-auth/email
