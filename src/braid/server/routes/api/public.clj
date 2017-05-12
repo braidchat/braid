@@ -64,8 +64,8 @@
       (error-response 400 "The password is too short.")
 
       :else
-      (let [user (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                      :email email}))
+      (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
+                                                        :email email}))
             _ (db/run-txns! (user/set-user-password-txn (user :id)
                                                         password))]
         {:status 200
