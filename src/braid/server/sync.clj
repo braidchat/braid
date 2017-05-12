@@ -376,7 +376,7 @@
   (if-let [invite (invitation/invite-by-id (?data :id))]
     (do
       (events/user-join-group! user-id (invite :group-id))
-      (db/run-txns! [(invitation/retract-invitation-txn (invite :id))])
+      (db/run-txns! (invitation/retract-invitation-txn (invite :id)))
       (chsk-send! user-id [:braid.client/joined-group
                            {:group (group/group-by-id (invite :group-id))
                             :tags (group/group-tags (invite :group-id))}])
