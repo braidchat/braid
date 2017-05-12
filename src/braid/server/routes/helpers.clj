@@ -1,5 +1,6 @@
 (ns braid.server.routes.helpers
   (:require
+    [ring.middleware.anti-forgery :as anti-forgery]
     [braid.server.db.user :as user]))
 
 (defn logged-in? [req]
@@ -15,6 +16,9 @@
   (when-let [user-id (get-in req [:session :user-id])]
     (when (user/user-id-exists? user-id)
       user-id)))
+
+(defn session-token []
+  anti-forgery/*anti-forgery-token*)
 
 (defn error-response [status msg]
   {:status status

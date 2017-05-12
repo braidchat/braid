@@ -3,7 +3,7 @@
     [clojure.java.io :as io]
     [clojure.string :as string]
     [compojure.coercions :refer [as-uuid]]
-    [compojure.core :refer [GET PUT POST DELETE defroutes]]
+    [compojure.core :refer [GET PUT POST defroutes]]
     [braid.common.util :refer [valid-nickname? valid-email?]]
     [braid.server.api.github :as github]
     [braid.server.api.link-extract :as link-extract]
@@ -27,12 +27,6 @@
 
 (defroutes api-public-routes
 
-  ; get current logged in user
-  (GET "/session" req
-    (if-let [user (current-user req)]
-      (edn-response user)
-      {:status 401 :body "" :session nil}))
-
   ; log in
   (PUT "/session" [email password :as req]
     (if-let [user-id (when (and email password)
@@ -40,10 +34,6 @@
       {:status 200
        :session (assoc (req :session) :user-id user-id)}
       (error-response 401 :auth-fail)))
-
-  ; log out
-  (DELETE "/session" _
-    {:status 200 :session nil})
 
   ; register a user
   (PUT "/users" [email password :as req]

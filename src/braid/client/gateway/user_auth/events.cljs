@@ -9,6 +9,7 @@
   :gateway.user-auth/initialize
   (fn [{state :db} [_ mode]]
     {:db (-> state
+             (assoc :csrf-token nil)
              (assoc
                :user-auth {:user nil
                            :error nil
@@ -28,6 +29,11 @@
            (assoc-in [:user-auth :user] data)
            (assoc-in [:user-auth :checking?] false)
            (assoc-in [:user-auth :oauth-provider] nil))}))
+
+(reg-event-fx
+  :gateway.user-auth/set-csrf-token
+  (fn [{state :db} [_ token]]
+    {:db (assoc state :csrf-token token)}))
 
 (reg-event-fx
   :gateway.user-auth/switch-account
@@ -63,8 +69,9 @@
     {:db (assoc-in state [:user-auth :checking?] true)
      :edn-xhr {:uri "/session"
                :method :get
-               :on-complete (fn [user]
-                              (dispatch [:gateway.user-auth/set-user user]))
+               :on-complete (fn [{:keys [user csrf-token]}]
+                              (dispatch [:gateway.user-auth/set-user user])
+                              (dispatch [:gateway.user-auth/set-csrf-token csrf-token]))
                :on-error (fn [_]
                            (dispatch [:gateway.user-auth/set-user nil]))}}))
 
@@ -76,6 +83,7 @@
              (assoc-in [:user-auth :checking?] true))
      :edn-xhr {:uri "/session"
                :method :delete
+               :headers {"x-csrf-token" (state :csrf-token)}
                :on-complete (fn [_]
                               (dispatch [:gateway.user-auth/set-user nil]))
                :on-error (fn [_]

@@ -2,7 +2,7 @@
   (:require
     [clojure.string :as string]
     [clojure.java.io :as io]
-    [compojure.core :refer [GET PUT defroutes]]
+    [compojure.core :refer [GET PUT DELETE defroutes]]
     [braid.server.db :as db]
     [braid.server.s3 :as s3]
     [braid.server.db.group :as group]
@@ -11,15 +11,27 @@
     [braid.server.api.github :as github]
     [braid.server.markdown :refer [markdown->hiccup]]
     [braid.server.routes.helpers :refer [current-user current-user-id logged-in?
-                                         error-response edn-response]]))
+                                         error-response edn-response
+                                         session-token]]))
 
 (defroutes api-private-routes
+
+  ; get current logged in user
+  (GET "/session" req
+    (if-let [user (current-user req)]
+      (edn-response {:user user
+                     :csrf-token (session-token)})
+      {:status 401 :body "" :session nil}))
+
+  ; log out
+  (DELETE "/session" _
+    {:status 200 :session nil})
 
   ; create a group
   (PUT "/groups" [name slug type :as req]
     (cond
       ; logged in?
-      (logged-in? req)
+      (not (logged-in? req))
       (error-response 401 "Must be logged in.")
 
       ; group name validations
@@ -54,18 +66,18 @@
 
       ; passed all validations
       :else
-      (let [user (current-user-id req)
+      (let [user-id (current-user-id req)
             group-id (db/uuid)
-            group (db/run-txns!
-                    (group/create-group-txn {:id group-id
-                                             :slug slug
-                                             :name name}))]
+            [group] (db/run-txns!
+                      (group/create-group-txn {:id group-id
+                                               :slug slug
+                                               :name name}))]
         (db/run-txns! (group/group-set-txn (group :id) :public? (case type
                                                                   "public" true
                                                                   "private" false)))
-        (db/run-txns! (group/user-add-to-group-txn (user :id) group-id))
-        (db/run-txns! (group/user-subscribe-to-group-tags-txn (user :id) group-id))
-        (db/run-txns! (group/user-make-group-admin-txn (user :id) group-id))
+        (db/run-txns! (group/user-add-to-group-txn user-id group-id))
+        (db/run-txns! (group/user-subscribe-to-group-tags-txn user-id group-id))
+        (db/run-txns! (group/user-make-group-admin-txn user-id group-id))
         (edn-response {:group-id group-id}))))
 
   (GET "/changelog" []

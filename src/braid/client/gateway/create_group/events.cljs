@@ -43,6 +43,7 @@
     {:db (assoc-in state [:create-group :sending?] true)
      :edn-xhr {:method :put
                :uri "/groups"
+               :headers {"x-csrf-token" (state :csrf-token)}
                :params
                {:slug (get-in state [:create-group :fields :gateway.action.create-group/group-url :value])
                 :name (get-in state [:create-group :fields :gateway.action.create-group/group-name :value])
