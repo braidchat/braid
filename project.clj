@@ -26,11 +26,13 @@
                  [com.cognitect/transit-clj "0.8.288" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [ring-transit "0.1.6" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [clavatar "0.3.0"]
+
                  ;client
                  [org.clojure/clojurescript "1.9.92"]
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]
                  [cljs-ajax "0.5.8"]
                  [secretary "1.2.3"]
+                 [venantius/accountant "0.2.0"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.2"]
