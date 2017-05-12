@@ -15,11 +15,11 @@
 (defn group-with-slug-exists?
   [slug]
   (boolean (first (d/q '[:find [?g]
-                :in $ ?slug
-                :where
-                [?g :group/slug ?slug]]
-              (db/db)
-              slug))))
+                         :in $ ?slug
+                         :where
+                         [?g :group/slug ?slug]]
+                       (db/db)
+                       slug))))
 
 (defn group-by-id
   [group-id]
