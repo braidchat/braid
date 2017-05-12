@@ -4,6 +4,7 @@
     [compojure.core :refer [GET defroutes]]
     [compojure.route :refer [resources]]
     [clostache.parser :as clostache]
+    [environ.core :refer [env]]
     [ring.util.response :refer [resource-response]]
     [braid.server.api.github :as github]
     [braid.server.conf :refer [config]]
@@ -13,11 +14,19 @@
     [braid.server.db.user :as user]
     [braid.server.invite :as invites]))
 
+(def prod-js? (= (env :environment) "prod"))
+
 (defn get-html [client vars]
   (clostache/render-resource
     (str "public/" client ".html")
-    (merge {:algo "sha256"
-            :js (str (digest/from-file (str "public/js/" client "/out/braid.js")))
+    (merge {:prod prod-js?
+            :dev (not prod-js?)
+            :algo "sha256"
+            :js (if prod-js?
+                  (str (digest/from-file (str "public/js/prod/" client ".js")))
+                  (str (digest/from-file (str "public/js/dev/" client ".js"))))
+            :basejs (when prod-js?
+                      (str (digest/from-file (str "public/js/prod/base.js"))))
             :api_domain (config :api-domain)}
            vars)))
 
@@ -102,21 +111,19 @@
     (get-html "mobile" {})))
 
 (defroutes resource-routes
-  ; add cache-control headers to perma-cache braid.js
+
+  ; add cache-control headers to js files)
   ; (since it uses a cache-busted url anyway)
-
-  (GET "/js/desktop/out/braid.js" []
-    (if-let [response (resource-response "public/js/desktop/out/braid.js")]
-     (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")
-     {:status 200
-      :headers {"Content-Type" "application/javascript"}
-      :body "alert('The desktop js files are missing. please compile them with cljsbuild or figwheel.');"}))
-
-  (GET "/js/mobile/out/braid.js" []
-    (if-let [response (resource-response "public/js/mobile/out/braid.js")]
-      (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")
-      {:status 200
-       :headers {"Content-Type" "application/javascript"}
-       :body "alert('The mobile js files are missing. Please compile them with cljsbuild or figwheel.');"}))
+  (GET (str "/js/:build{desktop|mobile|gateway|base}.js") [build]
+    (if prod-js?
+      (if-let [response (resource-response (str "public/js/prod/" build ".js"))]
+        (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")
+        {:status 404
+         :body "File Not Found"})
+      (if-let [response (resource-response (str "public/js/dev/" build ".js"))]
+        response
+        {:status 200
+         :headers {"Content-Type" "application/javascript"}
+         :body (str "alert('The " build " js files are missing. Please compile them with cljsbuild or figwheel.');")})))
 
   (resources "/"))
