@@ -38,7 +38,9 @@
 (reg-event-fx
   :gateway.user-auth/switch-account
   (fn [{state :db} _]
-    {:dispatch-n [[:gateway.user-auth/set-mode :log-in]
+    {:dispatch-n [[:gateway.user-auth/update-value :gateway.user-auth/email ""]
+                  [:gateway.user-auth/update-value :gateway.user-auth/password ""]
+                  [:gateway.user-auth/set-mode :log-in]
                   [:gateway.user-auth/remote-log-out]]}))
 
 
