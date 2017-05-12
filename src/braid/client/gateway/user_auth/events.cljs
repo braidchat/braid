@@ -53,6 +53,7 @@
   (fn [{state :db} [_ mode]]
     {:db (-> state
              clear-error
+             (assoc-in [:user-auth :should-validate?] false)
              (assoc-in [:user-auth :mode] mode))}))
 
 (reg-event-fx
