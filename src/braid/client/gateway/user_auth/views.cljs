@@ -28,9 +28,9 @@
        [:input {:type "email"
                 :placeholder "you@awesome.com"
                 :auto-complete true
-                :auto-correct false
-                :auto-capitalize false
-                :spellcheck false
+                :auto-correct "off"
+                :auto-capitalize "off"
+                :spell-check "false"
                 :auto-focus true
                 :value value
                 :on-blur (fn [_]
@@ -206,9 +206,9 @@
        [:input {:type "email"
                 :placeholder "you@awesome.com"
                 :auto-complete true
-                :auto-correct false
-                :auto-capitalize false
-                :spellcheck false
+                :auto-correct "off"
+                :auto-capitalize "off"
+                :spell-check "false"
                 :auto-focus true
                 :value value
                 :on-blur (fn [_]
