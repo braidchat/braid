@@ -86,10 +86,10 @@
       (github/build-authorize-link {:register? true
                                     :group-id (java.util.UUID/fromString group)})}})
 
-  (GET "/actions/create-group" []
+  (GET "/gateway/create-group" []
     (get-html "gateway" {:gateway_action "create-group"}))
 
-  (GET "/actions/log-in" []
+  (GET "/gateway/log-in" []
     (get-html "gateway" {:gateway_action "log-in"}))
 
   ; everything else
