@@ -114,7 +114,8 @@
                                    :gateway.action.create-group/group-type]])
         sending? @(subscribe [:gateway.action.create-group/sending?])]
     [:button.submit
-     {:class (str (when (not fields-valid?) "disabled") " "
+     {:type "submit"
+      :class (str (when (not fields-valid?) "disabled") " "
                   (when sending? "sending"))}
      "Create your Braid group"]))
 

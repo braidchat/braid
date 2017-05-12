@@ -8,7 +8,8 @@
    (for [provider [:github :google :facebook]]
      ^{:key provider}
      [:button
-      {:class (name provider)
+      {:type "button"
+       :class (name provider)
        :on-click (fn [e]
                    (.preventDefault e)
                    (dispatch [:gateway.user-auth/remote-oauth provider]))}
@@ -66,7 +67,8 @@
        [:div.error-message (first errors)])
      [:p "Don't remember?"
       [:button
-       {:on-click (fn [e]
+       {:type "button"
+        :on-click (fn [e]
                     (.preventDefault e)
                     (dispatch [:gateway.user-auth/set-mode :reset-password]))}
        "Reset your password"]]]))
@@ -77,7 +79,8 @@
                      [:gateway.user-auth/email
                       :gateway.user-auth/password]])]
     [:button.submit
-     {:class (when-not fields-valid? "disabled")}
+     {:type "submit"
+      :class (when-not fields-valid? "disabled")}
      "Log in to Braid"]))
 
 (defn error-view []
@@ -91,7 +94,8 @@
         [:div.error-message
          "A user is already registered with that email."
          [:button
-          {:on-click (fn [e]
+          {:type "button"
+           :on-click (fn [e]
                        (.preventDefault e)
                        (dispatch [:gateway.user-auth/set-mode :log-in]))}
           "Log In"]]
@@ -112,7 +116,8 @@
         @(subscribe [:gateway.user-auth/fields-valid?
                      [:gateway.user-auth/email]])]
     [:button.submit
-     {:class (when-not fields-valid? "disabled")}
+     {:type "submit"
+      :class (when-not fields-valid? "disabled")}
      "Reset Your Password"]))
 
 (defn reset-password-view []
@@ -127,13 +132,15 @@
    [:h1 "Reset your password"]
    [:p
     [:button
-     {:on-click (fn [e]
+     {:type "button"
+      :on-click (fn [e]
                   (.preventDefault e)
                   (dispatch [:gateway.user-auth/set-mode :register]))}
      "Register"]
 
     [:button
-     {:on-click (fn [e]
+     {:type "button"
+      :on-click (fn [e]
                   (.preventDefault e)
                   (dispatch [:gateway.user-auth/set-mode :register]))}
      "Log In"]]
@@ -154,7 +161,8 @@
    [:h1 "Log in to Braid"]
    [:p "Don't have an account?"
     [:button
-     {:on-click (fn [e]
+     {:type "button"
+      :on-click (fn [e]
                   (.preventDefault e)
                   (dispatch [:gateway.user-auth/set-mode :register]))}
      "Register"]]
@@ -220,7 +228,8 @@
                      [:gateway.user-auth/email
                       :gateway.user-auth/new-password]])]
     [:button.submit
-     {:class (when-not fields-valid? "disabled")}
+     {:type "submit"
+      :class (when-not fields-valid? "disabled")}
      "Create a Braid Account"]))
 
 (defn new-user-view []
@@ -236,7 +245,8 @@
    [:h1 "Create a Braid Account"]
    [:p "Already have one?"
     [:button
-     {:on-click (fn [e]
+     {:type "button"
+      :on-click (fn [e]
                   (.preventDefault e)
                   (dispatch [:gateway.user-auth/set-mode :log-in]))}
      "Log In"]]
@@ -254,8 +264,10 @@
        [:div.nickname "@" (user :nickname)]
        [:div.email (user :email)]]]
      [:p "Not you?"
-      [:button {:on-click (fn []
-                            (dispatch [:gateway.user-auth/switch-account]))}
+      [:button
+       {:type "button"
+        :on-click (fn []
+                    (dispatch [:gateway.user-auth/switch-account]))}
        "Sign in with a different account"]]]))
 
 (defn checking-user-view []
