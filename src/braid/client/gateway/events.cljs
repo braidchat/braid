@@ -9,7 +9,9 @@
 (reg-event-fx
   :gateway/initialize
   (fn [{state :db} [_ action]]
-    {:db (assoc state :action action)
+    {:db (-> state
+             (assoc :action action)
+             (assoc :action-disabled? true))
      :dispatch [:gateway/handle-action]}))
 
 (reg-event-fx
@@ -27,14 +29,11 @@
 
 (reg-event-fx
   :gateway/change-user-status
-  (fn [{state :db} [_ status]]
-    (case (state :action)
-      :create-group
-      {:dispatch [:gateway.action.create-group/change-user-status status]}
-
-      :log-in
-      {:dispatch [:gateway.action.log-in/change-user-status status]}
-
-      :request-password-reset
-      {})))
+  (fn [{state :db} [_ logged-in?]]
+    (merge
+      {:db (assoc state :action-disabled? (not logged-in?))}
+      (case (state :action)
+        :log-in
+        {:dispatch [:gateway.action.log-in/change-user-status logged-in?]}
+        {}))))
 

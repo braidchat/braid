@@ -11,19 +11,13 @@
   (fn [{state :db}]
     {:db (-> state
              (assoc
-               :create-group {:disabled? true
-                              :sending? false
+               :create-group {:sending? false
                               :error nil
                               :validations validations
                               :should-validate? false
                               :fields (helpers/init-fields validations)}))
      :dispatch-n [[:gateway.user-auth/initialize :register]
                   [:gateway.create-group/validate-all]]}))
-
-(reg-event-fx
-  :gateway.action.create-group/change-user-status
-  (fn [{state :db} [_ logged-in?]]
-    {:db (assoc-in state [:create-group :disabled?] (not logged-in?))}))
 
 (reg-event-fx
   :gateway.action.create-group/guess-group-url

@@ -101,7 +101,7 @@
   [form-view
    {:title "Start a New Braid Group"
     :class "create-group"
-    :disabled? @(subscribe [:gateway.action.create-group/disabled?])
+    :disabled? @(subscribe [:gateway/action-disabled?])
     :on-submit
     (fn [e]
       (.preventDefault e)

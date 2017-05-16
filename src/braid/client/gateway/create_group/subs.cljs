@@ -4,11 +4,6 @@
     [braid.client.gateway.helpers :as helpers]))
 
 (reg-sub
-  :gateway.action.create-group/disabled?
-  (fn [state _]
-    (get-in state [:create-group :disabled?])))
-
-(reg-sub
   :gateway.action.create-group/sending?
   (fn [state _]
     (get-in state [:create-group :sending?])))
