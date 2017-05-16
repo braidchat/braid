@@ -4,8 +4,7 @@
     [braid.client.gateway.fx]
     [braid.client.gateway.user-auth.events]
     [braid.client.gateway.create-group.events]
-    [braid.client.gateway.log-in.events]
-    [braid.client.gateway.log-in-external.events]))
+    [braid.client.gateway.log-in.events]))
 
 (reg-event-fx
   :gateway/initialize
@@ -20,9 +19,6 @@
       :create-group
       {:dispatch [:gateway.action.create-group/initialize]}
 
-      :log-in-external
-      {:dispatch [:gateway.action.log-in-external/initialize]}
-
       :log-in
       {:dispatch [:gateway.action.log-in/initialize]}
 
@@ -35,9 +31,6 @@
     (case (state :action)
       :create-group
       {:dispatch [:gateway.action.create-group/change-user-status status]}
-
-      :log-in-external
-      {:dispatch [:gateway.action.log-in-external/change-user-status status]}
 
       :log-in
       {:dispatch [:gateway.action.log-in/change-user-status status]}
