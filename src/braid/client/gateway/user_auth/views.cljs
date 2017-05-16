@@ -1,7 +1,8 @@
 (ns braid.client.gateway.user-auth.views
   (:require
     [clojure.string :as string]
-    [re-frame.core :refer [dispatch subscribe]]))
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.gateway.helper-views :refer [form-view]]))
 
 (defn auth-providers-view []
   [:span.auth-providers
@@ -122,37 +123,37 @@
      "Request a Password Reset"]))
 
 (defn request-password-reset-view []
-  [:form.request-password-reset
-   {:no-validate true
-    :on-submit
-    (fn [e]
-      (.preventDefault e)
-      (dispatch [:gateway.user-auth/submit-form
-                 {:validate-fields [:gateway.user-auth/email]
-                  :dispatch-when-valid [:gateway.user-auth/remote-request-password-reset]}]))}
-   [:fieldset
-    [:h1 "Request a Password Reset"]
-    [:p
-     [:button
-      {:type "button"
-       :on-click (fn [e]
-                   (.preventDefault e)
-                   (dispatch [:gateway.user-auth/set-mode :register]))}
-      "Register"]
+  [form-view
+   {:title "Request a Password Reset"
+    :class "user-auth request-password-reset"
+    :on-submit (fn [e]
+                 (.preventDefault e)
+                 (dispatch [:gateway.user-auth/submit-form
+                            {:validate-fields [:gateway.user-auth/email]
+                             :dispatch-when-valid [:gateway.user-auth/remote-request-password-reset]}]))}
+   [:p
+    [:button
+     {:type "button"
+      :on-click (fn [e]
+                  (.preventDefault e)
+                  (dispatch [:gateway.user-auth/set-mode :register]))}
+     "Register"]
 
-     [:button
-      {:type "button"
-       :on-click (fn [e]
-                   (.preventDefault e)
-                   (dispatch [:gateway.user-auth/set-mode :register]))}
-      "Log In"]]
-    [returning-email-field-view]
-    [password-reset-button-view]
-    [error-view]]])
+    [:button
+     {:type "button"
+      :on-click (fn [e]
+                  (.preventDefault e)
+                  (dispatch [:gateway.user-auth/set-mode :register]))}
+     "Log In"]]
+
+   [returning-email-field-view]
+   [password-reset-button-view]
+   [error-view]])
 
 (defn returning-user-view []
-  [:form.returning-user
-   {:no-validate true
+  [form-view
+   {:title "Log in to Braid"
+    :class "user-auth returning-user"
     :on-submit
     (fn [e]
       (.preventDefault e)
@@ -160,19 +161,17 @@
                  {:validate-fields [:gateway.user-auth/email
                                     :gateway.user-auth/password]
                   :dispatch-when-valid [:gateway.user-auth/remote-log-in]}]))}
-   [:fieldset
-    [:h1 "Log in to Braid"]
-    [:p "Don't have an account?"
-     [:button
-      {:type "button"
-       :on-click (fn [e]
-                   (.preventDefault e)
-                   (dispatch [:gateway.user-auth/set-mode :register]))}
-      "Register"]]
+   [:p "Don't have an account?"
+    [:button
+     {:type "button"
+      :on-click (fn [e]
+                  (.preventDefault e)
+                  (dispatch [:gateway.user-auth/set-mode :register]))}
+     "Register"]]
     [returning-email-field-view]
     [returning-password-field-view]
     [login-button-view]
-    [error-view]]])
+    [error-view]])
 
 (defn new-password-field-view []
   (let [field-id :gateway.user-auth/new-password
@@ -236,8 +235,9 @@
      "Create a Braid Account"]))
 
 (defn new-user-view []
-  [:form.new-user
-   {:no-validate true
+  [form-view
+   {:title "Create a Braid Account"
+    :class "user-auth new-user"
     :on-submit
     (fn [e]
       (.preventDefault e)
@@ -245,23 +245,21 @@
                  {:validate-fields [:gateway.user-auth/email
                                     :gateway.user-auth/new-password]
                   :dispatch-when-valid [:gateway.user-auth/remote-register]}]))}
-   [:fieldset
-    [:h1 "Create a Braid Account"]
-    [:p "Already have one?"
-     [:button
-      {:type "button"
-       :on-click (fn [e]
-                   (.preventDefault e)
-                   (dispatch [:gateway.user-auth/set-mode :log-in]))}
-      "Log In"]]
-    [new-email-field-view]
-    [new-password-field-view]
-    [register-button-view]
-    [error-view]]])
+   [:p "Already have one?"
+    [:button
+     {:type "button"
+      :on-click (fn [e]
+                  (.preventDefault e)
+                  (dispatch [:gateway.user-auth/set-mode :log-in]))}
+     "Log In"]]
+   [new-email-field-view]
+   [new-password-field-view]
+   [register-button-view]
+   [error-view]])
 
 (defn authed-user-view []
   (let [user @(subscribe [:gateway.user-auth/user])]
-    [:div.authed-user
+    [:div.section.user-auth.authed-user
      [:div.profile
       [:img.avatar {:src (user :avatar)}]
       [:div.info
@@ -275,19 +273,20 @@
        "Sign in with a different account"]]]))
 
 (defn checking-user-view []
-  [:div.checking
-   [:span "Authenticating..."]])
+  [:div.section.user-auth.checking
+   [:div
+    [:span "Authenticating..."]]])
 
 (defn oauth-in-progress-view []
-  [:div.authorizing
-   [:span "Authenticating with " (string/capitalize (name @(subscribe [:gateway.user-auth/oauth-provider]))) "..."]])
+  [:div.section.user-auth.authorizing
+   [:div
+    [:span "Authenticating with " (string/capitalize (name @(subscribe [:gateway.user-auth/oauth-provider]))) "..."]]])
 
 (defn user-auth-view []
-  [:div.section.user-auth
-   (case @(subscribe [:gateway.user-auth/user-auth-mode])
-     :checking [checking-user-view]
-     :register [new-user-view]
-     :request-password-reset [request-password-reset-view]
-     :log-in [returning-user-view]
-     :authed [authed-user-view]
-     :oauth-in-progress [oauth-in-progress-view])])
+  (case @(subscribe [:gateway.user-auth/user-auth-mode])
+    :checking [checking-user-view]
+    :register [new-user-view]
+    :request-password-reset [request-password-reset-view]
+    :log-in [returning-user-view]
+    :authed [authed-user-view]
+    :oauth-in-progress [oauth-in-progress-view]))

@@ -1,7 +1,8 @@
 (ns braid.client.gateway.create-group.views
   (:require
     [clojure.string :as string]
-    [re-frame.core :refer [dispatch subscribe]])
+    [re-frame.core :refer [dispatch subscribe]]
+    [braid.client.gateway.helper-views :refer [form-view]])
   (:import
     [goog.events KeyCodes]))
 
@@ -126,21 +127,21 @@
        "An error occured. Please try again."])))
 
 (defn create-group-view []
-  (let [disabled? @(subscribe [:gateway.action.create-group/disabled?])]
-    [:div.section.create-group {:class (when disabled? "disabled")}
-     [:form
-      {:on-submit (fn [e]
-                    (.preventDefault e)
-                    (dispatch [:gateway.create-group/submit-form
-                               {:validate-fields
-                                [:gateway.action.create-group/group-name
-                                 :gateway.action.create-group/group-url
-                                 :gateway.action.create-group/group-type]
-                                :dispatch-when-valid [:gateway.action.create-group/remote-create-group]}]))}
-      [:fieldset {:disabled disabled?}
-       [:h1 "Start a New Braid Group"]
-       [group-name-field-view]
-       [group-url-field-view]
-       [group-type-field-view]
-       [button-view]
-       [error-view]]]]))
+  [form-view
+   {:title "Start a New Braid Group"
+    :class "create-group"
+    :disabled? @(subscribe [:gateway.action.create-group/disabled?])
+    :on-submit
+    (fn [e]
+      (.preventDefault e)
+      (dispatch [:gateway.create-group/submit-form
+                 {:validate-fields
+                  [:gateway.action.create-group/group-name
+                   :gateway.action.create-group/group-url
+                   :gateway.action.create-group/group-type]
+                  :dispatch-when-valid [:gateway.action.create-group/remote-create-group]}]))}
+   [group-name-field-view]
+   [group-url-field-view]
+   [group-type-field-view]
+   [button-view]
+   [error-view]])

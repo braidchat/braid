@@ -16,7 +16,7 @@
      [:button
       (vars/small-button-mixin)]]
 
-    [:.authed-user
+    [:&.authed-user
 
      [:.profile
       (vars/padded-with-border-mixin)
@@ -45,35 +45,39 @@
       {:text-align "center"
        :margin-top "2rem"}]]
 
-    [:.checking
-     :.authorizing
-     (vars/padded-with-border-mixin)
-     {:height "3rem"}
+    [:&.checking
+     :&.authorizing
+     [:>div
+      (vars/padded-with-border-mixin)
+      {:height "3rem"}
 
-     [:span
-      {:font-size "0.8em"
-       :color vars/secondary-text-color}]
+      [:span
+       {:font-size "0.8em"
+        :color vars/secondary-text-color}]
 
-     [:&::before
-      mixins/spin
-      (fontawesome/mixin :spinner)
-      {:display "inline-block"
-       :margin-right "0.5em"
-       :font-size "2rem"
-       :vertical-align "middle"
-       :color vars/accent-color}]]
+      [:&::before
+       mixins/spin
+       (fontawesome/mixin :spinner)
+       {:display "inline-block"
+        :margin-right "0.5em"
+        :font-size "2rem"
+        :vertical-align "middle"
+        :color vars/accent-color}]]]
 
-    [:.returning-user
-     :.new-user
-     :.request-password-reset
-     {:position "relative"}
+    [:&.returning-user
+     :&.new-user
+     :&.request-password-reset
 
-     ["> fieldset > p"
-      {:position "absolute"
-       :top 0
-       :right 0
-       :margin 0
-       :line-height "2rem"}]]
+     [:>form
+      {:position "relative"}
+
+      [:>fieldset
+       [:>p
+        {:position "absolute"
+         :top 0
+         :right 0
+         :margin 0
+         :line-height "2rem"}]]]]
 
     [:.auth-providers
      {:display "inline"}
@@ -97,7 +101,6 @@
         (fontawesome/mixin :facebook)]]]]
 
     [:.option
-
 
      [:&.password
       [:input
