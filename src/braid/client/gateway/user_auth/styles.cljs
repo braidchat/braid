@@ -68,7 +68,7 @@
      :.request-password-reset
      {:position "relative"}
 
-     ["> p"
+     ["> fieldset > p"
       {:position "absolute"
        :top 0
        :right 0

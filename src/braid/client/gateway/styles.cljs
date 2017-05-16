@@ -51,84 +51,100 @@
      :margin-bottom "2rem"
      :border-radius vars/border-radius}
 
-    [:h1
-     {:margin [[0 0 "1.5rem"]]
-      :color vars/accent-color
-      :font-size "1.2em"}]]
+    [:&.disabled
+     {:opacity 0.3
+      :cursor "not-allowed"}
 
-   [:.option
-    {:margin [[0 0 "2rem"]]
-     :position "relative"}
+     [:>form
+      {:pointer-events "none"}]]
 
-    [:h2
-     {:font-size "1em"
-      :color vars/primary-text-color
-      :margin [[0 0 vars/small-spacing 0]]}]
+    [:>form
 
-    [:.explanation
-     (vars/small-text-mixin)]
+     [:>fieldset
+      {:margin 0
+       :padding 0
+       :border "none"}
 
-    [:.error-message
-     {:position "absolute"
-      :top 0
-      :right 0
-      :text-align "right"
-      :line-height "1.5rem"
-      :font-size "0.75em"
-      :color vars/invalid-color}]
+      [:>h1
+       {:margin [[0 0 "1.5rem"]]
+        :color vars/accent-color
+        :font-size "1.2em"}]
 
-    [:label
-     {:display "block"}
+      [:>.option
+       {:margin [[0 0 "2rem"]]
+        :position "relative"}
 
-     ["input[type=text]"
-      "input[type=email]"
-      "input[type=password]"
-      (vars/input-field-mixin)
+       [:>h2
+        {:font-size "1em"
+         :color vars/primary-text-color
+         :margin [[0 0 vars/small-spacing 0]]}]
 
-      [:&:focus
-       {:border-color vars/accent-color
-        :outline "none"}]]
+       [:>label
+        {:display "block"}
 
-     ["::-webkit-input-placeholder"
-      {:color vars/placeholder-color}]
+        ["input[type=text]"
+         "input[type=email]"
+         "input[type=password]"
+         (vars/input-field-mixin)
 
-     ["&&::-moz-placeholder"
-      {:color vars/placeholder-color}]]
+         [:&:focus
+          {:border-color vars/accent-color
+           :outline "none"}]]
 
-    [:.field
-     {:position "relative"}
+        ["::-webkit-input-placeholder"
+         {:color vars/placeholder-color}]
 
-     [:&::after
-      (vars/input-field-mixin)
-      ; cancel out some input-field-mixin styles
-      {:width "inherit"
-       :border "none"
-       :margin "1px"}
-      {:position "absolute"
-       :top 0
-       :right "0.25em"}]]
+        ["&&::-moz-placeholder"
+         {:color vars/placeholder-color}]
 
-    [:&.invalid
-     ["input[type=text]"
-      "input[type=email]"
-      "input[type=password]"
-      {:border-color vars/invalid-color}]
+        [:>.explanation
+         (vars/small-text-mixin)]
 
-     [:.field
-      [:&::after
-       (fontawesome/mixin :warning)
-       {:color vars/invalid-color}]]]
+        [:>.error-message
+         {:position "absolute"
+          :top 0
+          :right 0
+          :text-align "right"
+          :line-height "1.5rem"
+          :font-size "0.75em"
+          :color vars/invalid-color}]]
 
-    [:&.valid
-     [:.field::after
-      (fontawesome/mixin :check-circle)
-      {:color vars/valid-color}]]
+       [:.field
+        {:position "relative"}
 
-    [:&.loading
-     [:.field::after
-      (fontawesome/mixin :spinner)
-      mixins/spin
-      {:color vars/secondary-text-color}]]]
+        [:&::after
+         (vars/input-field-mixin)
+         ; cancel out some input-field-mixin styles
+         {:width "inherit"
+          :border "none"
+          :margin "1px"}
+         {:position "absolute"
+          :top 0
+          :right "0.25em"}]]
+
+       [:&.invalid
+        ["input[type=text]"
+         "input[type=email]"
+         "input[type=password]"
+         {:border-color vars/invalid-color}]
+
+        [:.field
+         [:&::after
+          (fontawesome/mixin :warning)
+          {:color vars/invalid-color}]]]
+
+       [:&.valid
+        [:.field::after
+         (fontawesome/mixin :check-circle)
+         {:color vars/valid-color}]]
+
+       [:&.loading
+        [:.field::after
+         (fontawesome/mixin :spinner)
+         mixins/spin
+         {:color vars/secondary-text-color}]]]]]]
+
+
 
    [:button.submit
     {:font-size "1.25em"

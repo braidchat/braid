@@ -10,19 +10,9 @@
 
     [:>.create-group
 
-     [:&.disabled
-      {:opacity 0.3
-       :cursor "not-allowed"}
-
-      [:>form
-       {:pointer-events "none"}]]
-
      [:>form
 
       [:>fieldset
-       {:margin 0
-        :padding 0
-        :border "none"}
 
        [:>.option
 
