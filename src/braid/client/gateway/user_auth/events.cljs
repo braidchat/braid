@@ -14,7 +14,7 @@
                :user-auth {:user nil
                            :error nil
                            :checking? true
-                           :mode mode ; :register :log-in , :reset-password
+                           :mode mode ; :register :log-in , :request-password-reset
                            :should-validate? false
                            :oauth-provider nil
                            :validations validations

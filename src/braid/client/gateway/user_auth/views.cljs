@@ -71,8 +71,8 @@
        {:type "button"
         :on-click (fn [e]
                     (.preventDefault e)
-                    (dispatch [:gateway.user-auth/set-mode :reset-password]))}
-       "Reset your password"]]]))
+                    (dispatch [:gateway.user-auth/set-mode :request-password-reset]))}
+       "Request a Password Reset"]]]))
 
 (defn login-button-view []
   (let [fields-valid?
@@ -119,10 +119,10 @@
     [:button.submit
      {:type "submit"
       :class (when-not fields-valid? "disabled")}
-     "Reset Your Password"]))
+     "Request a Password Reset"]))
 
-(defn reset-password-view []
-  [:form.reset-password
+(defn request-password-reset-view []
+  [:form.request-password-reset
    {:no-validate true
     :on-submit
     (fn [e]
@@ -130,7 +130,7 @@
       (dispatch [:gateway.user-auth/submit-form
                  {:validate-fields [:gateway.user-auth/email]
                   :dispatch-when-valid [:gateway.user-auth/remote-request-password-reset]}]))}
-   [:h1 "Reset your password"]
+   [:h1 "Request a Password Reset"]
    [:p
     [:button
      {:type "button"
@@ -284,7 +284,7 @@
    (case @(subscribe [:gateway.user-auth/user-auth-mode])
      :checking [checking-user-view]
      :register [new-user-view]
-     :reset-password [reset-password-view]
+     :request-password-reset [request-password-reset-view]
      :log-in [returning-user-view]
      :authed [authed-user-view]
      :oauth-in-progress [oauth-in-progress-view])])

@@ -24,7 +24,10 @@
       {:dispatch [:gateway.action.log-in-external/initialize]}
 
       :log-in
-      {:dispatch [:gateway.action.log-in/initialize]})))
+      {:dispatch [:gateway.action.log-in/initialize]}
+
+      :request-password-reset
+      {:dispatch [:gateway.user-auth/initialize :request-password-reset]})))
 
 (reg-event-fx
   :gateway/change-user-status
@@ -37,5 +40,8 @@
       {:dispatch [:gateway.action.log-in-external/change-user-status status]}
 
       :log-in
-      {:dispatch [:gateway.action.log-in/change-user-status status]})))
+      {:dispatch [:gateway.action.log-in/change-user-status status]}
+
+      :request-password-reset
+      {})))
 

@@ -65,7 +65,7 @@
 
     [:.returning-user
      :.new-user
-     :.reset-password
+     :.request-password-reset
      {:position "relative"}
 
      ["> p"

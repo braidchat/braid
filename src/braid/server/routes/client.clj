@@ -88,6 +88,9 @@
   (GET "/gateway/log-in" []
     (get-html "gateway" {:gateway_action "log-in-external"}))
 
+  (GET  "/gateway/request-password-reset" _
+    (get-html "gateway" {:gateway_action "request-password-reset"}))
+
   (GET "/:slug" [slug]
     (when-let [group (group/group-by-slug slug)]
       {:status 302
