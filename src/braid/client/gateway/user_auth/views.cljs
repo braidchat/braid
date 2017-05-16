@@ -2,7 +2,7 @@
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]]
-    [braid.client.gateway.helper-views :refer [form-view]]))
+    [braid.client.gateway.helper-views :refer [form-view field-view]]))
 
 (defn auth-providers-view []
   [:span.auth-providers
@@ -18,62 +18,33 @@
         (string/capitalize (name provider))]))])
 
 (defn returning-email-field-view []
-  (let [field-id :gateway.user-auth/email
-        value @(subscribe [:gateway.user-auth/field-value field-id])
-        status @(subscribe [:gateway.user-auth/field-status field-id])
-        errors @(subscribe [:gateway.user-auth/field-errors field-id])]
-    [:div.option.email
-     {:class (name status)}
-     [:h2 "Email"]
-     [:label
-      [:div.field
-       [:input {:type "email"
-                :placeholder "you@awesome.com"
-                :auto-complete true
-                :auto-correct "off"
-                :auto-capitalize "off"
-                :spell-check "false"
-                :auto-focus true
-                :value value
-                :on-blur (fn [_]
-                           (dispatch [:gateway.user-auth/blur field-id]))
-                :on-change (fn [e]
-                             (let [value (.. e -target -value)]
-                               (dispatch [:gateway.user-auth/update-value field-id value])))
-                }]]
-      (when (= :invalid status)
-        [:div.error-message (first errors)])
-      ; TODO
-      #_[:p "Or, log in with: "
-         [auth-providers-view]]]]))
+  [field-view
+   {:id :gateway.user-auth/email
+    :ns :gateway.user-auth
+    :title "Email"
+    :class "email"
+    :type "email"
+    :placeholder "you@awesome.com"
+    :auto-complete true
+    :auto-focus true
+    ; :help-text [:span "Or, log in with: " [auth-providers-view]]
+    }])
 
 (defn returning-password-field-view []
-  (let [field-id :gateway.user-auth/password
-        value @(subscribe [:gateway.user-auth/field-value field-id])
-        status @(subscribe [:gateway.user-auth/field-status field-id])
-        errors @(subscribe [:gateway.user-auth/field-errors field-id])]
-    [:div.option.password
-     {:class (name status)}
-     [:h2 "Password"]
-     [:label
-      [:div.field
-       [:input {:type "password"
-                :placeholder "•••••••••••"
-                :value value
-                :on-blur (fn [_]
-                           (dispatch [:gateway.user-auth/blur field-id]))
-                :on-change (fn [e]
-                             (let [value (.. e -target -value)]
-                               (dispatch [:gateway.user-auth/update-value field-id value])))}]]]
-     (when (= :invalid status)
-       [:div.error-message (first errors)])
-     [:p "Don't remember?"
-      [:button
-       {:type "button"
-        :on-click (fn [e]
-                    (.preventDefault e)
-                    (dispatch [:gateway.user-auth/set-mode :request-password-reset]))}
-       "Request a Password Reset"]]]))
+  [field-view
+   {:id :gateway.user-auth/password
+    :ns :gateway.user-auth
+    :title "Password"
+    :class "password"
+    :type "password"
+    :placeholder "•••••••••••"
+    :help-text [:span "Don't remember?"
+                [:button
+                 {:type "button"
+                  :on-click (fn [e]
+                              (.preventDefault e)
+                              (dispatch [:gateway.user-auth/set-mode :request-password-reset]))}
+                 "Request a Password Reset"]]}])
 
 (defn login-button-view []
   (let [fields-valid?
@@ -174,55 +145,27 @@
     [error-view]])
 
 (defn new-password-field-view []
-  (let [field-id :gateway.user-auth/new-password
-        value @(subscribe [:gateway.user-auth/field-value field-id])
-        status @(subscribe [:gateway.user-auth/field-status field-id])
-        errors @(subscribe [:gateway.user-auth/field-errors field-id])]
-    [:div.option.password
-     {:class (name status)}
-     [:h2 "Password"]
-     [:label
-      [:div.field
-       [:input {:type "password"
-                :placeholder "•••••••••••"
-                :value value
-                :on-blur (fn [_]
-                           (dispatch [:gateway.user-auth/blur field-id]))
-                :on-change (fn [e]
-                             (let [value (.. e -target -value)]
-                               (dispatch [:gateway.user-auth/update-value field-id value])))}]]]
-     (when (= :invalid status)
-       [:div.error-message (first errors)])
-     [:p "At least 8 characters. More is better!"]]))
+  [field-view
+   {:id :gateway.user-auth/new-password
+    :ns :gateway.user-auth
+    :title "Password"
+    :class "password"
+    :type "password"
+    :placeholder "•••••••••••"
+    :help-text "At least 8 characters. More is better!"}])
 
 (defn new-email-field-view []
-  (let [field-id :gateway.user-auth/email
-        value @(subscribe [:gateway.user-auth/field-value field-id])
-        status @(subscribe [:gateway.user-auth/field-status field-id])
-        errors @(subscribe [:gateway.user-auth/field-errors field-id])]
-    [:div.option.email
-     {:class (name status)}
-     [:h2 "Email"]
-     [:label
-      [:div.field
-       [:input {:type "email"
-                :placeholder "you@awesome.com"
-                :auto-complete true
-                :auto-correct "off"
-                :auto-capitalize "off"
-                :spell-check "false"
-                :auto-focus true
-                :value value
-                :on-blur (fn [_]
-                           (dispatch [:gateway.user-auth/blur field-id]))
-                :on-change (fn [e]
-                             (let [value (.. e -target -value)]
-                               (dispatch [:gateway.user-auth/update-value field-id value])))}]]
-      (when (= :invalid status)
-        [:div.error-message (first errors)])
-      ; TODO
-      #_[:p "Or, register with: "
-         [auth-providers-view]]]]))
+  [field-view
+   {:id :gateway.user-auth/email
+    :ns :gateway.user-auth
+    :title "Email"
+    :class "email"
+    :type "email"
+    :auto-complete true
+    :auto-focus true
+    :placeholder "you@awesome.com"
+    ;:help-text [:span "Or, register with: " [auth-providers-view]]
+    }])
 
 (defn register-button-view []
   (let [fields-valid?

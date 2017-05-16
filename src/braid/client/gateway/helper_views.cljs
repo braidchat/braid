@@ -2,27 +2,40 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]))
 
+(defn with-ns [ns n]
+  (keyword (name ns) (name n)))
+
 (defn field-view [opts]
   (let [field-id (opts :id)
-        value @(subscribe [:gateway.action.reset-password/field-value field-id])
-        status @(subscribe [:gateway.action.reset-password/field-status field-id])
-        errors @(subscribe [:gateway.action.reset-password/field-errors field-id])]
+        value @(subscribe [(with-ns (opts :ns) :field-value) field-id])
+        status @(subscribe [(with-ns (opts :ns) :field-status) field-id])
+        errors @(subscribe [(with-ns (opts :ns) :field-errors) field-id])
+        on-change-transform (or (opts :on-change-transform) identity)]
     [:div.option
      {:class (str (opts :class) " " (name status))}
      [:h2 (opts :title)]
      [:label
       [:div.field
+       (when (opts :pre-input)
+         (opts :pre-input))
        [:input {:type (opts :type)
                 :placeholder (opts :placeholder)
+                :auto-complete (opts :auto-complete)
+                :auto-correct "off"
+                :auto-capitalize "off"
+                :spell-check "false"
+                :auto-focus (opts :auto-focus)
                 :value value
+                :on-key-down (or (opts :on-key-down) (fn [_]))
                 :on-blur (fn [_]
-                           (dispatch [:gateway.action.reset-password/blur field-id]))
+                           (dispatch [(with-ns (opts :ns) :blur) field-id]))
                 :on-change (fn [e]
-                             (let [value (.. e -target -value)]
-                               (dispatch [:gateway.action.reset-password/update-value field-id value])))}]]
+                             (let [value (on-change-transform (.. e -target -value))]
+                               (dispatch [(with-ns (opts :ns) :update-value) field-id value])))}]]
       (when (= :invalid status)
         [:div.error-message (first errors)])
-      [:p.explanation (opts :help-text)]]]))
+      (when (opts :help-text)
+        [:div.explanation (opts :help-text)])]]))
 
 (defn button-view [opts]
   (let [fields-valid?
