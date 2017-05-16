@@ -2,6 +2,7 @@
   (:require
     [clojure.set :refer [difference intersection]]
     [clojure.string :as string]
+    [environ.core :refer [env]]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
     [braid.common.schema :refer [new-message-valid? upload-valid?]]
@@ -556,7 +557,9 @@
       user-id
       [:braid.client/init-data
        {:user-id user-id
-        :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
+        :version-checksum (if (= "prod" (env :environment))
+                            (digest/from-file "public/js/prod/desktop.js")
+                            (digest/from-file "public/js/dev/desktop.js"))
         :user-groups (group/user-groups user-id)
         :user-threads (thread/open-threads-for-user user-id)
         :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)

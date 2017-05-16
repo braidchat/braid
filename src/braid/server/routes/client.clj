@@ -99,7 +99,7 @@
     (get-html "gateway" {:gateway_action "create-group"}))
 
   (GET "/gateway/log-in" []
-    (get-html "gateway" {:gateway_action "log-in"}))
+    (get-html "gateway" {:gateway_action "log-in-external"}))
 
   ; everything else
   (GET "/*" []

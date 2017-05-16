@@ -126,7 +126,7 @@
        "An error occured. Please try again."])))
 
 (defn create-group-view []
-  (let [disabled? (not @(subscribe [:gateway.user-auth/user]))]
+  (let [disabled? @(subscribe [:gateway.action.create-group/disabled?])]
     [:div.section.create-group {:class (when disabled? "disabled")}
      [:form
       {:on-submit (fn [e]

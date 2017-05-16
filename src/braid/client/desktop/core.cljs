@@ -6,6 +6,8 @@
     [braid.client.bots.subs]
     [braid.client.core.events]
     [braid.client.core.subs]
+    [braid.client.gateway.events]
+    [braid.client.gateway.subs]
     [braid.client.group-admin.events]
     [braid.client.group-admin.subs]
     [braid.client.invites.events]
@@ -35,8 +37,6 @@
   (render)
 
   (router/init)
-
-  (dispatch [:check-auth])
 
   (quests/install-quests-handler!))
 

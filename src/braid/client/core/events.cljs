@@ -92,10 +92,11 @@
                              "#" (or (name->open-tag-id state tag-name)
                                       tag-name))))))
 
-(reg-event-db
+(reg-event-fx
   :initialize-db
   (fn [_ _]
-    store/initial-state))
+    {:db store/initial-state
+     :dispatch [:gateway/initialize :log-in]}))
 
 (reg-event-db
   :new-message-text
@@ -415,15 +416,6 @@
     {:websocket-send (list [:braid.server/remove-from-group args])
      :dispatch [:redirect-to-first-group]}))
 
-(reg-event-fx
-  :check-auth
-  (fn [{state :db} _]
-    {:db (assoc state :login-state :auth-check)
-     :edn-xhr {:uri "/session"
-               :method :get
-               :on-complete (fn [_] (dispatch [:start-socket]))
-               :on-error (fn [_] (dispatch [:set-login-state :login-form]))}}))
-
 (reg-event-db
   :set-login-state
   (fn [state [_ login-state]]
@@ -471,11 +463,11 @@
   (fn [cofx [_ _]]
     {:edn-xhr {:uri "/session"
                :method :delete
-               :params {:csrf-token (:csrf-token @sync/chsk-state)}
+               :headers {"x-csrf-token" (:csrf-token @sync/chsk-state)}
                :on-complete (fn [data]
                               (sync/disconnect!)
                               (dispatch [:initialize-db])
-                              (dispatch [:set-login-state :login-form]))}}))
+                              (dispatch [:set-login-state :gateway]))}}))
 
 (reg-event-fx
   :set-group-and-page
@@ -646,7 +638,7 @@
   :core/websocket-needs-auth
   (fn [{state :db} _]
     {:dispatch-n [[:initialize-db]
-                  [:set-login-state :login-form]]}))
+                  [:set-login-state :gateway]]}))
 
 (reg-event-fx
   :core/websocket-update-next-reconnect

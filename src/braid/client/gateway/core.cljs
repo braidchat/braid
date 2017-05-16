@@ -4,15 +4,15 @@
     [re-frame.core :refer [dispatch-sync]]
     [braid.client.gateway.events]
     [braid.client.gateway.subs]
-    [braid.client.gateway.views :refer [app-view]]))
+    [braid.client.gateway.views :refer [gateway-view]]))
 
 (enable-console-print!)
 
 (defn render []
-  (r/render [app-view] (. js/document (getElementById "app"))))
+  (r/render [gateway-view] (. js/document (getElementById "app"))))
 
 (defn ^:export init []
-  (dispatch-sync [:gateway/initialize])
+  (dispatch-sync [:gateway/initialize (keyword (aget js/window "gateway_action"))])
   (render))
 
 (defn ^:export reload []

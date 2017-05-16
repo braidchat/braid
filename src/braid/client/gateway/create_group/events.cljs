@@ -17,12 +17,13 @@
                               :validations validations
                               :should-validate? false
                               :fields (helpers/init-fields validations)}))
-     :dispatch [:gateway.create-group/validate-all]}))
+     :dispatch-n [[:gateway.user-auth/initialize :register]
+                  [:gateway.create-group/validate-all]]}))
 
 (reg-event-fx
-  :gateway.action.create-group/ready
-  (fn [{state :db} _]
-    {:db (assoc-in state [:create-group :disabled?] false)}))
+  :gateway.action.create-group/change-user-status
+  (fn [{state :db} [_ logged-in?]]
+    {:db (assoc-in state [:create-group :disabled?] (not logged-in?))}))
 
 (reg-event-fx
   :gateway.action.create-group/guess-group-url

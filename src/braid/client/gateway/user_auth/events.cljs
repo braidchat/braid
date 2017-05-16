@@ -28,7 +28,10 @@
     {:db (-> state
            (assoc-in [:user-auth :user] data)
            (assoc-in [:user-auth :checking?] false)
-           (assoc-in [:user-auth :oauth-provider] nil))}))
+           (assoc-in [:user-auth :oauth-provider] nil))
+     :dispatch (if data
+                 [:gateway/change-user-status true]
+                 [:gateway/change-user-status false])}))
 
 (reg-event-fx
   :gateway.user-auth/set-csrf-token
