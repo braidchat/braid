@@ -10,7 +10,6 @@
     {:nav-handler (fn [path]
                     (secretary/dispatch! path))
      :path-exists? (fn [path]
-                     (println "path exists?" path (secretary/locate-route path))
                      (secretary/locate-route path))}))
 
 (defn dispatch-current-path! []
