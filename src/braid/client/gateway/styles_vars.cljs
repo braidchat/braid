@@ -22,11 +22,12 @@
 (defn input-field-mixin []
   {:font-size "1.25rem"
    :font-family font-family
-   :padding "0.4em"
+   :padding "0 0.4em"
    :width "100%"
    :box-sizing "border-box"
    :border [["1px" "solid" field-border-color]]
-   :line-height 1.5
+   :line-height "2em"
+   :height "2em"
    :border-radius border-radius})
 
 (defn small-text-mixin []

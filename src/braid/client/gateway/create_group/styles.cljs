@@ -35,26 +35,21 @@
          [:.field
           {:white-space "nowrap"}
 
-          ["input[type=text]"
-           {:text-align "right"
-            :border-radius [[vars/border-radius 0 0 vars/border-radius]]
-            :width "10em"
-            :vertical-align "top" }]
-
-          [:span
+          [:>span.domain
            (vars/input-field-mixin)
            {:width "inherit"
-            :border-left "none"
+            :border-right "none"
             :display "inline-block"
             :vertical-align "top"
             :background vars/disabled-input-color
             :color vars/secondary-text-color
-            :border-radius [[0 vars/border-radius vars/border-radius 0]]}
+            :border-radius [[vars/border-radius 0 0 vars/border-radius]]}]
 
-           [:&::after
-            {:content "\"\""
-             :width "0.15em"
-             :display "inline-block"}]]]]
+          ["input[type=text]"
+           {:text-align "left"
+            :border-radius [[0 vars/border-radius vars/border-radius 0]]
+            :width "10em"
+            :vertical-align "top"}]]]
 
         [:&.group-type
 

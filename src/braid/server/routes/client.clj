@@ -32,19 +32,6 @@
 
 (defroutes desktop-client-routes
 
-  ; used by forward-proxy for domain redirect
-  ; ie. slug.domain.com
-  ;       -> www.domain.com/groups/slug
-  ;       -> www.domain.com/group-uuid
-  (GET "/groups/:slug" [slug]
-    (if-let [group (group/group-by-slug slug)]
-      {:status 302
-       :headers {"Location" (str "/" (group :id) "/inbox")}
-       :body nil}
-      {:status 404
-       :headers {"Content-Type" "text/plain"}
-       :body "No such group exists."}))
-
   ; public group page
   (GET "/group/:group-name" [group-name :as req]
     (if-let [group (group/public-group-with-name group-name)]
@@ -100,6 +87,12 @@
 
   (GET "/gateway/log-in" []
     (get-html "gateway" {:gateway_action "log-in-external"}))
+
+  (GET "/:slug" [slug]
+    (when-let [group (group/group-by-slug slug)]
+      {:status 302
+       :headers {"Location" (str "/groups/" (group :id) "/inbox")}
+       :body nil}))
 
   ; everything else
   (GET "/*" []

@@ -39,6 +39,7 @@
      [:label
       [:h2 "Group URL"]
       [:div.field
+       [:span.domain "braid.chat∕"]
        [:input {:type "text"
                 :placeholder "awesome"
                 :autocomplete false
@@ -60,8 +61,7 @@
                                  (.preventDefault e)))
                 :on-change (fn [e]
                              (let [value (string/lower-case (.. e -target -value))]
-                               (dispatch [:gateway.create-group/update-value field-id value])))}]
-       [:span ".braid.chat"]]
+                               (dispatch [:gateway.create-group/update-value field-id value])))}]]
       (when (= :invalid status)
         [:div.error-message (first errors)])
       [:div.explanation
