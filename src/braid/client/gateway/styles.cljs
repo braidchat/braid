@@ -98,7 +98,10 @@
          {:color vars/placeholder-color}]
 
         [:>.explanation
-         (vars/small-text-mixin)]
+         (vars/small-text-mixin)
+
+         [:button
+          (vars/small-button-mixin)]]
 
         [:>.error-message
          {:position "absolute"
