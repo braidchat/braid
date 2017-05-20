@@ -203,10 +203,15 @@
   (let [sender (subscribe [:user (message :user-id)])
         current-group (subscribe [:open-group-id])]
     (fn [message embed-update-chan]
-      (let [sender-path (if (@sender :bot?)
+      (let [sender-path (cond
+                          (nil? @sender) ""
+
+                          (:bot? @sender)
                           (routes/bots-path {:group-id @current-group})
-                          (routes/search-page-path {:group-id @current-group
-                                                    :query (str "@" (@sender :nickname))}))]
+
+                          :else (routes/search-page-path
+                                  {:group-id @current-group
+                                   :query (str "@" (:nickname @sender))}))]
         [:div.message {:class (str " " (when (:collapse? message) "collapse")
                                    " " (if (:unseen? message) "unseen" "seen")
                                    " " (when (:first-unseen? message) "first-unseen")
@@ -219,14 +224,16 @@
              "Resend"]])
          [:a.avatar {:href sender-path
                      :tabIndex -1}
-          [:img {:src (@sender :avatar)
-                 :style {:backgroundColor (id->color (@sender :id))}}]]
+          [:img {:src (:avatar @sender)
+                 :style {:backgroundColor (id->color (:id @sender))}}]]
          [:div.info
-          (when (@sender :bot?)
+          (when (:bot? @sender)
             [:span.bot-notice "BOT"])
-          [:a.nickname {:tabIndex -1
-                        :href sender-path}
-           (@sender :nickname)]
+          (if @sender
+            [:a.nickname {:tabIndex -1
+                          :href sender-path}
+             (:nickname @sender)]
+            [:span.nickname "[DELETED]"])
           [:span.time {:title (message :created-at)}
            (helpers/format-date (message :created-at))]]
 
