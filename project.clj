@@ -107,7 +107,8 @@
 
   :min-lein-version "2.5.0"
 
-  :profiles {:dev {:dependencies [[com.datomic/datomic-free "0.9.5201"
+  :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.2.1"]
+                                  [com.datomic/datomic-free "0.9.5201"
                                    :exclusions [joda-time
                                                 com.amazonaws/aws-java-sdk
                                                 com.google.guava/guava
@@ -115,7 +116,10 @@
                                   [figwheel-sidecar "0.5.4-7"
                                    :exclusions
                                    [org.clojure/google-closure-library-third-party
-                                    com.google.javascript/closure-compiler]]]}
+                                    com.google.javascript/closure-compiler]]]
+                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+                   :plugins [[cider/cider-nrepl "0.15.0-SNAPSHOT"]
+                             [refactor-nrepl "2.3.0-SNAPSHOT"]]}
              :prod {:dependencies [[com.datomic/datomic-pro "0.9.5201"
                                     :exclusions [joda-time
                                                  com.amazonaws/aws-java-sdk
