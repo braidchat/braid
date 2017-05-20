@@ -157,17 +157,14 @@ By default, the Clojurescript REPL that starts with figwheel doesn't support com
   ```
 
 
-### The Best REPL
+### Using Emacs + CIDER instead of terminals
 
-AKA: Using Emacs + CIDER instead of terminals. Emacs users who wish to
-have their repl sessions integrated with their development environment
-should follow these steps.
+Emacs users who wish to have their repl sessions integrated with their development environment should follow these steps.
 
 First,
-[install CIDER](https://cider.readthedocs.io/en/latest/installation/). Braid
-has the nREPL middleware CIDER depends on available under the `cider`
-profile in `project.clj`. To use this profile in Emacs, you'll need to
-edit the `cider-lein-parameters` variable. There are two ways to do this:
+[install CIDER](https://cider.readthedocs.io/en/latest/installation/).
+Braid has the nREPL middleware CIDER depends on available under the `cider` profile in `project.clj`.
+To use this profile in Emacs, you'll need to edit the `cider-lein-parameters` variable. There are two ways to do this:
 
 * `M-x set-variable cider-lein-parameters`
 * `C-h v cider-lein-parameters` and then click or hit enter on
@@ -175,12 +172,9 @@ edit the `cider-lein-parameters` variable. There are two ways to do this:
 
 In either case, set the value of the variable to be `with-profiles +cider repl :headless`
 
-This should be sufficient to run a Clojure repl for server-side
-development. To also integrate a ClojureScript repl for client-side
-development, follow the instructions from the Figwheel
-wiki
-[here](https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl#integration-with-emacscider). Specifically,
-you'll need to add the following to your emacs config:
+This should be sufficient to run a Clojure repl for server-side development.
+To also integrate a ClojureScript repl for client-side development, follow the instructions from the Figwheel wiki [here](https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl#integration-with-emacscider).
+Specifically, you'll need to add the following to your emacs config:
 
 ```emacs-lisp
 ;; ~/.emacs.el or ~/.emacs.d/init.el
@@ -192,9 +186,7 @@ you'll need to add the following to your emacs config:
            (figwheel-sidecar.repl-api/cljs-repl))")
 ```
 
-With that, you should be able to just run `M-x
-cider-jack-in-clojurescript` and emacs will launch both a Clojure and
-a ClojureScript repl configured for Braid development.
+With that, you should be able to just run `M-x cider-jack-in-clojurescript` and emacs will launch both a Clojure and a ClojureScript repl configured for Braid development.
 
 
 ### Running Tests
