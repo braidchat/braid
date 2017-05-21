@@ -1,4 +1,6 @@
-(ns braid.server.schema)
+(ns braid.server.schema
+  (:require
+    [datomic.db]))
 
 (def schema
  [ ; user

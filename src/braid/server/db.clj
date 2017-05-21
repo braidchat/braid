@@ -3,6 +3,7 @@
     [braid.server.conf :refer [config]]
     [braid.server.schema :refer [schema]]
     [datomic.api :as d]
+    [datomic.db]
     [mount.core :refer [defstate]]))
 
 (defn install-schema! [db-url]
