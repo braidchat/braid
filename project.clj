@@ -122,6 +122,10 @@
                                                  com.google.guava/guava]]
                                    [org.postgresql/postgresql "9.3-1103-jdbc4"]
                                    [org.clojure/tools.nrepl "0.2.12"]]}
+             :cider [:dev {:dependencies [[com.cemerick/piggieback "0.2.1"]]
+                           :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+                           :plugins [[cider/cider-nrepl "0.15.0-SNAPSHOT"]
+                                     [refactor-nrepl "2.3.0-SNAPSHOT"]]}]
              :test [:dev]
              :uberjar [:prod
                        {:aot :all
