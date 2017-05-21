@@ -45,8 +45,8 @@
   bubbled up via ex-info, with the assertion failure message under the key
   `:braid.server.db/error`."
   [txns]
-  (let [[returns checks] ((juxt (partial extract ::return)
-                                (partial extract ::check))
+  (let [[returns checks] ((juxt (partial keep ::return)
+                                (partial keep ::check))
                           (map meta txns))]
     (when (seq checks)
       (let [test-db (d/with (db) txns)]
