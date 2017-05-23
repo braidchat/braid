@@ -235,42 +235,4 @@
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))
-          (assoc fail :body "Invalid user")))))
-
-    ; OAuth dance
-    (GET "/oauth/github"  [code state :as req]
-      (println "GITHUB OAUTH" (pr-str code) (pr-str state))
-      (if-let [{tok :access_token scope :scope :as resp}
-               (github/exchange-token code state)]
-        (do (println "GITHUB TOKEN" tok)
-            ; check scope includes email permission? Or we could just see if
-            ; getting the email fails
-            (let [email (github/email-address tok)
-                  user (user/user-with-email email)]
-              (cond
-                (nil? email) {:status 401
-                              :headers {"Content-Type" "text/plain"}
-                              :body "Couldn't get email address from github"}
-
-                user {:status 302
-                      ; TODO: when we have mobile, redirect to correct site
-                      ; (maybe part of state?)
-                      :headers {"Location" (config :site-url)}
-                      :session (assoc (req :session) :user-id (user :id))}
-
-                (:braid.server.api/register? resp)
-                (let [user-id (events/register-user! email (:braid.server.api/group-id resp))]
-                  {:status 302
-                   ; TODO: when we have mobile, redirect to correct site
-                   ; (maybe part of state?)
-                   :headers {"Location" (config :site-url)}
-                   :session (assoc (req :session) :user-id user-id)})
-
-                :else
-                {:status 401
-                 ; TODO: handle failure better
-                 :headers {"Content-Type" "text/plain"}
-                 :body "No such user"
-                 :session nil})))
-        {:status 400
-         :body "Couldn't exchange token with github"})))
+          (assoc fail :body "Invalid user"))))))

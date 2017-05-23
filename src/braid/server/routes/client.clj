@@ -71,17 +71,6 @@
        :headers {"Content-Type" "text/plain"}
        :body "Bad user or token"}))
 
-  (GET "/github-login" []
-    {:status 302
-     :headers {"Location" (github/build-authorize-link {:register? false})}})
-
-  (GET "/github-register" [group]
-    {:status 302
-     :headers
-     {"Location"
-      (github/build-authorize-link {:register? true
-                                    :group-id (java.util.UUID/fromString group)})}})
-
   (GET "/gateway/oauth/:provider/auth" [provider]
     (case provider
       "github"
