@@ -82,6 +82,26 @@
       (github/build-authorize-link {:register? true
                                     :group-id (java.util.UUID/fromString group)})}})
 
+  (GET "/gateway/oauth/:provider/auth" [provider]
+    (case provider
+      "github"
+      {:status 302
+       :headers {"Location" (github/build-authorize-link {})}}
+      ; else
+      {:status 400
+       :headers {"Content-Type" "text/plain"}
+       :body "Incorrect provider"}))
+
+  (GET "/gateway/oauth/:provider/post-auth" [provider]
+    (case provider
+      "github"
+      (clostache/render-resource
+        "public/oauth-post-auth.html" {})
+      ; else
+      {:status 400
+       :headers {"Content-Type" "text/plain"}
+       :body "Incorrect provider"}))
+
   (GET "/gateway/create-group" []
     (get-html "gateway" {:gateway_action "create-group"}))
 

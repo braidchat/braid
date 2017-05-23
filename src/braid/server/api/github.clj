@@ -14,11 +14,7 @@
   "This is a function instead of a var because we need to access config, which
   wouldn't be started at compile-time"
   []
-  (let [domain (config :api-domain)
-        proto (str "http"
-                   (when-not (string/starts-with? domain "localhost") "s")
-                   "://")]
-    (str proto domain "/oauth/github")))
+  (str (config :site-url) "/gateway/oauth/github/post-auth"))
 
 (defn build-authorize-link
   [{:keys [register? group-id]}]

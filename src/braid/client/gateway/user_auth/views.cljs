@@ -1,20 +1,22 @@
 (ns braid.client.gateway.user-auth.views
   (:require
     [clojure.string :as string]
-    [re-frame.core :refer [dispatch subscribe]]
+    [re-frame.core :refer [dispatch dispatch-sync subscribe]]
     [braid.client.gateway.helper-views :refer [form-view field-view]]))
 
 (defn auth-providers-view []
   [:span.auth-providers
    (doall
-     (for [provider [:github :google :facebook]]
+     (for [provider [:github]]
        ^{:key provider}
        [:button
         {:type "button"
          :class (name provider)
          :on-click (fn [e]
                      (.preventDefault e)
-                     (dispatch [:gateway.user-auth/remote-oauth provider]))}
+                     ; must use dispatch-sync
+                     ; b/c dispatch triggers pop-up blocker
+                     (dispatch-sync [:gateway.user-auth/open-oauth-window provider]))}
         (string/capitalize (name provider))]))])
 
 (defn returning-email-field-view []
@@ -27,8 +29,7 @@
     :placeholder "you@awesome.com"
     :auto-complete true
     :auto-focus true
-    ; :help-text [:span "Or, log in with: " [auth-providers-view]]
-    }])
+    :help-text [:span "Or, log in with: " [auth-providers-view]]}])
 
 (defn returning-password-field-view []
   [field-view
@@ -164,8 +165,7 @@
     :auto-complete true
     :auto-focus true
     :placeholder "you@awesome.com"
-    ;:help-text [:span "Or, register with: " [auth-providers-view]]
-    }])
+    :help-text [:span "Or, register with: " [auth-providers-view]]}])
 
 (defn register-button-view []
   (let [fields-valid?

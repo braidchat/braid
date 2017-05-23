@@ -35,6 +35,25 @@
        :session (assoc (req :session) :user-id user-id)}
       (error-response 401 :auth-fail)))
 
+  (PUT "/session/oauth/github" [code state :as req]
+    (if-let [{:keys [access_token]} (github/exchange-token code state)]
+      (let [email (github/email-address access_token)
+            user (user/user-with-email email)]
+        (cond
+          (nil? email)
+          (error-response 500 "Couldn't get email from Github")
+
+          user
+          {:status 200
+           :session (assoc (req :session) :user-id (user :id))}
+
+          :else
+          (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
+                                                            :email email}))]
+            {:status 200
+             :session (assoc (req :session) :user-id (user :id))})))
+      (error-response 500 "Couldn't exchange token with github")))
+
   ; register a user
   (PUT "/users" [email password :as req]
     (cond
