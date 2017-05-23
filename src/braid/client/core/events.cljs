@@ -467,7 +467,8 @@
                :on-complete (fn [data]
                               (sync/disconnect!)
                               (dispatch [:initialize-db])
-                              (dispatch [:set-login-state :gateway]))}}))
+                              (dispatch [:set-login-state :gateway])
+                              (dispatch [:go-to "/"]))}}))
 
 (reg-event-fx
   :set-group-and-page
