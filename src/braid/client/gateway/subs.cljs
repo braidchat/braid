@@ -1,8 +1,8 @@
 (ns braid.client.gateway.subs
   (:require
     [re-frame.core :refer [reg-sub]]
-    [braid.client.gateway.user-auth.subs]
-    [braid.client.gateway.create-group.subs]))
+    [braid.client.gateway.forms.user-auth.subs]
+    [braid.client.gateway.forms.create-group.subs]))
 
 (reg-sub
   :gateway/action

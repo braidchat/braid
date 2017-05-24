@@ -1,4 +1,4 @@
-(ns braid.client.gateway.user-auth.styles
+(ns braid.client.gateway.forms.user-auth.styles
   (:require
     [braid.client.gateway.styles-vars :as vars]
     [braid.client.ui.styles.fontawesome :as fontawesome]

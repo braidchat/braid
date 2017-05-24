@@ -1,4 +1,4 @@
-(ns braid.client.gateway.create-group.styles
+(ns braid.client.gateway.forms.create-group.styles
   (:require
     [braid.client.gateway.styles-vars :as vars]
     [braid.client.ui.styles.fontawesome :as fontawesome]))

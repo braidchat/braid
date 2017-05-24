@@ -1,4 +1,4 @@
-(ns braid.client.gateway.user-auth.views
+(ns braid.client.gateway.forms.user-auth.views
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [dispatch dispatch-sync subscribe]]

@@ -1,4 +1,4 @@
-(ns braid.client.gateway.create-group.validations
+(ns braid.client.gateway.forms.create-group.validations
   (:require
     [clojure.string :as string]
     [braid.client.xhr :as xhr]))

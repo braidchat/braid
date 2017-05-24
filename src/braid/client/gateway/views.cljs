@@ -5,10 +5,10 @@
     [braid.client.gateway.styles :as styles]
     [braid.client.ui.styles.imports :refer [imports]]
     [braid.client.gateway.views.join-group :refer [join-group-view]]
-    [braid.client.gateway.create-group.views :refer [create-group-view]]
-    [braid.client.gateway.create-group.styles :refer [create-group-styles]]
-    [braid.client.gateway.user-auth.views :refer [user-auth-view]]
-    [braid.client.gateway.user-auth.styles :refer [user-styles]]))
+    [braid.client.gateway.forms.create-group.views :refer [create-group-view]]
+    [braid.client.gateway.forms.create-group.styles :refer [create-group-styles]]
+    [braid.client.gateway.forms.user-auth.views :refer [user-auth-view]]
+    [braid.client.gateway.forms.user-auth.styles :refer [user-styles]]))
 
 (defn style-view []
   [:style
