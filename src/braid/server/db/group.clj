@@ -50,14 +50,6 @@
        :group/settings
        ((fnil edn/read-string "{}"))))
 
-(defn public-group-with-name
-  [group-name]
-  (when-let [group (-> (d/pull (db/db) group-pull-pattern
-                               [:group/name group-name])
-                       db->group)]
-    (when (:public? (group-settings (group :id)))
-      group)))
-
 (defn group-tags
   [group-id]
   (->> (d/q '[:find (pull ?t [:tag/id

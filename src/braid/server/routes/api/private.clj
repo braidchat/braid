@@ -79,6 +79,22 @@
         (db/run-txns! (group/user-make-group-admin-txn user-id group-id))
         (edn-response {:group-id group-id}))))
 
+  (PUT "/groups/:group-id/join" [group-id :as req]
+    (let [group-id (java.util.UUID/fromString group-id)]
+      (cond
+        ; logged in?
+        (not (logged-in? req))
+        (error-response 401 "Must be logged in.")
+
+        ; public group?
+        (not (:public? (group/group-by-id group-id)))
+        (error-response 401 "Can only join public group via this endpoint")
+
+        :else
+        (do
+          (db/run-txns! (group/user-join-group-txn (current-user-id req) group-id))
+          (edn-response {:status "OK"})))))
+
   (GET "/changelog" []
     (edn-response {:braid/ok
                    (-> (io/resource "CHANGELOG.md")

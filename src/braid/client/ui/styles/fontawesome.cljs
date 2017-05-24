@@ -10,7 +10,8 @@
   :angle-double-right \uf101
   :warning \uf071
   :check-circle \uf00c
-  :spinner \uf110})
+  :spinner \uf110
+  :users \uf0c0})
 
 (defn mixin [code]
   {:font-family "fontawesome"

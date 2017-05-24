@@ -17,7 +17,7 @@
      :users {}
      :tags {}
      :groups {}
-     :page {:type :inbox}
+     :page {:type nil}
      :session nil
      :errors []
      :preferences {}

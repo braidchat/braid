@@ -32,17 +32,6 @@
 
 (defroutes desktop-client-routes
 
-  ; public group page
-  (GET "/group/:group-name" [group-name :as req]
-    (if-let [group (group/public-group-with-name group-name)]
-      (clostache/render-resource "templates/public_group_desktop.html.mustache"
-                                 {:group-name (group :name)
-                                  :group-id (group :id)
-                                  :api-domain (config :api-domain)})
-      {:status 403
-       :headers {"Content-Type" "text/plain"}
-       :body "No such public group"}))
-
   ; invite accept page
   (GET "/accept" [invite :<< as-uuid tok]
     (if (and invite tok)
@@ -91,6 +80,9 @@
        :headers {"Content-Type" "text/plain"}
        :body "Incorrect provider"}))
 
+  (GET "/gateway/join-group/:group-id" [group-id]
+    (get-html "gateway" {:gateway_action "join-group"}))
+
   (GET "/gateway/create-group" []
     (get-html "gateway" {:gateway_action "create-group"}))
 
@@ -100,7 +92,7 @@
   (GET "/:slug" [slug]
     (when-let [group (group/group-by-slug slug)]
       {:status 302
-       :headers {"Location" (str "/groups/" (group :id) "/inbox")}
+       :headers {"Location" (str "/groups/" (group :id) )}
        :body nil}))
 
   ; everything else

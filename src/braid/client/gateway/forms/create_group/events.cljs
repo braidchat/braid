@@ -54,7 +54,7 @@
 (reg-event-fx
   :gateway.action.create-group/handle-registration-response
   (fn [{state :db} [_ response]]
-    (set! js/window.location (str "/" (response :group-id) "/inbox"))
+    (set! js/window.location (str "/groups/" (response :group-id) ))
     {:db (assoc-in state [:create-group :sending?] false)}))
 
 (reg-event-fx

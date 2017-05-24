@@ -152,6 +152,7 @@
    :group/name
    :group/settings
    {:group/admins [:user/id]}
+   {:group/user [:user/id]}
    {:bot/_group bot-display-pull-pattern}])
 
 (defn db->group [e]
@@ -163,7 +164,8 @@
      :intro (settings :intro)
      :avatar (settings :avatar)
      :public? (get settings :public? false)
-     :bots (into #{} (map db->bot-display) (:bot/_group e))}))
+     :bots (into #{} (map db->bot-display) (:bot/_group e))
+     :users-count (count (e :group/user))}))
 
 (def upload-pull-pattern
   [:upload/id
