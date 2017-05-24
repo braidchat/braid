@@ -95,14 +95,44 @@
                :on-error (fn [_]
                            (dispatch [:gateway.user-auth/set-user nil]))}}))
 
+(defn message-event-handler [e]
+  (dispatch [:gateway.user-auth/remote-oauth
+             (.. e -data -code)
+             (.. e -data -state)]))
+
+(defn init-message-listener! []
+  ; using a named function, b/c an anonymous function would  get registered multiple times
+  (js/window.addEventListener "message" message-event-handler))
+
 (reg-event-fx
-  :gateway.user-auth/remote-oauth
+  :gateway.user-auth/open-oauth-window
   (fn [{state :db} [_ provider]]
-    ; TODO kick off oauth process
-    (dispatch [:gateway.user-auth/fake-remote-auth])
+    (init-message-listener!)
+    (case provider
+      :github
+      (.open js/window
+             "/gateway/oauth/github/auth"
+             "GitHub OAuth"
+             "width=300,height=400"))
     {:db (-> state
              clear-error
              (assoc-in [:user-auth :oauth-provider] provider))}))
+
+(reg-event-fx
+  :gateway.user-auth/remote-oauth
+  (fn [_ [_ code state]]
+    {:edn-xhr {:uri "/session/oauth/github"
+               :method :put
+               :params {:code code
+                        :state state}
+               :on-complete
+               (fn [user]
+                 (dispatch [:gateway.user-auth/remote-check-auth]))
+               :on-error
+               (fn [error]
+                 (when-let [k (get-in error [:response :error])]
+                   (dispatch [:gateway.user-auth/set-error k]))
+                 (dispatch [:gateway.user-auth/set-user nil]))}}))
 
 (reg-event-fx
   :gateway.user-auth/remote-log-in

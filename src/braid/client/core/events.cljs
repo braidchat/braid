@@ -414,7 +414,7 @@
   :remove-from-group
   (fn [cofx [ _ {:keys [group-id user-id] :as args}]]
     {:websocket-send (list [:braid.server/remove-from-group args])
-     :dispatch [:redirect-to-first-group]}))
+     :dispatch [:redirect-from-root]}))
 
 (reg-event-db
   :set-login-state
@@ -467,23 +467,27 @@
                :on-complete (fn [data]
                               (sync/disconnect!)
                               (dispatch [:initialize-db])
-                              (dispatch [:set-login-state :gateway]))}}))
+                              (dispatch [:set-login-state :gateway])
+                              (dispatch [:go-to "/"]))}}))
 
 (reg-event-fx
   :set-group-and-page
   (fn [{state :db :as cofx} [_ [group-id page-id]]]
     (if (or (nil? group-id) (some? (get-in state [:groups group-id])))
       {:db (assoc state :open-group-id group-id :page page-id)}
-      {:dispatch [:redirect-to-first-group]})))
+      {:dispatch [:redirect-from-root]})))
 
 (reg-event-fx
-  :redirect-to-first-group
+  :redirect-from-root
   (fn [{state :db :as cofx} _]
-    {:redirect-to
-     (when-let [group-id (-> (helpers/ordered-groups state)
+    (if (state :session)
+      {:redirect-to
+       (if-let [group-id (-> (helpers/ordered-groups state)
                              first
                              :id)]
-       (routes/inbox-page-path {:group-id group-id}))}))
+         (routes/inbox-page-path {:group-id group-id})
+         (routes/other-path {:page-id "group-explore"}))}
+      {})))
 
 (reg-event-db
   :set-page-loading
@@ -567,7 +571,7 @@
                                      sidebar-order)})
               state))))
      :dispatch [(when (= group-id (state :open-group-id))
-                 :redirect-to-first-group)]}))
+                 :redirect-from-root)]}))
 
 (reg-event-db
   :add-open-thread

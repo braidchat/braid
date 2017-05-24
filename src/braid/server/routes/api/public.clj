@@ -35,6 +35,25 @@
        :session (assoc (req :session) :user-id user-id)}
       (error-response 401 :auth-fail)))
 
+  (PUT "/session/oauth/github" [code state :as req]
+    (if-let [{:keys [access_token]} (github/exchange-token code state)]
+      (let [email (github/email-address access_token)
+            user (user/user-with-email email)]
+        (cond
+          (nil? email)
+          (error-response 500 "Couldn't get email from Github")
+
+          user
+          {:status 200
+           :session (assoc (req :session) :user-id (user :id))}
+
+          :else
+          (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
+                                                            :email email}))]
+            {:status 200
+             :session (assoc (req :session) :user-id (user :id))})))
+      (error-response 500 "Couldn't exchange token with github")))
+
   ; register a user
   (PUT "/users" [email password :as req]
     (cond
@@ -216,42 +235,4 @@
                :headers {"Location" (str proto "//" referrer-domain)}
                :session (assoc (req :session) :user-id (user :id))
                :body ""}))
-          (assoc fail :body "Invalid user")))))
-
-    ; OAuth dance
-    (GET "/oauth/github"  [code state :as req]
-      (println "GITHUB OAUTH" (pr-str code) (pr-str state))
-      (if-let [{tok :access_token scope :scope :as resp}
-               (github/exchange-token code state)]
-        (do (println "GITHUB TOKEN" tok)
-            ; check scope includes email permission? Or we could just see if
-            ; getting the email fails
-            (let [email (github/email-address tok)
-                  user (user/user-with-email email)]
-              (cond
-                (nil? email) {:status 401
-                              :headers {"Content-Type" "text/plain"}
-                              :body "Couldn't get email address from github"}
-
-                user {:status 302
-                      ; TODO: when we have mobile, redirect to correct site
-                      ; (maybe part of state?)
-                      :headers {"Location" (config :site-url)}
-                      :session (assoc (req :session) :user-id (user :id))}
-
-                (:braid.server.api/register? resp)
-                (let [user-id (events/register-user! email (:braid.server.api/group-id resp))]
-                  {:status 302
-                   ; TODO: when we have mobile, redirect to correct site
-                   ; (maybe part of state?)
-                   :headers {"Location" (config :site-url)}
-                   :session (assoc (req :session) :user-id user-id)})
-
-                :else
-                {:status 401
-                 ; TODO: handle failure better
-                 :headers {"Content-Type" "text/plain"}
-                 :body "No such user"
-                 :session nil})))
-        {:status 400
-         :body "Couldn't exchange token with github"})))
+          (assoc fail :body "Invalid user"))))))

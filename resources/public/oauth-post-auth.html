@@ -1,0 +1,12 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <script>
+      var code = decodeURIComponent(window.location.toString().match(/code=(.*)&/, '')[1]);
+      var state = decodeURIComponent(window.location.toString().match(/state=(.*)/, '')[1]);
+      window.opener.postMessage({code: code, state: state}, window.location);
+      window.close();
+    </script>
+  </body>
+</html>

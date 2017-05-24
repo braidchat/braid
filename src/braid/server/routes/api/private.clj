@@ -8,7 +8,6 @@
     [braid.server.db.group :as group]
     [braid.server.db.user :as user]
     [braid.server.api.link-extract :as link-extract]
-    [braid.server.api.github :as github]
     [braid.server.markdown :refer [markdown->hiccup]]
     [braid.server.routes.helpers :refer [current-user current-user-id logged-in?
                                          error-response edn-response
