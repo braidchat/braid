@@ -27,6 +27,18 @@
 
 (defroutes api-public-routes
 
+  (GET "/groups/:group-id" [group-id]
+    (let [group (group/group-by-id (java.util.UUID/fromString group-id))]
+      (if (group :id)
+        (edn-response {:public? (group :public?)
+                       :id (group :id)
+                       :slug (group :slug)
+                       :name (group :name)
+                       :intro (group :intro)
+                       :avatar (group :avatar)
+                       :users-count (group :users-count)})
+        (error-response 400 "No group with that id found"))))
+
   ; log in
   (PUT "/session" [email password :as req]
     (if-let [user-id (when (and email password)
@@ -171,47 +183,7 @@
                 (let [referer (get-in req [:headers "referer"] (config :site-url))
                       [proto _ referrer-domain] (string/split referer #"/")]
                   {:status 302
-                   :headers {"Location" (str proto "//" referrer-domain "/" group-id "/inbox")}
-                   :body ""}))
-              (assoc bad-resp :body "Not logged in")))))))
-
-  ; join a public group
-  (POST "/public-register" [group-id email :as req]
-    (let [bad-resp {:status 400 :headers {"Content-Type" "text/plain"}}]
-      (if-not group-id
-        (assoc bad-resp :body "Missing group id")
-        (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (group/group-settings group-id)]
-          (if-not (get group-settings :public?)
-            (assoc bad-resp :body "No such group or the group is private")
-            (if (string/blank? email)
-              (assoc bad-resp :body "Invalid email")
-              (if (user/user-with-email email)
-                (assoc bad-resp
-                       :body (str "A user is already registered with that email.\n"
-                                  "Log in and try joining"))
-                (let [id (events/register-user! email group-id)
-                      referer (get-in req [:headers "referer"] (config :site-url))
-                      [proto _ referrer-domain] (string/split referer #"/")]
-                  {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
-                   :session (assoc (req :session) :user-id id)
-                   :body ""}))))))))
-
-  (POST "/public-join" [group-id :as req]
-    (let [bad-resp {:status 400 :headers {"Content-Type" "text/plain"}}]
-      (if-not group-id
-        (assoc bad-resp :body "Missing group id")
-        (let [group-id (java.util.UUID/fromString group-id)
-              group-settings (group/group-settings group-id)]
-          (if-not (:public? group-settings)
-            (assoc bad-resp :body "No such group or the group is private")
-            (if-let [user-id (get-in req [:session :user-id])]
-              (do
-                (join-group user-id group-id)
-                (let [referer (get-in req [:headers "referer"] (config :site-url))
-                      [proto _ referrer-domain] (string/split referer #"/")]
-                  {:status 302
-                   :headers {"Location" (str proto "//" referrer-domain "/" group-id "/inbox")}
+                   :headers {"Location" (str proto "//" referrer-domain "/groups/" group-id)}
                    :body ""}))
               (assoc bad-resp :body "Not logged in")))))))
 

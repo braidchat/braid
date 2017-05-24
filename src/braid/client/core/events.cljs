@@ -473,8 +473,18 @@
 (reg-event-fx
   :set-group-and-page
   (fn [{state :db :as cofx} [_ [group-id page-id]]]
-    (if (or (nil? group-id) (some? (get-in state [:groups group-id])))
+    (cond
+      (nil? group-id)
+      {:db (assoc state :open-group-id nil :page page-id)}
+
+      (some? (get-in state [:groups group-id]))
       {:db (assoc state :open-group-id group-id :page page-id)}
+
+      (and group-id (not (get-in state [:groups group-id])))
+      {:dispatch-n [[:set-login-state :gateway]
+                    [:gateway/initialize :join-group]]}
+
+      :else
       {:dispatch [:redirect-from-root]})))
 
 (reg-event-fx

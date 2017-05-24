@@ -1,4 +1,4 @@
-(ns braid.client.gateway.create-group.views
+(ns braid.client.gateway.forms.create-group.views
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]]

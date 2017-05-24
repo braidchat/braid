@@ -1,4 +1,4 @@
-(ns braid.client.gateway.user-auth.subs
+(ns braid.client.gateway.forms.user-auth.subs
   (:require
     [re-frame.core :refer [reg-sub]]
     [braid.client.gateway.helpers :as helpers]))

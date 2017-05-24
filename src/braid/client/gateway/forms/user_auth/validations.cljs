@@ -1,4 +1,4 @@
-(ns braid.client.gateway.user-auth.validations
+(ns braid.client.gateway.forms.user-auth.validations
   (:require
     [clojure.string :as string])
   (:import

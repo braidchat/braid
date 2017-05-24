@@ -1,9 +1,9 @@
-(ns braid.client.gateway.user-auth.events
+(ns braid.client.gateway.forms.user-auth.events
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
     [braid.client.gateway.helpers :as helpers]
-    [braid.client.gateway.user-auth.validations :refer [validations]]))
+    [braid.client.gateway.forms.user-auth.validations :refer [validations]]))
 
 (reg-event-fx
   :gateway.user-auth/initialize

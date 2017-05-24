@@ -1,10 +1,10 @@
-(ns braid.client.gateway.create-group.events
+(ns braid.client.gateway.forms.create-group.events
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
     [braid.common.util :refer [slugify]]
     [braid.client.gateway.helpers :as helpers]
-    [braid.client.gateway.create-group.validations :refer [validations]]))
+    [braid.client.gateway.forms.create-group.validations :refer [validations]]))
 
 (reg-event-fx
   :gateway.action.create-group/initialize
@@ -54,7 +54,7 @@
 (reg-event-fx
   :gateway.action.create-group/handle-registration-response
   (fn [{state :db} [_ response]]
-    (set! js/window.location (str "/" (response :group-id) "/inbox"))
+    (set! js/window.location (str "/groups/" (response :group-id) ))
     {:db (assoc-in state [:create-group :sending?] false)}))
 
 (reg-event-fx

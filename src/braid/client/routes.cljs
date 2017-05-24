@@ -7,7 +7,7 @@
 (defn go-to! [path]
   (router/go-to path))
 
-(defroute inbox-page-path "/groups/:group-id/inbox" [group-id]
+(defroute inbox-page-path "/groups/:group-id" [group-id]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :inbox}]]))
 
 (defroute recent-page-path "/groups/:group-id/recent" [group-id]
@@ -44,11 +44,11 @@
   (dispatch [:set-page-loading true])
   (dispatch [:search-history [query (uuid group-id)]]))
 
-(defroute other-path "/:page-id" [page-id]
-  (dispatch [:set-group-and-page [nil {:type (keyword page-id)}]]))
-
 (defroute page-path "/groups/:group-id/:page-id" [group-id page-id]
   (dispatch [:set-group-and-page [(uuid group-id) {:type (keyword page-id)}]]))
+
+(defroute other-path "/pages/:page-id" [page-id]
+  (dispatch [:set-group-and-page [nil {:type (keyword page-id)}]]))
 
 (defroute index-path "/" {}
   (dispatch [:redirect-from-root]))

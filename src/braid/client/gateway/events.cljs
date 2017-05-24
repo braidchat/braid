@@ -2,9 +2,10 @@
   (:require
     [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
     [braid.client.gateway.fx]
-    [braid.client.gateway.user-auth.events]
-    [braid.client.gateway.create-group.events]
-    [braid.client.gateway.log-in.events]))
+    [braid.client.gateway.forms.user-auth.events]
+    [braid.client.gateway.forms.create-group.events]
+    [braid.client.gateway.forms.join-group.events]
+    [braid.client.gateway.forms.log-in.events]))
 
 (reg-event-fx
   :gateway/initialize
@@ -25,7 +26,10 @@
       {:dispatch [:gateway.action.log-in/initialize]}
 
       :request-password-reset
-      {:dispatch [:gateway.user-auth/initialize :request-password-reset]})))
+      {:dispatch [:gateway.user-auth/initialize :request-password-reset]}
+
+      :join-group
+      {:dispatch [:gateway.forms.join-group/initialize]})))
 
 (reg-event-fx
   :gateway/change-user-status

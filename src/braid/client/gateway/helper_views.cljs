@@ -55,4 +55,4 @@
      :on-submit (opts :on-submit)}
 
     (into [:fieldset {:disabled (opts :disabled?)}]
-          (concat [[:h1 (opts :title)]] body))]])
+          (concat [(when (opts :title) [:h1 (opts :title)])] body))]])
