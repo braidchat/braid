@@ -9,30 +9,7 @@
     [braid.server.db.user :as user]
     [braid.server.quests.db :as quests]))
 
-(defn migrate-2017-04-19
-  "Add bot notify-all-messages boolean"
-  []
-  @(d/transact
-     db/conn
-     [{:db/ident :bot/notify-all-messages?
-       :db/doc "Indicates that this bot should recieve all visible messages in its group"
-       :db/valueType :db.type/boolean
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
-
-(defn migrate-2017-04-11
-  "add bot change events"
-  []
-  @(d/transact
-     db/conn
-     [{:db/ident :bot/event-webhook-url
-       :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
-
-(defn migrate-2016-10-28
+(defn migrate-2017-05-25
   "change all db.unique/identity to db.unique/value (to avoid accidental upserts)"
   []
   @(d/transact db/conn
@@ -43,7 +20,7 @@
              [:user/id :message/id :upload/id :thread/id
               :tag/id :group/id :invite/id :bot/id :quest-record/id])))
 
-(defn migrate-2016-10-26
+(defn migrate-2017-05-24
   "add slug to groups"
   []
   @(d/transact db/conn
@@ -72,6 +49,29 @@
                         [:db/add group
                          :group/slug (slugify group-name)])))]
       @(d/transact db/conn (doall txs))))
+
+(defn migrate-2017-04-19
+  "Add bot notify-all-messages boolean"
+  []
+  @(d/transact
+     db/conn
+     [{:db/ident :bot/notify-all-messages?
+       :db/doc "Indicates that this bot should recieve all visible messages in its group"
+       :db/valueType :db.type/boolean
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}]))
+
+(defn migrate-2017-04-11
+  "add bot change events"
+  []
+  @(d/transact
+     db/conn
+     [{:db/ident :bot/event-webhook-url
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/one
+       :db/id #db/id [:db.part/db]
+       :db.install/_attribute :db.part/db}]))
 
 (defn migrate-2016-08-18
   "schema change for quests"
