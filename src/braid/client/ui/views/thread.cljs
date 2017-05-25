@@ -4,7 +4,7 @@
   (:require
     [clojure.set :refer [difference]]
     [clojure.string :as string]
-    [cljs.core.async :refer [chan put!]]
+    [cljs.core.async :refer [alts! chan put!]]
     [reagent.core :as r]
     [re-frame.core :refer [dispatch subscribe]]
     [braid.client.helpers :as helpers]
