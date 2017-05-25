@@ -21,16 +21,16 @@
      {:font-family vars/font-family}]])
 
 (defn form-styles []
-  [:.gateway
+  [:>.gateway
 
-   [:h1.header
+   [:>h1.header
     {:color vars/accent-color
      :font-weight "normal"
      :font-size "1.75em"
      :text-align "center"
      :margin "2rem 0"}
 
-    [:&:before
+    [:&::before
      {:content "\"\""
       :display "inline-block"
       :margin-right "0.5em"
@@ -41,7 +41,7 @@
       :background-image "url(/images/braid-logo-color.svg)"
       :background-size "contain"}]]
 
-   [:.section
+   [:>.section
     {:background vars/form-background-color
      :border [["1px" "solid" vars/field-border-color]]
      :max-width "32em"
@@ -192,28 +192,29 @@
       (fontawesome/mixin :spinner)
       {:display "inline-block"}]]]
 
-[:form
- [:.message
-  (merge
-    (vars/small-text-mixin)
-    {:text-align "center"})]
+   [:form
 
- [:.error-message
-  (merge
-    (vars/small-text-mixin)
-    {:color vars/invalid-color
-     :text-align "center"})
+    [:.message
+     (merge
+       (vars/small-text-mixin)
+       {:text-align "center"})]
 
-  [:button
-   (merge
-     (vars/small-button-mixin)
-     {:color vars/invalid-color
-      :border-color vars/invalid-light-color})
+    [:.error-message
+     (merge
+       (vars/small-text-mixin)
+       {:color vars/invalid-color
+        :text-align "center"})
 
-   [:&:active
-    {:background [[vars/invalid-light-color "!important"]]}]
+     [:button
+      (merge
+        (vars/small-button-mixin)
+        {:color vars/invalid-color
+         :border-color vars/invalid-light-color})
 
-   [:&:hover
-    {:color [[vars/invalid-color "!important"]]
-     :border-color [[vars/invalid-color "!important"]]}]]]]])
+      [:&:active
+       {:background [[vars/invalid-light-color "!important"]]}]
+
+      [:&:hover
+       {:color [[vars/invalid-color "!important"]]
+        :border-color [[vars/invalid-color "!important"]]}]]]]])
 

@@ -9,7 +9,7 @@
     [braid.client.gateway.forms.join-group.views :refer [join-group-view]]
     [braid.client.gateway.forms.join-group.styles :refer [join-group-styles]]
     [braid.client.gateway.forms.user-auth.views :refer [user-auth-view]]
-    [braid.client.gateway.forms.user-auth.styles :refer [user-styles]]))
+    [braid.client.gateway.forms.user-auth.styles :refer [user-auth-styles]]))
 
 (defn style-view []
   [:style
@@ -26,10 +26,11 @@
           imports
           styles/anim-spin
           (styles/app-styles)
-          (styles/form-styles)
-          (create-group-styles)
-          (join-group-styles)
-          (user-styles))}}])
+          [:#app
+           (styles/form-styles)
+           (create-group-styles)
+           (join-group-styles)
+           (user-auth-styles)])}}])
 
 (defn header-view []
   [:h1.header "Braid"])
