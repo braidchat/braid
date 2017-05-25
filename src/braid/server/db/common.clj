@@ -165,7 +165,7 @@
      :avatar (settings :avatar)
      :public? (get settings :public? false)
      :bots (into #{} (map db->bot-display) (:bot/_group e))
-     :users-count (count (e :group/user))}))
+     :users-count (count (:group/user e))}))
 
 (def upload-pull-pattern
   [:upload/id
