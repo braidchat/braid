@@ -80,10 +80,26 @@
         kill-chan (chan)
         embed-update-chan (chan)
 
+        messages-node (atom nil)
+        ref-cb (fn [node] (reset! messages-node node))
+
+        at-bottom? (atom true)
+
+        check-at-bottom
+        (fn []
+          (let [node @messages-node]
+            (reset! at-bottom?
+                    (> 2
+                       (- (.-scrollHeight node)
+                          (.-scrollTop node)
+                          (.-clientHeight node))))))
+
         scroll-to-bottom!
         (fn [component]
-          (when-let [messages (r/dom-node component)]
-            (set! (.-scrollTop messages) (.-scrollHeight messages))))]
+          (when-let [node @messages-node]
+            (when @at-bottom?
+              (set! (.-scrollTop node) (.-scrollHeight node)))))]
+
     (r/create-class
       {:display-name "thread"
 
@@ -101,9 +117,12 @@
 
        :component-did-update scroll-to-bottom!
 
+       :component-will-update check-at-bottom
+
        :reagent-render
        (fn [thread]
          [:div.messages
+          {:ref ref-cb}
           (let [sorted-messages
                 (->> @messages
                      (sort-by :created-at)
