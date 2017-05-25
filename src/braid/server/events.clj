@@ -23,8 +23,8 @@
 
 (defn register-user!
   [email group-id]
-  (let [user (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                  :email email}))]
+  (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
+                                                    :email email}))]
     (user-join-group! (user :id) group-id)
     (user :id)))
 
