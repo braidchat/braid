@@ -1,10 +1,10 @@
 (ns braid.server.db
   (:require
-    [datomic.api :as d]
-    [mount.core :refer [defstate]]
-    [braid.common.util :refer [extract]]
     [braid.server.conf :refer [config]]
-    [braid.server.schema :refer [schema]]))
+    [braid.server.schema :refer [schema]]
+    [datomic.api :as d]
+    [datomic.db]
+    [mount.core :refer [defstate]]))
 
 (defn install-schema! [db-url]
  (d/transact (d/connect db-url)
@@ -45,8 +45,8 @@
   bubbled up via ex-info, with the assertion failure message under the key
   `:braid.server.db/error`."
   [txns]
-  (let [[returns checks] ((juxt (partial extract ::return)
-                                (partial extract ::check))
+  (let [[returns checks] ((juxt (partial keep ::return)
+                                (partial keep ::check))
                           (map meta txns))]
     (when (seq checks)
       (let [test-db (d/with (db) txns)]

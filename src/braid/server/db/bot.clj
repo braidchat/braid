@@ -1,12 +1,10 @@
 (ns braid.server.db.bot
   (:require
-    [datomic.api :as d]
     [braid.server.crypto :as crypto :refer [random-nonce]]
     [braid.server.db :as db]
     [braid.server.db.common :refer [bot-pull-pattern db->bot]]
-    [braid.server.db.user :as user]))
-
-;; Queries
+    [braid.server.db.user :as user]
+    [datomic.api :as d]))
 
 (defn bots-in-group
   [group-id]
