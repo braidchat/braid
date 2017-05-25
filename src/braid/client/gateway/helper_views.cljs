@@ -7,9 +7,9 @@
 
 (defn field-view [opts]
   (let [field-id (opts :id)
-        value @(subscribe [(with-ns (opts :ns) :field-value) field-id])
-        status @(subscribe [(with-ns (opts :ns) :field-status) field-id])
-        errors @(subscribe [(with-ns (opts :ns) :field-errors) field-id])
+        value @(subscribe [(with-ns (opts :subs-ns) :field-value) field-id])
+        status @(subscribe [(with-ns (opts :subs-ns) :field-status) field-id])
+        errors @(subscribe [(with-ns (opts :subs-ns) :field-errors) field-id])
         on-change-transform (or (opts :on-change-transform) identity)]
     [:div.option
      {:class (str (opts :class) " " (name status))}
@@ -28,10 +28,10 @@
                 :value value
                 :on-key-down (or (opts :on-key-down) (fn [_]))
                 :on-blur (fn [_]
-                           (dispatch [(with-ns (opts :ns) :blur) field-id]))
+                           (dispatch [(with-ns (opts :disp-ns) :blur) field-id]))
                 :on-change (fn [e]
                              (let [value (on-change-transform (.. e -target -value))]
-                               (dispatch [(with-ns (opts :ns) :update-value) field-id value])))}]]
+                               (dispatch [(with-ns (opts :disp-ns) :update-value) field-id value])))}]]
       (when (= :invalid status)
         [:div.error-message (first errors)])
       (when (opts :help-text)
@@ -39,7 +39,7 @@
 
 (defn button-view [opts]
   (let [fields-valid?
-        @(subscribe [:gateway.user-auth/fields-valid?
+        @(subscribe [:braid.client.gateway.forms.user-auth.subs/fields-valid?
                      (opts :validations)])]
     [:button.submit
      {:type "submit"

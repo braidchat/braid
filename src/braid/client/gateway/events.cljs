@@ -8,36 +8,36 @@
     [braid.client.gateway.forms.log-in.events]))
 
 (reg-event-fx
-  :gateway/initialize
+  ::initialize
   (fn [{state :db} [_ action]]
     {:db (-> state
              (assoc :action action)
              (assoc :action-disabled? true))
-     :dispatch [:gateway/handle-action]}))
+     :dispatch [::handle-action]}))
 
 (reg-event-fx
-  :gateway/handle-action
+  ::handle-action
   (fn [{state :db} _ ]
     (case (state :action)
       :create-group
-      {:dispatch [:gateway.action.create-group/initialize]}
+      {:dispatch [:braid.client.gateway.forms.create-group.events/initialize]}
 
       :log-in
-      {:dispatch [:gateway.action.log-in/initialize]}
+      {:dispatch [:braid.client.gateway.forms.log-in.events/initialize]}
 
       :request-password-reset
-      {:dispatch [:gateway.user-auth/initialize :request-password-reset]}
+      {:dispatch [:braid.client.gateway.forms.user-auth.events/initialize :request-password-reset]}
 
       :join-group
-      {:dispatch [:gateway.forms.join-group/initialize]})))
+      {:dispatch [:braid.client.gateway.forms.join-group.events/initialize]})))
 
 (reg-event-fx
-  :gateway/change-user-status
+  ::change-user-status
   (fn [{state :db} [_ logged-in?]]
     (merge
       {:db (assoc state :action-disabled? (not logged-in?))}
       (case (state :action)
         :log-in
-        {:dispatch [:gateway.action.log-in/change-user-status logged-in?]}
+        {:dispatch [:braid.client.gateway.forms.log-in.events/change-user-status logged-in?]}
         {}))))
 

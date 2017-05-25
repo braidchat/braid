@@ -12,7 +12,7 @@
   (r/render [gateway-view] (. js/document (getElementById "app"))))
 
 (defn ^:export init []
-  (dispatch-sync [:gateway/initialize (keyword (aget js/window "gateway_action"))])
+  (dispatch-sync [:braid.client.gateway.events/initialize (keyword (aget js/window "gateway_action"))])
   (render))
 
 (defn ^:export reload []

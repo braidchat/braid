@@ -6,11 +6,11 @@
     [braid.client.gateway.forms.join-group.subs]))
 
 (reg-sub
-  :gateway/action
+  ::action
   (fn [state _]
     (get-in state [:action])))
 
 (reg-sub
-  :gateway/action-disabled?
+  ::action-disabled?
   (fn [state _]
     (get-in state [:action-disabled?])))

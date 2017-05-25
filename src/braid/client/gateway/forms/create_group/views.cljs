@@ -8,8 +8,9 @@
 
 (defn group-name-field-view []
   [field-view
-   {:id :gateway.action.create-group/group-name
-    :ns :gateway.create-group
+   {:id :group-name
+    :subs-ns :braid.client.gateway.forms.create-group.subs
+    :disp-ns :braid.client.gateway.forms.create-group.events
     :title "Group Name"
     :class "group-name"
     :type "text"
@@ -20,8 +21,9 @@
 
 (defn group-url-field-view []
   [field-view
-   {:id :gateway.action.create-group/group-url
-    :ns :gateway.create-group
+   {:id :group-url
+    :subs-ns :braid.client.gateway.forms.create-group.subs
+    :disp-ns :braid.client.gateway.forms.create-group.events
     :title "Group URL"
     :class "group-url"
     :type "text"
@@ -41,10 +43,10 @@
     :on-change-transform string/lower-case}])
 
 (defn group-type-field-view []
-  (let [field-id :gateway.action.create-group/group-type
-        value @(subscribe [:gateway.create-group/field-value field-id])
-        status @(subscribe [:gateway.create-group/field-status field-id])
-        errors @(subscribe [:gateway.create-group/field-errors field-id])]
+  (let [field-id :group-type
+        value @(subscribe [:braid.client.gateway.forms.create-group.subs/field-value field-id])
+        status @(subscribe [:braid.client.gateway.forms.create-group.subs/field-status field-id])
+        errors @(subscribe [:braid.client.gateway.forms.create-group.subs/field-errors field-id])]
     [:div.option.group-type
      {:class (name status)}
      [:h2 "Group Type"]
@@ -56,10 +58,10 @@
                :value "public"
                :checked (when (= "public" value))
                :on-blur (fn [_]
-                          (dispatch [:gateway.create-group/blur field-id]))
+                          (dispatch [:braid.client.gateway.forms.create-group.events/blur field-id]))
                :on-click (fn [e]
                            (let [value (.. e -target -value)]
-                             (dispatch [:gateway.create-group/update-value field-id value])))}]
+                             (dispatch [:braid.client.gateway.forms.create-group.events/update-value field-id value])))}]
       [:span "Public Group"]
       [:div.explanation
        [:p "Anyone can find your group through the Braid Group Directory."]
@@ -70,21 +72,21 @@
                :value "private"
                :checked (when (= "private" value))
                :on-blur (fn [_]
-                          (dispatch [:gateway.create-group/blur :type]))
+                          (dispatch [:braid.client.gateway.forms.create-group.events/blur :type]))
                :on-click (fn [e]
                            (let [value (.. e -target -value)]
-                             (dispatch [:gateway.create-group/update-value field-id value])))}]
+                             (dispatch [:braid.client.gateway.forms.create-group.events/update-value field-id value])))}]
       [:span "Private Group"]
       [:div.explanation
        [:p "Invite-only and hidden from the Braid Group Directory."]
        [:p "Free to evaluate, then pay-what-you-want."]]]]))
 
 (defn button-view []
-  (let [fields-valid? @(subscribe [:gateway.create-group/fields-valid?
-                                  [:gateway.action.create-group/group-name
-                                   :gateway.action.create-group/group-url
-                                   :gateway.action.create-group/group-type]])
-        sending? @(subscribe [:gateway.action.create-group/sending?])]
+  (let [fields-valid? @(subscribe [:braid.client.gateway.forms.create-group.subs/fields-valid?
+                                  [:group-name
+                                   :group-url
+                                   :group-type]])
+        sending? @(subscribe [:braid.client.gateway.forms.create-group.subs/sending?])]
     [:button.submit
      {:type "submit"
       :class (str (when (not fields-valid?) "disabled") " "
@@ -92,7 +94,7 @@
      "Create your Braid group"]))
 
 (defn error-view []
-  (let [error @(subscribe [:gateway.action.create-group/error])]
+  (let [error @(subscribe [:braid.client.gateway.forms.create-group.subs/error])]
     (when error
       [:div.error-message
        "An error occured. Please try again."])))
@@ -101,16 +103,16 @@
   [form-view
    {:title "Start a New Braid Group"
     :class "create-group"
-    :disabled? @(subscribe [:gateway/action-disabled?])
+    :disabled? @(subscribe [:braid.client.gateway.subs/action-disabled?])
     :on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:gateway.create-group/submit-form
+      (dispatch [:braid.client.gateway.forms.create-group.events/submit-form
                  {:validate-fields
-                  [:gateway.action.create-group/group-name
-                   :gateway.action.create-group/group-url
-                   :gateway.action.create-group/group-type]
-                  :dispatch-when-valid [:gateway.action.create-group/remote-create-group]}]))}
+                  [:group-name
+                   :group-url
+                   :group-type]
+                  :dispatch-when-valid [:braid.client.gateway.forms.create-group.events/remote-create-group]}]))}
    [group-name-field-view]
    [group-url-field-view]
    [group-type-field-view]

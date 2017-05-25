@@ -4,12 +4,12 @@
     [braid.client.gateway.helpers :as helpers]))
 
 (reg-sub
-  :gateway.user-auth/user
+  ::user
   (fn [state _]
     (get-in state [:user-auth :user])))
 
 (reg-sub
-  :gateway.user-auth/user-auth-mode
+  ::user-auth-mode
   (fn [state _]
     (cond
       (nil? (get-in state [:user-auth])) :checking
@@ -19,13 +19,13 @@
       :else (get-in state [:user-auth :mode]))))
 
 (reg-sub
-  :gateway.user-auth/oauth-provider
+  ::oauth-provider
   (fn [state _]
     (get-in state [:user-auth :oauth-provider])))
 
 (reg-sub
-  :gateway.user-auth/error
+  ::error
   (fn [state _]
     (get-in state [:user-auth :error])))
 
-(helpers/reg-form-subs :gateway.user-auth :user-auth)
+(helpers/reg-form-subs :braid.client.gateway.forms.user-auth.subs :user-auth)

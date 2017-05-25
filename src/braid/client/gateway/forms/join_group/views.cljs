@@ -2,7 +2,7 @@
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]]
-    [braid.client.gateway.helper-views :refer [form-view field-view]]))
+    [braid.client.gateway.helper-views :refer [form-view]]))
 
 (defn error-view []
   (let [error @(subscribe [:braid.client.gateway.forms.join-group.subs/error])]
@@ -35,7 +35,7 @@
         (and (group :id) (group :public?))
         [form-view
          {:class "join-group"
-          :disabled? @(subscribe [:gateway/action-disabled?])
+          :disabled? @(subscribe [:braid.client.gateway.subs/action-disabled?])
           :on-submit
           (fn [e]
             (.preventDefault e)

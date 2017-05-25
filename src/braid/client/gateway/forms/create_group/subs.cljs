@@ -4,13 +4,13 @@
     [braid.client.gateway.helpers :as helpers]))
 
 (reg-sub
-  :gateway.action.create-group/sending?
+  ::sending?
   (fn [state _]
     (get-in state [:create-group :sending?])))
 
 (reg-sub
-  :gateway.action.create-group/error
+  ::error
   (fn [state _]
     (get-in state [:create-group :error])))
 
-(helpers/reg-form-subs :gateway.create-group :create-group)
+(helpers/reg-form-subs :braid.client.gateway.forms.create-group.subs :create-group)

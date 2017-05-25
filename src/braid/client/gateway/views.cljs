@@ -40,7 +40,7 @@
    [style-view]
    [header-view]
    [user-auth-view]
-   (case @(subscribe [:gateway/action])
+   (case @(subscribe [:braid.client.gateway.subs/action])
      :create-group [create-group-view]
      :join-group [join-group-view]
      nil)])

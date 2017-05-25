@@ -5,7 +5,7 @@
     [goog.format EmailAddress]))
 
 (def validations
-  {:gateway.user-auth/email
+  {:email
    [(fn [email cb]
       (if (string/blank? email)
         (cb "You need to enter an email.")
@@ -15,13 +15,13 @@
         (cb "This doesn't look like a valid email.")
         (cb nil)))]
 
-   :gateway.user-auth/password
+   :password
    [(fn [password cb]
       (if (string/blank? password)
         (cb "You need to enter a password.")
         (cb nil)))]
 
-   :gateway.user-auth/new-password
+   :new-password
    [(fn [password cb]
       (if (string/blank? password)
         (cb "You need to enter a password.")

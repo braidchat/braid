@@ -16,13 +16,14 @@
                      (.preventDefault e)
                      ; must use dispatch-sync
                      ; b/c dispatch triggers pop-up blocker
-                     (dispatch-sync [:gateway.user-auth/open-oauth-window provider]))}
+                     (dispatch-sync [:braid.client.gateway.forms.user-auth.events/open-oauth-window provider]))}
         (string/capitalize (name provider))]))])
 
 (defn returning-email-field-view []
   [field-view
-   {:id :gateway.user-auth/email
-    :ns :gateway.user-auth
+   {:id :email
+    :subs-ns :braid.client.gateway.forms.user-auth.subs
+    :disp-ns :braid.client.gateway.forms.user-auth.events
     :title "Email"
     :class "email"
     :type "email"
@@ -33,8 +34,9 @@
 
 (defn returning-password-field-view []
   [field-view
-   {:id :gateway.user-auth/password
-    :ns :gateway.user-auth
+   {:id :password
+    :subs-ns :braid.client.gateway.forms.user-auth.subs
+    :disp-ns :braid.client.gateway.forms.user-auth.events
     :title "Password"
     :class "password"
     :type "password"
@@ -44,21 +46,21 @@
                  {:type "button"
                   :on-click (fn [e]
                               (.preventDefault e)
-                              (dispatch [:gateway.user-auth/set-mode :request-password-reset]))}
+                              (dispatch [:braid.client.gateway.forms.user-auth.events/set-mode :request-password-reset]))}
                  "Request a Password Reset"]]}])
 
 (defn login-button-view []
   (let [fields-valid?
-        @(subscribe [:gateway.user-auth/fields-valid?
-                     [:gateway.user-auth/email
-                      :gateway.user-auth/password]])]
+        @(subscribe [:braid.client.gateway.forms.user-auth.subs/fields-valid?
+                     [:email
+                      :password]])]
     [:button.submit
      {:type "submit"
       :class (when-not fields-valid? "disabled")}
      "Log in to Braid"]))
 
 (defn error-view []
-  (let [error @(subscribe [:gateway.user-auth/error])]
+  (let [error @(subscribe [:braid.client.gateway.forms.user-auth.subs/error])]
     (when error
       (case error
         :auth-fail
@@ -71,7 +73,7 @@
           {:type "button"
            :on-click (fn [e]
                        (.preventDefault e)
-                       (dispatch [:gateway.user-auth/set-mode :log-in]))}
+                       (dispatch [:braid.client.gateway.forms.user-auth.events/set-mode :log-in]))}
           "Log In"]]
         :no-such-email
         [:div.error-message
@@ -87,8 +89,8 @@
 
 (defn password-reset-button-view []
   (let [fields-valid?
-        @(subscribe [:gateway.user-auth/fields-valid?
-                     [:gateway.user-auth/email]])]
+        @(subscribe [:braid.client.gateway.forms.user-auth.subs/fields-valid?
+                     [:email]])]
     [:button.submit
      {:type "submit"
       :class (when-not fields-valid? "disabled")}
@@ -100,22 +102,22 @@
     :class "user-auth request-password-reset"
     :on-submit (fn [e]
                  (.preventDefault e)
-                 (dispatch [:gateway.user-auth/submit-form
-                            {:validate-fields [:gateway.user-auth/email]
-                             :dispatch-when-valid [:gateway.user-auth/remote-request-password-reset]}]))}
+                 (dispatch [:braid.client.gateway.forms.user-auth.events/submit-form
+                            {:validate-fields [:email]
+                             :dispatch-when-valid [:braid.client.gateway.forms.user-auth.events/remote-request-password-reset]}]))}
    [:p
     [:button
      {:type "button"
       :on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:gateway.user-auth/set-mode :register]))}
+                  (dispatch [:braid.client.gateway.forms.user-auth.events/set-mode :register]))}
      "Register"]
 
     [:button
      {:type "button"
       :on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:gateway.user-auth/set-mode :register]))}
+                  (dispatch [:braid.client.gateway.forms.user-auth.events/set-mode :register]))}
      "Log In"]]
 
    [returning-email-field-view]
@@ -129,16 +131,16 @@
     :on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:gateway.user-auth/submit-form
-                 {:validate-fields [:gateway.user-auth/email
-                                    :gateway.user-auth/password]
-                  :dispatch-when-valid [:gateway.user-auth/remote-log-in]}]))}
+      (dispatch [:braid.client.gateway.forms.user-auth.events/submit-form
+                 {:validate-fields [:email
+                                    :password]
+                  :dispatch-when-valid [:braid.client.gateway.forms.user-auth.events/remote-log-in]}]))}
    [:p "Don't have an account?"
     [:button
      {:type "button"
       :on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:gateway.user-auth/set-mode :register]))}
+                  (dispatch [:braid.client.gateway.forms.user-auth.events/set-mode :register]))}
      "Register"]]
     [returning-email-field-view]
     [returning-password-field-view]
@@ -147,8 +149,9 @@
 
 (defn new-password-field-view []
   [field-view
-   {:id :gateway.user-auth/new-password
-    :ns :gateway.user-auth
+   {:id :new-password
+    :subs-ns :braid.client.gateway.forms.user-auth.subs
+    :disp-ns :braid.client.gateway.forms.user-auth.events
     :title "Password"
     :class "password"
     :type "password"
@@ -157,8 +160,9 @@
 
 (defn new-email-field-view []
   [field-view
-   {:id :gateway.user-auth/email
-    :ns :gateway.user-auth
+   {:id :email
+    :subs-ns :braid.client.gateway.forms.user-auth.subs
+    :disp-ns :braid.client.gateway.forms.user-auth.events
     :title "Email"
     :class "email"
     :type "email"
@@ -169,9 +173,9 @@
 
 (defn register-button-view []
   (let [fields-valid?
-        @(subscribe [:gateway.user-auth/fields-valid?
-                     [:gateway.user-auth/email
-                      :gateway.user-auth/new-password]])]
+        @(subscribe [:braid.client.gateway.forms.user-auth.subs/fields-valid?
+                     [:email
+                      :new-password]])]
     [:button.submit
      {:type "submit"
       :class (when-not fields-valid? "disabled")}
@@ -184,16 +188,16 @@
     :on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:gateway.user-auth/submit-form
-                 {:validate-fields [:gateway.user-auth/email
-                                    :gateway.user-auth/new-password]
-                  :dispatch-when-valid [:gateway.user-auth/remote-register]}]))}
+      (dispatch [:braid.client.gateway.forms.user-auth.events/submit-form
+                 {:validate-fields [:email
+                                    :new-password]
+                  :dispatch-when-valid [:braid.client.gateway.forms.user-auth.events/remote-register]}]))}
    [:p "Already have one?"
     [:button
      {:type "button"
       :on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:gateway.user-auth/set-mode :log-in]))}
+                  (dispatch [:braid.client.gateway.forms.user-auth.events/set-mode :log-in]))}
      "Log In"]]
    [new-email-field-view]
    [new-password-field-view]
@@ -201,7 +205,7 @@
    [error-view]])
 
 (defn authed-user-view []
-  (let [user @(subscribe [:gateway.user-auth/user])]
+  (let [user @(subscribe [:braid.client.gateway.forms.user-auth.subs/user])]
     [:div.section.user-auth.authed-user
      [:div.profile
       [:img.avatar {:src (user :avatar)}]
@@ -212,7 +216,7 @@
       [:button
        {:type "button"
         :on-click (fn []
-                    (dispatch [:gateway.user-auth/switch-account]))}
+                    (dispatch [:braid.client.gateway.forms.user-auth.events/switch-account]))}
        "Sign in with a different account"]]]))
 
 (defn checking-user-view []
@@ -223,10 +227,10 @@
 (defn oauth-in-progress-view []
   [:div.section.user-auth.authorizing
    [:div
-    [:span "Authenticating with " (string/capitalize (name @(subscribe [:gateway.user-auth/oauth-provider]))) "..."]]])
+    [:span "Authenticating with " (string/capitalize (name @(subscribe [:braid.client.gateway.forms.user-auth.subs/oauth-provider]))) "..."]]])
 
 (defn user-auth-view []
-  (case @(subscribe [:gateway.user-auth/user-auth-mode])
+  (case @(subscribe [:braid.client.gateway.forms.user-auth.subs/user-auth-mode])
     :checking [checking-user-view]
     :register [new-user-view]
     :request-password-reset [request-password-reset-view]

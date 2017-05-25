@@ -5,9 +5,9 @@
     [braid.client.gateway.helpers :as helpers]))
 
 (reg-event-fx
-  :gateway.forms.join-group/initialize
+  ::initialize
   (fn [{state :db}]
-    {:dispatch-n [[:gateway.user-auth/initialize :log-in]
+    {:dispatch-n [[:braid.client.gateway.forms.user-auth.events/initialize :log-in]
                   [::remote-get-group-info]]}))
 
 (defn get-url-group-id []

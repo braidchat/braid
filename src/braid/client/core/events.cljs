@@ -96,7 +96,7 @@
   :initialize-db
   (fn [_ _]
     {:db store/initial-state
-     :dispatch [:gateway/initialize :log-in]}))
+     :dispatch [:braid.client.gateway.events/initialize :log-in]}))
 
 (reg-event-db
   :new-message-text
@@ -482,7 +482,7 @@
 
       (and group-id (not (get-in state [:groups group-id])))
       {:dispatch-n [[:set-login-state :gateway]
-                    [:gateway/initialize :join-group]]}
+                    [:braid.client.gateway.events/initialize :join-group]]}
 
       :else
       {:dispatch [:redirect-from-root]})))

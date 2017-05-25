@@ -4,13 +4,13 @@
     [braid.client.xhr :as xhr]))
 
 (def validations
-  {:gateway.action.create-group/group-name
+  {:group-name
    [(fn [name cb]
       (if (string/blank? name)
         (cb "Your group needs a name.")
         (cb nil)))]
 
-   :gateway.action.create-group/group-url
+   :group-url
    [(fn [url cb]
       (if (string/blank? url)
         (cb "Your group needs a URL.")
@@ -39,7 +39,7 @@
          :on-error (fn [_]
                      (cb "There was an error checking your URL."))}))]
 
-   :gateway.action.create-group/group-type
+   :group-type
    [(fn [type cb]
       (if (string/blank? type)
         (cb "You need to select a group type.")
