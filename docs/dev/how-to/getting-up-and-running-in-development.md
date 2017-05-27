@@ -191,6 +191,8 @@ With that, you should be able to just run `M-x cider-jack-in-clojurescript` and 
 
 ### Running Tests
 
+#### Server Tests
+
 ```bash
 lein test
 ```
@@ -201,6 +203,21 @@ Or, if you have quickie:
 lein with-profile test quickie "chat.*"
 ```
 
+#### Client Tests
+
+Install [PhantomJS](http://phantomjs.org/) and ensure that the `phantomjs` binary is available from your path.
+Once installed, you can run
+
+``` bash
+lein cljsbuild test once
+```
+
+to run the client-side tests once.
+If you prefer to have tests run automatically as you make changes, then run
+
+``` bash
+lein cljsbuild test auto
+```
 
 ### Permgen issues?
 
