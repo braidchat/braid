@@ -3,9 +3,11 @@
 The current state of Braid bots is deliberately simple.
 We anticipate extending the API available to bots as we start to write more and see how they are used.
 
-For an example of a simple bot, see [giphybot][].
+## Example Bots
 
-For a more complicated bot, see [octocat][].
+ - For a simple bot, see [giphybot](https://github.com/braidchat/giphybot) (Written in Rust).
+ - For a more complicated bot, see [octocat](https://github.com/braidchat/octocat) (Written in Rust).
+ - For a bot that monitors group events and all messages, see [greeterbot](https://github.com/braidchat/greeterbot) (Written in Haskell).
 
 ## Creating bots
 
@@ -119,5 +121,3 @@ The server will return the following error codes:
   - 403 if the user is one the bot isn't allowed to see (e.g. not in the bot's group)
 
   [transit]: https://github.com/cognitect/transit-format
-  [giphybot]: https://github.com/braidchat/giphybot
-  [octocat]: https://github.com/braidchat/octocat
