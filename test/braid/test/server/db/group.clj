@@ -24,6 +24,7 @@
                            :intro nil
                            :avatar nil
                            :public? false
+                           :users-count 0
                            :bots #{}}
                           data))))
 
@@ -71,8 +72,8 @@
       (is (= #{} (group/user-groups (user :id))))
       (is (= #{} (group/group-users (group :id))))
       (db/run-txns! (group/user-add-to-group-txn (user :id) (group :id)))
-      (is (= #{group}
-             (group/user-groups (user :id))))
+      (is (= #{(:id group)}
+             (set (map :id (group/user-groups (user :id))))))
       (is (= #{(dissoc user :group-ids)}
              (set (map (fn [u] (dissoc user :group-ids))
                        (group/group-users (group :id)))))))))
