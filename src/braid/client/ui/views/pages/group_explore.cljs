@@ -32,26 +32,6 @@
                 "Decline"]])]
            [:div "No invitations."])])))
 
-(defn create-group-view []
-  (let [new-group-name (r/atom "")]
-    (fn []
-      [:div
-       [:h2 "Create a Group"]
-       [:input {:placeholder "Group Name"
-                :value @new-group-name
-                :on-change (fn [e] (reset! new-group-name (.. e -target -value)))
-                :on-keydown
-                (fn [e]
-                  (when (= KeyCodes.ENTER e.keyCode)
-                    (.preventDefault e)
-                    (dispatch [:create-group {:name @new-group-name}])
-                    (reset! new-group-name "")))}]
-       [:button {:disabled (string/blank? @new-group-name)
-                 :on-click (fn [_]
-                             (dispatch [:create-group {:name @new-group-name}])
-                             (reset! new-group-name ""))}
-        "Create"]])))
-
 (defn public-groups-view []
   [:div
    [:h2 "Public Groups"]
@@ -62,6 +42,6 @@
   [:div.page.group-explore
    [:div.title "Group Explore"]
    [:div.content
-    [create-group-view]
+    [:a {:href "/gateway/create-group"} "Create a Group"]
     [invitations-view]
     [public-groups-view]]])

@@ -8,7 +8,7 @@
 
 (def initial-state
   (merge
-    {:login-state :init ; :auth-check :ws-connect :login-form :app
+    {:login-state :gateway ; :ws-connect :app
      :websocket-state {:connected? false
                        :next-reconnect nil}
      :open-group-id nil
@@ -17,7 +17,7 @@
      :users {}
      :tags {}
      :groups {}
-     :page {:type :inbox}
+     :page {:type nil}
      :session nil
      :errors []
      :preferences {}

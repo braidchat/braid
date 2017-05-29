@@ -8,16 +8,28 @@
     [braid.server.db.thread :as thread]
     [braid.server.db.user :as user]))
 
-;; Queries
-
 (defn group-exists?
   [group-name]
   (some? (d/pull (db/db) '[:group/id] [:group/name group-name])))
+
+(defn group-with-slug-exists?
+  [slug]
+  (boolean (first (d/q '[:find [?g]
+                         :in $ ?slug
+                         :where
+                         [?g :group/slug ?slug]]
+                       (db/db)
+                       slug))))
 
 (defn group-by-id
   [group-id]
   (-> (d/pull (db/db) group-pull-pattern [:group/id group-id])
       db->group))
+
+(defn group-by-slug
+  [group-slug]
+  (when-let [g (d/pull (db/db) group-pull-pattern [:group/slug group-slug])]
+    (db->group g)))
 
 (defn group-users
   [group-id]
@@ -37,14 +49,6 @@
   (->> (d/pull (db/db) [:group/settings] [:group/id group-id])
        :group/settings
        ((fnil edn/read-string "{}"))))
-
-(defn public-group-with-name
-  [group-name]
-  (when-let [group (-> (d/pull (db/db) group-pull-pattern
-                               [:group/name group-name])
-                       db->group)]
-    (when (:public? (group-settings (group :id)))
-      group)))
 
 (defn group-tags
   [group-id]
@@ -74,14 +78,16 @@
 
 (defn user-in-group?
   [user-id group-id]
-  (seq (d/q '[:find ?g
-              :in $ ?user-id ?group-id
-              :where
-              [?u :user/id ?user-id]
-              [?g :group/id ?group-id]
-              [?g :group/user ?u]]
-            (db/db)
-            user-id group-id)))
+  (-> (d/q '[:find ?g
+             :in $ ?user-id ?group-id
+             :where
+             [?u :user/id ?user-id]
+             [?g :group/id ?group-id]
+             [?g :group/user ?u]]
+           (db/db)
+           user-id group-id)
+      seq
+      boolean))
 
 (defn user-is-group-admin?
   [user-id group-id]
@@ -97,9 +103,10 @@
 ;; Transactions
 
 (defn create-group-txn
-  [{:keys [name id]}]
+  [{:keys [name slug id]}]
   (create-entity-txn
     {:group/id id
+     :group/slug slug
      :group/name name}
     db->group))
 

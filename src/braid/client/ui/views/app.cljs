@@ -1,30 +1,22 @@
 (ns braid.client.ui.views.app
   (:require
     [re-frame.core :refer [subscribe]]
-    [braid.client.ui.views.login :refer [login-view]]
+    [braid.client.gateway.views :refer [gateway-view]]
     [braid.client.ui.views.main :refer [main-view]]
     [braid.client.ui.views.styles :refer [styles-view]]))
 
 (defn app-view []
-  (let [login-state (subscribe [:login-state])]
-    (fn []
-      [:div.app
-       [styles-view]
+  (case @(subscribe [:login-state])
 
-       (case @login-state
-         :auth-check
-         [:div.status.authenticating "Authenticating..."]
+    :gateway
+    [gateway-view]
 
-         :ws-connect
-         [:div.status.ws-connet "Connecting..."]
+    :ws-connect
+    [:div.status
+     [styles-view]
+     [:span "Connecting..."]]
 
-         :login-form
-         [login-view]
-
-         :app
-         [main-view]
-
-         :init
-         [:div.status]
-
-         [:p "wha?"])])))
+    :app
+    [:div.app
+     [styles-view]
+     [main-view]]))

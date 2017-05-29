@@ -2,6 +2,7 @@
   (:require
     [clojure.set :refer [difference intersection]]
     [clojure.string :as string]
+    [environ.core :refer [env]]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
     [braid.common.schema :refer [new-message-valid? upload-valid?]]
@@ -19,6 +20,7 @@
     [braid.server.db.upload :as upload]
     [braid.server.db.user :as user]
     [braid.server.email-digest :as email]
+    [braid.server.events :as events]
     [braid.server.invite :as invites]
     [braid.server.message-format :refer [parse-tags-and-mentions]]
     [braid.server.notify-rules :as notify-rules]
@@ -319,29 +321,6 @@
       (db/run-txns! (tag/retract-tag-txn tag-id))
       (broadcast-group-change group-id [:braid.client/retract-tag tag-id]))))
 
-(defmethod event-msg-handler :braid.server/create-group
-  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-  (cond
-    (string/blank? (?data :name))
-    (do
-      (timbre/warnf "User %s attempted to create group with a bad name '%s'"
-                    user-id (?data :name))
-      (when ?reply-fn
-        (?reply-fn {:error "Bad group name"})))
-
-    (group/group-exists? (?data :name))
-    (do
-      (timbre/warnf "User %s attempted to create group that already exsits %s"
-                    user-id (?data :name))
-      (when ?reply-fn
-        (?reply-fn {:error "Group name already taken"})))
-
-    :else
-    ; TODO: way to do this in one transaction? Put a tempid in the ?data
-    (let [[new-group] (db/run-txns! (group/create-group-txn ?data))]
-      (db/run-txns! (group/user-make-group-admin-txn
-                      user-id (new-group :id))))))
-
 (defmethod event-msg-handler :braid.server/search
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   ; this can take a while, so move it to a future
@@ -397,11 +376,8 @@
   [{:as ev-msg :keys [?data user-id]}]
   (if-let [invite (invitation/invite-by-id (?data :id))]
     (do
-      (db/run-txns!
-        (concat
-          (group/user-join-group-txn user-id (invite :group-id))
-          (invitation/retract-invitation-txn (invite :id))))
-      (broadcast-new-user-to-group user-id (invite :group-id))
+      (events/user-join-group! user-id (invite :group-id))
+      (db/run-txns! (invitation/retract-invitation-txn (invite :id)))
       (chsk-send! user-id [:braid.client/joined-group
                            {:group (group/group-by-id (invite :group-id))
                             :tags (group/group-tags (invite :group-id))}])
@@ -581,7 +557,9 @@
       user-id
       [:braid.client/init-data
        {:user-id user-id
-        :version-checksum (digest/from-file "public/js/desktop/out/braid.js")
+        :version-checksum (if (= "prod" (env :environment))
+                            (digest/from-file "public/js/prod/desktop.js")
+                            (digest/from-file "public/js/dev/desktop.js"))
         :user-groups (group/user-groups user-id)
         :user-threads (thread/open-threads-for-user user-id)
         :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)

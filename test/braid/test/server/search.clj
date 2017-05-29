@@ -1,25 +1,15 @@
 (ns braid.test.server.search
   (:require
     [clojure.test :refer :all]
-    [mount.core :as mount]
-    [braid.server.conf :as conf]
     [braid.server.db :as db]
     [braid.server.db.group :as group]
     [braid.server.db.message :as message]
     [braid.server.db.tag :as tag]
     [braid.server.db.user :as user]
-    [braid.server.search :as search]))
+    [braid.server.search :as search]
+    [braid.test.fixtures.db :refer [drop-db]]))
 
-(use-fixtures :each
-              (fn [t]
-                (-> (mount/only #{#'conf/config #'db/conn})
-                    (mount/swap {#'conf/config
-                                 {:db-url "datomic:mem://chat-test"}})
-                    (mount/start))
-                (t)
-                (datomic.api/delete-database (conf/config :db-url))
-                (mount/stop)))
-
+(use-fixtures :each drop-db)
 
 (deftest query-parsing
   (testing "can properly parse queries"
@@ -54,8 +44,8 @@
         [group-1 group-2]
         (db/run-txns!
           (concat
-            (group/create-group-txn {:name "group1" :id group-1-id})
-            (group/create-group-txn {:name "group2" :id group-2-id})))
+            (group/create-group-txn {:name "group1" :slug "group1" :id group-1-id})
+            (group/create-group-txn {:name "group2" :slug "group2" :id group-2-id})))
         [tag-1 tag-2 tag-3]
         (db/run-txns!
           (concat
@@ -78,37 +68,41 @@
 
     ; this thread should be visible to user 1
     (db/run-txns!
-      (concat
-        (message/create-message-txn {:thread-id thread-1-id :id (db/uuid)
-                                     :group-id group-1-id
-                                     :content "Hello world" :user-id (user-1 :id)
-                                     :created-at (java.util.Date.)})
-        (message/create-message-txn {:thread-id thread-1-id :id (db/uuid)
-                                     :group-id group-1-id
-                                     :content "Hey world" :user-id (user-2 :id)
-                                     :created-at (java.util.Date.)
-                                     :mentioned-tag-ids [(tag-1 :id)]})
+      (message/create-message-txn {:thread-id thread-1-id :id (db/uuid)
+                                   :group-id group-1-id
+                                   :content "Hello world" :user-id (user-1 :id)
+                                   :created-at (java.util.Date.)}))
 
-        ; this thread should be visible to user 1
-        (message/create-message-txn {:thread-id thread-2-id :id (db/uuid)
-                                     :group-id group-1-id
-                                     :content "Goodbye World" :user-id (user-2 :id)
-                                     :created-at (java.util.Date.)
-                                     :mentioned-tag-ids [(tag-1 :id) (tag-3 :id)]})
+    (db/run-txns!
+      (message/create-message-txn {:thread-id thread-1-id :id (db/uuid)
+                                   :group-id group-1-id
+                                   :content "Hey world" :user-id (user-2 :id)
+                                   :created-at (java.util.Date.)
+                                   :mentioned-tag-ids [(tag-1 :id)]}))
 
-        ; this thread should not be visible to user 1
-        (message/create-message-txn {:thread-id thread-3-id :id (db/uuid)
-                                     :group-id group-2-id
-                                     :content "Hello world" :user-id (user-2 :id)
-                                     :created-at (java.util.Date.)
-                                     :mentioned-tag-ids [(tag-2 :id)]})
+    ; this thread should be visible to user 1
+    (db/run-txns!
+      (message/create-message-txn {:thread-id thread-2-id :id (db/uuid)
+                                   :group-id group-1-id
+                                   :content "Goodbye World" :user-id (user-2 :id)
+                                   :created-at (java.util.Date.)
+                                   :mentioned-tag-ids [(tag-1 :id) (tag-3 :id)]}))
 
-        ; this thread should not be visible to user 1
-        (message/create-message-txn {:thread-id thread-4-id :id (db/uuid)
-                                     :group-id group-2-id
-                                     :content "Something else" :user-id (user-2 :id)
-                                     :created-at (java.util.Date.)
-                                     :mentioned-tag-ids [(tag-2 :id)]})))
+    ; this thread should not be visible to user 1
+    (db/run-txns!
+      (message/create-message-txn {:thread-id thread-3-id :id (db/uuid)
+                                   :group-id group-2-id
+                                   :content "Hello world" :user-id (user-2 :id)
+                                   :created-at (java.util.Date.)
+                                   :mentioned-tag-ids [(tag-2 :id)]}))
+
+    ; this thread should not be visible to user 1
+    (db/run-txns!
+      (message/create-message-txn {:thread-id thread-4-id :id (db/uuid)
+                                   :group-id group-2-id
+                                   :content "Something else" :user-id (user-2 :id)
+                                   :created-at (java.util.Date.)
+                                   :mentioned-tag-ids [(tag-2 :id)]}))
 
     (testing "user can search by text and see threads"
       (is (= [thread-1-id]

@@ -6,7 +6,6 @@
     [braid.client.ui.styles.body]
     [braid.client.ui.styles.header]
     [braid.client.ui.styles.imports]
-    [braid.client.ui.styles.login]
     [braid.client.ui.styles.message]
     [braid.client.ui.styles.misc]
     [braid.client.ui.styles.page]
@@ -43,9 +42,10 @@
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
 
+               [:#app
+                braid.client.ui.styles.misc/status]
+
                [:.app
-                braid.client.ui.styles.login/login
-                braid.client.ui.styles.misc/status
 
                 [:>.main
                  (braid.client.ui.styles.header/header vars/pad)

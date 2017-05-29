@@ -6,8 +6,8 @@
     [ring.middleware.defaults :refer [wrap-defaults api-defaults
                                       secure-site-defaults site-defaults]]
     [ring.middleware.edn :refer [wrap-edn-params]]
-    [braid.server.routes.api :refer [api-private-routes
-                                     api-public-routes]]
+    [braid.server.routes.api.private :refer [api-private-routes]]
+    [braid.server.routes.api.public :refer [api-public-routes]]
     [braid.server.routes.bots :refer [bot-routes]]
     [braid.server.routes.socket :refer [sync-routes]]
     [braid.server.routes.client :refer [desktop-client-routes
@@ -35,7 +35,7 @@
 (defn assoc-cookie-conf [defaults]
   (-> defaults
       (assoc-in [:session :cookie-name] "braid")
-      (assoc-in [:session :cookie-attrs :secure] false #_(= (env :environment) "prod"))
+      (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
       (assoc-in [:session :cookie-attrs :max-age] session-max-age)
       (assoc-in [:session :store] session-store)))
 

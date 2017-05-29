@@ -12,7 +12,7 @@
     [braid.server.db.thread :as thread]
     [braid.server.db.user :as user]
     [braid.common.schema :as schema]
-    [braid.server.sync :as sync])
+    [braid.server.sync-helpers :as sync-helpers])
   (:import
     [org.apache.commons.codec.binary Base64]))
 
@@ -77,7 +77,7 @@
           (do
             (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
             (db/run-txns! (message/create-message-txn msg))
-            (sync/broadcast-thread (msg :thread-id) [])
+            (sync-helpers/broadcast-thread (msg :thread-id) [])
             {:status 201
              :headers {"Content-Type" "text/plain"}
              :body "ok"})
@@ -107,7 +107,7 @@
           (do
             (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
             (db/run-txns! (message/create-message-txn msg))
-            (sync/broadcast-thread (msg :thread-id) [])
+            (sync-helpers/broadcast-thread (msg :thread-id) [])
             {:status 201
              :headers {"Content-Type" "text/plain"}
              :body "ok"})

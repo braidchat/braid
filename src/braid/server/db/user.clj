@@ -2,13 +2,13 @@
   (:require
     [clojure.edn :as edn]
     [clojure.string :as string]
+    [clavatar.core :refer [gravatar]]
     [crypto.password.scrypt :as password]
     [datomic.api :as d]
+    [braid.common.util :refer [slugify]]
     [braid.server.db :as db]
     [braid.server.db.common :refer :all]
     [braid.server.quests.db :refer [activate-first-quests-txn]]))
-
-;; Queries
 
 (defn email-taken?
   [email]
@@ -17,6 +17,22 @@
 (defn nickname-taken?
   [nickname]
   (some? (d/entity (db/db) [:user/nickname nickname])))
+
+(defn generate-unique-nickname
+  "Recursively checks if nickname is taken; otherwise appends a random number and repeats"
+  [potential-nickname]
+  (if (nickname-taken? potential-nickname)
+    (generate-unique-nickname (str potential-nickname (rand-int 9)))
+    potential-nickname))
+
+(defn generate-nickname-from-email
+  "Generates a nickname from an email string"
+  [email]
+  (-> email
+      (string/split #"@")
+      first
+      slugify
+      generate-unique-nickname))
 
 (defn authenticate-user
   "returns user-id if email and password are correct"
@@ -30,14 +46,14 @@
                     [(.toLowerCase ^String ?stored-email) ?email]
                     [?e :user/password-token ?password-token]]
                   (db/db)
-                  (.toLowerCase email))]
+                  (string/lower-case email))]
          (when (and user-id (password/check password password-token))
            user-id))))
 
 (defn user-by-id
   [id]
-  (some-> (d/pull (db/db) user-pull-pattern [:user/id id])
-          db->user))
+  (some-> (d/pull (db/db) private-user-pull-pattern [:user/id id])
+          db->private-user))
 
 (defn user-id-exists?
   [id]
@@ -46,7 +62,7 @@
 (defn user-with-email
   "get the user with the given email address or nil if no such user registered"
   [email]
-  (some-> (d/pull (db/db) user-pull-pattern [:user/email email])
+  (some-> (d/pull (db/db) user-pull-pattern [:user/email (string/lower-case email)])
           db->user))
 
 (defn user-email
@@ -132,27 +148,31 @@
 ;; Transactions
 
 (defn create-user-txn
-  "creates a user, returns the newly-created user"
-  [{:keys [id email avatar nickname password]}]
+  "given an id and email, creates and returns a user;
+  the nickname and avatar are set based on the email;
+  the id, email, and resulting nickname must be unique"
+  [{:keys [id email password]}]
+  {:pre [(not (user-id-exists? id))]}
   (let [new-id (d/tempid :entities)]
     (into
       [^{:braid.server.db/return
          (fn [{:keys [db-after tempids]}]
            (->> (d/resolve-tempid db-after tempids new-id)
                 (d/entity db-after)
-                db->user))}
+                db->private-user))}
        {:db/id new-id
         :user/id id
-        :user/email email
-        :user/avatar avatar
-        :user/nickname (or nickname (-> email (string/split #"@") first))
-        :user/password-token (password/encrypt password)}]
+        :user/email (string/lower-case email)
+        :user/avatar (gravatar email
+                               :rating :g
+                               :default :identicon)
+        :user/nickname (generate-nickname-from-email email)}]
       (activate-first-quests-txn new-id))))
 
 (defn set-nickname-txn
   "Set the user's nickname"
   [user-id nickname]
-  [[:db/add [:user/id user-id] :user/nickname nickname]])
+  [[:db/add [:user/id user-id] :user/nickname (slugify nickname)]])
 
 (defn set-user-avatar-txn
   [user-id avatar]

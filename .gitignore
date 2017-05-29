@@ -12,3 +12,4 @@ figwheel_server.log
 /.idea
 *.iml
 .cljs_rhino_repl/
+/notes/

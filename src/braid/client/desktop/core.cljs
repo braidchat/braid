@@ -6,6 +6,8 @@
     [braid.client.bots.subs]
     [braid.client.core.events]
     [braid.client.core.subs]
+    [braid.client.gateway.events]
+    [braid.client.gateway.subs]
     [braid.client.group-admin.events]
     [braid.client.group-admin.subs]
     [braid.client.invites.events]
@@ -21,6 +23,9 @@
 
 (enable-console-print!)
 
+(defn render []
+  (r/render [app-view] (.getElementById js/document "app")))
+
 (defn ^:export init []
   (dispatch-sync [:initialize-db])
 
@@ -29,11 +34,9 @@
                        (dispatch [:set-window-visibility
                                   (= "visible" (.-visibilityState js/document))])))
 
-  (r/render [app-view] (. js/document (getElementById "app")))
+  (render)
 
   (router/init)
-
-  (dispatch [:check-auth])
 
   (quests/install-quests-handler!))
 
@@ -41,4 +44,4 @@
   "Force a re-render. For use with figwheel"
   []
   (quests/install-quests-handler!)
-  (r/render [app-view] (.getElementById js/document "app")))
+  (render))

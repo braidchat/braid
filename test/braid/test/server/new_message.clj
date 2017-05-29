@@ -1,25 +1,15 @@
 (ns braid.test.server.new-message
   (:require
     [clojure.test :refer :all]
-    [mount.core :as mount]
-    [braid.server.conf :as conf]
     [braid.server.db :as db]
     [braid.server.db.group :as group]
     [braid.server.db.message :as message]
     [braid.server.db.tag :as tag]
     [braid.server.db.thread :as thread]
-    [braid.server.db.user :as user]))
+    [braid.server.db.user :as user]
+    [braid.test.fixtures.db :refer [drop-db]]))
 
-(use-fixtures :each
-              (fn [t]
-                (-> (mount/only #{#'conf/config #'db/conn})
-                    (mount/swap {#'conf/config
-                                 {:db-url "datomic:mem://chat-test"}})
-                    (mount/start))
-                (t)
-                (datomic.api/delete-database (conf/config :db-url))
-                (mount/stop)))
-
+(use-fixtures :each drop-db)
 
 (deftest create-message
   (let [[user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
@@ -29,7 +19,7 @@
         thread-id (db/uuid)]
 
     (testing "new messages can create a thread"
-      (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :name "group"}))
+      (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "group" :name "group"}))
             message-data {:id (db/uuid)
                           :group-id (group :id)
                           :user-id (user-1 :id)
@@ -52,7 +42,7 @@
                 thread-id)))))
 
     (testing "new message can add to an existing thread"
-      (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :name "group2"}))
+      (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "group2" :name "group2"}))
             message-2-data {:id (db/uuid)
                             :group-id (group :id)
                             :user-id (user-1 :id)
@@ -83,7 +73,7 @@
                                                     :email "foo@bar.com"
                                                     :password "foobar"
                                                     :avatar ""})
-                             (group/create-group-txn {:id (db/uuid) :name "group"})))]
+                             (group/create-group-txn {:id (db/uuid) :slug "group" :name "group"})))]
 
       (testing "when the user sends a new message"
         (let [thread-id (db/uuid)]
@@ -118,23 +108,23 @@
                                                            :password "foobar"
                                                            :avatar ""})
                                     (group/create-group-txn {:id (db/uuid)
+                                                             :slug "group"
                                                              :name "group"})))
           thread-id (db/uuid)
-          [message-1 message-2]
-          (db/run-txns!
-            (concat
-              (message/create-message-txn {:id (db/uuid)
-                                           :group-id (group :id)
-                                           :user-id (user-1 :id)
-                                           :thread-id thread-id
-                                           :created-at (java.util.Date.)
-                                           :content "Hello?"})
-              (message/create-message-txn {:id (db/uuid)
-                                           :group-id (group :id)
-                                           :user-id (user-2 :id)
-                                           :thread-id thread-id
-                                           :created-at (java.util.Date.)
-                                           :content "Hello?"})))]
+          message-1 (db/run-txns!
+                      (message/create-message-txn {:id (db/uuid)
+                                                   :group-id (group :id)
+                                                   :user-id (user-1 :id)
+                                                   :thread-id thread-id
+                                                   :created-at (java.util.Date.)
+                                                   :content "Hello?"}))
+          message-2 (db/run-txns!
+                      (message/create-message-txn {:id (db/uuid)
+                                                   :group-id (group :id)
+                                                   :user-id (user-2 :id)
+                                                   :thread-id thread-id
+                                                   :created-at (java.util.Date.)
+                                                   :content "Hello?"}))]
 
       (testing "when user-2 hides the thread"
         (db/run-txns! (thread/user-hide-thread-txn (user-2 :id) thread-id))
@@ -172,6 +162,7 @@
                                                            :password "foobar"
                                                            :avatar ""})
                                     (group/create-group-txn {:id (db/uuid)
+                                                             :slug "leanpixel"
                                                              :name "Lean Pixel"})))
           [tag-1] (db/run-txns!
                     (tag/create-tag-txn {:id (db/uuid)
@@ -181,6 +172,7 @@
         (concat
           (group/user-add-to-group-txn (user-2 :id) (group :id))
           (group/user-add-to-group-txn (user-1 :id) (group :id))))
+
       (testing "given a user subscribed to a tag..."
         (db/run-txns! (tag/user-subscribe-to-tag-txn (user-1 :id) (tag-1 :id)))
 
@@ -222,6 +214,7 @@
                                                            :password "foobar"
                                                            :avatar ""})
                                     (group/create-group-txn {:id (db/uuid)
+                                                             :slug "leanpixel"
                                                              :name "Lean Pixel"})))
            thread-id (db/uuid)]
 
@@ -229,6 +222,7 @@
         (concat
           (group/user-add-to-group-txn (user-2 :id) (group :id))
           (group/user-add-to-group-txn (user-1 :id) (group :id))))
+
       (testing "when user-1 mentions user-2 in a message..."
         (let [[msg] (db/run-txns!
                       (message/create-message-txn {:id (db/uuid)
