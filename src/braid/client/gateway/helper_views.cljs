@@ -27,7 +27,9 @@
                 :auto-focus (opts :auto-focus)
                 :value value
                 :on-key-down (or (opts :on-key-down) (fn [_]))
-                :on-blur (fn [_]
+                :on-blur (fn [e]
+                           (when (opts :on-blur)
+                             ((opts :on-blur) e))
                            (dispatch [(with-ns (opts :disp-ns) :blur) field-id]))
                 :on-change (fn [e]
                              (let [value (on-change-transform (.. e -target -value))]

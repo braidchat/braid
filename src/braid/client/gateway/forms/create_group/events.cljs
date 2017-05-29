@@ -26,8 +26,8 @@
           group-url (get-in state [:create-group :fields :group-url :value])]
       {:db (if (string/blank? group-url)
              (-> state
-                 (assoc-in [:fields :group-url :value] (slugify group-name))
-                 (assoc-in [:fields :group-url :untouched?] false))
+                 (assoc-in [:create-group :fields :group-url :value] (slugify group-name))
+                 (assoc-in [:create-group :fields :group-url :untouched?] false))
              state)
        :dispatch-n [[::clear-errors :group-url]
                     [::validate-field :group-url]]})))

@@ -15,6 +15,8 @@
     :class "group-name"
     :type "text"
     :placeholder "Team Awesome"
+    :on-blur (fn [e]
+               (dispatch [:braid.client.gateway.forms.create-group.events/guess-group-url]))
     :help-text [:div
                 [:p "Your group's name will show up in menus and headings."]
                 [:p "It doesn't need to be formal and can always be changed later."]]}])
