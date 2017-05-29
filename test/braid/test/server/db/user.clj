@@ -53,7 +53,7 @@
   (testing "id must be unique"
     (let [id (db/uuid)]
       (db/run-txns! (user/create-user-txn {:id id :email "asdfasdf@gmail.com"}))
-      (is (thrown? Exception
+      (is (thrown? java.lang.AssertionError
                    (db/run-txns! (user/create-user-txn {:id id :email "kkkkk@gmail.com"}))))))
 
   (testing "email is required"
