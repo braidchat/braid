@@ -43,6 +43,7 @@
                  [com.cognitect/transit-cljs "0.8.239"]
                  [hickory "0.7.0"]
                  [org.clojure/core.memoize "0.5.8"]
+                 [lein-doo "0.1.7"]
 
                  ;shared
                  [org.clojure/tools.reader "1.0.0-beta3"]
@@ -58,7 +59,8 @@
 
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]]
-            [lein-figwheel "0.5.4-7"]]
+            [lein-figwheel "0.5.4-7"]
+            [lein-doo "0.1.7"]]
 
   :repl-options {:timeout 120000}
   :clean-targets ^{:protect false}
@@ -66,7 +68,9 @@
 
   :figwheel {:server-port 3559}
 
-  :cljsbuild {:builds
+  :cljsbuild {:test-commands {"once" ["lein" "doo" "phantom" "desktop-test" "once"]
+                              "auto" ["lein" "doo" "phantom" "desktop-test" "auto"]}
+              :builds
               [{:id "desktop-dev"
                 :figwheel {:on-jsload "braid.client.desktop.core/reload"}
                 :source-paths ["src/braid/client"
@@ -77,6 +81,15 @@
                            :output-to "resources/public/js/dev/desktop.js"
                            :output-dir "resources/public/js/dev/desktop/"
                            :verbose true}}
+
+               {:id "desktop-test"
+                :source-paths ["src/braid/client"
+                               "src/braid/common"
+                               "test/braid/test/client"]
+                :compiler {:main braid.test.client.runners.doo
+                           :optimizations :none
+                           :output-to "resources/public/js/desktop/tests/out/all-tests.js"
+                           :output-dir "resources/public/js/desktop/tests/out"}}
 
                {:id "mobile-dev"
                 :figwheel {:on-jsload "braid.client.mobile.core/reload"}
