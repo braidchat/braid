@@ -9,17 +9,6 @@
     [braid.server.db.user :as user]
     [braid.server.quests.db :as quests]))
 
-(defn migrate-2017-05-25
-  "change all db.unique/identity to db.unique/value (to avoid accidental upserts)"
-  []
-  @(d/transact db/conn
-     (map (fn [id]
-            {:db/id id
-             :db/unique :db.unique/value
-             :db.alter/_attribute :db.part/db})
-             [:user/id :message/id :upload/id :thread/id
-              :tag/id :group/id :invite/id :bot/id :quest-record/id])))
-
 (defn migrate-2017-05-24
   "add slug to groups"
   []

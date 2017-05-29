@@ -7,7 +7,7 @@
  {:db/ident :user/id
   :db/valueType :db.type/uuid
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/value
+  :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :user/email
@@ -78,7 +78,7 @@
  {:db/ident :message/id
   :db/valueType :db.type/uuid
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/value
+  :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :message/content
@@ -109,7 +109,7 @@
  {:db/ident :upload/id
   :db/valueType :db.type/uuid
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/value
+  :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :upload/thread
@@ -139,7 +139,7 @@
  {:db/ident :thread/id
   :db/valueType :db.type/uuid
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/value
+  :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  ; thread - tag
@@ -165,7 +165,7 @@
  {:db/ident :tag/id
   :db/valueType :db.type/uuid
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/value
+  :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :tag/name
@@ -188,7 +188,7 @@
  {:db/ident :group/id
   :db/valueType :db.type/uuid
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/value
+  :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :group/slug
@@ -222,7 +222,7 @@
  {:db/ident :invite/id
   :db/valueType :db.type/uuid
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/value
+  :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :invite/group
@@ -250,7 +250,7 @@
  {:db/ident :bot/id
   :db/valueType :db.type/uuid
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/value
+  :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :bot/token
@@ -305,7 +305,7 @@
  {:db/ident :quest-record/id
   :db/valueType :db.type/uuid
   :db/cardinality :db.cardinality/one
-  :db/unique :db.unique/value
+  :db/unique :db.unique/identity
   :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
  {:db/ident :quest-record/quest-id
