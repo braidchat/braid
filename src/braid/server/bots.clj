@@ -1,11 +1,12 @@
 (ns braid.server.bots
+  "Sending notification of messages and events to bots"
   (:require
-    [org.httpkit.client :as http]
-    [taoensso.timbre :as timbre]
     [braid.server.crypto :as crypto]
-    [braid.server.util :refer [->transit]])
+    [braid.server.util :refer [->transit]]
+    [org.httpkit.client :as http]
+    [taoensso.timbre :as timbre])
   (:import
-    java.io.ByteArrayInputStream))
+    (java.io ByteArrayInputStream)))
 
 (defn send-message-notification
   [bot message]
