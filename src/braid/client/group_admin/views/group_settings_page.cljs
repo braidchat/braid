@@ -48,7 +48,7 @@
    (if (group :public?)
      [:div
       [:p "Anyone can join this group by going to "
-       [:a {:href (str "/group/" (group :name))} "this link"]]
+       [:a {:href (str "/" (group :slug))} "this link"]]
       [:button {:on-click (fn [_]
                             (dispatch [:make-group-private! (group :id)]))}
        "Make private"]]

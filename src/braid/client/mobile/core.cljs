@@ -22,8 +22,7 @@
 (defn ^:export init []
   (dispatch-sync [:initialize-db])
   (render)
-  (router/init)
-  (dispatch [:check-auth]))
+  (router/init))
 
 (defn ^:export reload []
   (render))

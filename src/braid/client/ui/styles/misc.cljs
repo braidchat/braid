@@ -95,8 +95,8 @@
     :bottom 0
     :right 0
     :left 0
-    :background vars/dark-bg-color
-    :color "white"
+    :background vars/page-background-color
+    :color vars/primary-text-color
     :justify-content "center"
     :align-items "center"
     :font-size "2em"}

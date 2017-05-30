@@ -4,6 +4,7 @@
     [compojure.core :refer [GET defroutes]]
     [compojure.route :refer [resources]]
     [clostache.parser :as clostache]
+    [environ.core :refer [env]]
     [ring.util.response :refer [resource-response]]
     [braid.server.api.github :as github]
     [braid.server.conf :refer [config]]
@@ -13,24 +14,23 @@
     [braid.server.db.user :as user]
     [braid.server.invite :as invites]))
 
-(defn get-html [client]
+(def prod-js? (= (env :environment) "prod"))
+
+(defn get-html [client vars]
   (clostache/render-resource
     (str "public/" client ".html")
-    {:algo "sha256"
-     :js (str (digest/from-file (str "public/js/" client "/out/braid.js")))
-     :api_domain (config :api-domain)}))
+    (merge {:prod prod-js?
+            :dev (not prod-js?)
+            :algo "sha256"
+            :js (if prod-js?
+                  (str (digest/from-file (str "public/js/prod/" client ".js")))
+                  (str (digest/from-file (str "public/js/dev/" client ".js"))))
+            :basejs (when prod-js?
+                      (str (digest/from-file (str "public/js/prod/base.js"))))
+            :api_domain (config :api-domain)}
+           vars)))
 
 (defroutes desktop-client-routes
-  ; public group page
-  (GET "/group/:group-name" [group-name :as req]
-    (if-let [group (group/public-group-with-name group-name)]
-      (clostache/render-resource "templates/public_group_desktop.html.mustache"
-                                 {:group-name (group :name)
-                                  :group-id (group :id)
-                                  :api-domain (config :api-domain)})
-      {:status 403
-       :headers {"Content-Type" "text/plain"}
-       :body "No such public group"}))
 
   ; invite accept page
   (GET "/accept" [invite :<< as-uuid tok]
@@ -60,36 +60,64 @@
        :headers {"Content-Type" "text/plain"}
        :body "Bad user or token"}))
 
-  (GET "/github-login" []
-    {:status 302
-     :headers {"Location" (github/build-authorize-link {:register? false})}})
+  (GET "/gateway/oauth/:provider/auth" [provider]
+    (case provider
+      "github"
+      {:status 302
+       :headers {"Location" (github/build-authorize-link {})}}
+      ; else
+      {:status 400
+       :headers {"Content-Type" "text/plain"}
+       :body "Incorrect provider"}))
 
-  (GET "/github-register" [group]
-    {:status 302
-     :headers
-     {"Location"
-      (github/build-authorize-link {:register? true
-                                    :group-id (java.util.UUID/fromString group)})}})
+  (GET "/gateway/oauth/:provider/post-auth" [provider]
+    (case provider
+      "github"
+      (clostache/render-resource
+        "public/oauth-post-auth.html" {})
+      ; else
+      {:status 400
+       :headers {"Content-Type" "text/plain"}
+       :body "Incorrect provider"}))
+
+  (GET "/gateway/join-group/:group-id" [group-id]
+    (get-html "gateway" {:gateway_action "join-group"}))
+
+  (GET "/gateway/create-group" []
+    (get-html "gateway" {:gateway_action "create-group"}))
+
+  (GET  "/gateway/request-password-reset" _
+    (get-html "gateway" {:gateway_action "request-password-reset"}))
+
+  (GET "/:slug" [slug]
+    (when-let [group (group/group-by-slug slug)]
+      {:status 302
+       :headers {"Location" (str "/groups/" (group :id) )}
+       :body nil}))
 
   ; everything else
   (GET "/*" []
-    (get-html "desktop")))
+    (get-html "desktop" {})))
 
 (defroutes mobile-client-routes
   ; TODO: add mobile routse for public joining & password resets
   (GET "/*" []
-    (get-html "mobile")))
+    (get-html "mobile" {})))
 
 (defroutes resource-routes
-  ; add cache-control headers to perma-cache braid.js
+
+  ; add cache-control headers to js files)
   ; (since it uses a cache-busted url anyway)
-
-  (GET "/js/desktop/out/braid.js" []
-    (when-let [response (resource-response "public/js/desktop/out/braid.js")]
-     (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")))
-
-  (GET "/js/mobile/out/braid.js" []
-    (when-let [response (resource-response "public/js/mobile/out/braid.js")]
-      (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")))
+  (GET (str "/js/:build{desktop|mobile|gateway|base}.js") [build]
+    (if prod-js?
+      (if-let [response (resource-response (str "public/js/prod/" build ".js"))]
+        (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")
+        {:status 404
+         :body "File Not Found"})
+      (if-let [response (resource-response (str "public/js/dev/" build ".js"))]
+        response
+        {:status 200
+         :headers {"Content-Type" "application/javascript"}
+         :body (str "alert('The " build " js files are missing. Please compile them with cljsbuild or figwheel.');")})))
 
   (resources "/"))

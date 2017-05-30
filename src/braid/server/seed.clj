@@ -18,8 +18,8 @@
         [group-1 group-2]
         (db/run-txns!
           (concat
-            (group/create-group-txn {:id (db/uuid) :name "Braid"})
-            (group/create-group-txn {:id (db/uuid) :name "Chat"})))
+            (group/create-group-txn {:id (db/uuid) :slug "braid" :name "Braid"})
+            (group/create-group-txn {:id (db/uuid) :slug "chat" :name "Chat"})))
 
         _ (println "Create Users")
         [user-1 user-2]
@@ -27,16 +27,15 @@
           (concat
             (user/create-user-txn
               {:id (db/uuid)
-               :email "foo@example.com"
-               :nickname "foo"
-               :password "foo"
-               :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})
+               :email "foo@example.com"})
             (user/create-user-txn
               {:id (db/uuid)
-               :email "bar@example.com"
-               :nickname "bar"
-               :password "bar"
-               :avatar "data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="})))
+               :email "bar@example.com"})))
+
+        _ (println "Set Passwords")
+        _ (db/run-txns! (concat
+                          (user/set-user-password-txn (user-1 :id) "foofoofoo")
+                          (user/set-user-password-txn (user-2 :id) "barbarbar")))
 
         _ (println "Add Users to Groups and Make Users Admins")
         _ (db/run-txns!

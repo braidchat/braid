@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Braid</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+  </head>
+  <body id="gateway">
+    <div id="app"></div>
+    {{#prod}}
+      <script src="/js/base.js?v={{basejs}}" integrity="{{algo}}-{{basejs}}" type="text/javascript" crossorigin="anonymous"></script>
+      <script src="/js/gateway.js?v={{js}}" integrity="{{algo}}-{{js}}" type="text/javascript" crossorigin="anonymous"></script>
+    {{/prod}}
+    {{#dev}}
+      <script src="/js/gateway.js?v={{js}}" integrity="{{algo}}-{{js}}" type="text/javascript" crossorigin="anonymous"></script>
+    {{/dev}}
+    <script>
+      window.checksum = "{{js}}";
+      window.api_domain = "{{api_domain}}";
+      window.gateway_action = "{{gateway_action}}";
+      braid.client.gateway.core.init();
+    </script>
+  </body>
+</html>
+

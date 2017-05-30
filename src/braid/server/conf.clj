@@ -7,6 +7,7 @@
   :start
   (merge {:db-url "datomic:free://localhost:4334/braid"
           :api-domain (str "localhost:" (+ 2 (:port (mount/args))))
+          :site-url (str "http://localhost:" (:port (mount/args)))
           :hmac-secret "secret"}
          (select-keys env
                       [:api-domain

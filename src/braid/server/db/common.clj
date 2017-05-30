@@ -27,7 +27,23 @@
   {:id (:user/id e)
    :nickname (:user/nickname e)
    :avatar (:user/avatar e)
+   :email (:user/email e)
    ; TODO currently leaking all group-ids to the client
+   :group-ids (map :group/id (:group/_user e))})
+
+(def private-user-pull-pattern
+  '[:user/id
+    :user/nickname
+    :user/avatar
+    :user/email
+    {:group/_user [:group/id]}])
+
+(defn db->private-user
+  [e]
+  {:id (:user/id e)
+   :nickname (:user/nickname e)
+   :avatar (:user/avatar e)
+   :email (:user/email e)
    :group-ids (map :group/id (:group/_user e))})
 
 (def message-pull-pattern
@@ -132,20 +148,24 @@
 
 (def group-pull-pattern
   [:group/id
+   :group/slug
    :group/name
    :group/settings
    {:group/admins [:user/id]}
+   {:group/user [:user/id]}
    {:bot/_group bot-display-pull-pattern}])
 
 (defn db->group [e]
   (let [settings (-> e (get :group/settings "{}") edn/read-string)]
     {:id (:group/id e)
      :name (:group/name e)
+     :slug (:group/slug e)
      :admins (into #{} (map :user/id) (:group/admins e))
      :intro (settings :intro)
      :avatar (settings :avatar)
      :public? (get settings :public? false)
-     :bots (into #{} (map db->bot-display) (:bot/_group e))}))
+     :bots (into #{} (map db->bot-display) (:bot/_group e))
+     :users-count (count (:group/user e))}))
 
 (def upload-pull-pattern
   [:upload/id

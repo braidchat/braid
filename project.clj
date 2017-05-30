@@ -25,17 +25,19 @@
                  [mount "0.1.10"]
                  [com.cognitect/transit-clj "0.8.288" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [ring-transit "0.1.6" :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                 [clavatar "0.3.0"]
 
                  ;client
                  [org.clojure/clojurescript "1.9.92"]
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]
                  [cljs-ajax "0.5.8"]
                  [secretary "1.2.3"]
+                 [venantius/accountant "0.2.0"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.2"]
                  [reagent "0.6.0-rc"]
-                 [re-frame "0.8.0"]
+                 [re-frame "0.9.2"]
                  [cljsjs/husl "6.0.1-0"]
                  [cljsjs/highlight "9.6.0-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
@@ -69,26 +71,16 @@
   :cljsbuild {:test-commands {"once" ["lein" "doo" "phantom" "desktop-test" "once"]
                               "auto" ["lein" "doo" "phantom" "desktop-test" "auto"]}
               :builds
-              [
-               {:id "desktop-dev"
+              [{:id "desktop-dev"
                 :figwheel {:on-jsload "braid.client.desktop.core/reload"}
                 :source-paths ["src/braid/client"
-                               "src/braid/common"]
+                               "src/braid/common"
+                               "src/retouch"]
                 :compiler {:main braid.client.desktop.core
-                           :asset-path "/js/desktop/out"
-                           :output-to "resources/public/js/desktop/out/braid.js"
-                           :output-dir "resources/public/js/desktop/out"
+                           :asset-path "/js/dev/desktop/"
+                           :output-to "resources/public/js/dev/desktop.js"
+                           :output-dir "resources/public/js/dev/desktop/"
                            :verbose true}}
-
-               {:id "desktop-release"
-                :source-paths ["src/braid/client"
-                               "src/braid/common"]
-                :compiler {:main braid.client.desktop.core
-                           :asset-path "/js/desktop/out"
-                           :output-to "resources/public/js/desktop/out/braid.js"
-                           :output-dir "resources/public/js/desktop/out_prod"
-                           :optimizations :advanced
-                           :pretty-print false}}
 
                {:id "desktop-test"
                 :source-paths ["src/braid/client"
@@ -104,20 +96,40 @@
                 :source-paths ["src/braid/client"
                                "src/retouch"]
                 :compiler {:main braid.client.mobile.core
-                           :asset-path "/js/mobile/out"
-                           :output-to "resources/public/js/mobile/out/braid.js"
-                           :output-dir "resources/public/js/mobile/out"
+                           :asset-path "/js/dev/mobile/"
+                           :output-to "resources/public/js/dev/mobile.js"
+                           :output-dir "resources/public/js/dev/mobile/"
                            :verbose true}}
 
-               {:id "mobile-release"
+               {:id "gateway-dev"
+                :figwheel {:on-jsload "braid.client.gateway.core/reload"}
+                :source-paths ["src/braid/client"]
+                :compiler {:main braid.client.gateway.core
+                           :asset-path "/js/dev/gateway/"
+                           :output-to "resources/public/js/dev/gateway.js"
+                           :output-dir "resources/public/js/dev/gateway"
+                           :verbose true}}
+
+               {:id "release"
                 :source-paths ["src/braid/client"
+                               "src/braid/common"
                                "src/retouch"]
-                :compiler {:main braid.client.mobile.core
-                           :asset-path "/js/mobile/out"
-                           :output-to "resources/public/js/mobile/out/braid.js"
-                           :output-dir "resources/public/js/mobile/out_prod"
+                :compiler {:asset-path "/js/prod/"
+                           :output-dir "resources/public/js/prod/out"
                            :optimizations :advanced
-                           :pretty-print false}}]}
+                           :pretty-print false
+                           :modules {:cljs-base
+                                     {:output-to "resources/public/js/prod/base.js"}
+                                     :desktop
+                                     {:output-to "resources/public/js/prod/desktop.js"
+                                      :entries #{"braid.client.desktop.core"}}
+                                     :gateway
+                                     {:output-to "resources/public/js/prod/gateway.js"
+                                      :entries #{"braid.client.gateway.core"}}
+                                     :mobile
+                                     {:output-to "resources/public/js/prod/mobile.js"
+                                      :entries #{"braid.client.mobile.core"}}}
+                           :verbose true}}]}
 
   :min-lein-version "2.5.0"
 
@@ -143,4 +155,4 @@
              :test [:dev]
              :uberjar [:prod
                        {:aot :all
-                        :prep-tasks ["compile" ["cljsbuild" "once" "desktop-release" "mobile-release"]]}]})
+                        :prep-tasks ["compile" ["cljsbuild" "once" "release"]]}]})

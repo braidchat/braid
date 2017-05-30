@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Braid - Mobile</title>
+    <title>Braid </title>
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
     <link rel="icon" type="image/png" href="/images/favicon.png" />
   </head>
   <body id="mobile">
     <div id="app"></div>
-    <script src="/js/mobile/out/braid.js?v={{js}}" integrity="{{algo}}-{{js}}" type="text/javascript" crossorigin="anonymous"></script>
+    {{#prod}}
+      <script src="/js/base.js?v={{basejs}}" integrity="{{algo}}-{{basejs}}" type="text/javascript" crossorigin="anonymous"></script>
+      <script src="/js/mobile.js?v={{js}}" integrity="{{algo}}-{{js}}" type="text/javascript" crossorigin="anonymous"></script>
+    {{/prod}}
+    {{#dev}}
+      <script src="/js/mobile.js?v={{js}}" integrity="{{algo}}-{{js}}" type="text/javascript" crossorigin="anonymous"></script>
+    {{/dev}}
     <script>
       window.checksum = "{{js}}";
       window.api_domain = "{{api_domain}}";

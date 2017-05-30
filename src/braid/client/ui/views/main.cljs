@@ -36,7 +36,8 @@
         :thread [single-thread-view]
         :settings [group-settings-page-view]
         :global-settings [global-settings-page-view]
-        :changelog [changelog-view]))))
+        :changelog [changelog-view]
+        nil))))
 
 (defn main-view []
   (let [group-id (subscribe [:open-group-id])]

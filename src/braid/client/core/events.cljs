@@ -92,10 +92,11 @@
                              "#" (or (name->open-tag-id state tag-name)
                                       tag-name))))))
 
-(reg-event-db
+(reg-event-fx
   :initialize-db
   (fn [_ _]
-    store/initial-state))
+    {:db store/initial-state
+     :dispatch [:braid.client.gateway.events/initialize :log-in]}))
 
 (reg-event-db
   :new-message-text
@@ -244,32 +245,6 @@
          (update :tags dissoc tag-id))
      :websocket-send (when-not local-only?
                        (list [:braid.server/retract-tag tag-id]))}))
-
-(reg-event-db
-  :remove-group
-  (fn [state [_ group-id]]
-    (helpers/remove-group state group-id)))
-
-(reg-event-fx
-  :create-group
-  (fn [{state :db :as cofx} [_ group]]
-    (let [group (schema/make-group group)
-          group-id (group :id)
-          user-id (helpers/current-user-id state)]
-      {:websocket-send
-       (list
-         [:braid.server/create-group group]
-         1000
-         (fn [reply]
-           (when-let [msg (reply :error)]
-             (.error js/console msg)
-             (dispatch [:display-error [(str :bad-group group-id) msg]])
-             (dispatch [:remove-group group-id]))))
-       :db (-> state
-               (helpers/add-group group)
-               (update-in [:users user-id :group-ids]
-                          #(vec (conj (set %) group-id)))
-               (update-in [:groups group-id :admins] conj user-id))})))
 
 (reg-event-db
   :update-user-nickname
@@ -439,16 +414,7 @@
   :remove-from-group
   (fn [cofx [ _ {:keys [group-id user-id] :as args}]]
     {:websocket-send (list [:braid.server/remove-from-group args])
-     :dispatch [:redirect-to-first-group]}))
-
-(reg-event-fx
-  :check-auth
-  (fn [{state :db} _]
-    {:db (assoc state :login-state :auth-check)
-     :edn-xhr {:uri "/check"
-               :method :get
-               :on-complete (fn [_] (dispatch [:start-socket]))
-               :on-error (fn [_] (dispatch [:set-login-state :login-form]))}}))
+     :dispatch [:redirect-from-root]}))
 
 (reg-event-db
   :set-login-state
@@ -473,8 +439,8 @@
 (reg-event-fx
   :auth
   (fn [cofx [_ data]]
-    {:edn-xhr {:uri "/auth"
-               :method :post
+    {:edn-xhr {:uri "/session"
+               :method :put
                :params {:email (data :email)
                         :password (data :password)}
                :on-complete (fn [_]
@@ -495,29 +461,43 @@
 (reg-event-fx
   :logout
   (fn [cofx [_ _]]
-    {:edn-xhr {:uri "/logout"
-               :method :post
-               :params {:csrf-token (:csrf-token @sync/chsk-state)}
+    {:edn-xhr {:uri "/session"
+               :method :delete
+               :headers {"x-csrf-token" (:csrf-token @sync/chsk-state)}
                :on-complete (fn [data]
                               (sync/disconnect!)
                               (dispatch [:initialize-db])
-                              (dispatch [:set-login-state :login-form]))}}))
+                              (dispatch [:set-login-state :gateway])
+                              (dispatch [:go-to "/"]))}}))
 
 (reg-event-fx
   :set-group-and-page
   (fn [{state :db :as cofx} [_ [group-id page-id]]]
-    (if (or (nil? group-id) (some? (get-in state [:groups group-id])))
+    (cond
+      (nil? group-id)
+      {:db (assoc state :open-group-id nil :page page-id)}
+
+      (some? (get-in state [:groups group-id]))
       {:db (assoc state :open-group-id group-id :page page-id)}
-      {:dispatch [:redirect-to-first-group]})))
+
+      (and group-id (not (get-in state [:groups group-id])))
+      {:dispatch-n [[:set-login-state :gateway]
+                    [:braid.client.gateway.events/initialize :join-group]]}
+
+      :else
+      {:dispatch [:redirect-from-root]})))
 
 (reg-event-fx
-  :redirect-to-first-group
+  :redirect-from-root
   (fn [{state :db :as cofx} _]
-    {:redirect-to
-     (when-let [group-id (-> (helpers/ordered-groups state)
+    (if (state :session)
+      {:redirect-to
+       (if-let [group-id (-> (helpers/ordered-groups state)
                              first
                              :id)]
-       (routes/inbox-page-path {:group-id group-id}))}))
+         (routes/inbox-page-path {:group-id group-id})
+         (routes/other-path {:page-id "group-explore"}))}
+      {})))
 
 (reg-event-db
   :set-page-loading
@@ -601,7 +581,7 @@
                                      sidebar-order)})
               state))))
      :dispatch [(when (= group-id (state :open-group-id))
-                 :redirect-to-first-group)]}))
+                 :redirect-from-root)]}))
 
 (reg-event-db
   :add-open-thread
@@ -672,7 +652,7 @@
   :core/websocket-needs-auth
   (fn [{state :db} _]
     {:dispatch-n [[:initialize-db]
-                  [:set-login-state :login-form]]}))
+                  [:set-login-state :gateway]]}))
 
 (reg-event-fx
   :core/websocket-update-next-reconnect

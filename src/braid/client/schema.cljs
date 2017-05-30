@@ -23,6 +23,7 @@
 (defn make-group [data]
   {:id (or (data :id) (uuid/make-random-squuid))
    :name (data :name)
+   :slug (data :slug)
    :admins #{}
    :intro nil
    :avatar nil

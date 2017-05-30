@@ -16,8 +16,6 @@
 
 (def grey-text "#888")
 
-(def dark-bg-color "#3A4767")
-
 (def border-radius (px 3))
 
 (def private-thread-accent-color "#5f7997")
@@ -25,3 +23,6 @@
 (def limbo-thread-accent-color "#CA1414")
 
 (def archived-thread-accent-color "#AAAAAA")
+
+(def page-background-color "#f3f3f3")
+(def primary-text-color    "#444444")
