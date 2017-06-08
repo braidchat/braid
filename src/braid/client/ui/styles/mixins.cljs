@@ -97,7 +97,7 @@
    (box-shadow)
 
    [:.content
-    {:overflow-x "scroll"
+    {:overflow-x "auto"
      :height "100%"
      :box-sizing "border-box"
      :padding [[(m/* vars/pad 0.75)]]}]

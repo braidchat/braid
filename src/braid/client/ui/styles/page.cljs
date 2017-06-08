@@ -11,7 +11,7 @@
     :bottom 0
     :right 0
     :margin-top vars/top-bar-height
-    :overflow-x "scroll"}
+    :overflow-x "auto"}
 
    [:>.title
     {:height vars/top-bar-height

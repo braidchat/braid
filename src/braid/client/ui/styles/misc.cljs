@@ -85,7 +85,7 @@
     :left 0
     :padding-left vars/pad
     :align-items "flex-end"
-    :overflow-x "scroll" }])
+    :overflow-x "auto" }])
 
 (def status
   [:>.status
