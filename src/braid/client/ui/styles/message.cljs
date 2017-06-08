@@ -116,7 +116,7 @@
 
      [:&:hover
       {:text-overflow "initial"
-       :overflow-x "scroll"}]]
+       :overflow-x "auto"}]]
 
     [:&.multiline
      {:display "block"
@@ -133,4 +133,4 @@
 
        [:&:hover
         {:text-overflow "initial"
-         :overflow-x "scroll"}]]]]])
+         :overflow-x "auto"}]]]]])

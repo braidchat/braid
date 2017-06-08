@@ -32,7 +32,7 @@
        :background "white"
        :z-index 100
        :max-height (em 12)
-       :overflow-x "scroll"}
+       :overflow-x "auto"}
       (mixins/box-shadow)
 
       [:>.tag-option
@@ -110,7 +110,7 @@
 (defn messages [pad]
   [:>.messages
    {:position "relative"
-    :overflow-y "scroll"
+    :overflow-y "auto"
     :padding [[0 pad]]}])
 
 (defn thread [pad]
@@ -270,7 +270,7 @@
       :box-shadow [[0 (px 1) (px 4) 0 "#ccc"]]
       :background "white"
       :max-height (em 20)
-      :overflow "scroll"
+      :overflow "auto"
       :width vars/card-width
       ; will be an issue when text area expands:
       :position "absolute"

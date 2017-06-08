@@ -16,7 +16,7 @@
        [:.container
         {:height "100%"
          :width "100%"
-         :overflow "scroll"}
+         :overflow "auto"}
         [:.panels
          {:height "100%"
           :min-width "100%"
