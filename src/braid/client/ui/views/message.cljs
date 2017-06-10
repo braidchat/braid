@@ -109,8 +109,9 @@
         ([result input]
          (if (string? input)
            (cond
-             ; TODO: handle starting code block with delimiter not at beginning of word
-             ; start
+             ;; TODO: handle starting code block with delimiter not at beginning of word
+
+             ;; opening delimiter; initialize volatile! state variables
              (and (= @state ::start) (string/starts-with? input delimiter))
              (cond
                (and (not= input delimiter) (string/ends-with? input delimiter))
@@ -127,13 +128,14 @@
                    (vswap! in-code conj (.slice input (count delimiter)))
                    result))
 
-             ; end
+             ;; word ending with the closing delimiter
              (and (= @state ::in-code) (string/ends-with? input delimiter))
              (let [code (conj @in-code (.slice input 0 (- (.-length input) (count delimiter))))]
                (vreset! state ::start)
                (vreset! in-code [])
                (xf result (result-fn (string/join " " code))))
 
+             ;; word that contains the closing delimiter and some additional text afterwards
              (and (= @state ::in-code) (not= -1 (.indexOf input delimiter)))
              (let [idx (.indexOf input delimiter)
                    code (conj @in-code (.slice input 0 idx))
@@ -142,9 +144,13 @@
                (vreset! in-code [])
                (reduce xf result [(result-fn (string/join " " code)) after]))
 
+             ;; closing delimiter not yet found; eat next word
              (= @state ::in-code) (do (vswap! in-code conj input) result)
 
+             ;; opening delimiter not yet found; pass word on to rest of xform
              :else (xf result input))
+
+           ;; not a string, pass on to rest of xform
            (xf result input)))))))
 
 (def url-replace (make-text-replacer :urls))
@@ -182,6 +188,45 @@
   (make-delimited-processor {:delimiter "*"
                              :result-fn (fn [body] [:strong.starred body])}))
 
+(defn shortcode-emoji?
+  [message-part]
+  (and (= 4 (count message-part))
+       (= :span.dummy (first message-part))
+       (= :img (get-in message-part [2 0]))
+       (string/starts-with? (get-in message-part [2 1 :class]) "emojione")))
+
+(defn ascii-emoji?
+  [message-part]
+  (and (= 2 (count message-part))
+       (= :img (first message-part))
+       (string/starts-with? (get-in message-part [1 :class]) "emojione")))
+
+(defn emoji?
+  [message-part]
+  (or (shortcode-emoji? message-part)
+      (ascii-emoji? message-part)))
+
+(defn format-emojis
+  "Formats messages containing only emojis (ignoring whitespace). When
+  a message meets the criteria, all emojis will have the class 'large'
+  appended to the end of their class attribute. All other messages are
+  returned unmodified"
+  [message]
+  (let [text (filterv #(or (not (string? %))
+                           (not (some? (re-find #"\s+" %))))
+                      message)]
+    (if (every? emoji? text)
+      (map (fn [part]
+             (cond (shortcode-emoji? part)
+                   (update-in part [2 1 :class] #(str % " large"))
+
+                   (ascii-emoji? part)
+                   (update-in part [1 :class] #(str % " large"))
+
+                   :else part))
+           message)
+      message)))
+
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
   links"
@@ -197,7 +242,8 @@
         statefull-transform (comp extract-code-blocks extract-code-inline extract-emphasized)]
     (->> (into [] (comp statefull-transform stateless-transform) (string/split text #" "))
          (interleave (repeat " "))
-         rest)))
+         rest
+         format-emojis)))
 
 (defn message-view [message embed-update-chan]
   (let [sender (subscribe [:user (message :user-id)])
@@ -241,4 +287,3 @@
 
          (when-let [url (first (helpers/extract-urls (message :content)))]
            [embed-view url embed-update-chan])]))))
-
