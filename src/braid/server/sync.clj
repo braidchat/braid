@@ -1,14 +1,8 @@
 (ns braid.server.sync
   (:require
-    [clojure.set :refer [difference intersection]]
-    [clojure.string :as string]
-    [environ.core :refer [env]]
-    [taoensso.timbre :as timbre :refer [debugf]]
-    [taoensso.truss :refer [have]]
     [braid.common.schema :refer [new-message-valid? upload-valid?]]
     [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
     [braid.server.bots :as bots]
-    [braid.server.digest :as digest]
     [braid.server.db :as db]
     [braid.server.db.bot :as bot]
     [braid.server.db.common :refer [bot->display]]
@@ -19,6 +13,7 @@
     [braid.server.db.thread :as thread]
     [braid.server.db.upload :as upload]
     [braid.server.db.user :as user]
+    [braid.server.digest :as digest]
     [braid.server.email-digest :as email]
     [braid.server.events :as events]
     [braid.server.invite :as invites]
@@ -29,9 +24,12 @@
     [braid.server.search :as search]
     [braid.server.socket :refer [chsk-send! connected-uids]]
     [braid.server.sync-handler :refer [event-msg-handler]]
-    [braid.server.util :refer [valid-url?]]))
-
-;; Handler helpers
+    [braid.server.util :refer [valid-url?]]
+    [clojure.set :refer [difference intersection]]
+    [clojure.string :as string]
+    [environ.core :refer [env]]
+    [taoensso.timbre :as timbre :refer [debugf]]
+    [taoensso.truss :refer [have]]))
 
 (defn broadcast-thread
   "broadcasts thread to all users with the thread open, except those in ids-to-skip"
@@ -149,15 +147,15 @@
   (when-let [bot-name (second (re-find #"^/(\w+)\b" (:content new-message)))]
     (when-let [bot (bot/bot-by-name-in-group bot-name (new-message :group-id))]
       (timbre/debugf "notifying bot %s" bot)
-      (bots/send-message-notification bot new-message)))
+      (future (bots/send-message-notification bot new-message))))
   ; Notify bots subscribed to the thread
   (doseq [bot (bot/bots-watching-thread (new-message :thread-id))]
     (timbre/debugf "notifying bot %s" bot)
-    (bots/send-message-notification bot new-message))
+    (future (bots/send-message-notification bot new-message)))
   ; Notify bots subscribed to all messages
   (doseq [bot (bot/bots-for-message (new-message :group-id))]
     (when (thread/thread-has-tags? (new-message :thread-id))
-      (bots/send-message-notification bot new-message))))
+      (future (bots/send-message-notification bot new-message)))))
 
 (defn broadcast-new-user-to-group
   [user-id group-id]

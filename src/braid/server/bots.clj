@@ -13,12 +13,16 @@
   (let [body (->transit message)
         hmac (crypto/hmac-bytes (bot :token) body)]
     (timbre/debugf "sending bot notification")
-    (println
+    (try
       ; TODO: should this be a POST too?
-      @(http/put (bot :webhook-url)
-                 {:headers {"Content-Type" "application/transit+msgpack"
-                            "X-Braid-Signature" hmac}
-                  :body (ByteArrayInputStream. body)}))))
+      (->>
+        @(http/put (bot :webhook-url)
+                   {:headers {"Content-Type" "application/transit+msgpack"
+                              "X-Braid-Signature" hmac}
+                    :body (ByteArrayInputStream. body)})
+        (timbre/debugf "Bot response: %s"))
+      (catch Exception ex
+        (timbre/warnf "Error sending bot notification: %s" ex)))))
 
 (defn send-event-notification
   [bot info]
@@ -27,8 +31,12 @@
     (let [body (->transit info)
           hmac (crypto/hmac-bytes (bot :token) body)]
       (timbre/debugf "sending bot event notification")
-      (println
-        @(http/post url
-                    {:headers {"Content-Type" "application/transit+msgpack"
-                               "X-Braid-Signature" hmac}
-                     :body (ByteArrayInputStream. body)})))))
+      (try
+        (->>
+          @(http/post url
+                      {:headers {"Content-Type" "application/transit+msgpack"
+                                 "X-Braid-Signature" hmac}
+                       :body (ByteArrayInputStream. body)})
+          (timbre/debugf "Bot response: %s"))
+        (catch Exception ex
+          (timbre/warnf "Error sending bot event notification: %s" ex))))))
