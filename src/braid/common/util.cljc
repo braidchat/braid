@@ -23,12 +23,12 @@
 (defn valid-nickname?
   "Checks if a nickname is well-formed. Does NOT check if already taken"
   [nick]
-  (re-matches nickname-re nick))
+  (and (not (string/blank? nick)) (re-matches nickname-re nick)))
 
 (defn valid-tag-name?
   "Checks if a tag name is valid, but not if already taken"
   [tag]
-  (re-matches tag-name-re tag))
+  (and (not (string/blank? tag)) (re-matches tag-name-re tag)))
 
 (defn reversed
   "Given a function f, return a function that passes arguments to f in the reversed order"
