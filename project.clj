@@ -12,11 +12,11 @@
                  [ring-cors "0.1.8"]
                  [compojure "1.5.1"]
                  [environ "1.0.3"]
-                 [com.taoensso/timbre "4.7.4" :exclusions [org.clojure/tools.reader]]
+                 [com.taoensso/timbre "4.7.4" :exclusions [org.clojure/tools.reader com.taoensso/truss com.taoensso/encore]]
                  [crypto-password "0.2.0"]
                  [clj-time "0.12.0"]
                  [instaparse "1.4.2"]
-                 [com.taoensso/carmine "2.13.1"]
+                 [com.taoensso/carmine "2.13.1" :exclusions [com.taoensso/encore]]
                  [clj-aws-s3 "0.3.10" :exclusions [joda-time org.apache.httpcomponents/httpclient com.fasterxml.jackson.core/jackson-core]]
                  [image-resizer "0.1.9"]
                  [clojurewerkz/quartzite "2.0.0"]
@@ -28,7 +28,7 @@
                  [clavatar "0.3.0"]
 
                  ;client
-                 [org.clojure/clojurescript "1.9.92"]
+                 [org.clojure/clojurescript "1.9.671"]
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]
                  [cljs-ajax "0.5.8"]
                  [secretary "1.2.3"]
@@ -36,20 +36,21 @@
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.2"]
-                 [re-frame "0.9.2"]
+                 [reagent  "0.6.0"]
+                 [re-frame "0.9.2" :exclusions [org.clojure/clojurescript]]
                  [cljsjs/husl "6.0.1-0"]
                  [cljsjs/highlight "9.6.0-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
-                 [hickory "0.7.0"]
-                 [org.clojure/core.memoize "0.5.8"]
+                 [hickory "0.7.0" :exclusions [org.clojure/clojurescript]]
+                 [org.clojure/core.memoize "0.5.9"]
                  [lein-doo "0.1.7"]
 
                  ;shared
-                 [org.clojure/tools.reader "1.0.0-beta3"]
-                 [org.clojure/core.async "0.2.385" :exclusions [org.clojure/tools.reader]]
-                 [com.taoensso/truss "1.3.3"]
-                 [com.taoensso/sente "1.11.0" :exclusions [org.clojure/tools.reader taoensso.timbre]]
-                 [prismatic/schema "1.1.2"]
+                 [org.clojure/tools.reader "1.0.0"]
+                 [org.clojure/core.async "0.2.395" :exclusions [org.clojure/tools.reader]]
+                 [com.taoensso/truss "1.3.6"]
+                 [com.taoensso/sente "1.11.0" :exclusions [org.clojure/tools.reader taoensso.timbre com.taoensso/truss]]
+                 [prismatic/schema "1.1.6"]
 
                  ;mobile
                  [garden "1.3.2"]]
@@ -57,7 +58,7 @@
   :main braid.server.core
 
   :plugins [[lein-environ "1.0.0"]
-            [lein-cljsbuild "1.1.3" :exclusions [org.clojure/clojure]]
+            [lein-cljsbuild "1.1.6" :exclusions [org.clojure/clojure]]
             [lein-figwheel "0.5.4-7"]
             [lein-doo "0.1.7"]]
 
