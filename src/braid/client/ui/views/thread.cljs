@@ -117,12 +117,11 @@
 
        :component-did-update scroll-to-bottom!
 
-       :component-will-update check-at-bottom
-
        :reagent-render
        (fn [thread]
          [:div.messages
-          {:ref ref-cb}
+          {:ref ref-cb
+           :on-scroll (fn [_] (check-at-bottom))}
           (let [sorted-messages
                 (->> @messages
                      (sort-by :created-at)
