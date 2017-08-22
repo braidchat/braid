@@ -84,6 +84,7 @@
         ref-cb (fn [node] (reset! messages-node node))
 
         at-bottom? (atom true)
+        first-scroll? (atom true)
 
         check-at-bottom
         (fn []
@@ -105,6 +106,7 @@
 
        :component-did-mount
        (fn [c]
+         (reset! at-bottom? true)
          (scroll-to-bottom! c)
          (go (loop []
                (let [[_ ch] (alts! [embed-update-chan kill-chan])]
@@ -121,7 +123,9 @@
        (fn [thread]
          [:div.messages
           {:ref ref-cb
-           :on-scroll (fn [_] (check-at-bottom))}
+           :on-scroll (fn [_] (if-not @first-scroll?
+                                (check-at-bottom)
+                                (reset! first-scroll? false)))}
           (let [sorted-messages
                 (->> @messages
                      (sort-by :created-at)
