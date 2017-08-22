@@ -586,11 +586,17 @@
 (reg-event-db
   :add-open-thread
   (fn [state [_ thread]]
-    (-> state
-        (update-in [:threads (thread :id)] merge thread)
-        (update-in [:group-threads (thread :group-id)]
-                   #(conj (set %) (thread :id)))
-        (update-in [:user :open-thread-ids] conj (thread :id)))))
+    (let [msg-ids (into #{} (map (comp (partial str :failed-to-send) :id))
+                        (:messages thread))
+          remove-msg-errors (fn [state]
+                              (update state :errors
+                                      (partial remove (fn [[k _]] (msg-ids k)))))]
+      (-> state
+          remove-msg-errors
+          (update-in [:threads (thread :id)] merge thread)
+          (update-in [:group-threads (thread :group-id)]
+                     #(conj (set %) (thread :id)))
+          (update-in [:user :open-thread-ids] conj (thread :id))))))
 
 (reg-event-fx
   :maybe-increment-unread
