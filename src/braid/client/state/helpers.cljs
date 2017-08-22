@@ -74,7 +74,8 @@
 
 (defn maybe-reset-temp-thread [state thread-id]
   (if (= thread-id (get-in state [:temp-threads (state :open-group-id) :id]))
-    (assoc-in state [:temp-threads (state :open-group-id)] (schema/make-temp-thread (state :open-group-id)))
+    (assoc-in state [:temp-threads (state :open-group-id)]
+              (schema/make-temp-thread (state :open-group-id)))
     state))
 
 (defn update-thread-last-open-at [state thread-id]
@@ -129,4 +130,3 @@
         (update-in [:threads] #(apply dissoc % group-threads))
         (update-in [:group-threads] (flip dissoc group-id))
         (update-in [:groups] (flip dissoc group-id)))))
-

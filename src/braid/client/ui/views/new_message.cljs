@@ -11,7 +11,7 @@
     [braid.client.store :as store]
     [braid.client.ui.views.autocomplete :refer [engines]])
   (:import
-    [goog.events KeyCodes]))
+    (goog.events KeyCodes)))
 
 (defn- resize-textbox [el]
   (set! (.. el -style -height) "auto")
@@ -279,4 +279,3 @@
   [:div.message.new
    [upload-button-view config]
    [wrap-autocomplete config]])
-
