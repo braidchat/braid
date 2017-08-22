@@ -33,18 +33,19 @@
 ;                text to replace message with
 
 (defn normalize [s]
-  (-> (.toLowerCase s)
-     (string/replace #"\s" "")))
+  (-> (string/lower-case s)
+      (string/replace #"\s" "")))
 
 (defn simple-matches?
   [m s]
   (not= -1 (.indexOf m s)))
 
 (defn fuzzy-matches? [m s]
-  (let [m (normalize m)
-        s (normalize s)]
-    (or (simple-matches? m s)
-        (< (fuzzy/levenshtein m s) 2))))
+  (when (and (some? s) (some? m))
+    (let [m (normalize m)
+          s (normalize s)]
+      (or (simple-matches? m s)
+          (< (fuzzy/levenshtein m s) 2)))))
 
 (defn emoji-view
   [emoji]
