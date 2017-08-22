@@ -317,4 +317,3 @@
                                                    (thread :mentioned-ids))
                              :mentioned-tag-ids (when new?
                                                   (thread :tag-ids))}]]]))))
-
