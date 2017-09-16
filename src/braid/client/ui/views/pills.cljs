@@ -101,6 +101,12 @@
                                         ; [:a.pm "PM"]
                                         ; [:a.mute "Mute"]
       [search-button-view (str "@" (@user :nickname))]
+      (when (and @viewer-admin? (not= user-id @(subscribe [:user-id])))
+        [:button.ban
+         {:on-click (fn [_] (dispatch [:remove-from-group
+                                      {:group-id @open-group-id
+                                       :user-id user-id}]))}
+         "Kick from Group"])
       (when (and @viewer-admin? (not @admin?))
                                         ; TODO: make this not ugly
         [:button.make-admin
