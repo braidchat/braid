@@ -11,6 +11,7 @@
     [braid.client.ui.styles.page]
     [braid.client.ui.styles.pages.tags]
     [braid.client.ui.styles.pages.me]
+    [braid.client.ui.styles.pages.search]
     [braid.client.ui.styles.pills]
     [braid.client.ui.styles.reconnect-overlay]
     [braid.client.ui.styles.sidebar]
@@ -62,6 +63,7 @@
                  braid.client.uploads.views.uploads-page-styles/uploads-page
                  braid.client.invites.views.invite-page-styles/invite-page
                  braid.client.bots.views.bots-page-styles/bots-page
+                 braid.client.ui.styles.pages.search/search-user-card
 
                  [:>.page
                   (braid.client.ui.styles.misc/threads vars/pad)

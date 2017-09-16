@@ -1,16 +1,21 @@
 (ns braid.client.ui.views.pages.search
   (:require
-    [reagent.core :as r]
-    [reagent.ratom :include-macros true :refer-macros [reaction]]
+    [braid.client.ui.views.pills :refer [user-card-view]]
+    [braid.client.ui.views.thread :refer [thread-view]]
     [re-frame.core :refer [dispatch subscribe]]
-    [braid.client.ui.views.thread :refer [thread-view]]))
+    [reagent.core :as r]
+    [reagent.ratom :include-macros true :refer-macros [reaction]]))
+
+(def user-uuid-re #"^@([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$")
 
 (defn search-page-view
   []
   (let [page (subscribe [:page])
         threads (subscribe [:threads])
         query (subscribe [:search-query])
-        group-id (subscribe [:open-group-id])]
+        group-id (subscribe [:open-group-id])
+        user-search (reaction (some->> @query (re-matches user-uuid-re)
+                                       second uuid))]
     (fn []
       (let [status (cond
                      (@page :search-error?) :error
@@ -25,7 +30,8 @@
            [:div.title (str "Search for \"" @query "\"")]
            [:div.content
             [:div.description
-             "Searching..."]]]
+             "Searching..."]
+            (when-let [uid @user-search] [user-card-view uid])]]
 
           :error
           [:div.page.search
@@ -36,7 +42,8 @@
              {:on-click
               (fn [_]
                 (dispatch [:search-history [(@page :search-query) @group-id]]))}
-             "Try again"]]]
+             "Try again"]
+           (when-let [uid @user-search] [user-card-view uid])]]
 
           (:done-results :loading)
           (let [loaded-threads (vals (select-keys @threads (@page :thread-ids)))
@@ -60,16 +67,16 @@
                (fn [e]
                  (let [div (.. e -target)]
                    (when (and (= (.-className div) "threads")
-                           (= status :done-results)
-                           (< (count loaded-threads) (count (@page :thread-ids)))
-                           (> 100 (- (.-scrollWidth div)
-                                     (+ (.-scrollLeft div) (.-offsetWidth div)))
-                              0))
+                              (= status :done-results)
+                              (< (count loaded-threads) (count (@page :thread-ids)))
+                              (> 100 (- (.-scrollWidth div)
+                                        (+ (.-scrollLeft div) (.-offsetWidth div)))
+                                 0))
                      (dispatch [:set-page-loading true])
                      (let [already-have (set (map :id loaded-threads))
                            to-load (->> (@page :thread-ids)
-                                        (remove already-have)
-                                        (take 25))]
+                                       (remove already-have)
+                                       (take 25))]
                        (dispatch [:load-threads
                                   {:thread-ids to-load
                                    :on-complete
@@ -79,12 +86,13 @@
                (fn [e]
                  (let [target-classes (.. e -target -classList)
                        this-elt (.. e -target)]
-                   ; TODO: check if threads-div needs to scroll?
+                                        ; TODO: check if threads-div needs to scroll?
                    (when (and (or (.contains target-classes "thread")
                                   (.contains target-classes "threads"))
-                           (= 0 (.-deltaX e) (.-deltaZ e)))
+                              (= 0 (.-deltaX e) (.-deltaZ e)))
                      (set! (.-scrollLeft this-elt)
                            (- (.-scrollLeft this-elt) (.-deltaY e))))))}
+              (when-let [uid @user-search] [user-card-view uid])
               (doall
                 (for [thread sorted-threads]
                   ^{:key (:id thread)}
@@ -94,4 +102,5 @@
           [:div.page.search
            [:div.title (str "Search for \"" @query "\"")]
            [:div.content
-            [:div.description "No results."]]])))))
+            [:div.description "No results."]
+            (when-let [uid @user-search] [user-card-view uid])]])))))

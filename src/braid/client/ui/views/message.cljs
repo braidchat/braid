@@ -257,7 +257,7 @@
 
                           :else (routes/search-page-path
                                   {:group-id @current-group
-                                   :query (str "@" (:nickname @sender))}))]
+                                   :query (str "@" (:id @sender))}))]
         [:div.message {:class (str " " (when (:collapse? message) "collapse")
                                    " " (if (:unseen? message) "unseen" "seen")
                                    " " (when (:first-unseen? message) "first-unseen")
