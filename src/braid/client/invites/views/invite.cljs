@@ -13,7 +13,7 @@
         invitee-email (r/atom "")
         set-collapse! (fn [c?] (reset! collapsed? c?))
         set-invitee-email! (fn [message] (reset! invitee-email message))
-        link-expires (r/atom :never)
+        link-expires (r/atom :day)
         invite-link (r/atom nil)]
     (fn []
       [:div.invite
@@ -38,6 +38,11 @@
                                   :expires @link-expires
                                   :complete (fn [link] (reset! invite-link link))}]))}
          "Generate"]
+        (when (= @link-expires :never)
+          [:p.warning
+           "Be careful with never-expiring links! They will allow anyone with "
+           "this link to always be able to join, even if they get removed from "
+           "the group. Prefer to use one of the expiring links instead!"])
         (when @invite-link
           [:input {:type "text"
                    :on-focus (fn [e] (.. e -target select))
@@ -69,5 +74,3 @@
                            (fn [_]
                              (set-collapse! true))}
             "cancel"]])]])))
-
-
