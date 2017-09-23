@@ -202,5 +202,4 @@ Or, if you must, on Slack: [#braid-chat @ Clojurians](https://clojurians.herokua
 
 ## License
 
-Braid is distributed under the [Eclipse Public License](https://www.tldrlegal.com/l/epl), the same as Clojure.
-
+Braid may be freely used under the [AGPL license](https://www.gnu.org/licenses/agpl-3.0.html) or you may purchase a commercial license by contacting licensing@braidchat.com.
