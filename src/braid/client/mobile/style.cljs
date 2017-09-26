@@ -80,7 +80,8 @@
                    {:width "100vw"
                     :height "100%"
                     :background "white"
-                    :flex-direction "column"}
+                    :flex-direction "column"
+                    :justify-content "flex-end"}
 
                    [:>.card
                     (braid.client.ui.styles.thread/head pad)
@@ -104,12 +105,14 @@
                     (braid.client.ui.styles.thread/messages pad)
 
                     [:>.messages
-                     {:flex-grow 1}
+                     {:flex-grow 1
+                      :max-height "75vh"}
 
                      braid.client.ui.styles.message/message
                      [:>.message
                       (braid.client.ui.styles.embed/embed pad)]]
 
-                    (braid.client.ui.styles.thread/new-message pad)]]]]]]]]]]]
+                    (braid.client.ui.styles.thread/new-message pad)
+                    ]]]]]]]]]]]
 
          braid.client.ui.styles.body/body)))
