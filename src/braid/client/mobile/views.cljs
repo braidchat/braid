@@ -1,8 +1,6 @@
 (ns braid.client.mobile.views
   (:require
-    [reagent.core :as r]
-    [re-frame.core :refer [subscribe dispatch]]
-    [retouch.core :refer [drawer-view swipe-view]]
+    [braid.client.gateway.views :refer [gateway-view]]
     [braid.client.helpers :refer [->color]]
     [braid.client.mobile.auth-flow.views :refer [auth-flow-view]]
     [braid.client.mobile.style :refer [styles]]
@@ -10,7 +8,10 @@
     [braid.client.ui.views.header :refer [group-name-view group-header-buttons-view]]
     [braid.client.ui.views.new-message :refer [upload-button-view]]
     [braid.client.ui.views.sidebar]
-    [braid.client.ui.views.thread :refer [messages-view]])
+    [braid.client.ui.views.thread :refer [messages-view]]
+    [re-frame.core :refer [subscribe dispatch]]
+    [reagent.core :as r]
+    [retouch.core :refer [drawer-view swipe-view]])
   (:import
     [goog.events KeyCodes]))
 
@@ -103,6 +104,9 @@
       [:div.app
        [style-view]
        (case @login-state
+         :gateway
+         [gateway-view]
+
          :auth-check
          [:div.status.authenticating "Authenticating..."]
 
@@ -117,4 +121,3 @@
 
          :init
          [:div.status])])))
-
