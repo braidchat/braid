@@ -44,4 +44,3 @@
      :create-group [create-group-view]
      :join-group [join-group-view]
      nil)])
-

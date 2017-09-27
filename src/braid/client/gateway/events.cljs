@@ -40,4 +40,3 @@
         :log-in
         {:dispatch [:braid.client.gateway.forms.log-in.events/change-user-status logged-in?]}
         {}))))
-

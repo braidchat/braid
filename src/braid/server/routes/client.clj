@@ -100,7 +100,6 @@
     (get-html "desktop" {})))
 
 (defroutes mobile-client-routes
-  ; TODO: add mobile routse for public joining & password resets
   (GET "/*" []
     (get-html "mobile" {})))
 

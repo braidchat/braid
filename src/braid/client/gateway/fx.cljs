@@ -21,4 +21,3 @@
     (swap! timeouts dissoc id)))
 
 (reg-fx :edn-xhr xhr/edn-xhr)
-
