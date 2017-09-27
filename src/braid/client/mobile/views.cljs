@@ -110,25 +110,22 @@
            :dangerouslySetInnerHTML {:__html styles}}])
 
 (defn app-view []
-  (let [login-state (subscribe [:login-state])]
-    (fn []
-      [:div.app
-       [style-view]
-       (case @login-state
-         :gateway
-         [gateway-view]
+  (if (= :gateway @(subscribe [:login-state]))
+    [gateway-view]
+    [:div.app
+     [style-view]
+     (case @(subscribe [:login-state])
+       :auth-check
+       [:div.status.authenticating "Authenticating..."]
 
-         :auth-check
-         [:div.status.authenticating "Authenticating..."]
+       :ws-connect
+       [:div.status.connecting "Connecting..."]
 
-         :ws-connect
-         [:div.status.connecting "Connecting..."]
+       :login-form
+       [auth-flow-view]
 
-         :login-form
-         [auth-flow-view]
+       :app
+       [main-view]
 
-         :app
-         [main-view]
-
-         :init
-         [:div.status])])))
+       :init
+       [:div.status])]))

@@ -217,4 +217,3 @@
       [:&:hover
        {:color [[vars/invalid-color "!important"]]
         :border-color [[vars/invalid-color "!important"]]}]]]]])
-

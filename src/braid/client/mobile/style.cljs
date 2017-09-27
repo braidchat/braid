@@ -1,6 +1,5 @@
 (ns braid.client.mobile.style
   (:require
-    [braid.client.gateway.styles]
     [braid.client.mobile.auth-flow.styles]
     [braid.client.mobile.styles.drawer]
     [braid.client.ui.styles.body]
