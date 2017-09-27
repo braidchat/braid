@@ -6,6 +6,7 @@
 
 (defn drawer [pad]
   [:>.drawer
+   {:overflow-y "auto"}
 
    [:>.content
     {:width "100%"

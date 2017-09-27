@@ -1,5 +1,6 @@
 (ns braid.client.mobile.views
   (:require
+    [cljs.core.async :as a]
     [braid.client.gateway.views :refer [gateway-view]]
     [braid.client.helpers :refer [->color]]
     [braid.client.mobile.auth-flow.views :refer [auth-flow-view]]
@@ -62,37 +63,42 @@
                            :mentioned-tag-ids (when (thread :new?)
                                                 (thread :tag-ids))}]]])))
 
-(defn header-view []
+(defn header-view [toggle-draw-ch]
   (let [group-id (subscribe [:open-group-id])]
-    (fn []
+    (fn [_]
       [:div.group-header {:style {:background-color (->color @group-id)}}
        [:div.bar
-        [:a.open-sidebar {:on-click (fn []
-                                      ; TODO open sidebar
-                                      )}]
         [group-name-view]
+        [:span.buttons
+         [:a.open-sidebar {:on-click (fn [] (a/put! toggle-draw-ch true))}]]
         [:span.spacer]
         [group-header-buttons-view [{:title "Inbox"
                                      :route-fn routes/inbox-page-path
-                                     :class "inbox"}]]]])))
+                                     :class "inbox"}
+                                    {:title "Settings"
+                                     :route-fn routes/group-settings-path
+                                     :class "settings"}]]]])))
 
-(defn inbox-view []
+(defn inbox-view [toggle-draw-ch]
   (let [group-id (subscribe [:open-group-id])
         threads (subscribe [:open-threads] [group-id])
         temp-thread (subscribe [:temp-thread])]
-    (fn []
+    (fn [_]
       [:div.inbox.page
-       [header-view]
+       [header-view toggle-draw-ch]
        [:div.threads
         [swipe-view (conj @threads
                           @temp-thread) thread-view]]])))
 
 (defn main-view []
-  [:div.main
-   [drawer-view
-    [:div.sidebar
-     [braid.client.ui.views.sidebar/groups-view]]]
-   [inbox-view]])
+  (let [toggle-draw-ch (a/chan)]
+    (fn []
+      [:div.main
+       [drawer-view
+        toggle-draw-ch
+        [:div.sidebar
+         [braid.client.ui.views.sidebar/groups-view]]]
+       [inbox-view toggle-draw-ch]])))
 
 (defn style-view []
   [:style {:type "text/css"

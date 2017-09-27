@@ -1,5 +1,8 @@
 (ns retouch.views.drawer
+  (:require-macros
+   [cljs.core.async.macros :refer [go]])
   (:require
+    [cljs.core.async :as a]
     [garden.core :refer [css]]
     [reagent.core :as r]
     [reagent.ratom :include-macros true :refer-macros [reaction]]
@@ -27,7 +30,7 @@
           [:&.open
            {:transform (str "translate3d(" w ",0,0)")}]]))]))
 
-(defn drawer-view [content-view]
+(defn drawer-view [toggle-chan content-view]
   (let [state (r/atom {})
 
         get-position (fn []
@@ -86,7 +89,16 @@
                                 (open!))
                               (if (> x fudge-x)
                                 (open!)
-                                (close!)))))))]
+                                (close!)))))))
+
+        kill-chan (a/chan)]
+
+    (go (loop []
+          (let [[_ ch] (a/alts! [toggle-chan kill-chan])]
+            (when (= ch toggle-chan)
+              (open!)
+              (recur)))))
+
     (r/create-class
       {:component-did-mount
        (fn []
@@ -97,9 +109,10 @@
        (fn []
          (.removeEventListener js/document "touchstart" touch-start! true)
          (.removeEventListener js/document "touchmove" touch-move!  true)
-         (.removeEventListener js/document "touchend" touch-end! true))
+         (.removeEventListener js/document "touchend" touch-end! true)
+         (a/put! kill-chan (js/Date.)))
        :reagent-render
-       (fn [content-view]
+       (fn [_ content-view]
          (let [dragging? (get-dragging?)
                open? (get-open?)
                position (get-position)]

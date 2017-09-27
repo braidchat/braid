@@ -108,10 +108,13 @@
        {:background "rgba(0,0,0,0.25)"}]
 
       [:&.open-sidebar::after
-       (mixins/fontawesome \uf0c9)]
+       (mixins/fontawesome \uf0e8)]
 
       [:&.inbox::after
        (mixins/fontawesome \uf01c)]
+
+      [:&.settings::after
+       (mixins/fontawesome \uf013)]
 
       [:&.recent::after
        (mixins/fontawesome \uf1da)]
