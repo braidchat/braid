@@ -189,18 +189,16 @@
 
 (defn notification-rules-view
   []
-  (let [rules (subscribe [:user-preference :notification-rules])]
-    (fn []
-      [:div
-       [:table
-        [:thead
-         [:tr [:th "Notify me if"] [:th "In"] [:th ""]]]
-        [:tbody
-         (doall
-           (for [rule @rules]
-             ^{:key (hash rule)}
-             [notification-rule-view rule]))
-         [new-rule-view]]]])))
+  [:div
+   [:table
+    [:thead
+     [:tr [:th "Notify me if"] [:th "In"] [:th ""]]]
+    [:tbody
+     (doall
+       (for [rule @(subscribe [:user-preference :notification-rules])]
+         ^{:key (hash rule)}
+         [notification-rule-view rule]))
+     [new-rule-view]]]])
 
 (defn notification-settings-view
   []

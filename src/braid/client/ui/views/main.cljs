@@ -21,31 +21,27 @@
     [braid.client.ui.views.sidebar :refer [sidebar-view]]))
 
 (defn page-view []
-  (let [page (subscribe [:page])]
-    (fn []
-      (case (@page :type)
-        :inbox [inbox-page-view]
-        :recent [recent-page-view]
-        :search [search-page-view]
-        :tags [tags-page-view]
-        :me [me-page-view]
-        :invite [invite-page-view]
-        :group-explore [group-explore-page-view]
-        :bots [bots-page-view]
-        :uploads [uploads-page-view]
-        :thread [single-thread-view]
-        :settings [group-settings-page-view]
-        :global-settings [global-settings-page-view]
-        :changelog [changelog-view]
-        nil))))
+  (case (@(subscribe [:page]) :type)
+    :inbox [inbox-page-view]
+    :recent [recent-page-view]
+    :search [search-page-view]
+    :tags [tags-page-view]
+    :me [me-page-view]
+    :invite [invite-page-view]
+    :group-explore [group-explore-page-view]
+    :bots [bots-page-view]
+    :uploads [uploads-page-view]
+    :thread [single-thread-view]
+    :settings [group-settings-page-view]
+    :global-settings [global-settings-page-view]
+    :changelog [changelog-view]
+    nil))
 
 (defn main-view []
-  (let [group-id (subscribe [:open-group-id])]
-    (fn []
-      [:div.main
-       [error-banner-view]
-       [reconnect-overlay-view]
-       [sidebar-view]
-       (when @group-id
-         [header-view])
-       [page-view]])))
+  [:div.main
+   [error-banner-view]
+   [reconnect-overlay-view]
+   [sidebar-view]
+   (when @(subscribe [:open-group-id])
+     [header-view])
+   [page-view]])
