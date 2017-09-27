@@ -1,6 +1,5 @@
 (ns braid.client.mobile.views
   (:require
-    [cljs.core.async :as a]
     [braid.client.gateway.views :refer [gateway-view]]
     [braid.client.helpers :refer [->color]]
     [braid.client.mobile.auth-flow.views :refer [auth-flow-view]]
@@ -8,8 +7,10 @@
     [braid.client.routes :as routes]
     [braid.client.ui.views.header :refer [group-name-view group-header-buttons-view]]
     [braid.client.ui.views.new-message :refer [upload-button-view]]
+    [braid.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
     [braid.client.ui.views.sidebar]
     [braid.client.ui.views.thread :refer [messages-view]]
+    [cljs.core.async :as a]
     [re-frame.core :refer [subscribe dispatch]]
     [reagent.core :as r]
     [retouch.core :refer [drawer-view swipe-view]])
@@ -98,7 +99,11 @@
         toggle-draw-ch
         [:div.sidebar
          [braid.client.ui.views.sidebar/groups-view]]]
-       [inbox-view toggle-draw-ch]])))
+       (if (= :settings (:type @(subscribe [:page])))
+         [:div.page.settings
+          [header-view toggle-draw-ch]
+          [global-settings-page-view]]
+         [inbox-view toggle-draw-ch])])))
 
 (defn style-view []
   [:style {:type "text/css"

@@ -1,9 +1,6 @@
 (ns braid.client.mobile.style
   (:require
-    [garden.arithmetic :as m]
-    [garden.core :refer [css]]
-    [garden.stylesheet :refer [at-import]]
-    [garden.units :refer [rem vw vh em]]
+    [braid.client.gateway.styles]
     [braid.client.mobile.auth-flow.styles]
     [braid.client.mobile.styles.drawer]
     [braid.client.ui.styles.body]
@@ -14,7 +11,11 @@
     [braid.client.ui.styles.mixins :as mixins]
     [braid.client.ui.styles.pills]
     [braid.client.ui.styles.thread]
-    [braid.client.ui.styles.vars :as vars]))
+    [braid.client.ui.styles.vars :as vars]
+    [garden.arithmetic :as m]
+    [garden.core :refer [css]]
+    [garden.stylesheet :refer [at-import]]
+    [garden.units :refer [rem vw vh em]]))
 
 (def styles
   (let [pad (rem 1) ; (vw 5)
@@ -51,6 +52,11 @@
                :background "#CCC"}
 
               (braid.client.ui.styles.header/group-header "2.5rem")
+
+              [:>.global-settings
+               {:overflow-y "auto"
+                :height "90vh"
+                :margin-left "5em"}]
 
               [:>.group-header
                [:>.bar
