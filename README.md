@@ -1,6 +1,6 @@
 <img src="./docs/images/braid-icon-256.png" height="128px" alt="Braid Logo">
 
-# Braid [![Github Issues](https://img.shields.io/github/issues/braidchat/planning.svg)](https://www.github.com/braidchat/planning/issues) ![Codeship](https://img.shields.io/codeship/6f05b0f0-9e72-0133-e93b-76efcd0f79bd.svg) [![Braid Chat](https://img.shields.io/badge/braid-join_chat-green.svg)](https://braid.chat/group/braid)
+# Braid [![Github Issues](https://img.shields.io/github/issues/braidchat/planning.svg)](https://www.github.com/braidchat/planning/issues) ![Codeship](https://img.shields.io/codeship/6f05b0f0-9e72-0133-e93b-76efcd0f79bd.svg) [![Braid Chat](https://img.shields.io/badge/braid-join_chat-green.svg)](https://braid.chat/braid)
 
 Braid is a **group chat application** that promotes *productive* team communication, while still respecting each individual's need for focus.
 
@@ -110,7 +110,7 @@ And it's *awesome*.
 
 ## Live Demo
 
-[Give Braid a Try](https://braid.chat/group/try)
+[Give Braid a Try](https://braid.chat/try)
 
 
 ## Features
@@ -195,7 +195,7 @@ If you just want to use Braid, but not set it up yourself, you can get a hosted 
 
 If you run into any problems, please let us know.
 
-Join us on Braid: [braid @ Braid](https://braid.chat/group/braid)
+Join us on Braid: [braid @ Braid](https://braid.chat/braid)
 
 Or, if you must, on Slack: [#braid-chat @ Clojurians](https://clojurians.herokuapp.com/)
 
