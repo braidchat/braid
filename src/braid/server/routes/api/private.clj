@@ -1,17 +1,17 @@
 (ns braid.server.routes.api.private
   (:require
-    [clojure.string :as string]
-    [clojure.java.io :as io]
-    [compojure.core :refer [GET PUT DELETE defroutes]]
+    [braid.server.api.link-extract :as link-extract]
     [braid.server.db :as db]
-    [braid.server.s3 :as s3]
     [braid.server.db.group :as group]
     [braid.server.db.user :as user]
-    [braid.server.api.link-extract :as link-extract]
+    [braid.server.events :as events]
     [braid.server.markdown :refer [markdown->hiccup]]
     [braid.server.routes.helpers :refer [current-user current-user-id logged-in?
-                                         error-response edn-response
-                                         session-token]]))
+                                         error-response edn-response session-token]]
+    [braid.server.s3 :as s3]
+    [clojure.java.io :as io]
+    [clojure.string :as string]
+    [compojure.core :refer [GET PUT DELETE defroutes]]))
 
 (defroutes api-private-routes
 
@@ -92,7 +92,7 @@
 
         :else
         (do
-          (db/run-txns! (group/user-join-group-txn (current-user-id req) group-id))
+          (events/user-join-group! (current-user-id req) group-id)
           (edn-response {:status "OK"})))))
 
   (GET "/changelog" []
