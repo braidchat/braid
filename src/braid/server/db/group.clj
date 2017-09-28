@@ -174,6 +174,8 @@
     (map (fn [[tag]] [:db/add [:user/id user-id] :user/subscribed-tag tag]))))
 
 (defn user-join-group-txn
+  "Add a user to the given group, subscribe them to the group tags,
+  and subscribe them to the five most recent threads in the group."
   [user-id group-id]
   (concat
     (user-add-to-group-txn user-id group-id)
