@@ -24,12 +24,12 @@ Right now, we're especially looking for feedback on:
   - the first-time contributor experience
   - the first-time developer experience
 
-You can give us feedback [Braid](http://braid.chat/group/braid) or via [Github Issues](https://github.com/braidchat/braid/issues).
+You can give us feedback [Braid](http://braid.chat/group/braid) or via [Github Issues](https://github.com/braidchat/planning/issues).
 
 
 ### Reporting Issues
 
-Found a bug or some other issue? Let us know on [Braid](http://braid.chat/group/braid) or create a [Github Issue](https://github.com/braidchat/braid/issues).
+Found a bug or some other issue? Let us know on [Braid](http://braid.chat/group/braid) or create a [Github Issue](https://github.com/braidchat/planning/issues).
 
 If it's a security issue, please do not post it publicly, and instead, report it to us via email (see our [Responsible Disclosure Policy](./responsible-disclosure-policy.md).
 
@@ -43,7 +43,7 @@ When reporting an issue, the following information helps us track it down and fi
 
 ### Contributing Feature Ideas
 
-If you have an idea for a new feature or change to Braid, we'd love to hear it. Let us know on [Braid](http://braid.chat/group/braid) or create a [Github Issue](https://github.com/braidchat/braid/issues).
+If you have an idea for a new feature or change to Braid, we'd love to hear it. Let us know on [Braid](http://braid.chat/group/braid) or create a [Github Issue](https://github.com/braidchat/planning/issues).
 
 
 ### Feedback and Voting on Planned Features
