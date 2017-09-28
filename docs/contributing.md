@@ -7,7 +7,7 @@ There are a lot of ways you can be involved - not just coding - and all are valu
 
 ## Say Hello
 
-If you'd like to contribute, jump into the [Braid group on Braid](http://braid.chat/group/braid) and say hello. We can help match you with a good task, point you to resources and help you if you run into any problems.
+If you'd like to contribute, jump into the [Braid group on Braid](https://braid.chat/braid) and say hello. We can help match you with a good task, point you to resources and help you if you run into any problems.
 
 @jamesnvc and @rafd have a standing offer to remotely pair with anyone on Braid (via [Screenhero](https://screenhero.com/) or [Teamviewer](https://www.teamviewer.com/)). Send a message on Braid chat if you'd like to take us up on it.
 
@@ -24,12 +24,12 @@ Right now, we're especially looking for feedback on:
   - the first-time contributor experience
   - the first-time developer experience
 
-You can give us feedback [Braid](http://braid.chat/group/braid) or via [Github Issues](https://github.com/braidchat/planning/issues).
+You can give us feedback [Braid](https://braid.chat/braid) or via [Github Issues](https://github.com/braidchat/planning/issues).
 
 
 ### Reporting Issues
 
-Found a bug or some other issue? Let us know on [Braid](http://braid.chat/group/braid) or create a [Github Issue](https://github.com/braidchat/planning/issues).
+Found a bug or some other issue? Let us know on [Braid](https://braid.chat/braid) or create a [Github Issue](https://github.com/braidchat/planning/issues).
 
 If it's a security issue, please do not post it publicly, and instead, report it to us via email (see our [Responsible Disclosure Policy](./responsible-disclosure-policy.md).
 
@@ -43,7 +43,7 @@ When reporting an issue, the following information helps us track it down and fi
 
 ### Contributing Feature Ideas
 
-If you have an idea for a new feature or change to Braid, we'd love to hear it. Let us know on [Braid](http://braid.chat/group/braid) or create a [Github Issue](https://github.com/braidchat/planning/issues).
+If you have an idea for a new feature or change to Braid, we'd love to hear it. Let us know on [Braid](https://braid.chat/braid) or create a [Github Issue](https://github.com/braidchat/planning/issues).
 
 
 ### Feedback and Voting on Planned Features
