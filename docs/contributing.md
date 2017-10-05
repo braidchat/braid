@@ -77,11 +77,7 @@ The [Braid Planning Repo](https://github.com/braidchat/planning/issues) needs he
 ### Bountysource
 
 
-
 ## Coding
-
-(./contributing/coding.md)
-
 
 ### Adressing "Help Wanted" Issues
 
