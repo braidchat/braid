@@ -85,7 +85,7 @@ The [Braid Planning Repo](https://github.com/braidchat/planning/issues) needs he
 
 ### Adressing "Help Wanted" Issues
 
-We've been tagging issues that are ideal for first-time committers with the [#help-wanted tag on Braid Meta](https://github.com/braidchat/planning/issues?q=is%3Aissue+is%3Aopen+label%3Ahelp-wanted). Most of these i can be addressed with minor code changes that don't require knowledge of the full system.
+We've been tagging issues that are ideal for first-time committers with the [`help wanted`](https://github.com/braidchat/planning/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aopen%20label%3A%22help%20wanted%22) tag on Braid Meta. Most of these issues can be addressed with minor code changes that don't require knowledge of the full system.
 
 
 ### Contributing to Braid Core
