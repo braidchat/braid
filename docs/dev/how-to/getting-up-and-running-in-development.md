@@ -111,7 +111,7 @@ Login with:
 
 > username: `foo@example.com`
 >
-> password: `foo`
+> password: `foofoofoo`
 
 You should see a few messages and be able to reply.
 
