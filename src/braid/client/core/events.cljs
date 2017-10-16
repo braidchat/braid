@@ -617,7 +617,7 @@
 (reg-event-db
   :add-user
   (fn [state [_ user]]
-    (update-in state [:users] assoc (:id user) user)))
+    (assoc-in state [:users (:id user)] user)))
 
 (reg-event-db
   :remove-user-from-group
