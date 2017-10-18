@@ -58,6 +58,10 @@
    :contributions [""]
    :tags #{:documentation}}
 
+  {:name "Canna W."
+   :github "@cannawen"
+   :tags #{:documentation}}
+
 ]
 
 

@@ -69,7 +69,7 @@ To get the server running:
   (dev-main 5555)
   ```
 
-This will start the API server on port 5555, the desktop client server on 5556 and the mobile client server on 5557.
+This will start the desktop client server on 5555, the mobile client server on 5556, and the API server on port 5557.
 
 4. Seed some data (first time only):
 
@@ -111,7 +111,7 @@ Login with:
 
 > username: `foo@example.com`
 >
-> password: `foo`
+> password: `foofoofoo`
 
 You should see a few messages and be able to reply.
 
