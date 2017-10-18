@@ -11,7 +11,7 @@
   (db/run-txns! (group/user-join-group-txn user-id group-id))
   (sync-helpers/broadcast-group-change
     group-id
-    [:braid.client/new-user (user/user-by-id user-id)]))
+    [:braid.client/new-user [(user/user-by-id user-id) group-id]]))
 
 (defn register-user!
   [email group-id]
