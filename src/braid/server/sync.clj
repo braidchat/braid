@@ -289,7 +289,7 @@
             (fn [u] (tag/user-subscribe-to-tag-txn (u :id) (new-tag :id)))
             users))
         (doseq [u users]
-          (when (and (not= user-id (u :id)) (connected? (u :id)))
+          (when (connected? (u :id))
             (chsk-send! (u :id) [:braid.client/create-tag new-tag])))
         (when ?reply-fn
           (?reply-fn {:ok true})))
