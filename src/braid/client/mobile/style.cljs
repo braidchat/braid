@@ -87,6 +87,26 @@
                 [:>.panels
 
                  [:>.panel
+                  {:position "relative"}
+
+                  [:>.arrow-prev
+                   :>.arrow-next
+                   {:position "absolute"
+                    :bottom "50%"}]
+
+                  [:>.arrow-prev
+                   [:&::before
+                    (mixins/fontawesome \uf104)
+                    {:font-size (em 3)
+                     :color "lightgray"}]
+                   {:left 0}]
+
+                  [:>.arrow-next
+                   [:&::after
+                    (mixins/fontawesome \uf105)
+                    {:font-size (em 3)
+                     :color "lightgray"}]
+                   {:right 0}]
 
                   [:>.thread
                    mixins/flex

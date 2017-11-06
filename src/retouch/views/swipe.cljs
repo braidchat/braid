@@ -100,6 +100,11 @@
           [:div.panels
            [style-view]
            (doall
-             (for [panel-item panel-items]
+             (for [[idx panel-item] (map-indexed vector panel-items)]
                ^{:key (:id panel-item)}
-               [:div.panel [panel-view panel-item]]))]])})))
+               [:div.panel
+                (when (not= idx 0)
+                  [:div.arrow-prev])
+                [panel-view panel-item]
+                (when (not= idx (dec (count panel-items)))
+                  [:div.arrow-next])]))]])})))
