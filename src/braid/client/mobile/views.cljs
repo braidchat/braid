@@ -8,7 +8,7 @@
     [braid.client.ui.views.header :refer [group-name-view group-header-buttons-view]]
     [braid.client.ui.views.new-message :refer [upload-button-view]]
     [braid.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
-    [braid.client.ui.views.sidebar]
+    [braid.client.ui.views.sidebar :as sidebar]
     [braid.client.ui.views.thread :refer [messages-view]]
     [cljs.core.async :as a]
     [re-frame.core :refer [subscribe dispatch]]
@@ -69,6 +69,7 @@
     (fn [_]
       [:div.group-header {:style {:background-color (->color @group-id)}}
        [:div.bar
+        [:span.badge-wrapper [sidebar/badge-view @group-id]]
         [group-name-view]
         [:span.buttons
          [:a.open-sidebar {:on-click (fn [] (a/put! toggle-draw-ch true))}]]
@@ -98,7 +99,7 @@
        [drawer-view
         toggle-draw-ch
         [:div.sidebar
-         [braid.client.ui.views.sidebar/groups-view]]]
+         [sidebar/groups-view]]]
        (if (= :settings (:type @(subscribe [:page])))
          [:div.page.settings
           [header-view toggle-draw-ch]

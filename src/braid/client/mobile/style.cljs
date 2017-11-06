@@ -65,6 +65,14 @@
                 [:>.group-name
                  {:padding 0}]
 
+                [:>.badge-wrapper
+                 {:min-width (em 1.5)}
+                 [:>.badge
+                  mixins/pill-box
+                  {:background-color "#b53737 !important"
+                   :margin-left (em 0.5)
+                   :margin-top (em 0.5)}]]
+
                 [:>.spacer
                  {:flex-grow 2}]]]
 
