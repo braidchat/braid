@@ -57,5 +57,3 @@
                (fn [error]
                  (when-let [k (get-in error [:response :error])]
                    (dispatch [::handle-error k])))}}))
-
-
