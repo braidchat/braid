@@ -8,8 +8,7 @@
     [cljs.core.async :as async :refer [<! put! chan alts!]]
     [braid.client.helpers :refer [debounce stop-event!]]
     [braid.client.s3 :as s3]
-    [braid.client.store :as store]
-    [braid.client.ui.views.autocomplete :refer [engines]])
+    [braid.client.store :as store])
   (:import
     (goog.events KeyCodes)))
 
@@ -82,7 +81,8 @@
   (odd? (count (re-seq #"`" txt))))
 
 (defn wrap-autocomplete [config]
-  (let [autocomplete-chan (chan)
+  (let [engines (subscribe [:braid.core/autocomplete-engines])
+        autocomplete-chan (chan)
         kill-chan (chan)
         throttled-autocomplete-chan (debounce autocomplete-chan 100)
 
@@ -215,7 +215,7 @@
                    (when (= ch throttled-autocomplete-chan)
                      (when-not (inside-code-block? text)
                        (set-results!
-                         (seq (mapcat (fn [e] (e text)) engines)))
+                         (seq (mapcat (fn [e] (e text)) @engines)))
                        (highlight-first!))
                      (recur)))))
            (go (loop []

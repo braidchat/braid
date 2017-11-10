@@ -9,7 +9,7 @@
     [cljsjs.highlight.langs.yaml]
     [reagent.core :as r]
     [re-frame.core :refer [dispatch subscribe]]
-    [braid.client.emoji :as emoji]
+    [braid.emoji.helpers :as emoji]
     [braid.client.helpers :as helpers :refer [id->color ->color]]
     [braid.client.routes :as routes]
     [braid.client.ui.views.embed :refer [embed-view]]

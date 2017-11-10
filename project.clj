@@ -73,8 +73,7 @@
               :builds
               [{:id "desktop-dev"
                 :figwheel {:on-jsload "braid.client.desktop.core/reload"}
-                :source-paths ["src/braid/client"
-                               "src/braid/common"
+                :source-paths ["src/braid"
                                "src/retouch"]
                 :compiler {:main braid.client.desktop.core
                            :asset-path "/js/dev/desktop/"

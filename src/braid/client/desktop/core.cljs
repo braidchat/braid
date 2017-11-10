@@ -19,7 +19,8 @@
     [braid.client.uploads.subs]
     [braid.client.quests.events]
     [braid.client.quests.handler :as quests]
-    [braid.client.quests.subs]))
+    [braid.client.quests.subs]
+    [braid.core.modules]))
 
 (enable-console-print!)
 
@@ -33,6 +34,8 @@
                      (fn [e]
                        (dispatch [:set-window-visibility
                                   (= "visible" (.-visibilityState js/document))])))
+
+  (braid.core.modules/init)
 
   (render)
 
