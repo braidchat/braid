@@ -7,13 +7,13 @@
     [mount.core :refer [defstate]]))
 
 (defn install-schema! [db-url]
- (d/transact (d/connect db-url)
-                 (concat
-                   ; partition for our data
-                   [{:db/ident :entities
-                     :db/id #db/id [:db.part/db]
-                     :db.install/_partition :db.part/db}]
-                   schema)))
+  (d/transact (d/connect db-url)
+              (concat
+                ;; partition for our data
+                [{:db/ident :entities
+                  :db/id #db/id [:db.part/db]
+                  :db.install/_partition :db.part/db}]
+                schema)))
 
 (defn init!
   "set up schema"
