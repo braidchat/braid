@@ -27,7 +27,16 @@
            :height "100%"
            :flex-shrink 0
            :display "inline-block"
-           :vertical-align "top" }]]])]))
+           :vertical-align "top"}]]])]))
+
+(defn arrow-view [direction]
+  (let [[w h] [30 120]
+        x1 (case direction :left 5 :right w)
+        x2 (case direction :left w :right 5)]
+    [:svg {:view-box (str "0 0 " w " " h)}
+     [:g {:stroke "gray" :stroke-width 5}
+      [:line {:x1 x1 :y1 (/ h 2) :x2 x2 :y2 h}]
+      [:line {:x1 x1 :y1 (/ h 2) :x2 x2 :y2 0}]]]))
 
 (defn swipe-view [panel-items panel-view]
   (let [state (atom {:container nil
@@ -104,7 +113,7 @@
                ^{:key (:id panel-item)}
                [:div.panel
                 (when (not= idx 0)
-                  [:div.arrow-prev])
+                  [:div.arrow-prev [arrow-view :left]])
                 [panel-view panel-item]
                 (when (not= idx (dec (count panel-items)))
-                  [:div.arrow-next])]))]])})))
+                  [:div.arrow-next [arrow-view :right]])]))]])})))

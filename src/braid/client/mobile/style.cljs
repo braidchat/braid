@@ -18,8 +18,8 @@
 
 (def styles
   (let [pad (rem 1) ; (vw 5)
-        pads "1rem" ; "5vw"
-        ]
+        pads "1rem"] ; "5vw"
+
     (css {:auto-prefix #{:transition
                          :flex-direction
                          :flex-shrink
@@ -92,20 +92,14 @@
                   [:>.arrow-prev
                    :>.arrow-next
                    {:position "absolute"
-                    :bottom "50%"}]
+                    :bottom "50%"
+                    :width "10px"
+                    :height "40px"}]
 
                   [:>.arrow-prev
-                   [:&::before
-                    (mixins/fontawesome \uf104)
-                    {:font-size (em 3)
-                     :color "lightgray"}]
                    {:left 0}]
 
                   [:>.arrow-next
-                   [:&::after
-                    (mixins/fontawesome \uf105)
-                    {:font-size (em 3)
-                     :color "lightgray"}]
                    {:right 0}]
 
                   [:>.thread
@@ -145,7 +139,6 @@
                      [:>.message
                       (braid.client.ui.styles.embed/embed pad)]]
 
-                    (braid.client.ui.styles.thread/new-message pad)
-                    ]]]]]]]]]]]
+                    (braid.client.ui.styles.thread/new-message pad)]]]]]]]]]]]
 
          braid.client.ui.styles.body/body)))
