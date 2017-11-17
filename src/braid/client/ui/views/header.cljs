@@ -2,8 +2,9 @@
   (:require
     [reagent.ratom :refer-macros [reaction]]
     [re-frame.core :refer [subscribe]]
+    [schema.core :as s]
+    [braid.core.api :as api]
     [braid.client.helpers :refer [->color]]
-    [braid.quests.views :refer [quests-header-view quests-menu-view]]
     [braid.client.routes :as routes]
     [braid.client.ui.views.search-bar :refer [search-bar-view]]))
 
@@ -128,10 +129,26 @@
              ^{:key (header-item :class)}
              [header-item-view header-item]))]]])))
 
+(api/dispatch [:braid.state/register-state!
+               {::header-views []}
+               {::header-views [s/Any]}])
+
+(api/reg-event-fx :braid.core/register-header-view!
+  (fn [{db :db} [_ view]]
+    {:db (update db ::header-views conj view)}))
+
+(api/reg-sub :header-views
+ (fn [db _]
+   (db ::header-views)))
+
 (defn header-view []
-  [:div.header
-   [group-header-view]
-   [:div.spacer]
-   [quests-header-view]
-   [admin-header-view]
-   [user-header-view]])
+  (into
+    [:div.header]
+    (concat
+      [[group-header-view]
+       [:div.spacer]]
+      (doall
+        (for [view @(api/subscribe [:header-views])]
+          [view]))
+      [[admin-header-view]
+       [user-header-view]])))
