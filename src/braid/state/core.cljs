@@ -20,11 +20,12 @@
     (let [validator (s/validator (db ::state-spec))]
       (validator db))))
 
-(api/dispatch [:braid.state/register-state!
-               {::initial-state {}
-                ::state-spec {}}
-               {::initial-state s/Any
-                ::state-spec {s/Keyword s/Any}}])
+(defn init! []
+  (api/dispatch [:braid.state/register-state!
+                 {::initial-state {}
+                  ::state-spec {}}
+                 {::initial-state s/Any
+                  ::state-spec {s/Keyword s/Any}}]))
 
 (defn ^:export validate []
   @(api/subscribe [:braid.state/valid?]))

@@ -82,7 +82,6 @@
                              [:div.extra "..."]])})))
             @(subscribe [:group-bots] [open-group])))))
 
-(api/dispatch [:braid.core/register-autocomplete-engine! bot-autocomplete-engine])
 
 ; ... @<user>  -> autocompletes user name
 (defn user-autocomplete-engine [text]
@@ -106,8 +105,6 @@
                         [:img.avatar {:src (user :avatar)}]
                         [:div.name (user :nickname)]
                         [:div.extra (user :status)]])})))))))
-
-(api/dispatch [:braid.core/register-autocomplete-engine! user-autocomplete-engine])
 
 ; ... #<tag>   -> autocompletes tag
 (defn tag-autocomplete-engine [text]
@@ -164,4 +161,7 @@
              (remove nil?)
              reverse)))))
 
-(api/dispatch [:braid.core/register-autocomplete-engine! tag-autocomplete-engine])
+(defn init! []
+  (api/dispatch [:braid.core/register-autocomplete-engine! bot-autocomplete-engine])
+  (api/dispatch [:braid.core/register-autocomplete-engine! user-autocomplete-engine])
+  (api/dispatch [:braid.core/register-autocomplete-engine! tag-autocomplete-engine]))

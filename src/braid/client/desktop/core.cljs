@@ -17,6 +17,7 @@
     [braid.client.ui.views.app :refer [app-view]]
     [braid.client.uploads.events]
     [braid.client.uploads.subs]
+    [braid.core.modules :as modules]
     [braid.quests.handler :as quests]
     ; need to reference so that it loads its dependencies
     [braid.core.modules]))
@@ -33,6 +34,8 @@
                      (fn [e]
                        (dispatch [:set-window-visibility
                                   (= "visible" (.-visibilityState js/document))])))
+  (modules/init!)
+
   (render)
 
   (router/init)

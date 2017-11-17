@@ -8,12 +8,14 @@
     [braid.quests.styles :as styles]
     [braid.common.schema :refer [QuestRecordId QuestRecord]]))
 
-(api/dispatch [:braid.state/register-state!
-               {::quest-records {}}
-               {::quest-records {QuestRecordId QuestRecord}}])
+(defn init! []
 
-(api/dispatch [:braid.core/register-header-view!
-               views/quests-header-view])
+  (api/dispatch [:braid.state/register-state!
+                 {::quest-records {}}
+                 {::quest-records {QuestRecordId QuestRecord}}])
 
-(api/dispatch [:braid.core/register-styles!
-               (styles/quests-header)])
+  (api/dispatch [:braid.core/register-header-view!
+                 views/quests-header-view])
+
+  (api/dispatch [:braid.core/register-styles!
+                 (styles/quests-header)]))
