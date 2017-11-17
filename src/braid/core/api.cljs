@@ -2,15 +2,20 @@
   (:require
     [re-frame.core :as re-frame]))
 
-(enable-console-print!)
+(def ref
+  (atom {:events []
+         :subs []}))
+
+(defn ^:export log []
+  (cljs.pprint/pprint @ref))
 
 (def dispatch re-frame/dispatch)
 (def subscribe re-frame/subscribe)
 
 (defn reg-event-fx [key handler]
-  (println "api event:" key)
+  (swap! ref update :events conj key)
   (re-frame/reg-event-fx key handler))
 
 (defn reg-sub [key handler]
-  (println "api sub:" key)
+  (swap! ref update :subs conj key)
   (re-frame/reg-sub key handler))
