@@ -17,10 +17,7 @@
     [braid.client.ui.views.app :refer [app-view]]
     [braid.client.uploads.events]
     [braid.client.uploads.subs]
-    [braid.core.modules :as modules]
-    [braid.quests.handler :as quests]
-    ; need to reference so that it loads its dependencies
-    [braid.core.modules]))
+    [braid.core.modules :as modules]))
 
 (enable-console-print!)
 
@@ -38,12 +35,9 @@
 
   (render)
 
-  (router/init)
-
-  (quests/install-quests-handler!))
+  (router/init))
 
 (defn ^:export reload
   "Force a re-render. For use with figwheel"
   []
-  (quests/install-quests-handler!)
   (render))
