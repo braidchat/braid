@@ -142,10 +142,10 @@
                   (.preventDefault e)
                   (dispatch [:braid.client.gateway.forms.user-auth.events/set-mode :register]))}
      "Register"]]
-    [returning-email-field-view]
-    [returning-password-field-view]
-    [login-button-view]
-    [error-view]])
+   [returning-email-field-view]
+   [returning-password-field-view]
+   [login-button-view]
+   [error-view]])
 
 (defn new-password-field-view []
   [field-view

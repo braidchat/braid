@@ -182,6 +182,6 @@
                :on-error
                (fn [error]
                  (when-let [k (get-in error [:response :error])]
-                   (dispatch [::set-error k]))) }}))
+                   (dispatch [::set-error k])))}}))
 
 (helpers/reg-form-event-fxs :braid.client.gateway.forms.user-auth.events :user-auth)

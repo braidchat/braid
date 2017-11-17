@@ -22,7 +22,7 @@
    :font-weight "bold"
    :line-height size
    :-webkit-font-smoothing "antialiased"
-   :padding [[0 (m/* vars/pad 0.75)]] })
+   :padding [[0 (m/* vars/pad 0.75)]]})
 
 (defn menu []
   [:>.options
@@ -214,7 +214,7 @@
       {:color "white"
        :display "inline-block"
        :text-decoration "none"
-       :vertical-align "top" }]
+       :vertical-align "top"}]
 
      [:>.avatar
       {:height header-height
