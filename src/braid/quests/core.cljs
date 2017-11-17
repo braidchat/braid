@@ -5,6 +5,7 @@
     [braid.quests.subs]
     [braid.quests.remote-handlers]
     [braid.quests.views :as views]
+    [braid.quests.styles :as styles]
     [braid.common.schema :refer [QuestRecordId QuestRecord]]))
 
 (api/dispatch [:braid.state/register-state!
@@ -13,3 +14,6 @@
 
 (api/dispatch [:braid.core/register-header-view!
                views/quests-header-view])
+
+(api/dispatch [:braid.core/register-styles!
+               (styles/quests-header)])

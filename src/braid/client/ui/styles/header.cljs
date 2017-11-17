@@ -2,7 +2,6 @@
   (:require
     [garden.arithmetic :as m]
     [garden.units :refer [em px rem]]
-    [braid.quests.styles :refer [quests-header]]
     [braid.client.ui.styles.mixins :as mixins]
     [braid.client.ui.styles.vars :as vars]))
 
@@ -252,6 +251,5 @@
    [:>.spacer
     {:flex-grow 2}]
 
-   (quests-header header-text header-height)
    (user-header header-height)
    (admin-header header-height)])

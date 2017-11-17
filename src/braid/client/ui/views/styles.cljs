@@ -1,6 +1,8 @@
 (ns braid.client.ui.views.styles
   (:require
     [garden.core :refer [css]]
+    [schema.core :as s]
+    [braid.core.api :as api]
     [braid.client.ui.styles.animations]
     [braid.client.ui.styles.embed]
     [braid.client.ui.styles.body]
@@ -22,6 +24,18 @@
     [braid.client.invites.views.invite-page-styles]
     [braid.client.uploads.views.uploads-page-styles]))
 
+(api/dispatch [:braid.state/register-state!
+               {::styles []}
+               {::styles [s/Any]}])
+
+(api/reg-sub :styles
+  (fn [db _]
+    (db ::styles)))
+
+(api/reg-event-fx :braid.core/register-styles!
+  (fn [{db :db} [_ styles]]
+    {:db (update db ::styles conj styles)}))
+
 (defn styles-view []
   [:style
    {:type "text/css"
@@ -42,6 +56,8 @@
                braid.client.ui.styles.misc/page-headers
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
+
+               @(api/subscribe [:styles])
 
                [:#app
                 braid.client.ui.styles.misc/status]
