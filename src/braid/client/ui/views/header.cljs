@@ -3,7 +3,7 @@
     [reagent.ratom :refer-macros [reaction]]
     [re-frame.core :refer [subscribe]]
     [braid.client.helpers :refer [->color]]
-    [braid.client.quests.views :refer [quests-header-view quests-menu-view]]
+    [braid.quests.views :refer [quests-header-view quests-menu-view]]
     [braid.client.routes :as routes]
     [braid.client.ui.views.search-bar :refer [search-bar-view]]))
 

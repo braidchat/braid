@@ -2,10 +2,15 @@
   (:require
     [re-frame.core :as re-frame]))
 
-(def dispatch re-frame/dispatch)
-(def reg-event-fx re-frame/reg-event-fx)
-(def reg-sub re-frame/reg-sub)
+(enable-console-print!)
 
-(reg-event-fx :braid.core/init-state
-  (fn [{db :db} [_ state]]
-    {:db (merge db state)}))
+(def dispatch re-frame/dispatch)
+(def subscribe re-frame/subscribe)
+
+(defn reg-event-fx [key handler]
+  (println "api event:" key)
+  (re-frame/reg-event-fx key handler))
+
+(defn reg-sub [key handler]
+  (println "api sub:" key)
+  (re-frame/reg-sub key handler))

@@ -1,9 +1,9 @@
-(ns braid.client.quests.views
+(ns braid.quests.views
   (:require
     [reagent.core :as r]
     [re-frame.core :refer [dispatch subscribe]]
     [braid.client.helpers :refer [->color]]
-    [braid.client.quests.list :refer [quests-by-id]]))
+    [braid.quests.list :refer [quests-by-id]]))
 
 (defn quest-view [quest-record]
   (let [show-video? (r/atom false)
@@ -33,10 +33,10 @@
             "Skip"]
            (if @show-video?
              [:a.video.hide {:on-click (fn [_]
-                                      (reset! show-video? false))}
+                                        (reset! show-video? false))}
               "Hide Vid"]
              [:a.video.show {:on-click (fn [_]
-                                      (reset! show-video? true))}
+                                        (reset! show-video? true))}
               "Show Me"])]
           [:div.actions
            [:a.next

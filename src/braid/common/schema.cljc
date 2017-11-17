@@ -85,10 +85,12 @@
 (def Group
   {:id s/Uuid
    :name s/Str
+   :slug s/Str
    :admins #{s/Uuid}
    :intro (s/maybe s/Str)
    :avatar (s/maybe s/Str)
    :public? s/Bool
+   :users-count s/Int
    :bots #{BotDisplay}})
 
 (def UserId
@@ -99,6 +101,7 @@
    :nickname s/Str
    :avatar s/Str
    :group-ids [s/Uuid]
+   (s/optional-key :email) (s/maybe s/Str)
    (s/optional-key :status) (s/enum :online :offline)})
 
 (def Tag
@@ -141,6 +144,7 @@
   {:quest-record/id QuestId
    :quest-record/quest-id s/Keyword
    :quest-record/user-id UserId
+   :quest-record/foo s/Int
    :quest-record/progress s/Int
    :quest-record/state (s/enum :inactive
                                :active

@@ -1,5 +1,6 @@
 (ns braid.client.ui.views.autocomplete
   (:require
+    [schema.core :as s]
     [clojure.string :as string]
     [clj-fuzzy.metrics :as fuzzy]
     [goog.string :as gstring]
@@ -47,10 +48,11 @@
       (or (simple-matches? m s)
           (< (fuzzy/levenshtein m s) 2)))))
 
-(api/dispatch [:braid.core/init-state
-  {::autocomplete-engines []}])
+(api/dispatch [:braid.state/register-state!
+               {::autocomplete-engines []}
+               {::autocomplete-engines [s/Any]}])
 
-(api/reg-event-fx :braid.core/register-autocomplete-engine
+(api/reg-event-fx :braid.core/register-autocomplete-engine!
   (fn [{db :db} [_ handler]]
     {:db (update db ::autocomplete-engines conj handler)}))
 
@@ -80,7 +82,7 @@
                              [:div.extra "..."]])})))
             @(subscribe [:group-bots] [open-group])))))
 
-(api/dispatch [:braid.core/register-autocomplete-engine bot-autocomplete-engine])
+(api/dispatch [:braid.core/register-autocomplete-engine! bot-autocomplete-engine])
 
 ; ... @<user>  -> autocompletes user name
 (defn user-autocomplete-engine [text]
@@ -105,7 +107,7 @@
                         [:div.name (user :nickname)]
                         [:div.extra (user :status)]])})))))))
 
-(api/dispatch [:braid.core/register-autocomplete-engine user-autocomplete-engine])
+(api/dispatch [:braid.core/register-autocomplete-engine! user-autocomplete-engine])
 
 ; ... #<tag>   -> autocompletes tag
 (defn tag-autocomplete-engine [text]
@@ -162,4 +164,4 @@
              (remove nil?)
              reverse)))))
 
-(api/dispatch [:braid.core/register-autocomplete-engine tag-autocomplete-engine])
+(api/dispatch [:braid.core/register-autocomplete-engine! tag-autocomplete-engine])

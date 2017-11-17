@@ -37,5 +37,4 @@
                                      (str "(" emoji-name ")") k))
                       {:react-key k}])}))))))
 
-(defn init []
-  (api/dispatch [:braid.core/register-autocomplete-engine autocomplete-handler]))
+(api/dispatch [:braid.core/register-autocomplete-engine! autocomplete-handler])

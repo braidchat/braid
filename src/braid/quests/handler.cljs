@@ -1,4 +1,4 @@
-(ns braid.client.quests.handler
+(ns braid.quests.handler
   (:require
     [re-frame.core :as rf]))
 

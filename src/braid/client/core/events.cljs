@@ -2,16 +2,16 @@
   (:require
     [clojure.set :as set]
     [clojure.string :as string]
-    [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx]]
-    [braid.client.quests.helpers :as quest-helpers]
+    [re-frame.core :refer [dispatch reg-event-fx reg-event-db reg-fx]]
+    [braid.quests.helpers :as quest-helpers]
     [braid.client.router :as router]
     [braid.client.routes :as routes]
     [braid.client.schema :as schema]
     [braid.client.state.helpers :as helpers :refer [key-by-id]]
-    [braid.client.store :as store]
     [braid.client.sync :as sync]
     [braid.client.xhr :refer [edn-xhr]]
-    [braid.common.util :as util]))
+    [braid.common.util :as util]
+    [braid.state.core :as braid.state.core]))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
@@ -90,12 +90,13 @@
                         ; regex doesn't have lookbehind
                         (str (second (re-matches #"^(\s).*" m))
                              "#" (or (name->open-tag-id state tag-name)
-                                      tag-name))))))
+                                     tag-name))))))
+
 
 (reg-event-fx
   :initialize-db
-  (fn [_ _]
-    {:db store/initial-state
+  (fn [{db :db} _]
+    {:db (braid.state.core/initialize-state db)
      :dispatch [:braid.client.gateway.events/initialize :log-in]}))
 
 (reg-event-db

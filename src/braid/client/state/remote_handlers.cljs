@@ -2,7 +2,6 @@
   (:require
     [re-frame.core :refer [dispatch]]
     [braid.client.desktop.notify :as notify]
-    [braid.client.quests.remote-handlers]
     [braid.client.router :as router]
     [braid.client.sync :as sync]))
 

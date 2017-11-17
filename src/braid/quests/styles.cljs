@@ -1,4 +1,4 @@
-(ns braid.client.quests.styles
+(ns braid.quests.styles
   (:require
     [garden.arithmetic :as m]
     [garden.stylesheet :refer [at-keyframes]]

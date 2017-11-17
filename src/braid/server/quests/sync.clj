@@ -7,5 +7,5 @@
 
 (defmethod event-msg-handler :braid.server.quests/upsert-quest-record
   [{:keys [?data user-id]}]
-  (chsk-send! user-id [:braid.client.quests/upsert-quest-record ?data])
+  (chsk-send! user-id [:braid.quests/upsert-quest-record ?data])
   (db/run-txns! (quests/upsert-quest-record-txn user-id ?data)))

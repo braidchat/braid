@@ -1,39 +1,26 @@
 (ns braid.client.store
   (:require
     [schema.core :as s :include-macros true]
+    [braid.core.api :refer [subscribe dispatch]]
     [braid.client.invites.schema :as invites]
-    [braid.client.mobile.auth-flow.schema :as mobile-auth-flow]
-    [braid.client.quests.schema :as quests]
     [braid.common.schema :as app-schema]))
-
-(def initial-state
-  (merge
-    {:login-state :gateway ; :ws-connect :app
-     :websocket-state {:connected? false
-                       :next-reconnect nil}
-     :open-group-id nil
-     :threads {}
-     :group-threads {}
-     :users {}
-     :tags {}
-     :groups {}
-     :page {:type nil}
-     :session nil
-     :errors []
-     :preferences {}
-     :notifications {:window-visible? true
-                     :unread-count 0}
-     :user {:open-thread-ids #{}
-            :subscribed-tag-ids #{}}
-     :focused-thread-id nil
-     :temp-threads {}}
-    quests/init-state
-    invites/init-state
-    mobile-auth-flow/init-state))
 
 (def AppState
   (merge
-    {:login-state (s/enum :auth-check :login-form :ws-connect :app)
+    {:login-state (s/enum :auth-check :login-form :ws-connect
+                          :app :gateway)
+     :websocket-state {:connected? s/Bool
+                       :next-reconnect (s/maybe s/Int)}
+     :csrf-token s/Str
+     :action s/Keyword
+     :user-auth {:user s/Any
+                 :error s/Any
+                 :checking? s/Bool
+                 :mode (s/enum :register :log-in :request-password-reset)
+                 :should-validate? s/Bool
+                 :oauth-provider s/Any
+                 :validations s/Any
+                 :fields s/Any}
      :open-group-id (s/maybe s/Uuid)
      :threads {s/Uuid app-schema/MsgThread}
      :group-threads {s/Uuid #{s/Uuid}}
@@ -56,10 +43,40 @@
             :subscribed-tag-ids #{s/Uuid}}
      :focused-thread-id (s/maybe s/Uuid)
      :temp-threads {s/Uuid {:id s/Uuid
+                            :new? s/Bool
+                            :messages s/Any
+                            :group-id s/Uuid
+                            :mentioned-ids [s/Uuid]
                             :tag-ids [s/Uuid]
-                            :new-message s/Str}}}
-    quests/QuestsAppState
-    invites/InvitesAppState
-    mobile-auth-flow/MobileAuthFlowAppState))
+                            :new-message s/Str}}
+     :action-disabled? s/Bool}
+    invites/InvitesAppState))
 
-(def check-app-state! (s/validator AppState))
+(def initial-state
+  (merge
+    {:login-state :gateway ; :ws-connect :app
+     :websocket-state {:connected? false
+                       :next-reconnect nil}
+     :open-group-id nil
+     :threads {}
+     :group-threads {}
+     :users {}
+     :tags {}
+     :groups {}
+     :page {:type nil}
+     :session nil
+     :errors []
+     :preferences {}
+     :notifications {:window-visible? true
+                     :unread-count 0}
+     :user {:open-thread-ids #{}
+            :subscribed-tag-ids #{}}
+     :focused-thread-id nil
+     :temp-threads {}}
+    invites/init-state))
+
+(dispatch [:braid.state/register-state!
+           initial-state
+           AppState])
+
+

@@ -1,4 +1,4 @@
-(ns braid.client.quests.list)
+(ns braid.quests.list)
 
 ; listeners must filter based on event name to avoid infinite loops
 

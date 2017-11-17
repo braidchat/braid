@@ -1,7 +1,7 @@
-(ns braid.client.quests.subs
+(ns braid.quests.subs
   (:require
     [re-frame.core :refer [reg-sub]]
-    [braid.client.quests.helpers :as helpers]))
+    [braid.quests.helpers :as helpers]))
 
 (reg-sub
   :quests/active-quest-records
