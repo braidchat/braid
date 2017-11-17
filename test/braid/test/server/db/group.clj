@@ -36,8 +36,8 @@
                             #"unique-conflict"
                             (db/run-txns!
                               (group/create-group-txn {:id (db/uuid)
-                                                    :name "Dupe"
-                                                    :slug (data :slug)})))))))
+                                                       :name "Dupe"
+                                                       :slug (data :slug)})))))))
 
 (deftest group-with-slug-exists?
   (db/run-txns!
@@ -66,9 +66,9 @@
     (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "b" :name "b"}))
           user-id (db/uuid)
           [user] (db/run-txns! (user/create-user-txn {:id user-id
-                                                    :email "foo@bar.com"
-                                                    :password "foobar"
-                                                    :avatar "http://www.foobar.com/1.jpg"}))]
+                                                      :email "foo@bar.com"
+                                                      :password "foobar"
+                                                      :avatar "http://www.foobar.com/1.jpg"}))]
       (is (= #{} (group/user-groups (user :id))))
       (is (= #{} (group/group-users (group :id))))
       (db/run-txns! (group/user-add-to-group-txn (user :id) (group :id)))
@@ -82,14 +82,14 @@
   (testing "can make a user a group admin"
     (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "c" :name "c"}))
           [user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                      :email "foo@bar.com"
-                                                      :password "foobar"
-                                                      :avatar "http://www.foobar.com/1.jpg"}))
+                                                        :email "foo@bar.com"
+                                                        :password "foobar"
+                                                        :avatar "http://www.foobar.com/1.jpg"}))
           _ (db/run-txns! (group/user-add-to-group-txn (user-1 :id) (group :id)))
           [user-2] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                      :email "bar@baz.com"
-                                                      :password "foobar"
-                                                      :avatar "http://www.foobar.com/1.jpg"}))
+                                                        :email "bar@baz.com"
+                                                        :password "foobar"
+                                                        :avatar "http://www.foobar.com/1.jpg"}))
           _ (db/run-txns! (group/user-add-to-group-txn (user-2 :id) (group :id)))]
 
       (db/run-txns! (group/user-make-group-admin-txn (user-1 :id) (group :id)))
@@ -103,19 +103,19 @@
 (deftest integration-tests
   (testing "multiple groups, admin statuses"
     (let [[user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                       :email "foo@bar.com"
-                                                       :password "foobar"
-                                                       :avatar "http://www.foobar.com/1.jpg"}))
+                                                        :email "foo@bar.com"
+                                                        :password "foobar"
+                                                        :avatar "http://www.foobar.com/1.jpg"}))
           [user-2] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                       :email "bar@baz.com"
-                                                       :password "foobar"
-                                                       :avatar "http://www.foobar.com/1.jpg"}))
+                                                        :email "bar@baz.com"
+                                                        :password "foobar"
+                                                        :avatar "http://www.foobar.com/1.jpg"}))
           [group-1] (db/run-txns! (group/create-group-txn {:id (db/uuid)
-                                                         :slug "third-group"
-                                                         :name "third group"}))
+                                                           :slug "third-group"
+                                                           :name "third group"}))
           [group-2] (db/run-txns! (group/create-group-txn {:id (db/uuid)
-                                                         :slug "another-group"
-                                                         :name "another group"}))]
+                                                           :slug "another-group"
+                                                           :name "another group"}))]
 
       (db/run-txns! (group/user-add-to-group-txn (user-1 :id) (group-2 :id)))
       (db/run-txns! (group/user-make-group-admin-txn (user-2 :id) (group-2 :id)))
