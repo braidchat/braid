@@ -1,6 +1,5 @@
 (ns braid.client.ui.views.autocomplete
   (:require
-    [schema.core :as s]
     [clojure.string :as string]
     [clj-fuzzy.metrics :as fuzzy]
     [goog.string :as gstring]
@@ -47,18 +46,6 @@
           s (normalize s)]
       (or (simple-matches? m s)
           (< (fuzzy/levenshtein m s) 2)))))
-
-(api/dispatch [:braid.state/register-state!
-               {::autocomplete-engines []}
-               {::autocomplete-engines [s/Any]}])
-
-(api/reg-event-fx :braid.core/register-autocomplete-engine!
-  (fn [{db :db} [_ handler]]
-    {:db (update db ::autocomplete-engines conj handler)}))
-
-(api/reg-sub :braid.core/autocomplete-engines
-             (fn [db _]
-               (db ::autocomplete-engines)))
 
 ; /<bot-name> -> autocompletes bots
 (defn bot-autocomplete-engine [text]

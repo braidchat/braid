@@ -2,10 +2,12 @@
   (:require-macros
     [cljs.core.async.macros :refer [go]])
   (:require
+    [cljs.core.async :as async :refer [<! put! chan alts!]]
     [reagent.core :as r]
     [reagent.ratom :refer-macros [run!]]
     [re-frame.core :refer [dispatch subscribe]]
-    [cljs.core.async :as async :refer [<! put! chan alts!]]
+    [schema.core :as s]
+    [braid.core.api :as api]
     [braid.client.helpers :refer [debounce stop-event!]]
     [braid.client.s3 :as s3]
     [braid.client.store :as store])
@@ -80,8 +82,20 @@
   [txt]
   (odd? (count (re-seq #"`" txt))))
 
+(api/dispatch [:braid.state/register-state!
+               {::autocomplete-engines []}
+               {::autocomplete-engines [s/Any]}])
+
+(api/reg-event-fx :braid.core/register-autocomplete-engine!
+                  (fn [{db :db} [_ handler]]
+                    {:db (update db ::autocomplete-engines conj handler)}))
+
+(api/reg-sub :autocomplete-engines
+             (fn [db _]
+               (db ::autocomplete-engines)))
+
 (defn wrap-autocomplete [config]
-  (let [engines (subscribe [:braid.core/autocomplete-engines])
+  (let [engines (subscribe [:autocomplete-engines])
         autocomplete-chan (chan)
         kill-chan (chan)
         throttled-autocomplete-chan (debounce autocomplete-chan 100)
@@ -158,9 +172,9 @@
           (set-results! nil)
           (update-text! (result :message-transform)))
 
-        focus-textbox! (fn []
+        focus-textbox! (fn [])
                          ;TODO
-                         )
+
 
         handle-text-change! (fn [text]
                               (clear-force-close!)
