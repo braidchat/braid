@@ -19,3 +19,11 @@
 (defn reg-sub [key handler]
   (swap! ref update :subs conj key)
   (re-frame/reg-sub key handler))
+
+; ---------
+
+(reg-event-fx :braid.core/register-event-listener!
+  (fn [_ [_ id listener]]
+    (re-frame/add-post-event-callback id (fn [event _]
+                                          (listener event)))
+    {}))

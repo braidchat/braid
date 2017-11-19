@@ -4,13 +4,16 @@
     [braid.quests.events]
     [braid.quests.subs]
     [braid.quests.remote-handlers]
-    [braid.quests.handler :as handler]
     [braid.quests.views :as views]
     [braid.quests.styles :as styles]
     [braid.common.schema :refer [QuestRecordId QuestRecord]]))
 
 (defn init! []
-  (handler/install-quests-handler!)
+  (api/dispatch [:braid.core/register-event-listener!
+                 :quests
+                 (fn [event]
+                   (when (not= "quests" (namespace (first event)))
+                     (api/dispatch [:quests/update-handler event])))])
 
   (api/dispatch [:braid.state/register-state!
                  {::quest-records {}}
