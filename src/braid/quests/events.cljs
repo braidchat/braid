@@ -37,7 +37,7 @@
       {:websocket-send
        (list [:braid.server.quests/upsert-quest-record
               (helpers/get-quest-record state quest-record-id)])
-       :dispatch [:activate-next-quest]})))
+       :dispatch [:quests/activate-next-quest]})))
 
 (reg-event-fx
   :quests/increment-quest
