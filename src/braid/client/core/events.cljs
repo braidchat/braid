@@ -3,7 +3,7 @@
     [clojure.set :as set]
     [clojure.string :as string]
     [re-frame.core :refer [dispatch reg-event-fx reg-event-db reg-fx]]
-    [braid.quests.helpers :as quest-helpers]
+    [braid.quests.client.helpers :as quest-helpers]
     [braid.client.router :as router]
     [braid.client.routes :as routes]
     [braid.client.schema :as schema]

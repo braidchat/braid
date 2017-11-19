@@ -1,4 +1,4 @@
-(ns braid.quests.remote-handlers
+(ns braid.quests.client.remote-handlers
   (:require
     [re-frame.core :refer [dispatch]]
     [braid.client.sync :as sync]))

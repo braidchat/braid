@@ -1,11 +1,11 @@
-(ns braid.quests.core
+(ns braid.quests.client.core
   (:require
     [braid.core.api :as api]
-    [braid.quests.events]
-    [braid.quests.subs]
-    [braid.quests.remote-handlers]
-    [braid.quests.views :as views]
-    [braid.quests.styles :as styles]
+    [braid.quests.client.events]
+    [braid.quests.client.subs]
+    [braid.quests.client.remote-handlers]
+    [braid.quests.client.views :as views]
+    [braid.quests.client.styles :as styles]
     [braid.common.schema :refer [QuestRecordId QuestRecord]]))
 
 (defn init! []

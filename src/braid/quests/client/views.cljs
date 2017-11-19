@@ -1,9 +1,9 @@
-(ns braid.quests.views
+(ns braid.quests.client.views
   (:require
     [reagent.core :as r]
     [re-frame.core :refer [dispatch subscribe]]
     [braid.client.helpers :refer [->color]]
-    [braid.quests.list :refer [quests-by-id]]))
+    [braid.quests.client.list :refer [quests-by-id]]))
 
 (defn quest-view [quest-record]
   (let [show-video? (r/atom false)
