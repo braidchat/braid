@@ -167,9 +167,9 @@
 ;; Handlers
 
 (defmethod event-msg-handler :chsk/ws-ping
-  [ev-msg]
+  [ev-msg])
   ; Do nothing, just avoid unhandled event message
-  )
+
 
 (defmethod event-msg-handler :chsk/uidport-open
   [{:as ev-msg :keys [user-id]}]
@@ -204,9 +204,9 @@
   (let [{:keys [thread-id tag-id]} ?data]
     (let [group-id (tag/tag-group-id tag-id)]
       (db/run-txns! (thread/tag-thread-txn group-id thread-id tag-id))
-      (broadcast-thread thread-id []))
+      (broadcast-thread thread-id []))))
     ; TODO do we need to notify-users and notify-bots
-    ))
+
 
 (defmethod event-msg-handler :braid.server/subscribe-to-tag
   [{:as ev-msg :keys [?data user-id]}]
@@ -281,7 +281,7 @@
   (if (group/user-in-group? user-id (?data :group-id))
     (if (valid-tag-name? (?data :name))
       (let [[new-tag] (db/run-txns!
-                      (tag/create-tag-txn (select-keys ?data [:id :name :group-id])))
+                       (tag/create-tag-txn (select-keys ?data [:id :name :group-id])))
             connected? (set (:any @connected-uids))
             users (group/group-users (:group-id new-tag))]
         (db/run-txns!

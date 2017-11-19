@@ -195,8 +195,8 @@
       :db/valueType :db.type/ref
       :db/cardinality :db.cardinality/one
       :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
-     ]))
+      :db.install/_attribute :db.part/db}]))
+
 
 (defn migrate-2016-06-04
   "Remove old-style extensions"
@@ -396,8 +396,8 @@
        :db/valueType :db.type/ref
        :db/cardinality :db.cardinality/many
        :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
-      ]))
+       :db.install/_attribute :db.part/db}]))
+
 
 (defn migrate-2016-01-14
   "All users must have a nickname"
@@ -532,6 +532,6 @@
        :db/valueType :db.type/instant
        :db/cardinality :db.cardinality/one
        :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
-      ]))
+       :db.install/_attribute :db.part/db}]))
+
 
