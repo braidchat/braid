@@ -3,6 +3,7 @@
     [braid.core.api :as api]
     [braid.quests.client.events]
     [braid.quests.client.subs]
+    [braid.quests.client.helpers :as helpers]
     [braid.quests.client.remote-handlers]
     [braid.quests.client.views :as views]
     [braid.quests.client.styles :as styles]
@@ -23,4 +24,8 @@
                  views/quests-header-view])
 
   (api/dispatch [:braid.core/register-styles!
-                 (styles/quests-header)]))
+                 (styles/quests-header)])
+
+  (api/dispatch [:braid.core/register-initial-user-data-handler!
+                 (fn [db data]
+                   (helpers/set-quest-records db (data :quest-records)))]))

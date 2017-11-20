@@ -3,7 +3,7 @@
     [clojure.set :as set]
     [clojure.string :as string]
     [re-frame.core :refer [dispatch reg-event-fx reg-event-db reg-fx]]
-    [braid.quests.client.helpers :as quest-helpers]
+    [schema.core :as s]
     [braid.client.router :as router]
     [braid.client.routes :as routes]
     [braid.client.schema :as schema]
@@ -11,6 +11,7 @@
     [braid.client.sync :as sync]
     [braid.client.xhr :refer [edn-xhr]]
     [braid.common.util :as util]
+    [braid.core.api :as api]
     [braid.state.core :as braid.state.core]))
 
 ; TODO: handle callbacks declaratively too?
@@ -538,31 +539,44 @@
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))
 
+(api/dispatch [:braid.state/register-state!
+               {::initial-user-data-handlers []}
+               {::initial-user-data-handlers [s/Any]}])
+
+(api/reg-sub :initial-user-data-handlers
+  (fn [db _]
+    (db ::initial-user-data-handlers)))
+
+(api/reg-event-fx :braid.core/register-initial-user-data-handler!
+  (fn [{db :db} [_ handler]]
+    {:db (update db ::initial-user-data-handlers conj handler)}))
+
 (reg-event-fx
   :set-init-data
   (fn [{state :db :as cofx} [_ data]]
-    {:dispatch-n (list [:set-login-state :app]
-                   [:add-users (data :users)])
-     :db (-> state
-             (assoc :session {:user-id (data :user-id)})
-             (assoc-in [:user :subscribed-tag-ids]
-               (set (data :user-subscribed-tag-ids)))
-             (assoc :groups (key-by-id (data :user-groups)))
-             (assoc :invitations (data :invitations))
-             (assoc :threads (key-by-id (data :user-threads)))
-             (assoc :group-threads
-               (into {}
-                     (map (fn [[g t]] [g (into #{} (map :id) t)]))
-                     (group-by :group-id (data :user-threads))))
-             (assoc-in [:user :open-thread-ids]
-               (set (map :id (data :user-threads))))
-             (assoc :temp-threads (->> (data :user-groups)
-                                       (map :id)
-                                       (reduce (fn [memo group-id]
-                                                 (assoc memo group-id (schema/make-temp-thread group-id))) {})))
-             (helpers/add-tags (data :tags))
-             (helpers/set-preferences (data :user-preferences))
-             (quest-helpers/set-quest-records (data :quest-records)))}))
+    (let [combined-data-handlers (apply comp @(api/subscribe [:initial-user-data-handlers]))]
+      {:dispatch-n (list [:set-login-state :app]
+                     [:add-users (data :users)])
+       :db (-> state
+               (assoc :session {:user-id (data :user-id)})
+               (assoc-in [:user :subscribed-tag-ids]
+                 (set (data :user-subscribed-tag-ids)))
+               (assoc :groups (key-by-id (data :user-groups)))
+               (assoc :invitations (data :invitations))
+               (assoc :threads (key-by-id (data :user-threads)))
+               (assoc :group-threads
+                 (into {}
+                       (map (fn [[g t]] [g (into #{} (map :id) t)]))
+                       (group-by :group-id (data :user-threads))))
+               (assoc-in [:user :open-thread-ids]
+                 (set (map :id (data :user-threads))))
+               (assoc :temp-threads (->> (data :user-groups)
+                                         (map :id)
+                                         (reduce (fn [memo group-id]
+                                                   (assoc memo group-id (schema/make-temp-thread group-id))) {})))
+               (helpers/add-tags (data :tags))
+               (helpers/set-preferences (data :user-preferences))
+               (combined-data-handlers data))})))
 
 (reg-event-fx
   :leave-group
