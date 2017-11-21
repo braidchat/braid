@@ -7,7 +7,7 @@
          :subs []}))
 
 (defn ^:export log []
-  (cljs.pprint/pprint @ref))
+  (prn @ref))
 
 (def dispatch re-frame/dispatch)
 (def subscribe re-frame/subscribe)
