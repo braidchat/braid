@@ -169,132 +169,132 @@
     :quest/listener (fn [state [event args]]
                       false)}
 
-{:quest/id :quest/search-tag
- :quest/name "Search for an old conversation by tag"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/search-tag
+    :quest/name "Search for an old conversation by tag"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-; profile
+   ; profile
 
-{:quest/id :quest/set-avatar
- :quest/name "Set your avatar"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/set-avatar
+    :quest/name "Set your avatar"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/set-profile
- :quest/name "Set your profile"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/set-profile
+    :quest/name "Set your profile"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/update-nickname
- :quest/name "Update your nickname"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/update-nickname
+    :quest/name "Update your nickname"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/verify-email
- :quest/name "Verify your email"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/verify-email
+    :quest/name "Verify your email"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-; invite
+   ; invite
 
-{:quest/id :quest/invite
- :quest/name "Invite a user to your group"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/invite
+    :quest/name "Invite a user to your group"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-; tags
+   ; tags
 
-{:quest/id :quest/tags-review
- :quest/name "Review your subscriptions"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/tags-review
+    :quest/name "Review your subscriptions"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/tag-subscribe
- :quest/name "Subscribe to a tag"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)
- }
-{:quest/id :quest/tag-unsubscribe
- :quest/name "Unsubscribe from a tag"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/tag-subscribe
+    :quest/name "Subscribe to a tag"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/tag-create
- :quest/name "Create a tag"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/tag-unsubscribe
+    :quest/name "Unsubscribe from a tag"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/tag-create-autocomplete
- :quest/name "Create a tag using the autocomplete"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/tag-create
+    :quest/name "Create a tag"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/archives
- :quest/name "Look into a tag's archives"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   {:quest/id :quest/tag-create-autocomplete
+    :quest/name "Create a tag using the autocomplete"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-; settings
+   {:quest/id :quest/archives
+    :quest/name "Look into a tag's archives"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :review-digest-options
- :quest/name "Review your email preferences"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   ; settings
 
-; bots
+   {:quest/id :review-digest-options
+    :quest/name "Review your email preferences"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/bot-add
- :quest/name "Add a bot to your group"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   ; bots
 
-; clients
+   {:quest/id :quest/bot-add
+    :quest/name "Add a bot to your group"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/desktop-client
- :quest/name "Try the Braid desktop app"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
-{:quest/id :quest/mobile-client
- :quest/name "Try the Braid mobile app"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
-{:quest/id :quest/web-client
- :quest/name "Try the Braid web app"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
+   ; clients
 
-; groups
+   {:quest/id :quest/desktop-client
+    :quest/name "Try the Braid desktop app"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
+   {:quest/id :quest/mobile-client
+    :quest/name "Try the Braid mobile app"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
+   {:quest/id :quest/web-client
+    :quest/name "Try the Braid web app"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
 
-{:quest/id :quest/groups-create
- :quest/name "Create another group"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
-{:quest/id :quest/groups-explore
- :quest/name "Explore the available public groups"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}
-{:quest/id :quest/groups-join-public
- :quest/name "Join a public group"
- :quest/goal 3
- :quest/listener (fn [state [event args]]
-                   false)}])
+   ; groups
+
+   {:quest/id :quest/groups-create
+    :quest/name "Create another group"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
+   {:quest/id :quest/groups-explore
+    :quest/name "Explore the available public groups"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}
+   {:quest/id :quest/groups-join-public
+    :quest/name "Join a public group"
+    :quest/goal 3
+    :quest/listener (fn [state [event args]]
+                      false)}])
