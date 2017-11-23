@@ -3,7 +3,7 @@
     [braid.server.db :as db]
     [braid.server.socket :refer [chsk-send! connected-uids]]
     [braid.server.sync-handler :refer [event-msg-handler]]
-    [braid.server.quests.db :as quests]))
+    [braid.quests.server.db :as quests]))
 
 (defmethod event-msg-handler :braid.server.quests/upsert-quest-record
   [{:keys [?data user-id]}]

@@ -7,7 +7,7 @@
     [braid.server.db :as db]
     [braid.server.db.group :as group]
     [braid.server.db.user :as user]
-    [braid.server.quests.db :as quests]))
+    [braid.quests.server.db :as quests]))
 
 (defn migrate-2017-05-24
   "add slug to groups"

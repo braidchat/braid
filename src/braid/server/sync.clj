@@ -1,5 +1,6 @@
 (ns braid.server.sync
   (:require
+    [braid.core.api :as api]
     [braid.common.schema :refer [new-message-valid? upload-valid?]]
     [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
     [braid.server.bots :as bots]
@@ -19,7 +20,6 @@
     [braid.server.invite :as invites]
     [braid.server.message-format :refer [parse-tags-and-mentions]]
     [braid.server.notify-rules :as notify-rules]
-    [braid.server.quests.db :as quests]
     [braid.server.quests.sync]
     [braid.server.search :as search]
     [braid.server.socket :refer [chsk-send! connected-uids]]
@@ -28,6 +28,7 @@
     [clojure.set :refer [difference intersection]]
     [clojure.string :as string]
     [environ.core :refer [env]]
+    [schema.core :as s]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]))
 
@@ -548,24 +549,40 @@
       (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
 
+(defn init! []
+  (api/dispatch [:braid.core/register-state!
+                 {::initial-user-data []}
+                 {::initial-user-data [s/Any]}]))
+
+(api/reg-event-fx :braid.core/register-initial-user-data!
+  (fn [{db :db} [_ fn]]
+    {:db (update db ::initial-user-data conj fn)}))
+
+(api/reg-sub :initial-user-data
+  (fn [db _]
+    (db ::initial-user-data)))
+
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]
-  (let [connected (set (:any @connected-uids))]
+  (let [connected (set (:any @connected-uids))
+        dynamic-data (->> @(api/subscribe [:initial-user-data])
+                          (into {} (map (fn [f] (f user-id)))))]
     (chsk-send!
       user-id
       [:braid.client/init-data
-       {:user-id user-id
-        :version-checksum (if (= "prod" (env :environment))
-                            (digest/from-file "public/js/prod/desktop.js")
-                            (digest/from-file "public/js/dev/desktop.js"))
-        :user-groups (group/user-groups user-id)
-        :user-threads (thread/open-threads-for-user user-id)
-        :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)
-        :user-preferences (user/user-get-preferences user-id)
-        :users (into ()
-                     (map #(assoc % :status
-                             (if (connected (% :id)) :online :offline)))
-                     (user/users-for-user user-id))
-        :invitations (invitation/invites-for-user user-id)
-        :tags (tag/tags-for-user user-id)
-        :quest-records (quests/get-active-quests-for-user-id user-id)}])))
+       (merge
+         {:user-id user-id
+          :version-checksum (if (= "prod" (env :environment))
+                              (digest/from-file "public/js/prod/desktop.js")
+                              (digest/from-file "public/js/dev/desktop.js"))
+          :user-groups (group/user-groups user-id)
+          :user-threads (thread/open-threads-for-user user-id)
+          :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)
+          :user-preferences (user/user-get-preferences user-id)
+          :users (into ()
+                       (map #(assoc % :status
+                               (if (connected (% :id)) :online :offline)))
+                       (user/users-for-user user-id))
+          :invitations (invitation/invites-for-user user-id)
+          :tags (tag/tags-for-user user-id)}
+         dynamic-data)])))

@@ -8,7 +8,7 @@
     [braid.common.util :refer [slugify]]
     [braid.server.db :as db]
     [braid.server.db.common :refer :all]
-    [braid.server.quests.db :refer [activate-first-quests-txn]]))
+    [braid.quests.server.db :refer [activate-first-quests-txn]]))
 
 (defn email-taken?
   [email]

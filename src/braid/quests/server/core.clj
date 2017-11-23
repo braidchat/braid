@@ -1,6 +1,7 @@
 (ns braid.quests.server.core
   (:require
     [braid.core.api :as api]
+    [braid.quests.server.db :as db]
     [datomic.db]))
 
 (defn init! []
@@ -30,5 +31,9 @@
                    :db/valueType :db.type/long
                    :db/cardinality :db.cardinality/one
                    :db/id #db/id [:db.part/db]
-                   :db.install/_attribute :db.part/db}]]))
+                   :db.install/_attribute :db.part/db}]])
+
+  (api/dispatch [:braid.core/register-initial-user-data!
+                 (fn [user-id]
+                   {:quest-records (db/get-active-quests-for-user-id user-id)})]))
 
