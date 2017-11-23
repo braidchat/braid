@@ -53,7 +53,6 @@
         scroll-stop! (fn []
                        (let [container (@state :container)
                              width (.-offsetWidth container)
-                             ;scrollWidth (.-scrollWidth container)
                              scroll-x (.-scrollLeft container)
                              start-n (/ (@state :scroll-x-start) width)
                              percent-dragged (/ (- scroll-x
@@ -95,14 +94,15 @@
                               :dragging? true))
 
         scroll! (fn [e]
-                  (put! scroll-chan true))
+                  (put! scroll-chan true))]
 
-        _ (go (loop []
-                (let [[_ ch] (alts! [scroll-stop-chan])]
-                  (when (= ch scroll-stop-chan)
-                    (when-not (@state :dragging?)
-                      (scroll-stop!)))
-                  (recur))))]
+    (go (loop []
+          (let [[_ ch] (alts! [scroll-stop-chan])]
+            (when (= ch scroll-stop-chan)
+              (when-not (@state :dragging?)
+                (scroll-stop!)))
+            (recur))))
+
     (r/create-class
       {:component-did-mount
        (fn [component]
