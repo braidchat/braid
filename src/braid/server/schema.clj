@@ -2,6 +2,7 @@
   (:require
     [datomic.db]
     [schema.core :as s]
+    [mount.core :refer [defstate]]
     [braid.core.api :as api]))
 
 (def schema
@@ -308,8 +309,8 @@
     {:db (update db ::schema concat entities)}))
 
 (api/reg-sub :braid.core/schema
-             (fn [db _]
-               (db ::schema)))
+  (fn [db _]
+    (db ::schema)))
 
 (defn init! []
   (api/dispatch [:braid.state/register-state!
@@ -318,3 +319,6 @@
 
   (api/dispatch [:braid.core/register-db-schema!
                  schema]))
+
+(defstate schema
+  :start (init!))

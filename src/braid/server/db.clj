@@ -1,7 +1,8 @@
 (ns braid.server.db
   (:require
-    [braid.server.conf :refer [config]]
     [braid.core.api :as api]
+    [braid.server.conf :refer [config]]
+    [braid.server.schema] ; db needs schema state
     [datomic.api :as d]
     [datomic.db]
     [mount.core :refer [defstate]]))

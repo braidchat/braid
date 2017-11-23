@@ -1,5 +1,12 @@
 (ns braid.server.sync
   (:require
+    [clojure.set :refer [difference intersection]]
+    [clojure.string :as string]
+    [environ.core :refer [env]]
+    [mount.core :refer [defstate]]
+    [schema.core :as s]
+    [taoensso.timbre :as timbre :refer [debugf]]
+    [taoensso.truss :refer [have]]
     [braid.core.api :as api]
     [braid.common.schema :refer [new-message-valid? upload-valid?]]
     [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
@@ -24,13 +31,7 @@
     [braid.server.search :as search]
     [braid.server.socket :refer [chsk-send! connected-uids]]
     [braid.server.sync-handler :refer [event-msg-handler]]
-    [braid.server.util :refer [valid-url?]]
-    [clojure.set :refer [difference intersection]]
-    [clojure.string :as string]
-    [environ.core :refer [env]]
-    [schema.core :as s]
-    [taoensso.timbre :as timbre :refer [debugf]]
-    [taoensso.truss :refer [have]]))
+    [braid.server.util :refer [valid-url?]]))
 
 (defn broadcast-thread
   "broadcasts thread to all users with the thread open, except those in ids-to-skip"
@@ -549,19 +550,6 @@
       (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
 
-(defn init! []
-  (api/dispatch [:braid.core/register-state!
-                 {::initial-user-data []}
-                 {::initial-user-data [s/Any]}]))
-
-(api/reg-event-fx :braid.core/register-initial-user-data!
-  (fn [{db :db} [_ fn]]
-    {:db (update db ::initial-user-data conj fn)}))
-
-(api/reg-sub :initial-user-data
-  (fn [db _]
-    (db ::initial-user-data)))
-
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]
   (let [connected (set (:any @connected-uids))
@@ -586,3 +574,19 @@
           :invitations (invitation/invites-for-user user-id)
           :tags (tag/tags-for-user user-id)}
          dynamic-data)])))
+
+(defn init! []
+  (api/dispatch [:braid.core/register-state!
+                 {::initial-user-data []}
+                 {::initial-user-data [s/Any]}]))
+
+(api/reg-event-fx :braid.core/register-initial-user-data!
+  (fn [{db :db} [_ fn]]
+    {:db (update db ::initial-user-data conj fn)}))
+
+(api/reg-sub :initial-user-data
+  (fn [db _]
+    (db ::initial-user-data)))
+
+(defstate sync
+  :start (init!))

@@ -12,6 +12,7 @@
     [braid.core.modules :as modules]
     ; require so multimethods get registered
     [braid.server.sync]
+    [braid.state.core]
     [braid.server.handler :refer [mobile-client-app
                                   desktop-client-app
                                   api-server-app]]))
