@@ -86,7 +86,8 @@
         scroll-prev! (fn [] (scroll-page! -1))
 
         touch-end! (fn [e]
-                     (swap! state assoc :dragging? false))
+                     (swap! state assoc :dragging? false)
+                     (put! scroll-chan true))
 
         touch-start! (fn [e]
                        (swap! state assoc
