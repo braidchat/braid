@@ -29,7 +29,10 @@
            :display "inline-block"
            :vertical-align "top"}]]])]))
 
-(defn arrow-view [direction]
+(defn arrow-view
+  "Show an arrow, pointing in the direction given by `direction`;
+  either `:left` or `:right`."
+  [direction]
   (let [[w h] [30 120]
         x1 (case direction :left 5 :right w)
         x2 (case direction :left w :right 5)]
@@ -73,6 +76,15 @@
 
                         (set! (.-scrollLeft (@state :container)) target-x)))
 
+        scroll-page! (fn [n-pages]
+                       (let [container (@state :container)
+                             scroll-x (.-scrollLeft container)
+                             page-width (.-offsetWidth container)
+                             current-page (js/Math.floor (/ scroll-x page-width))]
+                         (set! (.-scrollLeft container) (* page-width (+ n-pages current-page)))))
+        scroll-next! (fn [] (scroll-page! 1))
+        scroll-prev! (fn [] (scroll-page! -1))
+
         touch-end! (fn [e]
                      (swap! state assoc :dragging? false))
 
@@ -112,8 +124,12 @@
              (for [[idx panel-item] (map-indexed vector panel-items)]
                ^{:key (:id panel-item)}
                [:div.panel
-                (when (not= idx 0)
-                  [:div.arrow-prev [arrow-view :left]])
                 [panel-view panel-item]
+                (when (not= idx 0)
+                  [:div.arrow-prev
+                   {:on-click (fn [_] (scroll-prev!))}
+                   [arrow-view :left]])
                 (when (not= idx (dec (count panel-items)))
-                  [:div.arrow-next [arrow-view :right]])]))]])})))
+                  [:div.arrow-next
+                   {:on-click (fn [_] (scroll-next!))}
+                   [arrow-view :right]])]))]])})))
