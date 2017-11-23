@@ -27,7 +27,6 @@
     [braid.server.invite :as invites]
     [braid.server.message-format :refer [parse-tags-and-mentions]]
     [braid.server.notify-rules :as notify-rules]
-    [braid.server.quests.sync]
     [braid.server.search :as search]
     [braid.server.socket :refer [chsk-send! connected-uids]]
     [braid.server.sync-handler :refer [event-msg-handler]]

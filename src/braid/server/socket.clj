@@ -3,8 +3,7 @@
     [mount.core :as mount :refer [defstate]]
     [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]]
     [taoensso.sente.packers.transit :as sente-transit]
-    [taoensso.sente :as sente]
-    [braid.server.sync-handler :refer [event-msg-handler*]]))
+    [taoensso.sente :as sente]))
 
 (let [packer (sente-transit/get-transit-packer :json)
       {:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
@@ -19,7 +18,3 @@
   (def ch-chsk                       ch-recv)
   (def chsk-send!                    send-fn)
   (def connected-uids                connected-uids))
-
-(defstate router
-  :start (sente/start-chsk-router! ch-chsk event-msg-handler*)
-  :stop (router))

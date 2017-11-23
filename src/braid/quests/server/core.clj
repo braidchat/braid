@@ -35,5 +35,10 @@
 
   (api/dispatch [:braid.core/register-initial-user-data!
                  (fn [user-id]
-                   {:quest-records (db/get-active-quests-for-user-id user-id)})]))
+                   {:quest-records (db/get-active-quests-for-user-id user-id)})])
 
+  (api/dispatch [:braid.core/register-server-message-handler!
+                 :braid.server.quests/upsert-quest-record
+                 (fn [{:keys [?data user-id]}]
+                   {:chsk-send! [user-id [:braid.quests/upsert-quest-record ?data]]
+                    :db-run-txns! (db/upsert-quest-record-txn user-id ?data)})]))

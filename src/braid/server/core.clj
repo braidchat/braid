@@ -8,7 +8,7 @@
     ; requiring so mount sees state
     [braid.server.email-digest :refer [email-jobs]]
     ; requiring router so mount sees state
-    [braid.server.socket :refer [router]]
+    [braid.server.sync-handler :refer [router]]
     [braid.core.modules :as modules]
     ; require so multimethods get registered
     [braid.server.sync]
