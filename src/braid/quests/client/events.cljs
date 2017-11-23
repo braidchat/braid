@@ -22,9 +22,10 @@
 
 (reg-event-fx
   :quests/skip-quest
-  (fn [db [_ quest-record-id]]
+  (fn [{db :db} [_ quest-record-id]]
     (let [db (helpers/skip-quest db quest-record-id)]
-      {:websocket-send
+      {:db db
+       :websocket-send
        (list [:braid.server.quests/upsert-quest-record
               (helpers/get-quest-record db quest-record-id)])
        :dispatch [:quests/activate-next-quest]})))
@@ -33,7 +34,8 @@
   :quests/complete-quest
   (fn [{db :db} [_ quest-record-id]]
     (let [db (helpers/complete-quest db quest-record-id)]
-      {:websocket-send
+      {:db db
+       :websocket-send
        (list [:braid.server.quests/upsert-quest-record
               (helpers/get-quest-record db quest-record-id)])
        :dispatch [:quests/activate-next-quest]})))
