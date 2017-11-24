@@ -69,10 +69,10 @@
     (fn [_]
       [:div.group-header {:style {:background-color (->color @group-id)}}
        [:div.bar
-        [:span.badge-wrapper [sidebar/badge-view @group-id]]
-        [group-name-view]
         [:span.buttons
          [:a.open-sidebar {:on-click (fn [] (a/put! toggle-draw-ch true))}]]
+        [:span.badge-wrapper [sidebar/badge-view @group-id]]
+        [group-name-view]
         [:span.spacer]
         [group-header-buttons-view [{:title "Inbox"
                                      :route-fn routes/inbox-page-path
