@@ -105,7 +105,7 @@
                   [:>.thread
                    mixins/flex
                    {:width "100vw"
-                    :height "100%"
+                    :height "calc(100vh - 2.5rem)"
                     :background "white"
                     :flex-direction "column"
                     :justify-content "flex-end"}
