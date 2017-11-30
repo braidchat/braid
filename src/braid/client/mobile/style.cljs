@@ -14,7 +14,7 @@
     [garden.arithmetic :as m]
     [garden.core :refer [css]]
     [garden.stylesheet :refer [at-import]]
-    [garden.units :refer [rem vw vh em]]))
+    [garden.units :refer [px rem vw vh em]]))
 
 (def styles
   (let [pad (rem 1) ; (vw 5)
@@ -111,9 +111,29 @@
                     :justify-content "flex-end"}
 
                    [:>.card
-                    (braid.client.ui.styles.thread/head pad)
-
+                    (braid.client.ui.styles.thread/head 0)
+                    mixins/flex
+                    {:flex-direction "column"
+                     :justify-content "flex-end"}
                     [:>.head
+                     {:flex-shrink 0
+                      :min-height (em 3.5)
+                      :position "relative"
+                      :width "100%"
+                      :border-radius 0
+                      :background-color "#333333"}
+                     [:>.notice
+                      {:margin [[(px 5) (px 10)]]}
+                      [:>.private :>.limbo
+                       {:padding [[(px 3) (px 5)]]
+                        :border-radius (px 3)}]
+                      [:>.private
+                       {:background "#D2E7FF"
+                        :color vars/private-thread-accent-color}]
+
+                      [:>.limbo
+                       {:background "#ffe4e4"
+                        :color vars/limbo-thread-accent-color}]]
 
                      [:>.tags
                       (braid.client.ui.styles.pills/tag)
@@ -124,9 +144,10 @@
                        :top 0
                        :right 0
                        :color "#CCC"
-                       :padding vars/pad}
+                       :padding-right (px 5)}
 
                       [:&::after
+                       {:font-size (em 2)}
                        (mixins/fontawesome \uf00d)]]]
 
                     (braid.client.ui.styles.thread/messages pad)

@@ -45,15 +45,38 @@
                         nil))}]]])))
 
 (defn thread-view [thread]
-  (let [open? (subscribe [:thread-open? (thread :id)])]
+  (let [open? (subscribe [:thread-open? (thread :id)])
+        private? (fn [thread] (and
+                               (not (thread :new?))
+                               (empty? (thread :tag-ids))
+                               (seq (thread :mentioned-ids))))
+
+        limbo? (fn [thread] (and
+                             (not (thread :new?))
+                             (empty? (thread :tag-ids))
+                             (empty? (thread :mentioned-ids))))]
     (fn [thread]
       [:div.thread
        [:div.card
         [:div.head
+
+
          [braid.client.ui.views.thread/thread-tags-view thread]
+
          (when @open?
            [:div.close {:on-click (fn [_]
-                                    (dispatch [:hide-thread {:thread-id (thread :id)}]))}])]
+                                    (dispatch [:hide-thread
+                                               {:thread-id (thread :id)}]))}])
+         (when (private? thread)
+           [:div.notice
+            [:div.private
+             "This is a private conversation." [:br]
+             "Only @mentioned users can see it."]])
+         (when (limbo? thread)
+           [:div.notice
+            [:div.limbo
+             "No one can see this conversation yet. "
+             "Mention a @user or #tag in a reply."]])]
         [messages-view thread]
         [new-message-view {:thread-id (thread :id)
                            :placeholder (if (thread :new?)
@@ -89,7 +112,7 @@
       [:div.inbox.page
        [header-view toggle-draw-ch]
        [:div.threads
-        [swipe-view (conj @threads
+        [swipe-view @threads #_(conj @threads
                           @temp-thread) thread-view]]])))
 
 (defn main-view []
