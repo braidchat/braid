@@ -133,6 +133,7 @@
     {:content "\"\""
      :flex-grow 1}]
 
+   ;; XXX: does this class actually apply to anything?
    [:&.archived :&.limbo :&.private
     [:>.head::before
      {:content "\"\""
