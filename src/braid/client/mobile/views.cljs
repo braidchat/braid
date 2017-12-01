@@ -112,7 +112,7 @@
       [:div.inbox.page
        [header-view toggle-draw-ch]
        [:div.threads
-        [swipe-view @threads #_(conj @threads
+        [swipe-view (conj @threads
                           @temp-thread) thread-view]]])))
 
 (defn main-view []
