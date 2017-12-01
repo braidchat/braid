@@ -31,7 +31,8 @@
          braid.client.ui.styles.imports/imports
 
          [:body
-          {:touch-action "none"}
+          {:touch-action "none"
+           :height "100vh"}
 
           [:>#app
 
@@ -60,7 +61,9 @@
               [:>.group-header
                [:>.bar
                 mixins/flex
-                {:justify-content "space-between"}
+                {:justify-content "space-between"
+                 :border-radius 0
+                 :box-shadow "none"}
 
                 [:>.group-name
                  {:padding 0}]
@@ -106,26 +109,27 @@
                    mixins/flex
                    {:width "100vw"
                     :height "calc(100vh - 2.5rem)"
-                    :background "white"
+                    :background "#bbb"
                     :flex-direction "column"
-                    :justify-content "flex-end"}
+                    :justify-content "flex-end"
+                    :overflow "none"}
 
                    [:>.card
                     (braid.client.ui.styles.thread/head 0)
                     mixins/flex
                     {:flex-direction "column"
-                     :justify-content "flex-end"}
+                     :justify-content "flex-end"
+                     :background-color "white"}
                     [:>.head
                      {:flex-shrink 0
                       :min-height (em 3.5)
                       :position "relative"
                       :width "100%"
-                      :border-radius 0
                       :background-color "#333333"}
                      [:>.notice
-                      {:margin [[(px 5) (px 10)]]}
+                      {:margin [[(px 5) (px 5)]]}
                       [:>.private :>.limbo
-                       {:padding [[(px 3) (px 5)]]
+                       {:padding [[(px 5) (px 5)]]
                         :border-radius (px 3)}]
                       [:>.private
                        {:background "#D2E7FF"
@@ -136,6 +140,7 @@
                         :color vars/limbo-thread-accent-color}]]
 
                      [:>.tags
+                      {:padding (em 0.5)}
                       (braid.client.ui.styles.pills/tag)
                       (braid.client.ui.styles.pills/user)]
 
@@ -154,7 +159,7 @@
 
                     [:>.messages
                      {:flex-grow 1
-                      :max-height "75vh"}
+                      :padding-top (em 0.5)}
 
                      braid.client.ui.styles.message/message
                      [:>.message
