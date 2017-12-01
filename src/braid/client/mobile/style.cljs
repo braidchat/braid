@@ -55,7 +55,7 @@
 
               [:>.global-settings
                {:overflow-y "auto"
-                :height "90vh"
+                :height "90%"
                 :margin-left "5em"}]
 
               [:>.group-header
@@ -80,9 +80,7 @@
                  {:flex-grow 2}]]]
 
               [:>.threads
-               {:padding-top "2.5rem"
-                :margin-top "-2.5rem"
-                :height "100%"
+               {:height "100%"
                 :box-sizing "border-box"}
 
                [:>.container
@@ -108,7 +106,7 @@
                   [:>.thread
                    mixins/flex
                    {:width "100vw"
-                    :height "calc(100vh - 2.5rem)"
+                    :height "calc(100% - 2.5rem)"
                     :background "#bbb"
                     :flex-direction "column"
                     :justify-content "flex-end"
