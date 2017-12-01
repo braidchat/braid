@@ -60,7 +60,6 @@
        [:div.card
         [:div.head
 
-
          [braid.client.ui.views.thread/thread-tags-view thread]
 
          (when @open?
@@ -112,8 +111,7 @@
       [:div.inbox.page
        [header-view toggle-draw-ch]
        [:div.threads
-        [swipe-view (conj @threads
-                          @temp-thread) thread-view]]])))
+        [swipe-view (conj @threads @temp-thread) thread-view]]])))
 
 (defn main-view []
   (let [toggle-draw-ch (a/chan)]
