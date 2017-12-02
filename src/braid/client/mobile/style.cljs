@@ -157,7 +157,8 @@
 
                     [:>.messages
                      {:flex-grow 1
-                      :padding-top (em 0.5)}
+                      :padding-top (em 0.5)
+                      :-webkit-overflow-scrolling "touch"}
 
                      braid.client.ui.styles.message/message
                      [:>.message
