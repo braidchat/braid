@@ -43,7 +43,7 @@
              (braid.client.mobile.styles.drawer/drawer pad)
 
              [:>.page
-              {:position "absolute"
+              {:position "fixed"
                :top 0
                :left 0
                :right 0
