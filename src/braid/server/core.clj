@@ -5,14 +5,11 @@
     [mount.core :as mount :refer [defstate]]
     [org.httpkit.server :refer [run-server]]
     [taoensso.timbre :as timbre]
-    ; requiring so mount sees state
-    [braid.server.email-digest :refer [email-jobs]]
-    ; requiring router so mount sees state
-    [braid.server.sync-handler :refer [router]]
-    [braid.core.modules :as modules]
-    ; require so multimethods get registered
-    [braid.server.sync]
-    [braid.state.core]
+    [braid.server.email-digest :refer [email-jobs]] ; for mount
+    [braid.server.sync-handler] ; for mount
+    [braid.core.modules]; for mount
+    [braid.server.sync] ; for multimethods and mount
+    [braid.state.core] ; for mount
     [braid.server.handler :refer [mobile-client-app
                                   desktop-client-app
                                   api-server-app]]))
@@ -51,11 +48,6 @@
 (defstate servers
   :start (start-servers!)
   :stop (stop-servers! servers))
-
-;; modules
-
-(defstate modules
-  :start (modules/init!))
 
 ;; nrepl
 

@@ -2,7 +2,11 @@
   (:require
     [braid.core.api :as api]
     [braid.quests.server.db :as db]
-    [datomic.db]))
+    [braid.server.sync-handler] ; for mount
+    [braid.server.sync] ; for mount
+    [braid.server.schema] ; for mount
+    [datomic.db] ; for reader macro
+    [mount.core :refer [defstate]]))
 
 (defn init! []
   (api/dispatch [:braid.core/register-db-schema!
@@ -42,3 +46,6 @@
                  (fn [{:keys [?data user-id]}]
                    {:chsk-send! [user-id [:braid.quests/upsert-quest-record ?data]]
                     :db-run-txns! (db/upsert-quest-record-txn user-id ?data)})]))
+
+(defstate quests
+  :start (init!))
