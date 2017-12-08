@@ -1,8 +1,7 @@
 (ns braid.quests.server.db
   (:require
     [datomic.api :as d]
-    [braid.server.db :as db]
-    [braid.server.db.common :refer [quest-record-pull-pattern]]))
+    [braid.server.db :as db]))
 
 ; Pull Patterns
 
