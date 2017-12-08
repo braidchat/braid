@@ -3,6 +3,7 @@
     [garden.core :refer [css]]
     [schema.core :as s]
     [braid.core.api :as api]
+    [braid.state.core :refer [register-state!]]
     [braid.client.ui.styles.animations]
     [braid.client.ui.styles.embed]
     [braid.client.ui.styles.body]
@@ -24,17 +25,21 @@
     [braid.client.invites.views.invite-page-styles]
     [braid.client.uploads.views.uploads-page-styles]))
 
-(api/dispatch [:braid.state/register-state!
-               {::styles []}
-               {::styles [s/Any]}])
+(register-state!
+  {::styles []}
+  {::styles [s/Any]})
 
-(api/reg-sub :styles
+(api/reg-sub ::styles
   (fn [db _]
     (db ::styles)))
 
-(api/reg-event-fx :braid.core/register-styles!
+(api/reg-event-fx ::register-styles!
   (fn [{db :db} [_ styles]]
     {:db (update db ::styles conj styles)}))
+
+(defn ^:api register-styles!
+  [styles]
+  (api/dispatch [::register-styles! styles]))
 
 (defn styles-view []
   [:style
@@ -57,7 +62,7 @@
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
 
-               @(api/subscribe [:styles])
+               @(api/subscribe [::styles])
 
                [:#app
                 braid.client.ui.styles.misc/status]

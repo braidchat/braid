@@ -2,7 +2,8 @@
   (:require
     [clojure.string :as string]
     [braid.core.api :as api]
-    [braid.emoji.helpers :as helpers]))
+    [braid.emoji.helpers :as helpers]
+    [braid.client.ui.views.new-message :refer [register-autocomplete-engine!]]))
 
 (defn simple-matches?
   [m s]
@@ -38,4 +39,4 @@
                       {:react-key k}])}))))))
 
 (defn init! []
-  (api/dispatch [:braid.core/register-autocomplete-engine! autocomplete-handler]))
+  (register-autocomplete-engine! autocomplete-handler))

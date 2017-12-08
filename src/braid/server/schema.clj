@@ -3,6 +3,7 @@
     [datomic.db]
     [schema.core :as s]
     [mount.core :refer [defstate]]
+    [braid.state.core :refer [register-state!]]
     [braid.core.api :as api]))
 
 (def schema
@@ -304,21 +305,24 @@
     :db/id #db/id [:db.part/db]
     :db.install/_attribute :db.part/db}])
 
-(api/reg-event-fx :braid.core/register-db-schema!
+(api/reg-event-fx ::register-db-schema!
   (fn [{db :db} [_ entities]]
     {:db (update db ::schema concat entities)}))
+
+(defn ^:api register-db-schema!
+  [entities]
+  (api/dispatch [::register-db-schema! entities]))
 
 (api/reg-sub :braid.core/schema
   (fn [db _]
     (db ::schema)))
 
 (defn init! []
-  (api/dispatch [:braid.state/register-state!
-                 {::schema []}
-                 {::schema [s/Any]}])
+  (register-state!
+    {::schema []}
+    {::schema [s/Any]})
 
-  (api/dispatch [:braid.core/register-db-schema!
-                 schema]))
+  (register-db-schema! schema))
 
 (defstate schema
   :start (init!))

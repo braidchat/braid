@@ -10,7 +10,8 @@
     [braid.core.api :as api]
     [braid.client.helpers :refer [debounce stop-event!]]
     [braid.client.s3 :as s3]
-    [braid.client.store :as store])
+    [braid.client.store :as store]
+    [braid.state.core :refer [register-state!]])
   (:import
     (goog.events KeyCodes)))
 
@@ -82,17 +83,21 @@
   [txt]
   (odd? (count (re-seq #"`" txt))))
 
-(api/dispatch [:braid.state/register-state!
-               {::autocomplete-engines []}
-               {::autocomplete-engines [s/Any]}])
+(register-state!
+  {::autocomplete-engines []}
+  {::autocomplete-engines [s/Any]})
 
-(api/reg-event-fx :braid.core/register-autocomplete-engine!
-                  (fn [{db :db} [_ handler]]
-                    {:db (update db ::autocomplete-engines conj handler)}))
+(api/reg-event-fx ::register-autocomplete-engine!
+  (fn [{db :db} [_ handler]]
+    {:db (update db ::autocomplete-engines conj handler)}))
+
+(defn ^:api register-autocomplete-engine!
+  [handler]
+  (api/dispatch [::register-autocomplete-engine! handler]))
 
 (api/reg-sub :autocomplete-engines
-             (fn [db _]
-               (db ::autocomplete-engines)))
+  (fn [db _]
+    (db ::autocomplete-engines)))
 
 (defn wrap-autocomplete [config]
   (let [engines (subscribe [:autocomplete-engines])

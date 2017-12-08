@@ -7,25 +7,30 @@
     [braid.quests.client.remote-handlers]
     [braid.quests.client.views :as views]
     [braid.quests.client.styles :as styles]
-    [braid.common.schema :refer [QuestRecordId QuestRecord]]))
+    [braid.common.schema :refer [QuestRecordId QuestRecord]]
+    [braid.state.core :refer [register-state!]]
+    [braid.core.api :refer [register-event-listener!]]
+    [braid.client.core.events :refer [register-initial-user-data-handler!]]
+    [braid.client.ui.views.header :refer [register-header-view!]]
+    [braid.client.ui.views.styles :refer [register-styles!]]))
 
 (defn init! []
-  (api/dispatch [:braid.core/register-event-listener!
-                 :quests
-                 (fn [event]
-                   (when (not= "quests" (namespace (first event)))
-                     (api/dispatch [:quests/update-handler event])))])
+  (register-event-listener!
+    :quests
+    (fn [event]
+      (when (not= "quests" (namespace (first event)))
+        (api/dispatch [:quests/update-handler event]))))
 
-  (api/dispatch [:braid.state/register-state!
-                 {::quest-records {}}
-                 {::quest-records {QuestRecordId QuestRecord}}])
+  (register-state!
+    {::quest-records {}}
+    {::quest-records {QuestRecordId QuestRecord}})
 
-  (api/dispatch [:braid.core/register-header-view!
-                 views/quests-header-view])
+  (register-header-view!
+    views/quests-header-view)
 
-  (api/dispatch [:braid.core/register-styles!
-                 (styles/quests-header)])
+  (register-styles!
+    (styles/quests-header))
 
-  (api/dispatch [:braid.core/register-initial-user-data-handler!
-                 (fn [db data]
-                   (helpers/set-quest-records db (data :quest-records)))]))
+  (register-initial-user-data-handler!
+    (fn [db data]
+      (helpers/set-quest-records db (data :quest-records)))))

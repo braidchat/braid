@@ -22,8 +22,12 @@
 
 ; ---------
 
-(reg-event-fx :braid.core/register-event-listener!
+(reg-event-fx ::register-event-listener!
   (fn [_ [_ id listener]]
     (re-frame/add-post-event-callback id (fn [event _]
                                           (listener event)))
     {}))
+
+(defn register-event-listener!
+  [id listener]
+  (dispatch [::register-event-listener! id listener]))

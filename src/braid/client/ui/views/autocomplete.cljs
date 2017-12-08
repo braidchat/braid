@@ -6,7 +6,8 @@
     [re-frame.core :refer [subscribe dispatch]]
     [braid.core.api :as api]
     [braid.client.schema :as schema]
-    [braid.client.helpers :refer [id->color debounce]])
+    [braid.client.helpers :refer [id->color debounce]]
+    [braid.client.ui.views.new-message :refer [register-autocomplete-engine!]])
   (:import
     [goog.events KeyCodes]))
 
@@ -149,6 +150,6 @@
              reverse)))))
 
 (defn init! []
-  (api/dispatch [:braid.core/register-autocomplete-engine! bot-autocomplete-engine])
-  (api/dispatch [:braid.core/register-autocomplete-engine! user-autocomplete-engine])
-  (api/dispatch [:braid.core/register-autocomplete-engine! tag-autocomplete-engine]))
+  (register-autocomplete-engine! bot-autocomplete-engine)
+  (register-autocomplete-engine! user-autocomplete-engine)
+  (register-autocomplete-engine! tag-autocomplete-engine))

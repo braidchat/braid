@@ -12,7 +12,7 @@
     [braid.client.xhr :refer [edn-xhr]]
     [braid.common.util :as util]
     [braid.core.api :as api]
-    [braid.state.core :as braid.state.core]))
+    [braid.state.core :refer [register-state!]]))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
@@ -539,22 +539,26 @@
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))
 
-(api/dispatch [:braid.state/register-state!
-               {::initial-user-data-handlers []}
-               {::initial-user-data-handlers [s/Any]}])
+(register-state!
+  {::initial-user-data-handlers []}
+  {::initial-user-data-handlers [s/Any]})
 
-(api/reg-sub :initial-user-data-handlers
+(api/reg-sub ::initial-user-data-handlers
   (fn [db _]
     (db ::initial-user-data-handlers)))
 
-(api/reg-event-fx :braid.core/register-initial-user-data-handler!
+(api/reg-event-fx ::register-initial-user-data-handler!
   (fn [{db :db} [_ handler]]
     {:db (update db ::initial-user-data-handlers conj handler)}))
+
+(defn ^:api register-initial-user-data-handler!
+  [handler]
+  (api/dispatch [::register-initial-user-data-handler! handler]))
 
 (reg-event-fx
   :set-init-data
   (fn [{state :db :as cofx} [_ data]]
-    (let [combined-data-handlers (apply comp @(api/subscribe [:initial-user-data-handlers]))]
+    (let [combined-data-handlers (apply comp @(api/subscribe [::initial-user-data-handlers]))]
       {:dispatch-n (list [:set-login-state :app]
                      [:add-users (data :users)])
        :db (-> state

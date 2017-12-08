@@ -6,7 +6,8 @@
     [braid.core.api :as api]
     [braid.client.helpers :refer [->color]]
     [braid.client.routes :as routes]
-    [braid.client.ui.views.search-bar :refer [search-bar-view]]))
+    [braid.client.ui.views.search-bar :refer [search-bar-view]]
+    [braid.state.core :refer [register-state!]]))
 
 (defn loading-indicator-view [group-id]
   (let [page (subscribe [:page])]
@@ -129,15 +130,19 @@
              ^{:key (header-item :class)}
              [header-item-view header-item]))]]])))
 
-(api/dispatch [:braid.state/register-state!
-               {::header-views []}
-               {::header-views [s/Any]}])
+(register-state!
+  {::header-views []}
+  {::header-views [s/Any]})
 
-(api/reg-event-fx :braid.core/register-header-view!
+(api/reg-event-fx ::register-header-view!
   (fn [{db :db} [_ view]]
     {:db (update db ::header-views conj view)}))
 
-(api/reg-sub :header-views
+(defn ^:api register-header-view!
+  [view]
+  (api/dispatch [::register-header-view! view]))
+
+(api/reg-sub ::header-views
  (fn [db _]
    (db ::header-views)))
 
@@ -148,7 +153,7 @@
       [[group-header-view]
        [:div.spacer]]
       (doall
-        (for [view @(api/subscribe [:header-views])]
+        (for [view @(api/subscribe [::header-views])]
           [view]))
       [[admin-header-view]
        [user-header-view]])))

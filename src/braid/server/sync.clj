@@ -30,7 +30,8 @@
     [braid.server.search :as search]
     [braid.server.socket :refer [chsk-send! connected-uids]]
     [braid.server.sync-handler :refer [event-msg-handler]]
-    [braid.server.util :refer [valid-url?]]))
+    [braid.server.util :refer [valid-url?]]
+    [braid.state.core :refer [register-state!]]))
 
 (defn broadcast-thread
   "broadcasts thread to all users with the thread open, except those in ids-to-skip"
@@ -552,7 +553,7 @@
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]
   (let [connected (set (:any @connected-uids))
-        dynamic-data (->> @(api/subscribe [:initial-user-data])
+        dynamic-data (->> @(api/subscribe [::initial-user-data])
                           (into {} (map (fn [f] (f user-id)))))]
     (chsk-send!
       user-id
@@ -575,15 +576,19 @@
          dynamic-data)])))
 
 (defn init! []
-  (api/dispatch [:braid.core/register-state!
-                 {::initial-user-data []}
-                 {::initial-user-data [s/Any]}]))
+  (register-state!
+    {::initial-user-data []}
+    {::initial-user-data [s/Any]}))
 
-(api/reg-event-fx :braid.core/register-initial-user-data!
+(api/reg-event-fx ::register-initial-user-data!
   (fn [{db :db} [_ fn]]
     {:db (update db ::initial-user-data conj fn)}))
 
-(api/reg-sub :initial-user-data
+(defn ^:api register-initial-user-data!
+  [fn]
+  (api/dispatch [::register-initial-user-data! fn]))
+
+(api/reg-sub ::initial-user-data
   (fn [db _]
     (db ::initial-user-data)))
 

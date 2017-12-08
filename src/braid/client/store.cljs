@@ -3,7 +3,8 @@
     [schema.core :as s :include-macros true]
     [braid.core.api :refer [subscribe dispatch]]
     [braid.client.invites.schema :as invites]
-    [braid.common.schema :as app-schema]))
+    [braid.common.schema :as app-schema]
+    [braid.state.core :refer [register-state!]]))
 
 (def AppState
   (merge
@@ -75,8 +76,8 @@
      :temp-threads {}}
     invites/init-state))
 
-(dispatch [:braid.state/register-state!
-           initial-state
-           AppState])
+(register-state!
+  initial-state
+  AppState)
 
 
