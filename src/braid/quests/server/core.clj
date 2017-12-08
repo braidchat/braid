@@ -1,13 +1,11 @@
 (ns braid.quests.server.core
   (:require
-    [braid.core.api :as api]
+    [datomic.db] ; for reader macro
+    [mount.core :refer [defstate]]
     [braid.quests.server.db :as db]
-    [braid.server.sync-handler] ; for mount
     [braid.server.sync :refer [register-initial-user-data!]]
     [braid.server.schema :refer [register-db-schema!]]
-    [braid.server.sync-handler :refer [register-server-message-handler!]]
-    [datomic.db] ; for reader macro
-    [mount.core :refer [defstate]]))
+    [braid.server.sync-handler :refer [register-server-message-handler!]]))
 
 (defn init! []
   (register-db-schema!
