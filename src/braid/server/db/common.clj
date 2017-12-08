@@ -180,9 +180,3 @@
    :thread-id (get-in e [:upload/thread :thread/id])
    :uploader-id (get-in e [:upload/uploaded-by :user/id])
    :url (:upload/url e)})
-
-(def quest-record-pull-pattern
-  [:quest-record/id
-   :quest-record/quest-id
-   :quest-record/progress
-   :quest-record/state])

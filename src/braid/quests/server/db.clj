@@ -4,6 +4,14 @@
     [braid.server.db :as db]
     [braid.server.db.common :refer [quest-record-pull-pattern]]))
 
+; Pull Patterns
+
+(def quest-record-pull-pattern
+  [:quest-record/id
+   :quest-record/quest-id
+   :quest-record/progress
+   :quest-record/state])
+
 ; Queries
 
 (defn get-active-quests-for-user-id
