@@ -1,8 +1,7 @@
 (ns braid.server.db
   (:require
-    [braid.core.api :as api]
     [braid.server.conf :refer [config]]
-    [braid.server.schema] ; db needs schema state
+    [braid.server.schema :as schema]
     [datomic.api :as d]
     [datomic.db]
     [mount.core :refer [defstate]]))
@@ -14,7 +13,7 @@
                [{:db/ident :entities
                  :db/id #db/id [:db.part/db]
                  :db.install/_partition :db.part/db}]
-               @(api/subscribe [:braid.core/schema]))))
+               (schema/schema))))
 
 (defn init!
   "set up schema"
