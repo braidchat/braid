@@ -1,8 +1,13 @@
 (ns braid.core.hooks
+  "Hooks as an extnesion interface to braid.
+  Consumers can define hooks and providers can extend those hooks to add functionality"
   (:require [robert.hooke :as hooke]))
 
 
 (defmacro def-data-hook
+  "Define a 'data' hook named `hook-name`. That is, a collection that
+  can be added to by providers. The initial value is `base-val` and
+  can be added to by providers using `def-data-hook-extension`."
   [hook-name [& args] base-val]
   `(do
      ;; To hook, the function needs to take at least one argument so we can change it
@@ -12,15 +17,16 @@
        (hidden# ~base-val ~@args))
      (alter-meta! (var ~hook-name) assoc ::data-hook true ::hook-fn (var hidden#))))
 
-; TODO: do we need to have the name? could be useful for deactivating hooks later
 (defmacro def-data-hook-extension
-  "Add data to the hook point.
-  The provided `body` should return data that will be added via `into`
-  to the accumulated data."
+  "Add data to the hook point `hook` by creating a new function named `ext-name`.
+  The provided `body` will have access to `args` and should return
+  data that will be added via `into` to the accumulated data."
+  ;; TODO: do we need to have the name? could be useful for deactivating hooks later
   [hook ext-name [& args] & body]
   `(do
      (assert (::data-hook (meta (var ~hook)))
              (str "Attempting to extend a non-data hook var " '~hook))
+     ;; TODO: validate that args here matches the args of def-data-hook?
 
      (defn ~ext-name
        [f# data# ~@args]
@@ -28,12 +34,30 @@
 
      (hooke/add-hook (::hook-fn (meta (var ~hook))) (var ~ext-name))))
 
+;; Just wrapping defmulti/defmethod for this style of hook
+(defmacro def-override-hook
+  "Define a hook where one implementer 'wins' and gets to handle the arguments.
+  `dispatch` is a function that will be called with the arguments passed to the handler
+  that determines which handler gets called."
+  [hook-name dispatch-fn default-args & default-body]
+  `(do
+     (defmulti ~hook-name ~dispatch-fn :default ::default)
+     (defmethod ~hook-name ::default
+       ~default-args
+       ~@default-body)))
+
+(defmacro def-override-hook-handler
+  "Implement an override hook handler"
+  [hook-name dispatch-val [& args] & body]
+  `(defmethod ~hook-name ~dispatch-val
+     [~@args]
+     ~@body))
+
+;; Example of usage
 (comment
 
   (def-data-hook schema []
     [])
-
-  (::hook-fn (meta #'schema))
 
   (def-data-hook-extension schema quests-schema
     []
@@ -44,6 +68,7 @@
     [{:db/ident :bots/id}])
 
   (schema)
+  ;; [{:db/ident :bots/id} {:db/ident :quests/id}]
 
   (def-data-hook init-data [user-id]
     {:id user-id})
@@ -53,5 +78,21 @@
     {:quests/for user-id
      :other-thing 123})
 
-  (init-data 'user-id)
+  (init-data 'the-user-id)
+  ;; {:id the-user-id, :quests/for the-user-id, :other-thing 123}
+
+  (def-override-hook handle-msg :id
+    [msg]
+    (str "unknown event " (:id msg)))
+
+  (def-override-hook-handler handle-msg :quest-msg
+    [{:keys [id quest-info]}]
+    (str "here's some quest info " quest-info))
+
+  (handle-msg {:id :foo})
+  ;; "unknown event :foo"
+
+  (handle-msg {:id :quest-msg :quest-info 12345})
+  ;; "here's some quest info 12345"
+
   )
