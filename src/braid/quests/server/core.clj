@@ -1,12 +1,11 @@
 (ns braid.quests.server.core
   (:require
     [datomic.db] ; for reader macro
-    [mount.core :refer [defstate]]
     [braid.core.hooks :as hooks]
     [braid.quests.server.db :as db]
     [braid.server.sync :refer [initial-user-data]]
     [braid.server.schema :refer [schema]]
-    [braid.server.sync-handler :refer [register-server-message-handler!]]))
+    [braid.server.sync-handler :refer [message-handler]]))
 
 (hooks/def-data-hook-extension schema quests-schema
   []
@@ -41,13 +40,8 @@
   [user-id]
   {:quest-records (db/get-active-quests-for-user-id user-id)})
 
-(defn init! []
-
-  (register-server-message-handler!
-    :braid.server.quests/upsert-quest-record
-    (fn [{:keys [?data user-id]}]
-      {:chsk-send! [user-id [:braid.quests/upsert-quest-record ?data]]
-       :db-run-txns! (db/upsert-quest-record-txn user-id ?data)})))
-
-(defstate quests
-  :start (init!))
+(hooks/def-override-hook-handler message-handler
+  :braid.server.quests/upsert-quest-record
+  [{:keys [?data user-id]}]
+  {:chsk-send! [user-id [:braid.quests/upsert-quest-record ?data]]
+   :db-run-txns! (db/upsert-quest-record-txn user-id ?data)})
