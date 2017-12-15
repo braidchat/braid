@@ -16,18 +16,20 @@
 
 (defmulti event-msg-handler :id)
 
-(hooks/def-override-hook message-handler :id
-  [evt]
-  ;; Result of this hook will be passed to run-cofx!
-  ;; for default case, assume that it directly causes side-effects
-  {:unhandled (event-msg-handler evt)})
+(hooks/def-data-hook message-handler []
+  {})
+
+(defn- no-cofx
+  [res]
+  {:unhandled res})
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
   (when-not (= event [:chsk/ws-ping])
     (debugf "User: %s Event: %s" (get-in ev-msg [:ring-req :session :user-id]) event)
 
     (when-let [user-id (get-in ev-msg [:ring-req :session :user-id])]
-      (run-cofx! (message-handler (assoc ev-msg :user-id user-id))))))
+      (run-cofx! ((get (message-handler) id (comp no-cofx event-msg-handler))
+                  (assoc ev-msg :user-id user-id))))))
 
 (defmethod event-msg-handler :default
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]

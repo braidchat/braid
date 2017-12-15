@@ -40,8 +40,9 @@
   [user-id]
   {:quest-records (db/get-active-quests-for-user-id user-id)})
 
-(hooks/def-override-hook-handler message-handler
-  :braid.server.quests/upsert-quest-record
-  [{:keys [?data user-id]}]
-  {:chsk-send! [user-id [:braid.quests/upsert-quest-record ?data]]
-   :db-run-txns! (db/upsert-quest-record-txn user-id ?data)})
+(hooks/def-data-hook-extension message-handler quest-message-handler
+  []
+  {:braid.server.quests/upsert-quest-record
+   (fn [{:keys [?data user-id]}]
+     {:chsk-send! [user-id [:braid.quests/upsert-quest-record ?data]]
+      :db-run-txns! (db/upsert-quest-record-txn user-id ?data)})})

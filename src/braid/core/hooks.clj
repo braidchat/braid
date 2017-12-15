@@ -34,25 +34,6 @@
 
      (hooke/add-hook (::hook-fn (meta (var ~hook))) (var ~ext-name))))
 
-;; Just wrapping defmulti/defmethod for this style of hook
-(defmacro def-override-hook
-  "Define a hook where one implementer 'wins' and gets to handle the arguments.
-  `dispatch` is a function that will be called with the arguments passed to the handler
-  that determines which handler gets called."
-  [hook-name dispatch-fn default-args & default-body]
-  `(do
-     (defmulti ~hook-name ~dispatch-fn :default ::default)
-     (defmethod ~hook-name ::default
-       ~default-args
-       ~@default-body)))
-
-(defmacro def-override-hook-handler
-  "Implement an override hook handler"
-  [hook-name dispatch-val [& args] & body]
-  `(defmethod ~hook-name ~dispatch-val
-     [~@args]
-     ~@body))
-
 ;; Example of usage
 (comment
 
@@ -80,19 +61,5 @@
 
   (init-data 'the-user-id)
   ;; {:id the-user-id, :quests/for the-user-id, :other-thing 123}
-
-  (def-override-hook handle-msg :id
-    [msg]
-    (str "unknown event " (:id msg)))
-
-  (def-override-hook-handler handle-msg :quest-msg
-    [{:keys [id quest-info]}]
-    (str "here's some quest info " quest-info))
-
-  (handle-msg {:id :foo})
-  ;; "unknown event :foo"
-
-  (handle-msg {:id :quest-msg :quest-info 12345})
-  ;; "here's some quest info 12345"
 
   )
