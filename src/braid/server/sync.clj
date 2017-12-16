@@ -3,11 +3,10 @@
     [clojure.set :refer [difference intersection]]
     [clojure.string :as string]
     [environ.core :refer [env]]
-    [mount.core :refer [defstate]]
     [schema.core :as s]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
-    [braid.core.api :as api]
+    [braid.core.hooks :as hooks]
     [braid.common.schema :refer [new-message-valid? upload-valid?]]
     [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
     [braid.server.bots :as bots]
@@ -30,8 +29,7 @@
     [braid.server.search :as search]
     [braid.server.socket :refer [chsk-send! connected-uids]]
     [braid.server.sync-handler :refer [event-msg-handler]]
-    [braid.server.util :refer [valid-url?]]
-    [braid.state.core :refer [register-state!]]))
+    [braid.server.util :refer [valid-url?]]))
 
 (defn broadcast-thread
   "broadcasts thread to all users with the thread open, except those in ids-to-skip"
@@ -550,47 +548,31 @@
       (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
 
+(declare initial-user-data)
+
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]
-  (let [connected (set (:any @connected-uids))
-        dynamic-data (->> @(api/subscribe [::initial-user-data])
-                          (into {} (map (fn [f] (f user-id)))))]
-    (chsk-send!
-      user-id
-      [:braid.client/init-data
-       (merge
-         {:user-id user-id
-          :version-checksum (if (= "prod" (env :environment))
-                              (digest/from-file "public/js/prod/desktop.js")
-                              (digest/from-file "public/js/dev/desktop.js"))
-          :user-groups (group/user-groups user-id)
-          :user-threads (thread/open-threads-for-user user-id)
-          :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)
-          :user-preferences (user/user-get-preferences user-id)
-          :users (into ()
-                       (map #(assoc % :status
+  (chsk-send!
+    user-id
+    [:braid.client/init-data (initial-user-data user-id)]))
+
+(hooks/def-data-hook initial-user-data [user-id]
+  {})
+
+(hooks/def-data-hook-extension initial-user-data base-data
+  [user-id]
+  (let [connected (set (:any @connected-uids))]
+    {:user-id user-id
+     :version-checksum (if (= "prod" (env :environment))
+                         (digest/from-file "public/js/prod/desktop.js")
+                         (digest/from-file "public/js/dev/desktop.js"))
+     :user-groups (group/user-groups user-id)
+     :user-threads (thread/open-threads-for-user user-id)
+     :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)
+     :user-preferences (user/user-get-preferences user-id)
+     :users (into ()
+                  (map #(assoc % :status
                                (if (connected (% :id)) :online :offline)))
-                       (user/users-for-user user-id))
-          :invitations (invitation/invites-for-user user-id)
-          :tags (tag/tags-for-user user-id)}
-         dynamic-data)])))
-
-(defn init! []
-  (register-state!
-    {::initial-user-data []}
-    {::initial-user-data [s/Any]}))
-
-(api/reg-event-fx ::register-initial-user-data!
-  (fn [{db :db} [_ fn]]
-    {:db (update db ::initial-user-data conj fn)}))
-
-(defn ^:api register-initial-user-data!
-  [fn]
-  (api/dispatch [::register-initial-user-data! fn]))
-
-(api/reg-sub ::initial-user-data
-  (fn [db _]
-    (db ::initial-user-data)))
-
-(defstate sync
-  :start (init!))
+                  (user/users-for-user user-id))
+     :invitations (invitation/invites-for-user user-id)
+     :tags (tag/tags-for-user user-id)}))

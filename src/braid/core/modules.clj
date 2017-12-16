@@ -1,13 +1,5 @@
 (ns braid.core.modules
-  "This namespace exist just to require other modules' defstate.
+  "This namespace exist just to require other modules' hooks.
    It is required by braid.server.core"
   (:require
-    [braid.core.api :as api]
-    [braid.quests.server.core] ; for mount
-    [mount.core :refer [defstate]]))
-
-(defn init! [])
-
-(defstate modules
-  :start (init!))
-
+    [braid.quests.server.core]))
