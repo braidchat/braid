@@ -6,7 +6,7 @@
     (java.net URLEncoder)
     (java.io ByteArrayOutputStream ByteArrayInputStream)
     (com.cognitect.transit Writer)
-    (com.cognitect.transit.impl MsgpackEmitter WriteCache WriterFactory WriteHandlerMap)
+    (com.cognitect.transit.impl MsgpackEmitter WriteCache  WriteHandlerMap)
     (org.msgpack MessagePack)
     (org.apache.commons.validator UrlValidator)))
 
