@@ -5,7 +5,7 @@
 
 (defstate config
   :start
-  (merge {:db-url "datomic:free://localhost:4334/braid"
+  (merge {:db-url "datomic:mem://braid"
           :api-domain (str "localhost:" (+ 2 (:port (mount/args))))
           :site-url (str "http://localhost:" (:port (mount/args)))
           :hmac-secret "secret"}

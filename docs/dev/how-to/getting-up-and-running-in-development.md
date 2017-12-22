@@ -4,9 +4,9 @@ The following steps should get Braid running on your computer, ready for develop
 
 If you're interested in getting Braid running in production, read: [Deploying Braid](./deploying.md)
 
-To get Braid running locally, **you will need to have 3 terminal sessions open**:
+To get Braid running locally, **you will need to have 2 or 3 terminal sessions open**:
 
- 1. The Datomic Transactor (database)
+ 1. The Datomic Transactor (database), if you want the data to stay around
  2. The Braid REPL and Servers
  3. Figwheel (JS compiler and hot-reloader)
 
@@ -15,7 +15,10 @@ To get Braid running locally, **you will need to have 3 terminal sessions open**
 
 Datomic is Braid's database. Datomic Free is fine for development, but Datomic Pro Starter is reccommended for production.
 
-To install Datomic:
+If you just want to test things out, by default Braid will use an in-memory Datomic database.
+This means that when your repl closes, all data will be lost.
+
+If you want the data to be persisted, follow the steps below to install Datomic:
 
 1. Download Datomic Free 0.9.5201 from [https://my.datomic.com/downloads/free](https://my.datomic.com/downloads/free)
 
@@ -57,13 +60,19 @@ To get the server running:
   cd braid
   ```
 
-2. Run the REPL:
+2.5. (optional) If you're *not* using the in-memory version of Datomic, create a `profiles.clj` file with the following contents:
+
+  ```clojure
+  {:user {:env {:db-url "datomic:free://localhost:4334/braid"}}
+  ```
+
+3. Run the REPL:
 
   ```bash
   lein repl
   ```
 
-3. Inside the REPL, start the servers:
+4. Inside the REPL, start the servers:
 
   ```clojure
   (dev-main 5555)
@@ -71,7 +80,7 @@ To get the server running:
 
 This will start the desktop client server on 5555, the mobile client server on 5556, and the API server on port 5557.
 
-4. Seed some data (first time only):
+5. Seed some data (first time only):
 
   ```clojure
   (require 'braid.server.seed)
