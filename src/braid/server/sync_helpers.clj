@@ -134,3 +134,29 @@
   (doseq [bot (bot/bots-watching-thread (new-message :thread-id))]
     (timbre/debugf "notifying bot %s" bot)
     (bots/send-message-notification bot new-message)))
+
+(defn notify-users [new-message]
+  (let [subscribed-user-ids (->>
+                              (thread/users-subscribed-to-thread
+                                (new-message :thread-id))
+                              (remove (partial = (:user-id new-message))))
+        online? (intersection
+                  (set subscribed-user-ids)
+                  (set (:any @connected-uids)))]
+    (doseq [uid subscribed-user-ids]
+      (when-let [rules (user/user-get-preference uid :notification-rules)]
+        (when (notify-rules/notify? uid rules new-message)
+          (let [msg (update new-message :content
+                            (partial parse-tags-and-mentions uid))]
+            (if (online? uid)
+              (chsk-send! uid [:braid.client/notify-message msg])
+              (let [update-msgs
+                    (partial
+                      map
+                      (fn [m] (update m :content
+                                     (partial parse-tags-and-mentions uid))))]
+                (-> (email/create-message
+                      [(-> (thread/thread-by-id (msg :thread-id))
+                           (update :messages update-msgs))])
+                    (assoc :subject "Notification from Braid")
+                    (->> (email/send-message (user/user-email uid))))))))))))
