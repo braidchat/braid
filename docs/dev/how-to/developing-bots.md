@@ -16,7 +16,7 @@ If you'd like to write a bot from scratch or in a another language, you may find
 | [giphybot](https://github.com/braidchat/giphybot)     | Rust     | Simple bot, finds a gif using the giphy API based on the message sent to it              |
 | [octocat](https://github.com/braidchat/octocat)       | Rust     | More complicated bot, allows interacting with pre-set GitHub repositories                |
 | [emailbot](https://github.com/braidchat/emailbot)     | Elixir   | Uses OAuth to connect to Gmail inboxes, manage inbox, compose emails with a Braid thread |
-| [greeterbot](https://github.com/braidchat/greeterbot) | Haskell  | Monitors all messages in a group (not just mentions) to welcome new users to the group   |
+| [greeterbot](https://github.com/braidchat/greeterbot) | Haskell  | Monitors all events in a group (not just mentions) to welcome new users to the group     |
 
 ## Creating bots
 
@@ -60,7 +60,7 @@ Requests must be authenticated with HTTP Basic auth, where the username is the (
 
 To create a message, the bot can send a `POST` request to `/bots/message` endpoint of the api server (e.g. `https://api.braid.chat`).
 The message sent must be in the same format as the server sends --- MessagePack-encoded Transit, with the same schema as shown above.
-However, the `user-id`, `group-id`, and `created-at` fields can be omitted as the server will fill them in with the bot's faux user-id and, the group of the bot, and the current server time, respectively.
+However, the `user-id`, `group-id`, and `created-at` fields can be omitted as the server will fill them in with the bot's faux user-id, the group of the bot, and the current server time, respectively.
 The server will return the following error codes:
 
   - 201 if the message is successfully created
