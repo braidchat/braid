@@ -6,8 +6,7 @@
    [braid.server.db.user :as user]
    [braid.server.events :as events]
    [braid.server.markdown :refer [markdown->hiccup]]
-   [braid.server.routes.helpers :refer [current-user current-user-id logged-in?
-                                        error-response edn-response session-token]]
+   [braid.server.routes.helpers :as helpers :refer [error-response edn-response]]
    [braid.server.s3 :as s3]
    [clojure.java.io :as io]
    [clojure.string :as string]
@@ -18,9 +17,9 @@
 
   ; get current logged in user
   (GET "/session" req
-    (if-let [user (current-user req)]
+    (if-let [user (helpers/current-user req)]
       (edn-response {:user user
-                     :csrf-token (session-token)})
+                     :csrf-token (helpers/session-token)})
       {:status 401 :body "" :session nil}))
 
   ; log out
@@ -31,7 +30,7 @@
   (PUT "/groups" [name slug type :as req]
     (cond
       ; logged in?
-      (not (logged-in? req))
+      (not (helpers/logged-in? req))
       (error-response 401 "Must be logged in.")
 
       ; group name validations
@@ -66,7 +65,7 @@
 
       ; passed all validations
       :else
-      (let [user-id (current-user-id req)
+      (let [user-id (helpers/current-user-id req)
             group-id (db/uuid)
             [group] (db/run-txns!
                       (group/create-group-txn {:id group-id
@@ -85,7 +84,7 @@
     (let [group-id (java.util.UUID/fromString group-id)]
       (cond
         ; logged in?
-        (not (logged-in? req))
+        (not (helpers/logged-in? req))
         (error-response 401 "Must be logged in.")
 
         ; public group?
@@ -94,7 +93,7 @@
 
         :else
         (do
-          (events/user-join-group! (current-user-id req) group-id)
+          (events/user-join-group! (helpers/current-user-id req) group-id)
           (edn-response {:status "OK"})))))
 
   (GET "/changelog" []
