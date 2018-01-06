@@ -1,17 +1,18 @@
 (ns braid.server.routes.api.private
   (:require
-    [braid.server.api.link-extract :as link-extract]
-    [braid.server.db :as db]
-    [braid.server.db.group :as group]
-    [braid.server.db.user :as user]
-    [braid.server.events :as events]
-    [braid.server.markdown :refer [markdown->hiccup]]
-    [braid.server.routes.helpers :refer [current-user current-user-id logged-in?
-                                         error-response edn-response session-token]]
-    [braid.server.s3 :as s3]
-    [clojure.java.io :as io]
-    [clojure.string :as string]
-    [compojure.core :refer [GET PUT DELETE defroutes]]))
+   [braid.server.api.link-extract :as link-extract]
+   [braid.server.db :as db]
+   [braid.server.db.group :as group]
+   [braid.server.db.user :as user]
+   [braid.server.events :as events]
+   [braid.server.markdown :refer [markdown->hiccup]]
+   [braid.server.routes.helpers :refer [current-user current-user-id logged-in?
+                                        error-response edn-response session-token]]
+   [braid.server.s3 :as s3]
+   [clojure.java.io :as io]
+   [clojure.string :as string]
+   [compojure.core :refer [GET PUT DELETE defroutes]]
+   [taoensso.timbre :as timbre]))
 
 (defroutes api-private-routes
 
@@ -77,6 +78,7 @@
         (db/run-txns! (group/user-add-to-group-txn user-id group-id))
         (db/run-txns! (group/user-subscribe-to-group-tags-txn user-id group-id))
         (db/run-txns! (group/user-make-group-admin-txn user-id group-id))
+        (timbre/debugf "Created group %s by %s" group user-id)
         (edn-response {:group-id group-id}))))
 
   (PUT "/groups/:group-id/join" [group-id :as req]
