@@ -214,10 +214,7 @@
 
           :on-key-down
           (fn [e]
-            (when (or (and
-                        (= KeyCodes.X (.-keyCode e))
-                        (.-ctrlKey e))
-                      (= KeyCodes.ESC (.-keyCode e)))
+            (when (= KeyCodes.ESC (.-keyCode e))
               (helpers/stop-event! e)
               (dispatch [:hide-thread {:thread-id (thread :id)}])))
 
