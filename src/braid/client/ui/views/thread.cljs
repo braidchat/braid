@@ -90,7 +90,7 @@
         (fn []
           (let [node @messages-node]
             (reset! at-bottom?
-                    (> 2
+                    (> 25
                        (- (.-scrollHeight node)
                           (.-scrollTop node)
                           (.-clientHeight node))))))
