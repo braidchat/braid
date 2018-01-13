@@ -67,14 +67,14 @@
        [tag-pill-view tag-id]))
    [add-tag-button-view thread]])
 
-(defn messages-view [thread]
+(defn messages-view [thread-id]
   ; Closing over thread-id, but the only time a thread's id changes is the new
   ; thread box, which doesn't have messages anyway
-  (let [messages (subscribe [:messages-for-thread (thread :id)])
+  (let [messages (subscribe [:messages-for-thread thread-id])
 
-        last-open-at (subscribe [:thread-last-open-at (thread :id)])
+        last-open-at (subscribe [:thread-last-open-at thread-id])
 
-        unseen? (fn [message thread] (> (:created-at message)
+        unseen? (fn [message] (> (:created-at message)
                                         @last-open-at))
 
         kill-chan (chan)
@@ -120,12 +120,12 @@
        :component-did-update scroll-to-bottom!
 
        :reagent-render
-       (fn [thread]
+       (fn [thread-id]
          [:div.messages
           {:ref ref-cb
-           :on-scroll (fn [_] (if-not @first-scroll?
-                                (check-at-bottom)
-                                (reset! first-scroll? false)))}
+           :on-scroll (fn [_] (if @first-scroll?
+                               (reset! first-scroll? false)
+                               (check-at-bottom)))}
           (let [sorted-messages
                 (->> @messages
                      (sort-by :created-at)
@@ -134,11 +134,11 @@
                      (map (fn [[prev-message message]]
                             (assoc message
                               :unseen?
-                              (unseen? message thread)
+                              (unseen? message)
                               :first-unseen?
                               (and
-                                (unseen? message thread)
-                                (not (unseen? prev-message thread)))
+                                (unseen? message)
+                                (not (unseen? prev-message)))
                               :collapse?
                               (and
                                 (= (:user-id message)
@@ -303,7 +303,7 @@
            [thread-tags-view thread]]
 
           (when-not new?
-            [messages-view thread])
+            [messages-view (thread :id)])
 
           (when uploading?
             [:div.uploading-indicator "\uf110"])

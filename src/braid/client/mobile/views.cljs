@@ -76,7 +76,7 @@
             [:div.limbo
              "No one can see this conversation yet. "
              "Mention a @user or #tag in a reply."]])]
-        [messages-view thread]
+        [messages-view (thread :id)]
         [new-message-view {:thread-id (thread :id)
                            :placeholder (if (thread :new?)
                                           "Start a conversation..."
