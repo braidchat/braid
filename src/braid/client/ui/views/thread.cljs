@@ -74,8 +74,7 @@
 
         last-open-at (subscribe [:thread-last-open-at thread-id])
 
-        unseen? (fn [message] (> (:created-at message)
-                                        @last-open-at))
+        unseen? (fn [message] (> (:created-at message) @last-open-at))
 
         kill-chan (chan)
         embed-update-chan (chan)
@@ -85,6 +84,8 @@
 
         at-bottom? (atom true)
         first-scroll? (atom true)
+
+        old-last-msg (atom nil)
 
         check-at-bottom
         (fn []
@@ -108,6 +109,7 @@
        (fn [c]
          (reset! at-bottom? true)
          (scroll-to-bottom! c)
+         (reset! old-last-msg (:id (last @messages)))
          (go (loop []
                (let [[_ ch] (alts! [embed-update-chan kill-chan])]
                  (when (not= ch kill-chan)
@@ -117,7 +119,14 @@
        :component-will-unmount
        (fn [] (put! kill-chan (js/Date.)))
 
-       :component-did-update scroll-to-bottom!
+       :component-did-update
+       (fn [c _]
+         (let [last-msg (last @messages)]
+           (when (and (not= @old-last-msg (:id last-msg))
+                      (= (:user-id last-msg) @(subscribe [:user-id])))
+             (reset! at-bottom? true))
+           (reset! old-last-msg (:id last-msg)))
+         (scroll-to-bottom! c))
 
        :reagent-render
        (fn [thread-id]
