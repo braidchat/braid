@@ -65,7 +65,7 @@
          [{:title "Inbox"
            :route-fn routes/inbox-page-path
            :class "inbox"}
-          {:title "Recent"
+          {:title "Recently Closed"
            :route-fn routes/recent-page-path
            :class "recent"}
           {:title "Uploads"
