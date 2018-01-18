@@ -11,9 +11,9 @@
 
 (def message-handlers (atom {}))
 
-(defn ^:api register-server-message-handler!
-  [key fn]
-  (swap! message-handlers assoc key fn))
+(defn ^:api register-server-message-handlers!
+  [key->fn]
+  (swap! message-handlers merge  fn))
 
 (defn run-cofx! [cofx]
   (when-let [args (cofx :chsk-send!)]

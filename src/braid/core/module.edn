@@ -1,0 +1,16 @@
+{:name core
+ :doc "Braid core"
+
+ :provides
+ {:register-server-message-handlers
+  {:fn braid.server.sync-handler/register-server-message-handlers!
+   :doc "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"}
+
+  :register-db-schema
+  {:fn braid.server.schema/register-db-schema!
+   :doc "Add new datoms to the db schema"}
+
+  :register-initial-user-data
+  {:fn braid.server.sync/register-initial-user-data!
+   :doc "Add a map of key -> fn for getting the initial user data to be sent to the client. `fn` will recieve the user-id as its argument."}
+  }}

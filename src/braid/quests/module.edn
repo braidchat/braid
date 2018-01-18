@@ -1,0 +1,7 @@
+{:name quests
+ :doc "Provides 'quests' for Braid - activies that users can complete to introduce them to the system"
+
+ :extends
+ {:register-db-schema braid.quests.server.core/db-schema
+  :register-initial-user-data braid.quests.server.core/initial-user-data-fn
+  :register-server-message-handlers braid.quests.server.core/server-message-handlers}}

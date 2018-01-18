@@ -1,12 +1,9 @@
 (ns braid.quests.server.core
   (:require
     [datomic.db] ; for reader macro
-    [braid.quests.server.db :as db]
-    [braid.server.sync :refer [register-initial-user-data!]]
-    [braid.server.schema :refer [register-db-schema!]]
-    [braid.server.sync-handler :refer [register-server-message-handler!]]))
+    [braid.quests.server.db :as db]))
 
-(register-db-schema!
+(def db-schema
   [{:db/ident :quest-record/id
     :db/valueType :db.type/uuid
     :db/cardinality :db.cardinality/one
@@ -34,12 +31,12 @@
     :db/id #db/id [:db.part/db]
     :db.install/_attribute :db.part/db}])
 
-(register-initial-user-data!
-  (fn [user-id]
-    {:quest-records (db/get-active-quests-for-user-id user-id)}))
+(defn initial-user-data-fn
+  [user-id]
+  {:quest-records (db/get-active-quests-for-user-id user-id)})
 
-(register-server-message-handler!
-    :braid.server.quests/upsert-quest-record
-    (fn [{:keys [?data user-id]}]
-      {:chsk-send! [user-id [:braid.quests/upsert-quest-record ?data]]
-       :db-run-txns! (db/upsert-quest-record-txn user-id ?data)}))
+(def server-message-handlers
+  {:braid.server.quests/upsert-quest-record
+   (fn [{:keys [?data user-id]}]
+     {:chsk-send! [user-id [:braid.quests/upsert-quest-record ?data]]
+      :db-run-txns! (db/upsert-quest-record-txn user-id ?data)})})
