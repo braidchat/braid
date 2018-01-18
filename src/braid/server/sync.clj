@@ -524,10 +524,12 @@
       (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
 
+(def initial-user-data (atom []))
+
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]
   (let [connected (set (:any @connected-uids))
-        dynamic-data (->> @(api/subscribe [::initial-user-data])
+        dynamic-data (->> @initial-user-data
                           (into {} (map (fn [f] (f user-id)))))]
     (chsk-send!
       user-id
@@ -549,22 +551,6 @@
           :tags (tag/tags-for-user user-id)}
          dynamic-data)])))
 
-(defn init! []
-  (register-state!
-    {::initial-user-data []}
-    {::initial-user-data [s/Any]}))
-
-(api/reg-event-fx ::register-initial-user-data!
-  (fn [{db :db} [_ fn]]
-    {:db (update db ::initial-user-data conj fn)}))
-
 (defn ^:api register-initial-user-data!
   [fn]
-  (api/dispatch [::register-initial-user-data! fn]))
-
-(api/reg-sub ::initial-user-data
-  (fn [db _]
-    (db ::initial-user-data)))
-
-(defstate sync
-  :start (init!))
+  (swap! initial-user-data conj fn))

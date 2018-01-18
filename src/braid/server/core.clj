@@ -7,8 +7,8 @@
     [taoensso.timbre :as timbre]
     [braid.server.email-digest :refer [email-jobs]] ; for mount
     [braid.server.sync-handler] ; for mount
-    [braid.core.modules]; for mount
-    [braid.server.sync] ; for multimethods and mount
+    [braid.core.modules]; for pulling in transitive deps
+    [braid.server.sync] ; for multimethods
     [braid.state.core] ; for mount
     [braid.server.handler :refer [mobile-client-app
                                   desktop-client-app

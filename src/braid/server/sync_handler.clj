@@ -9,25 +9,11 @@
     [braid.server.db :as db]
     [braid.server.socket :as socket]))
 
-(defn init! []
-  (register-state!
-    {::message-handlers {}}
-    {::message-handlers {s/Keyword s/Any}}))
-
-(defstate sync-handler
-  :start (init!))
-
-(api/reg-event-fx ::register-server-message-handler!
-  (fn [{db :db} [_ key fn]]
-    {:db (update db ::message-handlers assoc key fn)}))
+(def message-handlers (atom {}))
 
 (defn ^:api register-server-message-handler!
   [key fn]
-  (api/dispatch [::register-server-message-handler! key fn]))
-
-(api/reg-sub ::message-handler
-  (fn [db [_ key]]
-    (get-in db [::message-handlers key])))
+  (swap! message-handlers assoc key fn))
 
 (defn run-cofx! [cofx]
   (when-let [args (cofx :chsk-send!)]
@@ -42,7 +28,7 @@
     (debugf "User: %s Event: %s" (get-in ev-msg [:ring-req :session :user-id]) event)
 
     (when-let [user-id (get-in ev-msg [:ring-req :session :user-id])]
-      (if-let [dynamic-msg-handler @(api/subscribe [::message-handler id])]
+      (if-let [dynamic-msg-handler (get @message-handlers id)]
         (run-cofx! (dynamic-msg-handler (assoc ev-msg :user-id user-id)))
         (event-msg-handler (assoc ev-msg :user-id user-id))))))
 
