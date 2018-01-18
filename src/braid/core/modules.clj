@@ -17,6 +17,11 @@
   []
   (map read-module module-files))
 
+(defn resolve!
+  [s]
+  (or (resolve s) (throw (ex-info (str "Couldn't resolve " s)
+                                  {:symbol s}))))
+
 (defn build-provides
   [modules]
   (->> (map :provides modules)
@@ -24,7 +29,7 @@
       (reduce-kv
         (fn [m k {f-name :fn}]
           (require (symbol (namespace f-name)))
-          (assoc m k (resolve f-name)))
+          (assoc m k (resolve! f-name)))
         {})))
 
 (defn get! [m k]
@@ -38,7 +43,7 @@
   [provides modules]
   (doseq [[k v] (mapcat :extends modules)]
     (require (symbol (namespace v)))
-    ((get! provides k) (deref (resolve v)))))
+    ((get! provides k) (deref (resolve! v)))))
 
 (defn load-modules!
   []
