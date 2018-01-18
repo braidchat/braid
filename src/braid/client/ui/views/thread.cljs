@@ -67,15 +67,14 @@
        [tag-pill-view tag-id]))
    [add-tag-button-view thread]])
 
-(defn messages-view [thread]
+(defn messages-view [thread-id]
   ; Closing over thread-id, but the only time a thread's id changes is the new
   ; thread box, which doesn't have messages anyway
-  (let [messages (subscribe [:messages-for-thread (thread :id)])
+  (let [messages (subscribe [:messages-for-thread thread-id])
 
-        last-open-at (subscribe [:thread-last-open-at (thread :id)])
+        last-open-at (subscribe [:thread-last-open-at thread-id])
 
-        unseen? (fn [message thread] (> (:created-at message)
-                                        @last-open-at))
+        unseen? (fn [message] (> (:created-at message) @last-open-at))
 
         kill-chan (chan)
         embed-update-chan (chan)
@@ -86,11 +85,13 @@
         at-bottom? (atom true)
         first-scroll? (atom true)
 
+        old-last-msg (atom nil)
+
         check-at-bottom
         (fn []
           (let [node @messages-node]
             (reset! at-bottom?
-                    (> 2
+                    (> 25
                        (- (.-scrollHeight node)
                           (.-scrollTop node)
                           (.-clientHeight node))))))
@@ -108,6 +109,7 @@
        (fn [c]
          (reset! at-bottom? true)
          (scroll-to-bottom! c)
+         (reset! old-last-msg (:id (last @messages)))
          (go (loop []
                (let [[_ ch] (alts! [embed-update-chan kill-chan])]
                  (when (not= ch kill-chan)
@@ -117,15 +119,22 @@
        :component-will-unmount
        (fn [] (put! kill-chan (js/Date.)))
 
-       :component-did-update scroll-to-bottom!
+       :component-did-update
+       (fn [c _]
+         (let [last-msg (last @messages)]
+           (when (and (not= @old-last-msg (:id last-msg))
+                      (= (:user-id last-msg) @(subscribe [:user-id])))
+             (reset! at-bottom? true))
+           (reset! old-last-msg (:id last-msg)))
+         (scroll-to-bottom! c))
 
        :reagent-render
-       (fn [thread]
+       (fn [thread-id]
          [:div.messages
           {:ref ref-cb
-           :on-scroll (fn [_] (if-not @first-scroll?
-                                (check-at-bottom)
-                                (reset! first-scroll? false)))}
+           :on-scroll (fn [_] (if @first-scroll?
+                               (reset! first-scroll? false)
+                               (check-at-bottom)))}
           (let [sorted-messages
                 (->> @messages
                      (sort-by :created-at)
@@ -134,11 +143,11 @@
                      (map (fn [[prev-message message]]
                             (assoc message
                               :unseen?
-                              (unseen? message thread)
+                              (unseen? message)
                               :first-unseen?
                               (and
-                                (unseen? message thread)
-                                (not (unseen? prev-message thread)))
+                                (unseen? message)
+                                (not (unseen? prev-message)))
                               :collapse?
                               (and
                                 (= (:user-id message)
@@ -214,10 +223,7 @@
 
           :on-key-down
           (fn [e]
-            (when (or (and
-                        (= KeyCodes.X (.-keyCode e))
-                        (.-ctrlKey e))
-                      (= KeyCodes.ESC (.-keyCode e)))
+            (when (= KeyCodes.ESC (.-keyCode e))
               (helpers/stop-event! e)
               (dispatch [:hide-thread {:thread-id (thread :id)}])))
 
@@ -306,7 +312,7 @@
            [thread-tags-view thread]]
 
           (when-not new?
-            [messages-view thread])
+            [messages-view (thread :id)])
 
           (when uploading?
             [:div.uploading-indicator "\uf110"])

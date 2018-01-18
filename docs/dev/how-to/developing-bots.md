@@ -5,9 +5,18 @@ We anticipate extending the API available to bots as we start to write more and 
 
 ## Example Bots
 
- - For a simple bot, see [giphybot](https://github.com/braidchat/giphybot) (Written in Rust).
- - For a more complicated bot, see [octocat](https://github.com/braidchat/octocat) (Written in Rust).
- - For a bot that monitors group events and all messages, see [greeterbot](https://github.com/braidchat/greeterbot) (Written in Haskell).
+The easiest way to get started writing a bot is with the [braidbot library](https://github.com/braidchat/braidbot) (which is in [Racket](https://racket-lang.org)).
+
+For a bot written using the above library, see [rot13bot](https://github.com/braidchat/rot13bot) or [reminderbot](https://github.com/braidchat/reminderbot).
+
+If you'd like to write a bot from scratch or in a another language, you may find the below instructive:
+
+| Bot                                                   | Language | Notes                                                                                    |
+|-------------------------------------------------------|----------|------------------------------------------------------------------------------------------|
+| [giphybot](https://github.com/braidchat/giphybot)     | Rust     | Simple bot, finds a gif using the giphy API based on the message sent to it              |
+| [octocat](https://github.com/braidchat/octocat)       | Rust     | More complicated bot, allows interacting with pre-set GitHub repositories                |
+| [emailbot](https://github.com/braidchat/emailbot)     | Elixir   | Uses OAuth to connect to Gmail inboxes, manage inbox, compose emails with a Braid thread |
+| [greeterbot](https://github.com/braidchat/greeterbot) | Haskell  | Monitors all events in a group (not just mentions) to welcome new users to the group     |
 
 ## Creating bots
 
@@ -51,7 +60,7 @@ Requests must be authenticated with HTTP Basic auth, where the username is the (
 
 To create a message, the bot can send a `POST` request to `/bots/message` endpoint of the api server (e.g. `https://api.braid.chat`).
 The message sent must be in the same format as the server sends --- MessagePack-encoded Transit, with the same schema as shown above.
-However, the `user-id`, `group-id`, and `created-at` fields can be omitted as the server will fill them in with the bot's faux user-id and, the group of the bot, and the current server time, respectively.
+However, the `user-id`, `group-id`, and `created-at` fields can be omitted as the server will fill them in with the bot's faux user-id, the group of the bot, and the current server time, respectively.
 The server will return the following error codes:
 
   - 201 if the message is successfully created

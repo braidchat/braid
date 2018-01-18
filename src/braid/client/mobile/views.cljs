@@ -8,7 +8,7 @@
     [braid.client.ui.views.header :refer [group-name-view group-header-buttons-view]]
     [braid.client.ui.views.new-message :refer [upload-button-view]]
     [braid.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
-    [braid.client.ui.views.sidebar]
+    [braid.client.ui.views.sidebar :as sidebar]
     [braid.client.ui.views.thread :refer [messages-view]]
     [cljs.core.async :as a]
     [re-frame.core :refer [subscribe dispatch]]
@@ -45,16 +45,38 @@
                         nil))}]]])))
 
 (defn thread-view [thread]
-  (let [open? (subscribe [:thread-open? (thread :id)])]
+  (let [open? (subscribe [:thread-open? (thread :id)])
+        private? (fn [thread] (and
+                               (not (thread :new?))
+                               (empty? (thread :tag-ids))
+                               (seq (thread :mentioned-ids))))
+
+        limbo? (fn [thread] (and
+                             (not (thread :new?))
+                             (empty? (thread :tag-ids))
+                             (empty? (thread :mentioned-ids))))]
     (fn [thread]
       [:div.thread
        [:div.card
         [:div.head
+
          [braid.client.ui.views.thread/thread-tags-view thread]
+
          (when @open?
            [:div.close {:on-click (fn [_]
-                                    (dispatch [:hide-thread {:thread-id (thread :id)}]))}])]
-        [messages-view thread]
+                                    (dispatch [:hide-thread
+                                               {:thread-id (thread :id)}]))}])
+         (when (private? thread)
+           [:div.notice
+            [:div.private
+             "This is a private conversation." [:br]
+             "Only @mentioned users can see it."]])
+         (when (limbo? thread)
+           [:div.notice
+            [:div.limbo
+             "No one can see this conversation yet. "
+             "Mention a @user or #tag in a reply."]])]
+        [messages-view (thread :id)]
         [new-message-view {:thread-id (thread :id)
                            :placeholder (if (thread :new?)
                                           "Start a conversation..."
@@ -69,9 +91,10 @@
     (fn [_]
       [:div.group-header {:style {:background-color (->color @group-id)}}
        [:div.bar
-        [group-name-view]
         [:span.buttons
          [:a.open-sidebar {:on-click (fn [] (a/put! toggle-draw-ch true))}]]
+        [:span.badge-wrapper [sidebar/badge-view @group-id]]
+        [group-name-view]
         [:span.spacer]
         [group-header-buttons-view [{:title "Inbox"
                                      :route-fn routes/inbox-page-path
@@ -88,8 +111,7 @@
       [:div.inbox.page
        [header-view toggle-draw-ch]
        [:div.threads
-        [swipe-view (conj @threads
-                          @temp-thread) thread-view]]])))
+        [swipe-view (conj @threads @temp-thread) thread-view]]])))
 
 (defn main-view []
   (let [toggle-draw-ch (a/chan)]
@@ -98,7 +120,7 @@
        [drawer-view
         toggle-draw-ch
         [:div.sidebar
-         [braid.client.ui.views.sidebar/groups-view]]]
+         [sidebar/groups-view]]]
        (if (= :settings (:type @(subscribe [:page])))
          [:div.page.settings
           [header-view toggle-draw-ch]

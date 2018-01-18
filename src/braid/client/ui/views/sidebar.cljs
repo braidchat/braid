@@ -53,10 +53,9 @@
 
 (defn badge-view [group-id]
   (let [cnt (subscribe [:group-unread-count group-id])]
-    (fn []
-      (if (and @cnt (> @cnt 0))
-        [:div.badge @cnt]
-        [:div]))))
+    (if (and @cnt (> @cnt 0))
+      [:div.badge @cnt]
+      [:div])))
 
 (defn groups-view []
   (let [active-group (subscribe [:active-group])

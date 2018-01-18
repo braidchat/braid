@@ -104,7 +104,7 @@
         " haven't seen yet."]
        [:p (str "Currently getting emails " ((fnil name "never") @email-freq))]
        [:p "Recieve emails: "]
-       [:select {:value @email-freq
+       [:select {:value (or @email-freq :never)
                  :on-change (fn [e]
                               (let [v (keyword (.. e -target -value))]
                                 (dispatch [:set-preference [:email-frequency v]])))}

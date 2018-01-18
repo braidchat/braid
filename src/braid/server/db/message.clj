@@ -16,17 +16,11 @@
 
   ; upsert-thread
   (let [msg-id (d/tempid :entities)
-        new-thread? (nil? (d/entity (db/db) [:thread/id thread-id]))
-        thread (if new-thread?
-                    (d/tempid :entities)
-                    [:thread/id thread-id])]
+        thread (d/tempid :entities)]
     (concat
-      (if new-thread?
-        ; maybe create new thread
-        [{:db/id thread
-          :thread/id thread-id
-          :thread/group [:group/id group-id]}]
-        [])
+      [{:db/id thread
+        :thread/id thread-id
+        :thread/group [:group/id group-id]}]
       [; create message
        ^{:braid.server.db/return
          (fn [{:keys [db-after tempids]}]
@@ -61,9 +55,7 @@
            [:db/add [:user/id user-id] :user/open-thread thread]])
         mentioned-user-ids)
       ; open thread for users already subscribed to thread
-      (if new-thread?
-        []
-        (map
-          (fn [user-id]
-            [:db/add [:user/id user-id] :user/open-thread thread])
-          (thread/users-subscribed-to-thread thread-id))))))
+      (map
+        (fn [user-id]
+          [:db/add [:user/id user-id] :user/open-thread thread])
+        (thread/users-subscribed-to-thread thread-id)))))

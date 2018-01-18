@@ -27,7 +27,19 @@
            :height "100%"
            :flex-shrink 0
            :display "inline-block"
-           :vertical-align "top" }]]])]))
+           :vertical-align "top"}]]])]))
+
+(defn arrow-view
+  "Show an arrow, pointing in the direction given by `direction`;
+  either `:left` or `:right`."
+  [direction]
+  (let [[w h] [30 120]
+        x1 (case direction :left 5 :right w)
+        x2 (case direction :left w :right 5)]
+    [:svg {:view-box (str "0 0 " w " " h)}
+     [:g {:stroke "gray" :stroke-width 5}
+      [:line {:x1 x1 :y1 (/ h 2) :x2 x2 :y2 h}]
+      [:line {:x1 x1 :y1 (/ h 2) :x2 x2 :y2 0}]]]))
 
 (defn swipe-view [panel-items panel-view]
   (let [state (atom {:container nil
@@ -41,7 +53,6 @@
         scroll-stop! (fn []
                        (let [container (@state :container)
                              width (.-offsetWidth container)
-                             ;scrollWidth (.-scrollWidth container)
                              scroll-x (.-scrollLeft container)
                              start-n (/ (@state :scroll-x-start) width)
                              percent-dragged (/ (- scroll-x
@@ -64,8 +75,18 @@
 
                         (set! (.-scrollLeft (@state :container)) target-x)))
 
+        scroll-page! (fn [n-pages]
+                       (let [container (@state :container)
+                             scroll-x (.-scrollLeft container)
+                             page-width (.-offsetWidth container)
+                             current-page (js/Math.floor (/ scroll-x page-width))]
+                         (set! (.-scrollLeft container) (* page-width (+ n-pages current-page)))))
+        scroll-next! (fn [] (scroll-page! 1))
+        scroll-prev! (fn [] (scroll-page! -1))
+
         touch-end! (fn [e]
-                     (swap! state assoc :dragging? false))
+                     (swap! state assoc :dragging? false)
+                     (put! scroll-chan true))
 
         touch-start! (fn [e]
                        (swap! state assoc
@@ -73,14 +94,15 @@
                               :dragging? true))
 
         scroll! (fn [e]
-                  (put! scroll-chan true))
+                  (put! scroll-chan true))]
 
-        _ (go (loop []
-                (let [[_ ch] (alts! [scroll-stop-chan])]
-                  (when (= ch scroll-stop-chan)
-                    (when-not (@state :dragging?)
-                      (scroll-stop!)))
-                  (recur))))]
+    (go (loop []
+          (let [[_ ch] (alts! [scroll-stop-chan])]
+            (when (= ch scroll-stop-chan)
+              (when-not (@state :dragging?)
+                (scroll-stop!)))
+            (recur))))
+
     (r/create-class
       {:component-did-mount
        (fn [component]
@@ -100,6 +122,15 @@
           [:div.panels
            [style-view]
            (doall
-             (for [panel-item panel-items]
+             (for [[idx panel-item] (map-indexed vector panel-items)]
                ^{:key (:id panel-item)}
-               [:div.panel [panel-view panel-item]]))]])})))
+               [:div.panel
+                [panel-view panel-item]
+                (when (not= idx 0)
+                  [:div.arrow-prev
+                   {:on-click (fn [_] (scroll-prev!))}
+                   [arrow-view :left]])
+                (when (not= idx (dec (count panel-items)))
+                  [:div.arrow-next
+                   {:on-click (fn [_] (scroll-next!))}
+                   [arrow-view :right]])]))]])})))

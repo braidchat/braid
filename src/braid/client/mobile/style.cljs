@@ -14,12 +14,12 @@
     [garden.arithmetic :as m]
     [garden.core :refer [css]]
     [garden.stylesheet :refer [at-import]]
-    [garden.units :refer [rem vw vh em]]))
+    [garden.units :refer [px rem vw vh em]]))
 
 (def styles
   (let [pad (rem 1) ; (vw 5)
-        pads "1rem" ; "5vw"
-        ]
+        pads "1rem"] ; "5vw"
+
     (css {:auto-prefix #{:transition
                          :flex-direction
                          :flex-shrink
@@ -31,7 +31,8 @@
          braid.client.ui.styles.imports/imports
 
          [:body
-          {:touch-action "none"}
+          {:touch-action "none"
+           :height "100vh"}
 
           [:>#app
 
@@ -42,7 +43,7 @@
              (braid.client.mobile.styles.drawer/drawer pad)
 
              [:>.page
-              {:position "absolute"
+              {:position "fixed"
                :top 0
                :left 0
                :right 0
@@ -54,24 +55,32 @@
 
               [:>.global-settings
                {:overflow-y "auto"
-                :height "90vh"
+                :height "90%"
                 :margin-left "5em"}]
 
               [:>.group-header
                [:>.bar
                 mixins/flex
-                {:justify-content "space-between"}
+                {:justify-content "space-between"
+                 :border-radius 0
+                 :box-shadow "none"}
 
                 [:>.group-name
                  {:padding 0}]
+
+                [:>.badge-wrapper
+                 {:min-width (em 1.5)}
+                 [:>.badge
+                  mixins/pill-box
+                  {:background-color "#b53737 !important"
+                   :margin-left (em 0.5)
+                   :margin-top (em 0.5)}]]
 
                 [:>.spacer
                  {:flex-grow 2}]]]
 
               [:>.threads
-               {:padding-top "2.5rem"
-                :margin-top "-2.5rem"
-                :height "100%"
+               {:height "100%"
                 :box-sizing "border-box"}
 
                [:>.container
@@ -79,21 +88,57 @@
                 [:>.panels
 
                  [:>.panel
+                  {:position "relative"}
+
+                  [:>.arrow-prev
+                   :>.arrow-next
+                   {:position "absolute"
+                    :bottom "50%"
+                    :width "10px"
+                    :height "40px"}]
+
+                  [:>.arrow-prev
+                   {:left 0}]
+
+                  [:>.arrow-next
+                   {:right 0}]
 
                   [:>.thread
                    mixins/flex
                    {:width "100vw"
-                    :height "100%"
-                    :background "white"
+                    :height "calc(100% - 2.5rem)"
+                    :background "#bbb"
                     :flex-direction "column"
-                    :justify-content "flex-end"}
+                    :justify-content "flex-end"
+                    :overflow "none"}
 
                    [:>.card
-                    (braid.client.ui.styles.thread/head pad)
-
+                    (braid.client.ui.styles.thread/head 0)
+                    mixins/flex
+                    {:flex-direction "column"
+                     :justify-content "flex-end"
+                     :background-color "white"}
                     [:>.head
+                     {:flex-shrink 0
+                      :min-height (em 3.5)
+                      :position "relative"
+                      :width "100%"
+                      :background-color "#333333"}
+                     [:>.notice
+                      {:margin [[(px 5) (px 5)]]}
+                      [:>.private :>.limbo
+                       {:padding [[(px 5) (px 5)]]
+                        :border-radius (px 3)}]
+                      [:>.private
+                       {:background "#D2E7FF"
+                        :color vars/private-thread-accent-color}]
+
+                      [:>.limbo
+                       {:background "#ffe4e4"
+                        :color vars/limbo-thread-accent-color}]]
 
                      [:>.tags
+                      {:padding (em 0.5)}
                       (braid.client.ui.styles.pills/tag)
                       (braid.client.ui.styles.pills/user)]
 
@@ -102,22 +147,23 @@
                        :top 0
                        :right 0
                        :color "#CCC"
-                       :padding vars/pad}
+                       :padding-right (px 5)}
 
                       [:&::after
+                       {:font-size (em 2)}
                        (mixins/fontawesome \uf00d)]]]
 
                     (braid.client.ui.styles.thread/messages pad)
 
                     [:>.messages
                      {:flex-grow 1
-                      :max-height "75vh"}
+                      :padding-top (em 0.5)
+                      :-webkit-overflow-scrolling "touch"}
 
                      braid.client.ui.styles.message/message
                      [:>.message
                       (braid.client.ui.styles.embed/embed pad)]]
 
-                    (braid.client.ui.styles.thread/new-message pad)
-                    ]]]]]]]]]]]
+                    (braid.client.ui.styles.thread/new-message pad)]]]]]]]]]]]
 
          braid.client.ui.styles.body/body)))

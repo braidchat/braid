@@ -102,13 +102,14 @@
     (r/create-class
       {:component-did-mount
        (fn []
-         (.addEventListener js/document "touchstart" touch-start! true)
-         (.addEventListener js/document "touchmove" touch-move!  true)
-         (.addEventListener js/document "touchend" touch-end! true))
+         #_(.addEventListener js/document "touchstart" touch-start! true)
+         #_(.addEventListener js/document "touchmove" touch-move! true)
+         (.addEventListener js/document "touchend" touch-end! true)
+         )
        :component-will-unmount
        (fn []
-         (.removeEventListener js/document "touchstart" touch-start! true)
-         (.removeEventListener js/document "touchmove" touch-move!  true)
+         #_(.removeEventListener js/document "touchstart" touch-start! true)
+         #_(.removeEventListener js/document "touchmove" touch-move!  true)
          (.removeEventListener js/document "touchend" touch-end! true)
          (a/put! kill-chan (js/Date.)))
        :reagent-render
