@@ -18,8 +18,10 @@
              (update ::state-spec merge spec))}))
 
 (defn ^:api register-state!
-  [state spec]
-  (api/dispatch [::register-state! state spec]))
+  ([[state spec]]
+   (register-state! state spec))
+  ([state spec]
+   (api/dispatch [::register-state! state spec])))
 
 (api/reg-sub :braid.state/valid?
   (fn [db _]

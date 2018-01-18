@@ -45,4 +45,3 @@
 
 (defn increment-quest [state quest-record-id]
   (update-in state [:braid.quests.client.core/quest-records quest-record-id :quest-record/progress] inc))
-

@@ -31,7 +31,7 @@
                      (fn [e]
                        (dispatch [:set-window-visibility
                                   (= "visible" (.-visibilityState js/document))])))
-  (modules/init!)
+  ;; (modules/init!)
 
   (render)
 

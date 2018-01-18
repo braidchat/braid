@@ -1,45 +1,36 @@
 (ns braid.client.ui.views.styles
   (:require
-    [garden.core :refer [css]]
-    [schema.core :as s]
-    [braid.core.api :as api]
-    [braid.state.core :refer [register-state!]]
-    [braid.client.ui.styles.animations]
-    [braid.client.ui.styles.embed]
-    [braid.client.ui.styles.body]
-    [braid.client.ui.styles.header]
-    [braid.client.ui.styles.imports]
-    [braid.client.ui.styles.message]
-    [braid.client.ui.styles.misc]
-    [braid.client.ui.styles.page]
-    [braid.client.ui.styles.pages.tags]
-    [braid.client.ui.styles.pages.me]
-    [braid.client.ui.styles.pages.search]
-    [braid.client.ui.styles.pills]
-    [braid.client.ui.styles.reconnect-overlay]
-    [braid.client.ui.styles.sidebar]
-    [braid.client.ui.styles.thread]
-    [braid.client.ui.styles.vars :as vars]
-    [braid.client.bots.views.bots-page-styles]
-    [braid.client.group-admin.views.group-settings-page-styles]
-    [braid.client.invites.views.invite-page-styles]
-    [braid.client.uploads.views.uploads-page-styles]))
+   [garden.core :refer [css]]
+   [schema.core :as s]
+   [braid.core.api :as api]
+   [braid.state.core :refer [register-state!]]
+   [braid.client.ui.styles.animations]
+   [braid.client.ui.styles.embed]
+   [braid.client.ui.styles.body]
+   [braid.client.ui.styles.header]
+   [braid.client.ui.styles.imports]
+   [braid.client.ui.styles.message]
+   [braid.client.ui.styles.misc]
+   [braid.client.ui.styles.page]
+   [braid.client.ui.styles.pages.tags]
+   [braid.client.ui.styles.pages.me]
+   [braid.client.ui.styles.pages.search]
+   [braid.client.ui.styles.pills]
+   [braid.client.ui.styles.reconnect-overlay]
+   [braid.client.ui.styles.sidebar]
+   [braid.client.ui.styles.thread]
+   [braid.client.ui.styles.vars :as vars]
+   [braid.client.bots.views.bots-page-styles]
+   [braid.client.group-admin.views.group-settings-page-styles]
+   [braid.client.invites.views.invite-page-styles]
+   [braid.client.uploads.views.uploads-page-styles]
+   [reagent.core :as r]))
 
-(register-state!
-  {::styles []}
-  {::styles [s/Any]})
-
-(api/reg-sub ::styles
-  (fn [db _]
-    (db ::styles)))
-
-(api/reg-event-fx ::register-styles!
-  (fn [{db :db} [_ styles]]
-    {:db (update db ::styles conj styles)}))
+(def styles (r/atom []))
 
 (defn ^:api register-styles!
-  [styles]
-  (api/dispatch [::register-styles! styles]))
+  [more-styles]
+  (swap! styles conj more-styles))
 
 (defn styles-view []
   [:style
@@ -62,7 +53,7 @@
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
 
-               @(api/subscribe [::styles])
+               @styles
 
                [:#app
                 braid.client.ui.styles.misc/status]

@@ -1,13 +1,14 @@
 (ns braid.client.ui.views.header
   (:require
-    [reagent.ratom :refer-macros [reaction]]
-    [re-frame.core :refer [subscribe]]
-    [schema.core :as s]
-    [braid.core.api :as api]
-    [braid.client.helpers :refer [->color]]
-    [braid.client.routes :as routes]
-    [braid.client.ui.views.search-bar :refer [search-bar-view]]
-    [braid.state.core :refer [register-state!]]))
+   [reagent.core :as r]
+   [reagent.ratom :refer-macros [reaction]]
+   [re-frame.core :refer [subscribe]]
+   [schema.core :as s]
+   [braid.core.api :as api]
+   [braid.client.helpers :refer [->color]]
+   [braid.client.routes :as routes]
+   [braid.client.ui.views.search-bar :refer [search-bar-view]]
+   [braid.state.core :refer [register-state!]]))
 
 (defn loading-indicator-view [group-id]
   (let [page (subscribe [:page])]
@@ -130,21 +131,11 @@
              ^{:key (header-item :class)}
              [header-item-view header-item]))]]])))
 
-(register-state!
-  {::header-views []}
-  {::header-views [s/Any]})
+(def header-views (r/atom []))
 
-(api/reg-event-fx ::register-header-view!
-  (fn [{db :db} [_ view]]
-    {:db (update db ::header-views conj view)}))
-
-(defn ^:api register-header-view!
+(defn register-header-view!
   [view]
-  (api/dispatch [::register-header-view! view]))
-
-(api/reg-sub ::header-views
- (fn [db _]
-   (db ::header-views)))
+  (swap! header-views conj view))
 
 (defn header-view []
   (into
@@ -153,7 +144,7 @@
       [[group-header-view]
        [:div.spacer]]
       (doall
-        (for [view @(api/subscribe [::header-views])]
+        (for [view @header-views]
           [view]))
       [[admin-header-view]
        [user-header-view]])))

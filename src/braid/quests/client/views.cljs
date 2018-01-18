@@ -71,4 +71,3 @@
        [:div.quests-icon {:style {:color (when (seq @active-quest-records)
                                            (->color @user-id))}}]
        [quests-menu-view]])))
-
