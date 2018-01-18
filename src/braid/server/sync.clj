@@ -29,8 +29,7 @@
     [braid.server.socket :refer [chsk-send! connected-uids]]
     [braid.server.sync-handler :refer [event-msg-handler]]
     [braid.server.sync-helpers :refer [notify-users]]
-    [braid.server.util :refer [valid-url?]]
-    [braid.state.core :refer [register-state!]]))
+    [braid.server.util :refer [valid-url?]]))
 
 (defn broadcast-thread
   "broadcasts thread to all users with the thread open, except those in ids-to-skip"

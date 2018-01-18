@@ -5,7 +5,6 @@
     [taoensso.sente :as sente]
     [taoensso.timbre :as timbre :refer [debugf]]
     [braid.core.api :as api]
-    [braid.state.core :refer [register-state!]]
     [braid.server.db :as db]
     [braid.server.socket :as socket]))
 

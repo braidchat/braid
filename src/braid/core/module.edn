@@ -34,4 +34,12 @@
 
    :register-state
    {:fn braid.state.core/register-state!
-    :doc "Add a key and initial value to the default app state, plus an associated spec."}}}}
+    :doc "Add a key and initial value to the default app state, plus an associated spec."}
+
+   :register-autocomplete-engines
+   {:fn braid.client.ui.views.new-message/register-autocomplete-engines!
+    :doc "Provide a sequence of functions that will act as autocomplete Handlers. The functions will recieve the current typed text as an argument and should return a sequence of autocomplete values."}}}
+
+ :extends
+ {:cljs
+  {:register-autocomplete-engines braid.client.ui.views.autocomplete/provided-engines}}}

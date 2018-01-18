@@ -4,7 +4,9 @@
 
 (def module-files
   ;; TODO: glob, have a search path, have a registery or something
-  ["src/braid/core/module.edn" "src/braid/quests/module.edn"])
+  ["src/braid/core/module.edn"
+   "src/braid/quests/module.edn"
+   "src/braid/emoji/module.edn"])
 
 (defn read-module
   [module-path]

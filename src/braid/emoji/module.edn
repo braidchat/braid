@@ -1,0 +1,6 @@
+{:name emoji
+ :doc "Provides emoji autocomplete engine for Braid"
+
+ :extends
+ {:cljs
+  {:register-autocomplete-engines braid.emoji.core/engines}}}

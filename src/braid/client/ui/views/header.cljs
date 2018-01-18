@@ -7,8 +7,7 @@
    [braid.core.api :as api]
    [braid.client.helpers :refer [->color]]
    [braid.client.routes :as routes]
-   [braid.client.ui.views.search-bar :refer [search-bar-view]]
-   [braid.state.core :refer [register-state!]]))
+   [braid.client.ui.views.search-bar :refer [search-bar-view]]))
 
 (defn loading-indicator-view [group-id]
   (let [page (subscribe [:page])]

@@ -11,8 +11,7 @@
     [braid.client.sync :as sync]
     [braid.client.xhr :refer [edn-xhr]]
     [braid.common.util :as util]
-    [braid.core.api :as api]
-    [braid.state.core :refer [register-state!]]))
+    [braid.core.api :as api]))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))

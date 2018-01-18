@@ -1,8 +1,7 @@
 (ns braid.state.core
   (:require
     [schema.core :as s]
-    [braid.core.api :as api]
-    #?(:clj [mount.core :refer [defstate]])))
+    [braid.core.api :as api]))
 
 (defn initialize-state
   [db]
@@ -37,7 +36,3 @@
 
 (defn ^:export validate []
   @(api/subscribe [:braid.state/valid?]))
-
-#?(:clj
-    (defstate state
-      :start (init!)))

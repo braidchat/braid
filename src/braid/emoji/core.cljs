@@ -1,9 +1,7 @@
 (ns braid.emoji.core
   (:require
     [clojure.string :as string]
-    [braid.core.api :as api]
-    [braid.emoji.helpers :as helpers]
-    [braid.client.ui.views.new-message :refer [register-autocomplete-engine!]]))
+    [braid.emoji.helpers :as helpers]))
 
 (defn simple-matches?
   [m s]
@@ -38,5 +36,4 @@
                                      (str "(" emoji-name ")") k))
                       {:react-key k}])}))))))
 
-(defn init! []
-  (register-autocomplete-engine! autocomplete-handler))
+(def engines [autocomplete-handler])
