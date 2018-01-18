@@ -13,7 +13,7 @@
 
 (defn ^:api register-server-message-handlers!
   [key->fn]
-  (swap! message-handlers merge  fn))
+  (swap! message-handlers merge key->fn))
 
 (defn run-cofx! [cofx]
   (when-let [args (cofx :chsk-send!)]
