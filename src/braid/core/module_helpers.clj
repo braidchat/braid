@@ -31,6 +31,9 @@
                       {:map m :keys ks})))))
 
 (defmacro gen-module-requires
+  "Generate the `require` statements to pull in all necessary
+  namespaces to be able to connect the modules. That is, all the
+  namespaces named in both `:extends` and `:provides`."
   []
   (let [modules (read-all-modules)
         provides (->> modules
@@ -46,6 +49,12 @@
                  (map (partial list 'quote)))))))
 
 (defmacro gen-module-loads
+  "Generate the function calls needed to connect up the `:extend`-ing
+  and `:provide`-ing modules.
+  Doing this with a macro instead of a function because we want the
+  parsing of the EDN files to happen at compile time, by Clojure,
+  rather than at runtime with ClojureScript (particularly because
+  ClojureScript can't actually read said module.edn files)."
   []
   (let [modules (read-all-modules)
         provides (->> modules
