@@ -7,8 +7,7 @@
     [datomic.api :as d]
     [braid.common.util :refer [slugify]]
     [braid.server.db :as db]
-    [braid.server.db.common :refer :all]
-    [braid.quests.server.db :refer [activate-first-quests-txn]]))
+    [braid.server.db.common :refer :all]))
 
 (defn email-taken?
   [email]
@@ -147,6 +146,14 @@
 
 ;; Transactions
 
+(def post-create-txns (atom []))
+
+(defn register-post-create-user-txn!
+  "`txns-fn` should be a function that will recieve the id of the new
+  user and will return a vector of txns."
+  [txns-fn]
+  (swap! post-create-txns conj txns-fn))
+
 (defn create-user-txn
   "given an id and email, creates and returns a user;
   the nickname and avatar are set based on the email;
@@ -167,7 +174,7 @@
                                :rating :g
                                :default :identicon)
         :user/nickname (generate-nickname-from-email email)}]
-      (activate-first-quests-txn new-id))))
+      (mapcat #(% new-id) @post-create-txns))))
 
 (defn set-nickname-txn
   "Set the user's nickname"

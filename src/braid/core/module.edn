@@ -13,7 +13,11 @@
 
    :register-initial-user-data
    {:fn braid.server.sync/register-initial-user-data!
-    :doc "Add a map of key -> fn for getting the initial user data to be sent to the client. `fn` will recieve the user-id as its argument. See `:register-initial-user-data-handler` under `:cljs`"}}
+    :doc "Add a map of key -> fn for getting the initial user data to be sent to the client. `fn` will recieve the user-id as its argument. See `:register-initial-user-data-handler` under `:cljs`"}
+
+   :register-post-create-user-txn
+   {:fn braid.server.db.user/register-post-create-user-txn!
+    :doc "Add a function that will return a sequence of datomic txns to be called when a new user is created. The function will recieve the datomic id of the new user as an argument."}}
 
   :cljs
   {:register-header-view
