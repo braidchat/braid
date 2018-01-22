@@ -10,7 +10,8 @@
    :register-post-create-user-txn braid.quests.server.db/activate-first-quests-txn}
 
   :cljs
-  {:register-header-view braid.quests.client.views/quests-header-view :register-styles braid.quests.client.styles/quests-header
+  {:register-header-view braid.quests.client.views/quests-header-view
+   :register-styles braid.quests.client.styles/quests-header
    :register-initial-user-data-handler braid.quests.client.core/initial-data-handler
    :register-event-listener braid.quests.client.core/event-listener
    :register-state braid.quests.client.core/state}}}
