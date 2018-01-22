@@ -283,8 +283,7 @@
 
       [:>.match
 
-       [:>.emojione
-        :>.avatar
+       [:>.avatar
         :>.color-block
         {:display "block"
          :width "2em"
