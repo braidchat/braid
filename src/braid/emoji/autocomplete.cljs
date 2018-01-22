@@ -1,4 +1,4 @@
-(ns braid.emoji.core
+(ns braid.emoji.autocomplete
   (:require
     [clojure.string :as string]
     [braid.emoji.helpers :as helpers]))

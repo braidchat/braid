@@ -3,4 +3,6 @@
 
  :extends
  {:cljs
-  {:register-autocomplete-engines braid.emoji.core/engines}}}
+  {:register-autocomplete-engines braid.emoji.autocomplete/engines
+   :register-message-transforms braid.emoji.text-replacements/stateless-formatters
+   :register-message-formatters braid.emoji.text-replacements/message-formatters}}}

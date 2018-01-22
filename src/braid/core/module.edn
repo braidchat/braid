@@ -42,7 +42,15 @@
 
    :register-autocomplete-engines
    {:fn braid.client.ui.views.new-message/register-autocomplete-engines!
-    :doc "Provide a sequence of functions that will act as autocomplete Handlers. The functions will recieve the current typed text as an argument and should return a sequence of autocomplete values."}}}
+    :doc "Provide a sequence of functions that will act as autocomplete Handlers. The functions will recieve the current typed text as an argument and should return a sequence of autocomplete values."}
+
+   :register-message-transforms
+   {:fn braid.client.ui.views.message/register-stateless-formatters!
+    :doc "Register new stateless transformers to message bodies. The functions should expect to recieve either some text or hiccup nodes and should return the same."}
+
+   :register-message-formatters
+   {:fn braid.client.ui.views.message/register-post-transformers!
+    :doc "Register new post-transform message formatters. The function will recieve the hiccup representing the message and should return the same."}}}
 
  :extends
  {:cljs

@@ -9,7 +9,6 @@
     [cljsjs.highlight.langs.yaml]
     [reagent.core :as r]
     [re-frame.core :refer [dispatch subscribe]]
-    [braid.emoji.helpers :as emoji]
     [braid.client.helpers :as helpers :refer [id->color ->color]]
     [braid.client.routes :as routes]
     [braid.client.ui.views.embed :refer [embed-view]]
@@ -58,29 +57,17 @@
     :replace (fn [match]
                (if (some? @(subscribe [:tag (uuid match)]))
                  [tag-pill-view (uuid match)]
-                 [:span "#" match]))}
-   :emoji-shortcodes
-   {:pattern #"(:\S*:)"
-    :replace (fn [match]
-               (if (emoji/unicode match)
-                 (emoji/shortcode->html match)
-                 match))}
-   :emoji-ascii
-   {:replace (fn [match]
-               (if-let [shortcode (emoji/ascii match)]
-                 (emoji/shortcode->html shortcode)
-                 match))}
-   })
+                 [:span "#" match]))}})
 
 (defn re-replace
   [re s replace-fn]
   (if-let [match (second (re-find re s))]
-    ; TODO: recurse, incease the rest has more matches?
+    ; TODO: recurse, incase the rest has more matches?
     ; using Javascript split beacuse we don't want the match to be in the last
     ; component
     (let [[pre _ post] (seq (.split s re 3))]
       (if (or (string/blank? pre) (re-matches #".*\s$" pre))
-      ; XXX: find a way to use return a seq & use mapcat instead of this hack
+      ; XXX: find a way to return a seq & use mapcat instead of this hack
       [:span.dummy pre (replace-fn match) post]
       s))
     s))
@@ -156,15 +143,6 @@
 (def url-replace (make-text-replacer :urls))
 (def user-replace (make-text-replacer :users))
 (def tag-replace (make-text-replacer :tags))
-(def emoji-shortcodes-replace (make-text-replacer :emoji-shortcodes))
-
-(defn emoji-ascii-replace [text-or-node]
-  (if (string? text-or-node)
-    (let [text text-or-node]
-      (if (contains? emoji/ascii-set text)
-        ((get-in replacements [:emoji-ascii :replace]) text)
-        text))
-    text-or-node))
 
 (defn code-view-gen [class-name]
   (fn [body]
@@ -188,44 +166,17 @@
   (make-delimited-processor {:delimiter "*"
                              :result-fn (fn [body] [:strong.starred body])}))
 
-(defn shortcode-emoji?
-  [message-part]
-  (and (= 4 (count message-part))
-       (= :span.dummy (first message-part))
-       (= :img (get-in message-part [2 0]))
-       (string/starts-with? (get-in message-part [2 1 :class]) "emojione")))
+(def stateless-formatters (atom []))
 
-(defn ascii-emoji?
-  [message-part]
-  (and (= 2 (count message-part))
-       (= :img (first message-part))
-       (string/starts-with? (get-in message-part [1 :class]) "emojione")))
+(defn register-stateless-formatters!
+  [formatter-fns]
+  (swap! stateless-formatters into formatter-fns))
 
-(defn emoji?
-  [message-part]
-  (or (shortcode-emoji? message-part)
-      (ascii-emoji? message-part)))
+(def post-transformers (atom []))
 
-(defn format-emojis
-  "Formats messages containing only emojis (ignoring whitespace). When
-  a message meets the criteria, all emojis will have the class 'large'
-  appended to the end of their class attribute. All other messages are
-  returned unmodified"
-  [message]
-  (let [text (filterv #(or (not (string? %))
-                           (not (some? (re-find #"\s+" %))))
-                      message)]
-    (if (every? emoji? text)
-      (map (fn [part]
-             (cond (shortcode-emoji? part)
-                   (update-in part [2 1 :class] #(str % " large"))
-
-                   (ascii-emoji? part)
-                   (update-in part [1 :class] #(str % " large"))
-
-                   :else part))
-           message)
-      message)))
+(defn register-post-transformers!
+  [transformers]
+  (swap! post-transformers into transformers))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
@@ -234,16 +185,19 @@
   (let [; Caution: order of transforms is important! url-replace should come before
         ; user/tag replace at least so urls with octothorpes or at-signs don't get
         ; wrecked
-        stateless-transform (map (comp emoji-ascii-replace
-                                       emoji-shortcodes-replace
-                                       tag-replace
-                                       user-replace
-                                       url-replace))
-        statefull-transform (comp extract-code-blocks extract-code-inline extract-emphasized)]
-    (->> (into [] (comp statefull-transform stateless-transform) (string/split text #" "))
-         (interleave (repeat " "))
-         rest
-         format-emojis)))
+        additional-formatters (reduce comp identity @stateless-formatters)
+        stateless-transform (map (comp
+                                   additional-formatters
+                                   tag-replace
+                                   user-replace
+                                   url-replace))
+        statefull-transform (comp extract-code-blocks extract-code-inline extract-emphasized)
+        post-transform (fn [msg-body] (reduce #(%2 %1) msg-body @post-transformers))]
+    (->> (string/split text #" ")
+        (into [] (comp statefull-transform stateless-transform))
+        (interleave (repeat " "))
+        rest
+        post-transform)))
 
 (defn message-view [message embed-update-chan]
   (let [sender (subscribe [:user (message :user-id)])
