@@ -79,5 +79,3 @@
 (register-state!
   initial-state
   AppState)
-
-
