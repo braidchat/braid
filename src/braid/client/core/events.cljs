@@ -547,29 +547,31 @@
 (reg-event-fx
   :set-init-data
   (fn [{state :db :as cofx} [_ data]]
-    (let [combined-data-handlers (apply comp @initial-user-data-handlers)]
-      {:dispatch-n (list [:set-login-state :app]
-                     [:add-users (data :users)])
-       :db (-> state
-               (assoc :session {:user-id (data :user-id)})
-               (assoc-in [:user :subscribed-tag-ids]
-                 (set (data :user-subscribed-tag-ids)))
-               (assoc :groups (key-by-id (data :user-groups)))
-               (assoc :invitations (data :invitations))
-               (assoc :threads (key-by-id (data :user-threads)))
-               (assoc :group-threads
-                 (into {}
-                       (map (fn [[g t]] [g (into #{} (map :id) t)]))
-                       (group-by :group-id (data :user-threads))))
-               (assoc-in [:user :open-thread-ids]
-                 (set (map :id (data :user-threads))))
-               (assoc :temp-threads (->> (data :user-groups)
-                                         (map :id)
-                                         (reduce (fn [memo group-id]
-                                                   (assoc memo group-id (schema/make-temp-thread group-id))) {})))
-               (helpers/add-tags (data :tags))
-               (helpers/set-preferences (data :user-preferences))
-               (combined-data-handlers data))})))
+    {:dispatch-n (list [:set-login-state :app]
+                       [:add-users (data :users)])
+     :db (-> state
+             (assoc :session {:user-id (data :user-id)})
+             (assoc-in [:user :subscribed-tag-ids]
+                       (set (data :user-subscribed-tag-ids)))
+             (assoc :groups (key-by-id (data :user-groups)))
+             (assoc :invitations (data :invitations))
+             (assoc :threads (key-by-id (data :user-threads)))
+             (assoc :group-threads
+                    (into {}
+                          (map (fn [[g t]] [g (into #{} (map :id) t)]))
+                          (group-by :group-id (data :user-threads))))
+             (assoc-in [:user :open-thread-ids]
+                       (set (map :id (data :user-threads))))
+             (assoc :temp-threads (->> (data :user-groups)
+                                      (map :id)
+                                      (reduce (fn [memo group-id]
+                                                (assoc memo group-id (schema/make-temp-thread group-id))) {})))
+             (helpers/add-tags (data :tags))
+             (helpers/set-preferences (data :user-preferences))
+             (as-> <>
+                 (reduce (fn [db f] (f db data))
+                         <>
+                         @initial-user-data-handlers)))}))
 
 (reg-event-fx
   :leave-group
