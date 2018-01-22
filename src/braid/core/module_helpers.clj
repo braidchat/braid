@@ -1,12 +1,13 @@
 (ns braid.core.module-helpers
   (:require
-   [clojure.tools.reader.edn :as edn]))
+   [clojure.tools.reader.edn :as edn]
+   [clojure.java.io :as io]))
 
 (def module-files
-  ;; TODO: glob, have a search path, have a registery or something
-  ["src/braid/core/module.edn"
-   "src/braid/quests/module.edn"
-   "src/braid/emoji/module.edn"])
+  (for [dir (.listFiles (io/file "src/braid/"))
+        :let [m (io/file dir "module.edn")]
+        :when (.isFile m)]
+    m))
 
 (defn read-module
   [module-path]
