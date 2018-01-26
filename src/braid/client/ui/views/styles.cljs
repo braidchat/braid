@@ -51,7 +51,7 @@
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
 
-               @styles
+               (doall (mapv #(%) @styles))
 
                [:#app
                 braid.client.ui.styles.misc/status]

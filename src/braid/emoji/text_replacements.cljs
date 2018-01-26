@@ -70,7 +70,3 @@
                    :else part))
            message)
       message)))
-
-(def stateless-formatters [emoji-ascii-replace emoji-shortcodes-replace])
-
-(def message-formatters [format-emojis])

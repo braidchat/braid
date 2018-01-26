@@ -20,5 +20,6 @@
     {}))
 
 (defn register-event-listener!
-  [[id listener]]
-  (dispatch [::register-event-listener! id listener]))
+  [f]
+  (let [[id listener] (f)]
+    (dispatch [::register-event-listener! id listener])))

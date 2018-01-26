@@ -39,12 +39,21 @@
   (let [modules (read-all-modules)
         provides (->> modules
                      (map (comp :cljs :provides))
-                     (apply merge))
+                     (apply merge)
+                     vals
+                     (map :fn))
         extends (->> modules
-                    (mapcat (comp :cljs :extends)))]
+                    (mapcat (comp :cljs :extends))
+                    (map second)
+                    (mapcat
+                      (fn [ex]
+                        (cond
+                          (coll? ex) ex
+                          (symbol? ex) [ex]
+                          :else (throw (ex-info "Invalid extends"
+                                                {:thing ex}))))))]
     `(do (require
-           ~@(->> (concat (map :fn (vals provides))
-                         (map second extends))
+           ~@(->> (concat provides extends)
                  (map (comp symbol namespace))
                  set
                  (map (partial list 'quote)))))))
@@ -62,8 +71,18 @@
                      (map (comp :cljs :provides))
                      (apply merge))
         extends (->> modules
-                    (mapcat (comp :cljs :extends)))]
+                    (mapcat (comp :cljs :extends))
+                    (mapcat (fn [[k vs]]
+                              (cond
+                                (symbol? vs) [[k vs]]
+                                (coll? vs) (mapv (fn [v] [k v]) vs)
+                                :else (throw (ex-info "Invalid extends"
+                                                      {:thing vs}))))))]
     `(do
        ~@(doall
            (for [[k v] extends]
-             `(~(get-in! provides [k :fn]) ~v))))))
+             `(~(get-in! provides [k :fn])
+               (fn [& args#]
+                 (apply (resolve '~v) args#))))))))
+
+;; TODO: make macros to define register-hooks

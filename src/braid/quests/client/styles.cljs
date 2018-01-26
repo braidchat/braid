@@ -9,7 +9,8 @@
 
 (def quest-icon-size (rem 2.5))
 
-(def quests-header
+(defn quests-header
+  []
   [:.quests-header
    {:position "relative"}
 
