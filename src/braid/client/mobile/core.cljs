@@ -13,6 +13,7 @@
     [braid.client.state.remote-handlers]
     [braid.client.uploads.events]
     [braid.client.uploads.subs]
+    [braid.core.modules :as modules]
     [re-frame.core :refer [dispatch-sync dispatch]]
     [reagent.core :as r]))
 
@@ -22,6 +23,7 @@
   (r/render [app-view] (. js/document (getElementById "app"))))
 
 (defn ^:export init []
+  (modules/init!)
   (dispatch-sync [:initialize-db])
   (render)
   (router/init))

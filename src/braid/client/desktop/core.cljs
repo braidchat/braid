@@ -25,13 +25,13 @@
   (r/render [app-view] (.getElementById js/document "app")))
 
 (defn ^:export init []
+  (modules/init!)
   (dispatch-sync [:initialize-db])
 
   (.addEventListener js/document "visibilitychange"
                      (fn [e]
                        (dispatch [:set-window-visibility
                                   (= "visible" (.-visibilityState js/document))])))
-  ;; (modules/init!)
 
   (render)
 
