@@ -31,6 +31,23 @@
       (throw (ex-info (str "Missing key-path " ks)
                       {:map m :keys ks})))))
 
+(defn get-extends
+  "Get all the `:extends` key-value pairs, expanding any collections.
+  e.g. `{:register-foo [foo bar]}` will expand to
+  `([:register-foo foo] [:register-foo bar])`."
+  [target modules]
+  (into []
+        (comp (mapcat (comp target :extends))
+              (mapcat (fn [[k vs]]
+                        (cond
+                          (symbol? vs) [[k vs]]
+                          (coll? vs) (mapv (fn [v] [k v]) vs)
+                          :else (throw (ex-info (str "Invalid extends " vs)
+                                                {:form vs
+                                                 :target target
+                                                 :modules modules}))))))
+        modules))
+
 (defmacro gen-module-requires
   "Generate the `require` statements to pull in all necessary
   namespaces to be able to connect the modules. That is, all the
@@ -43,15 +60,8 @@
                      vals
                      (map :fn))
         extends (->> modules
-                    (mapcat (comp :cljs :extends))
-                    (map second)
-                    (mapcat
-                      (fn [ex]
-                        (cond
-                          (coll? ex) ex
-                          (symbol? ex) [ex]
-                          :else (throw (ex-info "Invalid extends"
-                                                {:thing ex}))))))]
+                    (get-extends :cljs)
+                    (map second))]
     `(do (require
            ~@(->> (concat provides extends)
                  (map (comp symbol namespace))
@@ -70,14 +80,7 @@
         provides (->> modules
                      (map (comp :cljs :provides))
                      (apply merge))
-        extends (->> modules
-                    (mapcat (comp :cljs :extends))
-                    (mapcat (fn [[k vs]]
-                              (cond
-                                (symbol? vs) [[k vs]]
-                                (coll? vs) (mapv (fn [v] [k v]) vs)
-                                :else (throw (ex-info "Invalid extends"
-                                                      {:thing vs}))))))]
+        extends (get-extends :cljs modules)]
     `(do
        ~@(doall
            (for [[k v] extends]

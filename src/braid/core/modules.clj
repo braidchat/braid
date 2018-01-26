@@ -19,7 +19,7 @@
 
 (defn apply-extends
   [provides modules]
-  (doseq [[k v] (mapcat (comp :clj :extends) modules)]
+  (doseq [[k v] (helpers/get-extends :clj modules)]
     (require (symbol (namespace v)))
     ((helpers/get! provides k) (deref (resolve! v)))))
 
