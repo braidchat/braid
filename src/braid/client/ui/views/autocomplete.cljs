@@ -147,8 +147,3 @@
                                  (:name @(subscribe [:group (tag :group-id)]))]])})))
              (remove nil?)
              reverse)))))
-
-(def provided-engines
-  [bot-autocomplete-engine
-   user-autocomplete-engine
-   tag-autocomplete-engine])

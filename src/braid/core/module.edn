@@ -54,4 +54,7 @@
 
  :extends
  {:cljs
-  {:register-autocomplete-engines braid.client.ui.views.autocomplete/provided-engines}}}
+  {:register-autocomplete-engines
+   [braid.client.ui.views.autocomplete/bot-autocomplete-engine
+    braid.client.ui.views.autocomplete/user-autocomplete-engine
+    braid.client.ui.views.autocomplete/tag-autocomplete-engine]}}}

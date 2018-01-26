@@ -35,5 +35,3 @@
                                    (if show-brackets?
                                      (str "(" emoji-name ")") k))
                       {:react-key k}])}))))))
-
-(def engines [autocomplete-handler])

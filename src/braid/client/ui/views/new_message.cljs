@@ -87,7 +87,7 @@
 
 (defn ^:api register-autocomplete-engines!
   [handlers]
-  (swap! autocomplete-engines concat handlers))
+  (swap! autocomplete-engines conj handlers))
 
 (defn wrap-autocomplete [config]
   (let [autocomplete-chan (chan)
