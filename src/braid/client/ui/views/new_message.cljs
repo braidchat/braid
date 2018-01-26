@@ -1,5 +1,6 @@
 (ns braid.client.ui.views.new-message
   (:require-macros
+   [braid.core.module-helpers :refer [defhook]]
     [cljs.core.async.macros :refer [go]])
   (:require
     [cljs.core.async :as async :refer [<! put! chan alts!]]
@@ -82,12 +83,9 @@
   [txt]
   (odd? (count (re-seq #"`" txt))))
 
-
-(def autocomplete-engines (atom []))
-
-(defn ^:api register-autocomplete-engines!
-  [handlers]
-  (swap! autocomplete-engines conj handlers))
+(defhook
+  :writer register-autocomplete-engines!
+  :reader autocomplete-engines)
 
 (defn wrap-autocomplete [config]
   (let [autocomplete-chan (chan)

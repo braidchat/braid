@@ -1,4 +1,6 @@
 (ns braid.client.core.events
+  (:require-macros
+   [braid.core.module-helpers :refer [defhook]])
   (:require
     [clojure.set :as set]
     [clojure.string :as string]
@@ -538,11 +540,9 @@
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))
 
-(def initial-user-data-handlers (atom []))
-
-(defn ^:api register-initial-user-data-handler!
-  [handler]
-  (swap! initial-user-data-handlers conj handler))
+(defhook
+  :reader initial-user-data-handlers
+  :writer register-initial-user-data-handler!)
 
 (reg-event-fx
   :set-init-data

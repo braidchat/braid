@@ -1,4 +1,6 @@
 (ns braid.client.ui.views.styles
+  (:require-macros
+   [braid.core.module-helpers :refer [defhook]])
   (:require
    [garden.core :refer [css]]
    [schema.core :as s]
@@ -25,11 +27,9 @@
    [braid.client.uploads.views.uploads-page-styles]
    [reagent.core :as r]))
 
-(def styles (r/atom []))
-
-(defn ^:api register-styles!
-  [more-styles]
-  (swap! styles conj more-styles))
+(defhook
+  :writer register-styles!
+  :reader module-styles)
 
 (defn styles-view []
   [:style
@@ -51,7 +51,7 @@
                (braid.client.ui.styles.pills/tag)
                (braid.client.ui.styles.pills/user)
 
-               (doall (mapv #(%) @styles))
+               @module-styles
 
                [:#app
                 braid.client.ui.styles.misc/status]

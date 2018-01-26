@@ -85,7 +85,23 @@
        ~@(doall
            (for [[k v] extends]
              `(~(get-in! provides [k :fn])
-               (fn [& args#]
-                 (apply (resolve '~v) args#))))))))
+               (fn []
+                 (deref (resolve '~v)))))))))
 
-;; TODO: make macros to define register-hooks
+(defmacro defhook
+  [& {:keys [reader writer initial-val add-fn]
+      :or {initial-val [] add-fn conj}}]
+  (assert (symbol? reader))
+  (assert (symbol? writer))
+  `(do
+     (defonce atom# (atom []))
+     (def ~reader
+       (reify ~'IDeref
+         (~'-deref [_#]
+           (doall (map (fn [th#] (th#)) (deref atom#))))))
+     (defn ~writer [f#]
+       (when-not (fn? f#)
+         (throw "Extensions must be functions"
+                {:invalid-value f#
+                 :register-fn (quote ~writer)}))
+       (swap! atom# conj f#))))

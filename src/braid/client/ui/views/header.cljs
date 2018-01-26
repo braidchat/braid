@@ -1,4 +1,6 @@
 (ns braid.client.ui.views.header
+  (:require-macros
+   [braid.core.module-helpers :refer [defhook]])
   (:require
    [reagent.core :as r]
    [reagent.ratom :refer-macros [reaction]]
@@ -130,11 +132,9 @@
              ^{:key (header-item :class)}
              [header-item-view header-item]))]]])))
 
-(def header-views (r/atom []))
-
-(defn register-header-view!
-  [view]
-  (swap! header-views conj view))
+(defhook
+  :writer register-header-view!
+  :reader header-views)
 
 (defn header-view []
   (into

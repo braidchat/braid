@@ -3,8 +3,7 @@
    [garden.units :refer [rem em px ex]]))
 
 ;; Taken from https://github.com/emojione/emojione/blob/2.2.7/assets/css/emojione.css#L1
-(defn emojione
-  []
+(def emojione
   [:.emojione
    {:font-size "inherit"
     :height (ex 3)
@@ -22,8 +21,7 @@
      :margin [[(ex -0.6) (em 0.15) 0 (em 0.3)]]
      :background-size [[(em 3) (em 3)]]}]])
 
-(defn autocomplete
-  []
+(def autocomplete
   [:.app>.main>.page>.threads>.thread>.card
    [:>.message.new
     [:>.autocomplete-wrapper

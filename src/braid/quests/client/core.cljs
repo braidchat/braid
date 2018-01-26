@@ -11,14 +11,12 @@
   [db data]
   (helpers/set-quest-records db (data :quest-records)))
 
-(defn event-listener
-  []
+(def event-listener
   [:quests
    (fn [event]
      (when (not= "quests" (namespace (first event)))
        (api/dispatch [:quests/update-handler event])))])
 
-(defn state
-  []
+(def state
   [{::quest-records {}}
    {::quest-records {QuestRecordId QuestRecord}}])

@@ -1,4 +1,6 @@
 (ns braid.client.ui.views.message
+  (:require-macros
+   [braid.core.module-helpers :refer [defhook]])
   (:require
     [clojure.string :as string]
     [cljsjs.highlight]
@@ -166,17 +168,13 @@
   (make-delimited-processor {:delimiter "*"
                              :result-fn (fn [body] [:strong.starred body])}))
 
-(def stateless-formatters (atom []))
+(defhook
+  :reader stateless-formatters
+  :writer register-stateless-formatters!)
 
-(defn register-stateless-formatters!
-  [formatter-fns]
-  (swap! stateless-formatters conj formatter-fns))
-
-(def post-transformers (atom []))
-
-(defn register-post-transformers!
-  [transformers-f]
-  (swap! post-transformers conj transformers-f))
+(defhook
+  :reader post-transformers
+  :writer register-post-transformers!)
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
@@ -185,16 +183,17 @@
   (let [; Caution: order of transforms is important! url-replace should come before
         ; user/tag replace at least so urls with octothorpes or at-signs don't get
         ; wrecked
-        additional-formatters (->> @stateless-formatters
-                                  (reduce comp identity))
+        additional-formatters (reduce comp identity @stateless-formatters)
         stateless-transform (map (comp
                                    additional-formatters
                                    tag-replace
                                    user-replace
                                    url-replace))
-        statefull-transform (comp extract-code-blocks extract-code-inline extract-emphasized)
-        post-transform (fn [msg-body] (->> @post-transformers
-                                          (reduce #(%2 %1) msg-body)))]
+        statefull-transform (comp extract-code-blocks
+                                  extract-code-inline
+                                  extract-emphasized)
+        post-transform (fn [msg-body]
+                         (reduce #(%2 %1) msg-body @post-transformers))]
     (->> (string/split text #" ")
         (into [] (comp statefull-transform stateless-transform))
         (interleave (repeat " "))

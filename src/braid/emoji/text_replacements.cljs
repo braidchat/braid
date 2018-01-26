@@ -47,8 +47,9 @@
 
 (defn emoji?
   [message-part]
-  (or (shortcode-emoji? message-part)
-      (ascii-emoji? message-part)))
+  (and (vector? message-part)
+       (or (shortcode-emoji? message-part)
+           (ascii-emoji? message-part))))
 
 (defn format-emojis
   "Formats messages containing only emojis (ignoring whitespace). When
