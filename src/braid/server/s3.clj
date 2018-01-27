@@ -21,11 +21,10 @@
   "Get the base64-encode HMAC-SHA1 of `to-sign` with `key`"
   [to-sign key]
   (let [mac (Mac/getInstance "HmacSHA1")
-        secret-key (SecretKeySpec. (.getBytes key "UTF-8") (.getAlgorithm mac))
-        b64-encode (fn [m] (.encode (BASE64Encoder.) m))]
+        secret-key (SecretKeySpec. (.getBytes key "UTF-8") (.getAlgorithm mac))]
     (-> (doto mac (.init secret-key))
         (.doFinal (.getBytes to-sign "UTF-8"))
-        b64-encode)))
+        Base64/encodeBase64)))
 
 (defn generate-policy
   []
