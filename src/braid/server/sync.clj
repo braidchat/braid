@@ -8,6 +8,7 @@
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
     [braid.core.api :as api]
+    [braid.core.module-helpers :refer [defhook]]
     [braid.common.schema :refer [new-message-valid? upload-valid?]]
     [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
     [braid.server.bots :as bots]
@@ -523,7 +524,9 @@
       (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
 
-(def initial-user-data (atom []))
+(defhook
+  :reader initial-user-data
+  :writer register-initial-user-data!)
 
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]
@@ -549,7 +552,3 @@
           :invitations (invitation/invites-for-user user-id)
           :tags (tag/tags-for-user user-id)}
          dynamic-data)])))
-
-(defn ^:api register-initial-user-data!
-  [fn]
-  (swap! initial-user-data conj fn))

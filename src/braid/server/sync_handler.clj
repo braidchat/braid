@@ -5,14 +5,15 @@
     [taoensso.sente :as sente]
     [taoensso.timbre :as timbre :refer [debugf]]
     [braid.core.api :as api]
+    [braid.core.module-helpers :refer [defhook]]
     [braid.server.db :as db]
     [braid.server.socket :as socket]))
 
-(def message-handlers (atom {}))
-
-(defn ^:api register-server-message-handlers!
-  [key->fn]
-  (swap! message-handlers merge key->fn))
+(defhook
+  :writer register-server-message-handlers!
+  :reader message-handlers
+  :initial-val {}
+  :add-fn merge)
 
 (defn run-cofx! [cofx]
   (when-let [args (cofx :chsk-send!)]

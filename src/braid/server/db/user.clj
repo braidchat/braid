@@ -5,6 +5,7 @@
     [clavatar.core :refer [gravatar]]
     [crypto.password.scrypt :as password]
     [datomic.api :as d]
+    [braid.core.module-helpers :refer [defhook]]
     [braid.common.util :refer [slugify]]
     [braid.server.db :as db]
     [braid.server.db.common :refer :all]))
@@ -146,13 +147,9 @@
 
 ;; Transactions
 
-(def post-create-txns (atom []))
-
-(defn register-post-create-user-txn!
-  "`txns-fn` should be a function that will recieve the id of the new
-  user and will return a vector of txns."
-  [txns-fn]
-  (swap! post-create-txns conj txns-fn))
+(defhook
+  :writer register-post-create-user-txn!
+  :reader post-create-txns)
 
 (defn create-user-txn
   "given an id and email, creates and returns a user;

@@ -1,7 +1,8 @@
 (ns braid.server.schema
   (:require
-    [datomic.db]
-    [schema.core :as s]))
+   [braid.core.module-helpers :refer [defhook]]
+   [datomic.db]
+   [schema.core :as s]))
 
 (def -initial-schema
   [ ; user
@@ -302,8 +303,8 @@
     :db/id #db/id [:db.part/db]
     :db.install/_attribute :db.part/db}])
 
-(def schema (atom -initial-schema))
-
-(defn ^:api register-db-schema!
-  [entities]
-  (swap! schema concat entities))
+(defhook
+  :writer register-db-schema!
+  :reader schema
+  :initial-val -initial-schema
+  :add-fn concat)
