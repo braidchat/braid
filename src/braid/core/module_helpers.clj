@@ -98,18 +98,34 @@
   By default, the values will be `conj`-ed into a vector, but this can
   be customized with the `:initial-val` and `:add-fn` arguments."
   [& {:keys [reader writer initial-val add-fn]
-      :or {initial-val [] add-fn conj}}]
+      :or {initial-val [] add-fn 'conj}}]
   (assert (symbol? reader))
   (assert (symbol? writer))
   `(do
-     (defonce atom# (atom []))
+     (defonce extend-thunks# (atom []))
      (def ~reader
-       (reify ~'IDeref
-         (~'-deref [_#]
-           (doall (map (fn [th#] (th#)) (deref atom#))))))
+       ;; Hack around protocol being clojure.lang.IDeref in Clojure vs
+       ;; cljs.core/IDeref in Clojurescript and the method being
+       ;; `deref` in Clojure vs `-deref` in Clojurescript.
+       (reify ~(if (nil? (:ns &env))
+                 'clojure.lang.IDeref
+                 'cljs.core/IDeref)
+         ;; This is a macro, so it'll always be Clojure, so we can't just use
+         ;; a reader conditional, so we check `(:ns &env)`, which will be
+         ;; `nil` if evaluating the macro in Clojure.
+         (~(if (nil? (:ns &env))
+             'deref
+             '-deref)
+          [_#]
+          (reduce
+            (fn [vs# th#]
+              (~add-fn vs# (th#)))
+            ~initial-val
+            (deref extend-thunks#)))))
      (defn ~writer [f#]
        (when-not (fn? f#)
-         (throw "Extensions must be functions"
-                {:invalid-value f#
-                 :register-fn (quote ~writer)}))
-       (swap! atom# conj f#))))
+         (throw (ex-info
+                  "Extensions must be functions"
+                  {:invalid-value f#
+                   :register-fn (quote ~writer)})))
+       (swap! extend-thunks# conj f#))))
