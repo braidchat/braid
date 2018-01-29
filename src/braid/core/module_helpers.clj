@@ -101,31 +101,33 @@
       :or {initial-val [] add-fn 'conj}}]
   (assert (symbol? reader))
   (assert (symbol? writer))
-  `(do
-     (defonce extend-thunks# (atom []))
-     (def ~reader
-       ;; Hack around protocol being clojure.lang.IDeref in Clojure vs
-       ;; cljs.core/IDeref in Clojurescript and the method being
-       ;; `deref` in Clojure vs `-deref` in Clojurescript.
-       (reify ~(if (nil? (:ns &env))
-                 'clojure.lang.IDeref
-                 'cljs.core/IDeref)
-         ;; This is a macro, so it'll always be Clojure, so we can't just use
-         ;; a reader conditional, so we check `(:ns &env)`, which will be
-         ;; `nil` if evaluating the macro in Clojure.
-         (~(if (nil? (:ns &env))
-             'deref
-             '-deref)
-          [_#]
-          (reduce
-            (fn [vs# th#]
-              (~add-fn vs# (th#)))
-            ~initial-val
-            (deref extend-thunks#)))))
-     (defn ~writer [f#]
-       (when-not (fn? f#)
-         (throw (ex-info
-                  "Extensions must be functions"
-                  {:invalid-value f#
-                   :register-fn (quote ~writer)})))
-       (swap! extend-thunks# conj f#))))
+  ;; This is a macro, so it'll always be Clojure, so we can't just use
+  ;; a reader conditional, so we check `(:ns &env)`, which will be
+  ;; `nil` if evaluating the macro in Clojure.
+  (let [clojure? (nil? (:ns &env))]
+    `(do
+       (defonce extend-thunks# (atom []))
+       (def ~reader
+         ;; Hack around protocol being clojure.lang.IDeref in Clojure vs
+         ;; cljs.core/IDeref in Clojurescript and the method being
+         ;; `deref` in Clojure vs `-deref` in Clojurescript.
+         (reify ~(if clojure? 'clojure.lang.IDeref
+                   'cljs.core/IDeref)
+           (~(if clojure? 'deref '-deref)
+            [_#]
+            (reduce
+              (fn [vs# th#]
+                (~add-fn vs# (~(if clojure?
+                                 `deref
+                                 `(fn [x#] (x#)))
+                              th#)))
+              ~initial-val
+              (deref extend-thunks#)))))
+       (defn ~writer [f#]
+         (when-not (~(if clojure? `var? `fn?) f#)
+           (throw (ex-info
+                    (str "Extensions must be "
+                         ~(if clojure? "var" "functions"))
+                    {:invalid-value f#
+                     :register-fn (quote ~writer)})))
+         (swap! extend-thunks# conj f#)))))
