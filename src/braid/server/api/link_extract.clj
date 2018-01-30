@@ -52,11 +52,11 @@
 
 (defn extract'
   [url]
-  (let [response @(http/get url)
+  (let [response @(http/head url)
         headers (-> response :headers)
         content (when (some-> headers :content-type
                               (string/starts-with? "text/html"))
-                  (-> response :body h/parse h/as-hickory))
+                  (-> @(http/get url) :body h/parse h/as-hickory))
         u (URL. url)
         [proto host port] ((juxt (memfn getProtocol)
                                  (memfn getHost)
