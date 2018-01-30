@@ -12,7 +12,7 @@
 (defhook
   :writer register-server-message-handlers!
   :reader message-handlers
-  :initial-val {}
+  :initial-value {}
   :add-fn merge)
 
 (defn run-cofx! [cofx]

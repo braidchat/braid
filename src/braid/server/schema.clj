@@ -306,5 +306,5 @@
 (defhook
   :writer register-db-schema!
   :reader schema
-  :initial-val -initial-schema
+  :initial-value -initial-schema
   :add-fn concat)
