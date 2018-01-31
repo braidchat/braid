@@ -109,7 +109,7 @@
   By default, the values will be `conj`-ed into a vector, but this can
   be customized with the `:initial-value` and `:add-fn` arguments."
   [& {:keys [reader writer initial-value add-fn]
-      :or {initial-value [] add-fn 'conj}}]
+      :or {initial-value [] add-fn `conj}}]
   (assert (symbol? reader))
   (assert (symbol? writer))
   ;; This is a macro, so it'll always be Clojure, so we can't just use
