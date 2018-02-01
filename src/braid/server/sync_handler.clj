@@ -4,7 +4,6 @@
     [schema.core :as s]
     [taoensso.sente :as sente]
     [taoensso.timbre :as timbre :refer [debugf]]
-    [braid.core.api :as api]
     [braid.core.module-helpers :refer [defhook]]
     [braid.server.db :as db]
     [braid.server.socket :as socket]))

@@ -7,7 +7,6 @@
     [schema.core :as s]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
-    [braid.core.api :as api]
     [braid.core.module-helpers :refer [defhook]]
     [braid.common.schema :refer [new-message-valid? upload-valid?]]
     [braid.common.util :as util :refer [valid-nickname? valid-tag-name?]]
