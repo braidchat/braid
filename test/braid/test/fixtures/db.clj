@@ -3,7 +3,6 @@
     [mount.core :as mount]
     [braid.server.db :as db]
     [braid.server.conf :as conf]
-    [braid.server.schema]
     [braid.core.modules :as modules]))
 
 (defn drop-db [t]
