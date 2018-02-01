@@ -23,6 +23,10 @@
     (require (symbol (namespace v)))
     ((helpers/get! provides k) (resolve! v))))
 
+;; This is a macro so that we can make the modules be read in at
+;; compile time, so that when generating an uberjar, the module
+;; information is fetched at uberjar-ing time, since we won't be able
+;; to access the module.edn files in the source tree at runtime
 (defmacro load-modules!
   []
   `(let [modules# (quote ~(doall (helpers/read-all-modules)))]
