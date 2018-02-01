@@ -7,11 +7,9 @@
     [taoensso.timbre :as timbre]
     [braid.server.email-digest :refer [email-jobs]] ; for mount
     [braid.server.sync-handler] ; for mount
-    [braid.core.modules]; for pulling in transitive deps
+    [braid.core.modules :as modules]
     [braid.server.sync] ; for multimethods
-    [braid.server.handler :refer [mobile-client-app
-                                  desktop-client-app
-                                  api-server-app]]))
+    [braid.server.handler :refer [mobile-client-app desktop-client-app api-server-app]]))
 
 ;; server
 
@@ -70,6 +68,7 @@
 (defn dev-main
   "Start things up, but don't start the email server or nrepl"
   [port]
+  (modules/init!)
   (->
     (mount/except #{#'email-jobs #'nrepl})
     (mount/with-args {:port port})
@@ -78,5 +77,6 @@
 (defn -main  [& args]
   (let [port (Integer/parseInt (first args))
         repl-port (Integer/parseInt (second args))]
+    (modules/init!)
     (mount/start-with-args {:port port
                             :repl-port repl-port})))

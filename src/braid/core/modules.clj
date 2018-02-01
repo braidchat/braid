@@ -23,9 +23,11 @@
     (require (symbol (namespace v)))
     ((helpers/get! provides k) (resolve! v))))
 
-(defn load-modules!
+(defmacro load-modules!
   []
-  (let [modules (helpers/read-all-modules)]
-    (apply-extends (build-provides modules) modules)))
+  `(let [modules# (quote ~(doall (helpers/read-all-modules)))]
+    (apply-extends (build-provides modules#) modules#)))
 
-(load-modules!)
+(defn init!
+  []
+  (load-modules!))

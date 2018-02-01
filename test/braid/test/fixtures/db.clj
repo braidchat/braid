@@ -4,9 +4,10 @@
     [braid.server.db :as db]
     [braid.server.conf :as conf]
     [braid.server.schema]
-    [braid.core.modules]))
+    [braid.core.modules :as modules]))
 
 (defn drop-db [t]
+  (modules/init!)
   (-> (mount/only #{#'conf/config #'db/conn})
       (mount/swap {#'conf/config
                    {:db-url "datomic:mem://chat-test"}})
