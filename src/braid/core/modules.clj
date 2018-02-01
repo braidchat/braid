@@ -28,6 +28,10 @@
   `(let [modules# (quote ~(doall (helpers/read-all-modules)))]
     (apply-extends (build-provides modules#) modules#)))
 
+(defonce inited? (atom false))
+
 (defn init!
   []
-  (load-modules!))
+  (when-not @inited?
+    (reset! inited? true)
+    (load-modules!)))
