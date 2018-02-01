@@ -109,15 +109,16 @@
   By default, the values will be `conj`-ed into a vector, but this can
   be customized with the `:initial-value` and `:add-fn` arguments."
   [& {:keys [reader writer initial-value add-fn]
-      :or {initial-value [] add-fn 'conj}}]
+      :or {initial-value [] add-fn `conj}}]
   (assert (symbol? reader))
   (assert (symbol? writer))
   ;; This is a macro, so it'll always be Clojure, so we can't just use
   ;; a reader conditional, so we check `(:ns &env)`, which will be
   ;; `nil` if evaluating the macro in Clojure.
-  (let [clojure? (nil? (:ns &env))]
+  (let [clojure? (nil? (:ns &env))
+        extend-thunks (symbol (str reader "-atom"))]
     `(do
-       (defonce extend-thunks# (atom []))
+       (defonce ~extend-thunks (atom []))
        (def ~reader
          ;; Hack around protocol being clojure.lang.IDeref in Clojure vs
          ;; cljs.core/IDeref in Clojurescript and the method being
@@ -137,7 +138,7 @@
                                  `(fn [x#] (x#)))
                               th#)))
               ~initial-value
-              (deref extend-thunks#)))))
+              (deref ~extend-thunks)))))
        (defn ~writer [f#]
          (when-not (~(if clojure? `var? `fn?) f#)
            (throw (ex-info
@@ -145,4 +146,4 @@
                          ~(if clojure? "var" "functions"))
                     {:invalid-value f#
                      :register-fn (quote ~writer)})))
-         (swap! extend-thunks# conj f#)))))
+         (swap! ~extend-thunks conj f#)))))
