@@ -21,19 +21,14 @@
    (let [[state spec] (f)]
      (register-state! state spec)))
   ([state spec]
-   (api/dispatch [::register-state! state spec])))
+   ;; Dispatch sync because we want the module setup calls
+   ;; to finish before initializing the db
+   (api/dispatch-sync [::register-state! state spec])))
 
 (api/reg-sub :braid.state/valid?
   (fn [db _]
     (let [validator (s/validator (db ::state-spec))]
       (validator db))))
-
-(defn init! []
-  (register-state!
-    {::initial-state {}
-     ::state-spec {}}
-    {::initial-state s/Any
-     ::state-spec {s/Keyword s/Any}}))
 
 (defn ^:export validate []
   @(api/subscribe [:braid.state/valid?]))

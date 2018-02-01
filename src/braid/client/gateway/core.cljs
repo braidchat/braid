@@ -4,7 +4,8 @@
     [re-frame.core :refer [dispatch-sync]]
     [braid.client.gateway.events]
     [braid.client.gateway.subs]
-    [braid.client.gateway.views :refer [gateway-view]]))
+    [braid.client.gateway.views :refer [gateway-view]]
+    [braid.core.modules :as modules]))
 
 (enable-console-print!)
 
@@ -12,6 +13,7 @@
   (r/render [gateway-view] (. js/document (getElementById "app"))))
 
 (defn ^:export init []
+  (modules/init!)
   (dispatch-sync [:braid.client.gateway.events/initialize (keyword (aget js/window "gateway_action"))])
   (render))
 

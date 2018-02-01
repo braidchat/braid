@@ -92,7 +92,7 @@
 
                {:id "mobile-dev"
                 :figwheel {:on-jsload "braid.client.mobile.core/reload"}
-                :source-paths ["src/braid/client"
+                :source-paths ["src/braid"
                                "src/retouch"]
                 :compiler {:main braid.client.mobile.core
                            :asset-path "/js/dev/mobile/"
@@ -102,7 +102,7 @@
 
                {:id "gateway-dev"
                 :figwheel {:on-jsload "braid.client.gateway.core/reload"}
-                :source-paths ["src/braid/client"]
+                :source-paths ["src/braid"]
                 :compiler {:main braid.client.gateway.core
                            :asset-path "/js/dev/gateway/"
                            :output-to "resources/public/js/dev/gateway.js"
@@ -110,8 +110,7 @@
                            :verbose true}}
 
                {:id "release"
-                :source-paths ["src/braid/client"
-                               "src/braid/common"
+                :source-paths ["src/braid"
                                "src/retouch"]
                 :compiler {:asset-path "/js/prod/"
                            :output-dir "resources/public/js/prod/out"

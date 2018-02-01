@@ -57,4 +57,5 @@
   {:register-autocomplete-engines
    [braid.client.ui.views.autocomplete/bot-autocomplete-engine
     braid.client.ui.views.autocomplete/user-autocomplete-engine
-    braid.client.ui.views.autocomplete/tag-autocomplete-engine]}}}
+    braid.client.ui.views.autocomplete/tag-autocomplete-engine]
+   :register-state braid.client.store/state}}}

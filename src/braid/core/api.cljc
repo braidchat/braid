@@ -3,6 +3,7 @@
     [re-frame.core :as re-frame]))
 
 (def dispatch re-frame/dispatch)
+(def dispatch-sync re-frame/dispatch-sync)
 (def subscribe re-frame/subscribe)
 
 (defn reg-event-fx [key handler]
