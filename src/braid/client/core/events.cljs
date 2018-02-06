@@ -4,7 +4,7 @@
   (:require
     [clojure.set :as set]
     [clojure.string :as string]
-    [re-frame.core :refer [dispatch reg-event-fx reg-event-db reg-fx]]
+    [re-frame.core :as re-frame :refer [dispatch reg-event-fx reg-event-db reg-fx]]
     [schema.core :as s]
     [braid.client.router :as router]
     [braid.client.routes :as routes]
@@ -12,8 +12,16 @@
     [braid.client.state.helpers :as helpers :refer [key-by-id]]
     [braid.client.sync :as sync]
     [braid.client.xhr :refer [edn-xhr]]
-    [braid.common.util :as util]
-    [braid.core.api :as api]))
+    [braid.common.util :as util]))
+
+(defhook
+  :writer register-event-listener!
+  :reader event-listeners)
+
+(re-frame/add-post-event-callback
+  (fn [event _]
+    (doseq [handler @event-listeners]
+      (handler event))))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))

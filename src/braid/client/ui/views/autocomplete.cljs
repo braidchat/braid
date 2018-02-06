@@ -4,7 +4,6 @@
     [clj-fuzzy.metrics :as fuzzy]
     [goog.string :as gstring]
     [re-frame.core :refer [subscribe dispatch]]
-    [braid.core.api :as api]
     [braid.client.schema :as schema]
     [braid.client.helpers :refer [id->color debounce]])
   (:import

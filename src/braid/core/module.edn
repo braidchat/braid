@@ -33,7 +33,7 @@
     :doc "Add a handler that will run with the initial db & user-info recieved from the server. See `:register-initial-user-data` under `:clj`"}
 
    :register-event-listener
-   {:fn braid.core.api/register-event-listener!
+   {:fn braid.client.core.events/register-event-listener!
     :doc "Register a function to intercept re-frame events."}
 
    :register-state

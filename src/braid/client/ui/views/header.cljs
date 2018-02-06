@@ -6,7 +6,6 @@
    [reagent.ratom :refer-macros [reaction]]
    [re-frame.core :refer [subscribe]]
    [schema.core :as s]
-   [braid.core.api :as api]
    [braid.client.helpers :refer [->color]]
    [braid.client.routes :as routes]
    [braid.client.ui.views.search-bar :refer [search-bar-view]]))

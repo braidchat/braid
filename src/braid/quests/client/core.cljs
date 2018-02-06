@@ -1,6 +1,6 @@
 (ns braid.quests.client.core
   (:require
-    [braid.core.api :as api]
+    [re-frame.core :as re-frame]
     [braid.quests.client.events]
     [braid.quests.client.subs]
     [braid.quests.client.helpers :as helpers]
@@ -12,10 +12,9 @@
   (helpers/set-quest-records db (data :quest-records)))
 
 (def event-listener
-  [:quests
-   (fn [event]
-     (when (not= "quests" (namespace (first event)))
-       (api/dispatch [:quests/update-handler event])))])
+  (fn [event]
+    (when (not= "quests" (namespace (first event)))
+      (re-frame/dispatch [:quests/update-handler event]))))
 
 (def state
   [{::quest-records {}}

@@ -4,7 +4,6 @@
   (:require
    [garden.core :refer [css]]
    [schema.core :as s]
-   [braid.core.api :as api]
    [braid.client.ui.styles.animations]
    [braid.client.ui.styles.embed]
    [braid.client.ui.styles.body]

@@ -8,7 +8,6 @@
     [reagent.ratom :refer-macros [run!]]
     [re-frame.core :refer [dispatch subscribe]]
     [schema.core :as s]
-    [braid.core.api :as api]
     [braid.client.helpers :refer [debounce stop-event!]]
     [braid.client.s3 :as s3]
     [braid.client.store :as store])
