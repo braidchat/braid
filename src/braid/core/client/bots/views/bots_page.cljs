@@ -118,7 +118,7 @@
         admin? (subscribe [:current-user-is-group-admin?] [group-id])
         dragging? (r/atom false)
         error (r/atom nil)
-        new-bot (r/atom nil)
+        new-bot (r/atom {})
         state (r/atom :initial)
         bot-valid? (reaction (and
                                (and (string? (@new-bot :name))
