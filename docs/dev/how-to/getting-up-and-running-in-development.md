@@ -83,8 +83,8 @@ This will start the desktop client server on 5555, the mobile client server on 5
 5. Seed some data (first time only):
 
   ```clojure
-  (require 'braid.server.seed)
-  (braid.server.seed/seed!)
+  (require 'braid.core.server.seed)
+  (braid.core.server.seed/seed!)
   ```
 
 Don't navigate to the website just yet.

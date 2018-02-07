@@ -1,11 +1,11 @@
 (ns braid.test.server.tags
   (:require
-    [clojure.test :refer :all]
-    [braid.server.db :as db]
-    [braid.server.db.group :as group]
-    [braid.server.db.tag :as tag]
-    [braid.server.db.user :as user]
-    [braid.test.fixtures.db :refer [drop-db]]))
+   [clojure.test :refer :all]
+   [braid.core.server.db :as db]
+   [braid.core.server.db.group :as group]
+   [braid.core.server.db.tag :as tag]
+   [braid.core.server.db.user :as user]
+   [braid.test.fixtures.db :refer [drop-db]]))
 
 (use-fixtures :each drop-db)
 
@@ -31,8 +31,7 @@
                (assoc tag-data
                  :description "Some tag with stuff"
                  :threads-count 0
-                 :subscribers-count 0)))
-        ))))
+                 :subscribers-count 0)))))))
 
 (deftest user-can-subscribe-to-tags
   (let [[user group] (db/run-txns!

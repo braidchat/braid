@@ -21,7 +21,7 @@
 #
 # 3. Move the gif to /resource/public/images/quests/
 #
-# 4. Add the image path to `braid.client.quests.list`
+# 4. Add the image path to `braid.quests.list`
 #
 # For Linux, consider using byzanz: http://linux.die.net/man/1/byzanz-record
 #

@@ -1,8 +1,8 @@
 (ns braid.test.client.ui.views.message-test
   "Unit tests for functions defined by the
-  braid.client.ui.views.message namespace"
+  braid.core.client.ui.views.message namespace"
   (:require
-   [braid.client.ui.views.message :as message]
+   [braid.core.client.ui.views.message :as message]
    [cljs.test :refer-macros [deftest is testing]]))
 
 (deftest test-abridged-url

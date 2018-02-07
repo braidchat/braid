@@ -2,13 +2,13 @@
   (:require
     [clojure.test :refer :all]
     [schema.core :as s]
-    [braid.common.schema :refer [rules-valid? check-rules!]]
-    [braid.server.db :as db]
-    [braid.server.db.group :as group]
-    [braid.server.db.message :as message]
-    [braid.server.db.tag :as tag]
-    [braid.server.db.user :as user]
-    [braid.server.notify-rules :as rules]
+    [braid.core.common.schema :refer [rules-valid? check-rules!]]
+    [braid.core.server.db :as db]
+    [braid.core.server.db.group :as group]
+    [braid.core.server.db.message :as message]
+    [braid.core.server.db.tag :as tag]
+    [braid.core.server.db.user :as user]
+    [braid.core.server.notify-rules :as rules]
     [braid.test.fixtures.db :refer [drop-db]]))
 
 (s/set-fn-validation! true)

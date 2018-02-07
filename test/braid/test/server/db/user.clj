@@ -2,9 +2,9 @@
   (:require
     [clojure.string :as string]
     [clojure.test :refer :all]
-    [braid.server.db :as db]
-    [braid.server.db.user :as user]
-    [braid.server.db.group :as group]
+    [braid.core.server.db :as db]
+    [braid.core.server.db.user :as user]
+    [braid.core.server.db.group :as group]
     [braid.test.fixtures.db :refer [drop-db]]))
 
 (use-fixtures :each drop-db)
@@ -89,12 +89,12 @@
                                            :email (str nickname "@bar.com")}))
       (let [[user-2] (db/run-txns! (user/create-user-txn {:id (db/uuid)
                                                           :email (str nickname "@quux.com")}))]
-        (is (re-matches (re-pattern (str "^" nickname ".+")) (:nickname user-2) )))))
+        (is (re-matches (re-pattern (str "^" nickname ".+")) (:nickname user-2))))))
 
   (testing "avatar is set to be a gravatar"
     (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
                                                       :email "zxc@example.com"}))]
-      (is (string/includes? (:avatar user) "gravatar")))) )
+      (is (string/includes? (:avatar user) "gravatar")))))
 
 (deftest email-taken?
   (let [data {:id (db/uuid)
@@ -113,14 +113,14 @@
     (testing "can set nickname"
       (let [email "foo@bar.com"
             [user-1] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                        :email "foo@bar.com"}))]
+                                                          :email "foo@bar.com"}))]
         (db/run-txns! (user/set-nickname-txn (user-1 :id) nickname))
         (is (= nickname
                (:nickname (user/user-with-email email))))))
 
     (testing "fails when not unique"
       (let [[user-2] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                        :email "baz@bas.com"}))]
+                                                          :email "baz@bas.com"}))]
         (is (thrown? java.util.concurrent.ExecutionException
                      @(db/run-txns! (user/set-nickname-txn (user-2 :id) nickname))))))
 
@@ -129,7 +129,7 @@
             safe-nickname "a-a"
             email "asdf@bas.com"
             [user-3] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                        :email email}))]
+                                                          :email email}))]
         (db/run-txns! (user/set-nickname-txn (user-3 :id) raw-nickname))
         (is (= safe-nickname (:nickname (user/user-with-email email))))))))
 
@@ -175,8 +175,8 @@
         users (user/users-for-user (user-1 :id))]
     (testing "users-for-user"
       (testing "returns all users"
-      (is (= (set (map partial-user users))
-             (set (map partial-user [user-1 user-2]))))))))
+       (is (= (set (map partial-user users))
+              (set (map partial-user [user-1 user-2]))))))))
 
 (deftest only-see-users-in-group
   (let [[group-1] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "g1" :name "g1"}))
