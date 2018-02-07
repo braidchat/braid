@@ -2,9 +2,9 @@
   (:require
     [clojure.string :as string]
     [clojure.test :refer :all]
-    [braid.server.db :as db]
-    [braid.server.db.user :as user]
-    [braid.server.db.group :as group]
+    [braid.core.server.db :as db]
+    [braid.core.server.db.user :as user]
+    [braid.core.server.db.group :as group]
     [braid.test.fixtures.db :refer [drop-db]]))
 
 (use-fixtures :each drop-db)

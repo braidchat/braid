@@ -5,7 +5,7 @@
     [braid.quests.client.subs]
     [braid.quests.client.helpers :as helpers]
     [braid.quests.client.remote-handlers]
-    [braid.common.schema :refer [QuestRecordId QuestRecord]]))
+    [braid.core.common.schema :refer [QuestRecordId QuestRecord]]))
 
 (defn initial-data-handler
   [db data]

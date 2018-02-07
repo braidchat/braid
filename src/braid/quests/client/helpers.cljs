@@ -1,7 +1,7 @@
 (ns braid.quests.client.helpers
   (:require
-    [braid.quests.client.list :refer [quests]]
-    [braid.client.state.helpers :refer [key-by-id key-by]]))
+   [braid.core.client.state.helpers :refer [key-by-id key-by]]
+   [braid.quests.client.list :refer [quests]]))
 
 ; getters
 

@@ -4,58 +4,58 @@
  :provides
  {:clj
   {:register-server-message-handlers
-   {:fn braid.server.sync-handler/register-server-message-handlers!
+   {:fn braid.core.server.sync-handler/register-server-message-handlers!
     :doc "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"}
 
    :register-db-schema
-   {:fn braid.server.schema/register-db-schema!
+   {:fn braid.core.server.schema/register-db-schema!
     :doc "Add new datoms to the db schema"}
 
    :register-initial-user-data
-   {:fn braid.server.sync/register-initial-user-data!
+   {:fn braid.core.server.sync/register-initial-user-data!
     :doc "Add a map of key -> fn for getting the initial user data to be sent to the client. `fn` will recieve the user-id as its argument. See `:register-initial-user-data-handler` under `:cljs`"}
 
    :register-post-create-user-txn
-   {:fn braid.server.db.user/register-post-create-user-txn!
+   {:fn braid.core.server.db.user/register-post-create-user-txn!
     :doc "Add a function that will return a sequence of datomic txns to be called when a new user is created. The function will recieve the datomic id of the new user as an argument."}}
 
   :cljs
   {:register-header-view
-   {:fn braid.client.ui.views.header/register-header-view!
+   {:fn braid.core.client.ui.views.header/register-header-view!
     :doc "Add a new view to appear in the header row at the top"}
 
    :register-styles
-   {:fn braid.client.ui.views.styles/register-styles!
+   {:fn braid.core.client.ui.views.styles/register-styles!
     :doc "Add Garden CSS styles to the page styles"}
 
    :register-initial-user-data-handler
-   {:fn braid.client.core.events/register-initial-user-data-handler!
+   {:fn braid.core.client.core.events/register-initial-user-data-handler!
     :doc "Add a handler that will run with the initial db & user-info recieved from the server. See `:register-initial-user-data` under `:clj`"}
 
    :register-event-listener
-   {:fn braid.client.core.events/register-event-listener!
+   {:fn braid.core.client.core.events/register-event-listener!
     :doc "Register a function to intercept re-frame events."}
 
    :register-state
-   {:fn braid.state.core/register-state!
+   {:fn braid.core.state.core/register-state!
     :doc "Add a key and initial value to the default app state, plus an associated spec."}
 
    :register-autocomplete-engines
-   {:fn braid.client.ui.views.new-message/register-autocomplete-engines!
+   {:fn braid.core.client.ui.views.new-message/register-autocomplete-engines!
     :doc "Provide a sequence of functions that will act as autocomplete Handlers. The functions will recieve the current typed text as an argument and should return a sequence of autocomplete values."}
 
    :register-message-transforms
-   {:fn braid.client.ui.views.message/register-stateless-formatters!
+   {:fn braid.core.client.ui.views.message/register-stateless-formatters!
     :doc "Register new stateless transformers to message bodies. The functions should expect to recieve either some text or hiccup nodes and should return the same."}
 
    :register-message-formatters
-   {:fn braid.client.ui.views.message/register-post-transformers!
+   {:fn braid.core.client.ui.views.message/register-post-transformers!
     :doc "Register new post-transform message formatters. The function will recieve the hiccup representing the message and should return the same."}}}
 
  :extends
  {:cljs
   {:register-autocomplete-engines
-   [braid.client.ui.views.autocomplete/bot-autocomplete-engine
-    braid.client.ui.views.autocomplete/user-autocomplete-engine
-    braid.client.ui.views.autocomplete/tag-autocomplete-engine]
-   :register-state braid.client.store/state}}}
+   [braid.core.client.ui.views.autocomplete/bot-autocomplete-engine
+    braid.core.client.ui.views.autocomplete/user-autocomplete-engine
+    braid.core.client.ui.views.autocomplete/tag-autocomplete-engine]
+   :register-state braid.core.client.store/state}}}

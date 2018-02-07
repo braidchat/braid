@@ -55,7 +55,7 @@
                  ;mobile
                  [garden "1.3.2"]]
 
-  :main braid.server.core
+  :main braid.core.server.core
 
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.6" :exclusions [org.clojure/clojure]]
@@ -72,18 +72,17 @@
                               "auto" ["lein" "doo" "phantom" "desktop-test" "auto"]}
               :builds
               [{:id "desktop-dev"
-                :figwheel {:on-jsload "braid.client.desktop.core/reload"}
+                :figwheel {:on-jsload "braid.core.client.desktop.core/reload"}
                 :source-paths ["src/braid"
                                "src/retouch"]
-                :compiler {:main braid.client.desktop.core
+                :compiler {:main braid.core.client.desktop.core
                            :asset-path "/js/dev/desktop/"
                            :output-to "resources/public/js/dev/desktop.js"
                            :output-dir "resources/public/js/dev/desktop/"
                            :verbose true}}
 
                {:id "desktop-test"
-                :source-paths ["src/braid/client"
-                               "src/braid/common"
+                :source-paths ["src/braid"
                                "test/braid/test/client"]
                 :compiler {:main braid.test.client.runners.doo
                            :optimizations :none
@@ -91,19 +90,19 @@
                            :output-dir "resources/public/js/desktop/tests/out"}}
 
                {:id "mobile-dev"
-                :figwheel {:on-jsload "braid.client.mobile.core/reload"}
+                :figwheel {:on-jsload "braid.core.client.mobile.core/reload"}
                 :source-paths ["src/braid"
                                "src/retouch"]
-                :compiler {:main braid.client.mobile.core
+                :compiler {:main braid.core.client.mobile.core
                            :asset-path "/js/dev/mobile/"
                            :output-to "resources/public/js/dev/mobile.js"
                            :output-dir "resources/public/js/dev/mobile/"
                            :verbose true}}
 
                {:id "gateway-dev"
-                :figwheel {:on-jsload "braid.client.gateway.core/reload"}
+                :figwheel {:on-jsload "braid.core.client.gateway.core/reload"}
                 :source-paths ["src/braid"]
-                :compiler {:main braid.client.gateway.core
+                :compiler {:main braid.core.client.gateway.core
                            :asset-path "/js/dev/gateway/"
                            :output-to "resources/public/js/dev/gateway.js"
                            :output-dir "resources/public/js/dev/gateway"
@@ -120,13 +119,13 @@
                                      {:output-to "resources/public/js/prod/base.js"}
                                      :desktop
                                      {:output-to "resources/public/js/prod/desktop.js"
-                                      :entries #{"braid.client.desktop.core"}}
+                                      :entries #{"braid.core.client.desktop.core"}}
                                      :gateway
                                      {:output-to "resources/public/js/prod/gateway.js"
-                                      :entries #{"braid.client.gateway.core"}}
+                                      :entries #{"braid.core.client.gateway.core"}}
                                      :mobile
                                      {:output-to "resources/public/js/prod/mobile.js"
-                                      :entries #{"braid.client.mobile.core"}}}
+                                      :entries #{"braid.core.client.mobile.core"}}}
                            :verbose true}}]}
 
   :min-lein-version "2.5.0"

@@ -2,7 +2,7 @@
   (:require
     [clojure.string :as string]
     [clojure.test :refer :all]
-    [braid.server.markdown :refer [markdown->hiccup]]))
+    [braid.core.server.markdown :refer [markdown->hiccup]]))
 
 (deftest basic-changelog-markdown
   (testing "Simple markdown parsing"

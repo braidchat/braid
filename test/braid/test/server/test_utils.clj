@@ -1,7 +1,7 @@
 (ns braid.test.server.test-utils
   (:require
     [datomic.api :as d]
-    [braid.server.db :as db]))
+    [braid.core.server.db :as db]))
 
 (defn- db->message
   [e]

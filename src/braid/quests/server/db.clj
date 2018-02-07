@@ -1,7 +1,7 @@
 (ns braid.quests.server.db
   (:require
-    [datomic.api :as d]
-    [braid.server.db :as db]))
+   [braid.core.server.db :as db]
+   [datomic.api :as d]))
 
 ; Pull Patterns
 

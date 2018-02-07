@@ -1,12 +1,12 @@
 (ns braid.test.server.search
   (:require
     [clojure.test :refer :all]
-    [braid.server.db :as db]
-    [braid.server.db.group :as group]
-    [braid.server.db.message :as message]
-    [braid.server.db.tag :as tag]
-    [braid.server.db.user :as user]
-    [braid.server.search :as search]
+    [braid.core.server.db :as db]
+    [braid.core.server.db.group :as group]
+    [braid.core.server.db.message :as message]
+    [braid.core.server.db.tag :as tag]
+    [braid.core.server.db.user :as user]
+    [braid.core.server.search :as search]
     [braid.test.fixtures.db :refer [drop-db]]))
 
 (use-fixtures :each drop-db)

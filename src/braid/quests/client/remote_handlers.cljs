@@ -1,7 +1,7 @@
 (ns braid.quests.client.remote-handlers
   (:require
-    [re-frame.core :refer [dispatch]]
-    [braid.client.sync :as sync]))
+   [braid.core.client.sync :as sync]
+   [re-frame.core :refer [dispatch]]))
 
 (defmethod sync/event-handler :braid.quests/upsert-quest-record
   [[_ quest-record]]

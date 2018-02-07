@@ -123,8 +123,7 @@
          ;; Hack around protocol being clojure.lang.IDeref in Clojure vs
          ;; cljs.core/IDeref in Clojurescript and the method being
          ;; `deref` in Clojure vs `-deref` in Clojurescript.
-         (reify ~(if clojure? 'clojure.lang.IDeref
-                   'cljs.core/IDeref)
+         (reify ~(if clojure? 'clojure.lang.IDeref 'cljs.core/IDeref)
            (~(if clojure? 'deref '-deref)
             [_#]
             (reduce

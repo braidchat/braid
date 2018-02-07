@@ -1,11 +1,11 @@
 (ns braid.quests.client.styles
   (:require
-    [garden.arithmetic :as m]
-    [garden.stylesheet :refer [at-keyframes]]
-    [garden.units :refer [em px rem]]
-    [braid.client.ui.styles.mixins :as mixins]
-    [braid.client.ui.styles.vars :as vars]
-    [braid.client.ui.styles.header :refer [header-text header-height]]))
+   [braid.core.client.ui.styles.header :refer [header-text header-height]]
+   [braid.core.client.ui.styles.mixins :as mixins]
+   [braid.core.client.ui.styles.vars :as vars]
+   [garden.arithmetic :as m]
+   [garden.stylesheet :refer [at-keyframes]]
+   [garden.units :refer [em px rem]]))
 
 (def quest-icon-size (rem 2.5))
 
