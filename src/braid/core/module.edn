@@ -37,7 +37,7 @@
     :doc "Register a function to intercept re-frame events."}
 
    :register-state
-   {:fn braid.core.state.core/register-state!
+   {:fn braid.core.client.state/register-state!
     :doc "Add a key and initial value to the default app state, plus an associated spec."}
 
    :register-autocomplete-engines

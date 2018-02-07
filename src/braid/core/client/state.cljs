@@ -1,7 +1,7 @@
-(ns braid.core.state.core
+(ns braid.core.client.state
   (:require
-    [schema.core :as s]
-    [re-frame.core :as api]))
+   [re-frame.core :as api]
+   [schema.core :as s]))
 
 (defn initialize-state
   [db]

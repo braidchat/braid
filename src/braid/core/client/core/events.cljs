@@ -106,7 +106,7 @@
 (reg-event-fx
   :initialize-db
   (fn [{db :db} _]
-    {:db (braid.core.state.core/initialize-state db)
+    {:db (braid.core.client.state/initialize-state db)
      :dispatch [:braid.core.client.gateway.events/initialize :log-in]}))
 
 (reg-event-db
