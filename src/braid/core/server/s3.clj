@@ -24,7 +24,8 @@
         secret-key (SecretKeySpec. (.getBytes key "UTF-8") (.getAlgorithm mac))]
     (-> (doto mac (.init secret-key))
         (.doFinal (.getBytes to-sign "UTF-8"))
-        Base64/encodeBase64)))
+        Base64/encodeBase64
+        String.)))
 
 (defn generate-policy
   []
