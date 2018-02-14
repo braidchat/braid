@@ -13,7 +13,7 @@
     {:method :get
      :uri "/s3-policy"
      :on-error (fn [err]
-                 (errorf "Error getting s3 authorization: %s" (:error err)))
+                 (errorf "Error getting s3 authorization: %s" err))
      :on-complete
      (fn [{:keys [bucket auth]}]
        (let [file-name (.-name file)
