@@ -5,6 +5,7 @@
    [braid.core.client.router :as router]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
+   [braid.core.client.state]
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
    [braid.core.client.sync :as sync]
    [braid.core.client.xhr :refer [edn-xhr]]
