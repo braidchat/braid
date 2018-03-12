@@ -112,7 +112,7 @@
     :route-fn routes/page-path
     :route-args {:page-id "me"}
     :body "Edit Your Profile"}
-   {:class "changelog"
+   #_{:class "changelog"
     :route-fn routes/page-path
     :route-args {:page-id "changelog"}
     :body "See Changelog"}])
