@@ -3,7 +3,11 @@
 
  :provides
  {:clj
-  {:register-server-message-handlers
+  {:register-config-var
+   {:fn braid.core.server.conf/register-config-var!
+    :doc "Add a keyword to be read from `env` and added to the `config` state"}
+
+   :register-server-message-handlers
    {:fn braid.core.server.sync-handler/register-server-message-handlers!
     :doc "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"}
 
