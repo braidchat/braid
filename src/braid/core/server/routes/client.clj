@@ -2,6 +2,7 @@
   (:require
    [braid.core.server.api.github :as github]
    [braid.core.server.conf :refer [config]]
+   [braid.core.module-helpers :refer [defhook]]
    [braid.core.server.db.group :as group]
    [braid.core.server.db.invitation :as invitation]
    [braid.core.server.db.user :as user]
@@ -16,6 +17,10 @@
 
 (def prod-js? (= (env :environment) "prod"))
 
+(defhook
+  :writer register-additional-script!
+  :reader additional-scripts)
+
 (defn get-html [client vars]
   (clostache/render-resource
     (str "public/" client ".html")
@@ -27,7 +32,14 @@
                   (str (digest/from-file (str "public/js/dev/" client ".js"))))
             :basejs (when prod-js?
                       (str (digest/from-file (str "public/js/prod/base.js"))))
-            :api_domain (config :api-domain)}
+            :api_domain (config :api-domain)
+            :extra_scripts
+            (->> @additional-scripts
+                (map (fn [s] (if (fn? s) (s) s)))
+                (map (fn [s]
+                       {:script (if-let [src (:src s)]
+                                  (str "<script src=\"" src "\"></script>")
+                                  (str "<script>\n" (s :body) "\n</script>"))})))}
            vars)))
 
 (defroutes desktop-client-routes

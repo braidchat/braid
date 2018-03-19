@@ -7,6 +7,10 @@
    {:fn braid.core.server.conf/register-config-var!
     :doc "Add a keyword to be read from `env` and added to the `config` state"}
 
+   :register-additional-script
+   {:fn braid.core.server.routes.client/register-additional-script!
+    :doc "Add a javascript script tag to client html. Values can be a map with a `:src` or `:body` key or a function with no arguments, returing the same."}
+
    :register-server-message-handlers
    {:fn braid.core.server.sync-handler/register-server-message-handlers!
     :doc "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"}
