@@ -3,6 +3,7 @@
    [braid.core.module-helpers :refer [defhook]]
    [braid.core.server.db :as db]
    [braid.core.server.socket :as socket]
+   [braid.core.server.sync-helpers :as helpers]
    [mount.core :refer [defstate]]
    [schema.core :as s]
    [taoensso.sente :as sente]
@@ -14,11 +15,16 @@
   :initial-value {}
   :add-fn merge)
 
-(defn run-cofx! [cofx]
+(defn run-cofx! [ev-msg cofx]
   (when-let [args (cofx :chsk-send!)]
     (apply socket/chsk-send! args))
   (when-let [txns (cofx :db-run-txns!)]
-    (db/run-txns! txns)))
+    (db/run-txns! txns))
+  (when-let [[group info] (cofx :group-broadcast!)]
+    (helpers/broadcast-group-change group info))
+  (when-let [info (cofx :reply!)]
+    (when-let [reply-fn (:?reply-fn ev-msg)]
+      (reply-fn info))))
 
 (defmulti event-msg-handler :id)
 
@@ -28,7 +34,7 @@
 
     (when-let [user-id (get-in ev-msg [:ring-req :session :user-id])]
       (if-let [dynamic-msg-handler (get @message-handlers id)]
-        (run-cofx! (dynamic-msg-handler (assoc ev-msg :user-id user-id)))
+        (run-cofx! ev-msg (dynamic-msg-handler (assoc ev-msg :user-id user-id)))
         (event-msg-handler (assoc ev-msg :user-id user-id))))))
 
 (defmethod event-msg-handler :default
