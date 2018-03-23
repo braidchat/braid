@@ -4,7 +4,6 @@
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
    [garden.arithmetic :as m]
-   [garden.stylesheet :refer [at-keyframes]]
    [garden.units :refer [em px rem]]))
 
 (def quest-icon-size (rem 2.5))
@@ -19,7 +18,7 @@
 
    [:.quests-icon
     (header-text header-height)
-    {:padding 0
+    {:padding [[0 "1em"]]
      :color "#CCC"}
 
     [:&::before
@@ -33,7 +32,7 @@
     (mixins/context-menu)
     {:position "absolute"
      :top header-height
-     :right (rem -0.5)
+     :right 0
      :z-index 150
      :display "none"}
 

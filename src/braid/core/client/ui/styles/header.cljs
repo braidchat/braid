@@ -176,8 +176,7 @@
    [:>.admin-icon
     (header-text size)
     {:padding [[0 (em 1)]]
-     :color "#CCC"
-     :margin-left (em 1)}
+     :color "#CCC"}
 
     [:&::before
      (mixins/fontawesome \uf0e3)]]
