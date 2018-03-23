@@ -60,12 +60,13 @@
   (some? (d/entity (db/db) [:user/id id])))
 
 (defn user-with-email
-  "get the user with the given email address or nil if no such user registered"
+  "Get the user with the given email address or nil if no such user registered"
   [email]
   (some-> (d/pull (db/db) user-pull-pattern [:user/email (string/lower-case email)])
           db->user))
 
 (defn user-email
+  "Get the email address for the user with the given id"
   [user-id]
   (:user/email (d/pull (db/db) [:user/email] [:user/id user-id])))
 
