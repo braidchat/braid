@@ -45,6 +45,11 @@
     (when ?reply-fn
       (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
 
+(defmethod event-msg-handler :braid.client/ping
+  [{:as ev-msg :keys [?reply-fn]}]
+  (when-let [reply ?reply-fn]
+    (reply [:braid.server/pong])))
+
 (defstate router
   :start (sente/start-chsk-router! socket/ch-chsk event-msg-handler*)
   :stop (router))
