@@ -82,8 +82,11 @@
         [:braid.client/ping]
         5000
         (fn [reply]
-          (when-not (sente/cb-success? reply)
-            (dispatch [:core/websocket-disconnected])))))))
+          (if-not (sente/cb-success? reply)
+            (let [reconnect-time (+ 10000 (.valueOf (js/Date.)))]
+              (dispatch [:core/websocket-disconnected])
+              (dispatch [:core/websocket-update-next-reconnect reconnect-time]))
+            (dispatch [:core/websocket-connected])))))))
 
 (defn stop-router! [] (when-let [stop-f @router_] (stop-f)))
 
