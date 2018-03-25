@@ -30,7 +30,7 @@
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
   (when-not (= event [:chsk/ws-ping])
-    (when (not= event :braid.client/ping)
+    (when-not (= event [:braid.client/ping])
       (debugf "User: %s Event: %s" (get-in ev-msg [:ring-req :session :user-id]) event))
 
     (when-let [user-id (get-in ev-msg [:ring-req :session :user-id])]
