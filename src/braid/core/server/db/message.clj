@@ -8,6 +8,37 @@
 
 ;; Queries
 
+(defn message-group
+  [message-id]
+  (d/q '[:find ?group-id .
+         :in $ ?msg-id
+         :where
+         [?m :message/id ?msg-id]
+         [?m :message/thread ?t]
+         [?t :thread/group ?g]
+         [?g :group/id ?group-id]]
+       (db/db) message-id))
+
+(defn message-thread
+  [message-id]
+  (d/q '[:find ?thread-id .
+         :in $ ?msg-id
+         :where
+         [?m :message/id ?msg-id]
+         [?m :message/thread ?t]
+         [?t :thread/id ?thread-id]]
+       (db/db) message-id))
+
+(defn message-author
+  [message-id]
+  (d/q '[:find ?user-id .
+         :in $ ?msg-id
+         :where
+         [?m :message/id ?msg-id]
+         [?m :message/user ?u]
+         [?u :user/id ?user-id]]
+       (db/db) message-id))
+
 ;; Transactions
 
 (defn create-message-txn
@@ -59,3 +90,8 @@
         (fn [user-id]
           [:db/add [:user/id user-id] :user/open-thread thread])
         (thread/users-subscribed-to-thread thread-id)))))
+
+
+(defn retract-message-txn
+  [message-id]
+  [[:db.fn/retractEntity [:message/id message-id]]])

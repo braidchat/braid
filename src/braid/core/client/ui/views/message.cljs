@@ -200,45 +200,59 @@
         rest
         post-transform)))
 
-(defn message-view [message embed-update-chan]
-  (let [sender (subscribe [:user (message :user-id)])
-        current-group (subscribe [:open-group-id])]
-    (fn [message embed-update-chan]
-      (let [sender-path (cond
-                          (nil? @sender) ""
+(defn message-view
+  [message embed-update-chan]
+  (let [sender @(subscribe [:user (message :user-id)])
+        current-group (subscribe [:open-group-id])
+        current-user @(subscribe [:user-id])
+        admin? @(subscribe [:current-user-is-group-admin?] [current-group])
 
-                          (:bot? @sender)
-                          (routes/bots-path {:group-id @current-group})
+        sender-path (cond
+                      (nil? sender) ""
 
-                          :else (routes/search-page-path
-                                  {:group-id @current-group
-                                   :query (str "@" (:id @sender))}))]
-        [:div.message {:class (str " " (when (:collapse? message) "collapse")
-                                   " " (if (:unseen? message) "unseen" "seen")
-                                   " " (when (:first-unseen? message) "first-unseen")
-                                   " " (when (:failed? message) "failed-to-send"))}
-         (when (:failed? message)
-           [:div.error
-            [:span "Message failed to send"]
-            [:button {:on-click
-                      (fn [_] (dispatch [:resend-message message]))}
-             "Resend"]])
-         [:a.avatar {:href sender-path
-                     :tabIndex -1}
-          [:img {:src (:avatar @sender)
-                 :style {:backgroundColor (id->color (:id @sender))}}]]
-         [:div.info
-          (when (:bot? @sender)
-            [:span.bot-notice "BOT"])
-          (if @sender
-            [:a.nickname {:tabIndex -1
-                          :href sender-path}
-             (:nickname @sender)]
-            [:span.nickname "[DELETED]"])
-          [:span.time {:title (message :created-at)}
-           (helpers/format-date (message :created-at))]]
+                      (:bot? sender)
+                      (routes/bots-path {:group-id @current-group})
 
-         (into [:div.content] (format-message (message :content)))
+                      :else (routes/search-page-path
+                              {:group-id @current-group
+                               :query (str "@" (:id sender))}))]
+    [:div.message {:class (str " " (when (:collapse? message) "collapse")
+                               " " (if (:unseen? message) "unseen" "seen")
+                               " " (when (:first-unseen? message) "first-unseen")
+                               " " (when (:failed? message) "failed-to-send"))}
+     (when (:failed? message)
+       [:div.error
+        [:span "Message failed to send"]
+        [:button {:on-click
+                  (fn [_] (dispatch [:resend-message message]))}
+         "Resend"]])
+     (when (or (= (:id sender) current-user) admin?)
+       [:span.delete
+        [:button
+         {:on-click (fn [_]
+                      (when (js/confirm (str "Delete this message?\n"
+                                             "\"" (message :content) "\""))
+                        (dispatch [:core/retract-message
+                                   {:thread-id (message :thread-id)
+                                    :message-id (message :id)
+                                    :remote? true}])))}
+         \uf1f8]])
+     [:a.avatar {:href sender-path
+                 :tabIndex -1}
+      [:img {:src (:avatar sender)
+             :style {:backgroundColor (id->color (:id sender))}}]]
+     [:div.info
+      (when (:bot? sender)
+        [:span.bot-notice "BOT"])
+      (if sender
+        [:a.nickname {:tabIndex -1
+                      :href sender-path}
+         (:nickname sender)]
+        [:span.nickname "[DELETED]"])
+      [:span.time {:title (message :created-at)}
+       (helpers/format-date (message :created-at))]]
 
-         (when-let [url (first (helpers/extract-urls (message :content)))]
-           [embed-view url embed-update-chan])]))))
+     (into [:div.content] (format-message (message :content)))
+
+     (when-let [url (first (helpers/extract-urls (message :content)))]
+       [embed-view url embed-update-chan])]))
