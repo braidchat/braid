@@ -116,6 +116,13 @@
                     false))))
           (?data :mentioned-user-ids)))))
 
+(defn user-can-delete-message?
+  [user-id message-id]
+  (or (= user-id (message/message-author message-id))
+      (group/user-is-group-admin?
+        user-id
+        (message/message-group message-id))))
+
 
 (defn notify-bots [new-message]
   ; Notify bots mentioned in the message
@@ -173,6 +180,18 @@
         (timbre/warnf "Malformed new message: %s" (pr-str new-message))
         (when-let [cb ?reply-fn]
           (cb :braid/error))))))
+
+(defmethod event-msg-handler :braid.server/retract-message
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
+  (let [message-id ?data]
+    (when (user-can-delete-message? user-id message-id)
+      (let [msg-group (message/message-group message-id)
+            msg-thread (message/message-thread message-id)]
+        (db/run-txns! (message/retract-message-txn message-id))
+        (broadcast-group-change msg-group
+                                [:braid.client/message-deleted
+                                 {:message-id message-id
+                                  :thread-id msg-thread}])))))
 
 (defmethod event-msg-handler :braid.server/tag-thread
   [{:as ev-msg :keys [?data user-id]}]

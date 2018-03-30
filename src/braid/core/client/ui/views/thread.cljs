@@ -159,7 +159,8 @@
             (doall
               (for [message sorted-messages]
                 ^{:key (message :id)}
-                [message-view message embed-update-chan])))])})))
+                [message-view (assoc message :thread-id thread-id)
+                 embed-update-chan])))])})))
 
 (defn thread-view [thread]
   (let [state (r/atom {:dragging? false
