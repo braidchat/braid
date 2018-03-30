@@ -158,6 +158,17 @@
                  (helpers/add-message message)
                  (helpers/maybe-reset-temp-thread (data :thread-id)))}))))
 
+(reg-event-fx
+  :core/retract-message
+  (fn [{db :db} [_ {:keys [thread-id message-id remote?]}]]
+    (when (get-in db [:threads thread-id])
+      (cond-> {:db (update-in
+                     db [:threads thread-id :messages]
+                     (partial
+                       into [] (remove (fn [{id :id}] (= id message-id)))))}
+        remote? (assoc :websocket-send
+                       (list [:braid.server/retract-message message-id]))))))
+
 (reg-event-db
   :clear-error
   (fn [state [_ err-key]]

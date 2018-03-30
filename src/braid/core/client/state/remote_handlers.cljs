@@ -124,3 +124,7 @@
 (defmethod sync/event-handler :braid.client/show-thread
   [[_ thread]]
   (dispatch [:add-open-thread thread]))
+
+(defmethod sync/event-handler :braid.client/message-deleted
+  [[_ {:keys [message-id thread-id] :as info}]]
+  (dispatch [:core/retract-message (assoc info :remote? false)]))
