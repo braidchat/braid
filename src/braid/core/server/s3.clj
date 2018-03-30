@@ -1,8 +1,8 @@
 (ns braid.core.server.s3
   (:require
-    [clojure.data.json :as json]
-    [clojure.string :as string]
-    [braid.core.server.conf :refer [config]])
+   [braid.core.server.conf :refer [config]]
+   [clojure.data.json :as json]
+   [clojure.string :as string])
   (:import
    (javax.crypto Mac)
    (javax.crypto.spec SecretKeySpec)
