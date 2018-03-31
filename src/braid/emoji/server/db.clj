@@ -53,6 +53,11 @@
            (db/db) emoji-pull-pattern group-id)
       (map db->emoji)))
 
+(defn emoji-group
+  [emoji-id]
+  (-> (d/pull (db/db) [{:custom-emoji/group [:group/id]}]
+              [:custom-emoji/id emoji-id])
+      (get-in [:custom-emoji/group :group/id])))
 
 (defn add-custom-emoji-txn
   [{:keys [id group-id shortcode image]}]
@@ -61,3 +66,7 @@
     :custom-emoji/group [:group/id group-id]
     :custom-emoji/shortcode (str ":" shortcode ":")
     :custom-emoji/image image}])
+
+(defn retract-custom-emoji-txn
+  [emoji-id]
+  [[:db.fn/retractEntity [:custom-emoji/id emoji-id]]])

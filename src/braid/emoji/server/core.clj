@@ -16,5 +16,15 @@
      (when (group-db/user-is-group-admin? user-id group-id)
        (let [new-emoji (assoc data :id (java.util.UUID/randomUUID))]
          {:db-run-txns! (emoji-db/add-custom-emoji-txn new-emoji)
-          :group-broadcast! [group-id [:braid.emoji/new-emoji-notification
-                                       (assoc new-emoji :group-id group-id)]]})))})
+          :group-broadcast! [group-id
+                             [:braid.emoji/new-emoji-notification
+                              (-> new-emoji
+                                  (assoc :group-id group-id)
+                                  (update :shortcode #(str ":" % ":")))]]})))
+   :braid.server.emoji/retract-custom-emoji
+   (fn [{user-id :user-id emoji-id :?data}]
+     (let [group-id (emoji-db/emoji-group emoji-id)]
+       (when (group-db/user-is-group-admin? user-id group-id)
+         {:db-run-txns! (emoji-db/retract-custom-emoji-txn emoji-id)
+          :group-broadcast! [group-id [:braid.emoji/remove-emoji-notification
+                                       [group-id emoji-id]]]})))})

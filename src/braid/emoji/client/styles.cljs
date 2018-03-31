@@ -34,3 +34,10 @@
           :height "2em"
           :float "left"
           :margin "0.25em 0.5em 0.25em 0"}]]]]]]])
+
+(def settings-page
+  [:.app>.main>.page.group-settings>.content
+   [:.settings.custom-emoji
+    [:button.delete
+     {:font-family "fontawesome"
+      :color "red"}]]])

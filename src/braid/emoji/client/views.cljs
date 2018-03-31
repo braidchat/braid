@@ -35,16 +35,28 @@
                                   (reset! image-url url))))}]]
        [:button
         {:disabled (or (string/blank? @shortcode)
-                       (string/blank? @image-url))
+                       (string/blank? @image-url)
+                       @uploading?)
          :on-click (fn [_]
                      (dispatch [:emoji/add-emoji
                                 {:group-id @(subscribe [:open-group-id])
                                  :shortcode @shortcode
-                                 :image @image-url}]))}
+                                 :image @image-url}])
+                     (reset! shortcode "")
+                     (reset! image-url nil))}
         "Add"]
        [:br]
        (when-let [url @image-url]
          [:img {:src url :width "300"}])])))
+
+(defn extra-emoji-view
+  [emoji]
+  [:tr
+   [:td (emoji :shortcode)]
+   [:td [:img {:src (emoji :image)}]]
+   [:td [:button.delete
+         {:on-click (fn [_] (dispatch [:emoji/retract-emoji (emoji :id)]))}
+         \uf1f8]]])
 
 (defn extra-emoji-settings-view
   [group]
@@ -54,11 +66,9 @@
    (if-let [emojis (seq @(subscribe [:emoji/group-emojis (group :id)]))]
      [:table
       [:thead
-       [:tr [:th "shortcode"] [:th ""]]]
+       [:tr [:th "shortcode"] [:th ""] [:th ""]]]
       [:tbody
-       (for [emojo emojis]
-         ^{:key (emojo :id)}
-         [:tr
-          [:td (str ":" (emojo :shortcode) ":")]
-          [:td [:img {:src (emojo :image)}]]])]]
+       (for [emoji emojis]
+         ^{:key (emoji :id)}
+         [extra-emoji-view emoji])]]
      [:p "No custom emoji yet"])])

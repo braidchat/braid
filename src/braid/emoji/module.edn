@@ -9,7 +9,8 @@
     braid.emoji.client.text-replacements/emoji-shortcodes-replace]
    :register-message-formatters braid.emoji.client.text-replacements/format-emojis
    :register-styles [braid.emoji.client.styles/emojione
-                     braid.emoji.client.styles/autocomplete]
+                     braid.emoji.client.styles/autocomplete
+                     braid.emoji.client.styles/settings-page]
    :register-state braid.emoji.client.core/state
    :register-initial-user-data-handler braid.emoji.client.core/initial-data-handler
    :register-group-setting braid.emoji.client.views/extra-emoji-settings-view}
