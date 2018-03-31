@@ -58,7 +58,11 @@
 
    :register-message-formatters
    {:fn braid.core.client.ui.views.message/register-post-transformers!
-    :doc "Register new post-transform message formatters. The function will recieve the hiccup representing the message and should return the same."}}}
+    :doc "Register new post-transform message formatters. The function will recieve the hiccup representing the message and should return the same."}
+
+   :register-group-setting
+   {:fn braid.core.client.group-admin.views.group-settings-page/register-group-setting!
+    :doc "Register a view to add to the group settings page. The view will recieve the group map as an argument."}}}
 
  :extends
  {:cljs
