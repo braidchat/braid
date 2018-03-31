@@ -14,7 +14,6 @@
             (map (fn [[g-id emojis]]
                    [g-id
                     (->> emojis
-                        (map (fn [e] (update e :shortcode #(str ":" % ":"))))
                         (group-by :shortcode)
                         (reduce-kv #(assoc %1 %2 (first %3)) {}))])))
           (data :emoji/custom-emoji))))

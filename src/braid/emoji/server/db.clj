@@ -59,5 +59,5 @@
   [{:db/id (d/tempid :entities)
     :custom-emoji/id id
     :custom-emoji/group [:group/id group-id]
-    :custom-emoji/shortcode shortcode
+    :custom-emoji/shortcode (str ":" shortcode ":")
     :custom-emoji/image image}])
