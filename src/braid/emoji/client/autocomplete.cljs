@@ -1,7 +1,7 @@
-(ns braid.emoji.autocomplete
+(ns braid.emoji.client.autocomplete
   (:require
     [clojure.string :as string]
-    [braid.emoji.helpers :as helpers]))
+    [braid.emoji.client.helpers :as helpers]))
 
 (defn simple-matches?
   [m s]

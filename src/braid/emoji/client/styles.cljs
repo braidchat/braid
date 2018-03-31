@@ -1,4 +1,4 @@
-(ns braid.emoji.styles
+(ns braid.emoji.client.styles
   (:require
    [garden.units :refer [rem em px ex]]))
 
