@@ -27,4 +27,15 @@
        (when (group-db/user-is-group-admin? user-id group-id)
          {:db-run-txns! (emoji-db/retract-custom-emoji-txn emoji-id)
           :group-broadcast! [group-id [:braid.emoji/remove-emoji-notification
-                                       [group-id emoji-id]]]})))})
+                                       [group-id emoji-id]]]})))
+
+   :braid.server.emoji/edit-custom-emoji
+   (fn [{user-id :user-id [emoji-id new-code] :?data}]
+     (let [old-emoji (emoji-db/emoji-by-id emoji-id)]
+       (when (group-db/user-is-group-admin? user-id (:group-id old-emoji))
+         {:db-run-txns! (emoji-db/edit-custom-emoji-txn emoji-id new-code)
+          :group-broadcast! [(old-emoji :group-id)
+                             [:braid.emoji/edit-emoji-notification
+                              [(old-emoji :group-id)
+                               (old-emoji :shortcode)
+                               (str ":" new-code ":")]]]})))})

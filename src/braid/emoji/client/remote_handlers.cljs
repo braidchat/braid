@@ -10,3 +10,7 @@
 (defmethod sync/event-handler :braid.emoji/remove-emoji-notification
   [[_ [group-id emoji-id]]]
   (dispatch [:emoji/remove-emoji-notification group-id emoji-id]))
+
+(defmethod sync/event-handler :braid.emoji/edit-emoji-notification
+  [[_ [group-id old-code new-code]]]
+  (dispatch [:emoji/edit-emoji-notification group-id old-code new-code]))

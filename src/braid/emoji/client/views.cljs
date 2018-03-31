@@ -1,9 +1,9 @@
 (ns braid.emoji.client.views
   (:require
    [braid.core.client.s3 :as s3]
+   [clojure.string :as string]
    [re-frame.core :refer [subscribe dispatch]]
-   [reagent.core :as r]
-   [clojure.string :as string]))
+   [reagent.core :as r]))
 
 (defn new-custom-emoji-view
   []
@@ -13,6 +13,7 @@
     (fn []
       [:div.new-emoji
        [:label "Shortcode (omit ':')"
+        ; TODO: validate shortcode is sensible
         [:input {:placeholder "shortcode"
                  :value @shortcode
                  :on-change (fn [e]
@@ -51,12 +52,31 @@
 
 (defn extra-emoji-view
   [emoji]
-  [:tr
-   [:td (emoji :shortcode)]
-   [:td [:img {:src (emoji :image)}]]
-   [:td [:button.delete
-         {:on-click (fn [_] (dispatch [:emoji/retract-emoji (emoji :id)]))}
-         \uf1f8]]])
+  (let [editing? (r/atom false)
+        new-code (r/atom (->> (emoji :shortcode)
+                              (re-matches #"^:([^:]+):$")
+                              second))]
+    (fn [emoji]
+      [:tr
+       [:td
+        (if @editing?
+          [:span
+           [:input {:value @new-code
+                    :on-change (fn [e] (reset! new-code (.. e -target -value)))}]
+           [:button
+            {:on-click (fn [_]
+                         (dispatch [:emoji/edit-emoji
+                                    (emoji :id) @new-code])
+                         (reset! editing? false))}
+            "Save"]
+           [:button {:on-click (fn [_] (reset! editing? false))}
+            "Cancel"]]
+          [:span (emoji :shortcode)
+           [:button {:on-click (fn [_] (reset! editing? true))} "Edit"]])]
+       [:td [:img {:src (emoji :image)}]]
+       [:td [:button.delete
+             {:on-click (fn [_] (dispatch [:emoji/retract-emoji (emoji :id)]))}
+             \uf1f8]]])))
 
 (defn extra-emoji-settings-view
   [group]

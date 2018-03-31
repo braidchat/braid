@@ -43,6 +43,10 @@
    :shortcode (:custom-emoji/shortcode e)
    :image (:custom-emoji/image e)})
 
+(defn emoji-by-id
+  [id]
+  (db->emoji (d/pull (db/db) emoji-pull-pattern [:custom-emoji/id id])))
+
 (defn group-custom-emoji
   [group-id]
   (->> (d/q '[:find [(pull ?e pattern) ...]
@@ -66,6 +70,11 @@
     :custom-emoji/group [:group/id group-id]
     :custom-emoji/shortcode (str ":" shortcode ":")
     :custom-emoji/image image}])
+
+(defn edit-custom-emoji-txn
+  [id shortcode]
+  [[:db/add [:custom-emoji/id id]
+    :custom-emoji/shortcode (str ":" shortcode ":")]])
 
 (defn retract-custom-emoji-txn
   [emoji-id]
