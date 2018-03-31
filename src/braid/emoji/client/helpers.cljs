@@ -1,23 +1,49 @@
-(ns braid.emoji.client.helpers)
+(ns braid.emoji.client.helpers
+  (:require
+   [re-frame.core :refer [subscribe]]))
 
-(declare unicode ascii)
+(declare unicode-data ascii)
+
+(defn simple-matches?
+  [m s]
+  (not= -1 (.indexOf m s)))
+
+(defn matching
+  [query]
+  (mapcat
+    (partial filter (fn [[code _]] (simple-matches? code query)))
+    [(map (fn [{:keys [shortcode image]}] [shortcode image])
+          @(subscribe [:emoji/group-emojis]))
+     unicode-data]))
+
+(defn unicode
+  [shortcode]
+  (or (get @(subscribe [:emoji/custom-emoji shortcode]) :image)
+      (unicode-data shortcode)))
 
 (defn shortcode->html [shortcode]
-  (let [ext :png]
-    (case ext
-      :png
-      [:img {:class "emojione"
-             :alt shortcode
-             :title shortcode
-             :src (str "//cdn.jsdelivr.net/emojione/assets/png/" (last (unicode shortcode)) ".png")}]
-      :svg
-      [:object {:class "emojione"
-                :data (str "//cdn.jsdelivr.net/emojione/assets/svg/" (last (unicode shortcode)) ".svg")
-                :type "image/svg+xml"
-                :title shortcode
-                :standby shortcode}])))
+  (if-let [custom @(subscribe [:emoji/custom-emoji shortcode])]
+    [:img {:class "emojione"
+           :alt shortcode
+           :title shortcode
+           :src (custom :image)}]
+    (let [ext :png]
+      (case ext
+        :png
+        [:img {:class "emojione"
+               :alt shortcode
+               :title shortcode
+               :src (str "//cdn.jsdelivr.net/emojione/assets/png/"
+                         (last (unicode shortcode)) ".png")}]
+        :svg
+        [:object {:class "emojione"
+                  :data (str "//cdn.jsdelivr.net/emojione/assets/svg/"
+                             (last (unicode shortcode)) ".svg")
+                  :type "image/svg+xml"
+                  :title shortcode
+                  :standby shortcode}]))))
 
-(def unicode
+(def unicode-data
   {
    ":kiss_ww:" ["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"]
    ":couplekiss_ww:" ["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"]

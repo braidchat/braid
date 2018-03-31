@@ -51,7 +51,7 @@
   [:div.settings.custom-emoji
    [:h2 "Custom Emoji"]
    [new-custom-emoji-view]
-   (if-let [emojis (seq @(subscribe [:emoji/custom-emoji (group :id)]))]
+   (if-let [emojis (seq @(subscribe [:emoji/group-emojis (group :id)]))]
      [:table
       [:thead
        [:tr [:th "shortcode"] [:th ""]]]
