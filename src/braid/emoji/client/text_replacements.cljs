@@ -1,6 +1,6 @@
-(ns braid.emoji.text-replacements
+(ns braid.emoji.client.text-replacements
   (:require
-   [braid.emoji.helpers :as emoji]
+   [braid.emoji.client.helpers :as emoji]
    [clojure.string :as string]))
 
 (defn emoji-shortcodes-replace
