@@ -19,21 +19,17 @@
                  :on-change (fn [e]
                               (reset! shortcode
                                       (.. e -target -value)))}]]
-       [:label {:style {:border "1px solid gray"
-                        :background-color "white"
-                        :padding "0.25em"
-                        :border-radius "5px"}}
-        (if @uploading? "Uploading..." "Upload Image")
-        [:input {:type "file"
-                 :multiple false
-                 :style {:display "none"}
-                 :on-change (fn [e]
-                              (reset! uploading? true)
-                              (s3/upload
-                                (aget (.. e -target -files) 0)
-                                (fn [url]
-                                  (reset! uploading? false)
-                                  (reset! image-url url))))}]]
+       [:label
+        (if @uploading? "Uploading..."
+            [:input {:type "file"
+                     :multiple false
+                     :on-change (fn [e]
+                                  (reset! uploading? true)
+                                  (s3/upload
+                                    (aget (.. e -target -files) 0)
+                                    (fn [url]
+                                      (reset! uploading? false)
+                                      (reset! image-url url))))}])]
        [:button
         {:disabled (or (string/blank? @shortcode)
                        (string/blank? @image-url)
