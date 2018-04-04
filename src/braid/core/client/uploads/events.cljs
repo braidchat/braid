@@ -27,3 +27,8 @@
          (if-let [uploads (:braid/ok reply)]
            (on-success uploads)
            (on-error (get reply :braid/error "Couldn't get uploads in group")))))}))
+
+(reg-event-fx
+  :core.uploads/delete-upload
+  (fn [cofx [_ upload-id]]
+    {:websocket-send (list [:braid.server/delete-upload upload-id])}))

@@ -29,6 +29,7 @@
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :refer [notify-users]]
+    [braid.core.server.uploads :as s3-uploads]
     [braid.core.server.util :refer [valid-url?]]))
 
 (defn broadcast-thread
@@ -541,6 +542,16 @@
     (if (group/user-in-group? user-id ?data)
       (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
+
+(defmethod event-msg-handler :braid.server/delete-upload
+  [{:as ev-msg :keys [?data user-id ?reply-fn]}]
+  (let [upload (upload/upload-info ?data)]
+    (when (or (= user-id (:user-id upload))
+              (group/user-is-group-admin? user-id (:group-id upload)))
+      (when-let [path (s3-uploads/upload-url-path (:url upload))]
+        (s3-uploads/delete-upload path))
+      (db/run-txns!
+        (upload/retract-upload-txn (:id upload))))))
 
 (defhook
   :reader initial-user-data

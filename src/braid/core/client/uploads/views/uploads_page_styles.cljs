@@ -20,6 +20,10 @@
 
       [:>tr.upload
 
+       [:>td.delete
+        [:>button
+         {:font-family "fontawesome"
+          :color "red"}]]
        [:>td.uploaded-file
 
         [:>.embed
