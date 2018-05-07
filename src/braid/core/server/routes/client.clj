@@ -1,13 +1,14 @@
 (ns braid.core.server.routes.client
   (:require
+   [braid.core.module-helpers :refer [defhook]]
    [braid.core.server.api.github :as github]
    [braid.core.server.conf :refer [config]]
-   [braid.core.module-helpers :refer [defhook]]
    [braid.core.server.db.group :as group]
    [braid.core.server.db.invitation :as invitation]
    [braid.core.server.db.user :as user]
    [braid.core.server.digest :as digest]
    [braid.core.server.invite :as invites]
+   [braid.core.server.routes.helpers :as helpers]
    [clostache.parser :as clostache]
    [compojure.coercions :refer [as-uuid]]
    [compojure.core :refer [GET defroutes]]
@@ -101,11 +102,16 @@
   (GET  "/gateway/request-password-reset" _
     (get-html "gateway" {:gateway_action "request-password-reset"}))
 
-  (GET "/:slug" [slug]
+  (GET "/:slug" [slug :as req]
     (when-let [group (group/group-by-slug slug)]
-      {:status 302
-       :headers {"Location" (str "/groups/" (group :id) )}
-       :body nil}))
+      (when (or (:public? group)
+                (some-> (helpers/current-user req)
+                        :group-ids
+                        set
+                        (contains? (group :id))))
+        {:status 302
+         :headers {"Location" (str "/groups/" (group :id) )}
+         :body nil})))
 
   ; everything else
   (GET "/*" []
