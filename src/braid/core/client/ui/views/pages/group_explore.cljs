@@ -1,5 +1,6 @@
 (ns braid.core.client.ui.views.pages.group-explore
   (:require
+   [braid.core.client.gateway.forms.create-group.views :refer [create-group-view]]
    [clojure.string :as string]
    [reagent.core :as r]
    [re-frame.core :refer [dispatch subscribe]])
@@ -42,6 +43,7 @@
   [:div.page.group-explore
    [:div.title "Group Explore"]
    [:div.content
-    [:a {:href "/gateway/create-group"} "Create a Group"]
+    [:div.gateway
+     [create-group-view]]
     [invitations-view]
     [public-groups-view]]])

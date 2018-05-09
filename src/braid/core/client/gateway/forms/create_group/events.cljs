@@ -4,7 +4,9 @@
    [braid.core.client.gateway.helpers :as helpers]
    [braid.core.common.util :refer [slugify]]
    [clojure.string :as string]
-   [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
+   [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
+   [braid.core.client.routes :as routes]
+   [braid.core.client.schema :as schema]))
 
 (reg-event-fx
   ::initialize
@@ -53,9 +55,12 @@
 
 (reg-event-fx
   ::handle-registration-response
-  (fn [{state :db} [_ response]]
-    (set! js/window.location (str "/groups/" (response :group-id) ))
-    {:db (assoc-in state [:create-group :sending?] false)}))
+  (fn [{state :db} [_ {:keys [group-id group] :as response}]]
+    {:db (-> state
+             (assoc-in [:create-group :sending?] false)
+             (assoc-in [:groups group-id] group)
+             (assoc-in [:temp-threads group-id] (schema/make-temp-thread group-id)))
+     :redirect-to (routes/inbox-page-path {:group-id group-id})}))
 
 (reg-event-fx
   ::handle-registration-error
