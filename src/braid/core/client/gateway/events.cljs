@@ -17,7 +17,7 @@
 
 (reg-event-fx
   ::handle-action
-  (fn [{state :db} _ ]
+  (fn [{state :db} _]
     (case (state :action)
       :create-group
       {:dispatch [:braid.core.client.gateway.forms.create-group.events/initialize]}
