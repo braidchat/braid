@@ -3,6 +3,11 @@
    [braid.core.module-helpers :refer [defhook]])
   (:require
    [braid.core.client.bots.views.bots-page-styles]
+   [braid.core.client.gateway.forms.create-group.styles]
+   [braid.core.client.gateway.forms.join-group.styles]
+   [braid.core.client.gateway.forms.user-auth.styles]
+   [braid.core.client.gateway.styles-vars :as gateway-vars]
+   [braid.core.client.gateway.styles]
    [braid.core.client.group-admin.views.group-settings-page-styles]
    [braid.core.client.invites.views.invite-page-styles]
    [braid.core.client.ui.styles.animations]
@@ -65,7 +70,24 @@
                  braid.core.client.ui.styles.reconnect-overlay/reconnect-overlay
                  braid.core.client.ui.styles.page/page
 
-                 ; page styles
+                 [:.gateway
+                  {:min-height "100vh"
+                   :font-family gateway-vars/font-family
+                   :margin 0
+                   :line-height 1.5
+                   :background gateway-vars/page-background-color
+                   :color gateway-vars/primary-text-color}
+
+                  [:input
+                   :button
+                   {:font-family gateway-vars/font-family}]]
+                 (braid.core.client.gateway.styles/form-styles)
+                 [:.page.group-explore>.content
+                  (braid.core.client.gateway.forms.create-group.styles/create-group-styles)]
+                 (braid.core.client.gateway.forms.join-group.styles/join-group-styles)
+                 (braid.core.client.gateway.forms.user-auth.styles/user-auth-styles)
+
+                                        ; page styles
                  braid.core.client.ui.styles.pages.tags/tags-page
                  braid.core.client.ui.styles.pages.me/me-page
                  braid.core.client.group-admin.views.group-settings-page-styles/group-settings-page

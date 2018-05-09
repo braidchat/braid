@@ -1,6 +1,7 @@
 (ns braid.core.client.ui.views.main
   (:require
    [braid.core.client.bots.views.bots-page :refer [bots-page-view]]
+   [braid.core.client.gateway.forms.user-auth.views :refer [user-auth-view]]
    [braid.core.client.group-admin.views.group-settings-page :refer [group-settings-page-view]]
    [braid.core.client.invites.views.invite-page :refer [invite-page-view]]
    [braid.core.client.routes :as routes]
@@ -38,10 +39,15 @@
     nil))
 
 (defn main-view []
-  [:div.main
-   [error-banner-view]
-   [reconnect-overlay-view]
-   [sidebar-view]
-   (when @(subscribe [:open-group-id])
-     [header-view])
-   [page-view]])
+  (if (= :gateway @(subscribe [:login-state]))
+    [:div.main
+     [sidebar-view]
+     [:div.gateway
+      [user-auth-view]]]
+    [:div.main
+     [error-banner-view]
+     [reconnect-overlay-view]
+     [sidebar-view]
+     (when @(subscribe [:open-group-id])
+       [header-view])
+     [page-view]]))
