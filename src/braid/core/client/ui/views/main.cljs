@@ -54,7 +54,6 @@
        [readonly-group-header])
      [readonly-inbox-page-view]]
 
-    :else
     [:div.main
      [error-banner-view]
      [reconnect-overlay-view]
