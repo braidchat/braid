@@ -146,6 +146,26 @@
                 #(compare %2 %1))
        (take num-threads)))
 
+(defn public-threads
+  [group-id]
+  (->> (d/q '[:find (pull ?thread pull-pattern)
+              :in $ ?group-id ?cutoff pull-pattern
+              :where
+              [?g :group/id ?group-id]
+              [?thread :thread/group ?g]
+              ;; any thread with at least one tag
+              [?thread :thread/tag ?tag]
+              [?tag :tag/group ?g]
+              [?msg :message/thread ?thread]
+              [?msg :message/created-at ?time]
+              [(clj-time.coerce/to-date-time ?time) ?dtime]
+              [(clj-time.core/after? ?dtime ?cutoff)]]
+            (db/db) group-id (t/minus (t/now) (t/weeks 1))
+            thread-pull-pattern)
+      (map (comp db->thread first))
+      (sort-by (fn [t] (apply max (map (comp to-long :created-at) (t :messages))))
+               #(compare %2 %1))))
+
 (defn subscribed-thread-ids-for-user
   [user-id]
   (d/q '[:find [?thread-id ...]
