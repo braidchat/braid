@@ -22,8 +22,8 @@
 
 (defn group-by-id
   [group-id]
-  (-> (d/pull (db/db) group-pull-pattern [:group/id group-id])
-      db->group))
+  (some-> (d/pull (db/db) group-pull-pattern [:group/id group-id])
+          db->group))
 
 (defn group-by-slug
   [group-slug]
