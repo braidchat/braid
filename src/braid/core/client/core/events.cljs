@@ -362,7 +362,7 @@
 
 (reg-event-db
   :add-threads
-  (fn [state [_ threads]]
+  (fn [state [_ threads ?open]]
     (-> state
         (update :threads #(merge-with merge % (key-by-id threads)))
         (update :group-threads
@@ -371,7 +371,10 @@
                    %
                    (into {}
                          (map (fn [[g t]] [g (into #{} (map :id) t)]))
-                         (group-by :group-id threads)))))))
+                         (group-by :group-id threads))))
+        (cond->
+            ?open (update-in [:user :open-thread-ids] into
+                             (map :id threads))))))
 
 (reg-event-fx
   :load-recent-threads
@@ -443,6 +446,12 @@
   :set-login-state
   (fn [state [_ login-state]]
     (assoc state :login-state login-state)))
+
+(reg-event-fx
+  :start-anon-socket
+  (fn [cofx [_ _]]
+    (sync/connect!)
+    {}))
 
 (reg-event-fx
   :start-socket
@@ -687,8 +696,21 @@
 (reg-event-fx
   :core/websocket-needs-auth
   (fn [{state :db} _]
-    {:dispatch-n [[:initialize-db]
-                  [:set-login-state :gateway]]}))
+    (if (= :anon-ws-connect (:login-state state))
+      {:dispatch-n [[:set-login-state :anon-connected]
+                    [:core/load-readonly-group]]}
+      {:dispatch-n [[:initialize-db]
+                    [:set-login-state :gateway]]})))
+
+(reg-event-fx
+  :core/load-readonly-group
+  (fn [{db :db} _]
+    {:websocket-send (list [:braid.server.anon/load-group (:open-group-id db)]
+                           5000
+                           (fn [resp]
+                             (when (not= :chsk/timeout resp)
+                               (dispatch [:join-group (dissoc resp :threads)])
+                               (dispatch [:add-threads (:threads resp) true]))))}))
 
 (reg-event-fx
   :core/websocket-update-next-reconnect

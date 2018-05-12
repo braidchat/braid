@@ -7,12 +7,12 @@
 (defn app-view []
   (case @(subscribe [:login-state])
 
-    :ws-connect
+    (:ws-connect :anon-ws-connect)
     [:div.status
      [styles-view]
      [:span "Connecting..."]]
 
-    (:gateway :app)
+    (:gateway :app :anon-connected)
     [:div.app
      [styles-view]
      [main-view]]))

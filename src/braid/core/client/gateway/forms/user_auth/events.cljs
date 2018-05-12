@@ -1,7 +1,8 @@
 (ns braid.core.client.gateway.forms.user-auth.events
   (:require
-   [braid.core.client.gateway.helpers :as helpers]
    [braid.core.client.gateway.forms.user-auth.validations :refer [validations]]
+   [braid.core.client.gateway.helpers :as helpers]
+   [braid.core.client.router :as router]
    [clojure.string :as string]
    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
 
@@ -79,7 +80,33 @@
                               (dispatch [::set-user user])
                               (dispatch [::set-csrf-token csrf-token]))
                :on-error (fn [_]
-                           (dispatch [::set-user nil]))}}))
+                           (dispatch [::remote-check-public-group]))}}))
+
+(reg-event-fx
+  ::remote-check-public-group
+  (fn [_ _]
+    (if-let [[_ group-id] (re-matches #"/groups/([0-9a-z-]+)" (router/current-path))]
+      (dispatch [::load-group-readonly group-id])
+      (dispatch [::set-user nil]))))
+
+(reg-event-fx
+  ::load-group-readonly
+  (fn [_ [_ group-id]]
+    {:edn-xhr {:uri (str "/groups/" group-id)
+               :method :get
+               :on-complete (fn [group]
+                              (if (:public? group)
+                                (dispatch [::display-group-readonly group])
+                                (dispatch [::set-user nil])))
+               :on-error (fn [_] (dispatch [::set-user nil]))}}))
+
+(reg-event-fx
+  ::display-group-readonly
+  (fn [{db :db} [_ group]]
+    {:dispatch-n [[:set-login-state :anon-ws-connect]
+                  [:start-anon-socket]]
+     :db (assoc db :open-group-id (:id group)
+                :page {:type :readonly})}))
 
 (reg-event-fx
   ::remote-log-out

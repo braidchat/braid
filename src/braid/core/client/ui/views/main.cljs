@@ -19,6 +19,7 @@
    [braid.core.client.ui.views.reconnect-overlay :refer [reconnect-overlay-view]]
    [braid.core.client.ui.views.sidebar :refer [sidebar-view]]
    [braid.core.client.uploads.views.uploads-page :refer [uploads-page-view]]
+   [braid.core.client.ui.views.pages.readonly :refer [readonly-inbox-page-view readonly-group-header]]
    [re-frame.core :refer [subscribe]]))
 
 (defn page-view []
@@ -39,11 +40,21 @@
     nil))
 
 (defn main-view []
-  (if (= :gateway @(subscribe [:login-state]))
+  (case @(subscribe [:login-state])
+    :gateway
     [:div.main
      [sidebar-view]
      [:div.gateway
       [user-auth-view]]]
+
+    :anon-connected
+    [:div.main
+     [sidebar-view]
+     (when @(subscribe [:active-group])
+       [readonly-group-header])
+     [readonly-inbox-page-view]]
+
+    :else
     [:div.main
      [error-banner-view]
      [reconnect-overlay-view]

@@ -7,7 +7,9 @@
    [mount.core :refer [defstate]]
    [schema.core :as s]
    [taoensso.sente :as sente]
-   [taoensso.timbre :as timbre :refer [debugf]]))
+   [taoensso.timbre :as timbre :refer [debugf]]
+   [braid.core.server.db.group :as group]
+   [braid.core.server.db.thread :as thread]))
 
 (defhook
   :writer register-server-message-handlers!
@@ -28,15 +30,31 @@
 
 (defmulti event-msg-handler :id)
 
+(defmulti anon-msg-handler :id)
+
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
   (when-not (= event [:chsk/ws-ping])
     (when-not (= event [:braid.client/ping])
       (debugf "User: %s Event: %s" (get-in ev-msg [:ring-req :session :user-id]) event))
 
-    (when-let [user-id (get-in ev-msg [:ring-req :session :user-id])]
+    (if-let [user-id (get-in ev-msg [:ring-req :session :user-id])]
       (if-let [dynamic-msg-handler (get @message-handlers id)]
         (run-cofx! ev-msg (dynamic-msg-handler (assoc ev-msg :user-id user-id)))
-        (event-msg-handler (assoc ev-msg :user-id user-id))))))
+        (event-msg-handler (assoc ev-msg :user-id user-id)))
+      ;; XXX: hook in anon here
+      (anon-msg-handler ev-msg))))
+
+(defmethod anon-msg-handler :default
+  [ev-msg]
+  #_(debugf "anon msg %s" (:id ev-msg)))
+
+(defmethod anon-msg-handler :braid.server.anon/load-group
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (when-let [group (group/group-by-id ?data)]
+    (when (:public? group)
+      (?reply-fn {:tags (group/group-tags ?data)
+                  :group group
+                  :threads (thread/public-threads ?data)}))))
 
 (defmethod event-msg-handler :default
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
