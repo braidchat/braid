@@ -54,7 +54,8 @@
     (when (:public? group)
       (?reply-fn {:tags (group/group-tags ?data)
                   :group group
-                  :threads (thread/public-threads ?data)}))))
+                  :threads (thread/public-threads ?data)
+                  :users (group/group-users ?data)}))))
 
 (defmethod event-msg-handler :default
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]

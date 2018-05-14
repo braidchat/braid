@@ -709,8 +709,9 @@
                            5000
                            (fn [resp]
                              (when (not= :chsk/timeout resp)
-                               (dispatch [:join-group (dissoc resp :threads)])
-                               (dispatch [:add-threads (:threads resp) true]))))}))
+                               (dispatch [:join-group (select-keys resp [:tags :group])])
+                               (dispatch [:add-threads (:threads resp) true])
+                               (dispatch [:add-users (:users resp)]))))}))
 
 (reg-event-fx
   :core/websocket-update-next-reconnect
