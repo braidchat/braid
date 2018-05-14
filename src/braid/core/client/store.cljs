@@ -23,7 +23,6 @@
      :open-group-id (s/maybe s/Uuid)
      :threads {s/Uuid app-schema/MsgThread}
      :group-threads {s/Uuid #{s/Uuid}}
-     :users {s/Uuid app-schema/User}
      :tags {s/Uuid app-schema/Tag}
      :groups {s/Uuid app-schema/Group}
      :page {:type s/Keyword
@@ -59,7 +58,6 @@
      :open-group-id nil
      :threads {}
      :group-threads {}
-     :users {}
      :tags {}
      :groups {}
      :page {:type nil}

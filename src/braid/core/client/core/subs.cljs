@@ -49,10 +49,10 @@
 
 (reg-sub
   :user
-  (fn [state [_ q-user-id] [d-user-id]]
+  (fn [{:keys [open-group-id] :as state} [_ q-user-id] [d-user-id]]
     ; TODO refactor so that bots isn't mixed up in here
     (let [user-id (or d-user-id q-user-id)]
-      (if-let [u (get-in state [:users user-id])]
+      (if-let [u (get-in state [:groups open-group-id :users user-id])]
         u
         (let [g-id (state :open-group-id)
               group-bots (get-in state [:groups g-id :bots])]
@@ -63,8 +63,8 @@
 
 (reg-sub
   :users
-  (fn [state _]
-    (state :users)))
+  (fn [{:keys [open-group-id] :as state} _]
+    (get state [:groups open-group-id :users])))
 
 (reg-sub
   :user-is-group-admin?
@@ -88,7 +88,7 @@
     (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
           threads (reaction (@state :threads))
           tags (reaction (@state :tags))
-          users (reaction (@state :users))
+          users (reaction (get-in @state [:groups group-id :users]))
           thread-in-group? (fn [thread] (= group-id (thread :group-id)))
           thread-unseen? (fn [thread] (> (->> (thread :messages)
                                               (map :created-at)
@@ -154,10 +154,7 @@
 (reg-sub
   :users-in-group
   (fn [state [_ group-id]]
-    (->> (state :users)
-         vals
-         (filter (fn [u] (contains? (set (u :group-ids)) group-id)))
-         doall)))
+    (vals (get-in state [:groups group-id :users]))))
 
 (reg-sub-raw
   :users-in-open-group
@@ -195,7 +192,7 @@
 (reg-sub
   :user-avatar-url
   (fn [state _ [user-id]]
-    (get-in state [:users user-id :avatar])))
+    (get-in state [:groups (:open-group-id state) :users user-id :avatar])))
 
 (reg-sub
   :search-query
@@ -240,7 +237,7 @@
 (reg-sub
   :nickname
   (fn [state _ [user-id]]
-    (get-in state [:users user-id :nickname])))
+    (get-in state [:groups (:open-group-id state) :users user-id :nickname])))
 
 (reg-sub
   :user-subscribed-tag-ids

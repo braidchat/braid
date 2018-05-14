@@ -64,6 +64,7 @@
 
 (defn user-groups
   [user-id]
+  ;; XXX: pass pull-pattern into the query instead of separate pull-many?
   (->> (d/q '[:find [?g ...]
               :in $ ?user-id
               :where
@@ -72,7 +73,7 @@
             (db/db)
             user-id)
        (d/pull-many (db/db) group-pull-pattern)
-       (map (comp #(dissoc % :users) db->group))
+       (map db->group)
        set))
 
 (defn user-in-group?

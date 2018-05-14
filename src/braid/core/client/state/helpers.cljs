@@ -67,8 +67,8 @@
 
 ; users
 
-(defn update-user-avatar [state user-id avatar]
-  (assoc-in state [:users user-id :avatar] avatar))
+(defn update-user-avatar [state {:keys [group-id user-id avatar-url]}]
+  (assoc-in state [:groups group-id :users user-id :avatar] avatar-url))
 
 ; threads and messages
 

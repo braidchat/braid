@@ -146,7 +146,6 @@
     group-id
     [:braid.client/new-user [(user/user-by-id user-id) group-id]]))
 
-
 ;; Handlers
 
 (defmethod event-msg-handler :chsk/ws-ping
@@ -156,11 +155,13 @@
 
 (defmethod event-msg-handler :chsk/uidport-open
   [{:as ev-msg :keys [user-id]}]
-  (broadcast-user-change user-id [:braid.client/user-connected user-id]))
+  (doseq [{group-id :id} (group/user-groups user-id)]
+    (broadcast-group-change group-id [:braid.client/user-connected [group-id user-id]])))
 
 (defmethod event-msg-handler :chsk/uidport-close
   [{:as ev-msg :keys [user-id]}]
-  (broadcast-user-change user-id [:braid.client/user-disconnected user-id]))
+  (doseq [{group-id :id} (group/user-groups user-id)]
+    (broadcast-group-change group-id [:braid.client/user-disconnected [group-id user-id]])))
 
 (defmethod event-msg-handler :braid.server/new-message
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
@@ -218,6 +219,7 @@
       (do (db/run-txns! (user/set-nickname-txn user-id (?data :nickname)))
           (broadcast-user-change user-id [:braid.client/name-change
                                           {:user-id user-id
+                                           :group-ids (map :id (group/user-groups user-id))
                                            :nickname (?data :nickname)}])
           (when ?reply-fn (?reply-fn {:ok true})))
       (catch java.util.concurrent.ExecutionException _
@@ -228,9 +230,11 @@
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (if (valid-url? ?data)
     (do (db/run-txns! (user/set-user-avatar-txn user-id ?data))
-        (broadcast-user-change user-id [:braid.client/user-new-avatar
-                                        {:user-id user-id
-                                         :avatar ?data}])
+        (doseq [{group-id :id} (group/user-groups user-id)]
+          (broadcast-group-change group-id [:braid.client/user-new-avatar
+                                            {:user-id user-id
+                                             :group-id group-id
+                                             :avatar-url ?data}]))
         (when-let [r ?reply-fn] (r {:braid/ok true})))
     (do (timbre/warnf "Couldn't set user avatar to %s" ?data)
         (when-let [r ?reply-fn] (r {:braid/error "Bad url for avatar"})))))
@@ -374,7 +378,8 @@
       (chsk-send! user-id [:braid.client/joined-group
                            {:group (group/group-by-id (invite :group-id))
                             :tags (group/group-tags (invite :group-id))}])
-      (chsk-send! user-id [:braid.client/update-users (user/users-for-user user-id)]))
+      (chsk-send! user-id [:braid.client/update-users
+                           [(invite :group-id) (user/users-for-user user-id)]]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                   user-id (?data :id))))
 
@@ -561,7 +566,8 @@
   [{:as ev-msg :keys [user-id]}]
   (let [connected (set (:any @connected-uids))
         dynamic-data (->> @initial-user-data
-                          (into {} (map (fn [f] (f user-id)))))]
+                         (into {} (map (fn [f] (f user-id)))))
+        user-status (fn [user] (if (connected (user :id)) :online :offline))]
     (chsk-send!
       user-id
       [:braid.client/init-data
@@ -570,14 +576,14 @@
           :version-checksum (if (= "prod" (env :environment))
                               (digest/from-file "public/js/prod/desktop.js")
                               (digest/from-file "public/js/dev/desktop.js"))
-          :user-groups (group/user-groups user-id)
+          :user-groups
+          (->> (group/user-groups user-id)
+              (map (fn [group]
+                     (update group :users
+                             (partial map #(assoc % :status (user-status %)))))))
           :user-threads (thread/open-threads-for-user user-id)
           :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)
           :user-preferences (user/user-get-preferences user-id)
-          :users (into ()
-                       (map #(assoc % :status
-                               (if (connected (% :id)) :online :offline)))
-                       (user/users-for-user user-id))
           :invitations (invitation/invites-for-user user-id)
           :tags (tag/tags-for-user user-id)}
          dynamic-data)])))
