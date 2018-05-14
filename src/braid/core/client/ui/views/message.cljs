@@ -226,7 +226,7 @@
         [:button {:on-click
                   (fn [_] (dispatch [:resend-message message]))}
          "Resend"]])
-     (when (or (= (:id sender) current-user) admin?)
+     (when (or (= (message :user-id) current-user) admin?)
        [:span.delete
         [:button
          {:on-click (fn [_]
