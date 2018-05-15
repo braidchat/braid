@@ -576,7 +576,6 @@
 (reg-event-fx
   :set-init-data
   (fn [{state :db :as cofx} [_ data]]
-    (prn "GROUPS" (:user-groups data))
     {:dispatch-n (list [:set-login-state :app])
      :db (-> state
              (assoc :session {:user-id (data :user-id)})
