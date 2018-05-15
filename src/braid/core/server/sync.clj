@@ -28,94 +28,9 @@
     [braid.core.server.search :as search]
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :refer [event-msg-handler]]
-    [braid.core.server.sync-helpers :refer [notify-users]]
+    [braid.core.server.sync-helpers :refer [broadcast-thread broadcast-user-change user-can-message? notify-users]]
     [braid.core.server.uploads :as s3-uploads]
     [braid.core.server.util :refer [valid-url?]]))
-
-(defn broadcast-thread
-  "broadcasts thread to all users with the thread open, except those in ids-to-skip"
-  [thread-id ids-to-skip]
-  (let [user-ids (-> (difference
-                       (intersection
-                         (set (thread/users-with-thread-open thread-id))
-                         (set (:any @connected-uids)))
-                       (set ids-to-skip)))
-        thread (thread/thread-by-id thread-id)]
-    (doseq [uid user-ids]
-      (let [user-tags (tag/tag-ids-for-user uid)
-            filtered-thread (update-in thread [:tag-ids]
-                                       (partial into #{} (filter user-tags)))
-            thread-with-last-opens (thread/thread-add-last-open-at
-                                     filtered-thread uid)]
-        (chsk-send! uid [:braid.client/thread thread-with-last-opens])))))
-
-(defn broadcast-user-change
-  "Broadcast user info change to clients that can see this user"
-  [user-id info]
-  (let [ids-to-send-to (disj
-                         (intersection
-                           (set (:any @connected-uids))
-                           (into
-                             #{} (map :id)
-                             (user/users-for-user user-id)))
-                         user-id)]
-    (doseq [uid ids-to-send-to]
-      (chsk-send! uid info))))
-
-(defn broadcast-group-change
-  "Broadcast group change to clients that are in the group"
-  [group-id info]
-  (let [ids-to-send-to (intersection
-                         (set (:any @connected-uids))
-                         (into #{} (map :id) (group/group-users group-id)))]
-    (doseq [uid ids-to-send-to]
-      (chsk-send! uid info)))
-  (doseq [bot (bot/bots-for-event group-id)]
-    (bots/send-event-notification bot info)))
-
-; TODO: when using clojure.spec, use spec to validate this
-(defn user-can-message? [user-id ?data]
-  ; TODO: also check that thread in group
-  (every?
-      true?
-      (concat
-        [(or (boolean (thread/user-can-see-thread? user-id (?data :thread-id)))
-             (do (timbre/warnf
-                   "User %s attempted to add message to disallowed thread %s"
-                   user-id (?data :thread-id))
-                 false))
-         (or (boolean (if-let [cur-group (thread/thread-group-id (?data :thread-id))]
-                        (= (?data :group-id) cur-group)
-                        true)))]
-        (map
-          (fn [tag-id]
-            (and
-              (or (boolean (= (?data :group-id) (tag/tag-group-id tag-id)))
-                  (do
-                    (timbre/warnf
-                      "User %s attempted to add a tag %s from a different group"
-                      user-id tag-id)
-                    false))
-              (or (boolean (tag/user-in-tag-group? user-id tag-id))
-                  (do
-                    (timbre/warnf "User %s attempted to add a disallowed tag %s"
-                                  user-id tag-id)
-                    false))))
-          (?data :mentioned-tag-ids))
-        (map
-          (fn [mentioned-id]
-            (and
-              (or (boolean (group/user-in-group? user-id (?data :group-id)))
-                  (do (timbre/warnf
-                        "User %s attempted to mention disallowed user %s"
-                        user-id mentioned-id)
-                      false))
-              (or (boolean (user/user-visible-to-user? user-id mentioned-id))
-                  (do (timbre/warnf
-                        "User %s attempted to mention disallowed user %s"
-                        user-id mentioned-id)
-                    false))))
-          (?data :mentioned-user-ids)))))
 
 (defn user-can-delete-message?
   [user-id message-id]

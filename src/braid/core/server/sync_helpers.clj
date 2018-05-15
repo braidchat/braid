@@ -51,7 +51,9 @@
                          (into #{} (map :id)
                                (group/group-users group-id)))]
     (doseq [uid ids-to-send-to]
-      (chsk-send! uid info))))
+      (chsk-send! uid info)))
+  (doseq [bot (bot/bots-for-event group-id)]
+    (bots/send-event-notification bot info)))
 
 ; TODO: when using clojure.spec, use spec to validate this
 (defn user-can-message? [user-id ?data]
@@ -96,32 +98,6 @@
                         user-id mentioned-id)
                     false))))
           (?data :mentioned-user-ids)))))
-
-(defn notify-users [new-message]
-  (let [subscribed-user-ids (->>
-                              (thread/users-subscribed-to-thread
-                                (new-message :thread-id))
-                              (remove (partial = (:user-id new-message))))
-        online? (intersection
-                  (set subscribed-user-ids)
-                  (set (:any @connected-uids)))]
-    (doseq [uid subscribed-user-ids]
-      (when-let [rules (user/user-get-preference uid :notification-rules)]
-        (when (notify-rules/notify? uid rules new-message)
-          (let [msg (update new-message :content
-                            (partial parse-tags-and-mentions uid))]
-            (if (online? uid)
-              (chsk-send! uid [:braid.client/notify-message msg])
-              (let [update-msgs
-                    (partial
-                      map
-                      (fn [m] (update m :content
-                                      (partial parse-tags-and-mentions uid))))]
-                (-> (email/create-message
-                      [(-> (thread/thread-by-id (msg :thread-id))
-                           (update :messages update-msgs))])
-                    (assoc :subject "Notification from Braid")
-                    (->> (email/send-message (user/user-email uid))))))))))))
 
 (defn notify-bots [new-message]
   ; Notify bots mentioned in the message
