@@ -121,7 +121,8 @@
 
 (defn add-group [state group]
   (-> state
-      (update-in [:groups] assoc (group :id) group)
+      (update-in [:groups] assoc (group :id)
+                 (update group :users key-by-id))
       (update-in [:temp-threads] assoc (group :id) (schema/make-temp-thread (group :id)))))
 
 (defn remove-group [state group-id]
