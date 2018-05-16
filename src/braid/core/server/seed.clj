@@ -101,19 +101,20 @@
               (tag/user-subscribe-to-tag-txn (user-1 :id) (tag-3 :id))
               (tag/user-subscribe-to-tag-txn (user-2 :id) (tag-3 :id))))
 
+        new-thread-id (db/uuid)
         [msg5 msg6]
         (db/run-txns!
           (concat
             (message/create-message-txn {:id (db/uuid)
                                          :user-id (user-1 :id)
                                          :group-id (group-2 :id)
-                                         :thread-id (db/uuid)
+                                         :thread-id new-thread-id
                                          :created-at (java.util.Date.)
                                          :content "Hello?"
                                          :mentioned-tag-ids [(tag-3 :id)]})
             (message/create-message-txn {:id (db/uuid)
                                          :group-id (group-2 :id)
-                                         :thread-id (msg-1 :thread-id)
+                                         :thread-id new-thread-id
                                          :user-id (user-2 :id)
                                          :created-at (java.util.Date.)
                                          :content "Hi!"})))]))
