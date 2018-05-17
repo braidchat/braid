@@ -28,7 +28,7 @@
     [braid.core.server.search :as search]
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :refer [event-msg-handler]]
-    [braid.core.server.sync-helpers :refer [broadcast-thread broadcast-user-change user-can-message? notify-users]]
+    [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
     [braid.core.server.uploads :as s3-uploads]
     [braid.core.server.util :refer [valid-url?]]))
 
@@ -86,12 +86,12 @@
                         (update-in [:content] #(apply str (take 5000 %)))
                         (assoc :created-at (java.util.Date.)))]
     (if (new-message-valid? new-message)
-      (when (user-can-message? user-id new-message)
+      (when (helpers/user-can-message? user-id new-message)
         (db/run-txns! (message/create-message-txn new-message))
         (when-let [cb ?reply-fn]
           (cb :braid/ok))
-        (broadcast-thread (new-message :thread-id) [])
-        (notify-users new-message)
+        (helpers/broadcast-thread (new-message :thread-id) [])
+        (helpers/notify-users new-message)
         (notify-bots new-message))
       (do
         (timbre/warnf "Malformed new message: %s" (pr-str new-message))
@@ -115,7 +115,7 @@
   (let [{:keys [thread-id tag-id]} ?data]
     (let [group-id (tag/tag-group-id tag-id)]
       (db/run-txns! (thread/tag-thread-txn group-id thread-id tag-id))
-      (broadcast-thread thread-id []))))
+      (helpers/broadcast-thread thread-id []))))
     ; TODO do we need to notify-users and notify-bots
 
 
@@ -132,7 +132,7 @@
   (if (valid-nickname? (?data :nickname))
     (try
       (do (db/run-txns! (user/set-nickname-txn user-id (?data :nickname)))
-          (broadcast-user-change user-id [:braid.client/name-change
+          (helpers/broadcast-user-change user-id [:braid.client/name-change
                                           {:user-id user-id
                                            :group-ids (map :id (group/user-groups user-id))
                                            :nickname (?data :nickname)}])
