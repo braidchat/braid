@@ -699,9 +699,11 @@
 
 (reg-event-fx
   :core/websocket-anon-connected
-  (fn [_ _]
-    {:dispatch-n [[:set-login-state :anon-connected]
-                  [:core/load-readonly-group]]}))
+  (fn [{db :db} _]
+    (if (= :anon-ws-connect (:login-state db))
+      {:dispatch-n [[:set-login-state :anon-connected]
+                    [:core/load-readonly-group]]}
+      {:dispatch-n [[:core/websocket-needs-auth]]})))
 
 (reg-event-fx
   :core/load-readonly-group
