@@ -41,12 +41,15 @@
       (if-let [dynamic-msg-handler (get @message-handlers id)]
         (run-cofx! ev-msg (dynamic-msg-handler (assoc ev-msg :user-id user-id)))
         (event-msg-handler (assoc ev-msg :user-id user-id)))
-      ;; XXX: hook in anon here
       (anon-msg-handler ev-msg))))
 
+;; anonymous event handlers
+
 (defmethod anon-msg-handler :default
-  [ev-msg]
-  #_(debugf "anon msg %s" (:id ev-msg)))
+  [{:as ev-msg :keys [?reply-fn event]}]
+  (debugf "Unhandled anon event %s" (:id ev-msg))
+  (when ?reply-fn
+    (?reply-fn {:umatched-event-as-echoed-from-from-server event})))
 
 (defmethod anon-msg-handler :braid.server.anon/load-group
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
@@ -61,6 +64,13 @@
   [ev-msg]
   (debugf "Closing connection for anonymous client %s" (:client-id ev-msg))
   (helpers/remove-anonymous-reader (get-in ev-msg [:ring-req :session :fake-id])))
+
+(defmethod anon-msg-handler :braid.client/ping
+  [{:as ev-msg :keys [?reply-fn]}]
+  (when-let [reply ?reply-fn]
+    (reply [:braid.server/pong])))
+
+;; logged in event handlers
 
 (defmethod event-msg-handler :default
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
