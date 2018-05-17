@@ -99,7 +99,7 @@
   (GET "/gateway/create-group" []
     (get-html "gateway" {:gateway_action "create-group"}))
 
-  (GET  "/gateway/request-password-reset" _
+  (GET "/gateway/request-password-reset" _
     (get-html "gateway" {:gateway_action "request-password-reset"}))
 
   (GET "/:slug" [slug :as req]
