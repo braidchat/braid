@@ -155,4 +155,3 @@
                     (= 0 (get-in state [k :fields field :validations-left]))
                     (not (get-in state [k :fields field :typing?])))))
            (every? true?)))))
-
