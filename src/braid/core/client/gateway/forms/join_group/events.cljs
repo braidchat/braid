@@ -16,9 +16,7 @@
 (reg-event-fx
   ::handle-group-info
   (fn [{state :db} [_ group-info]]
-    {:db (assoc-in state [:join-group :group] (if group-info
-                                                       group-info
-                                                       {}))}))
+    {:db (assoc-in state [:join-group :group] (or group-info {}))}))
 
 (reg-event-fx
   ::handle-error
