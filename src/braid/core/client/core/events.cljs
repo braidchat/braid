@@ -694,11 +694,14 @@
 (reg-event-fx
   :core/websocket-needs-auth
   (fn [{state :db} _]
-    (if (= :anon-ws-connect (:login-state state))
-      {:dispatch-n [[:set-login-state :anon-connected]
-                    [:core/load-readonly-group]]}
-      {:dispatch-n [[:initialize-db]
-                    [:set-login-state :gateway]]})))
+    {:dispatch-n [[:initialize-db]
+                  [:set-login-state :gateway]]}))
+
+(reg-event-fx
+  :core/websocket-anon-connected
+  (fn [_ _]
+    {:dispatch-n [[:set-login-state :anon-connected]
+                  [:core/load-readonly-group]]}))
 
 (reg-event-fx
   :core/load-readonly-group

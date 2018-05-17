@@ -50,11 +50,18 @@
   [{[old-state new-state] :?data}]
 
   (if (new-state :open?)
-    (if (and (string? (new-state :uid))
-             (string/starts-with? (new-state :uid) "FAKE"))
+    ;; TODO: seperate events for
+    (cond
+      (= :taoensso.sente/nil-uid (new-state :uid))
       ; reconnected, but session has expired
       ; user needs to log in again
       (dispatch [:core/websocket-needs-auth])
+
+      (and (string? (new-state :uid))
+           (string/starts-with? (new-state :uid) "FAKE"))
+      (dispatch [:core/websocket-anon-connected])
+
+      :else
       (dispatch [:core/websocket-connected]))
     (dispatch [:core/websocket-disconnected]))
 
