@@ -39,6 +39,13 @@
     :changelog [changelog-view]
     nil))
 
+(defn readonly-page-view
+  []
+  (case (:type @(subscribe [:page]))
+    :readonly [readonly-inbox-page-view]
+    :login [:div.gateway [user-auth-view]]
+    nil))
+
 (defn main-view []
   (case @(subscribe [:login-state])
     :gateway
@@ -52,7 +59,7 @@
      [sidebar-view]
      (when @(subscribe [:active-group])
        [readonly-group-header])
-     [readonly-inbox-page-view]]
+     [readonly-page-view]]
 
     [:div.main
      [error-banner-view]

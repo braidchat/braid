@@ -52,3 +52,6 @@
 
 (defroute index-path "/" {}
   (dispatch [:redirect-from-root]))
+
+(defroute login-path "/login" []
+  (dispatch [:set-group-and-page [nil {:type :login}]]))

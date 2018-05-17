@@ -85,7 +85,7 @@
 (reg-event-fx
   ::remote-check-public-group
   (fn [_ _]
-    (if-let [[_ group-id] (re-matches #"/groups/([0-9a-z-]+)" (router/current-path))]
+    (if-let [[_ group-id] (re-matches #"^/groups/([0-9a-z-]+)(?:/?.*)$" (router/current-path))]
       (dispatch [::load-group-readonly group-id])
       (dispatch [::set-user nil]))))
 
@@ -105,8 +105,11 @@
   (fn [{db :db} [_ group]]
     {:dispatch-n [[:set-login-state :anon-ws-connect]
                   [:start-anon-socket]]
-     :db (assoc db :open-group-id (:id group)
-                :page {:type :readonly})}))
+     :db (-> db
+             (assoc
+                  :open-group-id (:id group)
+                  :page {:type :readonly})
+             (assoc-in [:user-auth :checking?] false))}))
 
 (reg-event-fx
   ::remote-log-out
