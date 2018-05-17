@@ -1,9 +1,9 @@
 (ns braid.core.client.gateway.events
   (:require
-   [braid.core.client.gateway.forms.create-group.events]
-   [braid.core.client.gateway.forms.join-group.events]
-   [braid.core.client.gateway.forms.log-in.events]
-   [braid.core.client.gateway.forms.user-auth.events]
+   [braid.core.client.gateway.forms.create-group.events :as create-group]
+   [braid.core.client.gateway.forms.join-group.events :as join-group]
+   [braid.core.client.gateway.forms.log-in.events :as log-in]
+   [braid.core.client.gateway.forms.user-auth.events :as user-auth]
    [braid.core.client.gateway.fx]
    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
 
@@ -20,16 +20,16 @@
   (fn [{state :db} _]
     (case (state :action)
       :create-group
-      {:dispatch [:braid.core.client.gateway.forms.create-group.events/initialize]}
+      {:dispatch [::create-group/initialize]}
 
       :log-in
-      {:dispatch [:braid.core.client.gateway.forms.log-in.events/initialize]}
+      {:dispatch [::log-in/initialize]}
 
       :request-password-reset
-      {:dispatch [:braid.core.client.gateway.forms.user-auth.events/initialize :request-password-reset]}
+      {:dispatch [::user-auth/initialize :request-password-reset]}
 
       :join-group
-      {:dispatch [:braid.core.client.gateway.forms.join-group.events/initialize]})))
+      {:dispatch [::join-group/initialize]})))
 
 (reg-event-fx
   ::change-user-status
@@ -38,5 +38,5 @@
       {:db (assoc state :action-disabled? (not logged-in?))}
       (case (state :action)
         :log-in
-        {:dispatch [:braid.core.client.gateway.forms.log-in.events/change-user-status logged-in?]}
+        {:dispatch [::log-in/change-user-status logged-in?]}
         {}))))
