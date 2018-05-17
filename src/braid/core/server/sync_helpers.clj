@@ -13,6 +13,20 @@
    [clojure.set :refer [difference intersection]]
    [taoensso.timbre :as timbre]))
 
+(def anonymous-group-readers (atom {}))
+
+(defn add-anonymous-reader
+  [group-id client-id]
+  (swap! anonymous-group-readers update group-id (fnil conj #{}) client-id))
+
+(defn remove-anonymous-reader
+  [client-id]
+  (let [group (some (fn [[g ids]]
+                      (and (contains? ids client-id)
+                           g))
+                    @anonymous-group-readers)]
+    (swap! anonymous-group-readers update group disj client-id)))
+
 (defn broadcast-thread
   "broadcasts thread to all users with the thread open, except those in ids-to-skip"
   [thread-id ids-to-skip]
@@ -28,7 +42,9 @@
                                        (partial into #{} (filter user-tags)))
             thread-with-last-opens (thread/thread-add-last-open-at
                                      filtered-thread uid)]
-        (chsk-send! uid [:braid.client/thread thread-with-last-opens])))))
+        (chsk-send! uid [:braid.client/thread thread-with-last-opens])))
+    (doseq [anon-id (@anonymous-group-readers (thread :group-id))]
+      (chsk-send! anon-id [:braid.client/thread thread]))))
 
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
@@ -52,6 +68,8 @@
                                (group/group-users group-id)))]
     (doseq [uid ids-to-send-to]
       (chsk-send! uid info)))
+  (doseq [anon-id (@anonymous-group-readers group-id)]
+    (chsk-send! anon-id info))
   (doseq [bot (bot/bots-for-event group-id)]
     (bots/send-event-notification bot info)))
 

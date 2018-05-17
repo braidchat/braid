@@ -10,7 +10,8 @@
               connected-uids]}
       (sente/make-channel-socket! (get-sch-adapter)
                                   {:user-id-fn
-                                   (fn [ob] (get-in ob [:session :user-id]))
+                                   (fn [ob] (or (get-in ob [:session :user-id])
+                                               (get-in ob [:session :fake-id])))
                                    :ws-kalive-ms 30000
                                    :packer packer})]
   (def ring-ajax-post                ajax-post-fn)

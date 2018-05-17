@@ -54,7 +54,13 @@
     (when (:public? group)
       (?reply-fn {:tags (group/group-tags ?data)
                   :group group
-                  :threads (thread/public-threads ?data)}))))
+                  :threads (thread/public-threads ?data)})
+      (helpers/add-anonymous-reader ?data (get-in ev-msg [:ring-req :session :fake-id])))))
+
+(defmethod anon-msg-handler :chsk/uidport-close
+  [ev-msg]
+  (debugf "Closing connection for anonymous client %s" (:client-id ev-msg))
+  (helpers/remove-anonymous-reader (get-in ev-msg [:ring-req :session :fake-id])))
 
 (defmethod event-msg-handler :default
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]

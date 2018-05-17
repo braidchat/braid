@@ -4,6 +4,7 @@
   (:require
    [braid.core.client.store :as store]
    [cljs.core.async :as async]
+   [clojure.string :as string]
    [goog.string :as gstring]
    [goog.string.format]
    [re-frame.core :refer [dispatch]]
@@ -49,7 +50,8 @@
   [{[old-state new-state] :?data}]
 
   (if (new-state :open?)
-    (if (= :taoensso.sente/nil-uid (new-state :uid))
+    (if (and (string? (new-state :uid))
+             (string/starts-with? (new-state :uid) "FAKE"))
       ; reconnected, but session has expired
       ; user needs to log in again
       (dispatch [:core/websocket-needs-auth])
