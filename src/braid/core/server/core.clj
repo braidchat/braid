@@ -6,7 +6,6 @@
     [braid.core.server.handler :refer [mobile-client-app desktop-client-app api-server-app]]
     [braid.core.server.sync-handler] ; for mount
     [braid.core.server.sync] ; for multimethods
-    [clojure.tools.nrepl.server :as nrepl]
     [mount.core :as mount :refer [defstate]]
     [org.httpkit.server :refer [run-server]]
     [taoensso.timbre :as timbre]))
@@ -46,12 +45,6 @@
   :start (start-servers!)
   :stop (stop-servers! servers))
 
-;; nrepl
-
-(defstate nrepl
-  :start (nrepl/start-server :port (:repl-port (mount/args)))
-  :stop (nrepl/stop-server nrepl))
-
 ;; exceptions in background thread handler
 
 (defn set-default-exception-handler
@@ -66,17 +59,15 @@
 
 ;; main
 (defn dev-main
-  "Start things up, but don't start the email server or nrepl"
+  "Start things up, but don't start the email server"
   [port]
   (modules/init!)
   (->
-    (mount/except #{#'email-jobs #'nrepl})
+    (mount/except #{#'email-jobs})
     (mount/with-args {:port port})
     (mount/start)))
 
 (defn -main  [& args]
-  (let [port (Integer/parseInt (first args))
-        repl-port (Integer/parseInt (second args))]
+  (let [port (Integer/parseInt (first args))]
     (modules/init!)
-    (mount/start-with-args {:port port
-                            :repl-port repl-port})))
+    (mount/start-with-args {:port port})))
