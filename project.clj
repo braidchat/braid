@@ -143,8 +143,7 @@
                                     :exclusions [joda-time
                                                  com.amazonaws/aws-java-sdk
                                                  com.google.guava/guava]]
-                                   [org.postgresql/postgresql "9.3-1103-jdbc4"]
-                                   [org.clojure/tools.nrepl "0.2.12"]]}
+                                   [org.postgresql/postgresql "9.3-1103-jdbc4"]]}
              :cider [:dev {:dependencies [[com.cemerick/piggieback "0.2.1"]]
                            :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
                            :plugins [[cider/cider-nrepl "0.15.0-SNAPSHOT"]
