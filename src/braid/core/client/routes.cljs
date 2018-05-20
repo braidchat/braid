@@ -53,5 +53,6 @@
 (defroute index-path "/" {}
   (dispatch [:redirect-from-root]))
 
-(defroute login-path "/login" []
+(defroute join-group-path "/join/:group-id" [group-id]
+  (dispatch [:braid.core.client.gateway.events/initialize :join-group])
   (dispatch [:set-group-and-page [nil {:type :login}]]))
