@@ -28,7 +28,10 @@
 (defroutes api-public-routes
 
   (GET "/groups/:group-id" [group-id]
-       (if-let [group (group/group-by-id (java.util.UUID/fromString group-id))]
+       (if-let [group (try
+                        (group/group-by-id (java.util.UUID/fromString group-id))
+                        (catch java.lang.IllegalArgumentException _
+                          nil))]
          (if (:public? group) ; XXX: should it also give info for private groups?
            (edn-response {:public? (group :public?)
                           :id (group :id)
