@@ -2,7 +2,6 @@
   (:require
    [braid.core.client.gateway.forms.create-group.events :as create-group]
    [braid.core.client.gateway.forms.join-group.events :as join-group]
-   [braid.core.client.gateway.forms.log-in.events :as log-in]
    [braid.core.client.gateway.forms.user-auth.events :as user-auth]
    [braid.core.client.gateway.fx]
    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
@@ -23,7 +22,7 @@
       {:dispatch [::create-group/initialize]}
 
       :log-in
-      {:dispatch [::log-in/initialize]}
+      {:dispatch [::user-auth/initialize :log-in]}
 
       :request-password-reset
       {:dispatch [::user-auth/initialize :request-password-reset]}
@@ -36,7 +35,6 @@
   (fn [{state :db} [_ logged-in?]]
     (merge
       {:db (assoc state :action-disabled? (not logged-in?))}
-      (case (state :action)
-        :log-in
-        {:dispatch [::log-in/change-user-status logged-in?]}
+      (if (and (= :log-in (state :action)) logged-in?)
+        {:dispatch [:start-socket]}
         {}))))
