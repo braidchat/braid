@@ -79,8 +79,7 @@
         (db/run-txns! (group/user-make-group-admin-txn user-id group-id))
         (timbre/debugf "Created group %s by %s" group user-id)
         (edn-response {:group-id group-id
-                       :group (-> (group/group-by-id group-id)
-                                  (dissoc :users))}))))
+                       :group (group/group-by-id group-id)}))))
 
   (PUT "/groups/:group-id/join" [group-id :as req]
     (let [group-id (java.util.UUID/fromString group-id)]

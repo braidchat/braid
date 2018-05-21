@@ -581,9 +581,7 @@
              (assoc :session {:user-id (data :user-id)})
              (assoc-in [:user :subscribed-tag-ids]
                        (set (data :user-subscribed-tag-ids)))
-             (assoc :groups (key-by-id (->> (data :user-groups)
-                                           (map (fn [group]
-                                                  (update group :users key-by-id))))))
+             (assoc :groups (key-by-id (data :user-groups)))
              (assoc :invitations (data :invitations))
              (assoc :threads (key-by-id (data :user-threads)))
              (assoc :group-threads

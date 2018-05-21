@@ -165,8 +165,10 @@
      :avatar (settings :avatar)
      :public? (get settings :public? false)
      :bots (into #{} (map db->bot-display) (:bot/_group e))
-     :users (into () (comp (map db->user)
-                           (map #(dissoc % :group-ids :email)))
+     :users (into {}
+                  (comp (map db->user)
+                        (map #(dissoc % :group-ids :email))
+                        (map (juxt :id identity)))
                   (:group/user e))
      :users-count (count (:group/user e))}))
 

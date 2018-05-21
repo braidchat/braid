@@ -482,7 +482,12 @@
   (let [connected (set (:any @connected-uids))
         dynamic-data (->> @initial-user-data
                          (into {} (map (fn [f] (f user-id)))))
-        user-status (fn [user] (if (connected (user :id)) :online :offline))]
+        user-status (fn [user] (if (connected (user :id)) :online :offline))
+        update-user-statuses (fn [users]
+                               (reduce-kv
+                                 (fn [m id u]
+                                   (assoc m id (assoc u :status (user-status u))))
+                                 {} users))]
     (chsk-send!
       user-id
       [:braid.client/init-data
@@ -493,9 +498,7 @@
                               (digest/from-file "public/js/dev/desktop.js"))
           :user-groups
           (->> (group/user-groups user-id)
-              (map (fn [group]
-                     (update group :users
-                             (partial map #(assoc % :status (user-status %)))))))
+              (map (fn [group] (update group :users update-user-statuses))))
           :user-threads (thread/open-threads-for-user user-id)
           :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)
           :user-preferences (user/user-get-preferences user-id)
