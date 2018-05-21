@@ -85,7 +85,7 @@
 (reg-event-fx
   ::remote-check-public-group
   (fn [_ _]
-    (if-let [[_ group-id] (re-matches #"^/groups/([0-9a-z-]+)(?:/?.*)$" (router/current-path))]
+    (if-let [group-id (helpers/get-url-group-id)]
       (dispatch [::load-group-readonly group-id])
       (dispatch [::set-user nil]))))
 

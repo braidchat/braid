@@ -10,6 +10,12 @@
 (defn get-url-param [param]
   (.getParameterValue (.parse Uri js/window.location) (name param)))
 
+(defn get-url-group-id
+  []
+  (->> (.getPath (.parse Uri js/window.location))
+      (re-matches #"^/groups/([0-9a-z-]+)(?:/?.*)$")
+      second))
+
 ; init fields
 
 (defn init-fields [validations]

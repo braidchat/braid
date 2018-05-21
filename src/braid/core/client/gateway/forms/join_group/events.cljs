@@ -1,6 +1,6 @@
 (ns braid.core.client.gateway.forms.join-group.events
   (:require
-   [braid.core.client.gateway.helpers :as helpers]
+   [braid.core.client.gateway.helpers :as helpers :refer [get-url-group-id]]
    [clojure.string :as string]
    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
 
