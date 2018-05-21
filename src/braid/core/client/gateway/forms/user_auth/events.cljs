@@ -80,7 +80,9 @@
                               (dispatch [::set-user user])
                               (dispatch [::set-csrf-token csrf-token]))
                :on-error (fn [_]
-                           (dispatch [::remote-check-public-group]))}}))
+                           (if (= (:action state) :join-group)
+                             (dispatch [::set-user nil])
+                             (dispatch [::remote-check-public-group])))}}))
 
 (reg-event-fx
   ::remote-check-public-group
