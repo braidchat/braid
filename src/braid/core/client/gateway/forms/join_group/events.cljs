@@ -10,9 +10,6 @@
     {:dispatch-n [[:braid.core.client.gateway.forms.user-auth.events/initialize :log-in]
                   [::remote-get-group-info]]}))
 
-(defn get-url-group-id []
-  (last (string/split js/window.location #"/")))
-
 (reg-event-fx
   ::handle-group-info
   (fn [{state :db} [_ group-info]]
