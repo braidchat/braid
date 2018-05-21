@@ -127,19 +127,17 @@
                :on-error (fn [_]
                            (dispatch [::set-user nil]))}}))
 
-(defn message-event-handler [e]
-  (dispatch [::remote-oauth
-             (.. e -data -code)
-             (.. e -data -state)]))
-
-(defn init-message-listener! []
-  ; using a named function, b/c an anonymous function would  get registered multiple times
-  (js/window.addEventListener "message" message-event-handler))
+(defn message-event-handler
+  "Message handler for oauth login (from ::open-oauth-window).
+  This is a named function to prevent the handler from being added
+  multiple times."
+  [e]
+  (dispatch [::remote-oauth (.. e -data -code) (.. e -data -state)]))
 
 (reg-event-fx
   ::open-oauth-window
   (fn [{state :db} [_ provider]]
-    (init-message-listener!)
+    (js/window.addEventListener "message" message-event-handler)
     (case provider
       :github
       (.open js/window
