@@ -44,6 +44,10 @@
   (dispatch [:set-page-loading true])
   (dispatch [:search-history [query (uuid group-id)]]))
 
+(defroute join-group-path "/groups/:group-id/join" [group-id]
+  (dispatch [:braid.core.client.gateway.events/initialize :join-group])
+  (dispatch [:set-group-and-page [nil {:type :login}]]))
+
 (defroute page-path "/groups/:group-id/:page-id" [group-id page-id]
   (dispatch [:set-group-and-page [(uuid group-id) {:type (keyword page-id)}]]))
 
@@ -52,7 +56,3 @@
 
 (defroute index-path "/" {}
   (dispatch [:redirect-from-root]))
-
-(defroute join-group-path "/join/:group-id" [group-id]
-  (dispatch [:braid.core.client.gateway.events/initialize :join-group])
-  (dispatch [:set-group-and-page [nil {:type :login}]]))
