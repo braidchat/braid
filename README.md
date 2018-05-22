@@ -2,7 +2,7 @@
 
 # Braid [![Github Issues](https://img.shields.io/github/issues/braidchat/braid.svg)](https://www.github.com/braidchat/braid/issues) ![Codeship](https://img.shields.io/codeship/6f05b0f0-9e72-0133-e93b-76efcd0f79bd.svg) [![Braid Chat](https://img.shields.io/badge/braid-join_chat-green.svg)](https://braid.chat/braid)
 
-Braid is an experimental *team chat application* with a novel UI: instead of chatrooms, it's based on many short conversations. You can think of Braid as an email/mailing-list/web-forum/chatroom hybrid, but without the constant interruptions and FOMO of Slack. It's particularly good for remote-first companies, developer teams and online communities. Braid is also open-source, so you can hack on it and host your own version.
+Braid is an experimental **team chat application** with a novel UI: instead of chatrooms, it's based on many short conversations. You can think of Braid as an email/mailing-list/web-forum/chatroom hybrid, but without the constant interruptions and FOMO of Slack. It's particularly good for remote-first companies, developer teams and online communities. Braid is also open-source, so you can hack on it and host your own version.
 
 You can [read more about Braid](https://www.braidchat.org) and then [give Braid a try](https://braid.chat/try).
 
@@ -28,17 +28,17 @@ It's been our daily driver for over a year, but there are still some rough edges
 
 ## Contributing
 
-1. *If you like the concept, please let us know!*
+1. **If you like the concept, please let us know!**
 
    Your feedback is the fuel that pushes us too keep working on Braid. Say hello on [braid@braid](https://braid.chat/braid), and let us know what you think.
 
-2. Try Braid out on your team/group and give us feedback.
+2. **Try Braid out on your team/group and give us feedback.**
 
    You can set up a free team on [braid.chat](https://braid.chat/gateway/create-group) and message us on [braid@braid](https://braid.chat/braid) to give feedback.
 
-3. *If you want to code...*
+3. **If you want to code...**
 
-   Check out the Getting Started instructions below. @rafd and @jamesnvc are availble to pair remotely if you'd like help getting started. Message us on [braid@braid](https://braid.chat/braid) and we can help match you with a good task and debug any issues you run into.
+   Check out the Getting Started instructions below. @rafd and @jamesnvc are available to pair remotely if you'd like help getting started. Message us on [braid@braid](https://braid.chat/braid) and we can help match you with a good task and debug any issues you run into.
 
 
 There's also opportunities to help with triaging issues, writing docs and other non-"dev" work.
