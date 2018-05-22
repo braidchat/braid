@@ -41,6 +41,18 @@
 
     [:&.unseen {}]
 
+   [:>.delete
+    {:display "none"}]
+   [:&:hover
+    [:>.delete
+     {:position "absolute"
+      :display "block"
+      :right 0
+      :z-index 1000}
+     [:>button
+      {:font-family "fontawesome"
+       :color "red"}]]]
+
    [:>.avatar
     [:>img
      {:cursor "pointer"

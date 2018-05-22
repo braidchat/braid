@@ -7,6 +7,9 @@
   </head>
   <body id="mobile">
     <div id="app"></div>
+    {{#extra_scripts}}
+    {{& script}}
+    {{/extra_scripts}}
     {{#prod}}
       <script src="/js/base.js?v={{basejs}}" integrity="{{algo}}-{{basejs}}" type="text/javascript" crossorigin="anonymous"></script>
       <script src="/js/mobile.js?v={{js}}" integrity="{{algo}}-{{js}}" type="text/javascript" crossorigin="anonymous"></script>

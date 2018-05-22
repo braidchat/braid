@@ -110,4 +110,3 @@
      :right (m/* vars/pad 0.70)
      :color "white"
      :font-size "1.5em"}]])
-

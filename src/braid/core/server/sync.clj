@@ -29,6 +29,7 @@
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :refer [notify-users]]
+    [braid.core.server.uploads :as s3-uploads]
     [braid.core.server.util :refer [valid-url?]]))
 
 (defn broadcast-thread
@@ -116,6 +117,13 @@
                     false))))
           (?data :mentioned-user-ids)))))
 
+(defn user-can-delete-message?
+  [user-id message-id]
+  (or (= user-id (message/message-author message-id))
+      (group/user-is-group-admin?
+        user-id
+        (message/message-group message-id))))
+
 
 (defn notify-bots [new-message]
   ; Notify bots mentioned in the message
@@ -173,6 +181,18 @@
         (timbre/warnf "Malformed new message: %s" (pr-str new-message))
         (when-let [cb ?reply-fn]
           (cb :braid/error))))))
+
+(defmethod event-msg-handler :braid.server/retract-message
+  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
+  (let [message-id ?data]
+    (when (user-can-delete-message? user-id message-id)
+      (let [msg-group (message/message-group message-id)
+            msg-thread (message/message-thread message-id)]
+        (db/run-txns! (message/retract-message-txn message-id))
+        (broadcast-group-change msg-group
+                                [:braid.client/message-deleted
+                                 {:message-id message-id
+                                  :thread-id msg-thread}])))))
 
 (defmethod event-msg-handler :braid.server/tag-thread
   [{:as ev-msg :keys [?data user-id]}]
@@ -522,6 +542,16 @@
     (if (group/user-in-group? user-id ?data)
       (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
       (?reply-fn {:braid/error "Not allowed"}))))
+
+(defmethod event-msg-handler :braid.server/delete-upload
+  [{:as ev-msg :keys [?data user-id ?reply-fn]}]
+  (let [upload (upload/upload-info ?data)]
+    (when (or (= user-id (:user-id upload))
+              (group/user-is-group-admin? user-id (:group-id upload)))
+      (when-let [path (s3-uploads/upload-url-path (:url upload))]
+        (s3-uploads/delete-upload path))
+      (db/run-txns!
+        (upload/retract-upload-txn (:id upload))))))
 
 (defhook
   :reader initial-user-data

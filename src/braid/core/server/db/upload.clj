@@ -18,6 +18,19 @@
        (map (comp db->upload first))
        (sort-by :uploaded-at #(compare %2 %1))))
 
+(defn upload-info
+  [upload-id]
+  (->> (d/pull (db/db)
+              [{:upload/uploaded-by [:user/id]}
+               {:upload/thread [{:thread/group [:group/id]}]}
+               :upload/url]
+              [:upload/id upload-id])
+      ((fn [up]
+         {:id upload-id
+          :group-id (get-in up [:upload/thread :thread/group :group/id])
+          :user-id (get-in up [:upload/uploaded-by :user/id])
+          :url (:upload/url up)}))))
+
 ;; Transactions
 
 (defn create-upload-txn
@@ -29,3 +42,7 @@
      :upload/uploaded-by [:user/id uploader-id]
      :upload/uploaded-at uploaded-at}
     db->upload))
+
+(defn retract-upload-txn
+  [upload-id]
+  [[:db.fn/retractEntity [:upload/id upload-id]]])

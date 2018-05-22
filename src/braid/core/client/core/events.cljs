@@ -5,6 +5,7 @@
    [braid.core.client.router :as router]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
+   [braid.core.client.state]
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
    [braid.core.client.sync :as sync]
    [braid.core.client.xhr :refer [edn-xhr]]
@@ -156,6 +157,17 @@
          :db (-> state
                  (helpers/add-message message)
                  (helpers/maybe-reset-temp-thread (data :thread-id)))}))))
+
+(reg-event-fx
+  :core/retract-message
+  (fn [{db :db} [_ {:keys [thread-id message-id remote?]}]]
+    (when (get-in db [:threads thread-id])
+      (cond-> {:db (update-in
+                     db [:threads thread-id :messages]
+                     (partial
+                       into [] (remove (fn [{id :id}] (= id message-id)))))}
+        remote? (assoc :websocket-send
+                       (list [:braid.server/retract-message message-id]))))))
 
 (reg-event-db
   :clear-error

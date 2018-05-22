@@ -11,9 +11,10 @@
    [reagent.ratom :refer-macros [run!]]))
 
 (defn upload-view
-  [upload]
+  [upload on-delete]
   (let [group-id (subscribe [:open-group-id])
         thread-id (r/atom (upload :thread-id))
+        user-id (subscribe [:user-id])
         thread (subscribe [:thread] [thread-id])]
     (r/create-class
       {:display-name "upload-view"
@@ -23,12 +24,24 @@
          (reset! thread-id (new-upload :thread-id)))
 
        :reagent-render
-       (fn [upload]
+       (fn [upload on-delete]
          [:tr.upload
           [:td.uploaded-file
            [embed-view (upload :url)]
            [:br]
            (js/decodeURIComponent (last (string/split (upload :url) #"/")))]
+          [:td.delete
+           (when (or (= @(subscribe [:user-id]) (upload :uploader-id))
+                     @(subscribe [:current-user-is-group-admin?] [group-id]))
+             [:button
+              {:on-click
+               (fn [_]
+                 (when (js/confirm (str "Delete this uploaded file?\n"
+                                        "If this was uploading using Braid, it"
+                                        " will remove the file from S3 as well."))
+                   (on-delete)
+                   (dispatch [:core.uploads/delete-upload (:id upload)])))}
+              \uf1f8])]
           [:td.uploader
            "Uploaded by " [pills/user-pill-view (upload :uploader-id)]]
           [:td.uploaded-thread
@@ -50,7 +63,8 @@
         uploads (r/atom :initial)
         error (r/atom nil)
         ; TODO: will need to page this when it gets big?
-        ; FIXME: breaks the re-frame style, should dispatch and subscribe independently
+        ; FIXME: breaks the re-frame style, should dispatch and
+        ; subscribe independently
         get-uploads (run! (dispatch [:get-group-uploads
                                      {:group-id @group-id
                                       :on-success (partial reset! uploads)
@@ -67,8 +81,11 @@
             :else
             [:table.uploads
              [:thead
-              [:tr [:th ""] [:th ""] [:th ""]]]
-             (into [:tbody]
-                   (for [upload @uploads]
-                     ^{:key (upload :id)}
-                     [upload-view upload]))])]]))))
+              [:tr [:th ""] [:th ""] [:th ""] [:th ""]]]
+             [:tbody
+              (doall
+                (for [upload @uploads]
+                  ^{:key (upload :id)}
+                  [upload-view upload
+                   (fn [] (swap! uploads
+                                (partial remove #(= % upload))))]))]])]]))))

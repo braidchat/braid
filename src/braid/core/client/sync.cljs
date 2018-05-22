@@ -1,10 +1,13 @@
 (ns braid.core.client.sync
+  (:require-macros
+   [cljs.core.async.macros :refer [go]])
   (:require
    [braid.core.client.store :as store]
+   [cljs.core.async :as async]
    [goog.string :as gstring]
    [goog.string.format]
    [re-frame.core :refer [dispatch]]
-   [taoensso.sente :as sente :refer [cb-success?]]
+   [taoensso.sente :as sente]
    [taoensso.sente.packers.transit :as sente-transit]
    [taoensso.timbre :as timbre :refer-macros [debugf]]))
 
@@ -70,6 +73,21 @@
 
 (def router_ (atom nil))
 
+(defn start-ping-loop
+  []
+  (go
+    (while true
+      (async/<! (async/timeout 10000))
+      (chsk-send!
+        [:braid.client/ping]
+        5000
+        (fn [reply]
+          (if-not (sente/cb-success? reply)
+            (let [reconnect-time (+ 10000 (.valueOf (js/Date.)))]
+              (dispatch [:core/websocket-disconnected])
+              (dispatch [:core/websocket-update-next-reconnect reconnect-time]))
+            (dispatch [:core/websocket-connected])))))))
+
 (defn stop-router! [] (when-let [stop-f @router_] (stop-f)))
 
 (defn start-router! []
@@ -86,5 +104,6 @@
   (if-not chsk
     (do
       (make-socket!)
-      (start-router!))
+      (start-router!)
+      (start-ping-loop))
     (reconnect!)))

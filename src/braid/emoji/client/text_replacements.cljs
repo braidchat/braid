@@ -1,6 +1,6 @@
-(ns braid.emoji.text-replacements
+(ns braid.emoji.client.text-replacements
   (:require
-   [braid.emoji.helpers :as emoji]
+   [braid.emoji.client.helpers :as emoji]
    [clojure.string :as string]))
 
 (defn emoji-shortcodes-replace
@@ -16,8 +16,14 @@
           ;; component
           [pre _ post] (seq (.split text re replace-fn))]
       (if-let [match (second (re-find re text))]
-        (if (or (string/blank? pre) (re-matches #".*\s$" pre))
+        (cond
+          (not (emoji/unicode match))
+          text-or-node
+
+          (or (string/blank? pre) (re-matches #".*\s$" pre))
           [:span.dummy pre (replace-fn match) post]
+
+          :else
           text)
         text))
     text-or-node))

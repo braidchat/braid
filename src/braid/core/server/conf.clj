@@ -1,7 +1,12 @@
 (ns braid.core.server.conf
   (:require
+   [braid.core.module-helpers :refer [defhook]]
    [environ.core :refer [env]]
    [mount.core :as mount :refer [defstate]]))
+
+(defhook
+  :writer register-config-var!
+  :reader config-vars)
 
 (defstate config
   :start
@@ -10,21 +15,23 @@
           :site-url (str "http://localhost:" (:port (mount/args)))
           :hmac-secret "secret"}
          (select-keys env
-                      [:api-domain
-                       :asana-client-id
-                       :asana-client-secret
-                       :aws-access-key
-                       :aws-domain
-                       :aws-secret-key
-                       :db-url
-                       :elasticsearch-url
-                       :embedly-key
-                       :environment
-                       :github-client-id
-                       :github-client-secret
-                       :hmac-secret
-                       :mailgun-domain
-                       :mailgun-password
-                       :s3-upload-key
-                       :s3-upload-secret
-                       :site-url])))
+                      (into
+                        [:api-domain
+                         :asana-client-id
+                         :asana-client-secret
+                         :aws-access-key
+                         :aws-domain
+                         :aws-secret-key
+                         :db-url
+                         :elasticsearch-url
+                         :embedly-key
+                         :environment
+                         :github-client-id
+                         :github-client-secret
+                         :hmac-secret
+                         :mailgun-domain
+                         :mailgun-password
+                         :s3-upload-key
+                         :s3-upload-secret
+                         :site-url]
+                        @config-vars))))

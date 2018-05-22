@@ -3,12 +3,11 @@
     [clojure.data.json :as json]
     [clojure.string :as string]
     [org.httpkit.client :as http]
-    [braid.core.server.cache :as cache]
     [braid.core.server.conf :refer [config]]
     [braid.core.server.crypto :as crypto]
     [braid.core.server.util :refer [map->query-str ->transit transit->form]])
   (:import
-    org.apache.commons.codec.binary.Base64))
+    (org.apache.commons.codec.binary Base64)))
 
 (defn redirect-uri
   "This is a function instead of a var because we need to access config, which

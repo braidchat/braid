@@ -30,10 +30,12 @@
 
 (defn upsert-quest-record-txn
   [user-id quest-record]
-  (let [db-id (if (d/entity (db/db) [:quest-record/id (quest-record :id)])
+  (let [db-id (if (d/entity (db/db) [:quest-record/id (quest-record :quest-record/id)])
                 [:quest-record/id (quest-record :quest-record/id)]
                 (d/tempid :entities))]
-    [(assoc quest-record :db/id db-id)]))
+    [(assoc quest-record
+            :db/id db-id
+            :quest-record/user [:user/id user-id])]))
 
 (defn activate-first-quests-txn
   [user-id]

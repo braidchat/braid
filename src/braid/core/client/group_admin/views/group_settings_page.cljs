@@ -1,4 +1,6 @@
 (ns braid.core.client.group-admin.views.group-settings-page
+  (:require-macros
+   [braid.core.module-helpers :refer [defhook]])
   (:require
     [reagent.core :as r]
     [reagent.ratom :include-macros true :refer-macros [reaction]]
@@ -59,6 +61,10 @@
                               (dispatch [:make-group-public! (group :id)])))}
        "Make public"]])])
 
+(defhook
+  :writer register-group-setting!
+  :reader extra-group-settings)
+
 (defn group-settings-page-view
   []
   (let [group (subscribe [:active-group])
@@ -68,7 +74,10 @@
       [:div.page.group-settings
        (when @admin?
          [:div.title (str "Settings for " (:name @group))]
-         [:div.content
-          [intro-message-view @group]
-          [group-avatar-view @group]
-          [publicity-view @group]])])))
+         (into
+           [:div.content
+            [intro-message-view @group]
+            [group-avatar-view @group]
+            [publicity-view @group]]
+           (for [setting-view @extra-group-settings]
+             [setting-view @group])))])))
