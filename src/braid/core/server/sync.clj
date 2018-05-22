@@ -473,6 +473,16 @@
       (db/run-txns!
         (upload/retract-upload-txn (:id upload))))))
 
+(defmethod event-msg-handler :braid.server.anon/load-group
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  (when-let [group (group/group-by-id ?data)]
+    (if (:public? group)
+      (do (?reply-fn {:tags (group/group-tags ?data)
+                      :group (assoc group :readonly true)
+                      :threads (thread/public-threads ?data)})
+          (helpers/add-anonymous-reader ?data user-id))
+      (?reply-fn :braid/error))))
+
 (defhook
   :reader initial-user-data
   :writer register-initial-user-data!)

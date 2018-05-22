@@ -513,8 +513,7 @@
       {:db (assoc state :open-group-id group-id :page page-id)}
 
       (and group-id (not (get-in state [:groups group-id])))
-      {:dispatch-n [[:set-login-state :gateway]
-                    [:braid.core.client.gateway.events/initialize :join-group]]}
+      {:dispatch [:core/load-readonly-group group-id]}
 
       :else
       {:dispatch [:redirect-from-root]})))
@@ -705,13 +704,21 @@
 
 (reg-event-fx
   :core/load-readonly-group
-  (fn [{db :db} _]
-    {:websocket-send (list [:braid.server.anon/load-group (:open-group-id db)]
-                           5000
-                           (fn [resp]
-                             (when (not= :chsk/timeout resp)
-                               (dispatch [:join-group (select-keys resp [:tags :group])])
-                               (dispatch [:add-threads (:threads resp) true]))))}))
+  (fn [{db :db} [_ ?group-id]]
+    {:websocket-send
+     (list [:braid.server.anon/load-group (or ?group-id (:open-group-id db))]
+           5000
+           (fn [resp]
+             (case resp
+               :chsk/timeout (js/console.warn "Loading readonly group timed out")
+               :braid/error (do (prn "private or nonexistant group")
+                                ;; should probably show warning here?
+                                (dispatch [:redirect-from-root]))
+
+               (do (dispatch [:join-group (select-keys resp [:tags :group])])
+                   (dispatch [:add-threads (:threads resp) true])
+                   (when ?group-id
+                     (dispatch [:set-group-and-page [?group-id {:type :readonly}]]))))))}))
 
 
 (reg-event-fx
