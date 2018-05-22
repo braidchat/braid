@@ -509,14 +509,14 @@
       (nil? group-id)
       {:db (assoc state :open-group-id nil :page page-id)}
 
+      (get-in state [:groups group-id :readonly])
+      {:db (assoc state :open-group-id group-id :page {:type :readonly})}
+
       (some? (get-in state [:groups group-id]))
       {:db (assoc state :open-group-id group-id :page page-id)}
 
-      (and group-id (not (get-in state [:groups group-id])))
-      {:dispatch [:core/load-readonly-group group-id]}
-
       :else
-      {:dispatch [:redirect-from-root]})))
+      {:dispatch [:core/load-readonly-group group-id]})))
 
 (reg-event-fx
   :redirect-from-root
