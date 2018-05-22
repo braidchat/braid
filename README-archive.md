@@ -1,29 +1,3 @@
-
-
- - move Figwheel server as part of single REPL
-
- - update CHANGELOG
-
- - post a roadmap somewhere on github, link from README "(and more...")
-
- - update gaps in contributing.md
-
- - mention "add yourself to contributors.edn" in contributing guide
-
- - improve "deploying to production" notes
-
-
-
-
-
-
-
-
-
-
-
-
-
 Braid started out as a quick experiment to see if a new kind of team-chat interface could better handle multiple async conversations (early video here) , and in turn, alleviate the culture of interruption and FOMO that Slack and other chatroom-based clients tend to create. (see [Motivation]()).
 
 
