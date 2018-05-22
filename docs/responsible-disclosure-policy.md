@@ -8,6 +8,6 @@ Safety and data security is very important to the Braid community. If you have d
   4. If your report results in a change to the code base or documentation of a Braid product, we will – at your option – publicly acknowledge your responsible disclosure.
 
 
-Please do not test directly against our production instances. You can [install a copy of Braid yourself](./installing.md) to test against.
+Please do not test directly against our production instances. You can [install a copy of Braid yourself](./dev/getting-up-and-running-in-development.md) to test against.
 
 If you want to encrypt your disclosure email please email us to ask for our PGP key.

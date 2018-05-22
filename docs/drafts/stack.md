@@ -26,22 +26,22 @@
 
 . | .
 ----------------------------------------------------- | --------
-[Clojure](http://clojure.org/)                        | Language             
-[Datomic](http://www.datomic.com/)                    | Database             
-[Solr](https://lucene.apache.org/solr/)               | Search               
-[Onyx](http://www.onyxplatform.org/)                  | Stream Processing    
-[HTTPKit](http://www.http-kit.org/)                   | HTTP Server          
-[Compojure](https://github.com/weavejester/compojure) | HTTP Routing         
-[Mount](https://github.com/tolitius/mount)            | App State Management 
+[Clojure](http://clojure.org/)                        | Language
+[Datomic](http://www.datomic.com/)                    | Database
+[Solr](https://lucene.apache.org/solr/)               | Search
+[Onyx](http://www.onyxplatform.org/)                  | Stream Processing
+[HTTPKit](http://www.http-kit.org/)                   | HTTP Server
+[Compojure](https://github.com/weavejester/compojure) | HTTP Routing
+[Mount](https://github.com/tolitius/mount)            | App State Management
 
 
 ## In Between:
 
 . | .
 ------------------------------------------------------ | --------
-[Websockets](https://en.wikipedia.org/wiki/WebSocket)  | Client+Server Communication     
-[Sente](https://github.com/ptaoussanis/sente)          | Client+Server Websocket Library 
-[Transit](https://github.com/cognitect/transit-format) | Data Format                     
+[Websockets](https://en.wikipedia.org/wiki/WebSocket)  | Client+Server Communication
+[Sente](https://github.com/ptaoussanis/sente)          | Client+Server Websocket Library
+[Transit](https://github.com/cognitect/transit-format) | Data Format
 
 
 
@@ -86,11 +86,6 @@
    concerns:
      resource usage (need 4gb + RAM)
      not open source
-
-
-we are considering switch to postgres:
-
-https://github.com/braidchat/meta/issues/420
 
 
 ### Something something [Matrix](http://matrix.org/)!
