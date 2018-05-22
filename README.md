@@ -4,7 +4,7 @@
 
 Braid is an experimental **team chat application** with a novel UI: instead of chatrooms, it's based on many short conversations. You can think of Braid as an email/mailing-list/web-forum/chatroom hybrid, but without the constant interruptions and FOMO of Slack. It's particularly good for remote-first companies, developer teams and online communities. Braid is also open-source, so you can hack on it and host your own version.
 
-You can [read more about Braid](https://www.braidchat.org) and then [give Braid a try](https://braid.chat/try).
+You can [read more about Braid](https://www.braidchat.com) and then [give Braid a try](https://braid.chat/try).
 
 ![Braid Screenshot](./docs/images/screenshot-archer.png)
 
