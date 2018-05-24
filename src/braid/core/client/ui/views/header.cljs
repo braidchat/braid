@@ -135,7 +135,27 @@
   :writer register-header-view!
   :reader header-views)
 
-(defn header-view []
+(defn readonly-header-view
+  []
+  (let [group @(subscribe [:active-group])]
+    [:div.header
+     [:div.group-header
+      [:div.bar {:style {:background-color (->color (group :id))}}
+       [:div.group-name (group :name)]
+       #_[group-header-buttons-view
+        [{:title "Recently Closed"
+          :route-fn routes/recent-page-path
+          :class "recent"}
+         {:title "Uploads"
+          :class "group-uploads"
+          :route-fn routes/uploads-path}]]]]
+     [:div.user-header
+      [:div.bar {}
+       [:a.user-info {:href (routes/join-group-path {:group-id (:id group)})}
+        [:div.name "Join Group"]]]]]))
+
+(defn logged-in-header-view
+  []
   (into
     [:div.header]
     (concat
@@ -146,3 +166,9 @@
           [view]))
       [[admin-header-view]
        [user-header-view]])))
+
+(defn header-view
+  []
+  (if (:readonly @(subscribe [:active-group]))
+    [readonly-header-view]
+    [logged-in-header-view]))

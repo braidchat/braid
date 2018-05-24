@@ -7,7 +7,7 @@
    [braid.core.client.invites.views.invite-page :refer [invite-page-view]]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.error-banner :refer [error-banner-view]]
-   [braid.core.client.ui.views.header :refer [header-view]]
+   [braid.core.client.ui.views.header :refer [header-view readonly-header-view]]
    [braid.core.client.ui.views.pages.changelog :refer [changelog-view]]
    [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
    [braid.core.client.ui.views.pages.group-explore :refer [group-explore-page-view]]
@@ -20,7 +20,7 @@
    [braid.core.client.ui.views.reconnect-overlay :refer [reconnect-overlay-view]]
    [braid.core.client.ui.views.sidebar :refer [sidebar-view]]
    [braid.core.client.uploads.views.uploads-page :refer [uploads-page-view]]
-   [braid.core.client.ui.views.pages.readonly :refer [readonly-inbox-page-view readonly-group-header]]
+   [braid.core.client.ui.views.pages.readonly :refer [readonly-inbox-page-view]]
    [re-frame.core :refer [subscribe]]))
 
 (defn page-view []
@@ -60,7 +60,7 @@
     [:div.main
      [sidebar-view]
      (when @(subscribe [:active-group])
-       [readonly-group-header])
+       [readonly-header-view])
      [readonly-page-view]]
 
     [:div.main
