@@ -27,6 +27,7 @@
   (case (@(subscribe [:page]) :type)
     :inbox [inbox-page-view]
     :readonly [readonly-inbox-page-view]
+    :login [gateway-view]
     :recent [recent-page-view]
     :search [search-page-view]
     :tags [tags-page-view]
