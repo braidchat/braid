@@ -47,8 +47,9 @@
 (defn readonly-page-view
   []
   (case (:type @(subscribe [:page]))
-    :readonly [readonly-inbox-page-view]
+    (:inbox :readonly) [readonly-inbox-page-view]
     :login [gateway-view]
+    :group-explore [group-explore-page-view]
     nil))
 
 (defn main-view []
