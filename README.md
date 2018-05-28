@@ -89,4 +89,6 @@ If you just want to use Braid, but not set it up yourself, you can get a hosted 
 
 ## License
 
-Braid may be freely used under the [AGPL license](https://www.gnu.org/licenses/agpl-3.0.html) or you may purchase a commercial license by contacting licensing@braidchat.com
+Braid may be freely used under the [AGPL license](https://www.gnu.org/licenses/agpl-3.0.html).
+
+As per the AGPL, you can use Braid for personal or commercial purposes for free, but, you must publically release any modifications to the software (under the same license). If you need to make private modifications you can purchase a commercial license by contacting licensing@braidchat.com
