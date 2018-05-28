@@ -1,9 +1,9 @@
 (ns braid.core.client.ui.views.pages.group-explore
   (:require
-   [braid.core.client.gateway.forms.create-group.views :refer [create-group-view]]
    [clojure.string :as string]
    [reagent.core :as r]
-   [re-frame.core :refer [dispatch subscribe]])
+   [re-frame.core :refer [dispatch subscribe]]
+   [braid.core.client.routes :as routes])
   (:import
    (goog.events KeyCodes)))
 
@@ -43,7 +43,7 @@
   [:div.page.group-explore
    [:div.title "Group Explore"]
    [:div.content
-    [:div.gateway
-     [create-group-view]]
+    [:a {:href (routes/other-path {:page-id "create-group"})}
+     "Create Group"]
     [invitations-view]
     [public-groups-view]]])
