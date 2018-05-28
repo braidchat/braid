@@ -1,9 +1,10 @@
 (ns braid.core.client.ui.views.pages.group-explore
   (:require
+   [braid.core.client.helpers :refer [->color]]
+   [braid.core.client.routes :as routes]
    [clojure.string :as string]
-   [reagent.core :as r]
    [re-frame.core :refer [dispatch subscribe]]
-   [braid.core.client.routes :as routes])
+   [reagent.core :as r])
   (:import
    (goog.events KeyCodes)))
 
@@ -33,10 +34,28 @@
                 "Decline"]])]
            [:div "No invitations."])])))
 
+(defn public-group-view
+  [group]
+  [:a.group {:style {:background-color (->color (:id group))
+                     :color "white"
+                     :padding "0.5em"
+                     :margin "0.2em"}
+             :href (routes/inbox-page-path {:group-id (:id group)})}
+   [:div.name {:style {:font-size "large"}} (:name group)]
+   [:div.users (let [count (:users-count group)]
+                 (str count " user" (when (not= 1 count) "s")))]
+   [:div.info {:style {:font-size "small"}}
+    (:intro group)]])
+
 (defn public-groups-view []
   [:div
    [:h2 "Public Groups"]
-   [:div "Coming soon."]])
+   [:div.public-groups {:style {:display "flex"
+                                :flex-wrap "wrap"}}
+    (doall
+      (for [group @(subscribe [:core/public-groups])]
+        ^{:key (:id group)}
+        [public-group-view group]))]])
 
 (defn group-explore-page-view
   []

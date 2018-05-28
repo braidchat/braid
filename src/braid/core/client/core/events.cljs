@@ -720,6 +720,22 @@
                    (when ?group-id
                      (dispatch [:set-group-and-page [?group-id {:type :readonly}]]))))))}))
 
+(reg-event-fx
+  :core/load-public-groups
+  (fn [_ _]
+    {:websocket-send
+     (list [:braid.server/list-public-groups]
+           5000
+           (fn [resp]
+             (if (= resp :chsk/timeout)
+               (dispatch [:display-error [:load-public-groups
+                                          "Failed to load public groups list"]])
+               (dispatch [::-store-public-groups resp]))))}))
+
+(reg-event-fx
+  ::-store-public-groups
+  (fn [{db :db} [_ groups]]
+    {:db (assoc db :public-groups groups)}))
 
 (reg-event-fx
   :core/websocket-update-next-reconnect

@@ -481,6 +481,10 @@
           (helpers/add-anonymous-reader ?data user-id))
       (?reply-fn :braid/error))))
 
+(defmethod event-msg-handler :braid.server/list-public-groups
+  [{:keys [?reply-fn]}]
+  (?reply-fn (group/public-groups)))
+
 (defhook
   :reader initial-user-data
   :writer register-initial-user-data!)

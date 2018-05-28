@@ -100,6 +100,19 @@
            [?g :group/admins ?u]]
          (db/db) user-id group-id)))
 
+(defn public-groups
+  []
+  (->> (d/q '[:find [(pull ?g pull-pattern) ...]
+              :in $ pull-pattern
+              :where
+              [?g :group/id _]]
+            (db/db) group-pull-pattern)
+      (into #{}
+            (comp (map db->group)
+                  (filter :public?)
+                  (map #(select-keys % [:id :name :slug :avatar :intro
+                                        :users-count]))))))
+
 ;; Transactions
 
 (defn create-group-txn

@@ -52,6 +52,9 @@
   (dispatch [:set-group-and-page [(uuid group-id) {:type (keyword page-id)}]]))
 
 (defroute other-path "/pages/:page-id" [page-id]
+  (case page-id
+    "group-explore" (dispatch [:core/load-public-groups])
+    nil)
   (dispatch [:set-group-and-page [nil {:type (keyword page-id)}]]))
 
 (defroute index-path "/" {}

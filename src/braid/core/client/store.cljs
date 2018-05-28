@@ -47,7 +47,8 @@
                             :mentioned-ids [s/Uuid]
                             :tag-ids [s/Uuid]
                             :new-message s/Str}}
-     :action-disabled? s/Bool}
+     :action-disabled? s/Bool
+     (s/optional-key :public-groups) #{app-schema/Group}}
     invites/InvitesAppState))
 
 (def initial-state
