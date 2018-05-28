@@ -48,14 +48,16 @@
     (:intro group)]])
 
 (defn public-groups-view []
-  [:div
-   [:h2 "Public Groups"]
-   [:div.public-groups {:style {:display "flex"
-                                :flex-wrap "wrap"}}
-    (doall
-      (for [group @(subscribe [:core/public-groups])]
-        ^{:key (:id group)}
-        [public-group-view group]))]])
+  (let [subscribed-groups @(subscribe [:subscribed-group-ids])]
+    [:div
+     [:h2 "Public Groups"]
+     [:div.public-groups {:style {:display "flex"
+                                  :flex-wrap "wrap"}}
+      (doall
+        (for [group @(subscribe [:core/public-groups])
+              :when (not (subscribed-groups (:id group)))]
+          ^{:key (:id group)}
+          [public-group-view group]))]]))
 
 (defn group-explore-page-view
   []
