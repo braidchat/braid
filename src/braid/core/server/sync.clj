@@ -202,9 +202,7 @@
           (mapcat
             (fn [u] (tag/user-subscribe-to-tag-txn (u :id) (new-tag :id)))
             users))
-        (doseq [u users]
-          (when (connected? (u :id))
-            (chsk-send! (u :id) [:braid.client/create-tag new-tag])))
+        (broadcast-group-change (:group-id new-tag) [:braid.client/create-tag new-tag])
         (when ?reply-fn
           (?reply-fn {:ok true})))
       (do (timbre/warnf "User %s attempted to create a tag %s with an invalid name"
