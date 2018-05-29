@@ -27,6 +27,9 @@
 
 (defroutes api-public-routes
 
+  (GET "/groups" _
+    (edn-response (group/public-groups)))
+
   (GET "/groups/:group-id" [group-id]
        (if-let [group (try
                         (group/group-by-id (java.util.UUID/fromString group-id))

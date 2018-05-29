@@ -723,14 +723,14 @@
 (reg-event-fx
   :core/load-public-groups
   (fn [_ _]
-    {:websocket-send
-     (list [:braid.server/list-public-groups]
-           5000
-           (fn [resp]
-             (if (= resp :chsk/timeout)
-               (dispatch [:display-error [:load-public-groups
-                                          "Failed to load public groups list"]])
-               (dispatch [::-store-public-groups resp]))))}))
+    {:edn-xhr
+     {:uri "/groups"
+      :method :get
+      :on-complete (fn [resp] (dispatch [::-store-public-groups resp]))
+      :on-error
+      (fn [_]
+        (dispatch [:display-error [:load-public-groups
+                                   "Failed to load public groups list"]]))}}))
 
 (reg-event-fx
   ::-store-public-groups

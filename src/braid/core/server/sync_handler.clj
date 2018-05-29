@@ -60,10 +60,6 @@
                   :threads (thread/public-threads ?data)})
       (helpers/add-anonymous-reader ?data (get-in ev-msg [:ring-req :session :fake-id])))))
 
-(defmethod anon-msg-handler :braid.server/list-public-groups
-  [{:keys [?reply-fn]}]
-  (?reply-fn (group/public-groups)))
-
 (defmethod anon-msg-handler :chsk/uidport-close
   [ev-msg]
   (debugf "Closing connection for anonymous client %s" (:client-id ev-msg))
