@@ -11,8 +11,8 @@
    (org.apache.commons.codec.binary Base64)))
 
 (defn- config-oauth-get [key provider]
-  (let [oauth-paramater-list (-> config :oauth-provider-list edn/read-string)]
-    (get-in oauth-paramater-list [(keyword provider) key])))
+  (let [oauth-parameter-list (-> config :oauth-provider-list edn/read-string)]
+    (get-in oauth-parameter-list [(keyword provider) key])))
 
 (defn redirect-uri
   "This is a function instead of a var because we need to access config, which
@@ -49,13 +49,13 @@
   [code state provider]
   (let [info (transit->form (Base64/decodeBase64 state))]
     (when (and (map? info)
-                                        ; TODO: use spec to validate state when we can use 1.9
+               ;; TODO: use spec to validate state when we can use 1.9
                (crypto/hmac-verify {:secret (config :hmac-secret)
                                     :mac (info ::hmac)
                                     :data (->> [::nonce ::sent-at ::register? ::group-id]
                                                (map info)
                                                string/join)})
-                                        ; Was the request from the last 30 minutes?
+               ;; Was the request from the last 30 minutes?
                (< 0
                   (- (.getTime (java.util.Date.)) (info ::sent-at))
                   (* 1000 60 30)))

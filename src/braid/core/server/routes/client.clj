@@ -1,6 +1,5 @@
 (ns braid.core.server.routes.client
   (:require
-   [braid.core.server.api.github :as github]
    [braid.core.server.api.oauth :as oauth]
    [braid.core.server.conf :refer [config]]
    [braid.core.module-helpers :refer [defhook]]
@@ -51,8 +50,7 @@
            {:status 200 :headers {"Content-Type" "text/html"} :body (invites/register-page invite tok)}
            {:status 400 :headers {"Content-Type" "text/plain"} :body "Invalid invite"})
          {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
-
-                                        ; invite link
+  ;; invite link
   (GET "/invite" [group-id :<< as-uuid nonce expiry mac]
        (if (and group-id nonce expiry mac)
          (if (invites/verify-hmac mac (str nonce group-id expiry))
@@ -60,7 +58,7 @@
            {:status 400 :headers {"Content-Type" "text/plain"} :body "Parameter verification failed"})
          {:status 400 :headers {"Content-Type" "text/plain"} :body "Missing required parameters"}))
 
-                                        ; password reset page
+  ;; password reset page
   (GET "/reset" [user :<< as-uuid token :as req]
        (if-let [u (and user token
                        (invites/verify-reset-nonce {:id user} token)
@@ -93,8 +91,7 @@
          {:status 302
           :headers {"Location" (str "/groups/" (group :id))}
           :body nil}))
-
-                                        ; everything else
+  ;; everything else
   (GET "/*" []
        (get-html "desktop" {})))
 

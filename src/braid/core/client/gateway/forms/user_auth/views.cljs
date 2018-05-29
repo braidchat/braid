@@ -14,8 +14,8 @@
         :class (name provider)
         :on-click (fn [e]
                     (.preventDefault e)
-                                        ; must use dispatch-sync
-                                        ; b/c dispatch triggers pop-up blocker
+                    ;; must use dispatch-sync
+                    ;; b/c dispatch triggers pop-up blocker
                     (dispatch-sync [:braid.core.client.gateway.forms.user-auth.events/open-oauth-window provider]))}
        (string/capitalize (name provider))]))])
 

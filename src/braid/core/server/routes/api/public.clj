@@ -1,26 +1,18 @@
 (ns braid.core.server.routes.api.public
-  (:require [braid.core.common.util :refer [valid-email? valid-nickname?]]
-            [braid.core.server.api.github :as github]
-            [braid.core.server.api.link-extract :as link-extract]
-            [braid.core.server.api.oauth :as oauth]
-            [braid.core.server.conf :refer [config]]
-            [braid.core.server.crypto :refer [random-nonce]]
-            [braid.core.server.db :as db]
-            [braid.core.server.db.group :as group]
-            [braid.core.server.db.invitation :as invitation]
-            [braid.core.server.db.user :as user]
-            [braid.core.server.events :as events]
-            [braid.core.server.invite :as invites]
-            [braid.core.server.markdown :refer [markdown->hiccup]]
-            [braid.core.server.routes.helpers
-             :refer
-             [current-user edn-response error-response]]
-            [braid.core.server.s3 :as s3]
-            [braid.core.server.sync :as sync]
-            [clojure.java.io :as io]
-            [clojure.string :as string]
-            [compojure.coercions :refer [as-uuid]]
-            [compojure.core :refer [defroutes GET POST PUT]]))
+  (:require
+   [braid.core.common.util :refer [valid-email? valid-nickname?]]
+   [braid.core.server.api.oauth :as oauth]
+   [braid.core.server.conf :refer [config]]
+   [braid.core.server.db :as db]
+   [braid.core.server.db.group :as group]
+   [braid.core.server.db.invitation :as invitation]
+   [braid.core.server.db.user :as user]
+   [braid.core.server.events :as events]
+   [braid.core.server.invite :as invites]
+   [braid.core.server.routes.helpers :refer [edn-response error-response]]
+   [clojure.string :as string]
+   [compojure.coercions :refer [as-uuid]]
+   [compojure.core :refer [defroutes GET POST PUT]]))
 
 (defn join-group
   [user-id group-id]
