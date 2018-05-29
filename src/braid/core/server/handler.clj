@@ -52,14 +52,14 @@
 
 (def mobile-client-app
   (-> (routes
-        resource-routes
-        mobile-client-routes)
+       resource-routes
+       mobile-client-routes)
       (wrap-defaults static-site-defaults)))
 
 (def desktop-client-app
   (-> (routes
-        resource-routes
-        desktop-client-routes)
+       resource-routes
+       desktop-client-routes)
       (wrap-defaults static-site-defaults)))
 
 (def api-server-app

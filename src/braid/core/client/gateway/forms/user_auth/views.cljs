@@ -7,17 +7,17 @@
 (defn auth-providers-view []
   [:span.auth-providers
    (doall
-     (for [provider [:github]]
-       ^{:key provider}
-       [:button
-        {:type "button"
-         :class (name provider)
-         :on-click (fn [e]
-                     (.preventDefault e)
-                     ; must use dispatch-sync
-                     ; b/c dispatch triggers pop-up blocker
-                     (dispatch-sync [:braid.core.client.gateway.forms.user-auth.events/open-oauth-window provider]))}
-        (string/capitalize (name provider))]))])
+    (for [provider [:github :google]]
+      ^{:key provider}
+      [:button
+       {:type "button"
+        :class (name provider)
+        :on-click (fn [e]
+                    (.preventDefault e)
+                    ;; must use dispatch-sync
+                    ;; b/c dispatch triggers pop-up blocker
+                    (dispatch-sync [:braid.core.client.gateway.forms.user-auth.events/open-oauth-window provider]))}
+       (string/capitalize (name provider))]))])
 
 (defn returning-email-field-view []
   [field-view

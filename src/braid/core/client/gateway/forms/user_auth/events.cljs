@@ -98,30 +98,31 @@
 (defn message-event-handler [e]
   (dispatch [::remote-oauth
              (.. e -data -code)
-             (.. e -data -state)]))
+             (.. e -data -state)
+             (.. e -data -provider)]))
 
 (defn init-message-listener! []
-  ; using a named function, b/c an anonymous function would  get registered multiple times
+  ;; using a named function, b/c an anonymous function would get registered
+  ;; multiple times
   (js/window.addEventListener "message" message-event-handler))
 
 (reg-event-fx
-  ::open-oauth-window
-  (fn [{state :db} [_ provider]]
-    (init-message-listener!)
-    (case provider
-      :github
-      (.open js/window
-             "/gateway/oauth/github/auth"
-             "GitHub OAuth"
-             "width=300,height=400"))
-    {:db (-> state
-             clear-error
-             (assoc-in [:user-auth :oauth-provider] provider))}))
+ ::open-oauth-window
+ (fn [{state :db} [_ provider]]
+   (init-message-listener!)
+   (.open js/window
+          (str "/gateway/oauth/" (name provider))
+          "OAuth"
+          "width=300,height=400")
+   {:db (-> state
+            clear-error
+            (assoc-in [:user-auth :oauth-provider] provider))}))
 
 (reg-event-fx
   ::remote-oauth
-  (fn [_ [_ code state]]
-    {:edn-xhr {:uri "/session/oauth/github"
+  (fn [_ [_ code state provider]]
+    {:edn-xhr {:uri (str "/session/oauth/"
+                         (name provider))
                :method :put
                :params {:code code
                         :state state}
