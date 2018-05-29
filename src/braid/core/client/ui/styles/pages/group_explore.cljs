@@ -9,4 +9,13 @@
    [:label
     {:display "block"}
     [:input
-     {:display "block"}]]])
+     {:display "block"}]]
+   [:.public-groups
+    {:display "flex"
+     :flex-wrap "wrap"}
+    [:.group
+     {:color "white"
+      :padding "0.5em"
+      :margin "0.2em"}
+     [:.name {:font-size "large"}]
+     [:.info {:font-size "small"}]]]])

@@ -36,23 +36,18 @@
 
 (defn public-group-view
   [group]
-  [:a.group {:style {:background-color (->color (:id group))
-                     :color "white"
-                     :padding "0.5em"
-                     :margin "0.2em"}
+  [:a.group {:style {:background-color (->color (:id group))}
              :href (routes/inbox-page-path {:group-id (:id group)})}
-   [:div.name {:style {:font-size "large"}} (:name group)]
+   [:div.name (:name group)]
    [:div.users (let [count (:users-count group)]
                  (str count " user" (when (not= 1 count) "s")))]
-   [:div.info {:style {:font-size "small"}}
-    (:intro group)]])
+   [:div.info (:intro group)]])
 
 (defn public-groups-view []
   (let [subscribed-groups @(subscribe [:subscribed-group-ids])]
     [:div
      [:h2 "Public Groups"]
-     [:div.public-groups {:style {:display "flex"
-                                  :flex-wrap "wrap"}}
+     [:div.public-groups
       (doall
         (for [group @(subscribe [:core/public-groups])
               :when (not (subscribed-groups (:id group)))]
