@@ -1,24 +1,26 @@
 (ns braid.core.server.routes.api.public
-  (:require
-    [clojure.java.io :as io]
-    [clojure.string :as string]
-    [compojure.coercions :refer [as-uuid]]
-    [compojure.core :refer [GET PUT POST defroutes]]
-    [braid.core.common.util :refer [valid-nickname? valid-email?]]
-    [braid.core.server.api.github :as github]
-    [braid.core.server.api.link-extract :as link-extract]
-    [braid.core.server.conf :refer [config]]
-    [braid.core.server.crypto :refer [random-nonce]]
-    [braid.core.server.db :as db]
-    [braid.core.server.db.group :as group]
-    [braid.core.server.db.invitation :as invitation]
-    [braid.core.server.db.user :as user]
-    [braid.core.server.events :as events]
-    [braid.core.server.invite :as invites]
-    [braid.core.server.markdown :refer [markdown->hiccup]]
-    [braid.core.server.routes.helpers :refer [current-user error-response edn-response]]
-    [braid.core.server.s3 :as s3]
-    [braid.core.server.sync :as sync]))
+  (:require [braid.core.common.util :refer [valid-email? valid-nickname?]]
+            [braid.core.server.api.github :as github]
+            [braid.core.server.api.link-extract :as link-extract]
+            [braid.core.server.api.oauth :as oauth]
+            [braid.core.server.conf :refer [config]]
+            [braid.core.server.crypto :refer [random-nonce]]
+            [braid.core.server.db :as db]
+            [braid.core.server.db.group :as group]
+            [braid.core.server.db.invitation :as invitation]
+            [braid.core.server.db.user :as user]
+            [braid.core.server.events :as events]
+            [braid.core.server.invite :as invites]
+            [braid.core.server.markdown :refer [markdown->hiccup]]
+            [braid.core.server.routes.helpers
+             :refer
+             [current-user edn-response error-response]]
+            [braid.core.server.s3 :as s3]
+            [braid.core.server.sync :as sync]
+            [clojure.java.io :as io]
+            [clojure.string :as string]
+            [compojure.coercions :refer [as-uuid]]
+            [compojure.core :refer [defroutes GET POST PUT]]))
 
 (defn join-group
   [user-id group-id]
@@ -41,30 +43,31 @@
 
   ; log in
   (PUT "/session" [email password :as req]
-    (if-let [user-id (when (and email password)
-                       (user/authenticate-user email password))]
-      {:status 200
-       :session (assoc (req :session) :user-id user-id)}
-      (error-response 401 :auth-fail)))
+       (if-let [user-id (when (and email password)
+                          (user/authenticate-user email password))]
+         {:status 200
+          :session (assoc (req :session) :user-id user-id)}
+         (error-response 401 :auth-fail)))
 
-  (PUT "/session/oauth/github" [code state :as req]
-    (if-let [{:keys [access_token]} (github/exchange-token code state)]
-      (let [email (github/email-address access_token)
-            user (user/user-with-email email)]
-        (cond
-          (nil? email)
-          (error-response 500 "Couldn't get email from Github")
+  (PUT "/session/oauth/:provider" [provider code state :as req]
+       (if-let [{:keys [access_token]} (oauth/exchange-token code state provider)]
+         (let [email (oauth/email-address access_token provider)
+               user (user/user-with-email email)]
+           (def access_token access_token)
+           (cond
+             (nil? email)
+             (error-response 500 "Couldn't get email from Oauth")
 
-          user
-          {:status 200
-           :session (assoc (req :session) :user-id (user :id))}
+             user
+             {:status 200
+              :session (assoc (req :session) :user-id (user :id))}
 
-          :else
-          (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                                            :email email}))]
-            {:status 200
-             :session (assoc (req :session) :user-id (user :id))})))
-      (error-response 500 "Couldn't exchange token with github")))
+             :else
+             (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
+                                                               :email email}))]
+               {:status 200
+                :session (assoc (req :session) :user-id (user :id))})))
+         (error-response 500 "Couldn't exchange token with oauth")))
 
   ; register a user
   (PUT "/users" [email password :as req]
