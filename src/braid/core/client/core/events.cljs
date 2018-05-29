@@ -506,6 +506,10 @@
   :set-group-and-page
   (fn [{state :db :as cofx} [_ [group-id page-id]]]
     (cond
+      (and (= :gateway (:login-state state)) group-id)
+      {:dispatch [:braid.core.client.gateway.forms.user-auth.events/load-group-readonly
+                  group-id]}
+
       (nil? group-id)
       {:db (assoc state :open-group-id nil :page page-id)}
 

@@ -22,7 +22,7 @@
    [braid.core.client.ui.views.sidebar :refer [sidebar-view]]
    [braid.core.client.uploads.views.uploads-page :refer [uploads-page-view]]
    [braid.core.client.ui.views.pages.readonly :refer [readonly-inbox-page-view]]
-   [re-frame.core :refer [subscribe]]))
+   [re-frame.core :refer [dispatch subscribe]]))
 
 (defn page-view []
   (case (@(subscribe [:page]) :type)
@@ -57,8 +57,11 @@
     :gateway
     [:div.main
      [sidebar-view]
-     [:div.gateway
-      [user-auth-view]]]
+     (if (= @(subscribe [:page-path]) "/pages/group-explore")
+       (do (dispatch [:core/load-public-groups])
+         [group-explore-page-view])
+       [:div.gateway
+        [user-auth-view]])]
 
     :anon-connected
     [:div.main
