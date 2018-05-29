@@ -2,85 +2,61 @@
 
 The following steps should get Braid running on your computer, ready for development.
 
-If you're interested in getting Braid running in production, read: [Deploying Braid](./deploying.md)
+If you're interested in getting Braid running in production, read: [Deploying Braid](../drafts/deploying-to-production.md)
 
 To get Braid running locally, **you will need to have 2 or 3 terminal sessions open**:
 
- 1. The Datomic Transactor (database), if you want the data to stay around
- 2. The Braid REPL and Servers
- 3. Figwheel (JS compiler and hot-reloader)
+ 1. The Braid REPL and Servers
+ 2. Figwheel (JS compiler and hot-reloader)
+ 3. (optional) The Datomic database process (only if you want any state changes to survive a REPL restart)
 
+## 0. Prep
 
-## 1. Datomic
+Before running Braid, you'll need to have Java and Leiningen  installed.
 
-Datomic is Braid's database. Datomic Free is fine for development, but Datomic Pro Starter is reccommended for production.
+1. Check if you have java installed by running `java -version` from your commandline. It should be at least version 1.8.0. If not, install openjdk or Oracle Java (the exact procedure depends on your OS, see Google).
 
-If you just want to test things out, by default Braid will use an in-memory Datomic database.
-This means that when your repl closes, all data will be lost.
+2. Check if you have leiningen installed by running `lein --help` from your commandline. If it's not installed, see the [Leiningen website](http://leiningen.org/) for instructions.
 
-If you want the data to be persisted, follow the steps below to install Datomic:
-
-1. Download Datomic Free 0.9.5201 from [https://my.datomic.com/downloads/free](https://my.datomic.com/downloads/free)
-
-2. Unzip the download
-
-To run Datomic:
-
-1. In a terminal session, cd into the directory and run the transactor:
-
-  ```bash
-  cd ~/path/to/datomic-free-0.9.5201
-  bin/transactor config/samples/free-transactor-template.properties
-  ```
-
-You will need to keep this process running during development. You can kill the process when you're not using it and restart it using the command above.
-
-
-## 2. Braid Servers
-
-The Braid Back-end spins up 3 processes:
-
-  1. The API Server (which serves the HTTP and Websocket API, communicates with the database, etc.)
-  2. The Desktop Client HTTP Server (which serves the HTML + JS assets for the desktop client)
-  3. The Mobile Client HTTP Server (which serves the HTML + JS assets for the mobile client)
-
-Before starting, you should have Java and [Leiningen](http://leiningen.org/) installed.
-
-To get the server running:
-
-1. Clone the braid repo (you may want to change the URL to your fork):
+3. Clone the braid repo (you may want to change the URL to your fork):
 
   ```bash
   git clone git@github.com:braidchat/braid.git
   ```
 
-2. Go into the project directory:
+4. Go into the project directory:
 
   ```bash
   cd braid
   ```
 
-2.5. (optional) If you're *not* using the in-memory version of Datomic, create a `profiles.clj` file with the following contents:
 
-  ```clojure
-  {:user {:env {:db-url "datomic:free://localhost:4334/braid"}}
-  ```
+## 1. Braid REPL & Servers
 
-3. Run the REPL:
+From the project directory...
+
+1. Run the REPL:
 
   ```bash
   lein repl
   ```
 
-4. Inside the REPL, start the servers:
+2. Inside the REPL, start the servers:
 
   ```clojure
   (dev-main 5555)
   ```
 
-This will start the desktop client server on 5555, the mobile client server on 5556, and the API server on port 5557.
+This will start 3 servers:
 
-5. Seed some data (first time only):
+| Server             | Port | Description                                      |
+| ------------------ | ---- | ------------------------------------------------ |
+| desktop web client | 5555 | HTML, JS, CSS assets for desktop web client      |
+| mobile web client  | 5556 | HTML, JS, CSS assets for mobile web client       |
+| api                | 5557 | HTTP and Websocket API, communicates w/ db, etc. |
+
+
+3. Seed some data:
 
   ```clojure
   (require 'braid.core.server.seed)
@@ -124,12 +100,48 @@ Login with:
 
 You should see a few messages and be able to reply.
 
-If you edit a `.cljs` file in the repo, it should auto-update the page in the browser (no need for refreshing).
+In a private window, you can login as another user:
 
-Note: currently in dev mode (the default profile), you cannot invite users or upload avatars. We're working on it.
+> username: `bar@example.com`
+>
+> password: `barbarbar`
+
+If you edit a `.cljs` file in the repo, it should auto-update the page in the browser (no need for refreshing). Note: when developing, you should always have the Chrome/Firefox inspector, with "Disable Cache" on (under the Network Tab).
 
 
-## Issues and Extras
+## 3. Datomic
+
+By default, Braid uses Datomic's in-memory database, which requires no set-up, but, it requires re-seeding every time you start the REPL.
+
+To have data survive a REPL restart, you'll need to persist it to disk by installing Datomic.
+
+To install "Datomic Free":
+
+1. Download Datomic Free 0.9.5201 from [https://my.datomic.com/downloads/free](https://my.datomic.com/downloads/free)
+
+2. Unzip the download
+
+To run Datomic:
+
+1. In a terminal session, cd into the directory and run the transactor:
+
+  ```bash
+  cd ~/path/to/datomic-free-0.9.5201
+  bin/transactor config/samples/free-transactor-template.properties
+  ```
+
+You will need to keep this process running during development. You can kill the process when you're not using it and restart it using the command above.
+
+In your Braid project, you'll need to create a `profiles.cljs` with the following (and restart the REPL to pick up the changes).
+
+  ```clojure
+  {:user {:env {:db-url "datomic:free://localhost:4334/braid"}}
+  ```
+
+In production, we recommend "Datomic Starter" instead (instructions [here](../drafts/deploying-to-production.md)).
+
+
+## Extras
 
 
 ### Mobile Client
@@ -170,8 +182,7 @@ By default, the Clojurescript REPL that starts with figwheel doesn't support com
 
 Emacs users who wish to have their repl sessions integrated with their development environment should follow these steps.
 
-First,
-[install CIDER](https://cider.readthedocs.io/en/latest/installation/).
+First, [install CIDER](https://cider.readthedocs.io/en/latest/installation/).
 Braid has the nREPL middleware CIDER depends on available under the `cider` profile in `project.clj`.
 To use this profile in Emacs, you'll need to edit the `cider-lein-parameters` variable. There are two ways to do this:
 
@@ -214,8 +225,7 @@ lein with-profile test quickie "chat.*"
 
 #### Client Tests
 
-Install [PhantomJS](http://phantomjs.org/) and ensure that the `phantomjs` binary is available from your path.
-Once installed, you can run
+Install [PhantomJS](http://phantomjs.org/) and ensure that the `phantomjs` binary is available from your path.  Once installed, you can run:
 
 ``` bash
 lein cljsbuild test once
@@ -230,9 +240,7 @@ lein cljsbuild test auto
 
 ### Permgen issues?
 
-If you're experience the error: `java.lang.OutOfMemoryError: PermGen space`
-
-Try:
+If you're experience the error: `java.lang.OutOfMemoryError: PermGen space`, try the following:
 
 1. Add the following to `project.clj` or `profiles.clj`:
 
@@ -253,33 +261,6 @@ An easy way to set variables during development is to create a `profiles.clj` fi
 
 See [../profiles.sample.clj](../profiles.sample.clj) for sample profile options and instructions.
 
-
-### Using Datomic Pro
-
-To run Datomic Pro locally, you will need to:
-
-  - sign up for an account with Datomic
-  - download the pro version
-  - unzip and run the transactor similarly as with the free version (but different template file)
-  - add the following to the :chat lein profile (in your profiles.clj):
-
-```clojure
-  {:datomic-pro
-    [:prod
-    {:env {:db-url "datomic:dev://localhost:4333/braid"}}
-     :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
-                                      :creds :gpg
-                                      :username "USERNAME-HERE"
-                                      :password "PASSWORD-HERE"}}}]}
-```
-
-Henceforth, you will need to run lein with the profile:
-
-  ```bash
-  lein with-profile +datomic-pro repl
-  ```
-
-
 ### Getting Started w/ Clojure
 
 If you don't have Leiningen installed, then:
@@ -295,7 +276,3 @@ On Mac:
 
 For other platforms, see: [https://github.com/technomancy/leiningen/wiki/Packaging]()
 
-
-### Running in `:prod`
-
-Start Redis running (used for cookies & invite tokens).  Braid currently assumes Redis is running on localhost on port 6379.

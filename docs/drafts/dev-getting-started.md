@@ -16,7 +16,7 @@ Clone your fork locally
 Install Packages
 
 
-[./how-to/getting-up-and-running-in-development.md](./how-to/getting-up-and-running-in-development.md)
+[Getting Started](../dev/getting-up-and-running-in-development.md)
 
 
 
@@ -27,11 +27,11 @@ PR early, to start a discussion (and avoid major refactoring)
 
 Issues
 
-https://github.com/braidchat/planning/issues
+https://github.com/braidchat/braid/issues
 
  Check for open issues or open a fresh issue to start a discussion around a feature idea or a bug
 
- There is a [Help Wanted](https://github.com/braidchat/planning/issues?q=is%3Aissue+is%3Aopen+label%3Ahelp-wanted) tag for issues that should be ideal for people who are not very familiar with the codebase yet.
+ There is a [Help Wanted](https://github.com/braidchat/braid/issues?q=is%3Aissue+is%3Aopen+label%3Ahelp-wanted) tag for issues that should be ideal for people who are not very familiar with the codebase yet.
 
 
 ## Support
