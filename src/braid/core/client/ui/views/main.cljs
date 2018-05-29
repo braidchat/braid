@@ -50,6 +50,7 @@
     (:inbox :readonly) [readonly-inbox-page-view]
     :login [gateway-view]
     :group-explore [group-explore-page-view]
+    :create-group [create-group-page-view]
     nil))
 
 (defn main-view []
@@ -57,9 +58,14 @@
     :gateway
     [:div.main
      [sidebar-view]
-     (if (= @(subscribe [:page-path]) "/pages/group-explore")
+     (case @(subscribe [:page-path])
+       "/pages/group-explore"
        (do (dispatch [:core/load-public-groups])
          [group-explore-page-view])
+
+       "/pages/create-group"
+       [create-group-page-view]
+
        [:div.gateway
         [user-auth-view]])]
 

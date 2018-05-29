@@ -5,7 +5,7 @@
    [braid.core.client.ui.styles.mixins :as mixins]))
 
 (defn user-auth-styles []
-  [:>.gateway
+  [:.gateway
 
    [:>.user-auth
 
