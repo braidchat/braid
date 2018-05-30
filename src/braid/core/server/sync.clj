@@ -303,6 +303,20 @@
     (timbre/warnf "User %s attempted to decline nonexistant invitaiton %s"
                   user-id (?data :id))))
 
+(defmethod event-msg-handler :braid.server/join-public-group
+  [{:as ev-msg :keys [?data user-id]}]
+  (let [group (group/group-by-id ?data)]
+    (if (:public? group)
+      (do
+        (events/user-join-group! user-id (group :id))
+        (chsk-send! user-id [:braid.client/joined-group
+                             {:group group
+                              :tags (group/group-tags (group :id))}])
+        (chsk-send! user-id [:braid.client/update-users
+                             [(group :id) (user/users-for-user user-id)]]))
+      (timbre/warnf "User %s attempted to join nonexistant or private group %s"
+                    user-id ?data))))
+
 (defmethod event-msg-handler :braid.server/make-user-admin
   [{:as ev-msg :keys [?data user-id]}]
   (let [{new-admin-id :user-id group-id :group-id} ?data]

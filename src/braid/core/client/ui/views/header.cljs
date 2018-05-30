@@ -5,7 +5,7 @@
    [braid.core.client.helpers :refer [->color]]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.search-bar :refer [search-bar-view]]
-   [re-frame.core :refer [subscribe]]
+   [re-frame.core :refer [subscribe dispatch]]
    [reagent.core :as r]
    [reagent.ratom :refer-macros [reaction]]
    [schema.core :as s]))
@@ -151,8 +151,9 @@
           :route-fn routes/uploads-path}]]]]
      [:div.user-header
       [:div.bar {}
-       [:a.user-info {:href (routes/join-group-path {:group-id (:id group)})}
-        [:div.name "Join Group"]]]]]))
+       [:button.user-info
+        {:on-click (fn [_] (dispatch [:core/join-public-group (:id group)]))}
+        [:span.name "Join Group"]]]]]))
 
 (defn logged-in-header-view
   []

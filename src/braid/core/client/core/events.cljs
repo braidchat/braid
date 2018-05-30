@@ -737,6 +737,14 @@
                                    "Failed to load public groups list"]]))}}))
 
 (reg-event-fx
+  :core/join-public-group
+  (fn [{db :db} [_ group-id]]
+    (if (get-in db [:session :user-id])
+      {:websocket-send
+       (list [:braid.server/join-public-group group-id])}
+      {:redirect-to (routes/join-group-path {:group-id group-id})})))
+
+(reg-event-fx
   ::-store-public-groups
   (fn [{db :db} [_ groups]]
     {:db (assoc db :public-groups groups)}))
