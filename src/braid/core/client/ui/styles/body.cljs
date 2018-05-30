@@ -1,11 +1,12 @@
-(ns braid.core.client.ui.styles.body)
+(ns braid.core.client.ui.styles.body
+  (:require
+   [braid.core.client.ui.styles.mixins :as mixins]))
 
 (def body
   [:body
+   mixins/standard-font
    {:margin 0
     :padding 0
-    :font-family "\"Open Sans\", Helvetica, Arial, sans-serif"
-    :font-size "12px"
     :background "#F2F2F2"}
    ; prevent overscroll:
    {:height "100%"

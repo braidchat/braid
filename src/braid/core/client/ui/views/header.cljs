@@ -141,19 +141,13 @@
     [:div.header
      [:div.group-header
       [:div.bar {:style {:background-color (->color (group :id))}}
-       [:div.group-name (group :name)]
-       #_[group-header-buttons-view
-        [{:title "Recently Closed"
-          :route-fn routes/recent-page-path
-          :class "recent"}
-         {:title "Uploads"
-          :class "group-uploads"
-          :route-fn routes/uploads-path}]]]]
+       [:div.group-name (group :name)]]]
      [:div.user-header
-      [:div.bar {}
-       [:button.user-info
+      [:div.bar {:style {:background-color
+                         (->color (or @(subscribe [:user-id]) (group :id)))}}
+       [:button.join
         {:on-click (fn [_] (dispatch [:core/join-public-group (:id group)]))}
-        [:span.name "Join Group"]]]]]))
+        "Join Group"]]]]))
 
 (defn logged-in-header-view
   []
