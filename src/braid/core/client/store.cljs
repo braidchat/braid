@@ -23,7 +23,6 @@
      :open-group-id (s/maybe s/Uuid)
      :threads {s/Uuid app-schema/MsgThread}
      :group-threads {s/Uuid #{s/Uuid}}
-     :users {s/Uuid app-schema/User}
      :tags {s/Uuid app-schema/Tag}
      :groups {s/Uuid app-schema/Group}
      :page {:type s/Keyword
@@ -48,7 +47,8 @@
                             :mentioned-ids [s/Uuid]
                             :tag-ids [s/Uuid]
                             :new-message s/Str}}
-     :action-disabled? s/Bool}
+     :action-disabled? s/Bool
+     (s/optional-key :public-groups) #{app-schema/Group}}
     invites/InvitesAppState))
 
 (def initial-state
@@ -59,7 +59,6 @@
      :open-group-id nil
      :threads {}
      :group-threads {}
-     :users {}
      :tags {}
      :groups {}
      :page {:type nil}

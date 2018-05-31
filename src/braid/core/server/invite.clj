@@ -13,7 +13,6 @@
    [image-resizer.core :as img]
    [image-resizer.format :as img-format]
    [org.httpkit.client :as http]
-   [taoensso.carmine :as car]
    [taoensso.timbre :as timbre]))
 
 (when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))

@@ -1,7 +1,8 @@
 (ns braid.core.client.gateway.forms.user-auth.events
   (:require
-   [braid.core.client.gateway.helpers :as helpers]
    [braid.core.client.gateway.forms.user-auth.validations :refer [validations]]
+   [braid.core.client.gateway.helpers :as helpers]
+   [braid.core.client.router :as router]
    [clojure.string :as string]
    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
 
@@ -79,7 +80,38 @@
                               (dispatch [::set-user user])
                               (dispatch [::set-csrf-token csrf-token]))
                :on-error (fn [_]
-                           (dispatch [::set-user nil]))}}))
+                           (if (= (:action state) :join-group)
+                             (dispatch [::set-user nil])
+                             (dispatch [::remote-check-public-group])))}}))
+
+(reg-event-fx
+  ::remote-check-public-group
+  (fn [_ _]
+    (if-let [group-id (helpers/get-url-group-id)]
+      (dispatch [::load-group-readonly group-id])
+      (dispatch [::set-user nil]))))
+
+(reg-event-fx
+  ::load-group-readonly
+  (fn [_ [_ group-id]]
+    {:edn-xhr {:uri (str "/groups/" group-id)
+               :method :get
+               :on-complete (fn [group]
+                              (if (:public? group)
+                                (dispatch [::display-group-readonly group])
+                                (dispatch [::set-user nil])))
+               :on-error (fn [_] (dispatch [::set-user nil]))}}))
+
+(reg-event-fx
+  ::display-group-readonly
+  (fn [{db :db} [_ group]]
+    {:dispatch-n [[:set-login-state :anon-ws-connect]
+                  [:start-anon-socket]]
+     :db (-> db
+             (assoc
+                  :open-group-id (:id group)
+                  :page {:type :readonly})
+             (assoc-in [:user-auth :checking?] false))}))
 
 (reg-event-fx
   ::remote-log-out
@@ -95,19 +127,17 @@
                :on-error (fn [_]
                            (dispatch [::set-user nil]))}}))
 
-(defn message-event-handler [e]
-  (dispatch [::remote-oauth
-             (.. e -data -code)
-             (.. e -data -state)]))
-
-(defn init-message-listener! []
-  ; using a named function, b/c an anonymous function would  get registered multiple times
-  (js/window.addEventListener "message" message-event-handler))
+(defn message-event-handler
+  "Message handler for oauth login (from ::open-oauth-window).
+  This is a named function to prevent the handler from being added
+  multiple times."
+  [e]
+  (dispatch [::remote-oauth (.. e -data -code) (.. e -data -state)]))
 
 (reg-event-fx
   ::open-oauth-window
   (fn [{state :db} [_ provider]]
-    (init-message-listener!)
+    (js/window.addEventListener "message" message-event-handler)
     (case provider
       :github
       (.open js/window

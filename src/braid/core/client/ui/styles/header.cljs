@@ -187,6 +187,17 @@
     ".options:hover"
     {:display "inline-block"}]])
 
+(defn header-button [size]
+  [:&
+   (header-text size)
+   mixins/standard-font
+   {:background "transparent"
+    :cursor "pointer"
+    :border "none"
+    :color "white"}
+  [:&:hover
+   :&.active
+   {:background "rgba(0,0,0,0.25)"}] ])
 
 (defn user-header [size]
   [:>.user-header
@@ -199,6 +210,9 @@
    [:>.bar
     (bar)
     {:margin-left vars/pad}
+
+    [:button.join
+     (header-button size)]
 
     [:>.user-info
      {:display "inline-block"

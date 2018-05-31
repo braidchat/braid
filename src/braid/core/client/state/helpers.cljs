@@ -67,8 +67,8 @@
 
 ; users
 
-(defn update-user-avatar [state user-id avatar]
-  (assoc-in state [:users user-id :avatar] avatar))
+(defn update-user-avatar [state {:keys [group-id user-id avatar-url]}]
+  (assoc-in state [:groups group-id :users user-id :avatar] avatar-url))
 
 ; threads and messages
 
@@ -121,7 +121,7 @@
 
 (defn add-group [state group]
   (-> state
-      (update-in [:groups] assoc (group :id) group)
+      (assoc-in [:groups (group :id)] group)
       (update-in [:temp-threads] assoc (group :id) (schema/make-temp-thread (group :id)))))
 
 (defn remove-group [state group-id]

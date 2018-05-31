@@ -27,17 +27,25 @@
 
 (defroutes api-public-routes
 
+  (GET "/groups" _
+    (edn-response (group/public-groups)))
+
   (GET "/groups/:group-id" [group-id]
-    (let [group (group/group-by-id (java.util.UUID/fromString group-id))]
-      (if (group :id)
-        (edn-response {:public? (group :public?)
-                       :id (group :id)
-                       :slug (group :slug)
-                       :name (group :name)
-                       :intro (group :intro)
-                       :avatar (group :avatar)
-                       :users-count (group :users-count)})
-        (error-response 400 "No group with that id found"))))
+       (if-let [group (try
+                        (group/group-by-id (java.util.UUID/fromString group-id))
+                        (catch java.lang.IllegalArgumentException _
+                          nil))]
+         (if (:public? group) ; XXX: should it also give info for private groups?
+           (edn-response {:public? (group :public?)
+                          :id (group :id)
+                          :slug (group :slug)
+                          :name (group :name)
+                          :intro (group :intro)
+                          :avatar (group :avatar)
+                          :users-count (group :users-count)})
+           ;; XXX: should it just give 404? is it okay to let people guess private ids?
+           (error-response 401 "Group is private"))
+         (error-response 404 "No group with that id found")))
 
   ; log in
   (PUT "/session" [email password :as req]

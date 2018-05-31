@@ -165,7 +165,7 @@
         invitations (subscribe [:invitations])]
     (fn []
       [:a.plus
-       {:class (when (= (@page :type) :group-explore) "active")
+       {:class (when (#{:group-explore :create-group} (@page :type)) "active")
         :href (routes/other-path {:page-id "group-explore"})}
        (when (< 0 (count @invitations))
          [:div.badge (count @invitations)])])))

@@ -52,7 +52,8 @@
   (Thread/setDefaultUncaughtExceptionHandler
     (reify Thread$UncaughtExceptionHandler
       (uncaughtException [_ thread ex]
-        (timbre/errorf "Uncaught exception %s on %s" ex (.getName thread))))))
+        (timbre/errorf "Uncaught exception %s on %s" ex (.getName thread))
+        (.printStackTrace ex)))))
 
 (defstate thread-handler
   :start (set-default-exception-handler))

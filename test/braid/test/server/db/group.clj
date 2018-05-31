@@ -21,6 +21,7 @@
                            :name nil
                            :slug nil
                            :admins #{}
+                           :users {}
                            :intro nil
                            :avatar nil
                            :public? false

@@ -54,13 +54,15 @@
   (-> (routes
         resource-routes
         mobile-client-routes)
-      (wrap-defaults static-site-defaults)))
+      (wrap-defaults (-> static-site-defaults
+                         assoc-cookie-conf))))
 
 (def desktop-client-app
   (-> (routes
         resource-routes
         desktop-client-routes)
-      (wrap-defaults static-site-defaults)))
+      (wrap-defaults (-> static-site-defaults
+                         assoc-cookie-conf))))
 
 (def api-server-app
   (-> (routes

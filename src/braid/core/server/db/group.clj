@@ -22,8 +22,8 @@
 
 (defn group-by-id
   [group-id]
-  (-> (d/pull (db/db) group-pull-pattern [:group/id group-id])
-      db->group))
+  (some-> (d/pull (db/db) group-pull-pattern [:group/id group-id])
+          db->group))
 
 (defn group-by-slug
   [group-slug]
@@ -64,6 +64,7 @@
 
 (defn user-groups
   [user-id]
+  ;; XXX: pass pull-pattern into the query instead of separate pull-many?
   (->> (d/q '[:find [?g ...]
               :in $ ?user-id
               :where
@@ -72,7 +73,7 @@
             (db/db)
             user-id)
        (d/pull-many (db/db) group-pull-pattern)
-       (map (comp #(dissoc % :users) db->group))
+       (map db->group)
        set))
 
 (defn user-in-group?
@@ -98,6 +99,19 @@
            [?u :user/id ?user-id]
            [?g :group/admins ?u]]
          (db/db) user-id group-id)))
+
+(defn public-groups
+  []
+  (->> (d/q '[:find [(pull ?g pull-pattern) ...]
+              :in $ pull-pattern
+              :where
+              [?g :group/id _]]
+            (db/db) group-pull-pattern)
+      (into #{}
+            (comp (map db->group)
+                  (filter :public?)
+                  (map #(select-keys % [:id :name :slug :avatar :intro
+                                        :users-count]))))))
 
 ;; Transactions
 

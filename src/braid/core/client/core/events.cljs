@@ -54,12 +54,11 @@
 
 (defn all-users
   [state]
-  (vals (get-in state [:users])))
+  (vals (get-in state [:groups (:open-group-id state) :users])))
 
 (defn user-in-open-group?
   [state user-id]
-  (contains? (set (get-in state [:users user-id :group-ids]))
-             (state :open-group-id)))
+  (get-in state [:groups (:open-group-id state) :users user-id]))
 
 (defn extract-user-ids
   [state text]
@@ -70,12 +69,11 @@
                          (all-users state))]
     (->> mentioned-names
          (map nick->id)
-         (filter (partial user-in-open-group? state))
          (remove nil?))))
 
 (defn nickname->user
   [state nickname]
-  (->> (get-in state [:users])
+  (->> (get-in state [:groups (:open-group-id state) :users])
        vals
        (filter (fn [u] (= nickname (u :nickname))))
        ; nicknames are unique, so take the first
@@ -271,8 +269,10 @@
 
 (reg-event-db
   :update-user-nickname
-  (fn [state [_ {:keys [nickname user-id]}]]
-    (assoc-in state [:users user-id :nickname] nickname)))
+  (fn [state [_ {:keys [nickname user-id group-ids]}]]
+    (reduce (fn [state group-id]
+              (assoc-in state [:groups group-id :users user-id :nickname] nickname))
+            state group-ids)))
 
 (reg-event-fx
   :set-user-nickname
@@ -286,20 +286,20 @@
            (on-error msg)
            (dispatch [:update-user-nickname
                       {:nickname nickname
-                       :user-id (helpers/current-user-id state)}]))))}))
+                       :user-id (helpers/current-user-id state)
+                       :group-ids (keys (state :groups))}]))))}))
 
-; TODO: merge set-user-avatar & update-user-avatar?
 (reg-event-fx
   :set-user-avatar
   (fn [{state :db :as cofx} [_ avatar-url]]
-    {:websocket-send (list [:braid.server/set-user-avatar avatar-url])
-     :db (helpers/update-user-avatar
-           state (helpers/current-user-id state) avatar-url)}))
+    {:websocket-send (list [:braid.server/set-user-avatar avatar-url])}))
 
 (reg-event-db
   :update-user-avatar
-  (fn [state [_ {:keys [user-id avatar-url]}]]
-    (helpers/update-user-avatar state user-id avatar-url)))
+  (fn [state [_ {:keys [user-id group-id avatar-url]}]]
+    (helpers/update-user-avatar state {:group-id group-id
+                                       :user-id user-id
+                                       :avatar-url avatar-url})))
 
 (reg-event-fx
   :set-password
@@ -362,7 +362,7 @@
 
 (reg-event-db
   :add-threads
-  (fn [state [_ threads]]
+  (fn [state [_ threads ?open]]
     (-> state
         (update :threads #(merge-with merge % (key-by-id threads)))
         (update :group-threads
@@ -371,7 +371,10 @@
                    %
                    (into {}
                          (map (fn [[g t]] [g (into #{} (map :id) t)]))
-                         (group-by :group-id threads)))))))
+                         (group-by :group-id threads))))
+        (cond->
+            ?open (update-in [:user :open-thread-ids] into
+                             (map :id threads))))))
 
 (reg-event-fx
   :load-recent-threads
@@ -445,6 +448,12 @@
     (assoc state :login-state login-state)))
 
 (reg-event-fx
+  :start-anon-socket
+  (fn [cofx [_ _]]
+    (sync/connect!)
+    {}))
+
+(reg-event-fx
   :start-socket
   (fn [cofx [_ _]]
     (sync/connect!)
@@ -497,18 +506,21 @@
   :set-group-and-page
   (fn [{state :db :as cofx} [_ [group-id page-id]]]
     (cond
+      (and (= :gateway (:login-state state)) group-id)
+      {:dispatch [:braid.core.client.gateway.forms.user-auth.events/load-group-readonly
+                  group-id]}
+
       (nil? group-id)
       {:db (assoc state :open-group-id nil :page page-id)}
+
+      (get-in state [:groups group-id :readonly])
+      {:db (assoc state :open-group-id group-id :page {:type :readonly})}
 
       (some? (get-in state [:groups group-id]))
       {:db (assoc state :open-group-id group-id :page page-id)}
 
-      (and group-id (not (get-in state [:groups group-id])))
-      {:dispatch-n [[:set-login-state :gateway]
-                    [:braid.core.client.gateway.events/initialize :join-group]]}
-
       :else
-      {:dispatch [:redirect-from-root]})))
+      {:dispatch [:core/load-readonly-group group-id]})))
 
 (reg-event-fx
   :redirect-from-root
@@ -540,8 +552,8 @@
 
 (reg-event-db
   :add-users
-  (fn [state [_ users]]
-    (update-in state [:users] merge (key-by-id users))))
+  (fn [state [_ [group-id users]]]
+    (update-in state [:groups group-id :users] merge (key-by-id users))))
 
 (reg-event-db
   :join-group
@@ -567,8 +579,7 @@
 (reg-event-fx
   :set-init-data
   (fn [{state :db :as cofx} [_ data]]
-    {:dispatch-n (list [:set-login-state :app]
-                       [:add-users (data :users)])
+    {:dispatch-n (list [:set-login-state :app])
      :db (-> state
              (assoc :session {:user-id (data :user-id)})
              (assoc-in [:user :subscribed-tag-ids]
@@ -639,24 +650,21 @@
 
 (reg-event-db
   :update-user-status
-  (fn [state [_ [user-id status]]]
-    (if (get-in state [:users user-id])
-      (assoc-in state [:users user-id :status] status)
+  (fn [state [_ [group-id user-id status]]]
+    (if (get-in state [:groups group-id :users user-id])
+      (assoc-in state [:groups group-id :users user-id :status] status)
       state)))
 
 (reg-event-db
   :add-user
-  (fn [state [_ user]]
-    (assoc-in state [:users (:id user)] user)))
+  (fn [state [_ group-id user]]
+    (assoc-in state [:groups group-id :users (:id user)] user)))
 
 (reg-event-db
   :remove-user-from-group
   (fn [state [_ [group-id user-id]]]
-    ; TODO: also remove user from collection if group-ids is now empty?
-    ; shouldn't make a difference
-    ; TODO: remove mentions of that user from the group?
-    (update-in state [:users user-id :group-ids]
-               (partial remove (partial = group-id)))))
+    ;; TODO: remove mentions of that user from the group?
+    (update-in state [:groups group-id :users] dissoc user-id)))
 
 (reg-event-fx :add-tag-to-thread
   (fn [{state :db :as cofx} [_ {:keys [thread-id tag-id local-only?]}]]
@@ -689,6 +697,57 @@
   (fn [{state :db} _]
     {:dispatch-n [[:initialize-db]
                   [:set-login-state :gateway]]}))
+
+(reg-event-fx
+  :core/websocket-anon-connected
+  (fn [{db :db} _]
+    (if (= :anon-ws-connect (:login-state db))
+      {:dispatch-n [[:set-login-state :anon-connected]
+                    [:core/load-readonly-group]]}
+      {:dispatch-n [[:core/websocket-needs-auth]]})))
+
+(reg-event-fx
+  :core/load-readonly-group
+  (fn [{db :db} [_ ?group-id]]
+    {:websocket-send
+     (list [:braid.server.anon/load-group (or ?group-id (:open-group-id db))]
+           5000
+           (fn [resp]
+             (case resp
+               :chsk/timeout (js/console.warn "Loading readonly group timed out")
+               :braid/error (do (prn "private or nonexistant group")
+                                ;; should probably show warning here?
+                                (dispatch [:redirect-from-root]))
+
+               (do (dispatch [:join-group (select-keys resp [:tags :group])])
+                   (dispatch [:add-threads (:threads resp) true])
+                   (when ?group-id
+                     (dispatch [:set-group-and-page [?group-id {:type :readonly}]]))))))}))
+
+(reg-event-fx
+  :core/load-public-groups
+  (fn [_ _]
+    {:edn-xhr
+     {:uri "/groups"
+      :method :get
+      :on-complete (fn [resp] (dispatch [::-store-public-groups resp]))
+      :on-error
+      (fn [_]
+        (dispatch [:display-error [:load-public-groups
+                                   "Failed to load public groups list"]]))}}))
+
+(reg-event-fx
+  :core/join-public-group
+  (fn [{db :db} [_ group-id]]
+    (if (get-in db [:session :user-id])
+      {:websocket-send
+       (list [:braid.server/join-public-group group-id])}
+      {:redirect-to (routes/join-group-path {:group-id group-id})})))
+
+(reg-event-fx
+  ::-store-public-groups
+  (fn [{db :db} [_ groups]]
+    {:db (assoc db :public-groups groups)}))
 
 (reg-event-fx
   :core/websocket-update-next-reconnect

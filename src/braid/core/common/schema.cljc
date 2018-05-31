@@ -82,17 +82,6 @@
    :nickname s/Str
    :avatar s/Str})
 
-(def Group
-  {:id s/Uuid
-   :name s/Str
-   :slug s/Str
-   :admins #{s/Uuid}
-   :intro (s/maybe s/Str)
-   :avatar (s/maybe s/Str)
-   :public? s/Bool
-   :users-count s/Int
-   :bots #{BotDisplay}})
-
 (def UserId
   s/Uuid)
 
@@ -103,6 +92,18 @@
    :group-ids [s/Uuid]
    (s/optional-key :email) (s/maybe s/Str)
    (s/optional-key :status) (s/enum :online :offline)})
+
+(def Group
+  {:id s/Uuid
+   :name s/Str
+   :slug s/Str
+   :admins #{s/Uuid}
+   :intro (s/maybe s/Str)
+   :avatar (s/maybe s/Str)
+   :public? s/Bool
+   :users-count s/Int
+   :users {UserId User}
+   :bots #{BotDisplay}})
 
 (def Tag
   {:id s/Uuid

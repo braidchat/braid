@@ -7,6 +7,10 @@
 (def flex
   {:display #{:flex :-webkit-flex}})
 
+(def standard-font
+  {:font-family "\"Open Sans\", Helvetica, Arial, sans-serif"
+   :font-size "12px"})
+
 (defn mini-text []
   {:font-size (em 0.75)
    :text-transform "uppercase"

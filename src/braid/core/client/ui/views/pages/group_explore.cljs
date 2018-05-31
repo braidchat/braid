@@ -1,8 +1,10 @@
 (ns braid.core.client.ui.views.pages.group-explore
   (:require
+   [braid.core.client.helpers :refer [->color]]
+   [braid.core.client.routes :as routes]
    [clojure.string :as string]
-   [reagent.core :as r]
-   [re-frame.core :refer [dispatch subscribe]])
+   [re-frame.core :refer [dispatch subscribe]]
+   [reagent.core :as r])
   (:import
    (goog.events KeyCodes)))
 
@@ -32,16 +34,32 @@
                 "Decline"]])]
            [:div "No invitations."])])))
 
+(defn public-group-view
+  [group]
+  [:a.group {:style {:background-color (->color (:id group))}
+             :href (routes/inbox-page-path {:group-id (:id group)})}
+   [:div.name (:name group)]
+   [:div.users (let [count (:users-count group)]
+                 (str count " user" (when (not= 1 count) "s")))]
+   [:div.info (:intro group)]])
+
 (defn public-groups-view []
-  [:div
-   [:h2 "Public Groups"]
-   [:div "Coming soon."]])
+  (let [subscribed-groups @(subscribe [:subscribed-group-ids])]
+    [:div
+     [:h2 "Public Groups"]
+     [:div.public-groups
+      (doall
+        (for [group @(subscribe [:core/public-groups])
+              :when (not (subscribed-groups (:id group)))]
+          ^{:key (:id group)}
+          [public-group-view group]))]]))
 
 (defn group-explore-page-view
   []
   [:div.page.group-explore
    [:div.title "Group Explore"]
    [:div.content
-    [:a {:href "/gateway/create-group"} "Create a Group"]
+    [:a {:href (routes/other-path {:page-id "create-group"})}
+     "Create Group"]
     [invitations-view]
     [public-groups-view]]])

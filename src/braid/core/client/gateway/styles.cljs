@@ -21,7 +21,7 @@
      {:font-family vars/font-family}]])
 
 (defn form-styles []
-  [:>.gateway
+  [:.gateway
 
    [:>h1.header
     {:color vars/accent-color

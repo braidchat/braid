@@ -318,13 +318,14 @@
           (when uploading?
             [:div.uploading-indicator "\uf110"])
 
-          [new-message-view {:thread-id (thread :id)
-                             :group-id (thread :group-id)
-                             :placeholder (if new?
-                                            "Start a conversation..."
-                                            "Reply...")
-                             :new-message (thread :new-message)
-                             :mentioned-user-ids (when new?
-                                                   (thread :mentioned-ids))
-                             :mentioned-tag-ids (when new?
-                                                  (thread :tag-ids))}]]]))))
+          (when-not (:readonly thread)
+            [new-message-view {:thread-id (thread :id)
+                               :group-id (thread :group-id)
+                               :placeholder (if new?
+                                              "Start a conversation..."
+                                              "Reply...")
+                               :new-message (thread :new-message)
+                               :mentioned-user-ids (when new?
+                                                     (thread :mentioned-ids))
+                               :mentioned-tag-ids (when new?
+                                                    (thread :tag-ids))}])]]))))

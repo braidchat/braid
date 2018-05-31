@@ -13,6 +13,20 @@
    [clojure.set :refer [difference intersection]]
    [taoensso.timbre :as timbre]))
 
+(def anonymous-group-readers (atom {}))
+
+(defn add-anonymous-reader
+  [group-id client-id]
+  (swap! anonymous-group-readers update group-id (fnil conj #{}) client-id))
+
+(defn remove-anonymous-reader
+  [client-id]
+  (let [group (some (fn [[g ids]]
+                      (and (contains? ids client-id)
+                           g))
+                    @anonymous-group-readers)]
+    (swap! anonymous-group-readers update group disj client-id)))
+
 (defn broadcast-thread
   "broadcasts thread to all users with the thread open, except those in ids-to-skip"
   [thread-id ids-to-skip]
@@ -28,7 +42,9 @@
                                        (partial into #{} (filter user-tags)))
             thread-with-last-opens (thread/thread-add-last-open-at
                                      filtered-thread uid)]
-        (chsk-send! uid [:braid.client/thread thread-with-last-opens])))))
+        (chsk-send! uid [:braid.client/thread thread-with-last-opens])))
+    (doseq [anon-id (@anonymous-group-readers (thread :group-id))]
+      (chsk-send! anon-id [:braid.client/thread thread]))))
 
 (defn broadcast-user-change
   "Broadcast user info change to clients that can see this user"
@@ -51,7 +67,11 @@
                          (into #{} (map :id)
                                (group/group-users group-id)))]
     (doseq [uid ids-to-send-to]
-      (chsk-send! uid info))))
+      (chsk-send! uid info)))
+  (doseq [anon-id (@anonymous-group-readers group-id)]
+    (chsk-send! anon-id info))
+  (doseq [bot (bot/bots-for-event group-id)]
+    (bots/send-event-notification bot info)))
 
 ; TODO: when using clojure.spec, use spec to validate this
 (defn user-can-message? [user-id ?data]
@@ -96,32 +116,6 @@
                         user-id mentioned-id)
                     false))))
           (?data :mentioned-user-ids)))))
-
-(defn notify-users [new-message]
-  (let [subscribed-user-ids (->>
-                              (thread/users-subscribed-to-thread
-                                (new-message :thread-id))
-                              (remove (partial = (:user-id new-message))))
-        online? (intersection
-                  (set subscribed-user-ids)
-                  (set (:any @connected-uids)))]
-    (doseq [uid subscribed-user-ids]
-      (when-let [rules (user/user-get-preference uid :notification-rules)]
-        (when (notify-rules/notify? uid rules new-message)
-          (let [msg (update new-message :content
-                            (partial parse-tags-and-mentions uid))]
-            (if (online? uid)
-              (chsk-send! uid [:braid.client/notify-message msg])
-              (let [update-msgs
-                    (partial
-                      map
-                      (fn [m] (update m :content
-                                      (partial parse-tags-and-mentions uid))))]
-                (-> (email/create-message
-                      [(-> (thread/thread-by-id (msg :thread-id))
-                           (update :messages update-msgs))])
-                    (assoc :subject "Notification from Braid")
-                    (->> (email/send-message (user/user-email uid))))))))))))
 
 (defn notify-bots [new-message]
   ; Notify bots mentioned in the message

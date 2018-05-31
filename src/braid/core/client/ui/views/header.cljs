@@ -5,7 +5,7 @@
    [braid.core.client.helpers :refer [->color]]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.search-bar :refer [search-bar-view]]
-   [re-frame.core :refer [subscribe]]
+   [re-frame.core :refer [subscribe dispatch]]
    [reagent.core :as r]
    [reagent.ratom :refer-macros [reaction]]
    [schema.core :as s]))
@@ -135,7 +135,22 @@
   :writer register-header-view!
   :reader header-views)
 
-(defn header-view []
+(defn readonly-header-view
+  []
+  (let [group @(subscribe [:active-group])]
+    [:div.header
+     [:div.group-header
+      [:div.bar {:style {:background-color (->color (group :id))}}
+       [:div.group-name (group :name)]]]
+     [:div.user-header
+      [:div.bar {:style {:background-color
+                         (->color (or @(subscribe [:user-id]) (group :id)))}}
+       [:button.join
+        {:on-click (fn [_] (dispatch [:core/join-public-group (:id group)]))}
+        "Join Group"]]]]))
+
+(defn logged-in-header-view
+  []
   (into
     [:div.header]
     (concat
@@ -146,3 +161,9 @@
           [view]))
       [[admin-header-view]
        [user-header-view]])))
+
+(defn header-view
+  []
+  (if (:readonly @(subscribe [:active-group]))
+    [readonly-header-view]
+    [logged-in-header-view]))

@@ -5,7 +5,7 @@
    [braid.core.client.ui.styles.mixins :as mixins]))
 
 (defn user-auth-styles []
-  [:>.gateway
+  [:.gateway
 
    [:>.user-auth
 
@@ -110,4 +110,3 @@
          :right 0
          :margin 0
          :line-height "2rem"}]]]]]])
-

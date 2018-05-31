@@ -1,6 +1,6 @@
 (ns braid.core.client.gateway.forms.join-group.events
   (:require
-   [braid.core.client.gateway.helpers :as helpers]
+   [braid.core.client.gateway.helpers :as helpers :refer [get-url-group-id]]
    [clojure.string :as string]
    [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
 
@@ -10,15 +10,10 @@
     {:dispatch-n [[:braid.core.client.gateway.forms.user-auth.events/initialize :log-in]
                   [::remote-get-group-info]]}))
 
-(defn get-url-group-id []
-  (last (string/split js/window.location #"/")))
-
 (reg-event-fx
   ::handle-group-info
   (fn [{state :db} [_ group-info]]
-    {:db (assoc-in state [:join-group :group] (if group-info
-                                                       group-info
-                                                       {}))}))
+    {:db (assoc-in state [:join-group :group] (or group-info {}))}))
 
 (reg-event-fx
   ::handle-error

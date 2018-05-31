@@ -38,14 +38,12 @@
   (dispatch [:add-invite invite]))
 
 (defmethod sync/event-handler :braid.client/name-change
-  [[_ {:keys [user-id nickname]}]]
-  (dispatch [:update-user-nickname {:user-id user-id
-                                    :nickname nickname}]))
+  [[_ {:keys [user-id nickname group-ids] :as data}]]
+  (dispatch [:update-user-nickname data]))
 
 (defmethod sync/event-handler :braid.client/user-new-avatar
-  [[_ {:keys [user-id avatar-url]}]]
-  (dispatch [:update-user-avatar {:avatar-url avatar-url
-                                  :user-id user-id}]))
+  [[_ {:keys [user-id group-id avatar-url] :as data}]]
+  (dispatch [:update-user-avatar data]))
 
 (defmethod sync/event-handler :braid.client/left-group
   [[_ [group-id group-name]]]
@@ -53,17 +51,16 @@
                            :group-name group-name}]))
 
 (defmethod sync/event-handler :braid.client/user-connected
-  [[_ user-id]]
-  (dispatch [:update-user-status [user-id :online]]))
+  [[_ [group-id user-id]]]
+  (dispatch [:update-user-status [group-id user-id :online]]))
 
 (defmethod sync/event-handler :braid.client/user-disconnected
-  [[_ user-id]]
-  (dispatch [:update-user-status [user-id :offline]]))
+  [[_ [group-id user-id]]]
+  (dispatch [:update-user-status [group-id user-id :offline]]))
 
 (defmethod sync/event-handler :braid.client/new-user
   [[_ [user new-group]]]
-  ; TODO: indicate to user to the group?
-  (dispatch [:add-user (assoc user :status :online)]))
+  (dispatch [:add-user new-group (assoc user :status :online)]))
 
 (defmethod sync/event-handler :braid.client/user-left
   [[_ [group-id user-id]]]
