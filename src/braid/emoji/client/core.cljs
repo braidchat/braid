@@ -18,6 +18,6 @@
                         (reduce-kv #(assoc %1 %2 (first %3)) {}))])))
           (data :emoji/custom-emoji))))
 
-(def state
-  [{::group-emoji {}}
-   {::group-emoji s/Any}])
+(def initial-state {::group-emoji {}})
+
+(def state-spec {::group-emoji s/Any})
