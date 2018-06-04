@@ -1,6 +1,6 @@
 (ns braid.core.client.ui.views.pages.group-explore
   (:require
-   [braid.core.client.helpers :refer [->color]]
+   [braid.core.client.helpers :as helpers :refer [->color]]
    [braid.core.client.routes :as routes]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]
@@ -39,9 +39,12 @@
   [:a.group {:style {:background-color (->color (:id group))}
              :href (routes/inbox-page-path {:group-id (:id group)})}
    [:div.name (:name group)]
+   [:div.info
+    [:div (:intro group)]
+    [:div "Last Updated " (helpers/format-date (:updated-at group))]
+    [:div "Created " (helpers/format-date (:created-at group))]]
    [:div.users (let [count (:users-count group)]
-                 (str count " user" (when (not= 1 count) "s")))]
-   [:div.info (:intro group)]])
+                 (str count " user" (when (not= 1 count) "s")))]])
 
 (defn public-groups-view []
   (let [subscribed-groups @(subscribe [:subscribed-group-ids])]
@@ -49,7 +52,8 @@
      [:h2 "Public Groups"]
      [:div.public-groups
       (doall
-        (for [group @(subscribe [:core/public-groups])
+        (for [group (->> @(subscribe [:core/public-groups])
+                        (sort-by :updated-at #(compare %2 %1)))
               :when (not (subscribed-groups (:id group)))]
           ^{:key (:id group)}
           [public-group-view group]))]]))
