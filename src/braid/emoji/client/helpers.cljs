@@ -1,6 +1,7 @@
 (ns braid.emoji.client.helpers
   (:require
-   [re-frame.core :refer [subscribe]]))
+    [clojure.string :as string]
+    [re-frame.core :refer [subscribe]]))
 
 (declare unicode-data ascii)
 
@@ -12,36 +13,28 @@
   [query]
   (mapcat
     (partial filter (fn [[code _]] (simple-matches? code query)))
-    [(map (fn [{:keys [shortcode image]}] [shortcode image])
-          @(subscribe [:emoji/group-emojis]))
-     unicode-data]))
+    [unicode-data]))
 
 (defn unicode
   [shortcode]
-  (or (get @(subscribe [:emoji/custom-emoji shortcode]) :image)
-      (unicode-data shortcode)))
+  (unicode-data shortcode))
 
 (defn shortcode->html [shortcode]
-  (if-let [custom @(subscribe [:emoji/custom-emoji shortcode])]
-    [:img {:class "emojione"
-           :alt shortcode
-           :title shortcode
-           :src (custom :image)}]
-    (let [ext :png]
-      (case ext
-        :png
-        [:img {:class "emojione"
-               :alt shortcode
-               :title shortcode
-               :src (str "//cdn.jsdelivr.net/emojione/assets/png/"
-                         (last (unicode shortcode)) ".png")}]
-        :svg
-        [:object {:class "emojione"
-                  :data (str "//cdn.jsdelivr.net/emojione/assets/svg/"
-                             (last (unicode shortcode)) ".svg")
-                  :type "image/svg+xml"
-                  :title shortcode
-                  :standby shortcode}]))))
+  (let [ext :png]
+    (case ext
+      :png
+      [:img {:class "emojione"
+             :alt shortcode
+             :title shortcode
+             :src (str "//cdn.jsdelivr.net/emojione/assets/png/"
+                       (last (unicode shortcode)) ".png")}]
+      :svg
+      [:object {:class "emojione"
+                :data (str "//cdn.jsdelivr.net/emojione/assets/svg/"
+                           (last (unicode shortcode)) ".svg")
+                :type "image/svg+xml"
+                :title shortcode
+                :standby shortcode}])))
 
 (def unicode-data
   {

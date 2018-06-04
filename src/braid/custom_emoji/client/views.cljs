@@ -1,9 +1,10 @@
-(ns braid.emoji.client.views
+(ns braid.custom-emoji.client.views
   (:require
-   [braid.core.client.s3 :as s3]
    [clojure.string :as string]
    [re-frame.core :refer [subscribe dispatch]]
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [braid.core.client.s3 :as s3] ; FIXME use of non-public API
+   ))
 
 (defn new-custom-emoji-view
   []
@@ -35,7 +36,7 @@
                        (string/blank? @image-url)
                        @uploading?)
          :on-click (fn [_]
-                     (dispatch [:emoji/add-emoji
+                     (dispatch [:custom-emoji/add-emoji
                                 {:group-id @(subscribe [:open-group-id])
                                  :shortcode @shortcode
                                  :image @image-url}])
@@ -79,7 +80,7 @@
   [:div.settings.custom-emoji
    [:h2 "Custom Emoji"]
    [new-custom-emoji-view]
-   (if-let [emojis (seq @(subscribe [:emoji/group-emojis (group :id)]))]
+   (if-let [emojis (seq @(subscribe [:custom-emoji/group-emojis (group :id)]))]
      [:table
       [:thead
        [:tr [:th "shortcode"] [:th ""] [:th ""]]]

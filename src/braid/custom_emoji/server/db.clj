@@ -1,8 +1,9 @@
-(ns braid.emoji.server.db
+(ns braid.custom-emoji.server.db
   (:require
-   [braid.core.server.db :as db]
    [datomic.api :as d]
-   [datomic.db]))
+   [datomic.db]
+   [braid.core.server.db :as db] ; FIXME use of non-public API
+   ))
 
 (def db-schema
   [{:db/ident :custom-emoji/id

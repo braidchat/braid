@@ -3,10 +3,12 @@
     [braid.core.hooks :as hooks]
     [braid.core.core]
     [braid.quests.core]
-    [braid.emoji.core]))
+    [braid.emoji.core]
+    [braid.custom-emoji.core]))
 
 (defn init! []
   (hooks/reset-all!)
   (braid.core.core/init!)
   (braid.quests.core/init!)
-  (braid.emoji.core/init!))
+  (braid.emoji.core/init!)
+  (braid.custom-emoji.core/init!))

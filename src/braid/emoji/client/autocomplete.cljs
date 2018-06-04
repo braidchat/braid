@@ -14,18 +14,18 @@
   (let [pattern #"\B[:(](\S{2,})$"]
     (when-let [query (second (re-find pattern text))]
       (->> (helpers/matching query)
-          (map (fn [[k v]]
-                 {:key
-                  (fn [] k)
-                  :action
-                  (fn [])
-                  :message-transform
-                  (fn [text]
-                    (string/replace text pattern (str k " ")))
-                  :html
-                  (fn []
-                    [emoji-view (let [show-brackets? (= "(" (first text))
-                                      emoji-name (apply str (-> k rest butlast))]
-                                  (if show-brackets?
-                                    (str "(" emoji-name ")") k))
-                     {:react-key k}])}))))))
+           (map (fn [[k v]]
+                  {:key
+                   (fn [] k)
+                   :action
+                   (fn [])
+                   :message-transform
+                   (fn [text]
+                     (string/replace text pattern (str k " ")))
+                   :html
+                   (fn []
+                     [emoji-view (let [show-brackets? (= "(" (first text))
+                                       emoji-name (apply str (-> k rest butlast))]
+                                   (if show-brackets?
+                                     (str "(" emoji-name ")") k))
+                      {:react-key k}])}))))))
