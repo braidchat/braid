@@ -29,4 +29,5 @@
   (router/init))
 
 (defn ^:export reload []
+  (modules/init!)
   (render))

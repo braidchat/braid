@@ -1,10 +1,9 @@
 (ns braid.core.client.group-admin.views.group-settings-page
-  (:require-macros
-   [braid.core.module-helpers :refer [defhook]])
   (:require
     [reagent.core :as r]
     [reagent.ratom :include-macros true :refer-macros [reaction]]
     [re-frame.core :refer [dispatch subscribe]]
+    [braid.core.hooks :as hooks]
     [braid.core.client.routes :as routes]
     [braid.core.client.s3 :as s3]
     [braid.core.client.ui.views.upload :refer [avatar-upload-view]]))
@@ -61,9 +60,7 @@
                               (dispatch [:make-group-public! (group :id)])))}
        "Make public"]])])
 
-(defhook
-  :writer register-group-setting!
-  :reader extra-group-settings)
+(defonce extra-group-settings (hooks/register! (atom [])))
 
 (defn group-settings-page-view
   []

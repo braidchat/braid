@@ -1,12 +1,10 @@
 (ns braid.core.server.conf
   (:require
-   [braid.core.module-helpers :refer [defhook]]
+   [braid.core.hooks :as hooks]
    [environ.core :refer [env]]
    [mount.core :as mount :refer [defstate]]))
 
-(defhook
-  :writer register-config-var!
-  :reader config-vars)
+(defonce config-vars (hooks/register! (atom [])))
 
 (defstate config
   :start

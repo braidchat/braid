@@ -7,7 +7,8 @@
           [braid.quests.client.styles :refer [quests-header]]
           [braid.quests.client.core :refer [initial-data-handler
                                             event-listener
-                                            state]]]
+                                            initial-state
+                                            schema]]]
          :clj
          [[braid.core.core :as core]
           [braid.quests.server.core :refer [db-schema
@@ -22,7 +23,7 @@
        (core/register-styles! quests-header)
        (core/register-initial-user-data-handler! initial-data-handler)
        (core/register-event-listener! event-listener)
-       (core/register-state! state))
+       (core/register-state! initial-state schema))
 
      :clj
      (do

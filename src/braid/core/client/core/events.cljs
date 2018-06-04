@@ -1,7 +1,6 @@
 (ns braid.core.client.core.events
-  (:require-macros
-   [braid.core.module-helpers :refer [defhook]])
   (:require
+   [braid.core.hooks :as hooks]
    [braid.core.client.router :as router]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
@@ -15,9 +14,7 @@
    [re-frame.core :as re-frame :refer [dispatch reg-event-fx reg-event-db reg-fx]]
    [schema.core :as s]))
 
-(defhook
-  :writer register-event-listener!
-  :reader event-listeners)
+(defonce event-listeners (hooks/register! (atom [])))
 
 (re-frame/add-post-event-callback
   (fn [event _]
@@ -572,9 +569,7 @@
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))
 
-(defhook
-  :reader initial-user-data-handlers
-  :writer register-initial-user-data-handler!)
+(defonce initial-user-data-handlers (hooks/register! (atom [])))
 
 (reg-event-fx
   :set-init-data

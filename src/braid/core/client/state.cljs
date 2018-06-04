@@ -12,7 +12,6 @@
 (api/reg-event-fx ::register-state!
   (fn [{db :db} [_ state spec]]
     {:db (-> db
-             (merge state)
              (update ::initial-state merge state)
              (update ::state-spec merge spec))}))
 

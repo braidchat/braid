@@ -1,7 +1,6 @@
 (ns braid.core.client.ui.views.message
-  (:require-macros
-   [braid.core.module-helpers :refer [defhook]])
   (:require
+    [braid.core.hooks :as hooks]
     [braid.core.client.helpers :as helpers :refer [id->color ->color]]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.embed :refer [embed-view]]
@@ -168,13 +167,9 @@
   (make-delimited-processor {:delimiter "*"
                              :result-fn (fn [body] [:strong.starred body])}))
 
-(defhook
-  :reader stateless-formatters
-  :writer register-stateless-formatters!)
+(defonce stateless-formatters (hooks/register! (atom [])))
 
-(defhook
-  :reader post-transformers
-  :writer register-post-transformers!)
+(defonce post-transformers (hooks/register! (atom [])))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into

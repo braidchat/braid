@@ -1,6 +1,6 @@
 (ns braid.core.server.routes.client
   (:require
-   [braid.core.module-helpers :refer [defhook]]
+   [braid.core.hooks :as hooks]
    [braid.core.server.api.github :as github]
    [braid.core.server.conf :refer [config]]
    [braid.core.server.db.group :as group]
@@ -18,9 +18,7 @@
 
 (def prod-js? (= (env :environment) "prod"))
 
-(defhook
-  :writer register-additional-script!
-  :reader additional-scripts)
+(defonce additional-scripts (hooks/register! (atom [])))
 
 (defn get-html [client vars]
   (clostache/render-resource

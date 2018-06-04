@@ -40,4 +40,5 @@
 (defn ^:export reload
   "Force a re-render. For use with figwheel"
   []
+  (modules/init!)
   (render))

@@ -7,7 +7,7 @@
     [schema.core :as s]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
-    [braid.core.module-helpers :refer [defhook]]
+    [braid.core.hooks :as hooks]
     [braid.core.common.schema :refer [new-message-valid? upload-valid?]]
     [braid.core.common.util :as util :refer [valid-nickname? valid-tag-name?]]
     [braid.core.server.bots :as bots]
@@ -495,9 +495,7 @@
           (helpers/add-anonymous-reader ?data user-id))
       (?reply-fn :braid/error))))
 
-(defhook
-  :reader initial-user-data
-  :writer register-initial-user-data!)
+(defonce initial-user-data (hooks/register! (atom [])))
 
 (defmethod event-msg-handler :braid.server/start
   [{:as ev-msg :keys [user-id]}]
