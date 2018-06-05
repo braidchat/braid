@@ -1,8 +1,8 @@
 (ns braid.core.client.ui.views.new-message
   (:require-macros
-   [braid.core.module-helpers :refer [defhook]]
    [cljs.core.async.macros :refer [go]])
   (:require
+   [braid.core.hooks :as hooks]
    [braid.core.client.helpers :refer [debounce stop-event!]]
    [braid.core.client.s3 :as s3]
    [braid.core.client.store :as store]
@@ -82,9 +82,7 @@
   [txt]
   (odd? (count (re-seq #"`" txt))))
 
-(defhook
-  :writer register-autocomplete-engines!
-  :reader autocomplete-engines)
+(defonce autocomplete-engines (hooks/register! (atom [])))
 
 (defn wrap-autocomplete [config]
   (let [autocomplete-chan (chan)

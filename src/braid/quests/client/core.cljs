@@ -16,6 +16,5 @@
     (when (not= "quests" (namespace (first event)))
       (re-frame/dispatch [:quests/update-handler event]))))
 
-(def state
-  [{::quest-records {}}
-   {::quest-records {QuestRecordId QuestRecord}}])
+(def initial-state {::quest-records {}})
+(def schema {::quest-records {QuestRecordId QuestRecord}})

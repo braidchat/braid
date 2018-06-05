@@ -72,6 +72,3 @@
      :focused-thread-id nil
      :temp-threads {}}
     invites/init-state))
-
-(def state
-  [initial-state AppState])

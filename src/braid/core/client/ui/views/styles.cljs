@@ -1,7 +1,6 @@
 (ns braid.core.client.ui.views.styles
-  (:require-macros
-   [braid.core.module-helpers :refer [defhook]])
   (:require
+   [braid.core.hooks :as hooks]
    [braid.core.client.bots.views.bots-page-styles]
    [braid.core.client.gateway.forms.create-group.styles]
    [braid.core.client.gateway.forms.join-group.styles]
@@ -32,9 +31,7 @@
    [reagent.core :as r]
    [schema.core :as s]))
 
-(defhook
-  :writer register-styles!
-  :reader module-styles)
+(defonce module-styles (hooks/register! (atom [])))
 
 (defn styles-view []
   [:style

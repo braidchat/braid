@@ -1,7 +1,7 @@
 (ns braid.core.server.db.user
   (:require
    [braid.core.common.util :refer [slugify]]
-   [braid.core.module-helpers :refer [defhook]]
+   [braid.core.hooks :as hooks]
    [braid.core.server.db :as db]
    [braid.core.server.db.common :refer :all]
    [clavatar.core :refer [gravatar]]
@@ -148,9 +148,7 @@
 
 ;; Transactions
 
-(defhook
-  :writer register-post-create-user-txn!
-  :reader post-create-txns)
+(defonce post-create-txns (hooks/register! (atom [])))
 
 (defn create-user-txn
   "given an id and email, creates and returns a user;

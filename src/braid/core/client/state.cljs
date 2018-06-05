@@ -12,18 +12,14 @@
 (api/reg-event-fx ::register-state!
   (fn [{db :db} [_ state spec]]
     {:db (-> db
-             (merge state)
              (update ::initial-state merge state)
              (update ::state-spec merge spec))}))
 
-(defn ^:api register-state!
-  ([f]
-   (let [[state spec] (f)]
-     (register-state! state spec)))
-  ([state spec]
-   ;; Dispatch sync because we want the module setup calls
-   ;; to finish before initializing the db
-   (api/dispatch-sync [::register-state! state spec])))
+(defn register-state!
+  [state spec]
+  ;; Dispatch sync because we want the module setup calls
+  ;; to finish before initializing the db
+  (api/dispatch-sync [::register-state! state spec]))
 
 (api/reg-sub :braid.state/valid?
   (fn [db _]

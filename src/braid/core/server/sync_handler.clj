@@ -1,6 +1,6 @@
 (ns braid.core.server.sync-handler
   (:require
-   [braid.core.module-helpers :refer [defhook]]
+   [braid.core.hooks :as hooks]
    [braid.core.server.db :as db]
    [braid.core.server.socket :as socket]
    [braid.core.server.sync-helpers :as helpers]
@@ -11,11 +11,7 @@
    [braid.core.server.db.group :as group]
    [braid.core.server.db.thread :as thread]))
 
-(defhook
-  :writer register-server-message-handlers!
-  :reader message-handlers
-  :initial-value {}
-  :add-fn merge)
+(defonce message-handlers (hooks/register! (atom {})))
 
 (defn run-cofx! [ev-msg cofx]
   (when-let [args (cofx :chsk-send!)]

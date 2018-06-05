@@ -1,7 +1,6 @@
 (ns braid.core.client.ui.views.header
-  (:require-macros
-   [braid.core.module-helpers :refer [defhook]])
   (:require
+   [braid.core.hooks :as hooks]
    [braid.core.client.helpers :refer [->color]]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.search-bar :refer [search-bar-view]]
@@ -131,9 +130,7 @@
              ^{:key (header-item :class)}
              [header-item-view header-item]))]]])))
 
-(defhook
-  :writer register-header-view!
-  :reader header-views)
+(defonce header-views (hooks/register! (atom [])))
 
 (defn readonly-header-view
   []
