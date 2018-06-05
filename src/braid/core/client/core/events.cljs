@@ -659,7 +659,9 @@
   :remove-user-from-group
   (fn [state [_ [group-id user-id]]]
     ;; TODO: remove mentions of that user from the group?
-    (update-in state [:groups group-id :users] dissoc user-id)))
+    (if (get-in state [:groups group-id :users])
+      (update-in state [:groups group-id :users] dissoc user-id)
+      state)))
 
 (reg-event-fx :add-tag-to-thread
   (fn [{state :db :as cofx} [_ {:keys [thread-id tag-id local-only?]}]]
