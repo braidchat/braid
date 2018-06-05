@@ -3,8 +3,8 @@
   (:require
     [braid.core.core :as core]
     #?@(:cljs
-         [[braid.custom-emoji.client.autocomplete :refer [autocomplete-handler
-                                                          emoji-shortcodes-replace]]
+         [[braid.emoji.core :as emoji]
+          [braid.custom-emoji.client.autocomplete :as autocomplete]
           [braid.custom-emoji.client.styles :refer [settings-page]]
           [braid.custom-emoji.client.state :refer [initial-state
                                                    state-spec
@@ -18,8 +18,8 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-autocomplete-engine! autocomplete-handler)
-       (core/register-message-transform! emoji-shortcodes-replace)
+       (emoji/register-emoji!
+         {:shortcode-lookup autocomplete/lookup})
        (core/register-styles! settings-page)
        (core/register-state! initial-state state-spec)
        (core/register-initial-user-data-handler! initial-data-handler)

@@ -1,42 +1,6 @@
-(ns braid.emoji.client.helpers
-  (:require
-    [clojure.string :as string]
-    [re-frame.core :refer [subscribe]]))
+(ns braid.emojione-emoji.ref)
 
-(declare unicode-data ascii)
-
-(defn simple-matches?
-  [m s]
-  (not= -1 (.indexOf m s)))
-
-(defn matching
-  [query]
-  (mapcat
-    (partial filter (fn [[code _]] (simple-matches? code query)))
-    [unicode-data]))
-
-(defn unicode
-  [shortcode]
-  (unicode-data shortcode))
-
-(defn shortcode->html [shortcode]
-  (let [ext :png]
-    (case ext
-      :png
-      [:img {:class "emojione"
-             :alt shortcode
-             :title shortcode
-             :src (str "//cdn.jsdelivr.net/emojione/assets/png/"
-                       (last (unicode shortcode)) ".png")}]
-      :svg
-      [:object {:class "emojione"
-                :data (str "//cdn.jsdelivr.net/emojione/assets/svg/"
-                           (last (unicode shortcode)) ".svg")
-                :type "image/svg+xml"
-                :title shortcode
-                :standby shortcode}])))
-
-(def unicode-data
+(def shortcodes
   {
    ":kiss_ww:" ["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"]
    ":couplekiss_ww:" ["1f469-200d-2764-fe0f-200d-1f48b-200d-1f469","1f469-2764-1f48b-1f469"]
@@ -2085,8 +2049,6 @@
    ":heart_exclamation:" ["2763"]
    ":heavy_heart_exclamation_mark_ornament:" ["2763"]})
 
-
-
 (def ascii
   {
    "<3" ":heart:"
@@ -2215,6 +2177,3 @@
    ":x" ":no_mouth:"
    ":-x" ":no_mouth:"
    "=#" ":no_mouth:"})
-
-
-(def ascii-set (set (keys ascii)))

@@ -5,18 +5,17 @@
     [braid.custom-emoji.client.remote-handlers]
     [braid.custom-emoji.client.subs]))
 
+(defn- key-by [k coll]
+  (reduce (fn [memo i]
+            (assoc memo (k i) i)) {} coll))
+
 (defn initial-data-handler
   [db data]
-  (assoc
-    db :custom-emoji/group-emoji
-    (into {}
-          (comp
-            (map (fn [[g-id emojis]]
-                   [g-id
-                    (->> emojis
-                        (group-by :shortcode)
-                        (reduce-kv #(assoc %1 %2 (first %3)) {}))])))
-          (data :custom-emoji/custom-emoji))))
+  (assoc db :custom-emoji/group-emoji
+    (->> (data :custom-emoji/custom-emoji)
+         (map (fn [[group-id emojis]]
+                [group-id (key-by :shortcode emojis)]))
+         (into {}))))
 
 (def initial-state {:custom-emoji/group-emoji {}})
 

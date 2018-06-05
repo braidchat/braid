@@ -38,7 +38,7 @@
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.2"]
-                 [reagent  "0.7.0"]
+                 [reagent  "0.8.1"]
                  [re-frame "0.10.5" :exclusions [org.clojure/clojurescript]]
                  [cljsjs/husl "6.0.1-0"]
                  [cljsjs/highlight "9.6.0-0"]
