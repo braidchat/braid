@@ -136,4 +136,3 @@
 
        (register-state! braid.core.client.store/initial-state
                         braid.core.client.store/AppState))))
-
