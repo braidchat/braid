@@ -43,7 +43,7 @@
        (swap! braid.core.client.ui.views.new-message/autocomplete-engines conj f))
 
      (defn register-message-transform!
-       "Register new stateless transformers to message bodies. The functions should expect to recieve either some text or hiccup nodes and should return the same."
+       "Register new stateless transformers to message bodies. The functions should expect to receive either some text or hiccup nodes and should return the same."
        [f]
        {:pre [(fn? f)]}
        (swap! braid.core.client.ui.views.message/stateless-formatters conj f))

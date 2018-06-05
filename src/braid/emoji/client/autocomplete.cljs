@@ -1,31 +1,41 @@
 (ns braid.emoji.client.autocomplete
   (:require
     [clojure.string :as string]
-    [braid.emoji.client.helpers :as helpers]))
+    [braid.emoji.client.lookup :as lookup]
+    [braid.emoji.client.views :refer [emoji-view]]))
 
-(defn emoji-view
-  [emoji]
+(defn- shortcode->brackets
+  "We allow user to search for emoji either using colons or brackets, ie. :shortcode: or (shortcode).
+  Internally, the lookups are stored with colon shortcodes, ie. :shortcode:
+  If the user is searching with brackets, we replace the colons with brackets when displaying results."
+  [shortcode]
+  (let [base (apply str (-> shortcode rest butlast))]
+    (str "(" base ")")))
+
+(defn- emoji-result-view
+  [shortcode emoji-meta show-as-brackets?]
   [:div.emoji.match
-   (helpers/shortcode->html (string/replace emoji #"[\(\)]" ":"))
-   [:div.name emoji]
-   [:div.extra "..."]])
+   [emoji-view shortcode emoji-meta]
+   [:div.name (if show-as-brackets?
+               (shortcode->brackets shortcode)
+               shortcode)]
+   [:div.extra]])
 
 (defn autocomplete-handler [text]
   (let [pattern #"\B[:(](\S{2,})$"]
     (when-let [query (second (re-find pattern text))]
-      (->> (helpers/matching query)
-          (map (fn [[k v]]
-                 {:key
-                  (fn [] k)
-                  :action
-                  (fn [])
-                  :message-transform
-                  (fn [text]
-                    (string/replace text pattern (str k " ")))
-                  :html
-                  (fn []
-                    [emoji-view (let [show-brackets? (= "(" (first text))
-                                      emoji-name (apply str (-> k rest butlast))]
-                                  (if show-brackets?
-                                    (str "(" emoji-name ")") k))
-                     {:react-key k}])}))))))
+      (let [show-as-brackets? (= "(" (first text))]
+        (->> (lookup/shortcode)
+             (filter (fn [[shortcode _]]
+                       (string/includes? shortcode query)))
+             (map (fn [[shortcode emoji-meta]]
+                    {:key
+                     (fn [] shortcode)
+                     :action
+                     (fn [])
+                     :message-transform
+                     (fn [text]
+                       (string/replace text pattern (str shortcode " ")))
+                     :html
+                     (fn []
+                       [emoji-result-view shortcode emoji-meta show-as-brackets?])})))))))
