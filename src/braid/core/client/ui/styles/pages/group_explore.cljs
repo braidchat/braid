@@ -11,11 +11,21 @@
     [:input
      {:display "block"}]]
    [:.public-groups
-    {:display "flex"
-     :flex-wrap "wrap"}
-    [:.group
-     {:color "white"
-      :padding "0.5em"
-      :margin "0.2em"}
-     [:.name {:font-size "large"}]
-     [:.info {:font-size "small"}]]]])
+    [:.active :.stale
+     {:display "flex"
+      :flex-wrap "wrap"}
+     [:.group
+      {:color "white"
+       :padding "0.5em"
+       :margin "0.2em"}
+      [:.name {:font-size "large"}]
+      [:.info {:font-size "small"}]]]
+
+    [:.toggle-stale
+     mixins/standard-font
+     {:background "transparent"
+      :background-color "darkgray"
+      :cursor "pointer"
+      :border "none"
+      :color "white"
+      :margin-left "1rem"}]]])

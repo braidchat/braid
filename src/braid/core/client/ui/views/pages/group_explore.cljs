@@ -3,6 +3,7 @@
    [braid.core.client.helpers :as helpers :refer [->color]]
    [braid.core.client.routes :as routes]
    [clojure.string :as string]
+   [cljs-time.core :as t]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r])
   (:import
@@ -47,16 +48,35 @@
                  (str count " user" (when (not= 1 count) "s")))]])
 
 (defn public-groups-view []
-  (let [subscribed-groups @(subscribe [:subscribed-group-ids])]
-    [:div
-     [:h2 "Public Groups"]
-     [:div.public-groups
-      (doall
-        (for [group (->> @(subscribe [:core/public-groups])
+  (let [subscribed-groups @(subscribe [:subscribed-group-ids])
+        showing? (r/atom false)]
+    (fn []
+      [:div
+       [:h2 "Public Groups"]
+       (let [groups (->> @(subscribe [:core/public-groups])
                         (sort-by :updated-at #(compare %2 %1)))
-              :when (not (subscribed-groups (:id group)))]
-          ^{:key (:id group)}
-          [public-group-view group]))]]))
+             cutoff (t/minus (t/now) (t/weeks 1))
+             {active-groups true stale-groups false}
+             (->> groups
+                 (group-by (comp #(t/after? % cutoff) t/to-default-time-zone :updated-at) ))]
+         [:div.public-groups
+          [:h3 "Active Groups"]
+          [:div.active
+           (doall
+             (for [group active-groups
+                   :when (not (subscribed-groups (:id group)))]
+               ^{:key (:id group)}
+               [public-group-view group]))]
+          [:h3 "Stale Groups"
+           [:button.toggle-stale {:on-click (fn [_] (swap! showing? not))}
+            (if @showing? "Hide" "Show")]]
+          (when @showing?
+            [:div.stale
+             (doall
+               (for [group stale-groups
+                     :when (not (subscribed-groups (:id group)))]
+                 ^{:key (:id group)}
+                 [public-group-view group]))])])])))
 
 (defn group-explore-page-view
   []
