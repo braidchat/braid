@@ -57,7 +57,7 @@
      (defn register-styles!
        "Add Garden CSS styles to the page styles"
        [styles]
-       {:pre [(vector? styles)]}
+       {:pre [(or (vector? styles) (map? styles))]}
        (swap! braid.core.client.ui.views.styles/module-styles conj styles))
 
      (defn register-state!
@@ -83,10 +83,9 @@
    (do
      (defn register-config-var!
        "Add a keyword to be read from `env` and added to the `config` state"
-       [vars]
-       {:pre [(vector? vars)
-              (every? keyword? vars)]}
-       (swap! braid.core.server.conf/config-vars concat vars))
+       [var]
+       {:pre [(keyword? var)]}
+       (swap! braid.core.server.conf/config-vars conj var))
 
      (defn register-additional-script!
        "Add a javascript script tag to client html. Values can be a map with a `:src` or `:body` key or a function with no arguments, returing the same."
