@@ -608,14 +608,10 @@
                                 (str "You have been removed from " group-name)
                                 :info)
          (helpers/remove-group group-id)
-         ((fn [state]
-            (if-let [sidebar-order (:groups-order
-                                     (helpers/get-user-preferences state))]
-              (helpers/set-preferences
-                state
-                {:groups-order (into [] (remove (partial = group-id))
-                                     sidebar-order)})
-              state))))
+         (cond->
+             (get-in state [:preferences :groups-order])
+           (update-in [:preferences :groups-order]
+                      (partial filterv #(not= % group-id)))))
      :dispatch [(when (= group-id (state :open-group-id))
                  :redirect-from-root)]}))
 
