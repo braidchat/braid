@@ -3,6 +3,7 @@
 .lein-env
 .lein-repl-history
 .nrepl-port
+.rebel_readline_history
 *-init.clj
 profiles.clj
 .lein-failures
