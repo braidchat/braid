@@ -48,6 +48,7 @@
                  [hickory "0.7.0" :exclusions [org.clojure/clojurescript]]
                  [org.clojure/core.memoize "0.5.9"]
                  [lein-doo "0.1.7"]
+                 [cljsjs/resize-observer-polyfill "1.4.2-0"]
 
                  ;;shared
                  [org.clojure/tools.reader "1.3.0-alpha3"]

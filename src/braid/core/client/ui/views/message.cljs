@@ -197,7 +197,7 @@
         post-transform)))
 
 (defn message-view
-  [message embed-update-chan]
+  [message]
   (let [sender @(subscribe [:user (message :user-id)])
         current-group (subscribe [:open-group-id])
         current-user @(subscribe [:user-id])
