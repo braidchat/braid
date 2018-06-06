@@ -602,18 +602,19 @@
 (reg-event-fx
   :leave-group
   (fn [{state :db :as cofx} [_ {:keys [group-id group-name]}]]
-    {:db
-     (-> state
-         (helpers/display-error (str "left-" group-id)
-                                (str "You have been removed from " group-name)
-                                :info)
-         (helpers/remove-group group-id)
-         (cond->
-             (get-in state [:preferences :groups-order])
-           (update-in [:preferences :groups-order]
-                      (partial filterv #(not= % group-id)))))
-     :dispatch [(when (= group-id (state :open-group-id))
-                 :redirect-from-root)]}))
+    (-> {:db
+         (-> state
+             (helpers/display-error (str "left-" group-id)
+                                    (str "You have been removed from " group-name)
+                                    :info)
+             (helpers/remove-group group-id)
+             (cond->
+                 (get-in state [:preferences :groups-order])
+               (update-in [:preferences :groups-order]
+                          (partial filterv #(not= % group-id)))))}
+        (cond->
+            (= group-id (state :open-group-id))
+          (assoc :dispatch [:redirect-from-root])))))
 
 (reg-event-db
   :add-open-thread
