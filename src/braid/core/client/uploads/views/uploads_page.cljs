@@ -2,13 +2,22 @@
   (:require
    [braid.core.client.helpers :as helpers]
    [braid.core.client.routes :as routes]
-   [braid.core.client.ui.views.embed :refer [embed-view]]
    [braid.core.client.ui.views.pills :as pills]
    [braid.core.client.ui.views.thread :as thread]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
    [reagent.ratom :refer-macros [run!]]))
+
+(defn file-view [url]
+  (cond
+    (re-matches #".*(png|jpg|jpeg|gif)" url)
+    [:img {:src url}]
+    (re-matches #".*(mp4|mkv|mov)$" url)
+    [:video
+     {:src url
+      :preload "metadata"
+      :controls true}]))
 
 (defn upload-view
   [upload on-delete]
@@ -27,7 +36,7 @@
        (fn [upload on-delete]
          [:tr.upload
           [:td.uploaded-file
-           [embed-view (upload :url)]
+           [file-view (upload :url)]
            [:br]
            (js/decodeURIComponent (last (string/split (upload :url) #"/")))]
           [:td.delete

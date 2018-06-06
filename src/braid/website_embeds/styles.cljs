@@ -1,20 +1,16 @@
-(ns braid.core.client.ui.styles.embed
+(ns braid.website-embeds.styles
   (:require
-   [braid.core.client.ui.styles.mixins :as mixins]
-   [braid.core.client.ui.styles.vars :as vars]
-   [garden.arithmetic :as m]
-   [garden.units :refer [rem]]))
+    [garden.arithmetic :as m]
+    [garden.units :refer [rem]]
+    [braid.core.client.ui.styles.mixins :as mixins]
+    [braid.core.client.ui.styles.vars :as vars]))
 
-(defn embed [pad]
-  [:>.embed
-   {:margin [[0 (m/* -1 pad)]]
-    :padding [[pad 0 0]]
-    :overflow "hidden"
-    :cursor "pointer"}
+(def styles
+  [:>.website-embed
 
    [:>.website
     {:background "black"
-     :padding (m/* 0.5 pad)
+     :padding (m/* 0.5 vars/pad)
      :color "white"
      :-webkit-font-smoothing "antialiased"
      :overflow "hidden"}
@@ -23,7 +19,7 @@
      {:width "75px"
       :height "75px"
       :float "left"
-      :margin-right (m// pad 2)}]
+      :margin-right (m// vars/pad 2)}]
 
     [:>.about
      {:overflow "hidden"}

@@ -3,7 +3,6 @@
    [braid.core.client.mobile.auth-flow.styles]
    [braid.core.client.mobile.styles.drawer]
    [braid.core.client.ui.styles.body]
-   [braid.core.client.ui.styles.embed]
    [braid.core.client.ui.styles.header]
    [braid.core.client.ui.styles.imports]
    [braid.core.client.ui.styles.message]
@@ -160,9 +159,7 @@
                       :padding-top (em 0.5)
                       :-webkit-overflow-scrolling "touch"}
 
-                     braid.core.client.ui.styles.message/message
-                     [:>.message
-                      (braid.core.client.ui.styles.embed/embed pad)]]
+                     braid.core.client.ui.styles.message/message]
 
                     (braid.core.client.ui.styles.thread/new-message pad)]]]]]]]]]]]
 

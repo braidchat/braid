@@ -155,6 +155,7 @@
                                 (> (* 2 60 1000) ; 2 minutes
                                    (- (:created-at message)
                                       (or (:created-at prev-message) 0)))
+                                ; TODO should instead check if there was an embed triggered
                                 (not (helpers/contains-urls? (prev-message :content))))))))]
             (doall
               (for [message sorted-messages]
