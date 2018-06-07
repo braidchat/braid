@@ -9,7 +9,7 @@
    [braid.core.server.digest :as digest]
    [braid.core.server.invite :as invites]
    [braid.core.server.routes.helpers :as helpers]
-   [clostache.parser :as clostache]
+   [cljstache.core :as cljstache]
    [compojure.coercions :refer [as-uuid]]
    [compojure.core :refer [GET defroutes]]
    [compojure.route :refer [resources]]
@@ -21,7 +21,7 @@
 (defonce additional-scripts (hooks/register! (atom [])))
 
 (defn get-html [client vars]
-  (clostache/render-resource
+  (cljstache/render-resource
     (str "public/" client ".html")
     (merge {:prod prod-js?
             :dev (not prod-js?)
@@ -84,7 +84,7 @@
   (GET "/gateway/oauth/:provider/post-auth" [provider]
     (case provider
       "github"
-      (clostache/render-resource
+      (cljstache/render-resource
         "public/oauth-post-auth.html" {})
       ; else
       {:status 400

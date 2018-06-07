@@ -22,7 +22,7 @@
                  [image-resizer "0.1.9"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [inliner "0.1.0"]
-                 [de.ubercode.clostache/clostache "1.4.0"]
+                 [cljstache "2.0.1"]
                  [mount "0.1.10"]
                  [com.fasterxml.jackson.core/jackson-core "2.8.7"]
                  [com.cognitect/transit-clj "0.8.300" :exclusions [com.fasterxml.jackson.core/jackson-core]]
