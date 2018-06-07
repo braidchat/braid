@@ -1,9 +1,18 @@
 (ns braid.core.server.routes.api.modules
   (:require
     [clout.core :as clout]
-    [braid.core.hooks :as hooks]))
+    [braid.core.hooks :as hooks]
+    [braid.core.server.routes.helpers :as helpers]))
 
 (defonce module-public-http-routes (hooks/register! (atom [])))
+(defonce module-private-http-routes (hooks/register! (atom [])))
+
+(defn- wrap-logged-in? [handler]
+  (fn [request]
+    (if (helpers/logged-in? request)
+      (handler request)
+      {:status 401
+       :body {:error "Must be logged in."}})))
 
 (defn- matches?
   [request {:keys [method clout-matcher]}]
@@ -22,8 +31,8 @@
                  (handler-fn (update request :params merge params)))))))
 
 (defn- make-handler
-  []
-  (let [routes (->> @module-public-http-routes
+  [routes-atom]
+  (let [routes (->> @routes-atom
                     (map (fn [[method url-pattern handler-fn]]
                            {:method method
                             :url-pattern url-pattern
@@ -35,8 +44,10 @@
                      (matches? request route-meta)))
            (dispatch request)))))
 
-(defn dynamic-handler [request]
-  ((make-handler) request))
+(defn- dynamic-handler
+  [routes-atom]
+  (fn [request]
+    ((make-handler routes-atom) request)))
 
 ; TODO
 ; the dynamic handler parses all the defined routes on each request
@@ -44,9 +55,12 @@
 ; in prod, however, this is inefficient, and we should use a static-handler
 ; but, other modules would need to register their routes before starting the server
 ; but, changing the order of modules is not currently possible
-; (def handler (make-handler))
+; (def public-handler (make-handler module-public-http-routes))
+; (def private-handler (make-handler module-private-http-routes))
 
-(def handler dynamic-handler)
+(def public-handler (dynamic-handler module-public-http-routes))
+(def private-handler (-> (dynamic-handler module-private-http-routes)
+                         wrap-logged-in?))
 
 (defn valid-route?
   [[method url-pattern handler]]

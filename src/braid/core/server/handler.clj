@@ -76,16 +76,22 @@
                                (assoc-in [:security :anti-forgery] false)
                                assoc-cookie-conf)))
 
-        (-> modules/handler
-            (wrap-defaults (-> site-defaults
-                               (assoc-in [:security :anti-forgery] false)
-                               assoc-cookie-conf))
-            (wrap-restful-format :formats [:edn :transit-json]))
-
         (-> api-private-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
                                assoc-csrf-conf)))
+
+        (-> modules/public-handler
+            (wrap-defaults (-> site-defaults
+                               (assoc-in [:security :anti-forgery] false)))
+            (wrap-restful-format :formats [:edn :transit-json]))
+
+        (-> modules/private-handler
+            (wrap-defaults (-> site-defaults
+                               assoc-cookie-conf
+                               assoc-csrf-conf))
+            (wrap-restful-format :formats [:edn :transit-json]))
+
         (-> sync-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf

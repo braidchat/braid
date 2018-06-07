@@ -143,7 +143,22 @@
                                :body (get-in request [:params :bar])})]"
        [route]
        {:pre [(braid.core.server.routes.api.modules/valid-route? route)]}
-       (swap! braid.core.server.routes.api.modules/module-public-http-routes conj route))))
+       (swap! braid.core.server.routes.api.modules/module-public-http-routes conj route))
+
+     (defn register-private-http-route!
+       "Add a private HTTP route (one that requires a user to be logged in).
+        Expects a route defined as:
+        [:method \"pattern\" handler-fn]
+
+        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
+        handler-fn should return a ring-compatible response (if it is a clojure data structure, it will be converted to edn or transit-json, based on the accepts header)
+        ex.
+        [:get \"/foo/:bar\" (fn [request]
+                              {:status 200
+                               :body (get-in request [:params :bar])})]"
+       [route]
+       {:pre [(braid.core.server.routes.api.modules/valid-route? route)]}
+       (swap! braid.core.server.routes.api.modules/module-private-http-routes conj route))))
 
 (defn init! []
   #?(:cljs
