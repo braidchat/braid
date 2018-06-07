@@ -25,4 +25,3 @@
   []
   (doseq [[a initial-state] @atoms]
     (reset! a initial-state)))
-
