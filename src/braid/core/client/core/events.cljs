@@ -563,7 +563,7 @@
        (cond->
            (and (= (:id group) (:open-group-id state))
                 (= :readonly (get-in state [:page :type])))
-         (assoc :redirect-to (routes/inbox-page-path {:group-id (:id group)}))) )))
+         (assoc :redirect-to (routes/inbox-page-path {:group-id (:id group)}))))))
 
 (reg-event-fx
   :notify-if-client-out-of-date
