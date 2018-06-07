@@ -2,8 +2,7 @@
   (:require
    [re-frame.core :refer [reg-sub]]
    [braid.core.client.gateway.forms.user-auth.subs]
-   [braid.core.client.gateway.forms.create-group.subs]
-   [braid.core.client.gateway.forms.join-group.subs]))
+   [braid.core.client.gateway.forms.create-group.subs]))
 
 (reg-sub
   ::action

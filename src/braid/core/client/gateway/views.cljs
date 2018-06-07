@@ -2,8 +2,6 @@
   (:require
    [braid.core.client.gateway.forms.create-group.styles :refer [create-group-styles]]
    [braid.core.client.gateway.forms.create-group.views :refer [create-group-view]]
-   [braid.core.client.gateway.forms.join-group.styles :refer [join-group-styles]]
-   [braid.core.client.gateway.forms.join-group.views :refer [join-group-view]]
    [braid.core.client.gateway.forms.user-auth.styles :refer [user-auth-styles]]
    [braid.core.client.gateway.forms.user-auth.views :refer [user-auth-view]]
    [braid.core.client.gateway.styles :as styles]
@@ -29,7 +27,6 @@
           [:#app
            (styles/form-styles)
            (create-group-styles)
-           (join-group-styles)
            (user-auth-styles)])}}])
 
 (defn header-view []
@@ -42,5 +39,4 @@
    [user-auth-view]
    (case @(subscribe [:braid.core.client.gateway.subs/action])
      :create-group [create-group-view]
-     :join-group [join-group-view]
      nil)])

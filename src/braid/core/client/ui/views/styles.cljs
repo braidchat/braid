@@ -3,7 +3,6 @@
    [braid.core.hooks :as hooks]
    [braid.core.client.bots.views.bots-page-styles]
    [braid.core.client.gateway.forms.create-group.styles]
-   [braid.core.client.gateway.forms.join-group.styles]
    [braid.core.client.gateway.forms.user-auth.styles]
    [braid.core.client.gateway.styles-vars :as gateway-vars]
    [braid.core.client.gateway.styles]
@@ -81,7 +80,6 @@
                  (braid.core.client.gateway.styles/form-styles)
                  [:.page.group-explore>.content
                   (braid.core.client.gateway.forms.create-group.styles/create-group-styles)]
-                 (braid.core.client.gateway.forms.join-group.styles/join-group-styles)
                  (braid.core.client.gateway.forms.user-auth.styles/user-auth-styles)
 
                  ;; page styles

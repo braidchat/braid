@@ -35,6 +35,11 @@
   (fn [{state :db} [_ logged-in?]]
     (merge
       {:db (assoc state :action-disabled? (not logged-in?))}
-      (if (and (= :log-in (state :action)) logged-in?)
+      (cond
+        (and (= :log-in (state :action)) logged-in?)
         {:dispatch [:start-socket]}
-        {}))))
+
+        (and (= :join-group (state :action)) logged-in?)
+        {:dispatch [::join-group/remote-join-group]}
+
+        :else {}))))
