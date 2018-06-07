@@ -552,14 +552,18 @@
   (fn [state [_ [group-id users]]]
     (update-in state [:groups group-id :users] merge (key-by-id users))))
 
-(reg-event-db
+(reg-event-fx
   :join-group
-  (fn [state [_ {:keys [group tags]}]]
-    (-> state
-        (helpers/add-tags tags)
-        (helpers/add-group group)
-        (update-in [:user :subscribed-tag-ids]
-                   set/union (set (map :id tags))))))
+  (fn [{state :db} [_ {:keys [group tags]}]]
+    (-> {:db (-> state
+                 (helpers/add-tags tags)
+                 (helpers/add-group group)
+                 (update-in [:user :subscribed-tag-ids]
+                            set/union (set (map :id tags))))}
+       (cond->
+           (and (= (:id group) (:open-group-id state))
+                (= :readonly (get-in state [:page :type])))
+         (assoc :redirect-to (routes/inbox-page-path {:group-id (:id group)}))) )))
 
 (reg-event-fx
   :notify-if-client-out-of-date
