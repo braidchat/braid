@@ -20,12 +20,13 @@
 
 (defn- embiggen-emoji [message]
   (for [node message]
-    (do (if (emoji? node)
-          (update-in node [2 :class] #(str % " large"))
-          node))))
+    (if (emoji? node)
+      (update-in node [2 :class] #(str % " large"))
+      node)))
 
 (defn format-emojis
-  "If a message contains only a single emoji, adds the large class to the emoji. Otherwise, returns the message unmodified."
+  "If a message contains only a single emoji, adds the large class to
+  the emoji. Otherwise, returns the message unmodified."
   [message]
   (if (single-emoji? message)
     (embiggen-emoji message)
