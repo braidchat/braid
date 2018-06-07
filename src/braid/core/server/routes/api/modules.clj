@@ -7,7 +7,18 @@
 (defonce module-public-http-routes (hooks/register! (atom [])))
 (defonce module-private-http-routes (hooks/register! (atom [])))
 
-(defn- wrap-logged-in? [handler]
+;; XXX: the way this works means that routes with wrap-logged-in?
+;; won't fall-through to other routes in the handler (because it
+;; always returns something, even the route doesn't match).
+;; In the future, investigate an alternate approach (e.g. wrapping the
+;; individual routes with the authorization checking logic)
+(defn- wrap-logged-in?
+  "Return a 401 if the request is coming from a client that isn't logged in.
+
+  WARNING: The route with this middleware must be the last in the
+  handler, because it will swallow *all* requests it receives, even if
+  the route doesn't match!"
+  [handler]
   (fn [request]
     (if (helpers/logged-in? request)
       (handler request)
@@ -49,14 +60,14 @@
   (fn [request]
     ((make-handler routes-atom) request)))
 
-; TODO
-; the dynamic handler parses all the defined routes on each request
-; this is fine in dev, b/c it allows for a reloaded workflow in the backend
-; in prod, however, this is inefficient, and we should use a static-handler
-; but, other modules would need to register their routes before starting the server
-; but, changing the order of modules is not currently possible
-; (def public-handler (make-handler module-public-http-routes))
-; (def private-handler (make-handler module-private-http-routes))
+;; TODO
+;; the dynamic handler parses all the defined routes on each request
+;; this is fine in dev, b/c it allows for a reloaded workflow in the backend
+;; in prod, however, this is inefficient, and we should use a static-handler
+;; but, other modules would need to register their routes before starting the server
+;; but, changing the order of modules is not currently possible
+;; (def public-handler (make-handler module-public-http-routes))
+;; (def private-handler (make-handler module-private-http-routes))
 
 (def public-handler (dynamic-handler module-public-http-routes))
 (def private-handler (-> (dynamic-handler module-private-http-routes)

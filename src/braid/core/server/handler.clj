@@ -76,26 +76,29 @@
                                (assoc-in [:security :anti-forgery] false)
                                assoc-cookie-conf)))
 
-        (-> api-private-routes
-            (wrap-defaults (-> api-defaults
-                               assoc-cookie-conf
-                               assoc-csrf-conf)))
-
         (-> modules/public-handler
             (wrap-defaults (-> site-defaults
                                (assoc-in [:security :anti-forgery] false)))
             (wrap-restful-format :formats [:edn :transit-json]))
 
-        (-> modules/private-handler
-            (wrap-defaults (-> site-defaults
-                               assoc-cookie-conf
-                               assoc-csrf-conf))
-            (wrap-restful-format :formats [:edn :transit-json]))
-
         (-> sync-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
-                               assoc-csrf-conf))))
+                               assoc-csrf-conf)))
+
+       (-> api-private-routes
+            (wrap-defaults (-> api-defaults
+                               assoc-cookie-conf
+                               assoc-csrf-conf)))
+
+       ;; this needs to be last, because the middleware will return
+       ;; 401 if not authorized & hence not fall-through to other
+       ;; routes
+       (-> modules/private-handler
+           (wrap-defaults (-> site-defaults
+                              assoc-cookie-conf
+                              assoc-csrf-conf))
+           (wrap-restful-format :formats [:edn :transit-json])))
       (wrap-cors :access-control-allow-origin [#".*"]
                  :access-control-allow-credentials true
                  :access-control-allow-methods [:get :put :post :delete])
