@@ -1,6 +1,5 @@
 (ns braid.core.server.routes.api.private
   (:require
-   [braid.core.server.api.link-extract :as link-extract]
    [braid.core.server.db :as db]
    [braid.core.server.db.group :as group]
    [braid.core.server.db.user :as user]
@@ -102,13 +101,6 @@
                    (-> (io/resource "CHANGELOG.md")
                        slurp
                        markdown->hiccup)}))
-
-  (GET "/extract" [url :as {session :session}]
-    (if (user/user-id-exists? (:user-id session))
-      (edn-response (link-extract/extract url))
-      {:status 403
-       :headers {"Content-Type" "application/edn"}
-       :body (pr-str {:error "Unauthorized"})}))
 
   (GET "/s3-policy" req
     (if (user/user-id-exists? (get-in req [:session :user-id]))

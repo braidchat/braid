@@ -1,27 +1,15 @@
-(ns braid.core.client.ui.views.embed
+(ns braid.website-embeds.views
   (:require
     [braid.core.client.helpers :refer [->color url->color]]
     [braid.core.client.xhr :refer [edn-xhr]]
-    [cljs.core.async :refer [put!]]
     [reagent.core :as r]))
 
-(defn- arr->rgb [arr]
-  ; until embedly provides color alpha, default to transparent background
-  "rgba(255,255,255,0)"
-  #_(if arr
-    (str "rgb(" (arr 0) "," (arr 1) "," (arr 2) ")")
-    "rgb(150, 150, 150)"))
-
-(defn website-embed-view
-  "View for embedly generic website info. Prefer to use embed-view with a url
-  instead of this directly"
+(defn- website-embed-view
   [content]
   [:div.website
    {:style {:background-color (url->color (content :original_url))}}
    (if-let [img (get-in content [:images 0])]
-     [:img.image {:src (img :url)
-                  :style {:background-color
-                          (arr->rgb (get-in img [:colors 0 :color]))}}]
+     [:img.image {:src (img :url)}]
      [:img.image {:src (:favicon_url content)}])
    [:div.about
     [:div.provider
@@ -31,27 +19,19 @@
     [:div.title (:title content)]
     [:div.url (:url content)]]])
 
-(defn video-embed-view
-  "View for embedly video info. Prefer to use embed-view with a url instead of
-  this directly"
+(defn- video-embed-view
   [content]
   [:div.video
    (when-let [img (get-in content [:images 0])]
-     [:img {:src (img :url)
-            :style {:background-color
-                    (arr->rgb (get-in img [:colors 0 :color]))}}])])
+     [:img {:src (img :url)}])])
 
-(defn image-embed-view
-  "View for embedly image info. Prefer to use embed-view with a url instead of
-  this directly"
+(defn- image-embed-view
   [content]
   [:div.image
    (when-let [img (get-in content [:images 0])]
-     [:img {:src (img :url)
-            :style {:background-color
-                    (arr->rgb (get-in img [:colors 0 :color]))}}])])
+     [:img {:src (img :url)}])])
 
-(defn embed-view [url embed-update-chan]
+(defn embed-view [url]
   (let [content (r/atom {})
         set-content! (fn [response]
                        (reset! content response))
@@ -66,15 +46,10 @@
        (fn []
          (fetch-content! url))
 
-       :component-did-update
-       (fn [_]
-         (when embed-update-chan
-           (put! embed-update-chan (js/Date.))))
-
        :reagent-render
        (fn [_ _]
          (if-let [media-type (:type @content)]
-           [:div.embed.loaded
+           [:div.website-embed.loaded
             {:on-click (fn []
                          (.open js/window (:original_url @content)))}
             (cond
@@ -85,4 +60,9 @@
               [image-embed-view @content]
 
               (@content :url) [website-embed-view @content])]
-           [:div.embed.loading]))})))
+           [:div.website-embed.loading]))})))
+
+(defn handler
+  [{:keys [urls]}]
+  (when-let [url (first urls)]
+    [embed-view url]))

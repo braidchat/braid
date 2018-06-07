@@ -3,7 +3,6 @@
     [braid.core.hooks :as hooks]
     [braid.core.client.helpers :as helpers :refer [id->color ->color]]
     [braid.core.client.routes :as routes]
-    [braid.core.client.ui.views.embed :refer [embed-view]]
     [braid.core.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
     [cljsjs.highlight.langs.clojure]
     [cljsjs.highlight.langs.css]
@@ -171,6 +170,8 @@
 
 (defonce post-transformers (hooks/register! (atom [])))
 
+(defonce post-message-views (hooks/register! (atom [])))
+
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
   links"
@@ -196,7 +197,7 @@
         post-transform)))
 
 (defn message-view
-  [message embed-update-chan]
+  [message]
   (let [sender @(subscribe [:user (message :user-id)])
         current-group (subscribe [:open-group-id])
         current-user @(subscribe [:user-id])
@@ -249,5 +250,6 @@
 
      (into [:div.content] (format-message (message :content)))
 
-     (when-let [url (first (helpers/extract-urls (message :content)))]
-       [embed-view url embed-update-chan])]))
+     (into [:div.post-message]
+           (for [post-message-view @post-message-views]
+             [post-message-view message]))]))

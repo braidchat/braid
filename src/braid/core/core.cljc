@@ -15,6 +15,7 @@
          [[braid.core.server.conf]
           [braid.core.server.routes.client]
           [braid.core.server.db.user]
+          [braid.core.server.routes.api.modules]
           [braid.core.server.schema]
           [braid.core.server.sync]
           [braid.core.server.sync-handler]])))
@@ -53,6 +54,13 @@
        [f]
        {:pre [(fn? f)]}
        (swap! braid.core.client.ui.views.message/post-transformers conj f))
+
+     (defn register-post-message-view!
+       "Register a view to display after a message.
+        View will receive message object as a parameter."
+       [view]
+       {:pre [(fn? view)]}
+       (swap! braid.core.client.ui.views.message/post-message-views conj view))
 
      (defn register-styles!
        "Add Garden CSS styles to the page styles"
@@ -120,7 +128,37 @@
        {:pre [(map? handler-defs)
               (every? keyword? (keys handler-defs))
               (every? fn? (vals handler-defs))]}
-       (swap! braid.core.server.sync-handler/message-handlers merge handler-defs))))
+       (swap! braid.core.server.sync-handler/message-handlers merge handler-defs))
+
+     (defn register-public-http-route!
+       "Add a public HTTP route.
+        Expects a route defined as:
+        [:method \"pattern\" handler-fn]
+
+        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
+        handler-fn should return a ring-compatible response (if it is a clojure data structure, it will be converted to edn or transit-json, based on the accepts header)
+        ex.
+        [:get \"/foo/:bar\" (fn [request]
+                              {:status 200
+                               :body (get-in request [:params :bar])})]"
+       [route]
+       {:pre [(braid.core.server.routes.api.modules/valid-route? route)]}
+       (swap! braid.core.server.routes.api.modules/module-public-http-routes conj route))
+
+     (defn register-private-http-route!
+       "Add a private HTTP route (one that requires a user to be logged in).
+        Expects a route defined as:
+        [:method \"pattern\" handler-fn]
+
+        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
+        handler-fn should return a ring-compatible response (if it is a clojure data structure, it will be converted to edn or transit-json, based on the accepts header)
+        ex.
+        [:get \"/foo/:bar\" (fn [request]
+                              {:status 200
+                               :body (get-in request [:params :bar])})]"
+       [route]
+       {:pre [(braid.core.server.routes.api.modules/valid-route? route)]}
+       (swap! braid.core.server.routes.api.modules/module-private-http-routes conj route))))
 
 (defn init! []
   #?(:cljs
