@@ -225,7 +225,7 @@
 
 (defmethod event-msg-handler :braid.server/retract-tag
   [{:as ev-msg :keys [?data user-id]}]
-  (let [tag-id (have util/uuid? ?data)
+  (let [tag-id (have uuid? ?data)
         group-id (tag/tag-group-id tag-id)]
     (when (group/user-is-group-admin? user-id group-id)
       (db/run-txns! (tag/retract-tag-txn tag-id))

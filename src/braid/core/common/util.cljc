@@ -39,12 +39,6 @@
 (def bot-name-re
   #"(?:\w|\d){1,30}")
 
-; cljs already has cljs.core/uuid?
-#?(:clj
-   (defn uuid?
-     [u]
-     (instance? java.util.UUID u)))
-
 (defn valid-email? [email]
   (let [pattern #"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"]
     (and (string? email) (re-matches pattern email))))
