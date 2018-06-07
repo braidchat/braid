@@ -2,6 +2,7 @@
   (:require
    [braid.core.server.routes.api.private :refer [api-private-routes]]
    [braid.core.server.routes.api.public :refer [api-public-routes]]
+   [braid.core.server.routes.api.modules :as modules]
    [braid.core.server.routes.bots :refer [bot-routes]]
    [braid.core.server.routes.client :refer [desktop-client-routes mobile-client-routes resource-routes]]
    [braid.core.server.routes.socket :refer [sync-routes]]
@@ -9,6 +10,7 @@
    [environ.core :refer [env]]
    [ring.middleware.cors :refer [wrap-cors]]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults secure-site-defaults site-defaults]]
+   [ring.middleware.format :refer [wrap-restful-format]]
    [ring.middleware.edn :refer [wrap-edn-params]]))
 
 (def session-max-age (* 60 60 24 365))
@@ -73,10 +75,23 @@
             (wrap-defaults (-> site-defaults
                                (assoc-in [:security :anti-forgery] false)
                                assoc-cookie-conf)))
+
         (-> api-private-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf
                                assoc-csrf-conf)))
+
+        (-> modules/public-handler
+            (wrap-defaults (-> site-defaults
+                               (assoc-in [:security :anti-forgery] false)))
+            (wrap-restful-format :formats [:edn :transit-json]))
+
+        (-> modules/private-handler
+            (wrap-defaults (-> site-defaults
+                               assoc-cookie-conf
+                               assoc-csrf-conf))
+            (wrap-restful-format :formats [:edn :transit-json]))
+
         (-> sync-routes
             (wrap-defaults (-> api-defaults
                                assoc-cookie-conf

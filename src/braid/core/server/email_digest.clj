@@ -13,7 +13,7 @@
    [clojurewerkz.quartzite.schedule.cron :as cron]
    [clojurewerkz.quartzite.scheduler :as qs]
    [clojurewerkz.quartzite.triggers :as t]
-   [clostache.parser :refer [render-resource]]
+   [cljstache.core :as cljstache]
    [inliner.core :refer [inline-css]]
    [mount.core :refer [defstate]]
    [org.httpkit.client :as http]
@@ -84,10 +84,10 @@
 ; TODO: look into rendering clojurescript to string instead of making a template
 (defn create-message
   [threads]
-  {:html  (inline-css (render-resource "templates/email_digest.html.mustache"
-                                       {:threads threads}))
-   :text (render-resource "templates/email_digest.txt.mustache"
-                          {:threads threads})})
+  {:html  (inline-css (cljstache/render-resource "templates/email_digest.html.mustache"
+                                                 {:threads threads}))
+   :text (cljstache/render-resource "templates/email_digest.txt.mustache"
+                                    {:threads threads})})
 
 ; sending
 

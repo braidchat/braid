@@ -1,4 +1,4 @@
-(ns braid.core.server.api.link-extract
+(ns braid.website-embeds.link-extract
   (:require
     [clojure.core.memoize :as memo]
     [clojure.string :as string]

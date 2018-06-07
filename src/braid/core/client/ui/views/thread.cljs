@@ -1,18 +1,16 @@
 (ns braid.core.client.ui.views.thread
-  (:require-macros
-   [cljs.core.async.macros :refer [go]])
   (:require
+   [clojure.set :refer [difference]]
+   [clojure.string :as string]
+   [cljsjs.resize-observer-polyfill]
+   [re-frame.core :refer [dispatch subscribe]]
+   [reagent.core :as r]
    [braid.core.client.helpers :as helpers]
    [braid.core.client.routes :as routes]
    [braid.core.client.s3 :as s3]
    [braid.core.client.ui.views.message :refer [message-view]]
    [braid.core.client.ui.views.new-message :refer [new-message-view]]
-   [braid.core.client.ui.views.pills :refer [user-pill-view tag-pill-view]]
-   [cljs.core.async :refer [alts! chan put!]]
-   [clojure.set :refer [difference]]
-   [clojure.string :as string]
-   [re-frame.core :refer [dispatch subscribe]]
-   [reagent.core :as r])
+   [braid.core.client.ui.views.pills :refer [user-pill-view tag-pill-view]])
   (:import
    (goog.events KeyCodes)))
 
@@ -76,9 +74,6 @@
 
         unseen? (fn [message] (> (:created-at message) @last-open-at))
 
-        kill-chan (chan)
-        embed-update-chan (chan)
-
         messages-node (atom nil)
         ref-cb (fn [node] (reset! messages-node node))
 
@@ -87,7 +82,7 @@
 
         old-last-msg (atom nil)
 
-        check-at-bottom
+        check-at-bottom!
         (fn []
           (let [node @messages-node]
             (reset! at-bottom?
@@ -110,14 +105,11 @@
          (reset! at-bottom? true)
          (scroll-to-bottom! c)
          (reset! old-last-msg (:id (last @messages)))
-         (go (loop []
-               (let [[_ ch] (alts! [embed-update-chan kill-chan])]
-                 (when (not= ch kill-chan)
-                   (js/setTimeout (fn [] (scroll-to-bottom! c)) 0)
-                   (recur))))))
 
-       :component-will-unmount
-       (fn [] (put! kill-chan (js/Date.)))
+         (let [resize-observer
+               (js/ResizeObserver. (fn [entries]
+                                     (js/setTimeout (fn [] (scroll-to-bottom! c)) 0)))]
+           (.. resize-observer (observe @messages-node))))
 
        :component-did-update
        (fn [c _]
@@ -134,7 +126,7 @@
           {:ref ref-cb
            :on-scroll (fn [_] (if @first-scroll?
                                (reset! first-scroll? false)
-                               (check-at-bottom)))}
+                               (check-at-bottom!)))}
           (let [sorted-messages
                 (->> @messages
                      (sort-by :created-at)
@@ -155,12 +147,12 @@
                                 (> (* 2 60 1000) ; 2 minutes
                                    (- (:created-at message)
                                       (or (:created-at prev-message) 0)))
+                                ; TODO should instead check if there was an embed triggered
                                 (not (helpers/contains-urls? (prev-message :content))))))))]
             (doall
               (for [message sorted-messages]
-                ^{:key (message :id)}
-                [message-view (assoc message :thread-id thread-id)
-                 embed-update-chan])))])})))
+                 ^{:key (message :id)}
+                 [message-view (assoc message :thread-id thread-id)])))])})))
 
 (defn thread-view [thread]
   (let [state (r/atom {:dragging? false
@@ -186,7 +178,7 @@
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
-            (dispatch [:display-error [:upload-fail "File to big to upload, sorry"]])
+            (dispatch [:display-error [:upload-fail "File too big to upload, sorry"]])
             (do (set-uploading! true)
                 (s3/upload file (fn [url]
                                   (set-uploading! false)

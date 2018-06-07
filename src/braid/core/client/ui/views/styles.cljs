@@ -11,7 +11,6 @@
    [braid.core.client.invites.views.invite-page-styles]
    [braid.core.client.ui.styles.animations]
    [braid.core.client.ui.styles.body]
-   [braid.core.client.ui.styles.embed]
    [braid.core.client.ui.styles.header]
    [braid.core.client.ui.styles.imports]
    [braid.core.client.ui.styles.message]
@@ -107,10 +106,7 @@
                      [:>.card
 
                       [:>.messages
-                       braid.core.client.ui.styles.message/message
-
-                       [:>.message
-                        (braid.core.client.ui.styles.embed/embed vars/pad)]]
+                       braid.core.client.ui.styles.message/message]
 
                       (braid.core.client.ui.styles.thread/new-message vars/pad)]]]]
 
@@ -124,9 +120,6 @@
                     [:>.card
 
                      [:>.messages
-                      braid.core.client.ui.styles.message/message
-
-                      [:>.message
-                       (braid.core.client.ui.styles.embed/embed vars/pad)]]
+                      braid.core.client.ui.styles.message/message]
 
                      (braid.core.client.ui.styles.thread/new-message vars/pad)]]]]]])}}])

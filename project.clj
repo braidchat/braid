@@ -22,12 +22,13 @@
                  [image-resizer "0.1.9"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [inliner "0.1.0"]
-                 [de.ubercode.clostache/clostache "1.4.0"]
+                 [cljstache "2.0.1"]
                  [mount "0.1.10"]
                  [com.fasterxml.jackson.core/jackson-core "2.8.7"]
                  [com.cognitect/transit-clj "0.8.300" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [ring-transit "0.1.6" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [clavatar "0.3.0"]
+                 [clout "2.1.2"]
 
                  ;;client
                  [org.clojure/clojurescript "1.10.238"]
@@ -40,12 +41,14 @@
                  [clj-fuzzy "0.3.2"]
                  [reagent  "0.8.1"]
                  [re-frame "0.10.5" :exclusions [org.clojure/clojurescript]]
+                 [ring-middleware-format "0.7.2"]
                  [cljsjs/husl "6.0.1-0"]
                  [cljsjs/highlight "9.6.0-0"]
                  [com.cognitect/transit-cljs "0.8.239"]
                  [hickory "0.7.0" :exclusions [org.clojure/clojurescript]]
                  [org.clojure/core.memoize "0.5.9"]
                  [lein-doo "0.1.7"]
+                 [cljsjs/resize-observer-polyfill "1.4.2-0"]
 
                  ;;shared
                  [org.clojure/tools.reader "1.3.0-alpha3"]

@@ -28,7 +28,7 @@
     :class "email"
     :type "email"
     :placeholder "you@awesome.com"
-    :auto-complete true
+    :auto-complete "on"
     :auto-focus true
     :help-text [:span "Or, log in with: " [auth-providers-view]]}])
 
@@ -166,7 +166,7 @@
     :title "Email"
     :class "email"
     :type "email"
-    :auto-complete true
+    :auto-complete "on"
     :auto-focus true
     :placeholder "you@awesome.com"
     :help-text [:span "Or, register with: " [auth-providers-view]]}])
