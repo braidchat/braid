@@ -29,7 +29,7 @@
      ; causing hover-cards to display under subsequent messages
      ["> .info"
       "> .avatar img"
-      "> .post-message"
+      "> .footer"
       "> .content > img"
       "> .content > .dummy > .user > .pill"
       "> .content > .dummy > .tag > .pill"
