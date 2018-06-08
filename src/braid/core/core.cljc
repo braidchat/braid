@@ -55,12 +55,12 @@
        {:pre [(fn? f)]}
        (swap! braid.core.client.ui.views.message/post-transformers conj f))
 
-     (defn register-post-message-view!
+     (defn register-footer-view!
        "Register a view to display after a message.
         View will receive message object as a parameter."
        [view]
        {:pre [(fn? view)]}
-       (swap! braid.core.client.ui.views.message/post-message-views conj view))
+       (swap! braid.core.client.ui.views.message/footer-views conj view))
 
      (defn register-styles!
        "Add Garden CSS styles to the page styles"

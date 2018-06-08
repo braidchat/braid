@@ -170,7 +170,7 @@
 
 (defonce post-transformers (hooks/register! (atom [])))
 
-(defonce post-message-views (hooks/register! (atom [])))
+(defonce footer-views (hooks/register! (atom [])))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into
@@ -250,6 +250,6 @@
 
      (into [:div.content] (format-message (message :content)))
 
-     (into [:div.post-message]
-           (for [post-message-view @post-message-views]
-             [post-message-view message]))]))
+     (into [:div.footer]
+           (for [footer-view @footer-views]
+             [footer-view message]))]))

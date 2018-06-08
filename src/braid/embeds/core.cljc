@@ -28,4 +28,4 @@
   #?(:cljs
      (do
        (core/register-styles! styles/embed)
-       (core/register-post-message-view! impl/embed-view))))
+       (core/register-footer-view! impl/embed-view))))
