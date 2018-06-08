@@ -122,7 +122,7 @@
        {:pre [(fn? f)]}
        (swap! braid.core.server.sync/initial-user-data conj f))
 
-     (defn register-server-message-handler!
+     (defn register-server-message-handlers!
        "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"
        [handler-defs]
        {:pre [(map? handler-defs)
