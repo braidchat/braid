@@ -24,7 +24,7 @@
   (let [group-id (subscribe [:open-group-id])
         thread-id (r/atom (upload :thread-id))
         user-id (subscribe [:user-id])
-        thread (subscribe [:thread] [thread-id])]
+        thread (subscribe [:thread*] [thread-id])]
     (r/create-class
       {:display-name "upload-view"
 
@@ -54,8 +54,9 @@
           [:td.uploader
            "Uploaded by " [pills/user-pill-view (upload :uploader-id)]]
           [:td.uploaded-thread
-           [:a {:href (routes/thread-path {:group-id @group-id
-                                           :thread-id (upload :thread-id)})}
+           [:a {:href (routes/page-path {:group-id @group-id
+                                         :page-id "thread"
+                                         :query-params {:thread-id (upload :thread-id)}})}
             (str "Uploaded at " (helpers/format-date (upload :uploaded-at)))]
            [:br]
            (if @thread

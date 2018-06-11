@@ -9,7 +9,9 @@
     [braid.emoji.core]
     [braid.emojione-emoji.core]
     [braid.image-embeds.core]
+    [braid.permalinks.core]
     [braid.quests.core]
+    [braid.stars.core]
     [braid.video-embeds.core]
     [braid.website-embeds.core]))
 
@@ -23,6 +25,8 @@
   (braid.emoji.core/init!)
   (braid.emojione-emoji.core/init!)
   (braid.image-embeds.core/init!)
+  (braid.permalinks.core/init!)
   (braid.quests.core/init!)
+  (braid.stars.core/init!)
   (braid.video-embeds.core/init!)
   (braid.website-embeds.core/init!))

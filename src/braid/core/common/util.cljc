@@ -1,6 +1,9 @@
 (ns braid.core.common.util
   (:require
-    [clojure.string :as string]))
+    [clojure.string :as string]
+    [clojure.spec.alpha :as s]
+    [spec-tools.data-spec :as ds]
+    [taoensso.timbre :refer [errorf]]))
 
 ; TODO: we should probably define this by a whitelist.  Unicode ranges?
 (def nickname-re
@@ -54,3 +57,11 @@
         string/trim
         string/lower-case
         remove-non-whitelist-characters)))
+
+(defn valid? [data-spec data]
+  (let [spec (ds/spec {:name ::spec
+                       :spec data-spec})
+        valid (s/valid? spec data)]
+    (when-not valid
+      (errorf "Spec validation error:\n %s" (s/explain-str spec data)))
+    valid))

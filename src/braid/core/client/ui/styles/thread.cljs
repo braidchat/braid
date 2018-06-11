@@ -16,6 +16,7 @@
     :box-sizing "border-box"}
 
    [:>.tags
+    {:display "inline-block"}
 
     [:>.add
      {:position "relative"}
@@ -61,51 +62,34 @@
       :margin-bottom (rem 0.25)
       :margin-right (rem 0.25)}]]
 
-   [:>.permalink
-
-    [:>button
-     mixins/pill-button]]
-
    [:>.controls
     {:position "absolute"
      :padding pad
      :top 0
      :right 0
-     :z-index 10
-     :color "#CCC"
-     :text-align "right"}
+     :z-index 10}
 
-    [:>.control
-     {:cursor "pointer"}
+    [:>.extras
+     {:display "none"}]
+
+    [:&:hover>.extras
+     {:display "block"}]
+
+    [:>.main>.control
+     :>.extras>.control
+     {:cursor "pointer"
+      :font-family "fontawesome"
+      :text-align "center"
+      :display "block"
+      :text-decoration "none"
+      :color "#CCC"
+      :margin-bottom (m/* pad 0.5)
+      ; needs to accomodate widest icon
+      ; otherwise, x button moves
+      :width "1.1em"}
 
      [:&:hover
-      {:color "#333"}]
-
-     [:&.close
-      [:&::after
-       (mixins/fontawesome \uf00d)]]
-
-     [:&.unread
-      [:&::after
-       (mixins/fontawesome \uf0e2)]]
-
-     [:&.permalink
-      [:&::after (mixins/fontawesome \uf0c1)]]
-
-     [:&.mute
-      [:&::after (mixins/fontawesome \uf1f6)]]
-
-     [:&.hidden
-      {:margin-top (m/* pad 0.5)
-       :display "none"}
-
-      [:&::after
-       {:font-size "0.9em"
-        :margin-right "-0.15em"}]]]
-
-    [:&:hover
-     [:>.hidden
-      {:display "block"}]]]])
+      {:color "#333"}]]]])
 
 (defn messages [pad]
   [:>.messages

@@ -95,20 +95,6 @@
                  [:>.page
                   (braid.core.client.ui.styles.misc/threads vars/pad)
 
-                  [:&.single-thread
-                   [:.content
-                    (braid.core.client.ui.styles.thread/thread vars/pad)
-                    (braid.core.client.ui.styles.thread/notice vars/pad)
-                    [:>.thread
-
-                     [:>.card
-
-                      [:>.messages
-                       braid.core.client.ui.styles.message/message]
-
-                      (braid.core.client.ui.styles.thread/new-message vars/pad)]]]]
-
-
                   [:>.threads
                    (braid.core.client.ui.styles.thread/thread vars/pad)
                    (braid.core.client.ui.styles.thread/notice vars/pad)

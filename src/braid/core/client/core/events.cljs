@@ -21,6 +21,11 @@
     (doseq [handler @event-listeners]
       (handler event))))
 
+(defn register-events!
+  [event-map]
+  (doseq [[k f] event-map]
+    (reg-event-fx k f)))
+
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
 
