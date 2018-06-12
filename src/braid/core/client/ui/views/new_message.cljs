@@ -9,8 +9,7 @@
    [cljs.core.async :as async :refer [<! put! chan alts!]]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
-   [reagent.ratom :refer-macros [run!]]
-   [schema.core :as s])
+   [reagent.ratom :refer-macros [run!]])
   (:import
    (goog.events KeyCodes)))
 

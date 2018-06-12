@@ -4,7 +4,6 @@
     [clojure.string :as string]
     [environ.core :refer [env]]
     [mount.core :refer [defstate]]
-    [schema.core :as s]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
     [braid.core.hooks :as hooks]

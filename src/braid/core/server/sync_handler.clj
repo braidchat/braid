@@ -5,7 +5,6 @@
    [braid.core.server.socket :as socket]
    [braid.core.server.sync-helpers :as helpers]
    [mount.core :refer [defstate]]
-   [schema.core :as s]
    [taoensso.sente :as sente]
    [taoensso.timbre :as timbre :refer [debugf]]
    [braid.core.server.db.group :as group]

@@ -11,8 +11,7 @@
    [braid.core.common.util :as util]
    [clojure.set :as set]
    [clojure.string :as string]
-   [re-frame.core :as re-frame :refer [dispatch reg-event-fx reg-event-db reg-fx]]
-   [schema.core :as s]))
+   [re-frame.core :as re-frame :refer [dispatch reg-event-fx reg-event-db reg-fx]]))
 
 (defonce event-listeners
   (hooks/register! (atom []) [fn?]))

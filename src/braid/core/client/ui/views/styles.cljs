@@ -26,8 +26,7 @@
    [braid.core.client.ui.styles.vars :as vars]
    [braid.core.client.uploads.views.uploads-page-styles]
    [garden.core :refer [css]]
-   [reagent.core :as r]
-   [schema.core :as s]))
+   [reagent.core :as r]))
 
 (def style-dataspec
   #(or (vector? %) (map? %)))
