@@ -3,7 +3,7 @@
   (:require
     [braid.core.api :as core]
     #?@(:cljs
-         [[braid.emoji.core :as emoji]
+         [[braid.emoji.api :as emoji]
           [braid.custom-emoji.client.autocomplete :as autocomplete]
           [braid.custom-emoji.client.styles :refer [settings-page]]
           [braid.custom-emoji.client.state :as state]
