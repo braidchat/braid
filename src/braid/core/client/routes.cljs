@@ -1,6 +1,7 @@
 (ns braid.core.client.routes
   (:require
    [braid.core.client.router :as router]
+   [braid.core.client.pages :as pages]
    [re-frame.core :refer [dispatch subscribe]]
    [secretary.core :as secretary :refer-macros [defroute]]))
 
@@ -30,11 +31,6 @@
 (defroute uploads-path "/groups/:group-id/uploads" [group-id]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :uploads}]]))
 
-(defroute thread-path "/groups/:group-id/thread/:thread-id" [group-id thread-id]
-  (dispatch [:set-group-and-page [(uuid group-id)
-                                  {:type :thread
-                                   :thread-ids [(uuid thread-id)]}]]))
-
 (defroute group-settings-path "/groups/:group-id/settings" [group-id]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :settings}]]))
 
@@ -48,8 +44,13 @@
   (dispatch [:braid.core.client.gateway.events/initialize :join-group])
   (dispatch [:set-group-and-page [nil {:type :login}]]))
 
-(defroute page-path "/groups/:group-id/:page-id" [group-id page-id]
-  (dispatch [:set-group-and-page [(uuid group-id) {:type (keyword page-id)}]]))
+(defroute page-path "/groups/:group-id/:page-id" [group-id page-id query-params]
+  (let [page (merge {:type (keyword page-id)
+                     :page-id (keyword page-id)
+                     :group-id (uuid group-id)}
+                    query-params)]
+    (dispatch [:set-group-and-page [(uuid group-id) page]])
+    (pages/on-load! (keyword page-id) page)))
 
 (defroute other-path "/pages/:page-id" [page-id]
   (case page-id

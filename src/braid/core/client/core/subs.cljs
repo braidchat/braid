@@ -5,6 +5,11 @@
   (:import
    (goog Uri)))
 
+(defn register-subs!
+  [sub-map]
+  (doseq [[k f] sub-map]
+    (reg-sub k f)))
+
 (reg-sub
   :open-group-id
   (fn [state _]
@@ -125,6 +130,11 @@
 
 (reg-sub
   :thread
+  (fn [state [_ thread-id]]
+    (get-in state [:threads thread-id])))
+
+(reg-sub
+  :thread*
   (fn [state _ [thread-id]]
     (get-in state [:threads thread-id])))
 

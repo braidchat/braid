@@ -29,4 +29,4 @@
      (do
        (core/register-db-schema! db-schema)
        (core/register-initial-user-data! initial-user-data-fn)
-       (core/register-server-message-handler! server-message-handlers))))
+       (core/register-server-message-handlers! server-message-handlers))))

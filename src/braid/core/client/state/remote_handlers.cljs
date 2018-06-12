@@ -3,7 +3,18 @@
    [braid.core.client.desktop.notify :as notify]
    [braid.core.client.router :as router]
    [braid.core.client.sync :as sync]
-   [re-frame.core :refer [dispatch]]))
+   [braid.core.hooks :as hooks]
+   [re-frame.core :refer [dispatch]]
+   [taoensso.timbre :as timbre :refer-macros [errorf]]))
+
+(defonce incoming-socket-message-handlers
+  (hooks/register! (atom {}) {keyword? fn?}))
+
+(defmethod sync/event-handler :default
+  [[id data]]
+  (if-let [handler (@incoming-socket-message-handlers id)]
+    (handler id data)
+    (errorf "No socket message handler for id: %s" id)))
 
 (defmethod sync/event-handler :braid.client/thread
   [[_ data]]

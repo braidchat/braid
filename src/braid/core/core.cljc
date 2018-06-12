@@ -1,13 +1,16 @@
 (ns braid.core.core
   "Braid core"
   (:require
+    [braid.core.common.util :as util]
     #?@(:cljs
          [[braid.core.client.ui.views.new-message]
           [braid.core.client.ui.views.message]
           [braid.core.client.state]
+          [braid.core.client.state.remote-handlers]
           [braid.core.client.core.events]
+          [braid.core.client.core.subs]
+          [braid.core.client.pages]
           [braid.core.client.ui.views.styles]
-          [braid.core.client.core.events]
           [braid.core.client.ui.views.header]
           [braid.core.client.ui.views.autocomplete]
           [braid.core.client.group-admin.views.group-settings-page]]
@@ -25,6 +28,73 @@
 
 #?(:cljs
    (do
+     (defn register-group-header-button!
+       "Add a new button to appear in the group header
+       Expects a map with the following keys
+        :title        string, for hover info
+        :priority     number, for ordering
+        :route-fn     secretary route fn that returns url
+        :route-args   optional map of args to pass to route-fn
+                      :group-id will be merged in"
+       [config]
+       {:pre [(util/valid? braid.core.client.ui.views.header/group-header-dataspec config)]}
+       (swap! braid.core.client.ui.views.header/group-header-buttons conj config))
+
+     (defn register-thread-header-item!
+       "Adds a new view to a thread's header.
+        Expects a map with the following keys:
+        :priority   number, of ordering
+        :view       reagent view fn (given thread map as first argument)"
+       [config]
+       {:pre [(util/valid? braid.core.client.ui.views.thread/header-item-dataspec config)]}
+       (swap! braid.core.client.ui.views.thread/thread-header-items conj config))
+
+     (defn register-thread-control!
+       "Adds a new view to a thread's controls.
+        Expects a map with the following keys:
+        :priority   number, of ordering
+        :view       reagent view fn (given thread map as first argument)"
+       [config]
+       {:pre [(util/valid? braid.core.client.ui.views.thread/thread-control-dataspec config)]}
+       (swap! braid.core.client.ui.views.thread/thread-controls conj config))
+
+     (defn register-group-page!
+       "Registers a group page with its own URL.
+
+       Expects a map with the following keys:
+         :key      keyword
+         :on-load  optional function to call
+                   when page is navigated to
+         :view   reagent view fn
+
+       Link for page can be generated using:
+        (braid.core.client.routes/page-path
+             {:group-id __
+              :page-id __))"
+       [page]
+       {:pre [(util/valid? braid.core.client.pages/page-dataspec page)]}
+       (swap! braid.core.client.pages/pages assoc (page :key) page))
+
+     (defn register-events!
+       "Registers multiple re-frame event handlers, as if passed to reg-event-fx.
+
+        Expects a map of event-keys to event-handler-fns."
+       [event-map]
+       {:pre [(map? event-map)
+              (every? keyword? (keys event-map))
+              (every? fn? (vals event-map))]}
+       (braid.core.client.core.events/register-events! event-map))
+
+     (defn register-subs!
+       "Registers multiple re-frame subscription handlers, as if passed to reg-sub.
+
+        Expects a map of sub-keys to sub-handler-fns."
+       [sub-map]
+       {:pre [(map? sub-map)
+              (every? keyword? (keys sub-map))
+              (every? fn? (vals sub-map))]}
+       (braid.core.client.core.subs/register-subs! sub-map))
+
      (defn register-header-view!
        "Add a new view to appear in the header row at the top"
        [view]
@@ -75,6 +145,17 @@
               (map? spec)]}
        (braid.core.client.state/register-state! state spec))
 
+     (defn register-incoming-socket-message-handlers!
+       "Registers multiple server-side socket message handlers.
+
+       Expects map of event-keys and handler-fns.
+       Handler fn will be called with user-id and data arguments"
+       [handler-map]
+       {:pre [(map? handler-map)
+              (every? keyword? (keys handler-map))
+              (every? fn? (vals handler-map))]}
+       (swap! braid.core.client.state.remote-handlers/incoming-socket-message-handlers merge handler-map))
+
      (defn register-initial-user-data-handler!
        "Add a handler that will run with the initial db & user-info recieved from the server. See `:register-initial-user-data` under `:clj`"
        [f]
@@ -122,7 +203,7 @@
        {:pre [(fn? f)]}
        (swap! braid.core.server.sync/initial-user-data conj f))
 
-     (defn register-server-message-handler!
+     (defn register-server-message-handlers!
        "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"
        [handler-defs]
        {:pre [(map? handler-defs)
