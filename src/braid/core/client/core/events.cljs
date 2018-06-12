@@ -14,7 +14,8 @@
    [re-frame.core :as re-frame :refer [dispatch reg-event-fx reg-event-db reg-fx]]
    [schema.core :as s]))
 
-(defonce event-listeners (hooks/register! (atom [])))
+(defonce event-listeners
+  (hooks/register! (atom []) [fn?]))
 
 (re-frame/add-post-event-callback
   (fn [event _]
@@ -578,7 +579,8 @@
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))
 
-(defonce initial-user-data-handlers (hooks/register! (atom [])))
+(defonce initial-user-data-handlers
+  (hooks/register! (atom []) [fn?]))
 
 (reg-event-fx
   :set-init-data

@@ -2,9 +2,11 @@
   (:require
     [braid.core.hooks :as hooks]))
 
-(defonce shortcode-fns (hooks/register! (atom [])))
+(defonce shortcode-fns
+  (hooks/register! (atom []) [fn?]))
 
-(defonce ascii-fns (hooks/register! (atom [])))
+(defonce ascii-fns
+  (hooks/register! (atom []) [fn?]))
 
 (defn shortcode []
   (->> @shortcode-fns

@@ -82,7 +82,8 @@
   [txt]
   (odd? (count (re-seq #"`" txt))))
 
-(defonce autocomplete-engines (hooks/register! (atom [])))
+(defonce autocomplete-engines
+  (hooks/register! (atom []) [fn?]))
 
 (defn wrap-autocomplete [config]
   (let [autocomplete-chan (chan)

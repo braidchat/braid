@@ -29,7 +29,12 @@
    [reagent.core :as r]
    [schema.core :as s]))
 
-(defonce module-styles (hooks/register! (atom [])))
+(def style-dataspec
+  #(or (vector? %) (map? %)))
+
+(defonce module-styles
+  (hooks/register!
+    (atom [] [style-dataspec])))
 
 (defn styles-view []
   [:style

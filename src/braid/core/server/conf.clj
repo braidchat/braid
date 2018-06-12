@@ -4,7 +4,8 @@
    [environ.core :refer [env]]
    [mount.core :as mount :refer [defstate]]))
 
-(defonce config-vars (hooks/register! (atom [])))
+(defonce config-vars
+  (hooks/register! (atom []) [keyword?]))
 
 (defstate config
   :start

@@ -1,6 +1,7 @@
 (ns braid.embeds.api
   (:require
     [braid.core.api :as core]
+    [braid.core.common.util :as util]
     #?@(:cljs
          [[braid.embeds.impl :as impl]])))
 
@@ -16,8 +17,6 @@
          {:urls [\"http://example.org\"
                  \"http://example.org/2\"]}}"
        [{:keys [handler styles priority] :as embed}]
-       {:pre [(fn? handler)
-              (vector? styles)
-              (number? priority)]}
+       {:pre [(util/valid? impl/embed-engine-dataspec embed)]}
        (swap! impl/embed-engines conj embed)
        (core/register-styles! [:.embed styles]))))

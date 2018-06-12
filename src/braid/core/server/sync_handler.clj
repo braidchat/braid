@@ -11,7 +11,8 @@
    [braid.core.server.db.group :as group]
    [braid.core.server.db.thread :as thread]))
 
-(defonce message-handlers (hooks/register! (atom {})))
+(defonce message-handlers
+  (hooks/register! (atom {}) {keyword? fn?}))
 
 (defn run-cofx! [ev-msg cofx]
   (when-let [args (cofx :chsk-send!)]

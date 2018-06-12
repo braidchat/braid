@@ -134,7 +134,7 @@
      (defn register-styles!
        "Add Garden CSS styles to the page styles"
        [styles]
-       {:pre [(or (vector? styles) (map? styles))]}
+       {:pre [(util/valid? braid.core.client.ui.views.styles/style-dataspec styles)]}
        (swap! braid.core.client.ui.views.styles/module-styles conj styles))
 
      (defn register-state!
@@ -178,9 +178,7 @@
      (defn register-additional-script!
        "Add a javascript script tag to client html. Values can be a map with a `:src` or `:body` key or a function with no arguments, returing the same."
        [tag]
-       {:pre [(or (fn? tag)
-                  (and (map? tag)
-                    (or (:src tag) (:body tag))))]}
+       {:pre [(util/valid? braid.core.server.routes.client/additional-script-dataspec tag)]}
        (swap! braid.core.server.routes.client/additional-scripts conj tag))
 
      (defn register-post-create-user-txn!
@@ -193,7 +191,7 @@
        "Add new datoms to the db schema"
        [schema]
        {:pre [(vector? schema)
-              (every? map? schema)]}
+              (every? (partial util/valid? braid.core.server.schema/rule-dataspec) schema)]}
        (swap! braid.core.server.schema/schema concat schema))
 
      (defn register-initial-user-data!
@@ -222,7 +220,7 @@
                               {:status 200
                                :body (get-in request [:params :bar])})]"
        [route]
-       {:pre [(braid.core.server.routes.api.modules/valid-route? route)]}
+       {:pre [(util/valid? braid.core.server.routes.api.modules/route? route)]}
        (swap! braid.core.server.routes.api.modules/module-public-http-routes conj route))
 
      (defn register-private-http-route!
@@ -237,5 +235,5 @@
                               {:status 200
                                :body (get-in request [:params :bar])})]"
        [route]
-       {:pre [(braid.core.server.routes.api.modules/valid-route? route)]}
+       {:pre [(util/valid? braid.core.server.routes.api.modules/route? route)]}
        (swap! braid.core.server.routes.api.modules/module-private-http-routes conj route))))
