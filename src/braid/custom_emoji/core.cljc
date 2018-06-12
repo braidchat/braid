@@ -1,7 +1,7 @@
 (ns braid.custom-emoji.core
   "Allows group admins to create custom emoji"
   (:require
-    [braid.core.core :as core]
+    [braid.core.api :as core]
     #?@(:cljs
          [[braid.emoji.core :as emoji]
           [braid.custom-emoji.client.autocomplete :as autocomplete]

@@ -1,7 +1,7 @@
 (ns braid.website-embeds.core
   "If a message contains a link, displays a generic website embed"
   (:require
-    [braid.core.core :as core]
+    [braid.core.api :as core]
     #?@(:cljs
          [[braid.embeds.api :as embeds]
           [braid.website-embeds.styles :as styles]

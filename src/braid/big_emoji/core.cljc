@@ -1,7 +1,7 @@
 (ns braid.big-emoji.core
   "If a message consists of a single emoji, displays it larger."
   (:require
-    [braid.core.core :as core]
+    [braid.core.api :as core]
     #?@(:cljs
          [[braid.emoji.client.views :refer [emoji-view]]])))
 

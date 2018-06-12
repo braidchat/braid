@@ -1,6 +1,6 @@
 (ns braid.embeds.api
   (:require
-    [braid.core.core :as core]
+    [braid.core.api :as core]
     #?@(:cljs
          [[braid.embeds.impl :as impl]])))
 

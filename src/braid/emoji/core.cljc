@@ -1,7 +1,7 @@
 (ns braid.emoji.core
   "Allows other modules to define emoji"
   (:require
-    [braid.core.core :as core]
+    [braid.core.api :as core]
     #?@(:cljs
          [[braid.emoji.client.autocomplete :refer [autocomplete-handler]]
           [braid.emoji.client.text-replacements :refer [emoji-ascii-replace

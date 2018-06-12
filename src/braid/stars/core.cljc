@@ -1,7 +1,7 @@
 (ns braid.stars.core
   "Allows users to star threads (for themselves) and view starred threads seperately."
   (:require
-    [braid.core.core :as core]
+    [braid.core.api :as core]
     #?@(:cljs
          [[re-frame.core :refer [subscribe dispatch]]
           [braid.core.client.routes :as routes]
