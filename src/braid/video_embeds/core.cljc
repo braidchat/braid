@@ -3,7 +3,7 @@
   (:require
     [braid.core.core :as core]
     #?@(:cljs
-         [[braid.embeds.core :as embeds]
+         [[braid.embeds.api :as embeds]
           [braid.video-embeds.impl :as impl]])))
 
 (defn init! []
