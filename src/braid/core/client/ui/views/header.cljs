@@ -147,7 +147,8 @@
              ^{:key (header-item :class)}
              [header-item-view header-item]))]]])))
 
-(defonce header-views (hooks/register! (atom [])))
+(defonce header-views
+  (hooks/register! (atom []) [fn?]))
 
 (defn readonly-header-view
   []

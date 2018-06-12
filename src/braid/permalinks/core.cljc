@@ -1,7 +1,7 @@
 (ns braid.permalinks.core
   "Includes a permalink in thread headers that leads to a dedicated page"
   (:require
-    [braid.core.core :as core]
+    [braid.core.api :as core]
     #?@(:cljs
          [[re-frame.core :refer [subscribe dispatch]]
           [braid.core.client.routes :as routes]

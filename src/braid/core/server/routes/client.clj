@@ -18,7 +18,14 @@
 
 (def prod-js? (= (env :environment) "prod"))
 
-(defonce additional-scripts (hooks/register! (atom [])))
+(def additional-script-dataspec
+  (fn [tag]
+    (or (fn? tag)
+        (and (map? tag)
+          (or (:src tag) (:body tag))))))
+
+(defonce additional-scripts
+  (hooks/register! (atom []) [additional-script-dataspec]))
 
 (defn get-html [client vars]
   (cljstache/render-resource

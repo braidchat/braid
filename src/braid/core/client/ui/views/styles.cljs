@@ -26,10 +26,14 @@
    [braid.core.client.ui.styles.vars :as vars]
    [braid.core.client.uploads.views.uploads-page-styles]
    [garden.core :refer [css]]
-   [reagent.core :as r]
-   [schema.core :as s]))
+   [reagent.core :as r]))
 
-(defonce module-styles (hooks/register! (atom [])))
+(def style-dataspec
+  #(or (vector? %) (map? %)))
+
+(defonce module-styles
+  (hooks/register!
+    (atom [] [style-dataspec])))
 
 (defn styles-view []
   [:style

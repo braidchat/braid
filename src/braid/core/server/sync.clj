@@ -4,11 +4,10 @@
     [clojure.string :as string]
     [environ.core :refer [env]]
     [mount.core :refer [defstate]]
-    [schema.core :as s]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
     [braid.core.hooks :as hooks]
-    [braid.core.common.schema :refer [new-message-valid? upload-valid?]]
+    [braid.core.common.schema :as schema]
     [braid.core.common.util :as util :refer [valid-nickname? valid-tag-name?]]
     [braid.core.server.bots :as bots]
     [braid.core.server.db :as db]
@@ -85,7 +84,7 @@
                         (update :mentioned-user-ids vec)
                         (update-in [:content] #(apply str (take 5000 %)))
                         (assoc :created-at (java.util.Date.)))]
-    (if (new-message-valid? new-message)
+    (if (util/valid? schema/NewMessage new-message)
       (when (helpers/user-can-message? user-id new-message)
         (db/run-txns! (message/create-message-txn new-message))
         (when-let [cb ?reply-fn]
@@ -462,7 +461,7 @@
   (let [upload (assoc ?data
                  :uploaded-at (java.util.Date.)
                  :uploader-id user-id)]
-    (when (and (upload-valid? upload)
+    (when (and (util/valid? schema/Upload upload)
                (group/user-in-group?
                  user-id
                  (thread/thread-group-id (upload :thread-id))))

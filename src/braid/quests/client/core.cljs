@@ -1,11 +1,11 @@
 (ns braid.quests.client.core
   (:require
+    [clojure.spec.alpha :as s]
     [re-frame.core :as re-frame]
     [braid.quests.client.events]
     [braid.quests.client.subs]
     [braid.quests.client.helpers :as helpers]
-    [braid.quests.client.remote-handlers]
-    [braid.core.common.schema :refer [QuestRecordId QuestRecord]]))
+    [braid.quests.client.remote-handlers]))
 
 (defn initial-data-handler
   [db data]
@@ -17,4 +17,12 @@
       (re-frame/dispatch [:quests/update-handler event]))))
 
 (def initial-state {::quest-records {}})
-(def schema {::quest-records {QuestRecordId QuestRecord}})
+(def schema {::quest-records
+             {uuid?
+              {:quest-record/id uuid?
+               :quest-record/quest-id keyword?
+               :quest-record/progress integer?
+               :quest-record/state (s/spec #{:inactive
+                                             :active
+                                             :complete
+                                             :skipped})}}})

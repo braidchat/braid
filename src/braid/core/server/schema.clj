@@ -1,8 +1,9 @@
 (ns braid.core.server.schema
   (:require
-   [braid.core.hooks :as hooks]
+   [clojure.spec.alpha :as s]
    [datomic.db]
-   [schema.core :as s]))
+   [spec-tools.data-spec :as ds]
+   [braid.core.hooks :as hooks]))
 
 (def -initial-schema
   [ ; user
@@ -303,4 +304,22 @@
     :db/id #db/id [:db.part/db]
     :db.install/_attribute :db.part/db}])
 
-(defonce schema (hooks/register! (atom -initial-schema)))
+(def rule-dataspec
+  {:db/ident keyword?
+   (ds/opt :db/doc) string?
+   :db/valueType (s/spec #{:db.type/boolean
+                           :db.type/instant
+                           :db.type/keyword
+                           :db.type/long
+                           :db.type/ref
+                           :db.type/string
+                           :db.type/uuid})
+   :db/cardinality (s/spec #{:db.cardinality/one
+                             :db.cardinality/many})
+   (ds/opt :db/unique) (s/spec #{:db.unique/identity
+                                 :db.unique/value})
+   :db/id any?
+   :db.install/_attribute (s/spec #{:db.part/db})})
+
+(defonce schema
+  (hooks/register! (atom -initial-schema) [rule-dataspec]))

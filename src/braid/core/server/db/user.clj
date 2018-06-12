@@ -148,7 +148,8 @@
 
 ;; Transactions
 
-(defonce post-create-txns (hooks/register! (atom [])))
+(defonce post-create-txns
+  (hooks/register! (atom []) [fn?]))
 
 (defn create-user-txn
   "given an id and email, creates and returns a user;
