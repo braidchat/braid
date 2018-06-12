@@ -239,18 +239,3 @@
        [route]
        {:pre [(braid.core.server.routes.api.modules/valid-route? route)]}
        (swap! braid.core.server.routes.api.modules/module-private-http-routes conj route))))
-
-(defn init! []
-  #?(:cljs
-     (do
-       (register-autocomplete-engine!
-         braid.core.client.ui.views.autocomplete/bot-autocomplete-engine)
-
-       (register-autocomplete-engine!
-         braid.core.client.ui.views.autocomplete/user-autocomplete-engine)
-
-       (register-autocomplete-engine!
-         braid.core.client.ui.views.autocomplete/tag-autocomplete-engine)
-
-       (register-state! braid.core.client.store/initial-state
-                        braid.core.client.store/AppState))))
