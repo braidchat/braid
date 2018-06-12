@@ -2,53 +2,60 @@
   (:require
    [braid.core.client.invites.schema :as invites]
    [braid.core.common.schema :as app-schema]
-   [schema.core :as s :include-macros true]))
+   [clojure.spec.alpha :as s]
+   [spec-tools.data-spec :as ds]))
+
+(defn Error
+  [[err-key msg type]]
+  (and
+    (or (keyword? err-key) (string? err-key))
+    (string? msg)
+    (contains? #{:error :warn :info} type)))
 
 (def AppState
   (merge
-    {:login-state (s/enum :auth-check :login-form :ws-connect
-                          :app :gateway)
-     :websocket-state {:connected? s/Bool
-                       :next-reconnect (s/maybe s/Int)}
-     :csrf-token s/Str
-     :action s/Keyword
-     :user-auth {:user s/Any
-                 :error s/Any
-                 :checking? s/Bool
-                 :mode (s/enum :register :log-in :request-password-reset)
-                 :should-validate? s/Bool
-                 :oauth-provider s/Any
-                 :validations s/Any
-                 :fields s/Any}
-     :open-group-id (s/maybe s/Uuid)
-     :threads {s/Uuid app-schema/MsgThread}
-     :group-threads {s/Uuid #{s/Uuid}}
-     :tags {s/Uuid app-schema/Tag}
-     :groups {s/Uuid app-schema/Group}
-     :page {:type s/Keyword
-            (s/optional-key :id) s/Uuid
-            (s/optional-key :thread-ids) [s/Uuid]
-            (s/optional-key :search-query) s/Str
-            (s/optional-key :loading?) s/Bool
-            (s/optional-key :error?) s/Bool}
-     :session (s/maybe {:user-id s/Uuid})
-     :errors [[(s/one (s/cond-pre s/Keyword s/Str) "err-key") (s/one s/Str "msg")
-               (s/one (s/enum :error :warn :info) "type")]]
-     :preferences {s/Keyword s/Any}
-     :notifications {:window-visible? s/Bool
-                     :unread-count s/Int}
-     :user {:open-thread-ids #{s/Uuid}
-            :subscribed-tag-ids #{s/Uuid}}
-     :focused-thread-id (s/maybe s/Uuid)
-     :temp-threads {s/Uuid {:id s/Uuid
-                            :new? s/Bool
-                            :messages s/Any
-                            :group-id s/Uuid
-                            :mentioned-ids [s/Uuid]
-                            :tag-ids [s/Uuid]
-                            :new-message s/Str}}
-     :action-disabled? s/Bool
-     (s/optional-key :public-groups) #{app-schema/Group}}
+    {:login-state (s/spec #{:auth-check :login-form :ws-connect
+                            :app :gateway})
+     :websocket-state {:connected? boolean?
+                       :next-reconnect (ds/maybe integer?)}
+     :csrf-token string?
+     :action keyword?
+     :user-auth {:user any?
+                 :error any?
+                 :checking? boolean?
+                 :mode (s/spec #{:register :log-in :request-password-reset})
+                 :should-validate? boolean?
+                 :oauth-provider any?
+                 :validations any?
+                 :fields any?}
+     :open-group-id (ds/maybe uuid?)
+     :threads {uuid? app-schema/MsgThread}
+     :group-threads {uuid? #{uuid?}}
+     :tags {uuid? app-schema/Tag}
+     :groups {uuid? app-schema/Group}
+     :page {:type keyword?
+            (ds/opt :id) uuid?
+            (ds/opt :thread-ids) [uuid?]
+            (ds/opt :search-query) string?
+            (ds/opt :loading?) boolean?
+            (ds/opt :error?) boolean?}
+     :session (ds/maybe {:user-id uuid?})
+     :errors [Error]
+     :preferences {keyword? any?}
+     :notifications {:window-visible? boolean?
+                     :unread-count integer?}
+     :user {:open-thread-ids #{uuid?}
+            :subscribed-tag-ids #{uuid?}}
+     :focused-thread-id (ds/maybe uuid?)
+     :temp-threads {uuid? {:id uuid?
+                           :new? boolean?
+                           :messages any?
+                           :group-id uuid?
+                           :mentioned-ids [uuid?]
+                           :tag-ids [uuid?]
+                           :new-message string?}}
+     :action-disabled? boolean?
+     (ds/opt :public-groups) #{app-schema/Group}}
     invites/InvitesAppState))
 
 (def initial-state

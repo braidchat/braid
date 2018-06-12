@@ -19,4 +19,4 @@
          braid.core.client.ui.views.autocomplete/tag-autocomplete-engine)
 
        (core/register-state! braid.core.client.store/initial-state
-                        braid.core.client.store/AppState))))
+                             braid.core.client.store/AppState))))

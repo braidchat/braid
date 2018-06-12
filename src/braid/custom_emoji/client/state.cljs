@@ -1,8 +1,7 @@
 (ns braid.custom-emoji.client.state
   (:require
     [clojure.set :as set]
-    [re-frame.core :refer [dispatch]]
-    [schema.core :as s]))
+    [re-frame.core :refer [dispatch]]))
 
 (defn- key-by [k coll]
   (reduce (fn [memo i]
@@ -18,7 +17,7 @@
 
 (def initial-state {:custom-emoji/group-emoji {}})
 
-(def state-spec {:custom-emoji/group-emoji s/Any})
+(def state-spec {:custom-emoji/group-emoji any?})
 
 (def subscriptions
   {:custom-emoji/group-emojis

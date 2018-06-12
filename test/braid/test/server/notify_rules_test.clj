@@ -1,8 +1,8 @@
 (ns braid.test.server.notify-rules-test
   (:require
     [clojure.test :refer :all]
-    [schema.core :as s]
-    [braid.core.common.schema :refer [rules-valid? check-rules!]]
+    [braid.core.common.util :as util]
+    [braid.core.common.schema :as schema]
     [braid.core.server.db :as db]
     [braid.core.server.db.group :as group]
     [braid.core.server.db.message :as message]
@@ -11,22 +11,21 @@
     [braid.core.server.notify-rules :as rules]
     [braid.test.fixtures.db :refer [drop-db]]))
 
-(s/set-fn-validation! true)
-
 (use-fixtures :each drop-db)
 
 (deftest rules-schema
-  (testing "schema can validate rules format"
-    (is (rules-valid? []))
-    (is (rules-valid? [[:any :any]]))
-    (is (thrown? clojure.lang.ExceptionInfo (check-rules! [[:any :any] []])))
-    (is (not (rules-valid? [[:any :any] []])))
-    (is (rules-valid?
-          [[:any #uuid "570fce10-9312-4550-9525-460c57fd9229"]
-           [:mention :any]
-           [:tag #uuid "56c2653c-a1fb-4043-97ca-3060ec95d852"]
-           [:tag #uuid "570fce1a-116c-46d1-8924-5ac28f8656cb"]
-           [:tag #uuid "57158d7e-8dd1-4834-9e6b-cb7985895621"]]))))
+  (let [rules-valid? (fn [x]
+                       (util/valid? schema/NotifyRules x))]
+    (testing "schema can validate rules format"
+      (is (rules-valid? []))
+      (is (rules-valid? [[:any :any]]))
+      (is (not (rules-valid? [[:any :any] []])))
+      (is (rules-valid?
+            [[:any #uuid "570fce10-9312-4550-9525-460c57fd9229"]
+             [:mention :any]
+             [:tag #uuid "56c2653c-a1fb-4043-97ca-3060ec95d852"]
+             [:tag #uuid "570fce1a-116c-46d1-8924-5ac28f8656cb"]
+             [:tag #uuid "57158d7e-8dd1-4834-9e6b-cb7985895621"]])))))
 
 (deftest notify-rules-work
   (let [[g1 g2 g3] (db/run-txns!

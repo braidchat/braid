@@ -9,6 +9,7 @@
     [braid.core.server.db.thread :as thread]
     [braid.core.server.db.user :as user]
     [braid.core.server.sync-helpers :as sync-helpers]
+    [braid.core.common.util :as util]
     [clojure.string :as string]
     [compojure.core :refer [GET POST PUT defroutes]]
     [ring.middleware.transit :as transit]
@@ -72,7 +73,7 @@
                 :user-id (bot :user-id)
                 :group-id (bot :group-id)
                 :created-at (java.util.Date.))]
-      (if (schema/new-message-valid? msg)
+      (if (util/valid? schema/NewMessage msg)
         (if (bot-can-message? bot-id msg)
           (do
             (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
@@ -103,7 +104,7 @@
                 :group-id (bot :group-id)
                 :created-at (java.util.Date.))]
       (timbre/warnf "Bot %s hitting deprecated PUT message endpoint" bot-id)
-      (if (schema/new-message-valid? msg)
+      (if (util/valid? schema/NewMessage msg)
         (if (bot-can-message? bot-id msg)
           (do
             (timbre/debugf "Creating message from bot: %s %s" bot-id msg)

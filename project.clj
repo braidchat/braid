@@ -57,7 +57,6 @@
                  [org.clojure/test.check "0.9.0"] ; b/c spec-tools breaks without it
                  [com.taoensso/truss "1.3.6"]
                  [com.taoensso/sente "1.11.0" :exclusions [org.clojure/tools.reader taoensso.timbre com.taoensso/truss]]
-                 [prismatic/schema "1.1.6"]
 
                  ;;mobile
                  [garden "1.3.2"]]

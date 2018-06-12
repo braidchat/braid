@@ -1,7 +1,7 @@
 (ns braid.core.client.state
   (:require
    [re-frame.core :as api]
-   [schema.core :as s]))
+   [braid.core.common.util :as util]))
 
 (defn initialize-state
   [db]
@@ -23,8 +23,7 @@
 
 (api/reg-sub :braid.state/valid?
   (fn [db _]
-    (let [validator (s/validator (db ::state-spec))]
-      (validator db))))
+    (util/valid? (db ::state-spec) db)))
 
 (defn ^:export validate []
   @(api/subscribe [:braid.state/valid?]))
