@@ -1,4 +1,5 @@
 (ns braid.dev.core
+  "Starting namespace for Braid REPL. Utilities for dev."
   (:require
     [mount.core :as mount]
     ; require core so that all mount modules are pulled in

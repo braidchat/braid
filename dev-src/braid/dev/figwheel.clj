@@ -1,4 +1,4 @@
-(ns braid.core.dev.figwheel
+(ns braid.dev.figwheel
   (:require
     [figwheel-sidecar.repl-api :as ra]
     [mount.core :refer [defstate]]))

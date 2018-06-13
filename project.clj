@@ -67,8 +67,6 @@
             [lein-cljsbuild "1.1.6" :exclusions [org.clojure/clojure]]
             [lein-doo "0.1.7"]]
 
-  :repl-options {:timeout 120000
-                 :init-ns braid.dev}
 
   :clean-targets ^{:protect false}
   ["resources/public/js"]
@@ -141,7 +139,10 @@
 
   :min-lein-version "2.5.0"
 
-  :profiles {:dev {:global-vars {*assert* true}
+  :profiles {:dev {:source-paths ["src" "dev-src"]
+                   :global-vars {*assert* true}
+                   :repl-options {:timeout 120000
+                                  :init-ns braid.dev.core}
                    :dependencies [[com.datomic/datomic-free "0.9.5201"
                                    :exclusions [joda-time
                                                 com.amazonaws/aws-java-sdk
@@ -166,5 +167,5 @@
                                      [refactor-nrepl "2.3.0-SNAPSHOT"]]}]
              :test [:dev]
              :uberjar [:prod
-                       {:aot :all
+                       {:aot [braid.core]
                         :prep-tasks ["compile" ["cljsbuild" "once" "release"]]}]})
