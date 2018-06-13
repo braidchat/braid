@@ -67,7 +67,9 @@
             [lein-cljsbuild "1.1.6" :exclusions [org.clojure/clojure]]
             [lein-doo "0.1.7"]]
 
-  :repl-options {:timeout 120000}
+  :repl-options {:timeout 120000
+                 :init-ns braid.dev}
+
   :clean-targets ^{:protect false}
   ["resources/public/js"]
 

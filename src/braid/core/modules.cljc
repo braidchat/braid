@@ -1,5 +1,6 @@
 (ns braid.core.modules
   (:require
+    [mount.core :refer [defstate]]
     [braid.core.hooks :as hooks]
     ; modules:
     [braid.big-emoji.core]
@@ -30,3 +31,6 @@
   (braid.stars.core/init!)
   (braid.video-embeds.core/init!)
   (braid.website-embeds.core/init!))
+
+(defstate modules
+  :start (init!))
