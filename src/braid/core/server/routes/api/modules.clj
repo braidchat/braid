@@ -4,8 +4,18 @@
     [braid.core.hooks :as hooks]
     [braid.core.server.routes.helpers :as helpers]))
 
-(defonce module-public-http-routes (hooks/register! (atom [])))
-(defonce module-private-http-routes (hooks/register! (atom [])))
+(defn route?
+  [[method url-pattern handler]]
+  (and
+    (keyword? method)
+    (string? url-pattern)
+    (fn? handler)))
+
+(defonce module-public-http-routes
+  (hooks/register! (atom []) [route?]))
+
+(defonce module-private-http-routes
+  (hooks/register! (atom []) [route?]))
 
 ;; XXX: the way this works means that routes with wrap-logged-in?
 ;; won't fall-through to other routes in the handler (because it
@@ -73,9 +83,4 @@
 (def private-handler (-> (dynamic-handler module-private-http-routes)
                          wrap-logged-in?))
 
-(defn valid-route?
-  [[method url-pattern handler]]
-  (and
-    (keyword? method)
-    (string? url-pattern)
-    (fn? handler)))
+

@@ -9,7 +9,13 @@
   [text]
   (map first (re-seq url-re text)))
 
-(defonce embed-engines (hooks/register! (atom [])))
+(def embed-engine-dataspec
+  {:handler fn?
+   :styles vector?
+   :priority number?})
+
+(defonce embed-engines
+  (hooks/register! (atom []) [embed-engine-dataspec]))
 
 (defn embed-view [message]
   (when-let [handler (->> @embed-engines

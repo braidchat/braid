@@ -53,9 +53,10 @@
                  ;;shared
                  [org.clojure/tools.reader "1.3.0-alpha3"]
                  [org.clojure/core.async "0.4.474" :exclusions [org.clojure/tools.reader]]
+                 [metosin/spec-tools "0.7.0"]
+                 [org.clojure/test.check "0.9.0"] ; b/c spec-tools breaks without it
                  [com.taoensso/truss "1.3.6"]
                  [com.taoensso/sente "1.11.0" :exclusions [org.clojure/tools.reader taoensso.timbre com.taoensso/truss]]
-                 [prismatic/schema "1.1.6"]
 
                  ;;mobile
                  [garden "1.3.2"]]
@@ -123,6 +124,7 @@
                            :output-dir "resources/public/js/prod/out"
                            :optimizations :advanced
                            :pretty-print false
+                           :elide-asserts true
                            :modules {:cljs-base
                                      {:output-to "resources/public/js/prod/base.js"}
                                      :desktop
@@ -138,7 +140,8 @@
 
   :min-lein-version "2.5.0"
 
-  :profiles {:dev {:dependencies [[com.datomic/datomic-free "0.9.5201"
+  :profiles {:dev {:global-vars {*assert* true}
+                   :dependencies [[com.datomic/datomic-free "0.9.5201"
                                    :exclusions [joda-time
                                                 com.amazonaws/aws-java-sdk
                                                 com.google.guava/guava
@@ -149,7 +152,8 @@
                                     com.google.javascript/closure-compiler
                                     org.clojure/tools.nrepl]]
                                   [day8.re-frame/re-frame-10x "0.3.3"]]}
-             :prod {:dependencies [[com.datomic/datomic-pro "0.9.5201"
+             :prod {:global-vars {*assert* false}
+                    :dependencies [[com.datomic/datomic-pro "0.9.5201"
                                     :exclusions [joda-time
                                                  com.amazonaws/aws-java-sdk
                                                  com.google.guava/guava]]

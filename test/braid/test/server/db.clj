@@ -11,6 +11,7 @@
     [braid.core.server.db.thread :as thread]
     [braid.core.server.db.user :as user]
     [braid.core.common.schema :as schema]
+    [braid.core.common.util :as util]
     [braid.core.server.search :as search]
     [braid.test.fixtures.db :refer [drop-db]]
     [braid.test.server.test-utils :refer [fetch-messages]]))
@@ -471,9 +472,9 @@
                                  (select-keys [:id :name :avatar :user-id])
                                  (rename-keys {:name :nickname})))]
 
-    (is (schema/check-bot! b1))
-    (is (schema/check-bot! b2))
-    (is (schema/check-bot! b3))
+    (is (util/valid? schema/Bot b1))
+    (is (util/valid? schema/Bot b2))
+    (is (util/valid? schema/Bot b3))
     (testing "can create bots & retrieve by group"
       (is (= #{b1 b2} (bot/bots-in-group (g1 :id))))
       (is (= (into #{} (map bot->display) [b1 b2])

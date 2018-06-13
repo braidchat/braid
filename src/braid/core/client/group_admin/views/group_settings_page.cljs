@@ -60,7 +60,8 @@
                               (dispatch [:make-group-public! (group :id)])))}
        "Make public"]])])
 
-(defonce extra-group-settings (hooks/register! (atom [])))
+(defonce extra-group-settings
+  (hooks/register! (atom []) [fn?]))
 
 (defn group-settings-page-view
   []

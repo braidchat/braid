@@ -3,7 +3,8 @@
     [clojure.set :as set]
     [braid.core.server.db.tag :as tag]
     [braid.core.server.db.thread :as thread]
-    [braid.core.common.schema :refer [check-new-message! check-rules!]]))
+    [braid.core.common.util :as util]
+    [braid.core.common.schema :as schema]))
 
 (defn tag->group
   [tag-id]
@@ -18,8 +19,8 @@
 
 (defn notify?
   [user-id rules new-message]
-  (check-rules! rules)
-  (check-new-message! new-message)
+  (assert (util/valid? schema/NotifyRules rules))
+  (assert (util/valid? schema/NewMessage new-message))
   (let [{:keys [tag mention any]
          :or {tag #{} mention #{} any #{}}}
         (->> (group-by first rules)

@@ -11,15 +11,20 @@
    [braid.core.common.util :as util]
    [clojure.set :as set]
    [clojure.string :as string]
-   [re-frame.core :as re-frame :refer [dispatch reg-event-fx reg-event-db reg-fx]]
-   [schema.core :as s]))
+   [re-frame.core :as re-frame :refer [dispatch reg-event-fx reg-event-db reg-fx]]))
 
-(defonce event-listeners (hooks/register! (atom [])))
+(defonce event-listeners
+  (hooks/register! (atom []) [fn?]))
 
 (re-frame/add-post-event-callback
   (fn [event _]
     (doseq [handler @event-listeners]
       (handler event))))
+
+(defn register-events!
+  [event-map]
+  (doseq [[k f] event-map]
+    (reg-event-fx k f)))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
@@ -573,7 +578,8 @@
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))
 
-(defonce initial-user-data-handlers (hooks/register! (atom [])))
+(defonce initial-user-data-handlers
+  (hooks/register! (atom []) [fn?]))
 
 (reg-event-fx
   :set-init-data

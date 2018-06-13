@@ -26,10 +26,14 @@
    [braid.core.client.ui.styles.vars :as vars]
    [braid.core.client.uploads.views.uploads-page-styles]
    [garden.core :refer [css]]
-   [reagent.core :as r]
-   [schema.core :as s]))
+   [reagent.core :as r]))
 
-(defonce module-styles (hooks/register! (atom [])))
+(def style-dataspec
+  #(or (vector? %) (map? %)))
+
+(defonce module-styles
+  (hooks/register!
+    (atom [] [style-dataspec])))
 
 (defn styles-view []
   [:style
@@ -94,20 +98,6 @@
 
                  [:>.page
                   (braid.core.client.ui.styles.misc/threads vars/pad)
-
-                  [:&.single-thread
-                   [:.content
-                    (braid.core.client.ui.styles.thread/thread vars/pad)
-                    (braid.core.client.ui.styles.thread/notice vars/pad)
-                    [:>.thread
-
-                     [:>.card
-
-                      [:>.messages
-                       braid.core.client.ui.styles.message/message]
-
-                      (braid.core.client.ui.styles.thread/new-message vars/pad)]]]]
-
 
                   [:>.threads
                    (braid.core.client.ui.styles.thread/thread vars/pad)

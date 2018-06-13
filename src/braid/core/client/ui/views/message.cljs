@@ -166,11 +166,14 @@
   (make-delimited-processor {:delimiter "*"
                              :result-fn (fn [body] [:strong.starred body])}))
 
-(defonce stateless-formatters (hooks/register! (atom [])))
+(defonce stateless-formatters
+  (hooks/register! (atom []) [fn?]))
 
-(defonce post-transformers (hooks/register! (atom [])))
+(defonce post-transformers
+  (hooks/register! (atom []) [fn?]))
 
-(defonce footer-views (hooks/register! (atom [])))
+(defonce footer-views
+  (hooks/register! (atom []) [fn?]))
 
 (defn format-message
   "Given the text of a message body, turn it into dom nodes, making urls into

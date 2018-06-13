@@ -10,7 +10,8 @@
    [braid.core.client.s3 :as s3]
    [braid.core.client.ui.views.message :refer [message-view]]
    [braid.core.client.ui.views.new-message :refer [new-message-view]]
-   [braid.core.client.ui.views.pills :refer [user-pill-view tag-pill-view]])
+   [braid.core.client.ui.views.pills :refer [user-pill-view tag-pill-view]]
+   [braid.core.hooks :as hooks])
   (:import
    (goog.events KeyCodes)))
 
@@ -154,6 +155,76 @@
                  ^{:key (message :id)}
                  [message-view (assoc message :thread-id thread-id)])))])})))
 
+(def header-item-dataspec
+  {:priority number?
+   :view fn?})
+
+(defonce thread-header-items
+  (hooks/register! (atom []) [header-item-dataspec]))
+
+(def thread-control-dataspec
+  {:priority number?
+   :view fn?})
+
+(defonce thread-controls
+  (hooks/register!
+    (atom [{:view
+            (fn [thread]
+              [:div.control.mute
+               {:title "Mute"
+                :on-click (fn [e]
+                            ; Need to preventDefault & propagation when using
+                            ; divs as controls, otherwise divs higher up also
+                            ; get click events
+                            (helpers/stop-event! e)
+                            (dispatch [:unsub-thread
+                                       {:thread-id (thread :id)}]))}
+               \uf1f6])
+            :priority 0}])
+    [thread-control-dataspec]))
+
+(defn thread-header-view [thread]
+  (into
+    [:div.head]
+    (conj
+      (->> @thread-header-items
+           (sort-by :priority)
+           reverse
+           (mapv (fn [el]
+                   [(el :view) thread])))
+
+      (when (not (thread :new?))
+        [:div.controls
+         [:div.main
+          (if @(subscribe [:thread-open? (thread :id)])
+            [:div.control.close
+             {:title "Close"
+              :on-click (fn [e]
+                          ; Need to preventDefault & propagation when using
+                          ; divs as controls, otherwise divs higher up also
+                          ; get click events
+                          (helpers/stop-event! e)
+                          (dispatch [:hide-thread {:thread-id (thread :id)}]))}
+             \uf00d]
+            [:div.control.unread
+             {:title "Mark Unread"
+              :on-click (fn [e]
+                          ; Need to preventDefault & propagation when using
+                          ; divs as controls, otherwise divs higher up also
+                          ; get click events
+                          (helpers/stop-event! e)
+                          (dispatch [:reopen-thread (thread :id)]))}
+             \uf0e2])]
+
+         (into [:div.extras]
+               (->> @thread-controls
+                    (sort-by :priority)
+                    reverse
+                    (mapv (fn [el]
+                            [(el :view) thread]))))])
+
+      [thread-tags-view thread])))
+
 (defn thread-view [thread]
   (let [state (r/atom {:dragging? false
                        :uploading? false})
@@ -174,7 +245,6 @@
         ; thread box, which is always open
         open? (subscribe [:thread-open? (thread :id)])
         focused? (subscribe [:thread-focused? (thread :id)])
-        permalink-open? (r/atom false)
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
@@ -253,56 +323,7 @@
             "Only @mentioned users can see it."])
 
          [:div.card
-          [:div.head
-           (when @permalink-open?
-             [:div.permalink
-              [:input {:type "text"
-                       :read-only true
-                       :on-focus (fn [e] (.. e -target select))
-                       :on-click (fn [e] (.. e -target select))
-                       :value (str
-                                (helpers/site-url)
-                                (routes/thread-path
-                                  {:thread-id (thread :id)
-                                   :group-id (thread :group-id)}))}]
-              [:button {:on-click (fn [e]
-                                    (reset! permalink-open? false))}
-               "Done"]])
-           (when (not new?)
-             [:div.controls
-              (if @open?
-                [:div.control.close
-                 {:title "Close"
-                  :on-click (fn [e]
-                              ; Need to preventDefault & propagation when using
-                              ; divs as controls, otherwise divs higher up also
-                              ; get click events
-                              (helpers/stop-event! e)
-                              (dispatch [:hide-thread {:thread-id (thread :id)}]))}]
-                [:div.control.unread
-                 {:title "Mark Unread"
-                  :on-click (fn [e]
-                              ; Need to preventDefault & propagation when using
-                              ; divs as controls, otherwise divs higher up also
-                              ; get click events
-                              (helpers/stop-event! e)
-                              (dispatch [:reopen-thread (thread :id)]))}])
-              [:div.control.permalink.hidden
-               {:title "Get Permalink"
-                :on-click (fn [e]
-                            (helpers/stop-event! e)
-                            (reset! permalink-open? true))}]
-              [:div.control.mute.hidden
-               {:title "Mute"
-                :on-click (fn [e]
-                            ; Need to preventDefault & propagation when using
-                            ; divs as controls, otherwise divs higher up also
-                            ; get click events
-                            (helpers/stop-event! e)
-                            (dispatch [:unsub-thread
-                                       {:thread-id (thread :id)}]))}]])
-
-           [thread-tags-view thread]]
+          [thread-header-view thread]
 
           (when-not new?
             [messages-view (thread :id)])

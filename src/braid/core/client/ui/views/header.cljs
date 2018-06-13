@@ -1,13 +1,11 @@
 (ns braid.core.client.ui.views.header
   (:require
-   [braid.core.hooks :as hooks]
-   [braid.core.client.helpers :refer [->color]]
-   [braid.core.client.routes :as routes]
-   [braid.core.client.ui.views.search-bar :refer [search-bar-view]]
-   [re-frame.core :refer [subscribe dispatch]]
-   [reagent.core :as r]
-   [reagent.ratom :refer-macros [reaction]]
-   [schema.core :as s]))
+    [spec-tools.data-spec :as ds]
+    [re-frame.core :refer [subscribe dispatch]]
+    [braid.core.hooks :as hooks]
+    [braid.core.client.helpers :refer [->color]]
+    [braid.core.client.routes :as routes]
+    [braid.core.client.ui.views.search-bar :refer [search-bar-view]]))
 
 (defn loading-indicator-view [group-id]
   (let [page (subscribe [:page])]
@@ -43,12 +41,38 @@
         current-path (subscribe [:page-path])]
     ; TODO: reaction for path = current-path? Would close over conf, probably
     ; not worthwhile
-    (fn [{:keys [route-fn route-args title class body]}]
+    (fn [{:keys [route-fn route-args title class icon body]}]
       (let [path (route-fn (merge route-args {:group-id @open-group-id}))]
         [:a {:class (str class (when (= path @current-path) " active"))
              :href path
              :title title}
+         (when icon
+           [:div.icon icon])
          body]))))
+
+(def group-header-dataspec
+  {:title string?
+   :route-fn fn?
+   (ds/opt :route-args) {keyword? any?}
+   :icon string?
+   :priority number?})
+
+(defonce group-header-buttons
+  (hooks/register!
+    (atom
+      [{:title "Inbox"
+        :route-fn routes/inbox-page-path
+        :icon \uf01c
+        :priority 10}
+       {:title "Recently Closed"
+        :route-fn routes/recent-page-path
+        :icon \uf1da
+        :priority 5}
+       {:title "Uploads"
+        :route-fn routes/uploads-path
+        :icon \uf0ee
+        :priority 0}])
+    [group-header-dataspec]))
 
 (defn group-header-buttons-view [header-items]
   [:div.buttons
@@ -63,16 +87,9 @@
       [:div.group-header
        [:div.bar {:style {:background-color (->color @group-id)}}
         [group-name-view]
-        [group-header-buttons-view
-         [{:title "Inbox"
-           :route-fn routes/inbox-page-path
-           :class "inbox"}
-          {:title "Recently Closed"
-           :route-fn routes/recent-page-path
-           :class "recent"}
-          {:title "Uploads"
-           :class "group-uploads"
-           :route-fn routes/uploads-path}]]
+        [group-header-buttons-view (->> @group-header-buttons
+                                        (sort-by :priority)
+                                        reverse)]
         [search-bar-view]]
        [loading-indicator-view @group-id]])))
 
@@ -130,7 +147,8 @@
              ^{:key (header-item :class)}
              [header-item-view header-item]))]]])))
 
-(defonce header-views (hooks/register! (atom [])))
+(defonce header-views
+  (hooks/register! (atom []) [fn?]))
 
 (defn readonly-header-view
   []

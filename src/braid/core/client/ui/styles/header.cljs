@@ -102,24 +102,15 @@
        :text-align "center"
        :text-decoration "none"}
 
+      [:>.icon
+       {:font-family "fontawesome"}]
+
       [:&:hover
        :&.active
        {:background "rgba(0,0,0,0.25)"}]
 
       [:&.open-sidebar::after
-       (mixins/fontawesome \uf0e8)]
-
-      [:&.inbox::after
-       (mixins/fontawesome \uf01c)]
-
-      [:&.settings::after
-       (mixins/fontawesome \uf013)]
-
-      [:&.recent::after
-       (mixins/fontawesome \uf1da)]
-
-      [:&.group-uploads::after
-       (mixins/fontawesome \uf0ee)]]]
+       (mixins/fontawesome \uf0e8)]]]
 
     [:>.search-bar
      {:display "inline-block"

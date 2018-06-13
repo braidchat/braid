@@ -5,13 +5,13 @@
    [braid.core.server.socket :as socket]
    [braid.core.server.sync-helpers :as helpers]
    [mount.core :refer [defstate]]
-   [schema.core :as s]
    [taoensso.sente :as sente]
    [taoensso.timbre :as timbre :refer [debugf]]
    [braid.core.server.db.group :as group]
    [braid.core.server.db.thread :as thread]))
 
-(defonce message-handlers (hooks/register! (atom {})))
+(defonce message-handlers
+  (hooks/register! (atom {}) {keyword? fn?}))
 
 (defn run-cofx! [ev-msg cofx]
   (when-let [args (cofx :chsk-send!)]

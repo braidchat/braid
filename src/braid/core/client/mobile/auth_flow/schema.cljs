@@ -1,11 +1,11 @@
 (ns braid.core.client.mobile.auth-flow.schema
   (:require
-   [schema.core :as s :include-macros true]))
+    [clojure.spec.alpha :as s]))
 
 (def init-state
   {:auth-flow {:method nil
                :stage nil}})
 
 (def MobileAuthFlowAppState
-  {:auth-flow {:method (s/enum :login :register)
-               :stage (s/enum :email :password)}})
+  {:auth-flow {:method (s/spec #{:login :register})
+               :stage (s/spec #{:email :password})}})
