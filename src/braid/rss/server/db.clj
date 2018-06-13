@@ -1,8 +1,6 @@
 (ns braid.rss.server.db
   (:require
    [braid.core.server.db :as db]
-   [braid.core.server.db.message :as message]
-   [braid.core.server.sync-helpers :as sync-helpers]
    [clojure.string :as string]
    [datomic.api :as d]
    [datomic.db]))
@@ -85,26 +83,9 @@
                tag-ids))))
 
 (defn update-last-fetched-txn
-  [feed new-last-fetched]
-  [[:db/add [:rss/id (feed :id)] :rss/last-fetched new-last-fetched]])
+  [feed-id new-last-fetched]
+  [[:db/add [:rss/id feed-id] :rss/last-fetched new-last-fetched]])
 
 (defn remove-feed-txn
   [feed-id]
   [[:db.fn/retractEntity [:rss/id feed-id]]])
-
-;; XXX: move this elsewhere
-(defn post-item
-  [feed item]
-  (let [msg {:id (java.util.UUID/randomUUID)
-             :content (string/join "\n" (feed :title) (feed :link) (feed :description))
-             :thread-id (java.util.UUID/randomUUID)
-             :user-id (feed :user-id)
-             :group-id (feed :group-id)
-             :created-at (java.util.Date.)
-             :mentioned-user-ids []
-             :mentioned-tag-ids (feed :tag-ids)}]
-    (db/run-txns! (message/create-message-txn msg))
-    ;; NB: explicitly *not* running sync-helpers/notify-users here
-    ;; since this is a sort of auto-generated post, it seems to
-    ;; not make the most sense
-    (sync-helpers/broadcast-thread (msg :thread-id) [])))
