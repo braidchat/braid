@@ -58,8 +58,7 @@ This will start all the various Braid components, including 3 web servers:
 3. Seed some data:
 
   ```clojure
-  (require 'braid.core.server.seed)
-  (braid.core.server.seed/seed!)
+  (seed!)
   ```
 
 ## ...and you're good!
