@@ -32,12 +32,16 @@
 
 (defn fetch-feed
   [url]
-  (->> @(http/get url)
-      :body
-      .getBytes
-      (java.io.ByteArrayInputStream.)
-      xml/parse
-      extract-items))
+  (let [feed (->> @(http/get url)
+            :body
+            .getBytes
+            (java.io.ByteArrayInputStream.)
+            xml/parse
+            extract-items)]
+    (if (seq feed)
+      feed
+      (throw (ex-info "Failed to parse feed"
+                      {:feed-url url})))))
 
 (defn item-guid
   [item]

@@ -71,6 +71,11 @@
             (db/db) group-id rss-pull-pattern)
        (map db->rss)))
 
+(defn feed-group-id
+  [feed-id]
+  (-> (d/pull (db/db) [{:rss/group [:group/id]}] [:rss/id feed-id])
+      (get-in [:rss/group :group/id])))
+
 (defn add-rss-feed-txn
   [{:keys [id feed-url group-id user-id tag-ids]}]
   (let [ent-id (d/tempid :entities)]
