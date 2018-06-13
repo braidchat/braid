@@ -35,6 +35,10 @@ From the project directory...
   lein repl
   ```
 
+The repl starts you off in `braid.dev.core`, which is a dev-only namespace with some utility functions. The source is in: `dev-src/braid/dev/core.clj`
+
+The main app entry point is `braid.core` with source under: `src/braid/core.clj`
+
 2. Inside the REPL, start the Braid system:
 
   ```clojure
