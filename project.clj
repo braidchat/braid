@@ -61,7 +61,7 @@
                  ;;mobile
                  [garden "1.3.2"]]
 
-  :main braid.core.server.core
+  :main braid.core
 
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.6" :exclusions [org.clojure/clojure]]

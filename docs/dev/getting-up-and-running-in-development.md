@@ -44,7 +44,7 @@ From the project directory...
 2. Inside the REPL, start the servers:
 
   ```clojure
-  (dev-main 5555)
+  (start! 5555)
   ```
 
 This will start 3 servers:

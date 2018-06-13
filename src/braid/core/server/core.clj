@@ -1,9 +1,8 @@
 (ns braid.core.server.core
-  (:gen-class)
   (:require
-    [braid.core.modules :as modules]
-    [braid.core.server.email-digest :refer [email-jobs]] ; for mount
-    [braid.core.server.handler :refer [mobile-client-app desktop-client-app api-server-app]]
+    [braid.core.server.handler :refer [mobile-client-app
+                                       desktop-client-app
+                                       api-server-app]]
     [braid.core.server.sync-handler] ; for mount
     [braid.core.server.sync] ; for multimethods
     [mount.core :as mount :refer [defstate]]
@@ -58,17 +57,3 @@
 (defstate thread-handler
   :start (set-default-exception-handler))
 
-;; main
-(defn dev-main
-  "Start things up, but don't start the email server"
-  [port]
-  (modules/init!)
-  (->
-    (mount/except #{#'email-jobs})
-    (mount/with-args {:port port})
-    (mount/start)))
-
-(defn -main  [& args]
-  (let [port (Integer/parseInt (first args))]
-    (modules/init!)
-    (mount/start-with-args {:port port})))
