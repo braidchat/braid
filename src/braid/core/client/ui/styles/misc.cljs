@@ -44,9 +44,6 @@
    [:.page.users>.title::before
     (mixins/fontawesome \uf0c0)]
 
-   [:.page.channels>.title::before
-    (mixins/fontawesome \uf02c)]
-
    [:.page.settings>.title::before
     (mixins/fontawesome \uf013)]
 
@@ -57,10 +54,7 @@
     (mixins/fontawesome \uf007)]
 
    [:.page.userpage>.title::before
-    (mixins/fontawesome \uf007)]
-
-   [:.page.channel>.title::before
-    (mixins/fontawesome \uf02b)]])
+    (mixins/fontawesome \uf007)]])
 
 
 (defn threads [pad]
