@@ -3,9 +3,10 @@
   (:require
     [mount.core :as mount]
     [braid.core.modules :as modules]
-    [braid.core.server.core] ; for mount
-    [braid.core.server.email-digest :refer [email-jobs]] ; for mount
-    ))
+    ;; all following requires are for mount:
+    [braid.core.server.core]
+    [braid.core.server.email-digest :refer [email-jobs]]
+    [braid.core.dev.figwheel :refer [figwheel]]))
 
 (defn start!
   "Helper function to start Braid components in dev.
@@ -27,4 +28,6 @@
   [& args]
   (let [port (Integer/parseInt (first args))]
     (modules/init!)
-    (mount/start-with-args {:port port})))
+    (-> (mount/except #{#'figwheel})
+        (mount/with-args {:port port})
+        (mount/start {:port port}))))

@@ -4,15 +4,9 @@ The following steps should get Braid running on your computer, ready for develop
 
 If you're interested in getting Braid running in production, read: [Deploying Braid](../drafts/deploying-to-production.md)
 
-To get Braid running locally, **you will need to have 2 or 3 terminal sessions open**:
-
- 1. The Braid REPL and Servers
- 2. Figwheel (JS compiler and hot-reloader)
- 3. (optional) The Datomic database process (only if you want any state changes to survive a REPL restart)
-
 ## 0. Prep
 
-Before running Braid, you'll need to have Java and Leiningen  installed.
+Before running Braid, you'll need to have Java and Leiningen installed.
 
 1. Check if you have java installed by running `java -version` from your commandline. It should be at least version 1.8.0. If not, install openjdk or Oracle Java (the exact procedure depends on your OS, see Google).
 
@@ -41,19 +35,20 @@ From the project directory...
   lein repl
   ```
 
-2. Inside the REPL, start the servers:
+2. Inside the REPL, start the Braid system:
 
   ```clojure
   (start! 5555)
   ```
 
-This will start 3 servers:
+This will start all the various Braid components, including 3 web servers:
 
-| Server             | Port | Description                                      |
-| ------------------ | ---- | ------------------------------------------------ |
-| desktop web client | 5555 | HTML, JS, CSS assets for desktop web client      |
-| mobile web client  | 5556 | HTML, JS, CSS assets for mobile web client       |
-| api                | 5557 | HTTP and Websocket API, communicates w/ db, etc. |
+| Server             | Port | Description                                                     |
+| ------------------ | ---- | --------------------------------------------------------------- |
+| desktop web client | 5555 | HTML, JS, CSS assets for desktop web client                     |
+| mobile web client  | 5556 | HTML, JS, CSS assets for mobile web client                      |
+| api                | 5557 | HTTP and Websocket API, communicates w/ db, etc.                |
+| figwheel           | 3559 | cljs->js compiler and live-code reloader, do not visit directly |
 
 
 3. Seed some data:
@@ -61,27 +56,6 @@ This will start 3 servers:
   ```clojure
   (require 'braid.core.server.seed)
   (braid.core.server.seed/seed!)
-  ```
-
-Don't navigate to the website just yet.
-
-
-## 3. Figwheel
-
-[Figwheel](https://github.com/bhauman/lein-figwheel) is used during development to compile Clojurescript to Javascript, and to hot-reload the code in the browser (ie. no need to refresh the browser when making changes).
-
-In a new terminal session:
-
-1. Navigate to the project folder:
-
-  ```bash
-  cd ~/path/to/braid
-  ```
-
-2. Run figwheel:
-
-  ```bash
-  lein figwheel desktop-dev
   ```
 
 ## ...and you're good!
@@ -109,9 +83,9 @@ In a private window, you can login as another user:
 If you edit a `.cljs` file in the repo, it should auto-update the page in the browser (no need for refreshing). Note: when developing, you should always have the Chrome/Firefox inspector, with "Disable Cache" on (under the Network Tab).
 
 
-## 3. Datomic
+## Datomic
 
-By default, Braid uses Datomic's in-memory database, which requires no set-up, but, it requires re-seeding every time you start the REPL.
+By default, Braid uses Datomic's in-memory database, which requires no set-up, but, it requires re-seeding every time you restart the REPL.
 
 To have data survive a REPL restart, you'll need to persist it to disk by installing Datomic.
 
@@ -159,24 +133,6 @@ To work on the mobile client:
   ```bash
   open http://localhost:5556/
   ```
-
-
-### A Better Clojurescript REPL
-
-By default, the Clojurescript REPL that starts with figwheel doesn't support command history (up/down arrows, Ctrl-R, etc.) You can get this functionality back by launching figwheel with `rlwrap`
-
-1. Install rlwrap:
-
-  ```bash
-  brew install rlwrap
-  ```
-
-2. Then, to start figwheel, use:
-
-  ```bash
-  rlwrap lein figwheel
-  ```
-
 
 ### Using Emacs + CIDER instead of terminals
 
