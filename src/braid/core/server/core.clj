@@ -6,6 +6,7 @@
     [braid.core.server.handler :refer [mobile-client-app desktop-client-app api-server-app]]
     [braid.core.server.sync-handler] ; for mount
     [braid.core.server.sync] ; for multimethods
+    [braid.core.server.jobs] ; for mount
     [mount.core :as mount :refer [defstate]]
     [org.httpkit.server :refer [run-server]]
     [taoensso.timbre :as timbre]))
