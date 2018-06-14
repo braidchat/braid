@@ -53,7 +53,7 @@
        (@tag :threads-count)]]
      [:div.info
       [:div.description
-       (or (@tag :description) "If I had a description, it would be here.")]]
+       (@tag :description)]]
      [:div.actions
       [search-button-view (str "#" (@tag :name))]
       [subscribe-button-view tag-id]]]))
@@ -97,7 +97,7 @@
       [:div.local-time (helpers/format-date (js/Date.))]
       #_[:div.since "member since"]
       [:div.description
-       "If I had a profile, it would be here"]]
+       #_"If I had a profile, it would be here"]]
 
      [:div.actions
       #_[:a.pm "PM"]
