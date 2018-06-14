@@ -115,7 +115,9 @@
    ; switch to ::after to align at top
    [:&::before
     {:content "\"\""
-     :flex-grow 1}]
+     :flex-grow 1
+     ; have 1px so card shadow shows
+     :min-height "1px"}]
 
    ;; XXX: does this class actually apply to anything?
    [:&.archived :&.limbo :&.private
