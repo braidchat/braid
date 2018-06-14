@@ -8,6 +8,7 @@
    [braid.core.client.helpers :as helpers]
    [braid.core.client.routes :as routes]
    [braid.core.client.s3 :as s3]
+   [braid.core.client.ui.views.card-border :refer [card-border-view]]
    [braid.core.client.ui.views.message :refer [message-view]]
    [braid.core.client.ui.views.new-message :refer [new-message-view]]
    [braid.core.client.ui.views.pills :refer [user-pill-view tag-pill-view]]
@@ -322,7 +323,9 @@
             "This is a private conversation." [:br]
             "Only @mentioned users can see it."])
 
-         [:div.card {:style {:border-left-color (helpers/->color (thread :group-id))}}
+         [:div.card
+          [card-border-view (thread :id)]
+
           [thread-header-view thread]
 
           (when-not new?

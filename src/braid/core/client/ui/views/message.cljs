@@ -4,6 +4,7 @@
     [braid.core.client.helpers :as helpers :refer [id->color ->color]]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
+    [braid.core.client.ui.views.card-border :refer [card-border-view]]
     [cljsjs.highlight.langs.clojure]
     [cljsjs.highlight.langs.css]
     [cljsjs.highlight.langs.javascript]
@@ -219,6 +220,9 @@
                                " " (if (:unseen? message) "unseen" "seen")
                                " " (when (:first-unseen? message) "first-unseen")
                                " " (when (:failed? message) "failed-to-send"))}
+
+     [card-border-view (message :thread-id)]
+
      (when (:failed? message)
        [:div.error
         [:span "Message failed to send"]

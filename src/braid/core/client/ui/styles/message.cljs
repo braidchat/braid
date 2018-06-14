@@ -12,7 +12,7 @@
 (def message
   [:>.message
    {:position "relative"
-    :margin [[0 0 pad]]}
+    :padding [[(m// pad 2) pad]]}
 
    [:&.failed-to-send
     {:background-color "rgba(239, 72, 72, 0.53)"}]
@@ -22,33 +22,21 @@
      [:.avatar :.info
       {:display "none"}]]
 
-    [:&.seen
-     {:transition [["opacity" "0.5s" "linear"]]}
-     ; cannot apply opacity to .message or .content or .dummy
-     ; b/c it creates a new stacking context
-     ; causing hover-cards to display under subsequent messages
-     ["> .info"
-      "> .avatar img"
-      "> .footer"
-      "> .content > img"
-      "> .content > .dummy > .user > .pill"
-      "> .content > .dummy > .tag > .pill"
-      "> .content > .dummy > .external"
-      {:opacity 0.6}]
+    [:&.unseen
 
-     ["> .content"
-      {:color "rgba(0,0,0,0.6)"}]]
-
-    [:&.unseen {}]
+     [:>.border
+      (mixins/card-border "8px")]]
 
    [:>.delete
     {:display "none"}]
+
    [:&:hover
     [:>.delete
      {:position "absolute"
       :display "block"
       :right 0
       :z-index 1000}
+
      [:>button
       {:font-family "fontawesome"
        :color "red"}]]]

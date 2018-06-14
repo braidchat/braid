@@ -144,20 +144,23 @@
 
    [:&.focused
     [:>.card
-     {:box-shadow [[0 (px 10) (px 10) (px 10) "#ccc"]]}]]
+     {:box-shadow [[(px 1) (px 1) (px 4) 0 "#999"]]}]]
 
    [:>.card
     mixins/flex
     {:flex-direction "column"
      :box-shadow [[0 (px 1) (px 3) 0 "#bbb"]]
-     :transition [["box-shadow" "0.2s"]]
      :max-height "100%"
      :background "white"
-     :border-left "4px solid #000" ; color overriden inline
      :border-radius [[vars/border-radius
-                      vars/border-radius 0 0]]}
-    (drag-and-drop pad)
+                      vars/border-radius 0 0]]
+     :position "relative"
+     :overflow "hidden"}
 
+    [:>.border
+     (mixins/card-border "4px")]
+
+    (drag-and-drop pad)
     (head pad)
     (messages pad)]])
 
