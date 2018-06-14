@@ -229,10 +229,6 @@
     [:div.page.global-settings
      [:div.title "Global Settings"]
      [:div.content
-      [:h2 "Log Out"]
-      [:button.logout {:on-click
-                       (fn [_]
-                         (dispatch [:logout nil]))} "Log Out"]
       [:h2 "Update Nickname"]
       [nickname-view]
       [:h2 "Update Avatar"]

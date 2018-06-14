@@ -16,10 +16,11 @@
   [shortcode emoji-meta show-as-brackets?]
   [:div.emoji.match
    [emoji-view shortcode emoji-meta]
-   [:div.name (if show-as-brackets?
-               (shortcode->brackets shortcode)
-               shortcode)]
-   [:div.extra]])
+   [:div.info
+    [:div.name (if show-as-brackets?
+                 (shortcode->brackets shortcode)
+                 shortcode)]
+    [:div.extra]]])
 
 (defn autocomplete-handler [text]
   (let [pattern #"\B[:(](\S{2,})$"]

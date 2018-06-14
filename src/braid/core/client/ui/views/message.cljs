@@ -229,17 +229,7 @@
         [:button {:on-click
                   (fn [_] (dispatch [:resend-message message]))}
          "Resend"]])
-     (when (or (= (message :user-id) current-user) admin?)
-       [:span.delete
-        [:button
-         {:on-click (fn [_]
-                      (when (js/confirm (str "Delete this message?\n"
-                                             "\"" (message :content) "\""))
-                        (dispatch [:core/retract-message
-                                   {:thread-id (message :thread-id)
-                                    :message-id (message :id)
-                                    :remote? true}])))}
-         \uf1f8]])
+
      [:a.avatar {:href sender-path
                  :tabIndex -1}
       [:img {:src (:avatar sender)
@@ -256,6 +246,17 @@
        (helpers/format-date (message :created-at))]]
 
      (into [:div.content] (format-message (message :content)))
+
+     (when (or (= (message :user-id) current-user) admin?)
+       [:button.delete
+        {:on-click (fn [_]
+                     (when (js/confirm (str "Delete this message?\n"
+                                            "\"" (message :content) "\""))
+                       (dispatch [:core/retract-message
+                                  {:thread-id (message :thread-id)
+                                   :message-id (message :id)
+                                   :remote? true}])))}
+        \uf1f8])
 
      (into [:div.footer]
            (for [footer-view @footer-views]

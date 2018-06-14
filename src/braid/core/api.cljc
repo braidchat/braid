@@ -11,6 +11,7 @@
           [braid.core.client.pages]
           [braid.core.client.ui.views.styles]
           [braid.core.client.ui.views.header]
+          [braid.core.client.ui.views.user-header]
           [braid.core.client.ui.views.autocomplete]
           [braid.core.client.group-admin.views.group-settings-page]]
          :clj
@@ -36,8 +37,21 @@
         :route-args   optional map of args to pass to route-fn
                       :group-id will be merged in"
        [config]
-       {:pre [(util/valid? braid.core.client.ui.views.header/group-header-dataspec config)]}
+       {:pre [(util/valid? braid.core.client.ui.views.header/GroupHeaderItem config)]}
        (swap! braid.core.client.ui.views.header/group-header-buttons conj config))
+
+     (defn register-user-header-menu-item!
+       "Add a new link to appear in the user header
+       Expects a map with the following keys
+       :body         string, text to show
+       :priority     number, for ordering
+       :on-click     optional on-click function
+       :route-fn     optional secretary route fn that returns url
+       :route-args   optional map of args to pass to route-fn
+                     :group-id will be merged in"
+       [config]
+       {:pre [(util/valid? braid.core.client.ui.views.user-header/UserHeaderItem config)]}
+       (swap! braid.core.client.ui.views.user-header/user-header-menu-items conj config))
 
      (defn register-thread-header-item!
        "Adds a new view to a thread's header.
