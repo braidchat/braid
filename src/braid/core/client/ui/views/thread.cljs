@@ -322,7 +322,7 @@
             "This is a private conversation." [:br]
             "Only @mentioned users can see it."])
 
-         [:div.card
+         [:div.card {:style {:border-left-color (helpers/->color (thread :group-id))}}
           [thread-header-view thread]
 
           (when-not new?

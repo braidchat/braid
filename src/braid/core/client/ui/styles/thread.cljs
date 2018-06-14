@@ -153,6 +153,7 @@
      :transition [["box-shadow" "0.2s"]]
      :max-height "100%"
      :background "white"
+     :border-left "4px solid #000" ; color overriden inline
      :border-radius [[vars/border-radius
                       vars/border-radius 0 0]]}
     (drag-and-drop pad)
