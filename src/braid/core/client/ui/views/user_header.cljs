@@ -39,6 +39,16 @@
         :body "Edit Your Profile"
         :icon \uf2bd
         :priority 8}
+       {:body "Leave Group"
+        :on-click (fn [_]
+                    (let [group (subscribe [:active-group])
+                          user-id (subscribe [:user-id])]
+                      (when (js/confirm (str "Are you sure you want to leave " (@group :name) "?"))
+                        (dispatch [:remove-from-group
+                                   {:group-id (@group :id)
+                                    :user-id @user-id}]))))
+        :priority 7
+        :icon \uf08b}
        #_{:body "See Changelog"
           :route-fn routes/page-path
           :route-args {:page-id "changelog"}
