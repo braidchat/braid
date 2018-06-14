@@ -8,11 +8,11 @@
   (let [group-id (subscribe [:open-group-id])
         open-threads (subscribe [:open-threads] [group-id])]
     (fn []
-      [:div.clear-inbox
-        (when (< 5 (count @open-threads))
-          [:button {:on-click (fn [_]
-                                (dispatch [:clear-inbox]))}
-            "Clear Inbox"])])))
+      (when (< 5 (count @open-threads))
+        [:button.clear-inbox
+         {:on-click (fn [_]
+                      (dispatch [:clear-inbox]))}
+         "Clear Inbox"]))))
 
 (defn inbox-page-view
   []
