@@ -35,12 +35,6 @@
   [[:.page>.title::before
     {:margin-right (em 0.5)}]
 
-   [:.page.inbox>.title::before
-    (mixins/fontawesome \uf01c)]
-
-   [:.page.recent>.title::before
-    (mixins/fontawesome \uf1da)]
-
    [:.page.users>.title::before
     (mixins/fontawesome \uf0c0)]
 
