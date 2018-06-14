@@ -266,30 +266,38 @@
       :bottom (m/* pad 3)}
 
      [:>.result
-      {:padding "0.25em 0.5em"
-       :clear "both"}
+      {:padding "0.25em 0.5em"}
 
       [:>.match
+       {:display "flex"}
 
        [:>.avatar
         :>.color-block
         {:display "block"
-         :width "2em"
          :height "2em"
-         :float "left"
          :margin "0.25em 0.5em 0.25em 0"}]
 
+       [:>.avatar
+        {:width "2em"}]
+
        [:>.color-block
-        {:width "1em"}]
+        {:width "1em"
+         :border "3px solid #fff"
+         :border-radius "3px"
+         :box-sizing "border-box"}]
 
-       [:>.name
-        {:height "1em"
-         :white-space "nowrap"}]
+       [:>.info
+        {:margin "0.25em 0"}
 
-       [:>.extra
-        {:color "#ccc"
-         :overflow-y "hidden"
-         :max-height "2.5em"}]]
+        [:>.name
+         {:height "1em"
+          :white-space "nowrap"}]
+
+        [:>.extra
+         {:color "#ccc"
+          :overflow-y "hidden"
+          :width "100%"
+          :max-height "1em"}]]]
 
       [:&:hover
        {:background "#eee"}]

@@ -64,8 +64,9 @@
                           (constantly
                             [:div.bot.match
                              [:img.avatar {:src (b :avatar)}]
-                             [:div.name (b :nickname)]
-                             [:div.extra "..."]])})))
+                             [:div.info
+                              [:div.name (b :nickname)]
+                              [:div.extra]]])})))
             @(subscribe [:group-bots] [open-group])))))
 
 
@@ -89,8 +90,9 @@
                      (fn []
                        [:div.user.match
                         [:img.avatar {:src (user :avatar)}]
-                        [:div.name (user :nickname)]
-                        [:div.extra (user :status)]])})))))))
+                        [:div.info
+                         [:div.name (user :nickname)]
+                         [:div.extra (user :status)]]])})))))))
 
 ; ... #<tag>   -> autocompletes tag
 (defn tag-autocomplete-engine [text]
@@ -116,15 +118,13 @@
                         [:div.color-block
                          {:style
                           (merge
-                            {:borderColor (id->color (tag :id))
-                             :borderWidth "3px"
-                             :borderStyle "solid"
-                             :borderRadius "3px"}
+                            {:border-color (id->color (tag :id))}
                             (when @(subscribe [:user-subscribed-to-tag? (tag :id)])
-                              {:backgroundColor (id->color (tag :id))}))}]
-                        [:div.name (tag :name)]
-                        [:div.extra (or (tag :description)
-                                        (gstring/unescapeEntities "&nbsp;"))]])}))
+                              {:background-color (id->color (tag :id))}))}]
+                        [:div.info
+                         [:div.name (tag :name)]
+                         [:div.extra (or (tag :description)
+                                         (gstring/unescapeEntities "&nbsp;"))]]])}))
              (cons (when-not (or exact-match? (string/blank? query))
                      (let [tag (merge (schema/make-tag)
                                       {:name query
@@ -140,9 +140,11 @@
                              (fn []
                                [:div.tag.match
                                 [:div.color-block
-                                 {:style {:backgroundColor (id->color (tag :id))}}]
-                                [:div.name (str "Create tag " (tag :name))]
-                                [:div.extra
-                                 (:name @(subscribe [:group (tag :group-id)]))]])})))
+                                 {:style {:border-color (id->color (tag :id))
+                                          :background-color (id->color (tag :id))}}]
+                                [:div.info
+                                 [:div.name (str "Create tag " (tag :name))]
+                                 [:div.extra
+                                  (:name @(subscribe [:group (tag :group-id)]))]]])})))
              (remove nil?)
              reverse)))))
