@@ -25,7 +25,7 @@
     [:&.unseen
 
      [:>.border
-      (mixins/card-border "8px")]]
+      (mixins/card-border "9px")]]
 
    [:>.delete
     {:display "none"}]

@@ -146,21 +146,19 @@
 
    [:&.focused
     [:>.card
-     {:box-shadow [[(px 1) (px 1) (px 4) 0 "#999"]]}]]
+     [:>.border
+     (mixins/card-border "5px")]]]
 
    [:>.card
     mixins/flex
     {:flex-direction "column"
-     :box-shadow [[0 (px 1) (px 3) 0 "#bbb"]]
+     :box-shadow [[0 (px 1) (px 4) 0 "#c3c3c3"]]
      :max-height "100%"
      :background "white"
      :border-radius [[vars/border-radius
                       vars/border-radius 0 0]]
      :position "relative"
      :overflow "hidden"}
-
-    [:>.border
-     (mixins/card-border "4px")]
 
     (drag-and-drop pad)
     (head pad)

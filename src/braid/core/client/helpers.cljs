@@ -100,9 +100,6 @@
 (defn ->color [input]
   (js/window.HUSL.toHex (mod (Math/abs (hash input)) 360) 95 50))
 
-(defn darken [color]
-  (color/as-hex (color/darken color 15)))
-
 (defn id->color [uuid]
   (->color uuid))
 
