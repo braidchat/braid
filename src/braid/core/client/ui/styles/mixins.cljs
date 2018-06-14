@@ -114,3 +114,12 @@
      :right (m/* vars/pad 0.70)
      :color "white"
      :font-size "1.5em"}]])
+
+(defn card-border [width]
+  {:position "absolute"
+   ; background overriden inline
+   :background "#000"
+   :top 0
+   :left 0
+   :bottom 0
+   :width width})

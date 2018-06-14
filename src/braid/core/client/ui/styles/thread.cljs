@@ -95,7 +95,7 @@
   [:>.messages
    {:position "relative"
     :overflow-y "auto"
-    :padding [[0 pad]]}])
+    :overflow-x "hidden"}])
 
 (defn thread [pad]
   [:>.thread
@@ -115,7 +115,9 @@
    ; switch to ::after to align at top
    [:&::before
     {:content "\"\""
-     :flex-grow 1}]
+     :flex-grow 1
+     ; have 1px so card shadow shows
+     :min-height "1px"}]
 
    ;; XXX: does this class actually apply to anything?
    [:&.archived :&.limbo :&.private
@@ -144,19 +146,21 @@
 
    [:&.focused
     [:>.card
-     {:box-shadow [[0 (px 10) (px 10) (px 10) "#ccc"]]}]]
+     [:>.border
+     (mixins/card-border "5px")]]]
 
    [:>.card
     mixins/flex
     {:flex-direction "column"
-     :box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
-     :transition [["box-shadow" "0.2s"]]
+     :box-shadow [[0 (px 1) (px 4) 0 "#c3c3c3"]]
      :max-height "100%"
      :background "white"
      :border-radius [[vars/border-radius
-                      vars/border-radius 0 0]]}
-    (drag-and-drop pad)
+                      vars/border-radius 0 0]]
+     :position "relative"
+     :overflow "hidden"}
 
+    (drag-and-drop pad)
     (head pad)
     (messages pad)]])
 
