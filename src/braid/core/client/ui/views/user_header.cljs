@@ -1,9 +1,10 @@
 (ns braid.core.client.ui.views.user-header
   (:require
-    [re-frame.core :refer [subscribe]]
+    [re-frame.core :refer [subscribe dispatch]]
+    [braid.core.hooks :as hooks]
     [braid.core.client.helpers :as helpers]
     [braid.core.client.routes :as routes]
-    [braid.core.client.ui.views.header-item :refer [header-item-view]]))
+    [braid.core.client.ui.views.header-item :refer [header-item-view HeaderItem]]))
 
 (defn current-user-button-view []
   (let [user-id (subscribe [:user-id])
@@ -19,22 +20,31 @@
          [:div.name (str "@" @user-nickname)]
          [:img.avatar {:src @user-avatar-url}]]))))
 
-(def user-header-items
-  [{:class "subscriptions"
-    :route-fn routes/page-path
-    :route-args {:page-id "tags"}
-    :body "Manage Subscriptions"}
-   {:class "invite-friend"
-    :route-fn routes/invite-page-path
-    :body "Invite a Person"}
-   {:class "edit-profile"
-    :route-fn routes/page-path
-    :route-args {:page-id "me"}
-    :body "Edit Your Profile"}
-   #_{:class "changelog"
-    :route-fn routes/page-path
-    :route-args {:page-id "changelog"}
-    :body "See Changelog"}])
+(def UserHeaderItem HeaderItem)
+
+(defonce user-header-menu-items
+  (hooks/register!
+    (atom
+      [{:body "Manage Subscriptions"
+        :route-fn routes/page-path
+        :route-args {:page-id "tags"}
+        :icon \uf02c
+        :priority 10}
+       {:body "Invite a Person"
+        :route-fn routes/invite-page-path
+        :icon \uf1e0
+        :priority 9}
+       {:route-fn routes/page-path
+        :route-args {:page-id "me"}
+        :body "Edit Your Profile"
+        :icon \uf2bd
+        :priority 8}
+       #_{:body "See Changelog"
+          :route-fn routes/page-path
+          :route-args {:page-id "changelog"}
+          :icon \uf1da
+          :priority 6}])
+    [UserHeaderItem]))
 
 (defn user-header-view []
   (let [user-id (subscribe [:user-id])]
@@ -44,8 +54,11 @@
         [current-user-button-view]
         [:div.more]]
        [:div.options
-        [:div.content
-         (doall
-           (for [header-item user-header-items]
-             ^{:key (header-item :class)}
-             [header-item-view header-item]))]]])))
+        (into
+          [:div.content]
+          (doall
+            (for [header-item (->> @user-header-menu-items
+                                   (sort-by :priority)
+                                   reverse)]
+              ^{:key (header-item :class)}
+              [header-item-view header-item])))]])))

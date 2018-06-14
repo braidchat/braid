@@ -1,13 +1,12 @@
 (ns braid.core.client.ui.views.header
   (:require
-    [spec-tools.data-spec :as ds]
     [re-frame.core :refer [subscribe dispatch]]
     [braid.core.hooks :as hooks]
     [braid.core.client.helpers :refer [->color]]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.search-bar :refer [search-bar-view]]
     [braid.core.client.ui.views.user-header :refer [user-header-view]]
-    [braid.core.client.ui.views.header-item :refer [header-item-view]]))
+    [braid.core.client.ui.views.header-item :refer [header-item-view HeaderItem]]))
 
 (defn loading-indicator-view [group-id]
   (let [page (subscribe [:page])]
@@ -23,12 +22,7 @@
     (fn []
       [:div.group-name (@group :name)])))
 
-(def group-header-dataspec
-  {:title string?
-   :route-fn fn?
-   (ds/opt :route-args) {keyword? any?}
-   :icon string?
-   :priority number?})
+(def GroupHeaderItem HeaderItem)
 
 (defonce group-header-buttons
   (hooks/register!
@@ -45,7 +39,7 @@
         :route-fn routes/uploads-path
         :icon \uf0ee
         :priority 0}])
-    [group-header-dataspec]))
+    [GroupHeaderItem]))
 
 (defn group-header-buttons-view [header-items]
   [:div.buttons
