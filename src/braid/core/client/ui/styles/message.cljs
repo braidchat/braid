@@ -19,27 +19,32 @@
 
    [:&.collapse
     {:margin-top (m/- pad)}
-     [:.avatar :.info
-      {:display "none"}]]
+    [:.avatar :.info
+     {:display "none"}]]
 
-    [:&.unseen
-
-     [:>.border
-      (mixins/card-border "9px")]]
-
-   [:>.delete
-    {:display "none"}]
+   [:&.unseen
+    [:>.border
+     (mixins/card-border "9px")]]
 
    [:&:hover
-    [:>.delete
-     {:position "absolute"
-      :display "block"
-      :right 0
-      :z-index 1000}
+    [:>button.delete
+     {:display "inline-block"
+      :position "absolute"
+      :line-height "1.25em"
+      :right pad}]]
 
-     [:>button
-      {:font-family "fontawesome"
-       :color "red"}]]]
+   [:>button.delete
+    {:display "none"
+     :font-family "fontawesome"
+     :color "#ccc"
+     :background "none"
+     :border "none"
+     :padding 0
+     :cursor "pointer"
+     :margin-left "0.25rem"}
+
+    [:&:hover
+     {:color "red"}]]
 
    [:>.avatar
     [:>img
@@ -131,6 +136,6 @@
        :width "100%"
        :text-overflow "ellipsis"}
 
-       [:&:hover
-        {:text-overflow "initial"
-         :overflow-x "auto"}]]]]])
+      [:&:hover
+       {:text-overflow "initial"
+        :overflow-x "auto"}]]]]])
