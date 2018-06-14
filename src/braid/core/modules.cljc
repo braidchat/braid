@@ -11,6 +11,7 @@
     [braid.image-embeds.core]
     [braid.permalinks.core]
     [braid.quests.core]
+    [braid.rss.core]
     [braid.stars.core]
     [braid.video-embeds.core]
     [braid.website-embeds.core]))
@@ -27,6 +28,7 @@
   (braid.image-embeds.core/init!)
   (braid.permalinks.core/init!)
   (braid.quests.core/init!)
+  (braid.rss.core/init!)
   (braid.stars.core/init!)
   (braid.video-embeds.core/init!)
   (braid.website-embeds.core/init!))

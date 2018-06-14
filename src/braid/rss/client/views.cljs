@@ -12,14 +12,18 @@
                           :tag-ids #{first-tag-id}})
         error (r/atom nil)]
     (fn [group]
-      [:form.new-rss-feed {:on-submit
-                           (fn [e]
-                             (.preventDefault e)
-                             (cond
-                               (string/blank? (:feed-url @new-feed))
-                               (reset! error "You need to supply a valid feed URL")
+      [:form.new-rss-feed
+       {:on-submit
+        (fn [e]
+          (.preventDefault e)
+          (cond
+            (string/blank? (:feed-url @new-feed))
+            (reset! error "You need to supply a valid feed URL")
 
-                               :else (dispatch [:rss/add-feed (assoc @new-feed :group-id (group :id))])))}
+            :else
+            (do
+              (dispatch [:rss/add-feed (assoc @new-feed :group-id (group :id))])
+              (swap! new-feed assoc :feed-url ""))))}
        [:div.warning "New posts will be posted as coming from you"]
        (when @error [:div.error @error])
        [:label [:span "Feed URL"]

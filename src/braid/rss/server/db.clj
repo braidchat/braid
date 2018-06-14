@@ -71,6 +71,15 @@
             (db/db) group-id rss-pull-pattern)
        (map db->rss)))
 
+(defn all-feeds
+  []
+  (->> (d/q '[:find [(pull ?rss pull-pattern) ...]
+              :in $ pull-pattern
+              :where
+             [?rss :rss/id]]
+           (db/db) rss-pull-pattern)
+       (map db->rss)))
+
 (defn feed-group-id
   [feed-id]
   (-> (d/pull (db/db) [{:rss/group [:group/id]}] [:rss/id feed-id])

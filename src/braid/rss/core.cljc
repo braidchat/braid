@@ -4,7 +4,9 @@
    [braid.core.api :as core]
    #?@(:clj
        [[braid.rss.server.db :as db]
-        [braid.core.server.db.group :as group-db]]
+        [braid.rss.server.fetching :as fetching]
+        [braid.core.server.db.group :as group-db]
+        [taoensso.timbre :as timbre]]
        :cljs
        [[braid.rss.client.views :as views]
         [re-frame.core :refer [dispatch]]])))
@@ -37,7 +39,16 @@
               (if (group-db/user-is-group-admin? user-id group-id)
                 {:db-run-txns! (db/remove-feed-txn feed-id)
                  :reply! :braid/ok}
-                {})))}))
+                {})))})
+       (core/register-daily-job!
+         (fn []
+           (timbre/debugf "Running RSS job")
+           (doseq [feed (db/all-feeds)]
+             (timbre/debugf "Fetching %s" feed)
+             (try
+               (fetching/update-feed! feed)
+               (catch clojure.lang.ExceptionInfo ex
+                 (timbre/errorf "Bad feed %s" feed)))))))
     :cljs
      (do
        (core/register-group-setting! views/rss-feed-settings-view)

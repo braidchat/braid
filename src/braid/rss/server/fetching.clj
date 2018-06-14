@@ -30,14 +30,16 @@
                    xml)
     @items))
 
+(defn tee [x] (prn x) x)
+
 (defn fetch-feed
   [url]
-  (let [feed (->> @(http/get url)
-            :body
-            .getBytes
-            (java.io.ByteArrayInputStream.)
-            xml/parse
-            extract-items)]
+  (let [feed (some->> @(http/get url)
+                      :body
+                      .getBytes
+                      (java.io.ByteArrayInputStream.)
+                      xml/parse
+                      extract-items)]
     (if (seq feed)
       feed
       (throw (ex-info "Failed to parse feed"
