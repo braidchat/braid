@@ -16,6 +16,7 @@
   #?(:clj
      (do
        (core/register-db-schema! db/schema)
+
        (core/register-server-message-handlers!
          {:braid.server.rss/load-feeds
           (fn [{user-id :user-id group-id :?data}]
@@ -25,7 +26,9 @@
 
           :braid.server.rss/add-feed
           (fn [{user-id :user-id {:keys [tag-ids feed-url group-id] :as new-feed} :?data}]
-            (if (group-db/user-is-group-admin? user-id group-id)
+            (if (and (group-db/user-is-group-admin? user-id group-id)
+                     (let [group-tags (into #{} (map :id) (group-db/group-tags group-id))]
+                       (every? group-tags tag-ids)))
               (let [new-feed (assoc new-feed
                                     :id (java.util.UUID/randomUUID)
                                     :user-id user-id)]
@@ -40,6 +43,7 @@
                 {:db-run-txns! (db/remove-feed-txn feed-id)
                  :reply! :braid/ok}
                 {})))})
+
        (core/register-daily-job!
          (fn []
            (timbre/debugf "Running RSS job")
