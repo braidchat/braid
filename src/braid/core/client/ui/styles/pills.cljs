@@ -26,7 +26,7 @@
      :position "absolute"
      :z-index 5000
      :background "white"
-     :min-width (em 15)
+     :min-width (em 17)
      :top (m/* -1 offset)
      :left (m/* -1 offset)
      :padding offset
@@ -52,8 +52,9 @@
 
     [:>.actions
      [:>a
+      :>button
       {:margin-bottom (px 2)
-       :margin-right (em 1)}
+       :margin-right (em 0.5)}
       mixins/pill-button]]]])
 
 (defn tag []

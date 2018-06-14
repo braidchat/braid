@@ -24,6 +24,7 @@
     :background-color "#222"
     :border [[(px 1) "solid" "#222"]]
     :height (em 1.75)
+    :box-sizing "content-box"
     :line-height (em 1.75)
     :max-width (em 10)
     :white-space "nowrap"

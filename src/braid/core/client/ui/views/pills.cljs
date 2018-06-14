@@ -82,36 +82,45 @@
         admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
         viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
     [:div.card
+
      [:div.header {:style {:background-color (id->color user-id)}}
       [user-pill user-id]
       [:div.status
        (@user :status)
-                                        ; [:div "time since last online"]
-       ]
+       #_[:div "time since last online"]]
       [:div.badges
        (when @admin?
          [:div.admin {:title "admin"}])]
       [:img.avatar {:src (@user :avatar)}]]
+
      [:div.info
       [:div.local-time (helpers/format-date (js/Date.))]
-                                        ; [:div.since "member since]
+      #_[:div.since "member since"]
       [:div.description
        "If I had a profile, it would be here"]]
+
      [:div.actions
-                                        ; [:a.pm "PM"]
-                                        ; [:a.mute "Mute"]
+      #_[:a.pm "PM"]
+      #_[:a.mute "Mute"]
+
       [search-button-view (str "@" (@user :nickname))]
+
       (when (and @viewer-admin? (not= user-id @(subscribe [:user-id])))
         [:button.ban
-         {:on-click (fn [_] (dispatch [:remove-from-group
-                                      {:group-id @open-group-id
-                                       :user-id user-id}]))}
-         "Kick from Group"])
+         {:on-click
+          (fn [_]
+            (dispatch [:remove-from-group
+                       {:group-id @open-group-id
+                        :user-id user-id}]))}
+         "Kick"])
+
       (when (and @viewer-admin? (not @admin?))
-                                        ; TODO: make this not ugly
         [:button.make-admin
-         {:on-click (fn [_] (dispatch [:make-admin {:group-id @open-group-id
-                                                   :user-id user-id}]))}
+         {:on-click
+          (fn [_]
+            (dispatch [:make-admin
+                       {:group-id @open-group-id
+                        :user-id user-id}]))}
          "Make Admin"])]]))
 
 (defn user-pill-view
