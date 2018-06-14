@@ -136,8 +136,7 @@
                       (when (= group (@drag-state :grp))
                         {:opacity 0.2}))
              :title (group :name)
-             :href (routes/page-path {:group-id (group :id)
-                                      :page-id "inbox"})
+             :href (routes/inbox-page-path {:group-id (group :id)})
              :on-mouse-down (partial drag-start group)
              :on-mouse-up (partial drag-end group)
              :on-mouse-move (partial drag-move group)}
