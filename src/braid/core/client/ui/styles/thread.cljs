@@ -149,7 +149,7 @@
    [:>.card
     mixins/flex
     {:flex-direction "column"
-     :box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
+     :box-shadow [[0 (px 1) (px 3) 0 "#bbb"]]
      :transition [["box-shadow" "0.2s"]]
      :max-height "100%"
      :background "white"
