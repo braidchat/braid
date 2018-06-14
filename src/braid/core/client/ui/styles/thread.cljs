@@ -95,7 +95,7 @@
   [:>.messages
    {:position "relative"
     :overflow-y "auto"
-    :padding [[0 pad]]}])
+    :overflow-x "hidden"}])
 
 (defn thread [pad]
   [:>.thread
