@@ -160,7 +160,7 @@
      :overflow "hidden"}
 
     [:>.border
-     (mixins/card-border "3px")]
+     (mixins/card-border "4px")]
 
     (drag-and-drop pad)
     (head pad)
