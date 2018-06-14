@@ -49,6 +49,11 @@
                                     :user-id @user-id}]))))
         :priority 7
         :icon \uf08b}
+       {:body "Log Out"
+        :on-click (fn [_]
+                    (dispatch [:logout nil]))
+        :icon \uf235
+        :priority -1}
        #_{:body "See Changelog"
           :route-fn routes/page-path
           :route-args {:page-id "changelog"}
