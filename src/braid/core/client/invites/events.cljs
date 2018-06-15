@@ -10,7 +10,7 @@
 
 (reg-event-fx
   :invite
-  (fn [cofx [_ data]]
+  (fn [_ [_ data]]
     (let [invite (make-invitation data)]
       {:websocket-send (list [:braid.server/invite-to-group invite])})))
 
@@ -21,13 +21,13 @@
 
 (reg-event-fx
   :accept-invite
-  (fn [{state :db :as cofx} [_ invite]]
+  (fn [{state :db} [_ invite]]
     {:websocket-send (list [:braid.server/invitation-accept invite])
      :dispatch [:remove-invite invite]}))
 
 (reg-event-fx
   :decline-invite
-  (fn [{state :db :as cofx} [_ invite]]
+  (fn [{state :db} [_ invite]]
     {:websocket-send (list [:braid.server/invitation-decline invite])
      :dispatch [:remove-invite invite]}))
 
@@ -38,7 +38,7 @@
 
 (reg-event-fx
   :generate-link
-  (fn [cofx [_ {:keys [group-id expires complete]}]]
+  (fn [_ [_ {:keys [group-id expires complete]}]]
     {:websocket-send
      (list
        [:braid.server/generate-invite-link {:group-id group-id :expires expires}]

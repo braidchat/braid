@@ -34,7 +34,7 @@
 
 (reg-event-fx
   :new-bot
-  (fn [cofx [_ {:keys [bot on-complete]}]]
+  (fn [_ [_ {:keys [bot on-complete]}]]
     (let [bot (make-bot bot)]
       {:websocket-send
        (list
@@ -51,7 +51,7 @@
 
 (reg-event-fx
   :retract-bot
-  (fn [cofx [_ {:keys [bot-id]}]]
+  (fn [_ [_ {:keys [bot-id]}]]
     {:websocket-send
      (list [:braid.server/retract-bot bot-id]
            5000
@@ -65,7 +65,7 @@
 
 (reg-event-fx
   :edit-bot
-  (fn [cofx [_ {:keys [bot on-complete]}]]
+  (fn [_ [_ {:keys [bot on-complete]}]]
     {:websocket-send
      (list
        [:braid.server/edit-bot bot]
@@ -81,7 +81,7 @@
 
 (reg-event-fx
   :get-bot-info
-  (fn [cofx [_ {:keys [bot-id on-complete]}]]
+  (fn [_ [_ {:keys [bot-id on-complete]}]]
     {:websocket-send
      (list
        [:braid.server/get-bot-info bot-id]
