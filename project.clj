@@ -124,6 +124,7 @@
                            :optimizations :advanced
                            :pretty-print false
                            :elide-asserts true
+                           :closure-defines {goog.DEBUG false}
                            :modules {:cljs-base
                                      {:output-to "resources/public/js/prod/base.js"}
                                      :desktop

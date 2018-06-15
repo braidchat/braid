@@ -43,22 +43,27 @@
                           :pred (problem :pred)})
                        (::s/problems errors))))))))
 
-(defn reg-event-fx
-  ([id handler-fn]
-   (reg-event-fx id nil handler-fn))
-  ([id interceptors handler-fn]
-   (re-frame/reg-event-fx
-     id
-     [validate-schema-interceptor
-      interceptors]
-     handler-fn)))
+(if ^boolean goog.DEBUG
+  (do
+    (defn reg-event-fx
+      ([id handler-fn]
+       (reg-event-fx id nil handler-fn))
+      ([id interceptors handler-fn]
+       (re-frame/reg-event-fx
+         id
+         [validate-schema-interceptor
+          interceptors]
+         handler-fn)))
 
-(defn reg-event-db
-  ([id handler-fn]
-   (reg-event-db id nil handler-fn))
-  ([id interceptors handler-fn]
-   (re-frame/reg-event-db
-     id
-     [validate-schema-interceptor
-      interceptors]
-     handler-fn)))
+    (defn reg-event-db
+      ([id handler-fn]
+       (reg-event-db id nil handler-fn))
+      ([id interceptors handler-fn]
+       (re-frame/reg-event-db
+         id
+         [validate-schema-interceptor
+          interceptors]
+         handler-fn))))
+
+  (do (def reg-event-fx re-frame/reg-event-fx)
+      (def reg-event-db re-frame/reg-event-db)))
