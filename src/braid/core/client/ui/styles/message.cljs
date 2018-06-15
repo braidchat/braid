@@ -27,18 +27,17 @@
     [:>.border
      (mixins/card-border "9px")]]
 
-   [:&:hover
-    [:>button.delete
-     {:display "inline-block"
-      :position "absolute"
-      :line-height "1.25em"
-      :right pad}]]
-
    [:>button.delete
     {:display "none"
+     :position "absolute"
+     :right pad
+     :line-height "1.25em"
      :font-family "fontawesome"
      :color "#ccc"
-     :background "none"
+     :background "#fff"
+     :width "1.25em"
+     :height "1.25em"
+     :border-radius "50%"
      :border "none"
      :padding 0
      :cursor "pointer"
@@ -46,6 +45,10 @@
 
     [:&:hover
      {:color "red"}]]
+
+   [:&:hover
+    [:>button.delete
+     {:display "inline-block"}]]
 
    [:>.avatar
     [:>img
