@@ -39,17 +39,6 @@
 
 ; SETTERS
 
-; error
-
-(defn display-error
-  ([state err-key msg]
-   (display-error state err-key msg :error))
-  ([state err-key msg cls]
-   (update-in state [:errors] conj [err-key msg cls])))
-
-(defn clear-error [state err-key]
-  (update-in state [:errors] #(into [] (remove (fn [[k _]] (= k err-key))) %)))
-
 ; page
 
 (defn set-group-and-page [state group-id page-id]

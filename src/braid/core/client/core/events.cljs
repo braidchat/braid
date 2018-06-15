@@ -118,11 +118,6 @@
       (assoc-in state [:temp-threads group-id :new-message] content))))
 
 (reg-event-db
-  :display-error
-  (fn [state [_ args]]
-    (apply helpers/display-error state args)))
-
-(reg-event-db
   :set-message-failed
   (fn [state [_ message]]
     (update-in state [:threads (message :thread-id) :messages]
@@ -151,8 +146,9 @@
            2000
            (fn [reply]
              (when (not= :braid/ok reply)
-               (dispatch [:display-error [(str :failed-to-send (message :id))
-                                          "Message failed to send!"]])
+               (dispatch [:display-error [(keyword "failed-to-send" (message :id))
+                                          "Message failed to send!"
+                                          :error]])
                (dispatch [:set-message-failed message]))))
          :db (-> state
                  (helpers/add-message message)
@@ -169,11 +165,6 @@
         remote? (assoc :websocket-send
                        (list [:braid.server/retract-message message-id]))))))
 
-(reg-event-db
-  :clear-error
-  (fn [state [_ err-key]]
-    (helpers/clear-error state err-key)))
-
 (reg-event-fx
   :resend-message
   (fn [{state :db :as cofx} [_ message]]
@@ -183,12 +174,13 @@
                        (fn [reply]
                          (when (not= :braid/ok reply)
                            (dispatch [:display-error
-                                      [(str :failed-to-send (message :id))
-                                       "Message failed to send!"]])
+                                      [(keyword "failed-to-send" (message :id))
+                                       "Message failed to send!"
+                                       :error]])
                            (dispatch [:set-message-failed message]))))
 
+     :dispatch [:clear-error (str :failed-to-send (message :id))]
      :db (-> state
-             (helpers/clear-error (str :failed-to-send (message :id)))
              (update-in [:threads (message :thread-id) :messages]
                         (partial map (fn [msg]
                                        (if (= (message :id) (msg :id))
@@ -227,10 +219,10 @@
            [:braid.server/create-tag tag]
            1000
            (fn [reply]
-             (if-let [msg (:error reply)]
+             (when-let [msg (:error reply)]
                (do
                  (dispatch [:remove-tag {:tag-id (tag :id) :local-only? true}])
-                 (dispatch [:display-error [(str :bad-tag (tag :id)) msg]]))))))})))
+                 (dispatch [:display-error [(keyword "bad-tag" (tag :id)) msg :error]]))))))})))
 
 (reg-event-fx
   :unsubscribe-from-tag
@@ -612,34 +604,33 @@
 (reg-event-fx
   :leave-group
   (fn [{state :db :as cofx} [_ {:keys [group-id group-name]}]]
-    (-> {:db
-         (-> state
-             (helpers/display-error (str "left-" group-id)
-                                    (str "You have been removed from " group-name)
-                                    :info)
-             (helpers/remove-group group-id)
-             (cond->
-                 (get-in state [:preferences :groups-order])
-               (update-in [:preferences :groups-order]
-                          (partial filterv #(not= % group-id)))))}
-        (cond->
-            (= group-id (state :open-group-id))
-          (assoc :dispatch [:redirect-from-root])))))
+    {:dispatch-n
+     [[:display-error
+       (keyword "left-group" group-id)
+       (str "You have been removed from " group-name)
+       :info]
+      (when (= group-id (state :open-group-id))
+        [:redirect-from-root])]
+     :db
+     (-> state
+         (helpers/remove-group group-id)
+         (cond->
+           (get-in state [:preferences :groups-order])
+           (update-in [:preferences :groups-order]
+                      (partial filterv #(not= % group-id)))))}))
 
-(reg-event-db
+(reg-event-fx
   :add-open-thread
-  (fn [state [_ thread]]
-    (let [msg-ids (into #{} (map (comp (partial str :failed-to-send) :id))
-                        (:messages thread))
-          remove-msg-errors (fn [state]
-                              (update state :errors
-                                      (partial remove (fn [[k _]] (msg-ids k)))))]
-      (-> state
-          remove-msg-errors
-          (update-in [:threads (thread :id)] merge thread)
-          (update-in [:group-threads (thread :group-id)]
-                     #(conj (set %) (thread :id)))
-          (update-in [:user :open-thread-ids] conj (thread :id))))))
+  (fn [{state :db} [_ thread]]
+    (let [msg-ids (map (comp (partial str :failed-to-send) :id)
+                       (:messages thread))]
+      {:dispatch [:braid.notices/remove-message-errors! msg-ids]
+       :db
+       (-> state
+           (update-in [:threads (thread :id)] merge thread)
+           (update-in [:group-threads (thread :group-id)]
+                      #(conj (set %) (thread :id)))
+           (update-in [:user :open-thread-ids] conj (thread :id)))})))
 
 (reg-event-fx
   :maybe-increment-unread
@@ -738,7 +729,8 @@
       :on-error
       (fn [_]
         (dispatch [:display-error [:load-public-groups
-                                   "Failed to load public groups list"]]))}}))
+                                   "Failed to load public groups list"
+                                   :error]]))}}))
 
 (reg-event-fx
   :core/join-public-group

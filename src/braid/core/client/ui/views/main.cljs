@@ -8,7 +8,6 @@
    [braid.core.client.invites.views.invite-page :refer [invite-page-view]]
    [braid.core.client.pages :as pages]
    [braid.core.client.routes :as routes]
-   [braid.core.client.ui.views.error-banner :refer [error-banner-view]]
    [braid.core.client.ui.views.header :refer [header-view readonly-header-view]]
    [braid.core.client.ui.views.pages.changelog :refer [changelog-view]]
    [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
@@ -82,8 +81,7 @@
 
     (into
       [:div.main]
-      (concat [[error-banner-view]
-               [reconnect-overlay-view]
+      (concat [[reconnect-overlay-view]
                [sidebar-view]
                (when @(subscribe [:open-group-id])
                  [header-view])

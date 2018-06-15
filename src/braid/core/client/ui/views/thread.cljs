@@ -249,7 +249,7 @@
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
-            (dispatch [:display-error [:upload-fail "File too big to upload, sorry"]])
+            (dispatch [:display-error [:upload-fail "File too big to upload, sorry" :error]])
             (do (set-uploading! true)
                 (s3/upload file (fn [url]
                                   (set-uploading! false)

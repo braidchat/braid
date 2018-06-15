@@ -41,9 +41,10 @@
          (fn [reply]
            (when (nil? (:braid/ok reply))
              (dispatch [:display-error
-                        [(str "bot-" (bot :id) (rand))
+                        [(keyword "bot-creation-error" (bot :id))
                          (get reply :braid/error
-                           "Something went wrong creating bot")]]))
+                           "Something went wrong creating bot")
+                         :error]]))
            (on-complete (:braid/ok reply))))})))
 
 (reg-event-fx
@@ -55,9 +56,10 @@
            (fn [reply]
              (when (nil? (:braid/ok reply))
                (dispatch [:display-error
-                          [(str "bot-" bot-id (rand))
+                          [(keyword "bot-retraction-error" bot-id)
                            (get reply :braid/error
-                                "Something went wrong retract bot")]]))))}))
+                             "Something went wrong retract bot")
+                           :error]]))))}))
 
 (reg-event-fx
   :edit-bot
@@ -69,9 +71,10 @@
        (fn [reply]
          (when-not (:braid/ok reply)
            (dispatch [:display-error
-                      [(str "bot-" (bot :id) (rand))
+                      [(keyword "bot-edit" (bot :id))
                        (get reply :braid/error
-                            "Something went wrong when updating bot")]]))
+                            "Something went wrong when updating bot")
+                       :error]]))
          (on-complete (:braid/ok reply))))}))
 
 (reg-event-fx

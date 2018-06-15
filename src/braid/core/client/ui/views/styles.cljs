@@ -67,7 +67,6 @@
                  (braid.core.client.ui.styles.header/header vars/pad)
 
                  braid.core.client.ui.styles.sidebar/sidebar
-                 braid.core.client.ui.styles.misc/error-banners
                  braid.core.client.ui.styles.reconnect-overlay/reconnect-overlay
                  braid.core.client.ui.styles.page/page
 
