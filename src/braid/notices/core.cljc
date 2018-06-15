@@ -16,19 +16,7 @@
 (defn init! []
   #?(:cljs
      (do
-       #_(core/register-root-view!
-           (fn []
-             [:div {:style {:z-index 99000
-                            :position "absolute"}}
-              [:button {:on-click (fn []
-                                    (dispatch [:display-error [:error "Error" :error]]))}
-               "ERROR"]
-              [:button {:on-click (fn []
-                                    (dispatch [:display-error [(gensym :error) "Error" :error]]))}
-               "ERROR+"]
-              [:button {:on-click (fn []
-                                    (dispatch [:display-error [:notice "Notice" :info]]))}
-               "NOTICE"]]))
+
 
        (core/register-state!
          {::state {}}
