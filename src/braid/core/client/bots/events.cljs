@@ -1,7 +1,7 @@
 (ns braid.core.client.bots.events
   (:require
    [braid.core.client.schema :as schema]
-   [braid.core.client.state :refer [reg-event-fx reg-event-db]]
+   [braid.core.client.state :refer [reg-event-fx]]
    [cljs-uuid-utils.core :as uuid]
    [re-frame.core :refer [dispatch]]))
 
@@ -9,31 +9,32 @@
   (merge {:id (uuid/make-random-squuid)}
          data))
 
-(reg-event-db
+(reg-event-fx
   :add-group-bot
-  (fn [state [_ [group-id bot]]]
-    (update-in state [:groups group-id :bots] conj bot)))
+  (fn [{db :db} [_ [group-id bot]]]
+    {:db (update-in db [:groups group-id :bots] conj bot)}))
 
-(reg-event-db
+(reg-event-fx
   :remove-group-bot
-  (fn [state [_ [group-id bot-id]]]
-    (update-in
-      state
-      [:groups group-id :bots]
-      (partial into [] (remove (fn [b] (= bot-id (b :id))))))))
+  (fn [{db :db} [_ [group-id bot-id]]]
+    {:db (update-in
+           db
+           [:groups group-id :bots]
+           (partial into [] (remove (fn [b] (= bot-id (b :id))))))}))
 
-(reg-event-db
+(reg-event-fx
   :update-group-bot
-  (fn [state [_ [group-id bot]]]
-    (update-in
-      state [:groups group-id :bots]
-      (partial mapv (fn [b] (if (= (b :id) (bot :id))
-                              (merge b bot)
-                              b))))))
+  (fn [{db :db} [_ [group-id bot]]]
+    {:db
+     (update-in
+       db [:groups group-id :bots]
+       (partial mapv (fn [b] (if (= (b :id) (bot :id))
+                               (merge b bot)
+                               b))))}))
 
 (reg-event-fx
   :new-bot
-  (fn [cofx [_ {:keys [bot on-complete]}]]
+  (fn [_ [_ {:keys [bot on-complete]}]]
     (let [bot (make-bot bot)]
       {:websocket-send
        (list
@@ -50,7 +51,7 @@
 
 (reg-event-fx
   :retract-bot
-  (fn [cofx [_ {:keys [bot-id]}]]
+  (fn [_ [_ {:keys [bot-id]}]]
     {:websocket-send
      (list [:braid.server/retract-bot bot-id]
            5000
@@ -64,7 +65,7 @@
 
 (reg-event-fx
   :edit-bot
-  (fn [cofx [_ {:keys [bot on-complete]}]]
+  (fn [_ [_ {:keys [bot on-complete]}]]
     {:websocket-send
      (list
        [:braid.server/edit-bot bot]
@@ -80,7 +81,7 @@
 
 (reg-event-fx
   :get-bot-info
-  (fn [cofx [_ {:keys [bot-id on-complete]}]]
+  (fn [_ [_ {:keys [bot-id on-complete]}]]
     {:websocket-send
      (list
        [:braid.server/get-bot-info bot-id]

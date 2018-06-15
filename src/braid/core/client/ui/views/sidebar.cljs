@@ -1,6 +1,6 @@
 (ns braid.core.client.ui.views.sidebar
   (:require
-   [braid.core.client.helpers :refer [id->color location element-offset get-style]]
+   [braid.core.client.helpers :refer [->color location element-offset get-style]]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.styles.vars :as style-vars]
    [clojure.string :as string]
@@ -128,7 +128,7 @@
            [:a.group
             {:class (when (= (:id @active-group) (:id group)) "active")
              :style (merge
-                      {:background-color (id->color (group :id))}
+                      {:background-color (->color (group :id))}
                       (when-let [avatar (group :avatar)]
                         {:background-image (str "url(" avatar ")")
                          :background-position "center"
@@ -145,7 +145,7 @@
             [badge-view (group :id)]]))
        (when-let [drag-grp (@drag-state :grp)]
          [:a.group
-          {:style (merge {:background-color (id->color (drag-grp :id))
+          {:style (merge {:background-color (->color (drag-grp :id))
                           :position "absolute"
                           :left (css->str style-vars/pad)
                           :top (second (@drag-state :location))

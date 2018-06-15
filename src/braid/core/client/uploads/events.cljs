@@ -9,7 +9,7 @@
 
 (reg-event-fx
   :create-upload
-  (fn [{state :db :as cofx} [_ {:keys [url thread-id group-id]}]]
+  (fn [{state :db} [_ {:keys [url thread-id group-id]}]]
     {:websocket-send (list [:braid.server/create-upload
                             (make-upload {:url url :thread-id thread-id})])
      :dispatch [:new-message {:content url
@@ -18,7 +18,7 @@
 
 (reg-event-fx
   :get-group-uploads
-  (fn [cofx [_ {:keys [group-id on-success on-error]}]]
+  (fn [_ [_ {:keys [group-id on-success on-error]}]]
     {:websocket-send
      (list
        [:braid.server/uploads-in-group group-id]
@@ -30,5 +30,5 @@
 
 (reg-event-fx
   :core.uploads/delete-upload
-  (fn [cofx [_ upload-id]]
+  (fn [_ [_ upload-id]]
     {:websocket-send (list [:braid.server/delete-upload upload-id])}))

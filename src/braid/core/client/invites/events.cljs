@@ -1,6 +1,6 @@
 (ns braid.core.client.invites.events
   (:require
-   [braid.core.client.state :refer [reg-event-fx reg-event-db]]
+   [braid.core.client.state :refer [reg-event-fx]]
    [cljs-uuid-utils.core :as uuid]))
 
 (defn make-invitation [data]
@@ -10,35 +10,35 @@
 
 (reg-event-fx
   :invite
-  (fn [cofx [_ data]]
+  (fn [_ [_ data]]
     (let [invite (make-invitation data)]
       {:websocket-send (list [:braid.server/invite-to-group invite])})))
 
-(reg-event-db
+(reg-event-fx
   :remove-invite
-  (fn [state [_ invite]]
-    (update-in state [:invitations] (partial remove (partial = invite)))))
+  (fn [{db :db} [_ invite]]
+    {:db (update-in db [:invitations] (partial remove (partial = invite)))}))
 
 (reg-event-fx
   :accept-invite
-  (fn [{state :db :as cofx} [_ invite]]
+  (fn [{state :db} [_ invite]]
     {:websocket-send (list [:braid.server/invitation-accept invite])
      :dispatch [:remove-invite invite]}))
 
 (reg-event-fx
   :decline-invite
-  (fn [{state :db :as cofx} [_ invite]]
+  (fn [{state :db} [_ invite]]
     {:websocket-send (list [:braid.server/invitation-decline invite])
      :dispatch [:remove-invite invite]}))
 
-(reg-event-db
+(reg-event-fx
   :add-invite
-  (fn [state [_ invite]]
-    (update-in state [:invitations] conj invite)))
+  (fn [{db :db} [_ invite]]
+    {:db (update-in db [:invitations] conj invite)}))
 
 (reg-event-fx
   :generate-link
-  (fn [cofx [_ {:keys [group-id expires complete]}]]
+  (fn [_ [_ {:keys [group-id expires complete]}]]
     {:websocket-send
      (list
        [:braid.server/generate-invite-link {:group-id group-id :expires expires}]

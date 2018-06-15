@@ -2,7 +2,7 @@
   (:require
     [braid.popovers.helpers :as popover]
     [braid.core.client.helpers :as helpers]
-    [braid.core.client.helpers :refer [id->color]]
+    [braid.core.client.helpers :refer [->color]]
     [braid.core.client.routes :as routes]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]))
@@ -24,9 +24,9 @@
   [tag-id]
   (let [tag (subscribe [:tag tag-id])
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])
-        color (id->color tag-id)]
+        color (->color tag-id)]
     [:span.pill {:class (if @user-subscribed-to-tag? "on" "off")
-                 :tabIndex -1
+                 :tab-index -1
                  :style {:background-color color
                          :color color
                          :border-color color}}
@@ -44,7 +44,7 @@
   (let [tag (subscribe [:tag tag-id])
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])]
     [:div.tag.card
-     [:div.header {:style {:background-color (id->color tag-id)}}
+     [:div.header {:style {:background-color (->color tag-id)}}
       [tag-pill tag-id]
       [:div.subscribers.count
        {:title (str (@tag :subscribers-count) " Subscribers")}
@@ -72,9 +72,9 @@
 (defn user-pill
   [user-id]
   (let [user (subscribe [:user user-id])]
-    (let [color (id->color user-id)]
+    (let [color (->color user-id)]
       [:span.pill {:class (str (case (@user :status) :online "on" "off"))
-                   :tabIndex -1
+                   :tab-index -1
                    :style {:background-color color
                            :color color
                            :border-color color}}
@@ -88,7 +88,7 @@
         viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
     [:div.user.card
 
-     [:div.header {:style {:background-color (id->color user-id)}}
+     [:div.header {:style {:background-color (->color user-id)}}
       [user-pill user-id]
       [:div.status
        (@user :status)
