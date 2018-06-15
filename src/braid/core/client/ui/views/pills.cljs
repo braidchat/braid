@@ -62,7 +62,8 @@
 (defn tag-pill-view
   [tag-id]
   [:div.tag
-   {:on-mouse-enter
+   {:style {:display "inline-block"}
+    :on-mouse-enter
     (popover/on-mouse-enter
       (fn []
         [tag-card-view tag-id]))}
@@ -130,7 +131,8 @@
 (defn user-pill-view
   [user-id]
   [:div.user
-   {:on-mouse-enter
+   {:style {:display "inline-block"}
+    :on-mouse-enter
     (popover/on-mouse-enter
       (fn []
         [user-card-view user-id]))}
