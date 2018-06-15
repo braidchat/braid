@@ -9,6 +9,7 @@
           [braid.core.client.core.events]
           [braid.core.client.core.subs]
           [braid.core.client.pages]
+          [braid.core.client.ui.views.main]
           [braid.core.client.ui.views.styles]
           [braid.core.client.ui.views.header]
           [braid.core.client.ui.views.user-header]
@@ -28,6 +29,13 @@
 
 #?(:cljs
    (do
+     (defn register-root-view!
+       "Add a new view to the app (when user is logged in).
+        Will be put under body > #app > .app > .main >"
+       [view]
+       {:pre [(fn? view)]}
+       (swap! braid.core.client.ui.views.main/root-views conj view))
+
      (defn register-group-header-button!
        "Add a new button to appear in the group header
        Expects a map with the following keys

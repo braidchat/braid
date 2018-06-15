@@ -1,5 +1,6 @@
 (ns braid.core.client.ui.views.main
   (:require
+   [braid.core.hooks :as hooks]
    [braid.core.client.bots.views.bots-page :refer [bots-page-view]]
    [braid.core.client.gateway.views :refer [gateway-view]]
    [braid.core.client.gateway.forms.user-auth.views :refer [user-auth-view]]
@@ -54,6 +55,8 @@
     :create-group [create-group-page-view]
     nil))
 
+(defonce root-views (hooks/register! (atom []) [fn?]))
+
 (defn main-view []
   (case @(subscribe [:login-state])
     :gateway
@@ -62,7 +65,7 @@
      (case @(subscribe [:page-path])
        "/pages/group-explore"
        (do (dispatch [:core/load-public-groups])
-         [group-explore-page-view])
+           [group-explore-page-view])
 
        "/pages/create-group"
        [create-group-page-view]
@@ -77,10 +80,13 @@
        [readonly-header-view])
      [readonly-page-view]]
 
-    [:div.main
-     [error-banner-view]
-     [reconnect-overlay-view]
-     [sidebar-view]
-     (when @(subscribe [:open-group-id])
-       [header-view])
-     [page-view]]))
+    (into
+      [:div.main]
+      (concat [[error-banner-view]
+               [reconnect-overlay-view]
+               [sidebar-view]
+               (when @(subscribe [:open-group-id])
+                 [header-view])
+               [page-view]]
+              (for [view @root-views]
+                [view])))))

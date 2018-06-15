@@ -1,5 +1,6 @@
 (ns braid.core.client.ui.views.pills
   (:require
+    [braid.popovers.helpers :as popover]
     [braid.core.client.helpers :as helpers]
     [braid.core.client.helpers :refer [id->color]]
     [braid.core.client.routes :as routes]
@@ -42,7 +43,7 @@
   [tag-id]
   (let [tag (subscribe [:tag tag-id])
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])]
-    [:div.card
+    [:div.tag.card
      [:div.header {:style {:background-color (id->color tag-id)}}
       [tag-pill tag-id]
       [:div.subscribers.count
@@ -61,8 +62,11 @@
 (defn tag-pill-view
   [tag-id]
   [:div.tag
-   [tag-pill tag-id]
-   [tag-card-view tag-id]])
+   {:on-mouse-enter
+    (popover/on-mouse-enter
+      (fn []
+        [tag-card-view tag-id]))}
+   [tag-pill tag-id]])
 
 (defn user-pill
   [user-id]
@@ -81,7 +85,7 @@
         open-group-id (subscribe [:open-group-id])
         admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
         viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
-    [:div.card
+    [:div.user.card
 
      [:div.header {:style {:background-color (id->color user-id)}}
       [user-pill user-id]
@@ -126,5 +130,8 @@
 (defn user-pill-view
   [user-id]
   [:div.user
-   [user-pill user-id]
-   [user-card-view user-id]])
+   {:on-mouse-enter
+    (popover/on-mouse-enter
+      (fn []
+        [user-card-view user-id]))}
+   [user-pill user-id]])

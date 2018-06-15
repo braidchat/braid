@@ -2,7 +2,6 @@
   (:require
    [braid.core.client.ui.styles.hljs :refer [hljs-styles]]
    [braid.core.client.ui.styles.mixins :as mixins]
-   [braid.core.client.ui.styles.pills :as pills]
    [braid.core.client.ui.styles.vars :refer [avatar-size pad card-width]]
    [garden.arithmetic :as m]
    [garden.units :refer [rem px]]))
@@ -90,9 +89,6 @@
      :box-sizing "border-box"
      :line-height "1.25em"
      :margin-top (rem 0.20)}
-
-    (pills/tag)
-    (pills/user)
 
     [:a.external
      mixins/pill-box
