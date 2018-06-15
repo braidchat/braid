@@ -2,9 +2,10 @@
   (:require
    [braid.core.client.gateway.forms.create-group.validations :refer [validations]]
    [braid.core.client.gateway.helpers :as helpers]
+   [braid.core.client.state :refer [reg-event-fx]]
    [braid.core.common.util :refer [slugify]]
    [clojure.string :as string]
-   [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]
+   [re-frame.core :refer [dispatch]]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]))
 

@@ -1,8 +1,9 @@
 (ns braid.core.client.bots.events
   (:require
    [braid.core.client.schema :as schema]
+   [braid.core.client.state :refer [reg-event-fx reg-event-db]]
    [cljs-uuid-utils.core :as uuid]
-   [re-frame.core :refer [dispatch reg-event-db reg-event-fx]]))
+   [re-frame.core :refer [dispatch]]))
 
 (defn make-bot [data]
   (merge {:id (uuid/make-random-squuid)}

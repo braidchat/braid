@@ -4,7 +4,8 @@
    [braid.core.client.gateway.forms.join-group.events :as join-group]
    [braid.core.client.gateway.forms.user-auth.events :as user-auth]
    [braid.core.client.gateway.fx]
-   [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
+   [braid.core.client.state :refer [reg-event-fx]]
+   [re-frame.core :refer [dispatch]]))
 
 (reg-event-fx
   ::initialize
