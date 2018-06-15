@@ -55,7 +55,7 @@
                            :tag-ids [uuid?]
                            :new-message string?}}
      :action-disabled? boolean?
-     (ds/opt :public-groups) #{app-schema/Group}}
+     (ds/opt :public-groups) #{app-schema/PublicGroup}}
     invites/InvitesAppState))
 
 (def initial-state
