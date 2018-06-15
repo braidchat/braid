@@ -17,8 +17,6 @@
 (defn init! []
   #?(:cljs
      (do
-
-
        (core/register-state!
          {::state {}}
          {::state {keyword? ErrorSpec}})
