@@ -16,7 +16,7 @@
 `braid.widget.api`
 
 - a module can optionally expose functionality to other modules via a `braid.widget.api` namespace
-- `braid.widget.api` must be a `cljc` file
+- `braid.widget.api` can be a `clj`, `cljs` or `cljc` file
 - `braid.widget.api` should only contain functions (or other values) intended for use by other modules (all "private" values should be in other namespaces under `braid.widget.*`)
 - all public functions should have docstrings
 - all public functions should validate their inputs (for example using `:pre` conditions and spec)
