@@ -40,10 +40,12 @@
             (vals (state ::state)))})
 
        (core/register-events!
-         {:braid.notices/remove-message-errors!
-          (fn [{db :db} [_ msg-ids]]
+         {:braid.notices/clear!
+          (fn [{db :db} [_ korks]]
             {:db (update db ::state (fn [errors]
-                                      (apply dissoc errors msg-ids)))})
+                                      (if (sequential? korks)
+                                        (apply dissoc errors korks)
+                                        (dissoc errors korks))))})
 
           :clear-error
           (fn [{db :db} [_ err-key]]

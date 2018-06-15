@@ -624,7 +624,7 @@
   (fn [{state :db} [_ thread]]
     (let [msg-ids (map (comp (partial str :failed-to-send) :id)
                        (:messages thread))]
-      {:dispatch [:braid.notices/remove-message-errors! msg-ids]
+      {:dispatch [:braid.notices/clear! msg-ids]
        :db
        (-> state
            (update-in [:threads (thread :id)] merge thread)
