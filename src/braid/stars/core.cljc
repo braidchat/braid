@@ -58,7 +58,7 @@
           [:>.star
            {:display "inline-block"
             :font-size "1.25em"
-            :margin-right "0.5em"
+            :margin-right "0.25rem"
             :cursor "pointer"
             :transform "rotate(-90deg)"
             :font-family "fontawesome"}
