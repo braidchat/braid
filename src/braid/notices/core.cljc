@@ -31,27 +31,27 @@
                "NOTICE"]]))
 
        (core/register-state!
-         {:errors {}}
-         {:errors {keyword? ErrorSpec}})
+         {::state {}}
+         {::state {keyword? ErrorSpec}})
 
        (core/register-subs!
-         {:errors
+         {::sub
           (fn [state _]
-            (vals (state :errors)))})
+            (vals (state ::state)))})
 
        (core/register-events!
          {:braid.notices/remove-message-errors!
           (fn [{db :db} [_ msg-ids]]
-            {:db (update db :errors (fn [errors]
+            {:db (update db ::state (fn [errors]
                                       (apply dissoc errors msg-ids)))})
 
           :clear-error
           (fn [{db :db} [_ err-key]]
-            {:db (update db :errors dissoc err-key)})
+            {:db (update db ::state dissoc err-key)})
 
           :display-error
           (fn [{db :db} [_ [err-key message error-class]]]
-            {:db (update db :errors assoc err-key {:key err-key
+            {:db (update db ::state assoc err-key {:key err-key
                                                    :message message
                                                    :class error-class})})})
 
@@ -59,7 +59,7 @@
          (fn []
            [:div.error-banners
             (doall
-              (for [{:keys [key message class]} @(subscribe [:errors])]
+              (for [{:keys [key message class]} @(subscribe [::sub])]
                 ^{:key key}
                 [:div.error-banner
                  {:class class}
