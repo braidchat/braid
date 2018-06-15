@@ -3,15 +3,16 @@
     [braid.core.api :as core]
     #?@(:cljs
          [[clojure.spec.alpha :as s]
+          [garden.units :refer [rem em]]
           [re-frame.core :refer [subscribe dispatch]]
-          [garden.units :refer [rem em]]])))
+          [braid.core.client.ui.styles.mixins :as mixins]])))
 
 #?(:cljs
    (do
      (def ErrorSpec
        {:key keyword?
         :message string?
-        :class (s/spec #{:error :warn :info})})))
+        :class (s/spec #{:error :info})})))
 
 (defn init! []
   #?(:cljs
@@ -43,40 +44,58 @@
 
        (core/register-root-view!
          (fn []
-           [:div.error-banners
+           [:div.notices
             (doall
               (for [{:keys [key message class]} @(subscribe [::sub])]
                 ^{:key key}
-                [:div.error-banner
+                [:div.notice
                  {:class class}
                  message
+                 [:span.gap]
                  [:span.close
                   {:on-click (fn [_] (dispatch [:braid.notices/clear! key]))}
                   "×"]]))]))
 
        (core/register-styles!
          [:#app>.app>.main
-          [:>.error-banners
+          [:>.notices
            {:z-index 9999
             :position "fixed"
-            :top 0
-            :right 0
-            :width "100%"}
+            :top "4rem"
+            :right "1rem"}
 
-           [:>.error-banner
-            {:margin-bottom (rem 0.25)
-             :font-size (em 2)
-             :text-align "center"}
+           [:>.notice
+            {:display "flex"
+             :justify-content "space-between"
+             :min-width "10em"
+             :align-items "center"
+             :margin [[0 "auto" (rem 0.25)]]
+             :font-size (em 1.5)
+             :padding "0.25em"
+             :border-radius "3px"
+             :border [["0.5px" "solid" "#000000"]]}
 
             [:&.error
-             {:background-color "rgba(255, 5, 14, 0.6)"}]
+             {:background "#ffe4e4"
+              :border-color "#CA1414"
+              :color "#CA1414"}
 
-            [:&.warn
-             {:background-color "rgba(255, 190, 5, 0.6)"}]
+             [:&:before
+              (mixins/fontawesome \uf071)
+              {:margin "0 0.5rem 0 0.25rem"}]]
 
             [:&.info
-             {:background-color "rgba(5, 255, 70, 0.6)"}]
+             {:background "#cfe9ff"
+              :border-color "#236cab"
+              :color "#236cab"}
+
+             [:&:before
+              (mixins/fontawesome \uf06a)
+              {:margin "0 0.5rem 0 0.25rem"}]]
+
+            [:>.gap
+             {:flex-grow 1}]
 
             [:>.close
-             {:margin-left (em 1)
-              :cursor "pointer"}]]]]))))
+             {:cursor "pointer"
+              :margin "0 0.25rem"}]]]]))))
