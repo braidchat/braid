@@ -157,8 +157,7 @@
      :background "white"
      :border-radius [[vars/border-radius
                       vars/border-radius 0 0]]
-     :position "relative"
-     :overflow "hidden"}
+     :position "relative"}
 
     (drag-and-drop pad)
     (head pad)
