@@ -16,7 +16,7 @@
     :box-sizing "border-box"}
 
    [:>.tags
-    {:display "inline-block"}
+    {:display "inline"}
 
     [:>.add
      {:position "relative"}
