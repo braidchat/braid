@@ -5,32 +5,6 @@
    [garden.arithmetic :as m]
    [garden.units :refer [rem em px ex]]))
 
-(def error-banners
-  [:>.error-banners
-   {:z-index 9999
-    :position "fixed"
-    :top 0
-    :right 0
-    :width "100%"}
-
-   [:>.error-banner
-    {:margin-bottom (rem 0.25)
-     :font-size (em 2)
-     :text-align "center"}
-
-    [:&.error
-     {:background-color "rgba(255, 5, 14, 0.6)"}]
-
-    [:&.warn
-     {:background-color "rgba(255, 190, 5, 0.6)"}]
-
-    [:&.info
-     {:background-color "rgba(5, 255, 70, 0.6)"}]
-
-     [:>.close
-      {:margin-left (em 1)
-       :cursor "pointer"}]]])
-
 (def page-headers
   [[:.page>.title::before
     {:margin-right (em 0.5)}]

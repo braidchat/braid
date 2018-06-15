@@ -21,4 +21,4 @@
                :on-error
                (fn [error]
                  (when-let [k (get-in error [:response :error])]
-                   (dispatch [:display-error [:join-group-error k]])))}}))
+                   (dispatch [:braid.notices/display! [(keyword "join-group-error" (get-url-group-id)) k :error]])))}}))

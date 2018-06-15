@@ -5,13 +5,6 @@
    [clojure.spec.alpha :as s]
    [spec-tools.data-spec :as ds]))
 
-(defn Error
-  [[err-key msg type]]
-  (and
-    (or (keyword? err-key) (string? err-key))
-    (string? msg)
-    (contains? #{:error :warn :info} type)))
-
 (def AppState
   (merge
     {:login-state (s/spec #{:auth-check :login-form :ws-connect
@@ -40,7 +33,6 @@
             (ds/opt :loading?) boolean?
             (ds/opt :error?) boolean?}
      :session (ds/maybe {:user-id uuid?})
-     :errors [Error]
      :preferences {keyword? any?}
      :notifications {:window-visible? boolean?
                      :unread-count integer?}
@@ -70,7 +62,6 @@
      :groups {}
      :page {:type nil}
      :session nil
-     :errors []
      :preferences {}
      :notifications {:window-visible? true
                      :unread-count 0}

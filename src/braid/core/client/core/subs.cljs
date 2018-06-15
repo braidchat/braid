@@ -238,11 +238,6 @@
     (get-in state [:threads thread-id :last-open-at])))
 
 (reg-sub
-  :errors
-  (fn [state _]
-    (get-in state [:errors])))
-
-(reg-sub
   :login-state
   (fn [state _]
     (get-in state [:login-state])))
@@ -265,7 +260,7 @@
 (reg-sub
   :connected?
   (fn [state _]
-    (not-any? (fn [[k _]] (= :disconnected k)) (state :errors))))
+    (get-in state [:websocket-state :connected?])))
 
 (reg-sub
   :temp-thread
