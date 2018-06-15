@@ -1,7 +1,7 @@
 (ns braid.core.client.ui.views.message
   (:require
     [braid.core.hooks :as hooks]
-    [braid.core.client.helpers :as helpers :refer [id->color ->color]]
+    [braid.core.client.helpers :as helpers :refer [->color]]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
     [braid.core.client.ui.views.card-border :refer [card-border-view]]
@@ -38,7 +38,7 @@
                 ; rel to address vuln caused by target=_blank
                 ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
                 :rel "noopener noreferrer"
-                :tabIndex -1}
+                :tab-index -1}
    (abridged-url url)])
 
 (def replacements
@@ -231,14 +231,14 @@
          "Resend"]])
 
      [:a.avatar {:href sender-path
-                 :tabIndex -1}
+                 :tab-index -1}
       [:img {:src (:avatar sender)
-             :style {:backgroundColor (id->color (:id sender))}}]]
+             :style {:background-color (->color (:id sender))}}]]
      [:div.info
       (when (:bot? sender)
         [:span.bot-notice "BOT"])
       (if sender
-        [:a.nickname {:tabIndex -1
+        [:a.nickname {:tab-index -1
                       :href sender-path}
          (:nickname sender)]
         [:span.nickname "[DELETED]"])
