@@ -170,11 +170,13 @@
          [:div.badge (count @invitations)])])))
 
 (defn global-settings-button-view []
-  (let [page (subscribe [:page])]
+  (let [user-id (subscribe [:user-id])
+        page (subscribe [:page])]
     (fn []
-      [:a.global-settings
-       {:class (when (= (@page :type) :global-settings) "active")
-        :href (routes/other-path {:page-id "global-settings"})}])))
+      (when @user-id
+        [:a.global-settings
+         {:class (when (= (@page :type) :global-settings) "active")
+          :href (routes/other-path {:page-id "global-settings"})}]))))
 
 (defn sidebar-view []
   [:div.sidebar
