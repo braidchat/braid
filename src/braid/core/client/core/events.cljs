@@ -4,7 +4,7 @@
    [braid.core.client.router :as router]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
-   [braid.core.client.state :refer [reg-event-fx reg-event-db]]
+   [braid.core.client.state :refer [reg-event-fx]]
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
    [braid.core.client.sync :as sync]
    [braid.core.client.xhr :refer [edn-xhr]]
@@ -110,20 +110,20 @@
     {:db (braid.core.client.state/initialize-state db)
      :dispatch [:braid.core.client.gateway.events/initialize :log-in]}))
 
-(reg-event-db
+(reg-event-fx
   :new-message-text
-  (fn [state [_ {:keys [group-id thread-id content]}]]
-    (if (get-in state [:threads thread-id])
-      (assoc-in state [:threads thread-id :new-message] content)
-      (assoc-in state [:temp-threads group-id :new-message] content))))
+  (fn [{db :db} [_ {:keys [group-id thread-id content]}]]
+    {:db (if (get-in db [:threads thread-id])
+           (assoc-in db [:threads thread-id :new-message] content)
+           (assoc-in db [:temp-threads group-id :new-message] content))}))
 
-(reg-event-db
+(reg-event-fx
   :set-message-failed
-  (fn [state [_ message]]
-    (update-in state [:threads (message :thread-id) :messages]
-               (partial map (fn [msg] (if (= (message :id) (msg :id))
-                                        (assoc msg :failed? true)
-                                        msg))))))
+  (fn [{db :db} [_ message]]
+    {:db (update-in db [:threads (message :thread-id) :messages]
+                    (partial map (fn [msg] (if (= (message :id) (msg :id))
+                                             (assoc msg :failed? true)
+                                             msg))))}))
 
 (reg-event-fx
   :new-message
@@ -261,12 +261,12 @@
      :websocket-send (when-not local-only?
                        (list [:braid.server/retract-tag tag-id]))}))
 
-(reg-event-db
+(reg-event-fx
   :update-user-nickname
-  (fn [state [_ {:keys [nickname user-id group-ids]}]]
-    (reduce (fn [state group-id]
-              (assoc-in state [:groups group-id :users user-id :nickname] nickname))
-            state group-ids)))
+  (fn [{db :db} [_ {:keys [nickname user-id group-ids]}]]
+    {:db (reduce (fn [state group-id]
+                   (assoc-in state [:groups group-id :users user-id :nickname] nickname))
+                 db group-ids)}))
 
 (reg-event-fx
   :set-user-nickname
@@ -288,12 +288,12 @@
   (fn [{state :db :as cofx} [_ avatar-url]]
     {:websocket-send (list [:braid.server/set-user-avatar avatar-url])}))
 
-(reg-event-db
+(reg-event-fx
   :update-user-avatar
-  (fn [state [_ {:keys [user-id group-id avatar-url]}]]
-    (helpers/update-user-avatar state {:group-id group-id
-                                       :user-id user-id
-                                       :avatar-url avatar-url})))
+  (fn [{db :db} [_ {:keys [user-id group-id avatar-url]}]]
+    {:db (helpers/update-user-avatar db {:group-id group-id
+                                         :user-id user-id
+                                         :avatar-url avatar-url})}))
 
 (reg-event-fx
   :set-password
@@ -325,19 +325,19 @@
                             :notification-rules []))]
       {:dispatch [:set-preference [:notification-rules new-rules]]})))
 
-(reg-event-db
+(reg-event-fx
   :set-search-results
-  (fn [state [_ [query {:keys [threads thread-ids] :as reply}]]]
-    (-> state
-        (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-        (update-in [:page] (fn [p] (if (= (p :search-query) query)
-                                     (assoc p :thread-ids thread-ids)
-                                     p))))))
+  (fn [{db :db} [_ [query {:keys [threads thread-ids] :as reply}]]]
+    {:db (-> db
+             (update-in [:threads] #(merge-with merge % (key-by-id threads)))
+             (update-in [:page] (fn [p] (if (= (p :search-query) query)
+                                          (assoc p :thread-ids thread-ids)
+                                          p))))}))
 
-(reg-event-db
+(reg-event-fx
   :set-search-query
-  (fn [state [_ query]]
-    (assoc-in state [:page :search-query] query)))
+  (fn [{db :db} [_ query]]
+    {:db (assoc-in db [:page :search-query] query)}))
 
 (reg-event-fx
   :search-history
@@ -354,21 +354,21 @@
              (dispatch [:set-page-error true]))))
        :dispatch [:set-page-error false]})))
 
-(reg-event-db
+(reg-event-fx
   :add-threads
-  (fn [state [_ threads ?open]]
-    (-> state
-        (update :threads #(merge-with merge % (key-by-id threads)))
-        (update :group-threads
-                #(merge-with
-                   set/union
-                   %
-                   (into {}
-                         (map (fn [[g t]] [g (into #{} (map :id) t)]))
-                         (group-by :group-id threads))))
-        (cond->
-            ?open (update-in [:user :open-thread-ids] into
-                             (map :id threads))))))
+  (fn [{db :db} [_ threads ?open]]
+    {:db (-> db
+             (update :threads #(merge-with merge % (key-by-id threads)))
+             (update :group-threads
+                     #(merge-with
+                        set/union
+                        %
+                        (into {}
+                              (map (fn [[g t]] [g (into #{} (map :id) t)]))
+                              (group-by :group-id threads))))
+             (cond->
+               ?open (update-in [:user :open-thread-ids] into
+                                (map :id threads))))}))
 
 (reg-event-fx
   :load-recent-threads
@@ -405,10 +405,10 @@
     {:websocket-send (list [:braid.server/mark-thread-read thread-id])
      :db (helpers/update-thread-last-open-at state thread-id)}))
 
-(reg-event-db
+(reg-event-fx
   :focus-thread
-  (fn [state [_ thread-id]]
-    (assoc-in state [:focused-thread-id] thread-id)))
+  (fn [{db :db} [_ thread-id]]
+    {:db (assoc-in db [:focused-thread-id] thread-id)}))
 
 (reg-event-fx
   :clear-inbox
@@ -436,10 +436,10 @@
     {:websocket-send (list [:braid.server/remove-from-group args])
      :dispatch [:redirect-from-root]}))
 
-(reg-event-db
+(reg-event-fx
   :set-login-state
-  (fn [state [_ login-state]]
-    (assoc state :login-state login-state)))
+  (fn [{db :db} [_ login-state]]
+    {:db (assoc db :login-state login-state)}))
 
 (reg-event-fx
   :start-anon-socket
@@ -528,15 +528,15 @@
          (routes/other-path {:page-id "group-explore"}))}
       {})))
 
-(reg-event-db
+(reg-event-fx
   :set-page-loading
-  (fn [state [_ bool]]
-    (assoc-in state [:page :loading?] bool)))
+  (fn [{db :db} [_ bool]]
+    {:db (assoc-in db [:page :loading?] bool)}))
 
-(reg-event-db
+(reg-event-fx
   :set-page-error
-  (fn [state [_ bool]]
-    (assoc-in state [:page :error?] bool)))
+  (fn [{db :db} [_ bool]]
+    {:db (assoc-in db [:page :error?] bool)}))
 
 (reg-event-fx
   :set-preference
@@ -544,10 +544,10 @@
     {:websocket-send (list [:braid.server/set-preferences {k v}])
      :db (helpers/set-preferences state {k v})}))
 
-(reg-event-db
+(reg-event-fx
   :add-users
-  (fn [state [_ [group-id users]]]
-    (update-in state [:groups group-id :users] merge (key-by-id users))))
+  (fn [{db :db} [_ [group-id users]]]
+    {:db (update-in db [:groups group-id :users] merge (key-by-id users))}))
 
 (reg-event-fx
   :join-group
@@ -641,25 +641,25 @@
         {:db state
          :window-title (str "Braid (" unread ")")}))))
 
-(reg-event-db
+(reg-event-fx
   :update-user-status
-  (fn [state [_ [group-id user-id status]]]
-    (if (get-in state [:groups group-id :users user-id])
-      (assoc-in state [:groups group-id :users user-id :status] status)
-      state)))
+  (fn [{db :db} [_ [group-id user-id status]]]
+    {:db (if (get-in db [:groups group-id :users user-id])
+           (assoc-in db [:groups group-id :users user-id :status] status)
+           db)}))
 
-(reg-event-db
+(reg-event-fx
   :add-user
-  (fn [state [_ group-id user]]
-    (assoc-in state [:groups group-id :users (:id user)] user)))
+  (fn [{db :db} [_ group-id user]]
+    {:db (assoc-in db [:groups group-id :users (:id user)] user)}))
 
-(reg-event-db
+(reg-event-fx
   :remove-user-from-group
-  (fn [state [_ [group-id user-id]]]
+  (fn [{db :db} [_ [group-id user-id]]]
     ;; TODO: remove mentions of that user from the group?
-    (if (get-in state [:groups group-id :users])
-      (update-in state [:groups group-id :users] dissoc user-id)
-      state)))
+    {:db (if (get-in db [:groups group-id :users])
+           (update-in db [:groups group-id :users] dissoc user-id)
+           db)}))
 
 (reg-event-fx :add-tag-to-thread
   (fn [{state :db :as cofx} [_ {:keys [thread-id tag-id local-only?]}]]

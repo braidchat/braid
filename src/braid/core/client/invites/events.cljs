@@ -1,6 +1,6 @@
 (ns braid.core.client.invites.events
   (:require
-   [braid.core.client.state :refer [reg-event-fx reg-event-db]]
+   [braid.core.client.state :refer [reg-event-fx]]
    [cljs-uuid-utils.core :as uuid]))
 
 (defn make-invitation [data]
@@ -14,10 +14,10 @@
     (let [invite (make-invitation data)]
       {:websocket-send (list [:braid.server/invite-to-group invite])})))
 
-(reg-event-db
+(reg-event-fx
   :remove-invite
-  (fn [state [_ invite]]
-    (update-in state [:invitations] (partial remove (partial = invite)))))
+  (fn [{db :db} [_ invite]]
+    {:db (update-in db [:invitations] (partial remove (partial = invite)))}))
 
 (reg-event-fx
   :accept-invite
@@ -31,10 +31,10 @@
     {:websocket-send (list [:braid.server/invitation-decline invite])
      :dispatch [:remove-invite invite]}))
 
-(reg-event-db
+(reg-event-fx
   :add-invite
-  (fn [state [_ invite]]
-    (update-in state [:invitations] conj invite)))
+  (fn [{db :db} [_ invite]]
+    {:db (update-in db [:invitations] conj invite)}))
 
 (reg-event-fx
   :generate-link

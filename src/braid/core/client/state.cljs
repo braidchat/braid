@@ -52,13 +52,3 @@
      [validate-schema-interceptor
       interceptors]
      handler-fn)))
-
-(defn reg-event-db
-  ([id handler-fn]
-   (reg-event-db id nil handler-fn))
-  ([id interceptors handler-fn]
-   (re-frame/reg-event-db
-     id
-     [validate-schema-interceptor
-      interceptors]
-     handler-fn)))
