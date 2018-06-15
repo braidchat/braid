@@ -2,8 +2,6 @@
   (:require
     [clojure.spec.alpha :as s]
     [re-frame.core :as re-frame]
-    [braid.quests.client.events]
-    [braid.quests.client.subs]
     [braid.quests.client.helpers :as helpers]
     [braid.quests.client.remote-handlers]))
 
