@@ -113,9 +113,14 @@
 (reg-event-fx
   :new-message-text
   (fn [{db :db} [_ {:keys [group-id thread-id content]}]]
-    {:db (if (get-in db [:threads thread-id])
+    {:db (cond
+           (get-in db [:threads thread-id])
            (assoc-in db [:threads thread-id :new-message] content)
-           (assoc-in db [:temp-threads group-id :new-message] content))}))
+
+           (get-in db [:temp-threads group-id])
+           (assoc-in db [:temp-threads group-id :new-message] content)
+
+           :else db)}))
 
 (reg-event-fx
   :set-message-failed
