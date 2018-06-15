@@ -47,7 +47,7 @@
                                         (apply dissoc errors korks)
                                         (dissoc errors korks))))})
 
-          :display-error
+          :braid.notices/display!
           (fn [{db :db} [_ [err-key message error-class]]]
             {:db (update db ::state assoc err-key {:key err-key
                                                    :message message

@@ -11,7 +11,7 @@
         start-upload (fn [on-upload file-list]
                        (let [file (aget file-list 0)]
                          (if (> (.-size file) max-avatar-size)
-                           (dispatch [:display-error [:avatar-set-fail "Avatar image too large" :error]])
+                           (dispatch [:braid.notices/display! [:avatar-set-fail "Avatar image too large" :error]])
                            (do (reset! uploading? true)
                                (s3/upload
                                  file

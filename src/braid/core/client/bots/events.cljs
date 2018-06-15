@@ -40,7 +40,7 @@
          5000
          (fn [reply]
            (when (nil? (:braid/ok reply))
-             (dispatch [:display-error
+             (dispatch [:braid.notices/display!
                         [(keyword "bot-creation-error" (bot :id))
                          (get reply :braid/error
                            "Something went wrong creating bot")
@@ -55,7 +55,7 @@
            5000
            (fn [reply]
              (when (nil? (:braid/ok reply))
-               (dispatch [:display-error
+               (dispatch [:braid.notices/display!
                           [(keyword "bot-retraction-error" bot-id)
                            (get reply :braid/error
                              "Something went wrong retract bot")
@@ -70,7 +70,7 @@
        5000
        (fn [reply]
          (when-not (:braid/ok reply)
-           (dispatch [:display-error
+           (dispatch [:braid.notices/display!
                       [(keyword "bot-edit" (bot :id))
                        (get reply :braid/error
                             "Something went wrong when updating bot")

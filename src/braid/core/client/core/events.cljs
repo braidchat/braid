@@ -146,9 +146,9 @@
            2000
            (fn [reply]
              (when (not= :braid/ok reply)
-               (dispatch [:display-error [(keyword "failed-to-send" (message :id))
-                                          "Message failed to send!"
-                                          :error]])
+               (dispatch [:braid.notices/display! [(keyword "failed-to-send" (message :id))
+                                                   "Message failed to send!"
+                                                   :error]])
                (dispatch [:set-message-failed message]))))
          :db (-> state
                  (helpers/add-message message)
@@ -173,7 +173,7 @@
                        2000
                        (fn [reply]
                          (when (not= :braid/ok reply)
-                           (dispatch [:display-error
+                           (dispatch [:braid.notices/display!
                                       [(keyword "failed-to-send" (message :id))
                                        "Message failed to send!"
                                        :error]])
@@ -222,7 +222,7 @@
              (when-let [msg (:error reply)]
                (do
                  (dispatch [:remove-tag {:tag-id (tag :id) :local-only? true}])
-                 (dispatch [:display-error [(keyword "bad-tag" (tag :id)) msg :error]]))))))})))
+                 (dispatch [:braid.notices/display! [(keyword "bad-tag" (tag :id)) msg :error]]))))))})))
 
 (reg-event-fx
   :unsubscribe-from-tag
@@ -566,7 +566,7 @@
   :notify-if-client-out-of-date
   (fn [cofx [_ server-checksum]]
     (if (not= (aget js/window "checksum") server-checksum)
-      {:dispatch [:display-error
+      {:dispatch [:braid.notices/display!
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))
 
@@ -605,7 +605,7 @@
   :leave-group
   (fn [{state :db :as cofx} [_ {:keys [group-id group-name]}]]
     {:dispatch-n
-     [[:display-error
+     [[:braid.notices/display!
        (keyword "left-group" group-id)
        (str "You have been removed from " group-name)
        :info]
@@ -728,9 +728,9 @@
       :on-complete (fn [resp] (dispatch [::-store-public-groups resp]))
       :on-error
       (fn [_]
-        (dispatch [:display-error [:load-public-groups
-                                   "Failed to load public groups list"
-                                   :error]]))}}))
+        (dispatch [:braid.notices/display! [:load-public-groups
+                                            "Failed to load public groups list"
+                                            :error]]))}}))
 
 (reg-event-fx
   :core/join-public-group
