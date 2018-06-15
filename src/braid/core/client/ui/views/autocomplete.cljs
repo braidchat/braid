@@ -1,6 +1,6 @@
 (ns braid.core.client.ui.views.autocomplete
   (:require
-   [braid.core.client.helpers :refer [id->color debounce]]
+   [braid.core.client.helpers :refer [->color debounce]]
    [braid.core.client.schema :as schema]
    [clj-fuzzy.metrics :as fuzzy]
    [clojure.string :as string]
@@ -118,9 +118,9 @@
                         [:div.color-block
                          {:style
                           (merge
-                            {:border-color (id->color (tag :id))}
+                            {:border-color (->color (tag :id))}
                             (when @(subscribe [:user-subscribed-to-tag? (tag :id)])
-                              {:background-color (id->color (tag :id))}))}]
+                              {:background-color (->color (tag :id))}))}]
                         [:div.info
                          [:div.name (tag :name)]
                          [:div.extra (or (tag :description)
@@ -140,8 +140,8 @@
                              (fn []
                                [:div.tag.match
                                 [:div.color-block
-                                 {:style {:border-color (id->color (tag :id))
-                                          :background-color (id->color (tag :id))}}]
+                                 {:style {:border-color (->color (tag :id))
+                                          :background-color (->color (tag :id))}}]
                                 [:div.info
                                  [:div.name (str "Create tag " (tag :name))]
                                  [:div.extra

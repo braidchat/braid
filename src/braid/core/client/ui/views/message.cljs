@@ -1,7 +1,7 @@
 (ns braid.core.client.ui.views.message
   (:require
     [braid.core.hooks :as hooks]
-    [braid.core.client.helpers :as helpers :refer [id->color ->color]]
+    [braid.core.client.helpers :as helpers :refer [->color]]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
     [braid.core.client.ui.views.card-border :refer [card-border-view]]
@@ -233,7 +233,7 @@
      [:a.avatar {:href sender-path
                  :tabIndex -1}
       [:img {:src (:avatar sender)
-             :style {:backgroundColor (id->color (:id sender))}}]]
+             :style {:backgroundColor (->color (:id sender))}}]]
      [:div.info
       (when (:bot? sender)
         [:span.bot-notice "BOT"])
