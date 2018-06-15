@@ -179,7 +179,7 @@
                                        :error]])
                            (dispatch [:set-message-failed message]))))
 
-     :dispatch [:clear-error (str :failed-to-send (message :id))]
+     :dispatch [:braid.notices/clear! (keyword "failed-to-send" (message :id))]
      :db (-> state
              (update-in [:threads (message :thread-id) :messages]
                         (partial map (fn [msg]

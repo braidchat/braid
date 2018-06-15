@@ -47,10 +47,6 @@
                                         (apply dissoc errors korks)
                                         (dissoc errors korks))))})
 
-          :clear-error
-          (fn [{db :db} [_ err-key]]
-            {:db (update db ::state dissoc err-key)})
-
           :display-error
           (fn [{db :db} [_ [err-key message error-class]]]
             {:db (update db ::state assoc err-key {:key err-key
@@ -67,7 +63,7 @@
                  {:class class}
                  message
                  [:span.close
-                  {:on-click (fn [_] (dispatch [:clear-error key]))}
+                  {:on-click (fn [_] (dispatch [:braid.notices/clear! key]))}
                   "×"]]))]))
 
        (core/register-styles!
