@@ -42,7 +42,8 @@
        :text-align "right"
        :text-decoration "none"
        :line-height "1.85em"
-       :white-space "nowrap"}
+       :white-space "nowrap"
+       :cursor "pointer"}
 
       [:&:hover
        {:color "#666"}]
@@ -50,19 +51,10 @@
       [:&::after
        {:margin-left "0.5em"}]
 
-      ; USER
-
-      [:&.subscriptions::after
-       (mixins/fontawesome \uf02c)]
-
-      [:&.invite-friend::after
-       (mixins/fontawesome \uf1e0)]
-
-      [:&.edit-profile::after
-       (mixins/fontawesome \uf007)]
-
-      [:&.changelog::after
-       (mixins/fontawesome \uf1da)]
+      [:>.icon
+       {:font-family "fontawesome"
+        :display "inline-block"
+        :width "1.5em"}]
 
       ; ADMIN
 

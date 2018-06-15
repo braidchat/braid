@@ -9,8 +9,10 @@
           [braid.core.client.core.events]
           [braid.core.client.core.subs]
           [braid.core.client.pages]
+          [braid.core.client.ui.views.main]
           [braid.core.client.ui.views.styles]
           [braid.core.client.ui.views.header]
+          [braid.core.client.ui.views.user-header]
           [braid.core.client.ui.views.autocomplete]
           [braid.core.client.group-admin.views.group-settings-page]]
          :clj
@@ -27,6 +29,13 @@
 
 #?(:cljs
    (do
+     (defn register-root-view!
+       "Add a new view to the app (when user is logged in).
+        Will be put under body > #app > .app > .main >"
+       [view]
+       {:pre [(fn? view)]}
+       (swap! braid.core.client.ui.views.main/root-views conj view))
+
      (defn register-group-header-button!
        "Add a new button to appear in the group header
        Expects a map with the following keys
@@ -36,8 +45,21 @@
         :route-args   optional map of args to pass to route-fn
                       :group-id will be merged in"
        [config]
-       {:pre [(util/valid? braid.core.client.ui.views.header/group-header-dataspec config)]}
+       {:pre [(util/valid? braid.core.client.ui.views.header/GroupHeaderItem config)]}
        (swap! braid.core.client.ui.views.header/group-header-buttons conj config))
+
+     (defn register-user-header-menu-item!
+       "Add a new link to appear in the user header
+       Expects a map with the following keys
+       :body         string, text to show
+       :priority     number, for ordering
+       :on-click     optional on-click function
+       :route-fn     optional secretary route fn that returns url
+       :route-args   optional map of args to pass to route-fn
+                     :group-id will be merged in"
+       [config]
+       {:pre [(util/valid? braid.core.client.ui.views.user-header/UserHeaderItem config)]}
+       (swap! braid.core.client.ui.views.user-header/user-header-menu-items conj config))
 
      (defn register-thread-header-item!
        "Adds a new view to a thread's header.

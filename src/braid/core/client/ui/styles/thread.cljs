@@ -16,7 +16,7 @@
     :box-sizing "border-box"}
 
    [:>.tags
-    {:display "inline-block"}
+    {:display "inline"}
 
     [:>.add
      {:position "relative"}
@@ -95,7 +95,7 @@
   [:>.messages
    {:position "relative"
     :overflow-y "auto"
-    :padding [[0 pad]]}])
+    :overflow-x "hidden"}])
 
 (defn thread [pad]
   [:>.thread
@@ -115,7 +115,9 @@
    ; switch to ::after to align at top
    [:&::before
     {:content "\"\""
-     :flex-grow 1}]
+     :flex-grow 1
+     ; have 1px so card shadow shows
+     :min-height "1px"}]
 
    ;; XXX: does this class actually apply to anything?
    [:&.archived :&.limbo :&.private
@@ -144,19 +146,21 @@
 
    [:&.focused
     [:>.card
-     {:box-shadow [[0 (px 10) (px 10) (px 10) "#ccc"]]}]]
+     [:>.border
+      (mixins/card-border "5px")
+      {:border-radius [[vars/border-radius 0 0 0]]}]]]
 
    [:>.card
     mixins/flex
     {:flex-direction "column"
-     :box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
-     :transition [["box-shadow" "0.2s"]]
+     :box-shadow [[0 (px 1) (px 4) 0 "#c3c3c3"]]
      :max-height "100%"
      :background "white"
      :border-radius [[vars/border-radius
-                      vars/border-radius 0 0]]}
-    (drag-and-drop pad)
+                      vars/border-radius 0 0]]
+     :position "relative"}
 
+    (drag-and-drop pad)
     (head pad)
     (messages pad)]])
 
@@ -262,30 +266,38 @@
       :bottom (m/* pad 3)}
 
      [:>.result
-      {:padding "0.25em 0.5em"
-       :clear "both"}
+      {:padding "0.25em 0.5em"}
 
       [:>.match
+       {:display "flex"}
 
        [:>.avatar
         :>.color-block
         {:display "block"
-         :width "2em"
          :height "2em"
-         :float "left"
          :margin "0.25em 0.5em 0.25em 0"}]
 
+       [:>.avatar
+        {:width "2em"}]
+
        [:>.color-block
-        {:width "1em"}]
+        {:width "1em"
+         :border "3px solid #fff"
+         :border-radius "3px"
+         :box-sizing "border-box"}]
 
-       [:>.name
-        {:height "1em"
-         :white-space "nowrap"}]
+       [:>.info
+        {:margin "0.25em 0"}
 
-       [:>.extra
-        {:color "#ccc"
-         :overflow-y "hidden"
-         :max-height "2.5em"}]]
+        [:>.name
+         {:height "1em"
+          :white-space "nowrap"}]
+
+        [:>.extra
+         {:color "#ccc"
+          :overflow-y "hidden"
+          :width "100%"
+          :max-height "1em"}]]]
 
       [:&:hover
        {:background "#eee"}]

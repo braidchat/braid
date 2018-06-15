@@ -5,6 +5,8 @@
     #?@(:cljs
          [[braid.quests.client.views :refer [quests-header-view]]
           [braid.quests.client.styles :refer [quests-header]]
+          [braid.quests.client.events :refer [events]]
+          [braid.quests.client.helpers :as helpers]
           [braid.quests.client.core :refer [initial-data-handler
                                             event-listener
                                             initial-state
@@ -22,7 +24,12 @@
        (core/register-styles! quests-header)
        (core/register-initial-user-data-handler! initial-data-handler)
        (core/register-event-listener! event-listener)
-       (core/register-state! initial-state schema))
+       (core/register-state! initial-state schema)
+       (core/register-events! events)
+       (core/register-subs!
+         {:quests/active-quest-records
+          (fn [state _]
+            (helpers/get-active-quest-records state))}))
 
      :clj
      (do

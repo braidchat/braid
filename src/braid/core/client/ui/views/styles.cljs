@@ -17,6 +17,7 @@
    [braid.core.client.ui.styles.page]
    [braid.core.client.ui.styles.pages.group-explore]
    [braid.core.client.ui.styles.pages.me]
+   [braid.core.client.ui.styles.pages.inbox]
    [braid.core.client.ui.styles.pages.search]
    [braid.core.client.ui.styles.pages.tags]
    [braid.core.client.ui.styles.pills]
@@ -66,7 +67,6 @@
                  (braid.core.client.ui.styles.header/header vars/pad)
 
                  braid.core.client.ui.styles.sidebar/sidebar
-                 braid.core.client.ui.styles.misc/error-banners
                  braid.core.client.ui.styles.reconnect-overlay/reconnect-overlay
                  braid.core.client.ui.styles.page/page
 
@@ -87,6 +87,8 @@
                  (braid.core.client.gateway.forms.user-auth.styles/user-auth-styles)
 
                  ;; page styles
+
+                 braid.core.client.ui.styles.pages.inbox/inbox-page
                  braid.core.client.ui.styles.pages.tags/tags-page
                  braid.core.client.ui.styles.pages.me/me-page
                  braid.core.client.ui.styles.pages.group-explore/group-explore-page

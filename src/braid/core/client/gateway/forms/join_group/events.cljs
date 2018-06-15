@@ -1,8 +1,9 @@
 (ns braid.core.client.gateway.forms.join-group.events
   (:require
    [braid.core.client.gateway.helpers :as helpers :refer [get-url-group-id]]
+   [braid.core.client.state :refer [reg-event-fx]]
    [clojure.string :as string]
-   [re-frame.core :refer [reg-event-db reg-event-fx dispatch]]))
+   [re-frame.core :refer [dispatch]]))
 
 (reg-event-fx
   ::initialize
@@ -21,4 +22,4 @@
                :on-error
                (fn [error]
                  (when-let [k (get-in error [:response :error])]
-                   (dispatch [:display-error [:join-group-error k]])))}}))
+                   (dispatch [:braid.notices/display! [(keyword "join-group-error" (get-url-group-id)) k :error]])))}}))

@@ -62,7 +62,8 @@
     :overflow-x "visible"
     :overflow-y "auto"
     :display "flex"
-    :flex-direction "column"}
+    :flex-direction "column"
+    :z-index 9999}
 
    [:>.groups
     [:>.group

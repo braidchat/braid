@@ -8,6 +8,7 @@
    [braid.core.client.helpers :as helpers]
    [braid.core.client.routes :as routes]
    [braid.core.client.s3 :as s3]
+   [braid.core.client.ui.views.card-border :refer [card-border-view]]
    [braid.core.client.ui.views.message :refer [message-view]]
    [braid.core.client.ui.views.new-message :refer [new-message-view]]
    [braid.core.client.ui.views.pills :refer [user-pill-view tag-pill-view]]
@@ -248,7 +249,7 @@
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
-            (dispatch [:display-error [:upload-fail "File too big to upload, sorry"]])
+            (dispatch [:braid.notices/display! [:upload-fail "File too big to upload, sorry" :error]])
             (do (set-uploading! true)
                 (s3/upload file (fn [url]
                                   (set-uploading! false)
@@ -323,6 +324,8 @@
             "Only @mentioned users can see it."])
 
          [:div.card
+          [card-border-view (thread :id)]
+
           [thread-header-view thread]
 
           (when-not new?

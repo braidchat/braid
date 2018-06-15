@@ -136,8 +136,7 @@
                       (when (= group (@drag-state :grp))
                         {:opacity 0.2}))
              :title (group :name)
-             :href (routes/page-path {:group-id (group :id)
-                                      :page-id "inbox"})
+             :href (routes/inbox-page-path {:group-id (group :id)})
              :on-mouse-down (partial drag-start group)
              :on-mouse-up (partial drag-end group)
              :on-mouse-move (partial drag-move group)}
@@ -171,11 +170,13 @@
          [:div.badge (count @invitations)])])))
 
 (defn global-settings-button-view []
-  (let [page (subscribe [:page])]
+  (let [user-id (subscribe [:user-id])
+        page (subscribe [:page])]
     (fn []
-      [:a.global-settings
-       {:class (when (= (@page :type) :global-settings) "active")
-        :href (routes/other-path {:page-id "global-settings"})}])))
+      (when @user-id
+        [:a.global-settings
+         {:class (when (= (@page :type) :global-settings) "active")
+          :href (routes/other-path {:page-id "global-settings"})}]))))
 
 (defn sidebar-view []
   [:div.sidebar

@@ -1,7 +1,7 @@
 (ns braid.core.client.invites.events
   (:require
-   [cljs-uuid-utils.core :as uuid]
-   [re-frame.core :refer [reg-event-db reg-event-fx]]))
+   [braid.core.client.state :refer [reg-event-fx reg-event-db]]
+   [cljs-uuid-utils.core :as uuid]))
 
 (defn make-invitation [data]
   {:id (or (data :id) (uuid/make-random-squuid))

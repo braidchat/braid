@@ -24,6 +24,7 @@
     :background-color "#222"
     :border [[(px 1) "solid" "#222"]]
     :height (em 1.75)
+    :box-sizing "content-box"
     :line-height (em 1.75)
     :max-width (em 10)
     :white-space "nowrap"
@@ -63,8 +64,14 @@
      :border-color "#666"
      :cursor "pointer"}]])
 
-(defn outline-button [{:keys [text-color border-color
-                              hover-text-color hover-border-color]}]
+(defn fontawesome [unicode]
+  {:font-family "fontawesome"
+   :content (str "\"" unicode "\"")})
+
+(defn outline-button
+  [{:keys [text-color border-color
+           hover-text-color hover-border-color
+           icon]}]
   [:&
    {:display "inline-block"
     :background "none"
@@ -73,6 +80,7 @@
     :text-decoration "none"
     :color text-color
     :padding [[0 (em 0.25)]]
+    :box-sizing "content-box"
     :line-height "1.5em"
     :height "1.5em"
     :white-space "nowrap"
@@ -81,11 +89,11 @@
 
    [:&:hover
     {:color hover-text-color
-     :border-color hover-border-color}]])
-
-(defn fontawesome [unicode]
-  {:font-family "fontawesome"
-   :content (str "\"" unicode "\"")})
+     :border-color hover-border-color}]
+   (when icon
+     [:&:after
+      (fontawesome icon)
+      {:margin-left "0.25em"}])])
 
 (def spin
   {:animation [["anim-spin" "1s" "infinite" "steps(8)"]]
@@ -114,3 +122,12 @@
      :right (m/* vars/pad 0.70)
      :color "white"
      :font-size "1.5em"}]])
+
+(defn card-border [width]
+  {:position "absolute"
+   ; background overriden inline
+   :background "#000"
+   :top 0
+   :left 0
+   :bottom 0
+   :width width})

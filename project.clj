@@ -61,14 +61,13 @@
                  ;;mobile
                  [garden "1.3.2"]]
 
-  :main braid.core.server.core
+  :main braid.core
 
   :plugins [[lein-environ "1.0.0"]
             [lein-cljsbuild "1.1.6" :exclusions [org.clojure/clojure]]
-            [lein-figwheel "0.5.16"]
             [lein-doo "0.1.7"]]
 
-  :repl-options {:timeout 120000}
+
   :clean-targets ^{:protect false}
   ["resources/public/js"]
 
@@ -88,7 +87,7 @@
                            :output-to "resources/public/js/dev/desktop.js"
                            :output-dir "resources/public/js/dev/desktop/"
                            :optimizations :none
-                           :verbose true}}
+                           :verbose false}}
 
                {:id "desktop-test"
                 :source-paths ["src/braid"
@@ -140,7 +139,10 @@
 
   :min-lein-version "2.5.0"
 
-  :profiles {:dev {:global-vars {*assert* true}
+  :profiles {:dev {:source-paths ["src" "dev-src"]
+                   :global-vars {*assert* true}
+                   :repl-options {:timeout 120000
+                                  :init-ns braid.dev.core}
                    :dependencies [[com.datomic/datomic-free "0.9.5201"
                                    :exclusions [joda-time
                                                 com.amazonaws/aws-java-sdk
@@ -151,6 +153,7 @@
                                    [org.clojure/google-closure-library-third-party
                                     com.google.javascript/closure-compiler
                                     org.clojure/tools.nrepl]]
+                                  [com.bhauman/rebel-readline "0.1.2"]
                                   [day8.re-frame/re-frame-10x "0.3.3"]]}
              :prod {:global-vars {*assert* false}
                     :dependencies [[com.datomic/datomic-pro "0.9.5201"
@@ -164,5 +167,5 @@
                                      [refactor-nrepl "2.3.0-SNAPSHOT"]]}]
              :test [:dev]
              :uberjar [:prod
-                       {:aot :all
+                       {:aot [braid.core]
                         :prep-tasks ["compile" ["cljsbuild" "once" "release"]]}]})

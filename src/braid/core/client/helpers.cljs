@@ -7,6 +7,7 @@
    [cljs-time.core :as t]
    [cljs-time.format :as f]
    [cljsjs.husl]
+   [garden.color :as color]
    [goog.style :as gstyle])
   (:import
    (goog Uri)))

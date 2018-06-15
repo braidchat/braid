@@ -1,6 +1,6 @@
 (ns braid.core.client.group-admin.events
   (:require
-    [re-frame.core :refer [reg-event-db reg-event-fx]]))
+    [braid.core.client.state :refer [reg-event-fx]]))
 
 (reg-event-fx
   :set-group-intro
@@ -26,7 +26,7 @@
   (fn [cofx [_ group-id]]
     {:websocket-send (list [:braid.server/set-group-publicity [group-id false]])}))
 
-(reg-event-db
+(reg-event-fx
   :set-group-publicity
-  (fn [state [_ [group-id publicity]]]
-    (assoc-in state [:groups group-id :public?] publicity)))
+  (fn [{db :db} [_ [group-id publicity]]]
+    {:db (assoc-in db [:groups group-id :public?] publicity)}))

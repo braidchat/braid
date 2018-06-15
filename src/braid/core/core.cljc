@@ -4,7 +4,9 @@
     [braid.core.api :as core]
     #?@(:cljs
          [[braid.core.client.ui.views.autocomplete]
-          [braid.core.client.store]])))
+          [braid.core.client.store]
+          [braid.popovers.api :as popovers]
+          [braid.core.client.ui.styles.hover-cards]])))
 
 (defn init! []
   #?(:cljs
@@ -19,4 +21,10 @@
          braid.core.client.ui.views.autocomplete/tag-autocomplete-engine)
 
        (core/register-state! braid.core.client.store/initial-state
-                             braid.core.client.store/AppState))))
+                             braid.core.client.store/AppState)
+
+       (popovers/register-popover-styles!
+         braid.core.client.ui.styles.hover-cards/>user-card)
+
+       (popovers/register-popover-styles!
+         braid.core.client.ui.styles.hover-cards/>tag-card))))

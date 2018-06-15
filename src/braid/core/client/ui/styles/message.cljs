@@ -2,7 +2,6 @@
   (:require
    [braid.core.client.ui.styles.hljs :refer [hljs-styles]]
    [braid.core.client.ui.styles.mixins :as mixins]
-   [braid.core.client.ui.styles.pills :as pills]
    [braid.core.client.ui.styles.vars :refer [avatar-size pad card-width]]
    [garden.arithmetic :as m]
    [garden.units :refer [rem px]]))
@@ -12,46 +11,41 @@
 (def message
   [:>.message
    {:position "relative"
-    :margin [[0 0 pad]]}
+    :padding [[(m// pad 2) pad]]}
 
    [:&.failed-to-send
     {:background-color "rgba(239, 72, 72, 0.53)"}]
 
    [:&.collapse
     {:margin-top (m/- pad)}
-     [:.avatar :.info
-      {:display "none"}]]
 
-    [:&.seen
-     {:transition [["opacity" "0.5s" "linear"]]}
-     ; cannot apply opacity to .message or .content or .dummy
-     ; b/c it creates a new stacking context
-     ; causing hover-cards to display under subsequent messages
-     ["> .info"
-      "> .avatar img"
-      "> .footer"
-      "> .content > img"
-      "> .content > .dummy > .user > .pill"
-      "> .content > .dummy > .tag > .pill"
-      "> .content > .dummy > .external"
-      {:opacity 0.6}]
+    [:>.avatar
+     :>.info
+     {:display "none"}]]
 
-     ["> .content"
-      {:color "rgba(0,0,0,0.6)"}]]
+   [:&.unseen
+    [:>.border
+     (mixins/card-border "9px")]]
 
-    [:&.unseen {}]
-
-   [:>.delete
-    {:display "none"}]
    [:&:hover
-    [:>.delete
-     {:position "absolute"
-      :display "block"
-      :right 0
-      :z-index 1000}
-     [:>button
-      {:font-family "fontawesome"
-       :color "red"}]]]
+    [:>button.delete
+     {:display "inline-block"
+      :position "absolute"
+      :line-height "1.25em"
+      :right pad}]]
+
+   [:>button.delete
+    {:display "none"
+     :font-family "fontawesome"
+     :color "#ccc"
+     :background "none"
+     :border "none"
+     :padding 0
+     :cursor "pointer"
+     :margin-left "0.25rem"}
+
+    [:&:hover
+     {:color "red"}]]
 
    [:>.avatar
     [:>img
@@ -95,9 +89,6 @@
      :box-sizing "border-box"
      :line-height "1.25em"
      :margin-top (rem 0.20)}
-
-    (pills/tag)
-    (pills/user)
 
     [:a.external
      mixins/pill-box
@@ -143,6 +134,6 @@
        :width "100%"
        :text-overflow "ellipsis"}
 
-       [:&:hover
-        {:text-overflow "initial"
-         :overflow-x "auto"}]]]]])
+      [:&:hover
+       {:text-overflow "initial"
+        :overflow-x "auto"}]]]]])

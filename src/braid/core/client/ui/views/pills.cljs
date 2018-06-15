@@ -1,5 +1,6 @@
 (ns braid.core.client.ui.views.pills
   (:require
+    [braid.popovers.helpers :as popover]
     [braid.core.client.helpers :as helpers]
     [braid.core.client.helpers :refer [id->color]]
     [braid.core.client.routes :as routes]
@@ -42,7 +43,7 @@
   [tag-id]
   (let [tag (subscribe [:tag tag-id])
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])]
-    [:div.card
+    [:div.tag.card
      [:div.header {:style {:background-color (id->color tag-id)}}
       [tag-pill tag-id]
       [:div.subscribers.count
@@ -53,7 +54,7 @@
        (@tag :threads-count)]]
      [:div.info
       [:div.description
-       (or (@tag :description) "If I had a description, it would be here.")]]
+       (@tag :description)]]
      [:div.actions
       [search-button-view (str "#" (@tag :name))]
       [subscribe-button-view tag-id]]]))
@@ -61,8 +62,12 @@
 (defn tag-pill-view
   [tag-id]
   [:div.tag
-   [tag-pill tag-id]
-   [tag-card-view tag-id]])
+   {:style {:display "inline-block"}
+    :on-mouse-enter
+    (popover/on-mouse-enter
+      (fn []
+        [tag-card-view tag-id]))}
+   [tag-pill tag-id]])
 
 (defn user-pill
   [user-id]
@@ -81,41 +86,54 @@
         open-group-id (subscribe [:open-group-id])
         admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
         viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
-    [:div.card
+    [:div.user.card
+
      [:div.header {:style {:background-color (id->color user-id)}}
       [user-pill user-id]
       [:div.status
        (@user :status)
-                                        ; [:div "time since last online"]
-       ]
+       #_[:div "time since last online"]]
       [:div.badges
        (when @admin?
          [:div.admin {:title "admin"}])]
       [:img.avatar {:src (@user :avatar)}]]
+
      [:div.info
       [:div.local-time (helpers/format-date (js/Date.))]
-                                        ; [:div.since "member since]
+      #_[:div.since "member since"]
       [:div.description
-       "If I had a profile, it would be here"]]
+       #_"If I had a profile, it would be here"]]
+
      [:div.actions
-                                        ; [:a.pm "PM"]
-                                        ; [:a.mute "Mute"]
+      #_[:a.pm "PM"]
+      #_[:a.mute "Mute"]
+
       [search-button-view (str "@" (@user :nickname))]
+
       (when (and @viewer-admin? (not= user-id @(subscribe [:user-id])))
         [:button.ban
-         {:on-click (fn [_] (dispatch [:remove-from-group
-                                      {:group-id @open-group-id
-                                       :user-id user-id}]))}
-         "Kick from Group"])
+         {:on-click
+          (fn [_]
+            (dispatch [:remove-from-group
+                       {:group-id @open-group-id
+                        :user-id user-id}]))}
+         "Kick"])
+
       (when (and @viewer-admin? (not @admin?))
-                                        ; TODO: make this not ugly
         [:button.make-admin
-         {:on-click (fn [_] (dispatch [:make-admin {:group-id @open-group-id
-                                                   :user-id user-id}]))}
+         {:on-click
+          (fn [_]
+            (dispatch [:make-admin
+                       {:group-id @open-group-id
+                        :user-id user-id}]))}
          "Make Admin"])]]))
 
 (defn user-pill-view
   [user-id]
   [:div.user
-   [user-pill user-id]
-   [user-card-view user-id]])
+   {:style {:display "inline-block"}
+    :on-mouse-enter
+    (popover/on-mouse-enter
+      (fn []
+        [user-card-view user-id]))}
+   [user-pill user-id]])

@@ -1,6 +1,7 @@
 (ns braid.core.client.gateway.helpers
   (:require
-   [re-frame.core :refer [reg-event-fx reg-sub dispatch]])
+   [braid.core.client.state :refer [reg-event-fx]]
+   [re-frame.core :refer [reg-sub dispatch]])
   (:import
    (goog Uri)))
 

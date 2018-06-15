@@ -4,6 +4,7 @@
     [braid.core.client.helpers :as helpers :refer [id->color ->color]]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
+    [braid.core.client.ui.views.card-border :refer [card-border-view]]
     [cljsjs.highlight.langs.clojure]
     [cljsjs.highlight.langs.css]
     [cljsjs.highlight.langs.javascript]
@@ -219,23 +220,16 @@
                                " " (if (:unseen? message) "unseen" "seen")
                                " " (when (:first-unseen? message) "first-unseen")
                                " " (when (:failed? message) "failed-to-send"))}
+
+     [card-border-view (message :thread-id)]
+
      (when (:failed? message)
        [:div.error
         [:span "Message failed to send"]
         [:button {:on-click
                   (fn [_] (dispatch [:resend-message message]))}
          "Resend"]])
-     (when (or (= (message :user-id) current-user) admin?)
-       [:span.delete
-        [:button
-         {:on-click (fn [_]
-                      (when (js/confirm (str "Delete this message?\n"
-                                             "\"" (message :content) "\""))
-                        (dispatch [:core/retract-message
-                                   {:thread-id (message :thread-id)
-                                    :message-id (message :id)
-                                    :remote? true}])))}
-         \uf1f8]])
+
      [:a.avatar {:href sender-path
                  :tabIndex -1}
       [:img {:src (:avatar sender)
@@ -252,6 +246,17 @@
        (helpers/format-date (message :created-at))]]
 
      (into [:div.content] (format-message (message :content)))
+
+     (when (or (= (message :user-id) current-user) admin?)
+       [:button.delete
+        {:on-click (fn [_]
+                     (when (js/confirm (str "Delete this message?\n"
+                                            "\"" (message :content) "\""))
+                       (dispatch [:core/retract-message
+                                  {:thread-id (message :thread-id)
+                                   :message-id (message :id)
+                                   :remote? true}])))}
+        \uf1f8])
 
      (into [:div.footer]
            (for [footer-view @footer-views]
