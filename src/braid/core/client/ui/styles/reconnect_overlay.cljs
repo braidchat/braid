@@ -12,7 +12,7 @@
     :right 0
     :top 0
     :background "rgba(242,242,242,0.75)"
-    :z-index 5000}
+    :z-index 10000}
 
    [:>.info
     {:position "absolute"
