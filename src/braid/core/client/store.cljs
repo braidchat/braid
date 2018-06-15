@@ -11,22 +11,23 @@
                             :app :gateway})
      :websocket-state {:connected? boolean?
                        :next-reconnect (ds/maybe integer?)}
-     :csrf-token string?
-     :action keyword?
-     :user-auth {:user any?
-                 :error any?
-                 :checking? boolean?
-                 :mode (s/spec #{:register :log-in :request-password-reset})
-                 :should-validate? boolean?
-                 :oauth-provider any?
-                 :validations any?
-                 :fields any?}
+     :csrf-token (ds/maybe string?)
+     :action (ds/maybe keyword?)
+     :user-auth (ds/maybe
+                  {:user any?
+                   :error any?
+                   :checking? boolean?
+                   :mode (s/spec #{:register :log-in :request-password-reset})
+                   :should-validate? boolean?
+                   :oauth-provider any?
+                   :validations any?
+                   :fields any?})
      :open-group-id (ds/maybe uuid?)
      :threads {uuid? app-schema/MsgThread}
      :group-threads {uuid? #{uuid?}}
      :tags {uuid? app-schema/Tag}
      :groups {uuid? app-schema/Group}
-     :page {:type keyword?
+     :page {:type (ds/maybe keyword?)
             (ds/opt :id) uuid?
             (ds/opt :thread-ids) [uuid?]
             (ds/opt :search-query) string?
@@ -55,6 +56,10 @@
     {:login-state :gateway ; :ws-connect :app
      :websocket-state {:connected? false
                        :next-reconnect nil}
+     :action nil
+     :action-disabled? false
+     :csrf-token nil
+     :user-auth nil
      :open-group-id nil
      :threads {}
      :group-threads {}

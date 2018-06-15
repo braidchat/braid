@@ -4,14 +4,14 @@
    [braid.core.client.router :as router]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
-   [braid.core.client.state]
+   [braid.core.client.state :refer [reg-event-fx reg-event-db]]
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
    [braid.core.client.sync :as sync]
    [braid.core.client.xhr :refer [edn-xhr]]
    [braid.core.common.util :as util]
    [clojure.set :as set]
    [clojure.string :as string]
-   [re-frame.core :as re-frame :refer [dispatch reg-event-fx reg-event-db reg-fx]]))
+   [re-frame.core :as re-frame :refer [dispatch reg-fx]]))
 
 (defonce event-listeners
   (hooks/register! (atom []) [fn?]))
