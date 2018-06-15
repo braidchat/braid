@@ -8,7 +8,7 @@
 (def AppState
   (merge
     {:login-state (s/spec #{:auth-check :login-form :ws-connect
-                            :app :gateway})
+                            :app :gateway :anon-connected :anon-ws-connect})
      :websocket-state {:connected? boolean?
                        :next-reconnect (ds/maybe integer?)}
      :csrf-token (ds/maybe string?)
