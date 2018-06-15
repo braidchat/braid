@@ -147,7 +147,8 @@
    [:&.focused
     [:>.card
      [:>.border
-     (mixins/card-border "5px")]]]
+      (mixins/card-border "5px")
+      {:border-radius [[vars/border-radius 0 0 0]]}]]]
 
    [:>.card
     mixins/flex
