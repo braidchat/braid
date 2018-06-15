@@ -26,7 +26,7 @@
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])
         color (->color tag-id)]
     [:span.pill {:class (if @user-subscribed-to-tag? "on" "off")
-                 :tabIndex -1
+                 :tab-index -1
                  :style {:background-color color
                          :color color
                          :border-color color}}
@@ -74,7 +74,7 @@
   (let [user (subscribe [:user user-id])]
     (let [color (->color user-id)]
       [:span.pill {:class (str (case (@user :status) :online "on" "off"))
-                   :tabIndex -1
+                   :tab-index -1
                    :style {:background-color color
                            :color color
                            :border-color color}}
