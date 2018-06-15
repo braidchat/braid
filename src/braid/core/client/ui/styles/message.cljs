@@ -19,7 +19,9 @@
 
    [:&.collapse
     {:margin-top (m/- pad)}
-    [:.avatar :.info
+
+    [:>.avatar
+     :>.info
      {:display "none"}]]
 
    [:&.unseen
