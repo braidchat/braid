@@ -59,4 +59,5 @@
   (dispatch [:set-group-and-page [nil {:type (keyword page-id)}]]))
 
 (defroute index-path "/" {}
+  (dispatch [:set-group-and-page [nil {:type :login}]])
   (dispatch [:redirect-from-root]))

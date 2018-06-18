@@ -77,6 +77,7 @@
 
    [:>.global-settings
     :>.plus
+    :>.login
     (sidebar-button vars/top-bar-height)
     {:color "#999"}
 
@@ -91,4 +92,7 @@
      (mixins/fontawesome \uf067)]
 
     [:&.global-settings::after
-     (mixins/fontawesome \uf013)]]])
+     (mixins/fontawesome \uf013)]
+
+    [:&.login::after
+     (mixins/fontawesome \uf090)]]])

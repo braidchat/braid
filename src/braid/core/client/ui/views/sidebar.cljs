@@ -162,25 +162,26 @@
 (defn group-explore-button-view []
   (let [page (subscribe [:page])
         invitations (subscribe [:invitations])]
-    (fn []
-      [:a.plus
-       {:class (when (#{:group-explore :create-group} (@page :type)) "active")
-        :href (routes/other-path {:page-id "group-explore"})}
-       (when (< 0 (count @invitations))
-         [:div.badge (count @invitations)])])))
+    [:a.plus
+     {:class (when (#{:group-explore :create-group} (@page :type)) "active")
+      :href (routes/other-path {:page-id "group-explore"})}
+     (when (< 0 (count @invitations))
+       [:div.badge (count @invitations)])]))
 
 (defn global-settings-button-view []
-  (let [user-id (subscribe [:user-id])
-        page (subscribe [:page])]
-    (fn []
-      (when @user-id
-        [:a.global-settings
-         {:class (when (= (@page :type) :global-settings) "active")
-          :href (routes/other-path {:page-id "global-settings"})}]))))
+  (let [page (subscribe [:page])]
+    [:a.global-settings
+     {:class (when (= (@page :type) :global-settings) "active")
+      :href (routes/other-path {:page-id "global-settings"})}]))
+
+(defn login-button-view []
+  [:a.login {:href (routes/index-path)}])
 
 (defn sidebar-view []
   [:div.sidebar
    [groups-view]
    [group-explore-button-view]
    [:div.spacer]
-   [global-settings-button-view]])
+   (if @(subscribe [:user-id])
+     [global-settings-button-view]
+     [login-button-view])])
