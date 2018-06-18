@@ -20,9 +20,8 @@
        (core/register-server-message-handlers!
          {:braid.server.rss/load-feeds
           (fn [{user-id :user-id group-id :?data}]
-            (if (group-db/user-in-group? user-id group-id)
-              {:reply! {:braid/ok (db/group-feeds group-id)}}
-              {}))
+            (when (group-db/user-in-group? user-id group-id)
+              {:reply! {:braid/ok (db/group-feeds group-id)}}))
 
           :braid.server.rss/check-feed-url
           (fn [{user-id :user-id feed-url :?data}]
@@ -31,15 +30,14 @@
 
           :braid.server.rss/add-feed
           (fn [{user-id :user-id {:keys [tag-ids feed-url group-id] :as new-feed} :?data}]
-            (if (and (group-db/user-is-group-admin? user-id group-id)
+            (when (and (group-db/user-is-group-admin? user-id group-id)
                      (let [group-tags (into #{} (map :id) (group-db/group-tags group-id))]
                        (every? group-tags tag-ids)))
               (let [new-feed (assoc new-feed
                                     :id (java.util.UUID/randomUUID)
                                     :user-id user-id)]
                 {:db-run-txns! (db/add-rss-feed-txn new-feed)
-                 :reply! {:braid/ok new-feed}})
-              {}))
+                 :reply! {:braid/ok new-feed}})))
 
           :braid.server.rss/force-feed-run!
           (fn [{user-id :user-id feed-id :?data}]
@@ -56,10 +54,9 @@
           :braid.server.rss/retract-feed
           (fn [{user-id :user-id feed-id :?data}]
             (let [group-id (db/feed-group-id feed-id)]
-              (if (group-db/user-is-group-admin? user-id group-id)
+              (when (group-db/user-is-group-admin? user-id group-id)
                 {:db-run-txns! (db/remove-feed-txn feed-id)
-                 :reply! :braid/ok}
-                {})))})
+                 :reply! :braid/ok})))})
 
        (core/register-daily-job!
          (fn []
