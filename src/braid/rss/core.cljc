@@ -24,6 +24,11 @@
               {:reply! {:braid/ok (db/group-feeds group-id)}}
               {}))
 
+          :braid.server.rss/check-feed-url
+          (fn [{user-id :user-id feed-url :?data}]
+            (when user-id
+              {:reply! {:braid/ok (fetching/feed-works? feed-url)}}))
+
           :braid.server.rss/add-feed
           (fn [{user-id :user-id {:keys [tag-ids feed-url group-id] :as new-feed} :?data}]
             (if (and (group-db/user-is-group-admin? user-id group-id)
@@ -58,7 +63,8 @@
        (core/register-group-setting! views/rss-feed-settings-view)
        (core/register-styles! [:.settings.rss-feeds
                                [:.new-rss-feed
-                                [:label {:display "block"}]]])
+                                [:label {:display "block"}]
+                                [:.error {:color "red"}]]])
        (core/register-state! {:rss/feeds {}} {:rss/feeds any?})
        (core/register-subs! {:rss/feeds
                              (fn [db [_ group-id]]
@@ -86,6 +92,25 @@
           :rss/-remove-feed
           (fn [{db :db} [_ feed]]
             {:db (update-in db [:rss/feeds (feed :group-id)] disj feed)})
+
+          :rss/-check-feed-valid
+          (fn [_ [_ feed-url on-complete]]
+            {:websocket-send
+             (list [:braid.server.rss/check-feed-url feed-url]
+                   5000
+                   (fn [reply]
+                     (if (and (map? reply) (contains? reply :braid/ok))
+                       (on-complete (:braid/ok reply))
+                       (dispatch [:braid.notices/display!
+                                  [::feed-url-check
+                                   "Something went wrong validating the feed URL"
+                                   :error]]))))})
+
+          :rss/check-feed-valid
+          (fn [_ [_ feed-url on-complete]]
+            {:dispatch-debounce
+             [::check-feed [:rss/-check-feed-valid feed-url on-complete]
+              1000]})
 
           :rss/add-feed
           (fn [_ [_ new-feed]]

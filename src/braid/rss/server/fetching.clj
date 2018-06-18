@@ -30,8 +30,6 @@
                    xml)
     @items))
 
-(defn tee [x] (prn x) x)
-
 (defn fetch-feed
   [url]
   (let [feed (some->> @(http/get url)
@@ -44,6 +42,14 @@
       feed
       (throw (ex-info "Failed to parse feed"
                       {:feed-url url})))))
+
+(defn feed-works?
+  [feed-url]
+  (try
+    (fetch-feed feed-url)
+    true
+    (catch Exception _
+      false)))
 
 (defn item-guid
   [item]

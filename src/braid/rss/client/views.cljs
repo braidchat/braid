@@ -10,6 +10,7 @@
   (let [first-tag-id (:id (first @(subscribe [:tags-in-group (group :id)])))
         new-feed (r/atom {:feed-url ""
                           :tag-ids #{first-tag-id}})
+        checked-feed? (r/atom false)
         error (r/atom nil)]
     (fn [group]
       [:form.new-rss-feed
@@ -31,7 +32,19 @@
         [:input {:type "url"
                  :placeholder "https://foo.bar/rss.xml"
                  :value (:feed-url @new-feed)
-                 :on-change (fn [e] (swap! new-feed assoc :feed-url (.. e -target -value)))}]]
+                 :on-change
+                 (fn [e]
+                   (swap! new-feed assoc :feed-url (.. e -target -value))
+                   (reset! checked-feed? false)
+                   (reset! error nil)
+                   (dispatch [:rss/check-feed-valid
+                              (:feed-url @new-feed)
+                              (fn [v?]
+                                (reset! checked-feed? v?)
+                                (when-not v?
+                                  (reset! error "Couldn't fetch feed from URL")))]))}]
+        (when @checked-feed?
+          [:span {:style {:color "green"}} "Feed looks good"])]
        [:label [:span "Tags to apply to posts"]
         [:br]
         ;; Annoying React thing: multiple select doesn't seem to be
@@ -61,7 +74,8 @@
           [:p "Otherwise, you can select one or more of the above tags"
            " to allow others to automatically see them."]])
        [:input {:type "submit" :value "Add"
-                :disabled (string/blank? (:feed-url @new-feed))}]])))
+                :disabled (or (string/blank? (:feed-url @new-feed))
+                              (not @checked-feed?))}]])))
 
 (defn existing-feeds-view
   [group]
