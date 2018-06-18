@@ -14,13 +14,13 @@
   (hooks/register! (atom {}) {keyword? fn?}))
 
 (defn run-cofx! [ev-msg cofx]
-  (when-let [args (cofx :chsk-send!)]
+  (when-let [args (:chsk-send! cofx)]
     (apply socket/chsk-send! args))
-  (when-let [txns (cofx :db-run-txns!)]
+  (when-let [txns (:db-run-txns! cofx)]
     (db/run-txns! txns))
-  (when-let [[group info] (cofx :group-broadcast!)]
+  (when-let [[group info] (:group-broadcast! cofx)]
     (helpers/broadcast-group-change group info))
-  (when-let [info (cofx :reply!)]
+  (when-let [info (:reply! cofx)]
     (when-let [reply-fn (:?reply-fn ev-msg)]
       (reply-fn info))))
 
