@@ -1,6 +1,5 @@
 (ns braid.core.client.state.remote-handlers
   (:require
-   [braid.core.client.desktop.notify :as notify]
    [braid.core.client.router :as router]
    [braid.core.client.sync :as sync]
    [braid.core.hooks :as hooks]
@@ -123,7 +122,7 @@
 
 (defmethod sync/event-handler :braid.client/notify-message
   [[_ message]]
-  (notify/notify {:msg (:content message)}))
+  (dispatch [:core/show-message-notification message]))
 
 (defmethod sync/event-handler :braid.client/hide-thread
   [[_ thread-id]]

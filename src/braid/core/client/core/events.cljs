@@ -761,6 +761,15 @@
     {:db (assoc-in state [:websocket-state :next-reconnect] next-reconnect)}))
 
 (reg-event-fx
+  :core/show-message-notification
+  (fn [{db :db} [_ {:keys [content group-id user-id] :as msg}]]
+    (let [sender (get-in db [:groups group-id :users user-id])]
+      {:notify {:body (str (sender :nickname) ": " content)
+                :title (str "New Message in "
+                            (get-in db [:groups group-id :name]))
+                :icon (sender :avatar)}})))
+
+(reg-event-fx
   :core/reconnect
   (fn [_ _]
     (sync/reconnect!)
