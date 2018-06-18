@@ -41,6 +41,18 @@
                  :reply! {:braid/ok new-feed}})
               {}))
 
+          :braid.server.rss/force-feed-run!
+          (fn [{user-id :user-id feed-id :?data}]
+            (let [feed (db/feed-by-id feed-id)]
+              (when (some->> feed
+                      :group-id
+                      (group-db/user-is-group-admin? user-id))
+                (try
+                  (fetching/update-feed! feed)
+                  (catch clojure.lang.ExceptionInfo ex
+                    (timbre/errorf "Failed to fetch feed %s: %s" feed
+                                   (ex-data ex)))))))
+
           :braid.server.rss/retract-feed
           (fn [{user-id :user-id feed-id :?data}]
             (let [group-id (db/feed-group-id feed-id)]
@@ -57,7 +69,8 @@
              (try
                (fetching/update-feed! feed)
                (catch clojure.lang.ExceptionInfo ex
-                 (timbre/errorf "Bad feed %s" feed)))))))
+                 (timbre/errorf "Bad feed %s: %s" feed
+                                (ex-data ex))))))))
     :cljs
      (do
        (core/register-group-setting! views/rss-feed-settings-view)
@@ -127,4 +140,8 @@
                                    5000
                                    (fn [reply]
                                      (when (= :braid/ok reply)
-                                       (dispatch [:rss/-remove-feed feed]))))})}))))
+                                       (dispatch [:rss/-remove-feed feed]))))})
+
+          :rss/force-feed-run
+          (fn [_ [_ feed-id]]
+            {:websocket-send (list [:braid.server.rss/force-feed-run! feed-id])})}))))

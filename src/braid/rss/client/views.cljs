@@ -81,7 +81,7 @@
   [group]
   (if-let [feeds @(subscribe [:rss/feeds (group :id)])]
     [:table
-     [:thead [:tr [:th "URL"] [:th "User"] [:th "Tags"] [:th]]]
+     [:thead [:tr [:th "URL"] [:th "User"] [:th "Tags"] [:th] [:th]]]
      [:tbody
       (doall (for [feed feeds]
                ^{:key (feed :id)}
@@ -92,11 +92,16 @@
                               ^{:key tag-id}
                               [pills/tag-pill-view tag-id]))]
                 [:td [:button
+                      {:on-click (fn [_] (dispatch [:rss/force-feed-run (feed :id)]))}
+                      "Check Now"]]
+                [:td [:button
                       {:style {:font-family "fontawesome"
                                :size "smaller"
                                :color "red"
                                :cursor "pointer"}
-                       :on-click (fn [_] (dispatch [:rss/retract-feed feed]))}
+                       :on-click (fn [_] (when (js/confirm "Stop fetching the feed at "
+                                                          (feed :feed-url) "?")
+                                          (dispatch [:rss/retract-feed feed])))}
                       \uf1f8]]]))]]
     [:p "No feeds added to this group yet"]))
 

@@ -80,6 +80,11 @@
            (db/db) rss-pull-pattern)
        (map db->rss)))
 
+(defn feed-by-id
+  [feed-id]
+  (some-> (d/pull (db/db) rss-pull-pattern [:rss/id feed-id])
+          db->rss))
+
 (defn feed-group-id
   [feed-id]
   (-> (d/pull (db/db) [{:rss/group [:group/id]}] [:rss/id feed-id])
