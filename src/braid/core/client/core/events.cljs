@@ -1,6 +1,6 @@
 (ns braid.core.client.core.events
   (:require
-   [braid.core.hooks :as hooks]
+   [braid.core.client.desktop.notify :as notify]
    [braid.core.client.router :as router]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
@@ -9,6 +9,7 @@
    [braid.core.client.sync :as sync]
    [braid.core.client.xhr :refer [edn-xhr]]
    [braid.core.common.util :as util]
+   [braid.core.hooks :as hooks]
    [clojure.set :as set]
    [clojure.string :as string]
    [re-frame.core :as re-frame :refer [dispatch reg-fx]]))
@@ -35,6 +36,8 @@
 (reg-fx :redirect-to (fn [route] (when route (router/go-to route))))
 
 (reg-fx :window-title (fn [title] (when title (set! (.-title js/document) title))))
+
+(reg-fx :notify notify/notify)
 
 (defn name->open-tag-id
   "Lookup tag by name in the open group"
