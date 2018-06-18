@@ -20,6 +20,7 @@
           [braid.core.server.routes.client]
           [braid.core.server.db.user]
           [braid.core.server.routes.api.modules]
+          [braid.core.server.jobs]
           [braid.core.server.schema]
           [braid.core.server.sync]
           [braid.core.server.sync-handler]])))
@@ -258,4 +259,10 @@
                                :body (get-in request [:params :bar])})]"
        [route]
        {:pre [(util/valid? braid.core.server.routes.api.modules/route? route)]}
-       (swap! braid.core.server.routes.api.modules/module-private-http-routes conj route))))
+       (swap! braid.core.server.routes.api.modules/module-private-http-routes conj route))
+
+     (defn register-daily-job!
+       "Add a recurring job that will run once a day. Expects a zero-arity function."
+       [job-fn]
+       {:pre [(fn? job-fn)]}
+       (braid.core.server.jobs/register-daily-job! job-fn))))

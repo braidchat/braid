@@ -13,6 +13,7 @@
     [braid.permalinks.core]
     [braid.popovers.core]
     [braid.quests.core]
+    [braid.rss.core]
     [braid.stars.core]
     [braid.video-embeds.core]
     [braid.website-embeds.core]))
@@ -31,6 +32,7 @@
   (braid.permalinks.core/init!)
   (braid.popovers.core/init!)
   (braid.quests.core/init!)
+  (braid.rss.core/init!)
   (braid.stars.core/init!)
   (braid.video-embeds.core/init!)
   (braid.website-embeds.core/init!))
