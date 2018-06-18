@@ -82,5 +82,3 @@
 (def public-handler (dynamic-handler module-public-http-routes))
 (def private-handler (-> (dynamic-handler module-private-http-routes)
                          wrap-logged-in?))
-
-
