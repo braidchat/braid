@@ -164,7 +164,7 @@
         invitations (subscribe [:invitations])]
     [:a.plus
      {:class (when (#{:group-explore :create-group} (@page :type)) "active")
-      :href (routes/other-path {:page-id "group-explore"})}
+      :href (routes/system-page-path {:page-id "group-explore"})}
      (when (< 0 (count @invitations))
        [:div.badge (count @invitations)])]))
 
@@ -172,7 +172,7 @@
   (let [page (subscribe [:page])]
     [:a.global-settings
      {:class (when (= (@page :type) :global-settings) "active")
-      :href (routes/other-path {:page-id "global-settings"})}]))
+      :href (routes/system-page-path {:page-id "global-settings"})}]))
 
 (defn login-button-view []
   [:a.login {:href (routes/index-path)}])

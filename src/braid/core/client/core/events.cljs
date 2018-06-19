@@ -533,7 +533,7 @@
                              first
                              :id)]
          (routes/inbox-page-path {:group-id group-id})
-         (routes/other-path {:page-id "group-explore"}))}
+         (routes/system-page-path {:page-id "group-explore"}))}
       {})))
 
 (reg-event-fx
@@ -730,30 +730,12 @@
                      (dispatch [:set-group-and-page [?group-id {:type :readonly}]]))))))}))
 
 (reg-event-fx
-  :core/load-public-groups
-  (fn [_ _]
-    {:edn-xhr
-     {:uri "/groups"
-      :method :get
-      :on-complete (fn [resp] (dispatch [::-store-public-groups resp]))
-      :on-error
-      (fn [_]
-        (dispatch [:braid.notices/display! [:load-public-groups
-                                            "Failed to load public groups list"
-                                            :error]]))}}))
-
-(reg-event-fx
   :core/join-public-group
   (fn [{db :db} [_ group-id]]
     (if (get-in db [:session :user-id])
       {:websocket-send
        (list [:braid.server/join-public-group group-id])}
       {:redirect-to (routes/join-group-path {:group-id group-id})})))
-
-(reg-event-fx
-  ::-store-public-groups
-  (fn [{db :db} [_ groups]]
-    {:db (assoc db :public-groups groups)}))
 
 (reg-event-fx
   :core/websocket-update-next-reconnect

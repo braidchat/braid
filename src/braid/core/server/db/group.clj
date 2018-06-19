@@ -100,27 +100,6 @@
            [?g :group/admins ?u]]
          (db/db) user-id group-id)))
 
-(defn public-groups
-  []
-  (->> (d/q '[:find (pull ?g pull-pattern) ?created (max ?updated)
-             :in $ pull-pattern
-             :where
-             [?g :group/id _ ?created-tx]
-             [?created-tx :db/txInstant ?created]
-             ;; group "updated" when a message is posted to it
-             ;; note that this means groups with no messages won't
-             ;; show up...but that's probably reasonable
-             [?t :thread/group ?g]
-             [?m :message/thread ?t ?updated-tx]
-             [?updated-tx :db/txInstant ?updated]]
-           (db/db) group-pull-pattern)
-      (into #{}
-            (comp (map (fn [[g c u]] (assoc (db->group g)
-                                           :created-at c :updated-at u)))
-                  (filter :public?)
-                  (map #(select-keys % [:id :name :slug :avatar :intro
-                                        :users-count :created-at :updated-at]))))))
-
 ;; Transactions
 
 (defn create-group-txn

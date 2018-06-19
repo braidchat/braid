@@ -15,7 +15,6 @@
    [braid.core.client.ui.styles.message]
    [braid.core.client.ui.styles.misc]
    [braid.core.client.ui.styles.page]
-   [braid.core.client.ui.styles.pages.group-explore]
    [braid.core.client.ui.styles.pages.me]
    [braid.core.client.ui.styles.pages.inbox]
    [braid.core.client.ui.styles.pages.search]
@@ -91,7 +90,6 @@
                  braid.core.client.ui.styles.pages.inbox/inbox-page
                  braid.core.client.ui.styles.pages.tags/tags-page
                  braid.core.client.ui.styles.pages.me/me-page
-                 braid.core.client.ui.styles.pages.group-explore/group-explore-page
                  braid.core.client.group-admin.views.group-settings-page-styles/group-settings-page
                  braid.core.client.uploads.views.uploads-page-styles/uploads-page
                  braid.core.client.invites.views.invite-page-styles/invite-page

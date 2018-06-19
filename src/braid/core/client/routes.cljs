@@ -52,11 +52,12 @@
     (dispatch [:set-group-and-page [(uuid group-id) page]])
     (pages/on-load! (keyword page-id) page)))
 
-(defroute other-path "/pages/:page-id" [page-id]
-  (case page-id
-    "group-explore" (dispatch [:core/load-public-groups])
-    nil)
-  (dispatch [:set-group-and-page [nil {:type (keyword page-id)}]]))
+(defroute system-page-path "/pages/:page-id" [page-id query-params]
+  (let [page (merge {:type (keyword page-id)
+                     :page-id (keyword page-id)}
+                    query-params)]
+    (dispatch [:set-group-and-page [nil page]])
+    (pages/on-load! (keyword page-id) page)))
 
 (defroute index-path "/" {}
   (dispatch [:set-group-and-page [nil {:type :login}]])

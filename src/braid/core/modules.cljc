@@ -8,6 +8,7 @@
     [braid.embeds.core]
     [braid.emoji.core]
     [braid.emojione-emoji.core]
+    [braid.group-explore.core]
     [braid.image-embeds.core]
     [braid.notices.core]
     [braid.permalinks.core]
@@ -27,6 +28,7 @@
   (braid.embeds.core/init!)
   (braid.emoji.core/init!)
   (braid.emojione-emoji.core/init!)
+  (braid.group-explore.core/init!)
   (braid.image-embeds.core/init!)
   (braid.notices.core/init!)
   (braid.permalinks.core/init!)
