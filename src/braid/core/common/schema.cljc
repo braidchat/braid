@@ -92,10 +92,6 @@
    :users {UserId User}
    :bots #{BotDisplay}})
 
-(def PublicGroup
-  (select-keys Group [:id :name :slug :avatar :intro
-                      :users-count :created-at :updated-at]))
-
 (def Tag
   {:id uuid?
    :name string?

@@ -10,7 +10,7 @@
   [:div.page.create-group
    [:div.title "Create New Group"]
    [:div.content
-    [:a {:href (routes/other-path {:page-id "group-explore"})}
+    [:a {:href (routes/system-page-path {:page-id "group-explore"})}
      "Explore Groups"]
     [:div.gateway
      (when-not @(subscribe [:user-id])

@@ -22,14 +22,6 @@
       (reaction (get-in @state [:groups @group-id])))))
 
 (reg-sub
-  :subscribed-group-ids
-  (fn [db _]
-    (into #{}
-          (comp (remove (fn [[id group]] (:readonly group)))
-                (map first))
-          (:groups db))))
-
-(reg-sub
   :groups
   (fn [state _]
     (vals (:groups state))))
@@ -286,11 +278,6 @@
     (->> (state :tags)
          vals
          (filter (fn [tag] (= (get-in state [:open-group-id]) (tag :group-id)))))))
-
-(reg-sub
-  :core/public-groups
-  (fn [state _]
-    (state :public-groups)))
 
 (reg-sub
   :core/websocket-state

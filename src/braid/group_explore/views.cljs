@@ -1,4 +1,4 @@
-(ns braid.core.client.ui.views.pages.group-explore
+(ns braid.group-explore.views
   (:require
    [braid.core.client.helpers :as helpers :refer [->color]]
    [braid.core.client.routes :as routes]
@@ -9,7 +9,7 @@
   (:import
    (goog.events KeyCodes)))
 
-(defn invitations-view
+(defn- invitations-view
   []
   (let [invitations (subscribe [:invitations])]
     (fn []
@@ -35,7 +35,7 @@
                 "Decline"]])]
            [:div "No invitations."])])))
 
-(defn public-group-view
+(defn- public-group-view
   [group]
   [:a.group {:style {:background-color (->color (:id group))}
              :href (routes/inbox-page-path {:group-id (:id group)})}
@@ -47,43 +47,42 @@
    [:div.users (let [count (:users-count group)]
                  (str count " user" (when (not= 1 count) "s")))]])
 
-(defn public-groups-view []
-  (let [subscribed-groups @(subscribe [:subscribed-group-ids])
+(defn- public-groups-view []
+  (let [subscribed-groups @(subscribe [:braid.group-explore/subscribed-group-ids])
         showing? (r/atom false)]
     (fn []
-      [:div
-       [:h2 "Public Groups"]
-       (let [groups (->> @(subscribe [:core/public-groups])
+      (let [groups (->> @(subscribe [:braid.group-explore/public-groups])
                         (sort-by :updated-at #(compare %2 %1)))
-             cutoff (t/minus (t/now) (t/weeks 1))
-             {active-groups true stale-groups false}
-             (->> groups
+            cutoff (t/minus (t/now) (t/weeks 1))
+            {active-groups true stale-groups false}
+            (->> groups
                  (group-by (comp #(t/after? % cutoff) t/to-default-time-zone :updated-at) ))]
-         [:div.public-groups
-          [:h3 "Active Groups"]
-          [:div.active
-           (doall
-             (for [group active-groups
-                   :when (not (subscribed-groups (:id group)))]
-               ^{:key (:id group)}
-               [public-group-view group]))]
-          [:h3 "Stale Groups"
-           [:button.toggle-stale {:on-click (fn [_] (swap! showing? not))}
-            (if @showing? "Hide" "Show")]]
-          (when @showing?
-            [:div.stale
-             (doall
-               (for [group stale-groups
-                     :when (not (subscribed-groups (:id group)))]
-                 ^{:key (:id group)}
-                 [public-group-view group]))])])])))
+        [:div.public-groups
+         [:h2 "Public Groups"]
+         [:h3 "Active Groups"]
+         [:div.active
+          (doall
+            (for [group active-groups
+                  :when (not (subscribed-groups (:id group)))]
+              ^{:key (:id group)}
+              [public-group-view group]))]
+         [:h3 "Stale Groups"
+          [:button.toggle-stale {:on-click (fn [_] (swap! showing? not))}
+           (if @showing? "Hide" "Show")]]
+         (when @showing?
+           [:div.stale
+            (doall
+              (for [group stale-groups
+                    :when (not (subscribed-groups (:id group)))]
+                ^{:key (:id group)}
+                [public-group-view group]))])]))))
 
 (defn group-explore-page-view
   []
   [:div.page.group-explore
    [:div.title "Group Explore"]
    [:div.content
-    [:a {:href (routes/other-path {:page-id "create-group"})}
+    [:a {:href (routes/system-page-path {:page-id "create-group"})}
      "Create Group"]
     [invitations-view]
     [public-groups-view]]])

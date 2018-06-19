@@ -80,6 +80,22 @@
        {:pre [(util/valid? braid.core.client.ui.views.thread/thread-control-dataspec config)]}
        (swap! braid.core.client.ui.views.thread/thread-controls conj config))
 
+     (defn register-system-page!
+       "Registers a system page with its own URL.
+
+       Expects a map with the following keys:
+         :key      keyword
+         :on-load  optional function to call
+                   when page is navigated to
+         :view   reagent view fn
+
+       Link for page can be generated using:
+        (braid.core.client.routes/system-page-path
+             {:page-id __})"
+       [page]
+       {:pre [(util/valid? braid.core.client.pages/page-dataspec page)]}
+       (swap! braid.core.client.pages/pages assoc (page :key) page))
+
      (defn register-group-page!
        "Registers a group page with its own URL.
 

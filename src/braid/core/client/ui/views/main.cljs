@@ -11,7 +11,6 @@
    [braid.core.client.ui.views.header :refer [header-view readonly-header-view]]
    [braid.core.client.ui.views.pages.changelog :refer [changelog-view]]
    [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
-   [braid.core.client.ui.views.pages.group-explore :refer [group-explore-page-view]]
    [braid.core.client.ui.views.pages.create-group :refer [create-group-page-view]]
    [braid.core.client.ui.views.pages.inbox :refer [inbox-page-view]]
    [braid.core.client.ui.views.pages.me :refer [me-page-view]]
@@ -35,7 +34,6 @@
       :tags [tags-page-view]
       :me [me-page-view]
       :invite [invite-page-view]
-      :group-explore [group-explore-page-view]
       :create-group [create-group-page-view]
       :bots [bots-page-view]
       :uploads [uploads-page-view]
@@ -47,12 +45,13 @@
 
 (defn readonly-page-view
   []
-  (case (:type @(subscribe [:page]))
-    (:inbox :readonly) [readonly-inbox-page-view]
-    :login [gateway-view]
-    :group-explore [group-explore-page-view]
-    :create-group [create-group-page-view]
-    nil))
+  (let [id (:type @(subscribe [:page]))]
+    (case id
+      (:inbox :readonly) [readonly-inbox-page-view]
+      :login [gateway-view]
+      :create-group [create-group-page-view]
+      (when-let [view (pages/get-view id)]
+        [view]))))
 
 (defonce root-views (hooks/register! (atom []) [fn?]))
 
@@ -62,10 +61,6 @@
     [:div.main
      [sidebar-view]
      (case @(subscribe [:page-path])
-       "/pages/group-explore"
-       (do (dispatch [:core/load-public-groups])
-           [group-explore-page-view])
-
        "/pages/create-group"
        [create-group-page-view]
 

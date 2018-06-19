@@ -9,5 +9,5 @@
    [:div.content
     [:p "Placeholder page for group-related profile settings"]
     [:p
-     [:a {:href (routes/other-path {:page-id "global-settings"})}
+     [:a {:href (routes/system-page-path {:page-id "global-settings"})}
       "Go to Global Settings"]]]])
