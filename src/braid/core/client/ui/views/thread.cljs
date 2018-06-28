@@ -11,7 +11,7 @@
    [braid.core.client.ui.views.card-border :refer [card-border-view]]
    [braid.core.client.ui.views.message :refer [message-view]]
    [braid.core.client.ui.views.new-message :refer [new-message-view]]
-   [braid.core.client.ui.views.pills :refer [user-pill-view tag-pill-view]]
+   [braid.core.client.ui.views.mentions :refer [user-mention-view tag-mention-view]]
    [braid.core.hooks :as hooks])
   (:import
    (goog.events KeyCodes)))
@@ -60,11 +60,11 @@
    (doall
      (for [user-id (thread :mentioned-ids)]
        ^{:key user-id}
-       [user-pill-view user-id]))
+       [user-mention-view user-id]))
    (doall
      (for [tag-id (thread :tag-ids)]
        ^{:key tag-id}
-       [tag-pill-view tag-id]))
+       [tag-mention-view tag-id]))
    [add-tag-button-view thread]])
 
 (defn messages-view [thread-id]

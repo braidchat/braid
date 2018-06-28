@@ -1,6 +1,6 @@
 (ns braid.core.client.ui.views.pages.search
   (:require
-   [braid.core.client.ui.views.pills :refer [user-card-view]]
+   [braid.core.client.ui.views.user-hover-card :refer [user-hover-card-view]]
    [braid.core.client.ui.views.thread :refer [thread-view]]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
@@ -29,7 +29,7 @@
        [:div.content
         [:div.description
          "Searching..."]
-        (when user-search [user-card-view user-search])]]
+        (when user-search [user-hover-card-view user-search])]]
 
       :error
       [:div.page.search
@@ -41,7 +41,7 @@
           (fn [_]
             (dispatch [:search-history [(@page :search-query) @group-id]]))}
          "Try again"]
-        (when user-search [user-card-view user-search])]]
+        (when user-search [user-hover-card-view user-search])]]
 
       (:done-results :loading)
       (let [loaded-threads (vals (select-keys @threads (@page :thread-ids)))
@@ -90,7 +90,7 @@
                           (= 0 (.-deltaX e) (.-deltaZ e)))
                  (set! (.-scrollLeft this-elt)
                        (- (.-scrollLeft this-elt) (.-deltaY e))))))}
-          (when user-search [user-card-view user-search])
+          (when user-search [user-hover-card-view user-search])
           (doall
             (for [thread sorted-threads]
               ^{:key (:id thread)}
@@ -101,4 +101,4 @@
        [:div.title (str "Search for \"" @query "\"")]
        [:div.content
         [:div.description "No results."]
-        (when user-search [user-card-view user-search])]])))
+        (when user-search [user-hover-card-view user-search])]])))

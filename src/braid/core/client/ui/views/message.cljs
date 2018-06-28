@@ -3,7 +3,7 @@
     [braid.core.hooks :as hooks]
     [braid.core.client.helpers :as helpers :refer [->color]]
     [braid.core.client.routes :as routes]
-    [braid.core.client.ui.views.pills :refer [tag-pill-view user-pill-view]]
+    [braid.core.client.ui.views.mentions :refer [tag-mention-view user-mention-view]]
     [braid.core.client.ui.views.card-border :refer [card-border-view]]
     [cljsjs.highlight.langs.clojure]
     [cljsjs.highlight.langs.css]
@@ -51,13 +51,13 @@
     :replace (fn [match]
                ;TODO: Subscribe to valid user id
                (if (some? @(subscribe [:user (uuid match)]))
-                 [user-pill-view (uuid match)]
+                 [user-mention-view (uuid match)]
                  [:span "@" match]))}
    :tags
    {:pattern #"#([-0-9a-z]+)"
     :replace (fn [match]
                (if (some? @(subscribe [:tag (uuid match)]))
-                 [tag-pill-view (uuid match)]
+                 [tag-mention-view (uuid match)]
                  [:span "#" match]))}})
 
 (defn re-replace

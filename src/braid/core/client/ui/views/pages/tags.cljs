@@ -1,11 +1,12 @@
 (ns braid.core.client.ui.views.pages.tags
   (:require
-   [braid.core.client.ui.views.pills :refer [tag-pill-view subscribe-button-view]]
-   [braid.core.common.util :refer [valid-tag-name?]]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
-   [reagent.ratom :include-macros true :refer-macros [reaction]])
+   [reagent.ratom :include-macros true :refer-macros [reaction]]
+   [braid.core.client.ui.views.pills :refer [tag-pill-view]]
+   [braid.core.client.ui.views.subscribe-button :refer [subscribe-button-view]]
+   [braid.core.common.util :refer [valid-tag-name?]])
   (:import
    (goog.events KeyCodes)))
 
