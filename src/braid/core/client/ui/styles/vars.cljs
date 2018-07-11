@@ -16,6 +16,8 @@
 
 (def grey-text "#888")
 
+(def darkgrey-text "#333")
+
 (def border-radius (px 3))
 
 (def private-thread-accent-color "#5f7997")
