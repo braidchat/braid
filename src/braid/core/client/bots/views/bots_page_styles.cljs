@@ -24,8 +24,9 @@
       {:margin (em 1)}
       [:img {:margin "0 auto"}]
       [:button
-       (mixins/outline-button {:text-color "black"
+       (mixins/outline-button {:text-color vars/grey-text
                                :border-color "darkgray"
+                               :hover-border-color "lightgray"
                                :hover-text-color "lightgray"})
        [:&.dangerous {:color "red"}]
        [:&.delete
