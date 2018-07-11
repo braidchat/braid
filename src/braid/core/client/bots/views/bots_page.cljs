@@ -132,7 +132,7 @@
         [:div.add-bot
          [:h2 "Add a New Bot"]
          [:p "For information on creating bots, see "
-          [:a {:href "https://github.com/braidchat/braid/blob/master/docs/dev/how-to/developing-bots.md"}
+          [:a {:href "https://github.com/braidchat/braid/blob/master/docs/dev/developing-bots.md"}
            "the documentation"] "."]
          (case @state
 
