@@ -108,7 +108,7 @@
 (defn rss-feed-settings-view
   [group]
   (dispatch [:rss/load-group-feeds (group :id)])
-  [:div.settings.rss-feeds
+  [:div.setting.rss-feeds
    [:h2 "RSS Feeds"]
    [new-rss-feed-view group]
    [existing-feeds-view group]])
