@@ -190,7 +190,7 @@
 
                 KeyCodes.ESC
                 (do (stop-event! e)
-                  (set-force-close!))
+                    (set-force-close!))
 
                 KeyCodes.UP
                 (do (stop-event! e)
