@@ -19,60 +19,16 @@
     (fn [bot]
       [:div.bot
        [:img.avatar {:src (:avatar bot)}]
-       (:nickname bot)
+       (str "/" (:nickname bot))
        (when @admin?
          [:div
-          [:button.dangerous
+          [:button.dangerous.delete
            {:on-click (fn [_]
                         (when (js/confirm "Permanently remove this bot?")
                           (dispatch [:retract-bot {:bot-id (bot :id)}])))}
-           "Delete Bot"]
+           \uf1f8]
           (if-let [info @detailed-info]
             [:div
-             (into
-               [:dl]
-               (mapcat
-                 (fn [[k v]]
-                   [[:dt (name k)]
-                    [:dd (if @editing?
-                           (case k
-                             (:id :user-id :group-id :token) v
-
-                             :notify-all-messages?
-                             [:input {:type "checkbox"
-                                      :checked (boolean (get @edited-info k))
-                                      :on-change
-                                      (fn [e]
-                                        (->> (.. e -target -checked)
-                                             (swap! edited-info assoc k)))}]
-
-                             :avatar
-                             [:div.dragging.new-avatar
-                              {:class (when @dragging? "dragging")}
-                              (when-let [avatar (get @edited-info :avatar)]
-                                [:img {:src avatar}])
-                              [avatar-upload-view
-                               {:on-upload (fn [url] (swap! edited-info assoc :avatar url))
-                                :dragging-change (partial reset! dragging?)}]]
-
-                             (:webhook-url :event-webhook-url)
-                             [:input
-                              {:value (get @edited-info k)
-                               :type "url"
-                               :on-change (fn [e]
-                                            (->> (.. e -target -value)
-                                                 (swap! edited-info assoc k)))}]
-
-                             [:input
-                              {:value (get @edited-info k)
-                               :type "text"
-                               :on-change (fn [e]
-                                            (->> (.. e -target -value)
-                                                 (swap! edited-info assoc k)))}])
-                           (if (= k :notify-all-messages?)
-                             (if v "Yes" "No")
-                             v))]]))
-               info)
              [:button
               {:on-click (fn [_]
                            (when-not @editing?
@@ -92,7 +48,52 @@
                                          (reset! editing? false))))}]))}
                 "Save"])
              [:button {:on-click (fn [_] (reset! detailed-info nil))}
-              "Hide"]]
+              "Hide"]
+             (into
+               [:dl]
+               (mapcat
+                 (fn [[k v]]
+                   [[:dt (name k)]
+                    [:dd (if @editing?
+                           (case k
+                             (:id :user-id :group-id :token) v
+
+                             :notify-all-messages?
+                             [:input {:type "checkbox"
+                                      :checked (boolean (get @edited-info k))
+                                      :on-change
+                                      (fn [e]
+                                        (->> (.. e -target -checked)
+                                            (swap! edited-info assoc k)))}]
+
+                             :avatar
+                             [:div.dragging.new-avatar
+                              {:class (when @dragging? "dragging")}
+                              (when-let [avatar (get @edited-info :avatar)]
+                                [:img {:src avatar}])
+                              [avatar-upload-view
+                               {:on-upload (fn [url] (swap! edited-info assoc :avatar url))
+                                :dragging-change (partial reset! dragging?)}]]
+
+                             (:webhook-url :event-webhook-url)
+                             [:input
+                              {:value (get @edited-info k)
+                               :type "url"
+                               :on-change (fn [e]
+                                            (->> (.. e -target -value)
+                                                (swap! edited-info assoc k)))}]
+
+                             [:input
+                              {:value (get @edited-info k)
+                               :type "text"
+                               :on-change (fn [e]
+                                            (->> (.. e -target -value)
+                                                (swap! edited-info assoc k)))}])
+                           (if (= k :notify-all-messages?)
+                             (if v "Yes" "No")
+                             v))]]))
+               info)
+             ]
             [:button
              {:on-click (fn [_]
                           (dispatch
@@ -100,7 +101,7 @@
                              {:bot-id (bot :id)
                               :on-complete (fn [info]
                                              (reset! detailed-info info))}]))}
-             "See bot config"])])])))
+             "Show Config"])])])))
 
 (defn group-bots-view []
   (let [group-id (subscribe [:open-group-id])
@@ -118,7 +119,7 @@
         admin? (subscribe [:current-user-is-group-admin?] [group-id])
         dragging? (r/atom false)
         error (r/atom nil)
-        new-bot (r/atom {})
+        new-bot (r/atom {:avatar "https://s3.amazonaws.com/chat.leanpixel.com/uploads/5a693df3-5e3b-4a90-9173-c2a335aff863/dice.png"})
         state (r/atom :initial)
         bot-valid? (reaction (and
                                (and (string? (@new-bot :name))
