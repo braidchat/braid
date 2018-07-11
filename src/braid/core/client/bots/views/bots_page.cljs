@@ -119,7 +119,7 @@
         admin? (subscribe [:current-user-is-group-admin?] [group-id])
         dragging? (r/atom false)
         error (r/atom nil)
-        new-bot (r/atom {:avatar "https://s3.amazonaws.com/chat.leanpixel.com/uploads/5a693df3-5e3b-4a90-9173-c2a335aff863/dice.png"})
+        new-bot (r/atom {})
         state (r/atom :initial)
         bot-valid? (reaction (and
                                (and (string? (@new-bot :name))
