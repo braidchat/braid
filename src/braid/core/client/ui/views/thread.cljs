@@ -287,7 +287,8 @@
 
           :on-key-down
           (fn [e]
-            (when (= KeyCodes.ESC (.-keyCode e))
+            (when (and (= KeyCodes.ESC (.-keyCode e))
+                       (string/blank? (thread :new-message)))
               (helpers/stop-event! e)
               (dispatch [:hide-thread {:thread-id (thread :id)}])))
 
