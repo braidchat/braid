@@ -18,7 +18,7 @@
       :padding (em 1)
       :border-radius (px 10)}
      [:button
-      (mixins/outline-button {:text-color vars/grey-text
+      (mixins/outline-button {:text-color vars/darkgrey-text
                               :hover-text-color "lightgray"
                               :border-color "darkgray"
                               :hover-border-color "lightgray"})
