@@ -2,7 +2,7 @@
   (:require
    [braid.core.client.ui.styles.vars :as vars]
    [garden.arithmetic :as m]
-   [garden.units :refer [px em]]))
+   [garden.units :refer [px em rem]]))
 
 (def flex
   {:display #{:flex :-webkit-flex}})
@@ -131,3 +131,31 @@
    :left 0
    :bottom 0
    :width width})
+
+
+(defn settings-style []
+  [:&
+   [:>.content
+    flex
+    {:flex-direction "column"
+     :align-items "center"}
+    [:>.setting
+     {:background-color "white"
+      :font-size (rem 0.9)
+      :width "50%"
+      :margin (rem 1)
+      :padding (rem 1)
+      :border-radius (px 10)}
+     [:button
+      (outline-button {:text-color vars/darkgrey-text
+                              :hover-text-color "lightgray"
+                              :border-color "darkgray"
+                              :hover-border-color "lightgray"})
+      [:&:disabled
+       {:background-color "darkgray"
+        :color "gray"
+        :border-color "darkgray"}]]
+     [:&.avatar
+      [:>.upload
+       [:>.uploading-indicator
+        {:display "inline-block"}]]]]]])
