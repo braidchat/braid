@@ -5,4 +5,5 @@
    [garden.units :refer [rem em px]]))
 
 (def me-page
-  [:>.page.me])
+  [:>.page.me
+   (mixins/settings-style)])
