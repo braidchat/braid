@@ -34,13 +34,13 @@
   [group]
   (let [dragging? (r/atom false)]
     (fn [group]
-      [:div.setting.avatar {:class (when @dragging? "dragging")}
+      [:div.setting.avatar
        [:h2 "Group Avatar"]
        [:div
         (if (group :avatar)
           [:img {:src (group :avatar)}]
           [:p "Avatar not set"])]
-       [:div.dragging
+       [:div {:class (when @dragging? "dragging")}
         [avatar-upload-view {:on-upload (fn [url]
                                           (dispatch [:set-group-avatar
                                                      {:group-id (group :id)
