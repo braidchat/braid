@@ -132,6 +132,16 @@
    :bottom 0
    :width width})
 
+(defn settings-button []
+  [:&
+   (outline-button {:text-color vars/darkgrey-text
+                    :hover-text-color "lightgray"
+                    :border-color "darkgray"
+                    :hover-border-color "lightgray"})
+   [:&:disabled
+    {:background-color "darkgray"
+     :color "gray"
+     :border-color "darkgray"}]])
 
 (defn settings-style []
   [:&
@@ -146,15 +156,7 @@
       :margin (rem 1)
       :padding (rem 1)
       :border-radius (px 10)}
-     [:button
-      (outline-button {:text-color vars/darkgrey-text
-                              :hover-text-color "lightgray"
-                              :border-color "darkgray"
-                              :hover-border-color "lightgray"})
-      [:&:disabled
-       {:background-color "darkgray"
-        :color "gray"
-        :border-color "darkgray"}]]
+     [:button (settings-button)]
      [:&.avatar
       [:>.upload
        [:>.uploading-indicator
