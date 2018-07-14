@@ -2,15 +2,20 @@
   (:require
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
-   [garden.units :refer [rem em]]))
+   [garden.units :refer [px rem em]]))
 
 (def tags-page
   [:>.page.tags
-
+   [:>.title
+    {:font-size "large"}]
    [:>.content
-
+    (mixins/settings-container-style)
+    [:>.new-tag
+     (mixins/settings-item-style)
+     [:input.error
+      {:color "red"}]]
     [:>.tag-list
-
+     (mixins/settings-item-style)
      [:>.tags
       {:margin-top (em 1)
        :color vars/grey-text}

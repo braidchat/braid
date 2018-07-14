@@ -34,23 +34,34 @@
 (defn new-tag-view
   [data]
   (let [error (r/atom nil)
-        set-error! (fn [err?] (reset! error err?))]
+        set-error! (fn [err?] (reset! error err?))
+        text (r/atom "")]
     (fn [data]
-      [:input.new-tag
-       {:class (when error "error")
-        :on-key-up
-        (fn [e]
-          (let [text (.. e -target -value)]
-            (set-error! (not (valid-tag-name? text)))))
-        :on-key-down
-        (fn [e]
-          (when (= KeyCodes.ENTER e.keyCode)
-            (let [text (.. e -target -value)]
-              (dispatch [:create-tag {:tag {:name text
-                                            :group-id (data :group-id)}}]))
-            (.preventDefault e)
-            (aset (.. e -target) "value" "")))
-        :placeholder "New Tag"}])))
+      [:div.new-tag
+       [:h2 "Create a new tag"]
+       [:input
+        {:class (when @error "error")
+         :value @text
+         :on-change (fn [e]
+                      (reset! text (.. e -target -value))
+                      (when-not (string/blank? @text)
+                        (set-error! (not (valid-tag-name? @text)))) )
+         :on-key-down
+         (fn [e]
+           (when (= KeyCodes.ENTER e.keyCode)
+             (dispatch [:create-tag {:tag {:name @text
+                                           :group-id (data :group-id)}}])
+             (.preventDefault e)
+             (reset! text "")))
+         :placeholder "New Tag"}]
+       [:button
+        {:on-click (fn [_]
+                     (when-not (string/blank? @text)
+                       (dispatch [:create-tag {:tag {:name @text
+                                                     :group-id (data :group-id)}}])
+                       (reset! text "")))
+         :disabled (or @error (string/blank? @text))}
+        "Create Tag"]])))
 
 (defn delete-tag-view
   [tag]
@@ -97,7 +108,7 @@
                                 (remove (fn [t] (subscribed-to? (t :id))))))]
     (fn []
       [:div.page.tags
-       [:div.title "Tags"]
+       [:div.title "Manage Tag Subscriptions"]
 
        [:div.content
         [new-tag-view {:group-id @group-id}]
