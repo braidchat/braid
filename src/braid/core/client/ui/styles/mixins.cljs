@@ -143,21 +143,31 @@
      :color "gray"
      :border-color "darkgray"}]])
 
+(defn settings-item-style
+  []
+  [:&
+   {:background-color "white"
+    :font-size (rem 0.9)
+    :width "50%"
+    :margin (rem 1)
+    :padding (rem 1)
+    :border-radius (px 10)}
+   [:button (settings-button)]
+   [:&.avatar
+    [:>.upload
+     [:>.uploading-indicator
+      {:display "inline-block"}]]]])
+
+(defn settings-container-style
+  []
+  [:&
+   flex
+   {:flex-direction "column"
+    :align-items "center"}])
+
 (defn settings-style []
   [:&
    [:>.content
-    flex
-    {:flex-direction "column"
-     :align-items "center"}
+    (settings-container-style)
     [:>.setting
-     {:background-color "white"
-      :font-size (rem 0.9)
-      :width "50%"
-      :margin (rem 1)
-      :padding (rem 1)
-      :border-radius (px 10)}
-     [:button (settings-button)]
-     [:&.avatar
-      [:>.upload
-       [:>.uploading-indicator
-        {:display "inline-block"}]]]]]])
+     (settings-item-style)]]])
