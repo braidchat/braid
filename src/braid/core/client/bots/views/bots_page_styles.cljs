@@ -7,8 +7,7 @@
 (def bots-page
   [:>.page.bots
    [:>.title
-    {:font-size "large"
-     :text-transform "uppercase"}]
+    {:font-size "large"}]
    [:>.content
     {:background-color "white"
      :color "black"}
