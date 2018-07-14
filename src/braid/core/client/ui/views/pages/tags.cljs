@@ -61,23 +61,22 @@
   [tag]
   (let [group-id (subscribe [:open-group-id])
         admin? (subscribe [:current-user-is-group-admin?] [group-id])]
-    (fn [tag]
-      [:div.tag-info
-       [:span.count.threads-count
-        (tag :threads-count)]
-       [:span.count.subscribers-count
-        (tag :subscribers-count)]
-       [tag-pill-view (tag :id)]
-       [subscribe-button-view (tag :id)]
-       [:div.description
-        [:p
-         (if (string/blank? (tag :description))
-           "One day, a tag description will be here."
-           (tag :description))]
-        (when @admin?
-          [:div
-           [edit-description-view tag]
-           [delete-tag-view tag]])]])))
+    [:div.tag-info
+     [:span.count.threads-count
+      (tag :threads-count)]
+     [:span.count.subscribers-count
+      (tag :subscribers-count)]
+     [:span.tag [tag-pill-view (tag :id)]]
+     [subscribe-button-view (tag :id)]
+     [:div.description
+      [:p
+       (if (string/blank? (tag :description))
+         "One day, a tag description will be here."
+         (tag :description))]
+      (when @admin?
+        [:div
+         [edit-description-view tag]
+         [delete-tag-view tag]])]]))
 
 (defn tags-page-view
   []
