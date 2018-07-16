@@ -28,7 +28,6 @@
        [:div.warning "New posts will be posted as coming from you"]
        (when @error [:div.error @error])
        [:label [:span "Feed URL"]
-        [:br]
         [:input {:type "url"
                  :placeholder "https://foo.bar/rss.xml"
                  :value (:feed-url @new-feed)
@@ -45,6 +44,7 @@
                                   (reset! error "Couldn't fetch feed from URL")))]))}]
         (when @checked-feed?
           [:span {:style {:color "green"}} "Feed looks good"])]
+       [:br]
        [:label [:span "Tags to apply to posts"]
         [:br]
         ;; Annoying React thing: multiple select doesn't seem to be
@@ -73,6 +73,7 @@
            " private feed-reader, or you want to manually vet items before tagging them."]
           [:p "Otherwise, you can select one or more of the above tags"
            " to allow others to automatically see them."]])
+       [:br]
        [:input {:type "submit" :value "Add"
                 :disabled (or (string/blank? (:feed-url @new-feed))
                               (not @checked-feed?))}]])))
@@ -87,10 +88,10 @@
                ^{:key (feed :id)}
                [:tr
                 [:td (feed :feed-url)]
-                [:td [pills/user-pill-view (feed :user-id)]]
+                [:td [:span.user [pills/user-pill-view (feed :user-id)]]]
                 [:td (doall (for [tag-id (feed :tag-ids)]
                               ^{:key tag-id}
-                              [pills/tag-pill-view tag-id]))]
+                              [:span.tag [pills/tag-pill-view tag-id]]))]
                 [:td [:button
                       {:on-click (fn [_] (dispatch [:rss/force-feed-run (feed :id)]))}
                       "Check Now"]]
