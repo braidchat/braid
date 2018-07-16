@@ -13,27 +13,27 @@
   []
   (let [invitations (subscribe [:invitations])]
     (fn []
-        [:div
-         [:h2 "Invitations"]
-         (if (seq @invitations)
-           [:ul.invitations
-            (for [invite @invitations]
-              ^{:key (invite :id)}
-              [:li.invite
-               "Group "
-               [:strong (invite :group-name)]
-               " from "
-               [:strong (invite :inviter-email)]
-               [:br]
-               [:button {:on-click
-                         (fn [_]
-                           (dispatch [:accept-invite invite]))}
-                "Accept"]
-               [:button {:on-click
-                         (fn [_]
-                           (dispatch [:decline-invite invite]))}
-                "Decline"]])]
-           [:div "No invitations."])])))
+      [:div.invitations
+       [:h2 "Invitations"]
+       (if (seq @invitations)
+         [:ul.invitations
+          (for [invite @invitations]
+            ^{:key (invite :id)}
+            [:li.invite
+             "Group "
+             [:strong (invite :group-name)]
+             " from "
+             [:strong (invite :inviter-email)]
+             [:br]
+             [:button {:on-click
+                       (fn [_]
+                         (dispatch [:accept-invite invite]))}
+              "Accept"]
+             [:button {:on-click
+                       (fn [_]
+                         (dispatch [:decline-invite invite]))}
+              "Decline"]])]
+         [:div "No invitations."])])))
 
 (defn- public-group-view
   [group]

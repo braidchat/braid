@@ -8,8 +8,11 @@
   [:.page.group-explore
 
    [:>.content
-
+    (mixins/settings-container-style)
+    [:>.invitations
+     (mixins/settings-item-style)]
     [:>.public-groups
+     (mixins/settings-item-style)
 
      [:>.active
       :>.stale
