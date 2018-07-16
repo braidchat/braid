@@ -1,7 +1,8 @@
 (ns braid.core.client.gateway.helper-views
   (:require
    [reagent.core :as r]
-   [re-frame.core :refer [subscribe dispatch]]))
+   [re-frame.core :refer [subscribe dispatch]]
+   [reagent.ratom :refer-macros [run!]]))
 
 (defn with-ns [ns n]
   (keyword (name ns) (name n)))
@@ -14,6 +15,7 @@
         on-change-transform (or (opts :on-change-transform) identity)
         value-atom (r/atom value)]
     (fn [opts]
+      (run! (reset! value-atom @(subscribe [(with-ns (opts :subs-ns) :field-value) field-id])))
       [:div.option
        {:class (str (opts :class) " " (name status))}
        [:h2 (opts :title)]
