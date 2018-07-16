@@ -67,7 +67,7 @@
                                             (swap! edited-info assoc k)))}]
 
                              :avatar
-                             [:div.dragging.new-avatar
+                             [:div.new-avatar
                               {:class (when @dragging? "dragging")}
                               (when-let [avatar (get @edited-info :avatar)]
                                 [:img {:src avatar}])
@@ -92,8 +92,7 @@
                            (if (= k :notify-all-messages?)
                              (if v "Yes" "No")
                              v))]]))
-               info)
-             ]
+               info)]
             [:button
              {:on-click (fn [_]
                           (dispatch
@@ -107,12 +106,14 @@
   (let [group-id (subscribe [:open-group-id])
         group-bots (subscribe [:group-bots] [group-id])]
     (fn []
-      [:div.bots-list
+      [:div.bots
+       [:h2 "Group Bots"]
        (if (empty? @group-bots)
-         [:h2 "No bots in this group"]
-         (doall (for [b @group-bots]
-                  ^{:key (:id b)}
-                  [bot-view b])))])))
+         [:h3 "No bots in this group"]
+         [:div.bots-list
+          (doall (for [b @group-bots]
+                   ^{:key (:id b)}
+                   [bot-view b]))])])))
 
 (defn new-bot-view []
   (let [group-id (subscribe [:open-group-id])
@@ -179,7 +180,7 @@
                                    (->> (.. e -target -checked)
                                         (swap! new-bot assoc :notify-all-messages?)))}]]
             [:br]
-            [:div.dragging.new-avatar {:class (when @dragging? "dragging")}
+            [:div.new-avatar {:class (when @dragging? "dragging")}
              (when-let [avatar (@new-bot :avatar)]
                [:img {:src avatar}])
              [avatar-upload-view {:on-upload (fn [url] (swap! new-bot assoc :avatar url))

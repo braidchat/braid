@@ -9,41 +9,42 @@
    [:>.title
     {:font-size "large"}]
    [:>.content
-    {:background-color "white"
-     :color "black"}
+    (mixins/settings-container-style)
 
-    [:>.bots-list
-     mixins/flex
-     {:flex-direction "row"
-      :flex-wrap "wrap"
-      :align-content "space-between"
-      :align-items "baseline"}
+    [:>.bots
+     (mixins/settings-item-style)
+     [:>.bots-list
+      mixins/flex
+      {:flex-direction "row"
+       :flex-wrap "wrap"
+       :align-content "space-between"
+       :align-items "baseline"}
 
-     [:>.bot
-      {:margin (em 1)}
-      [:img {:margin "0 auto"}]
-      [:button
-       (mixins/outline-button {:text-color vars/grey-text
-                               :border-color "darkgray"
-                               :hover-border-color "lightgray"
-                               :hover-text-color "lightgray"})
-       [:&.dangerous {:color "red"}]
-       [:&.delete
-        {:font-family "fontawesome"}]]
+      [:>.bot
+       {:margin (em 1)}
+       [:img {:margin "0 auto"}]
+       [:button
+        (mixins/outline-button {:text-color vars/grey-text
+                                :border-color "darkgray"
+                                :hover-border-color "lightgray"
+                                :hover-text-color "lightgray"})
+        [:&.dangerous {:color "red"}]
+        [:&.delete
+         {:font-family "fontawesome"}]]
 
-      [:>.avatar
-       {:width (rem 4)
-        :height (rem 4)
-        :display "block"
-        :border-radius (rem 1)
-        :margin-bottom vars/pad}]]]
+       [:>.avatar
+        {:width (rem 4)
+         :height (rem 4)
+         :display "block"
+         :border-radius (rem 1)
+         :margin-bottom vars/pad}]]]]
 
     [:>.add-bot
+     (mixins/settings-item-style)
      {:max-width "50%"
       :margin "0 auto"}
      [:form
       mixins/flex
-      {:flex-direction "column"
-       :align-items "center"}
+      {:flex-direction "column"}
       [:.new-avatar>img
        {:max-width "150px"}]]]]])
