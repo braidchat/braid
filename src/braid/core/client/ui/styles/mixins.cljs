@@ -152,6 +152,8 @@
     :margin (rem 1)
     :padding (rem 1)
     :border-radius (px 10)}
+   [:>h2
+    {:margin 0}]
    [:button (settings-button)]
    [:&.avatar
     [:>.upload
