@@ -14,12 +14,16 @@
     (fn [group]
       [:div.setting.intro
        [:h2 "Intro Message"]
-       [:p "Current intro message"]
-       [:blockquote (:intro group)]
+       (if (:intro group)
+         [:div [:p "Current intro message"]
+          [:blockquote (:intro group)]]
+         [:p "No intro message set"])
        [:p "Set new intro"]
        [:textarea {:placeholder "New message"
                    :value @new-message
+                   :style {:width "100%"}
                    :on-change (fn [e] (reset! new-message (.. e -target -value)))}]
+       [:br]
        [:button {:on-click (fn [_]
                              (dispatch [:set-group-intro {:group-id (group :id)
                                                           :intro @new-message}])
@@ -30,17 +34,18 @@
   [group]
   (let [dragging? (r/atom false)]
     (fn [group]
-      [:div.setting.avatar {:class (when @dragging? "dragging")}
+      [:div.setting.avatar
        [:h2 "Group Avatar"]
        [:div
         (if (group :avatar)
           [:img {:src (group :avatar)}]
           [:p "Avatar not set"])]
-       [avatar-upload-view {:on-upload (fn [url]
-                                         (dispatch [:set-group-avatar
-                                                    {:group-id (group :id)
-                                                     :avatar url}]))
-                            :dragging-change (partial reset! dragging?)}]])))
+       [:div {:class (when @dragging? "dragging")}
+        [avatar-upload-view {:on-upload (fn [url]
+                                          (dispatch [:set-group-avatar
+                                                     {:group-id (group :id)
+                                                      :avatar url}]))
+                             :dragging-change (partial reset! dragging?)}]]])))
 
 (defn publicity-view
   [group]

@@ -28,7 +28,7 @@
 
    [:>.content
     {:padding vars/pad
-     :color vars/grey-text}
+     :color vars/darkgrey-text}
 
     [:>.description
      {:width vars/card-width

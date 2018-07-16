@@ -61,8 +61,8 @@
   [:&
 
    [:&.dragging
-    {:background-color "gray"
-     :border [[(px 5) "dashed" "black"]]}]
+    {:background-color "lightgray"
+     :border [[(px 5) "dashed" "darkgray"]]}]
 
    [:>.uploading-indicator
     (mixins/fontawesome \uf110)

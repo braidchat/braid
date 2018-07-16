@@ -44,10 +44,12 @@
            "this link to always be able to join, even if they get removed from "
            "the group. Prefer to use one of the expiring links instead!"])
         (when @invite-link
-          [:input {:type "text"
-                   :on-focus (fn [e] (.. e -target select))
-                   :read-only true
-                   :value @invite-link}])]
+          [:div.invite-link
+           [:input
+            {:type "text"
+             :on-focus (fn [e] (.. e -target select))
+             :read-only true
+             :value @invite-link}]])]
        [:div.by-email
         [:h2 "Invite By Email"]
         (if @collapsed?
@@ -69,8 +71,8 @@
                                                   :invitee-email @invitee-email}])
                               (set-collapse! true)
                               (set-invitee-email! ""))}
-            "invite"]
+            "Send Invite"]
            [:button.close {:on-click
                            (fn [_]
                              (set-collapse! true))}
-            "cancel"]])]])))
+            "Cancel"]])]])))

@@ -77,7 +77,7 @@
 
 (defn extra-emoji-settings-view
   [group]
-  [:div.settings.custom-emoji
+  [:div.setting.custom-emoji
    [:h2 "Custom Emoji"]
    [new-custom-emoji-view]
    (if-let [emojis (seq @(subscribe [:custom-emoji/group-emojis (group :id)]))]

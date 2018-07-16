@@ -15,8 +15,9 @@
    [braid.core.client.ui.styles.message]
    [braid.core.client.ui.styles.misc]
    [braid.core.client.ui.styles.page]
-   [braid.core.client.ui.styles.pages.me]
+   [braid.core.client.ui.styles.pages.global-settings]
    [braid.core.client.ui.styles.pages.inbox]
+   [braid.core.client.ui.styles.pages.me]
    [braid.core.client.ui.styles.pages.search]
    [braid.core.client.ui.styles.pages.tags]
    [braid.core.client.ui.styles.pills]
@@ -95,6 +96,7 @@
                  braid.core.client.invites.views.invite-page-styles/invite-page
                  braid.core.client.bots.views.bots-page-styles/bots-page
                  braid.core.client.ui.styles.pages.search/search-user-card
+                 braid.core.client.ui.styles.pages.global-settings/global-settings-page
 
                  [:>.page
                   (braid.core.client.ui.styles.misc/threads vars/pad)

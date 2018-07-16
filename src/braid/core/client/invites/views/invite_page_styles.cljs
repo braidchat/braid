@@ -5,4 +5,8 @@
    [garden.units :refer [rem em px]]))
 
 (def invite-page
-  [:>.page.invite])
+  [:>.page.invite
+   [:>.content
+    (mixins/settings-container-style)
+    [:>.invite
+     (mixins/settings-item-style)]]])
