@@ -616,9 +616,9 @@
   (fn [{state :db} [_ {:keys [group-id group-name]}]]
     {:dispatch-n
      [[:braid.notices/display!
-       (keyword "left-group" group-id)
-       (str "You have been removed from " group-name)
-       :info]
+       [(keyword "left-group" group-id)
+        (str "You have been removed from " group-name)
+        :info]]
       (when (= group-id (state :open-group-id))
         [:redirect-from-root])]
      :db
