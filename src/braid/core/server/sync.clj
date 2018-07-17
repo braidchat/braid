@@ -254,7 +254,10 @@
   (let [user-tags (tag/tag-ids-for-user user-id)
         filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
         thread-ids (filter (partial thread/user-can-see-thread? user-id) ?data)
-        threads (map filter-tags (thread/threads-by-id thread-ids))]
+        threads (into ()
+                      (comp (map filter-tags)
+                            (map #(thread/thread-add-last-open-at % user-id)))
+                      (thread/threads-by-id thread-ids))]
     (when ?reply-fn
       (?reply-fn {:threads threads}))))
 
