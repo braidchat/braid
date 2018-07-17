@@ -13,9 +13,9 @@
 (defn edit-description-view
   [tag]
   (let [editing? (r/atom false)
-        new-description (r/atom "")]
+        new-description (r/atom (or (:description tag) ""))]
     (fn [tag]
-      [:div.description-edit
+      [:span.description-edit
        (if @editing?
          [:div
           [:textarea {:placeholder "New description"
@@ -27,7 +27,12 @@
                       (swap! editing? not)
                       (dispatch [:set-tag-description {:tag-id (tag :id)
                                                        :description @new-description}]))}
-           "Save"]]
+           "Save"]
+          [:button {:on-click (fn [_]
+                                (swap! editing? not)
+                                (reset! new-description
+                                        (or (:description tag) "")))}
+           "Cancel"]]
          [:button {:on-click (fn [_] (swap! editing? not))}
           "Edit description"])])))
 
@@ -65,8 +70,8 @@
 
 (defn delete-tag-view
   [tag]
-  [:button {:on-click (fn [_] (dispatch [:remove-tag {:tag-id (tag :id)}]))}
-   "Delete Tag"])
+  [:button.delete {:on-click (fn [_] (dispatch [:remove-tag {:tag-id (tag :id)}]))}
+   \uf1f8])
 
 (defn tag-info-view
   [tag]

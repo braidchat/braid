@@ -23,9 +23,20 @@
       [:>.tag-info
        {:margin-bottom (em 1)}
 
+       [:.description-edit
+        [:textarea
+         {:display "block"
+          :width "100%"}]]
+
        [:>.button
         mixins/pill-button
         {:margin-left (em 1)}]
+
+       [:button
+        {:margin-right (rem 0.5)}
+        [:&.delete
+         {:color "red"
+          :font-family "fontawesome"}]]
 
        [:>.count
         {:margin-right (em 0.5)}
