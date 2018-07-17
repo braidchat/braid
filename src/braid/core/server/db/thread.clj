@@ -3,6 +3,7 @@
    [braid.core.server.db :as db]
    [braid.core.server.db.common :refer :all]
    [braid.core.server.db.tag :as tag]
+   [braid.core.server.db.group]
    [clj-time.coerce :refer [to-date-time to-long]]
    [clj-time.core :as t]
    [clojure.set :refer [difference]]
@@ -75,16 +76,17 @@
 (defn user-can-see-thread?
   [user-id thread-id]
   (or
-    ;user can see the thread if it's a new (i.e. not yet in the database) thread...
+    ;; user can see the thread if it's a new (i.e. not yet in the
+    ;; database) thread...
     (nil? (d/entity (db/db) [:thread/id thread-id]))
-    ; ...or they're already subscribed to the thread...
+    ;; ...or they're already subscribed to the thread...
     (contains? (set (users-subscribed-to-thread thread-id)) user-id)
-    ; ...or they're mentioned in the thread
-    ; TODO: is it possible for them to be mentioned but not subscribed?
+    ;; ...or they're mentioned in the thread
+    ;; TODO: is it possible for them to be mentioned but not subscribed?
     (contains? (-> (d/pull (db/db) [:thread/mentioned] [:thread/id thread-id])
                    :thread/mentioned set)
                user-id)
-    ; ...or they are in the group of any tags on the thread
+    ;; ...or they are in the group of any tags on the thread
     (seq (d/q '[:find (pull ?group [:group/id])
                 :in $ ?thread-id ?user-id
                 :where
@@ -93,7 +95,22 @@
                 [?tag :tag/group ?group]
                 [?group :group/user ?user]
                 [?user :user/id ?user-id]]
-              (db/db) thread-id user-id))))
+              (db/db) thread-id user-id))
+    ;; ...or they're in the group & already have a message in the thread
+    ;; this is quite the edge case -- can happen if a user creates a
+    ;; thread, tags it, leaves the group, then re-joins it & deletes
+    ;; the tag
+    (-> (d/q '[:find ?m
+               :in $ ?user-id ?thread-id
+               :where
+               [?u :user/id ?user-id]
+               [?t :thread/id ?thread-id]
+               [?t :thread/group ?g]
+               [?g :group/user ?u]
+               [?m :message/thread ?t]
+               [?m :message/user ?u]]
+             (db/db) user-id thread-id)
+        seq boolean)))
 
 (defn thread-has-tags?
   [thread-id]
