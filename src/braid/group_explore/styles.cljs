@@ -22,7 +22,12 @@
       [:>a.group
        {:color "white"
         :padding "0.5em"
-        :margin "0.2em"}
+        :margin "0.2em"
+        :border-radius (px 5)
+        :text-decoration "none"}
+       [:&:hover
+        {:color "#ccc"
+         :opacity 0.8}]
 
        [:>.name
         {:font-size "large"}]
