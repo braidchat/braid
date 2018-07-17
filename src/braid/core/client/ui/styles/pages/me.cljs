@@ -6,4 +6,9 @@
 
 (def me-page
   [:>.page.me
-   (mixins/settings-style)])
+   (mixins/settings-style)
+   [:>.content
+    [:>.setting
+     [:form.password
+      [:label
+       {:display "block"}]]]]])
