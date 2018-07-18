@@ -465,9 +465,9 @@
                  :uploaded-at (java.util.Date.)
                  :uploader-id user-id)]
     (when (and (util/valid? schema/Upload upload)
-               (group/user-in-group?
-                 user-id
-                 (thread/thread-group-id (upload :thread-id))))
+               (let [thread-group-id (thread/thread-group-id (upload :thread-id))]
+                 (or (nil? thread-group-id) (= thread-group-id (upload :group-id))))
+               (group/user-in-group? user-id (upload :group-id)))
       (db/run-txns! (upload/create-upload-txn upload)))))
 
 (defmethod event-msg-handler :braid.server/uploads-in-group

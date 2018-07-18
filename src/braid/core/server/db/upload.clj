@@ -34,14 +34,20 @@
 ;; Transactions
 
 (defn create-upload-txn
-  [{:keys [id url thread-id uploader-id uploaded-at]}]
-  (create-entity-txn
-    {:upload/id id
-     :upload/url url
-     :upload/thread [:thread/id thread-id]
-     :upload/uploaded-by [:user/id uploader-id]
-     :upload/uploaded-at uploaded-at}
-    db->upload))
+  [{:keys [id url thread-id group-id uploader-id uploaded-at]}]
+  (let [thread (d/tempid :entities)]
+    (concat
+      [{:db/id thread
+        :thread/id thread-id
+        :thread/group [:group/id group-id]}]
+      [[:db/add [:user/id uploader-id] :user/subscribed-thread thread]]
+      (create-entity-txn
+        {:upload/id id
+         :upload/url url
+         :upload/thread thread
+         :upload/uploaded-by [:user/id uploader-id]
+         :upload/uploaded-at uploaded-at}
+        db->upload))))
 
 (defn retract-upload-txn
   [upload-id]
