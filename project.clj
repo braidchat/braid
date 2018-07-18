@@ -18,7 +18,6 @@
                  [clj-time "0.12.0"]
                  [instaparse "1.4.2"]
                  [com.taoensso/carmine "2.13.1" :exclusions [com.taoensso/encore]]
-                 [clj-aws-s3 "0.3.10" :exclusions [joda-time org.apache.httpcomponents/httpclient com.fasterxml.jackson.core/jackson-core]]
                  [image-resizer "0.1.9"]
                  [clojurewerkz/quartzite "2.0.0"]
                  [inliner "0.1.0"]
