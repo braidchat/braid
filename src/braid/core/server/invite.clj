@@ -73,6 +73,8 @@
         api-domain (:api-domain config)]
     (cljstache/render-resource "templates/register_page.html.mustache"
                                {:invitee_email (invite :invitee-email)
+                                :inviter (invite :inviter-email)
+                                :group (invite :group-name)
                                 :api_domain api-domain
                                 :token token
                                 :invite_id (invite :id)
