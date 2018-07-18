@@ -1,6 +1,5 @@
 (ns braid.core.client.bots.views.bots-page
   (:require
-    [braid.core.client.ui.views.pills :refer [user-pill-view]]
     [braid.core.client.ui.views.upload :refer [avatar-upload-view]]
     [braid.core.common.util :refer [bot-name-re]]
     [clojure.string :as string]
