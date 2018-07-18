@@ -145,7 +145,6 @@
                                   :init-ns braid.dev.core}
                    :dependencies [[com.datomic/datomic-free "0.9.5201"
                                    :exclusions [joda-time
-                                                com.amazonaws/aws-java-sdk
                                                 com.google.guava/guava
                                                 org.slf4j/slf4j-api]]
                                   [figwheel-sidecar "0.5.16"
@@ -158,7 +157,6 @@
              :prod {:global-vars {*assert* false}
                     :dependencies [[com.datomic/datomic-pro "0.9.5201"
                                     :exclusions [joda-time
-                                                 com.amazonaws/aws-java-sdk
                                                  com.google.guava/guava]]
                                    [org.postgresql/postgresql "9.3-1103-jdbc4"]]}
              :cider [:dev {:dependencies [[com.cemerick/piggieback "0.2.1"]]
