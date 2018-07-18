@@ -7,48 +7,53 @@
 
 (defn user-hover-card-view
   [user-id]
-  (let [user (subscribe [:user user-id])
-        open-group-id (subscribe [:open-group-id])
-        admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
-        viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
+  (if-let [user @(subscribe [:user user-id])]
+    (let [open-group-id (subscribe [:open-group-id])
+          admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
+          viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
+      [:div.user.card
+
+       [:div.header {:style {:background-color (helpers/->color user-id)}}
+        [user-pill-view user-id]
+        [:div.status
+         (user :status)
+         #_[:div "time since last online"]]
+        [:div.badges
+         (when @admin?
+           [:div.admin {:title "admin"}])]
+        [:img.avatar {:src (user :avatar)}]]
+
+       [:div.info
+        [:div.local-time (helpers/format-date (js/Date.))]
+        #_[:div.since "member since"]
+        [:div.description
+         #_"If I had a profile, it would be here"]]
+
+       [:div.actions
+        #_[:a.pm "PM"]
+        #_[:a.mute "Mute"]
+
+        [search-button-view (str "@" (user :nickname))]
+
+        (when (and @viewer-admin? (not= user-id @(subscribe [:user-id])))
+          [:button.ban
+           {:on-click
+            (fn [_]
+              (dispatch [:remove-from-group
+                         {:group-id @open-group-id
+                          :user-id user-id}]))}
+           "Kick"])
+
+        (when (and @viewer-admin? (not @admin?))
+          [:button.make-admin
+           {:on-click
+            (fn [_]
+              (dispatch [:make-admin
+                         {:group-id @open-group-id
+                          :user-id user-id}]))}
+           "Make Admin"])]])
+
     [:div.user.card
-
      [:div.header {:style {:background-color (helpers/->color user-id)}}
-      [user-pill-view user-id]
-      [:div.status
-       (@user :status)
-       #_[:div "time since last online"]]
-      [:div.badges
-       (when @admin?
-         [:div.admin {:title "admin"}])]
-      [:img.avatar {:src (@user :avatar)}]]
-
-     [:div.info
-      [:div.local-time (helpers/format-date (js/Date.))]
-      #_[:div.since "member since"]
-      [:div.description
-       #_"If I had a profile, it would be here"]]
-
-     [:div.actions
-      #_[:a.pm "PM"]
-      #_[:a.mute "Mute"]
-
-      [search-button-view (str "@" (@user :nickname))]
-
-      (when (and @viewer-admin? (not= user-id @(subscribe [:user-id])))
-        [:button.ban
-         {:on-click
-          (fn [_]
-            (dispatch [:remove-from-group
-                       {:group-id @open-group-id
-                        :user-id user-id}]))}
-         "Kick"])
-
-      (when (and @viewer-admin? (not @admin?))
-        [:button.make-admin
-         {:on-click
-          (fn [_]
-            (dispatch [:make-admin
-                       {:group-id @open-group-id
-                        :user-id user-id}]))}
-         "Make Admin"])]]))
+      [user-pill-view user-id]]
+     [:div.info "No longer in group"]]))

@@ -17,11 +17,13 @@
 
 (defn user-pill-view
   [user-id]
-  (let [user (subscribe [:user user-id])]
-    (let [color (helpers/->color user-id)]
-      [:span.pill {:class (str (case (@user :status) :online "on" "off"))
-                   :tab-index -1
-                   :style {:background-color color
-                           :color color
-                           :border-color color}}
-       [:span.name (str "@" (@user :nickname))]])))
+  (let [user (or @(subscribe [:user user-id])
+                 {:nickname "DELETED"
+                  :status :offline})
+        color (helpers/->color user-id)]
+    [:span.pill {:class (str (case (user :status) :online "on" "off"))
+                 :tab-index -1
+                 :style {:background-color color
+                         :color color
+                         :border-color color}}
+     [:span.name (str "@" (user :nickname))]]))
