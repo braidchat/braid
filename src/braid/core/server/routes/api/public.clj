@@ -107,11 +107,9 @@
     (edn-response (not (group/group-with-slug-exists? (get-in req [:params :slug])))))
 
   ; accept an email invite to join a group
-  (POST "/register" [token invite_id password email now hmac :as req]
+  (POST "/register" [token invite_id email now hmac :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
-        (string/blank? password) (assoc fail :body "Must provide a password")
-
         (not (invites/verify-hmac hmac (str now token invite_id email)))
         (assoc fail :body "Invalid HMAC")
 
@@ -122,20 +120,17 @@
         (let [invite (invitation/invite-by-id (java.util.UUID/fromString invite_id))]
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
-            (let [user-id (db/uuid)
-                  referer (get-in req [:headers "referer"] (config :site-url))
-                  [proto _ referrer-domain] (string/split referer #"/")]
+            (let [user-id (db/uuid)]
               (do
                 (db/run-txns!
                   (user/create-user-txn {:id user-id
-                                         :email email
-                                         :password password}))
+                                         :email email}))
                 (events/user-join-group! user-id (invite :group-id))
                 (db/run-txns!
                   (concat
                     (invitation/retract-invitation-txn (invite :id)))))
               {:status 302
-               :headers {"Location" (str proto "//" referrer-domain)}
+               :headers {"Location" (config :site-url)}
                :session (assoc (req :session) :user-id user-id)
                :body ""}))))))
 
