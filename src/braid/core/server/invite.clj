@@ -1,6 +1,5 @@
 (ns braid.core.server.invite
   (:require
-   [aws.sdk.s3 :as s3]
    [braid.core.server.cache :refer [cache-set! cache-get cache-del!]]
    [braid.core.server.conf :refer [config]]
    [braid.core.server.crypto :refer [hmac constant-comp random-nonce]]
@@ -86,27 +85,6 @@
     (params :hmac)
     (hmac (config :hmac-secret)
           (str (params :now) (params :token) (params :invite_id) (params :email)))))
-
-(def avatar-size [128 128])
-
-(defn upload-avatar
-  [f]
-  (let [creds {:access-key (config :aws-access-key)
-               :secret-key (config :aws-secret-key)}
-        ext (case (f :content-type)
-              "image/jpeg" "jpg"
-              "image/png" "png"
-              ; TODO
-              (last (string/split (f :filename) #"\.")))
-        avatar-filename (str (java.util.UUID/randomUUID) "." ext)
-        [h w] avatar-size
-        resized-image (-> f :tempfile (img/resize-and-crop h w)
-                          (img-format/as-stream ext))]
-    (s3/put-object creds (config :aws-domain) (str "avatars/" avatar-filename) resized-image
-                   {:content-type (f :content-type)})
-    (s3/update-object-acl creds (config :aws-domain) (str "avatars/" avatar-filename)
-                          (s3/grant :all-users :read))
-    (str "https://s3.amazonaws.com/" (config :aws-domain) "/avatars/" avatar-filename)))
 
 ;; invite by link
 
