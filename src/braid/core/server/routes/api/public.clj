@@ -107,7 +107,7 @@
     (edn-response (not (group/group-with-slug-exists? (get-in req [:params :slug])))))
 
   ; accept an email invite to join a group
-  (POST "/register" [token invite_id nickname password email now hmac avatar :as req]
+  (POST "/register" [token invite_id password email now hmac :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
         (string/blank? password) (assoc fail :body "Must provide a password")
@@ -118,30 +118,17 @@
         (string/blank? invite_id)
         (assoc fail :body "Invalid invitation ID")
 
-        (not (valid-nickname? nickname))
-        (assoc fail :body "Nickname must be 1-30 characters without whitespace")
-
-        (user/nickname-taken? nickname)
-        (assoc fail :body "nickname taken")
-
-        ; TODO: be smarter about this
-        (not (#{"image/jpeg" "image/png"} (:content-type avatar)))
-        (assoc fail :body "Invalid image")
-
         :else
         (let [invite (invitation/invite-by-id (java.util.UUID/fromString invite_id))]
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
-            (let [avatar-url (invites/upload-avatar avatar)
-                  user-id (db/uuid)
+            (let [user-id (db/uuid)
                   referer (get-in req [:headers "referer"] (config :site-url))
                   [proto _ referrer-domain] (string/split referer #"/")]
               (do
                 (db/run-txns!
                   (user/create-user-txn {:id user-id
                                          :email email
-                                         :avatar avatar-url
-                                         :nickname nickname
                                          :password password}))
                 (events/user-join-group! user-id (invite :group-id))
                 (db/run-txns!
