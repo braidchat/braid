@@ -155,7 +155,7 @@
   "given an id and email, creates and returns a user;
   the nickname and avatar are set based on the email;
   the id, email, and resulting nickname must be unique"
-  [{:keys [id email password]}]
+  [{:keys [id email]}]
   {:pre [(not (user-id-exists? id))]}
   (let [new-id (d/tempid :entities)]
     (into
