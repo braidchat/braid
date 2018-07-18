@@ -20,6 +20,7 @@
                          :asana-client-secret
                          :aws-access-key
                          :aws-domain
+                         :aws-region
                          :aws-secret-key
                          :db-url
                          :elasticsearch-url
