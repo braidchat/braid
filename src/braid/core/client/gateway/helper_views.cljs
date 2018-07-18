@@ -1,7 +1,7 @@
 (ns braid.core.client.gateway.helper-views
   (:require
    [reagent.core :as r]
-   [re-frame.core :refer [subscribe dispatch]]
+   [re-frame.core :refer [subscribe dispatch dispatch-sync]]
    [reagent.ratom :refer-macros [run!]]))
 
 (defn with-ns [ns n]
@@ -39,7 +39,7 @@
                   :on-change (fn [e]
                                (let [value (on-change-transform (.. e -target -value))]
                                  (reset! value-atom value)
-                                 (dispatch [(with-ns (opts :disp-ns) :update-value) field-id value])))}]]
+                                 (dispatch-sync [(with-ns (opts :disp-ns) :update-value) field-id value])))}]]
         (when (= :invalid status)
           [:div.error-message (first errors)])
         (when (opts :help-text)
