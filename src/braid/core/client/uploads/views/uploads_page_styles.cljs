@@ -9,6 +9,9 @@
 
    [:>.content
 
+    [:button
+     (mixins/settings-button)]
+
     [:>table.uploads
      {:width "100%"
       :flex-direction "row"
@@ -20,13 +23,21 @@
 
       [:>tr.upload
 
+       ["&:nth-child(odd)"
+        {:background-color "#f9f9f9"}]
+
+       ["&:nth-child(even)"
+        {:background-color "white"}]
+
        [:>td.delete
+
         [:>button
          {:font-family "fontawesome"
           :color "red"}]]
+
        [:>td.uploaded-file
 
-        [:>.embed
+        [:img :video
          {:width (rem 5)
           :margin 0}]
 
