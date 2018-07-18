@@ -3,7 +3,6 @@
    [braid.core.server.db :as db]
    [braid.core.server.db.common :refer :all]
    [braid.core.server.db.tag :as tag]
-   [braid.core.server.db.group]
    [clj-time.coerce :refer [to-date-time to-long]]
    [clj-time.core :as t]
    [clojure.set :refer [difference]]
