@@ -4,7 +4,7 @@
   (:import
    (javax.crypto Mac)
    (javax.crypto.spec SecretKeySpec)
-   (java.security SecureRandom)
+   (java.security SecureRandom MessageDigest)
    (org.apache.commons.codec.binary Base64)))
 
 (defn random-nonce
@@ -20,16 +20,22 @@
         (string/replace "/" "_")
         (string/replace "=" ""))))
 
+(defn str->bytes ^bytes
+  [s]
+  (.getBytes s "UTF-8"))
+
+(defn hmac-sha256
+  ^bytes [^bytes key-bytes ^bytes to-sign-bytes]
+  (let [mac (Mac/getInstance "HmacSHA256")
+        secret-key (SecretKeySpec. key-bytes (.getAlgorithm mac))]
+    (-> (doto mac (.init secret-key))
+        (.doFinal to-sign-bytes))))
+
 (defn hmac-bytes
   [hmac-key data-bytes]
-  (let [key-bytes (.getBytes hmac-key "UTF-8")
-        algo "HmacSHA256"]
-    (->>
-      (doto (Mac/getInstance algo)
-        (.init (SecretKeySpec. key-bytes algo)))
-      (#(.doFinal % data-bytes))
+  (->> (hmac-sha256 (str->bytes hmac-key) data-bytes)
       (map (partial format "%02x"))
-      (apply str))))
+      (apply str)))
 
 (defn hmac
   [hmac-key data]
@@ -49,3 +55,15 @@
 (defn hmac-verify
   [{:keys [secret mac data]}]
   (constant-comp mac (hmac secret data)))
+
+(defn bytes->hex
+  [^bytes bs]
+  (->> bs (map (partial format "%02x")) (apply str)))
+
+(defn sha256
+  ^bytes [^bytes input-bytes]
+  (-> (doto (MessageDigest/getInstance "SHA-256")
+        (.update input-bytes))
+      (.digest)))
+
+(def hex-hash (comp bytes->hex sha256 str->bytes))

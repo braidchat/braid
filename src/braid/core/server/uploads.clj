@@ -1,19 +1,22 @@
 (ns braid.core.server.uploads
   (:require
-   [aws.sdk.s3 :as s3]
-   [braid.core.server.conf :refer [config]]))
+   [braid.core.server.conf :refer [config]]
+   [braid.core.server.s3 :refer [make-request]]
+   [clj-time.core :as t]
+   [clj-time.format :as f]
+   [org.httpkit.client :as http]))
 
 (defn upload-url-path
   [url]
   (some->
     (re-pattern (str "^https://s3.amazonaws.com/"
                      (config :aws-domain)
-                     "/(.*)$"))
+                     "(/.*)$"))
     (re-matches url)
     second))
 
 (defn delete-upload
   [upload-path]
-  (let [creds {:access-key (config :aws-access-key)
-               :secret-key (config :aws-secret-key)}]
-    (s3/delete-object creds (config :aws-domain) upload-path)))
+  @(http/request (make-request {:method :delete
+                                :body ""
+                                :path upload-path})))
