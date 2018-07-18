@@ -2,7 +2,7 @@
   (:require
    [braid.core.client.helpers :as helpers]
    [braid.core.client.routes :as routes]
-   [braid.core.client.ui.views.pills :as pills]
+   [braid.core.client.ui.views.mentions :as mentions]
    [braid.core.client.ui.views.thread :as thread]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]
@@ -52,7 +52,8 @@
                    (dispatch [:core.uploads/delete-upload (:id upload)])))}
               \uf1f8])]
           [:td.uploader
-           "Uploaded by " [pills/user-pill-view (upload :uploader-id)]]
+           "Uploaded by "
+           [mentions/user-mention-view (upload :uploader-id)]]
           [:td.uploaded-thread
            [:a {:href (routes/page-path {:group-id @group-id
                                          :page-id "thread"
