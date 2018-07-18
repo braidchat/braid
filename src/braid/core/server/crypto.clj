@@ -2,9 +2,9 @@
   (:require
    [clojure.string :as string])
   (:import
+   (java.security SecureRandom MessageDigest)
    (javax.crypto Mac)
    (javax.crypto.spec SecretKeySpec)
-   (java.security SecureRandom MessageDigest)
    (org.apache.commons.codec.binary Base64)))
 
 (defn random-nonce
@@ -19,6 +19,23 @@
         (string/replace "+" "-")
         (string/replace "/" "_")
         (string/replace "=" ""))))
+
+(defn base64-encode
+  [input]
+  (-> input
+      (.getBytes "UTF-8")
+      Base64/encodeBase64
+      String.))
+
+(defn b64-sha1-encode
+  "Get the base64-encode HMAC-SHA1 of `to-sign` with `key`"
+  [to-sign key]
+  (let [mac (Mac/getInstance "HmacSHA1")
+        secret-key (SecretKeySpec. (.getBytes key "UTF-8") (.getAlgorithm mac))]
+    (-> (doto mac (.init secret-key))
+        (.doFinal (.getBytes to-sign "UTF-8"))
+        Base64/encodeBase64
+        String.)))
 
 (defn str->bytes ^bytes
   [s]
