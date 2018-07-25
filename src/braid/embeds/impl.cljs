@@ -1,6 +1,7 @@
 (ns braid.embeds.impl
   (:require
-    [braid.core.hooks :as hooks]))
+    [braid.core.hooks :as hooks]
+    [spec-tools.data-spec :as ds]))
 
 (def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
 
@@ -11,7 +12,7 @@
 
 (def embed-engine-dataspec
   {:handler fn?
-   :styles vector?
+   (ds/opt :styles) vector?
    :priority number?})
 
 (defonce embed-engines

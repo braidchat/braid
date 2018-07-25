@@ -17,7 +17,8 @@
     [braid.rss.core]
     [braid.stars.core]
     [braid.video-embeds.core]
-    [braid.website-embeds.core]))
+    [braid.website-embeds.core]
+    [braid.youtube-embeds.core]))
 
 (defn init! []
   (hooks/reset-all!)
@@ -37,4 +38,5 @@
   (braid.rss.core/init!)
   (braid.stars.core/init!)
   (braid.video-embeds.core/init!)
-  (braid.website-embeds.core/init!))
+  (braid.website-embeds.core/init!)
+  (braid.youtube-embeds.core/init!))
