@@ -24,8 +24,4 @@
                                                (second (re-matches #"^https?://www\.youtube\.com/watch\?v=(.*)" url))))))]
               [youtube-embed-view video-id]))
 
-          :styles
-          [:>video
-           {:width "100%"}]
-
           :priority 1}))))

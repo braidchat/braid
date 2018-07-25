@@ -19,4 +19,5 @@
        [{:keys [handler styles priority] :as embed}]
        {:pre [(util/valid? impl/embed-engine-dataspec embed)]}
        (swap! impl/embed-engines conj embed)
-       (core/register-styles! [:.embed styles]))))
+       (when styles
+         (core/register-styles! [:.embed styles])))))
