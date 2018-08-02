@@ -61,7 +61,16 @@
              (assoc-in [:create-group :sending?] false)
              (assoc-in [:groups group-id] group)
              (assoc-in [:temp-threads group-id] (schema/make-temp-thread group-id)))
-     :redirect-to (routes/inbox-page-path {:group-id group-id})}))
+
+     ;; need to do a full redirect, because the sign-up flow via gateway.js
+     ;; doesn't have any of the other assets
+     ;; :redirect-to (routes/inbox-page-path {:group-id group-id})
+     :dispatch [::redirect (routes/inbox-page-path {:group-id group-id})]}))
+
+(reg-event-fx
+  ::redirect
+  (fn [_ [_ url]]
+    (set! js/window.location url)))
 
 (reg-event-fx
   ::handle-registration-error
