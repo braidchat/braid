@@ -6,7 +6,7 @@ Braid is an experimental **team chat application** with a novel UI: instead of c
 
 You can [read more about Braid](https://www.braidchat.com) and then [give Braid a try](https://braid.chat/try).
 
-![Braid Screenshot](./docs/images/screenshot-archer.png)
+![Braid Screenshot](./docs/images/screenshot.png)
 
 Braid's not as polished as Slack yet, but it's got most of the features you'd expect from other chat clients:
 
