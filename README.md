@@ -1,6 +1,6 @@
 <img src="./docs/images/braid-icon-256.png" height="128px" alt="Braid Logo">
 
-# Braid [![Github Issues](https://img.shields.io/github/issues/braidchat/braid.svg)](https://www.github.com/braidchat/braid/issues) ![Codeship](https://img.shields.io/codeship/6f05b0f0-9e72-0133-e93b-76efcd0f79bd.svg) [![Braid Chat](https://img.shields.io/badge/braid-join_chat-green.svg)](https://braid.chat/braid)
+# Braid [![Github Issues](https://img.shields.io/github/issues/braidchat/braid.svg)](https://www.github.com/braidchat/braid/issues)  [![Braid Chat](https://img.shields.io/badge/braid-join_chat-green.svg)](https://braid.chat/braid)
 
 Braid is an experimental **team chat application** with a novel UI: instead of chatrooms, it's based on many short conversations. You can think of Braid as an email/mailing-list/web-forum/chatroom hybrid, but without the constant interruptions and FOMO of Slack. It's particularly good for remote-first companies, developer teams and online communities. Braid is also open-source, so you can hack on it and host your own version.
 
