@@ -11,8 +11,6 @@
    [braid.core.client.router :as router]
    [braid.core.client.routes]
    [braid.core.client.state.remote-handlers]
-   [braid.core.client.uploads.events]
-   [braid.core.client.uploads.subs]
    [braid.core.modules :as modules]
    [re-frame.core :refer [dispatch-sync dispatch]]
    [reagent.core :as r]))

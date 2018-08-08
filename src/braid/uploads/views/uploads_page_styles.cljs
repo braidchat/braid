@@ -1,10 +1,10 @@
-(ns braid.core.client.uploads.views.uploads-page-styles
+(ns braid.uploads.views.uploads-page-styles
   (:require
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
    [garden.units :refer [rem em]]))
 
-(def uploads-page
+(defn >uploads-page []
   [:>.page.uploads
 
    [:>.content

@@ -28,9 +28,6 @@
 (defroute bots-path "/groups/:group-id/bots" [group-id]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :bots}]]))
 
-(defroute uploads-path "/groups/:group-id/uploads" [group-id]
-  (dispatch [:set-group-and-page [(uuid group-id) {:type :uploads}]]))
-
 (defroute group-settings-path "/groups/:group-id/settings" [group-id]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :settings}]]))
 

@@ -34,11 +34,7 @@
        {:title "Recently Closed"
         :route-fn routes/recent-page-path
         :icon \uf1da
-        :priority 5}
-       {:title "Uploads"
-        :route-fn routes/uploads-path
-        :icon \uf0ee
-        :priority 0}])
+        :priority 5}])
     [GroupHeaderItem]))
 
 (defn group-header-buttons-view [header-items]

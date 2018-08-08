@@ -13,8 +13,6 @@
    [braid.core.client.router :as router]
    [braid.core.client.state.remote-handlers]
    [braid.core.client.ui.views.app :refer [app-view]]
-   [braid.core.client.uploads.events]
-   [braid.core.client.uploads.subs]
    [braid.core.modules :as modules]
    [re-frame.core :as rf :refer [dispatch-sync dispatch]]
    [reagent.core :as r]))
