@@ -70,8 +70,14 @@
                        #_(on-error (get reply :braid/error "Couldn't get uploads in group"))))))}))
 
           :core.uploads/delete-upload
-          (fn [_ [_ upload-id]]
-            {:websocket-send (list [:braid.server/delete-upload upload-id])})}))
+          (fn [{db :db} [_ group-id upload-id]]
+            {:websocket-send (list [:braid.server/delete-upload upload-id])
+             :db (update-in db [:uploads group-id]
+                            (fn [uploads]
+                              (remove
+                                (fn [upload]
+                                  (= (upload :id) upload-id))
+                                uploads)))})}))
      :clj
      (do)))
 

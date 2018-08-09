@@ -47,7 +47,7 @@
                  (when (js/confirm (str "Delete this uploaded file?\n"
                                         "If this was uploading using Braid, it"
                                         " will remove the file from S3 as well."))
-                   (dispatch [:core.uploads/delete-upload (:id upload)])))}
+                   (dispatch [:core.uploads/delete-upload @group-id (upload :id)])))}
               \uf1f8])]
           [:td.uploader
            "Uploaded by "
