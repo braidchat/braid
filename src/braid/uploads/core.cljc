@@ -15,7 +15,7 @@
          {:key :uploads
           :on-load (fn [_]
                      ;; TODO: will need to page this when it gets big?
-                     (dispatch [:braid.uploads/get-group-uploads!]))
+                     (dispatch [:braid.uploads-page/get-group-uploads!]))
           :view uploads-page-view})
 
        (core/register-styles!
@@ -31,16 +31,16 @@
           :route-args {:page-id "uploads"}})
 
        (core/register-subs!
-         {:braid.uploads/uploads
+         {:braid.uploads-page/uploads
           (fn [db _]
             (get-in db [:uploads (db :open-group-id)]))
 
-          :braid.uploads/error
+          :braid.uploads-page/error
           (fn [db _]
             nil)})
 
        (core/register-events!
-         {:create-upload
+         {:braid.uploads/create-upload
           (fn [{state :db} [_ {:keys [url thread-id group-id]}]]
             {:websocket-send (list [:braid.server/create-upload
                                     {:id (uuid/make-random-squuid)
@@ -55,7 +55,7 @@
           (fn [{db :db} [_ group-id uploads]]
             {:db (assoc-in db [:uploads group-id] uploads)})
 
-          :braid.uploads/get-group-uploads!
+          :braid.uploads-page/get-group-uploads!
           (fn [{state :db} _]
             (let [group-id (state :open-group-id)]
               {:websocket-send
@@ -69,7 +69,7 @@
                      (do
                        #_(on-error (get reply :braid/error "Couldn't get uploads in group"))))))}))
 
-          :core.uploads/delete-upload
+          :braid.uploads-page/delete-upload
           (fn [{db :db} [_ group-id upload-id]]
             {:websocket-send (list [:braid.server/delete-upload upload-id])
              :db (update-in db [:uploads group-id]

@@ -273,7 +273,7 @@
                                (aget (.. e -target -files) 0)
                                (fn [url]
                                  (reset! uploading? false)
-                                 (dispatch [:create-upload
+                                 (dispatch [:braid.uploads/create-upload
                                             {:url url
                                              :group-id (config :group-id)
                                              :thread-id (config :thread-id)}]))))}]])))

@@ -47,7 +47,7 @@
                  (when (js/confirm (str "Delete this uploaded file?\n"
                                         "If this was uploading using Braid, it"
                                         " will remove the file from S3 as well."))
-                   (dispatch [:core.uploads/delete-upload @group-id (upload :id)])))}
+                   (dispatch [:braid.uploads-page/delete-upload @group-id (upload :id)])))}
               \uf1f8])]
           [:td.uploader
            "Uploaded by "
@@ -68,8 +68,8 @@
 
 (defn uploads-page-view
   []
-  (let [uploads @(subscribe [:braid.uploads/uploads])
-        error @(subscribe [:braid.uploads/error])]
+  (let [uploads @(subscribe [:braid.uploads-page/uploads])
+        error @(subscribe [:braid.uploads-page/error])]
     [:div.page.uploads
      [:div.title "Uploads"]
      [:div.content

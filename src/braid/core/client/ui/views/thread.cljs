@@ -253,7 +253,7 @@
             (do (set-uploading! true)
                 (s3/upload file (fn [url]
                                   (set-uploading! false)
-                                  (dispatch [:create-upload
+                                  (dispatch [:braid.uploads/create-upload
                                              {:url url
                                               :thread-id (thread :id)
                                               :group-id (thread :group-id)}]))))))]
