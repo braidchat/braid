@@ -4,8 +4,8 @@
    [braid.core.client.ui.styles.vars :as vars]
    [garden.units :refer [rem em px]]))
 
-(def group-explore-page
-  [:.page.group-explore
+(def >group-explore-page
+  [:>.page.group-explore
 
    [:>.content
     (mixins/settings-container-style)

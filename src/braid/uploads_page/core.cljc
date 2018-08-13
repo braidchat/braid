@@ -17,11 +17,8 @@
           :on-load (fn [_]
                      ;; TODO: will need to page this when it gets big?
                      (dispatch [:braid.uploads-page/get-group-uploads!]))
-          :view uploads-page-view})
-
-       (core/register-styles!
-         [:#app>.app>.main
-          (>uploads-page)])
+          :view uploads-page-view
+          :styles (>uploads-page)})
 
        (core/register-group-header-button!
          {:title "Uploads"
