@@ -40,11 +40,7 @@
        (core/register-subs!
          {:braid.uploads-page/uploads
           (fn [db _]
-            (get-in db [::uploads (db :open-group-id)]))
-
-          :braid.uploads-page/error
-          (fn [db _]
-            nil)})
+            (get-in db [::uploads (db :open-group-id)]))})
 
        (core/register-events!
          {::store-group-uploads!
@@ -61,9 +57,7 @@
                  (fn [reply]
                    (if-let [uploads (:braid/ok reply)]
                      (dispatch [::store-group-uploads! group-id uploads])
-                     ;; TODO handle error
-                     (do
-                       #_(on-error (get reply :braid/error "Couldn't get uploads in group"))))))}))
+                     (dispatch [:braid.notices/display! [::fetching-uploads "Error loading uploads." :error]]))))}))
 
           :braid.uploads-page/delete-upload
           (fn [{db :db} [_ group-id upload-id]]

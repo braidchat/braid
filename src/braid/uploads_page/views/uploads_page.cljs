@@ -68,15 +68,11 @@
 
 (defn uploads-page-view
   []
-  (let [uploads @(subscribe [:braid.uploads-page/uploads])
-        error @(subscribe [:braid.uploads-page/error])]
+  (let [uploads @(subscribe [:braid.uploads-page/uploads])]
     [:div.page.uploads
      [:div.title "Uploads"]
      [:div.content
       (cond
-        error
-        [:div.error error]
-
         (nil? uploads)
         [:p "Loading..."]
 
