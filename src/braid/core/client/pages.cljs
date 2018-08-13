@@ -5,8 +5,8 @@
 
 (def page-dataspec
   {:key keyword?
-   :on-load fn?
    :view fn?
+   (ds/opt :on-load) fn?
    (ds/opt :styles) vector?})
 
 (defonce pages
