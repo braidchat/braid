@@ -4,6 +4,7 @@
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
           [re-frame.core :refer [subscribe dispatch]]
+          [spec-tools.data-spec :as ds]
           [braid.core.client.routes :as routes]
           [braid.uploads-page.views.uploads-page-styles :refer [>uploads-page]]
           [braid.uploads-page.views.uploads-page :refer [uploads-page-view]]])))
@@ -30,10 +31,16 @@
           :route-fn routes/page-path
           :route-args {:page-id "uploads"}})
 
+       (core/register-state!
+         {::uploads {}}
+         {::uploads {uuid? (ds/maybe [{:id uuid?
+                                       :url string?
+                                       :thread-id uuid?}])}})
+
        (core/register-subs!
          {:braid.uploads-page/uploads
           (fn [db _]
-            (get-in db [:uploads (db :open-group-id)]))
+            (get-in db [::uploads (db :open-group-id)]))
 
           :braid.uploads-page/error
           (fn [db _]
@@ -42,7 +49,7 @@
        (core/register-events!
          {::store-group-uploads!
           (fn [{db :db} [_ group-id uploads]]
-            {:db (assoc-in db [:uploads group-id] uploads)})
+            {:db (assoc-in db [::uploads group-id] uploads)})
 
           :braid.uploads-page/get-group-uploads!
           (fn [{state :db} _]
@@ -61,7 +68,7 @@
           :braid.uploads-page/delete-upload
           (fn [{db :db} [_ group-id upload-id]]
             {:websocket-send (list [:braid.server/delete-upload upload-id])
-             :db (update-in db [:uploads group-id]
+             :db (update-in db [::uploads group-id]
                             (fn [uploads]
                               (remove
                                 (fn [upload]
