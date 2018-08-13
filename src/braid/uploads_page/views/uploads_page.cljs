@@ -77,6 +77,9 @@
         error
         [:div.error error]
 
+        (nil? uploads)
+        [:p "Loading..."]
+
         (empty? uploads)
         [:p "No uploads in this group yet"]
 
