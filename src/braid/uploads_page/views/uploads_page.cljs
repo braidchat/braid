@@ -81,8 +81,6 @@
 
         :else
         [:table.uploads
-         [:thead
-          [:tr [:th ""] [:th ""] [:th ""] [:th ""]]]
          [:tbody
           (doall
             (for [upload uploads]
