@@ -80,6 +80,12 @@
        {:pre [(util/valid? braid.core.client.ui.views.thread/thread-control-dataspec config)]}
        (swap! braid.core.client.ui.views.thread/thread-controls conj config))
 
+     (defn register-styles!
+       "Add Garden CSS styles to the page styles"
+       [styles]
+       {:pre [(util/valid? braid.core.client.ui.views.styles/style-dataspec styles)]}
+       (swap! braid.core.client.ui.views.styles/module-styles conj styles))
+
      (defn register-system-page!
        "Registers a system page with its own URL.
 
@@ -100,12 +106,6 @@
          (register-styles!
            [:#app>.app>.main
             (page :styles)])))
-
-     (defn register-styles!
-       "Add Garden CSS styles to the page styles"
-       [styles]
-       {:pre [(util/valid? braid.core.client.ui.views.styles/style-dataspec styles)]}
-       (swap! braid.core.client.ui.views.styles/module-styles conj styles))
 
      (defn register-group-page!
        "Registers a group page with its own URL.
