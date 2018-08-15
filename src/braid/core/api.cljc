@@ -14,6 +14,7 @@
           [braid.core.client.ui.views.header]
           [braid.core.client.ui.views.user-header]
           [braid.core.client.ui.views.autocomplete]
+          [braid.core.client.ui.views.new-message-action-button]
           [braid.core.client.group-admin.views.group-settings-page]]
          :clj
          [[braid.core.server.conf]
@@ -214,7 +215,12 @@
        "Register a view to add to the group settings page. The view will recieve the group map as an argument."
        [view]
        {:pre [(fn? view)]}
-       (swap! braid.core.client.group-admin.views.group-settings-page/extra-group-settings conj view)))
+       (swap! braid.core.client.group-admin.views.group-settings-page/extra-group-settings conj view))
+
+     (defn register-new-message-action-menu-item!
+       [menu-item]
+       {:pre [(util/valid? braid.core.client.ui.views.header-item/HeaderItem menu-item)]}
+       (swap! braid.core.client.ui.views.new-message-action-button/menu-items conj menu-item)))
 
    :clj
    (do

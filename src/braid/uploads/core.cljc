@@ -18,7 +18,24 @@
                                      :group-id group-id}])
              :dispatch [:new-message {:content url
                                       :thread-id thread-id
-                                      :group-id group-id}]})}))
+                                      :group-id group-id}]})})
+       (core/register-new-message-action-menu-item!
+         {:body "upload"
+          :priority 1}))
      :clj
      (do)))
 
+#_[:label.plus {:class (when @uploading? "uploading")}
+[:input {:type "file"
+           :multiple false
+           :style {:display "none"}
+           :on-change (fn [e]
+                        (reset! uploading? true)
+                        (s3/upload
+                          (aget (.. e -target -files) 0)
+                          (fn [url]
+                            (reset! uploading? false)
+                            (dispatch [:braid.uploads/create-upload
+                                       {:url url
+                                        :group-id (config :group-id)
+                                        :thread-id (config :thread-id)}]))))}]]

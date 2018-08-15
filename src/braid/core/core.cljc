@@ -6,6 +6,7 @@
          [[braid.core.client.ui.views.autocomplete]
           [braid.core.client.store]
           [braid.popovers.api :as popovers]
+          [braid.core.client.ui.styles.hover-menu]
           [braid.core.client.ui.styles.hover-cards]])))
 
 (defn init! []
@@ -27,4 +28,7 @@
          braid.core.client.ui.styles.hover-cards/>user-card)
 
        (popovers/register-popover-styles!
-         braid.core.client.ui.styles.hover-cards/>tag-card))))
+         braid.core.client.ui.styles.hover-cards/>tag-card)
+
+       (popovers/register-popover-styles!
+         (braid.core.client.ui.styles.hover-menu/>hover-menu)))))

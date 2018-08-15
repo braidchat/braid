@@ -2,14 +2,15 @@
   (:require-macros
    [cljs.core.async.macros :refer [go]])
   (:require
+   [cljs.core.async :as async :refer [<! put! chan alts!]]
+   [re-frame.core :refer [dispatch subscribe]]
+   [reagent.core :as r]
+   [reagent.ratom :refer-macros [run!]]
    [braid.core.hooks :as hooks]
    [braid.core.client.helpers :refer [debounce stop-event!]]
    [braid.core.client.s3 :as s3]
    [braid.core.client.store :as store]
-   [cljs.core.async :as async :refer [<! put! chan alts!]]
-   [re-frame.core :refer [dispatch subscribe]]
-   [reagent.core :as r]
-   [reagent.ratom :refer-macros [run!]])
+   [braid.core.client.ui.views.new-message-action-button :refer [new-message-action-button-view]])
   (:import
    (goog.events KeyCodes)))
 
@@ -258,27 +259,7 @@
                                             (choose-result! result)
                                             (focus-textbox!)))}])])})))
 
-(defn upload-button-view
-  [config]
-  (let [uploading? (r/atom false)]
-    (fn [config]
-      ; clicking on label == clicking on (hidden) input
-      [:label.plus {:class (when @uploading? "uploading")}
-       [:input {:type "file"
-                :multiple false
-                :style {:display "none"}
-                :on-change (fn [e]
-                             (reset! uploading? true)
-                             (s3/upload
-                               (aget (.. e -target -files) 0)
-                               (fn [url]
-                                 (reset! uploading? false)
-                                 (dispatch [:braid.uploads/create-upload
-                                            {:url url
-                                             :group-id (config :group-id)
-                                             :thread-id (config :thread-id)}]))))}]])))
-
 (defn new-message-view [config]
   [:div.message.new
-   [upload-button-view config]
+   [new-message-action-button-view config]
    [wrap-autocomplete config]])
