@@ -3,16 +3,18 @@
     [braid.core.client.ui.views.header-item :refer [header-item-view]]))
 
 (defn hover-menu-view
-  [items position]
+  [context items position]
   [:div.hover-menu {:class (name position)}
-   [:svg.arrow {:view-box "0 -5 10 10"
-                :width "10px"
-                :height "10ox"}
-    [:polygon {:points "0,-5 0,5, 6,0"
-               :transform "rotate(90 0 5)"
-               :fill "white"
-               :stroke "#333"
-               :stroke-width "0.5px"}]]
+   [:svg.arrow {:class (name position)
+                :view-box "0 -5 10 10"}
+    [:polyline {:points "0,-5 5,0 0,5"
+                :transform (str "rotate("
+                                (case position
+                                  :top 90 ;
+                                  :bottom 270
+                                  :left 0
+                                  :right 180)
+                                ", 5, 0)")}]]
    (into
      [:div.content]
      (doall
@@ -20,4 +22,4 @@
                        (sort-by :priority)
                        reverse)]
          ^{:key (item :class)}
-         [header-item-view item])))])
+         [header-item-view (assoc item :context context)])))])

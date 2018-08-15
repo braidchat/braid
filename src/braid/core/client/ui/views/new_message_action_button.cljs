@@ -11,6 +11,11 @@
 (defn new-message-action-button-view
   [{:keys [thread-id group-id] :as config}]
   [:div.plus
-   {:on-mouse-enter (popovers/on-mouse-enter
-                      (fn []
-                        [hover-menu-view @menu-items :top]))}])
+   {:on-mouse-enter
+    (popovers/on-mouse-enter
+      (fn []
+        [hover-menu-view
+         {:thread-id thread-id
+          :group-id group-id}
+         @menu-items
+         :top]))}])

@@ -12,6 +12,8 @@
                           (reset! popover nil))
         :style {:position "absolute"
                 :z-index 1000
+                :width (.-width bounds)
+                :height (.-height bounds)
                 :top (.-top bounds)
                 :left (.-left bounds)}}
        [view]])))

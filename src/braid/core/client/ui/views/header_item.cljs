@@ -16,12 +16,14 @@
   [conf]
   (let [open-group-id (subscribe [:open-group-id])
         current-path (subscribe [:page-path])]
-    (fn [{:keys [route-fn route-args title icon body on-click]}]
+    (fn [{:keys [route-fn route-args title icon body on-click context]}]
       (let [path (when route-fn
                    (route-fn (merge route-args {:group-id @open-group-id})))]
         [:a {:class (when (= path @current-path) "active")
              :href path
-             :on-click on-click
+             :on-click (if context
+                         (on-click context)
+                         on-click)
              :title title}
          body
          (when icon

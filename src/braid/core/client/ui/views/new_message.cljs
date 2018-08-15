@@ -8,7 +8,6 @@
    [reagent.ratom :refer-macros [run!]]
    [braid.core.hooks :as hooks]
    [braid.core.client.helpers :refer [debounce stop-event!]]
-   [braid.core.client.s3 :as s3]
    [braid.core.client.store :as store]
    [braid.core.client.ui.views.new-message-action-button :refer [new-message-action-button-view]])
   (:import
