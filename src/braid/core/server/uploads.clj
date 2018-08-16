@@ -1,7 +1,7 @@
 (ns braid.core.server.uploads
   (:require
    [braid.core.server.conf :refer [config]]
-   [braid.core.server.s3 :refer [make-request]]
+   [braid.uploads.s3 :refer [make-request]]
    [clj-time.core :as t]
    [clj-time.format :as f]
    [org.httpkit.client :as http]))

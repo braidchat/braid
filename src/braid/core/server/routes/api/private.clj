@@ -6,7 +6,7 @@
    [braid.core.server.events :as events]
    [braid.core.server.markdown :refer [markdown->hiccup]]
    [braid.core.server.routes.helpers :as helpers :refer [error-response edn-response]]
-   [braid.core.server.s3 :as s3]
+   [braid.uploads.s3 :as s3]
    [clojure.java.io :as io]
    [clojure.string :as string]
    [compojure.core :refer [GET PUT DELETE defroutes]]

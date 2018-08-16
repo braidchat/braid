@@ -1,4 +1,4 @@
-(ns braid.core.server.s3
+(ns braid.uploads.s3
   (:require
    [braid.core.server.conf :refer [config]]
    [braid.core.server.crypto :as crypto :refer [hmac-sha256 str->bytes]]
