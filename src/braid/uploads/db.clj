@@ -1,4 +1,4 @@
-(ns braid.core.server.db.upload
+(ns braid.uploads.db
   (:require
    [datomic.api :as d]
    [braid.core.server.db :as db]

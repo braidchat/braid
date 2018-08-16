@@ -11,7 +11,7 @@
           [braid.core.server.db :as db]
           [braid.core.server.db.thread :as thread]
           [braid.core.server.db.group :as group]
-          [braid.core.server.db.upload :as upload]
+          [braid.uploads.db :as db.uploads]
           [braid.core.server.db.user :as user]])))
 
 (def Upload
@@ -88,7 +88,7 @@
 
           :braid.server/delete-upload
           (fn [{:as ev-msg :keys [?data user-id ?reply-fn]}]
-            (let [upload (upload/upload-info ?data)]
+            (let [upload (db.uploads/upload-info ?data)]
               (when (or (= user-id (:user-id upload))
                         (group/user-is-group-admin? user-id (:group-id upload)))
                 (when-let [path (s3/upload-url-path (:url upload))]
