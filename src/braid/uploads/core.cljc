@@ -22,7 +22,7 @@
           ::create-upload!
           (fn [{db :db} [_ url]]
             (let [thread-id (get-in db [::upload-config :thread-id])
-                  group-id (get-in db [::upload-config :thread-id])]
+                  group-id (get-in db [::upload-config :group-id])]
               {:websocket-send (list [:braid.server/create-upload
                                       {:id (uuid/make-random-squuid)
                                        :url url
@@ -30,7 +30,9 @@
                                        :group-id group-id}])
                :dispatch [:new-message {:content url
                                         :thread-id thread-id
-                                        :group-id group-id}]}))})
+                                        :group-id group-id
+                                        :mentioned-user-ids []
+                                        :mentioned-tag-ids []}]}))})
 
        (core/register-root-view!
          (fn []
