@@ -74,6 +74,36 @@
      :clj
      (do
 
+       (core/register-db-schema!
+         [{:db/ident :upload/id
+           :db/valueType :db.type/uuid
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/id #db/id [:db.part/db]
+           :db.install/_attribute :db.part/db}
+          {:db/ident :upload/thread
+           :db/doc "The thread this upload is associated with"
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/id #db/id [:db.part/db]
+           :db.install/_attribute :db.part/db}
+          {:db/ident :upload/url
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/id #db/id [:db.part/db]
+           :db.install/_attribute :db.part/db}
+          {:db/ident :upload/uploaded-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/id #db/id [:db.part/db]
+           :db.install/_attribute :db.part/db}
+          {:db/ident :upload/uploaded-by
+           :db/doc "User that uploaded this file"
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/id #db/id [:db.part/db]
+           :db.install/_attribute :db.part/db}])
+
        (core/register-server-message-handlers!
          {:braid.server/create-upload
           (fn [{:as ev-msg :keys [?data user-id]}]
