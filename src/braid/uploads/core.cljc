@@ -4,7 +4,10 @@
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
           [re-frame.core :refer [subscribe dispatch dispatch-sync]]
-          [braid.uploads.s3 :as s3]])))
+          [braid.uploads.s3 :as s3]]
+         :clj
+         [[braid.uploads.s3 :as s3]
+          [braid.core.server.db.user :as user]])))
 
 (defn init! []
   #?(:cljs
@@ -52,4 +55,19 @@
                         (dispatch-sync [::initiate-upload! {:thread-id thread-id
                                                             :group-id group-id}])))}))
      :clj
-     (do)))
+     (do
+       (core/register-private-http-route!
+         [:get "/s3-policy"
+          (fn [req]
+            (println (get-in req [:session :user-id]))
+            (if (user/user-id-exists? (get-in req [:session :user-id]))
+              (if-let [policy (s3/generate-policy)]
+                {:status 200
+                 :headers {"Content-Type" "application/edn"}
+                 :body (pr-str policy)}
+                {:status 500
+                 :headers {"Content-Type" "application/edn"}
+                 :body (pr-str {:error "No S3 secret for upload"})})
+              {:status 403
+               :headers {"Content-Type" "application/edn"}
+               :body (pr-str {:error "Unauthorized"})}))]))))
