@@ -43,7 +43,10 @@
                                   (s3/upload
                                     (aget (.. e -target -files) 0)
                                     (fn [url]
-                                      (dispatch [::create-upload! url]))))}]]))
+                                      (dispatch [::create-upload! url])))
+                                  ;; clear the value of this input field
+                                  ;; so that it can be re-used with the same file if need be
+                                  (set! (.. e -target -value) nil))}]]))
 
        (core/register-new-message-action-menu-item!
          {:body "Add File"
