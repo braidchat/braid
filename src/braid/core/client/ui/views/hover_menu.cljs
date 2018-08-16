@@ -10,7 +10,7 @@
     [:polyline {:points "0,-5 5,0 0,5"
                 :transform (str "rotate("
                                 (case position
-                                  :top 90 ;
+                                  :top 90
                                   :bottom 270
                                   :left 0
                                   :right 180)
