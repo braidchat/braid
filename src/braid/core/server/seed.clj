@@ -7,7 +7,10 @@
     [braid.core.server.db.tag :as tag]
     [braid.core.server.db.user :as user]))
 
-(defn drop! []
+(defn drop!
+  "Drops the database (and also the database connection).
+  To re-seed, you'll need to make a new connection, usually by the (start!) function in dev.core"
+  []
   (datomic.api/delete-database (config :db-url)))
 
 (defn init! []
