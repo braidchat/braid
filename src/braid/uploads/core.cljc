@@ -7,7 +7,19 @@
           [braid.uploads.s3 :as s3]]
          :clj
          [[braid.uploads.s3 :as s3]
+          [braid.core.common.util :as util]
+          [braid.core.server.db :as db]
+          [braid.core.server.db.thread :as thread]
+          [braid.core.server.db.group :as group]
+          [braid.core.server.db.upload :as upload]
           [braid.core.server.db.user :as user]])))
+
+(def Upload
+  {:id uuid?
+   :thread-id uuid?
+   :uploader-id uuid?
+   :uploaded-at inst?
+   :url string?})
 
 (defn init! []
   #?(:cljs
@@ -61,6 +73,36 @@
                                                             :group-id group-id}])))}))
      :clj
      (do
+
+       (core/register-server-message-handlers!
+         {:braid.server/create-upload
+          (fn [{:as ev-msg :keys [?data user-id]}]
+            (let [upload (assoc ?data
+                           :uploaded-at (java.util.Date.)
+                           :uploader-id user-id)]
+              (when (and (util/valid? Upload upload)
+                      (let [thread-group-id (thread/thread-group-id (upload :thread-id))]
+                        (or (nil? thread-group-id) (= thread-group-id (upload :group-id))))
+                      (group/user-in-group? user-id (upload :group-id)))
+                (db/run-txns! (upload/create-upload-txn upload)))))
+
+          :braid.server/delete-upload
+          (fn [{:as ev-msg :keys [?data user-id ?reply-fn]}]
+            (let [upload (upload/upload-info ?data)]
+              (when (or (= user-id (:user-id upload))
+                        (group/user-is-group-admin? user-id (:group-id upload)))
+                (when-let [path (s3/upload-url-path (:url upload))]
+                  (s3/delete-upload path))
+                (db/run-txns!
+                  (upload/retract-upload-txn (:id upload))))))
+
+          :braid.server/uploads-in-group
+          (fn [{:as ev-msg :keys [?data user-id ?reply-fn]}]
+            (when ?reply-fn
+              (if (group/user-in-group? user-id ?data)
+                (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
+                (?reply-fn {:braid/error "Not allowed"}))))})
+
        (core/register-private-http-route!
          [:get "/s3-policy"
           (fn [req]
