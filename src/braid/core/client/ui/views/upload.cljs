@@ -1,6 +1,6 @@
 (ns braid.core.client.ui.views.upload
   (:require
-   [braid.core.client.s3 :as s3]
+   [braid.uploads.s3 :as s3]
    [re-frame.core :refer [dispatch]]
    [reagent.core :as r]))
 

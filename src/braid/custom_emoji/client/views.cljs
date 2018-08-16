@@ -3,7 +3,7 @@
    [clojure.string :as string]
    [re-frame.core :refer [subscribe dispatch]]
    [reagent.core :as r]
-   [braid.core.client.s3 :as s3] ; FIXME use of non-public API
+   [braid.uploads.s3 :as s3] ; FIXME use of non-public API
    ))
 
 (defn new-custom-emoji-view

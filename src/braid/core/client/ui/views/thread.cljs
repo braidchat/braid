@@ -7,7 +7,7 @@
    [reagent.core :as r]
    [braid.core.client.helpers :as helpers]
    [braid.core.client.routes :as routes]
-   [braid.core.client.s3 :as s3]
+   [braid.uploads.s3 :as s3]
    [braid.core.client.ui.views.card-border :refer [card-border-view]]
    [braid.core.client.ui.views.message :refer [message-view]]
    [braid.core.client.ui.views.new-message :refer [new-message-view]]

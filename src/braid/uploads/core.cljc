@@ -4,7 +4,7 @@
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
           [re-frame.core :refer [subscribe dispatch dispatch-sync]]
-          [braid.core.client.s3 :as s3]])))
+          [braid.uploads.s3 :as s3]])))
 
 (defn init! []
   #?(:cljs
