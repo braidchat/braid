@@ -121,7 +121,7 @@
                       (let [thread-group-id (thread/thread-group-id (upload :thread-id))]
                         (or (nil? thread-group-id) (= thread-group-id (upload :group-id))))
                       (group/user-in-group? user-id (upload :group-id)))
-                (db/run-txns! (upload/create-upload-txn upload)))))
+                (db/run-txns! (db.uploads/create-upload-txn upload)))))
 
           :braid.server/delete-upload
           (fn [{:as ev-msg :keys [?data user-id ?reply-fn]}]
@@ -131,13 +131,13 @@
                 (when-let [path (s3/upload-url-path (:url upload))]
                   (s3/delete-upload path))
                 (db/run-txns!
-                  (upload/retract-upload-txn (:id upload))))))
+                  (db.uploads/retract-upload-txn (:id upload))))))
 
           :braid.server/uploads-in-group
           (fn [{:as ev-msg :keys [?data user-id ?reply-fn]}]
             (when ?reply-fn
               (if (group/user-in-group? user-id ?data)
-                (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
+                (?reply-fn {:braid/ok (db.uploads/uploads-in-group ?data)})
                 (?reply-fn {:braid/error "Not allowed"}))))})
 
        (core/register-private-http-route!
