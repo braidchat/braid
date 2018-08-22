@@ -13,7 +13,7 @@
 
 (defn generate-policy
   []
-  (when-let [secret (config :s3-upload-secret)]
+  (when-let [secret (config :aws-secret-key)]
     ;; why is this using joda via java interop instead of clj-time?
     (let [policy (-> {:expiration (.. (DateTime. (DateTimeZone/UTC))
                                       (plus (Period/minutes 5))
@@ -29,7 +29,7 @@
                      crypto/base64-encode)]
       {:bucket (config :aws-domain)
        :auth {:policy policy
-              :key (config :s3-upload-key)
+              :key (config :aws-access-key)
               :signature (crypto/b64-sha1-encode policy secret)}})))
 
 (defn signing-key

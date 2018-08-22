@@ -31,7 +31,5 @@
                          :hmac-secret
                          :mailgun-domain
                          :mailgun-password
-                         :s3-upload-key
-                         :s3-upload-secret
                          :site-url]
                         @config-vars))))
