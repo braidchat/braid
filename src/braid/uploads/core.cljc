@@ -31,7 +31,14 @@
             {:db (assoc db ::upload-config {:group-id group-id
                                             :thread-id thread-id})})
 
-          ::create-upload!
+          :braid.uploads/upload!
+          (fn [{db :db} [_ file on-complete]]
+            (s3/upload
+              file
+              on-complete)
+            {})
+
+          :braid.uploads/create-upload!
           (fn [{db :db} [_ url]]
             (let [thread-id (get-in db [::upload-config :thread-id])
                   group-id (get-in db [::upload-config :group-id])]
@@ -54,13 +61,13 @@
                      :id "uploader"
                      :style {:display "none"}
                      :on-change (fn [e]
-                                  (s3/upload
-                                    (aget (.. e -target -files) 0)
-                                    (fn [url]
-                                      (dispatch [::create-upload! url])))
-                                  ;; clear the value of this input field
-                                  ;; so that it can be re-used with the same file if need be
-                                  (set! (.. e -target -value) nil))}]]))
+                                  (dispatch [:braid.uploads/upload!
+                                             (aget (.. e -target -files) 0)
+                                             (fn [url]
+                                               (dispatch [:braid.uploads/create-upload! url])
+                                               ;; clear the value of this input field
+                                               ;; so that it can be re-used with the same file if need be
+                                               (set! (.. e -target -value) nil))]))}]]))
 
        (core/register-new-message-action-menu-item!
          {:body "Add File"

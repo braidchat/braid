@@ -2,9 +2,7 @@
   (:require
    [clojure.string :as string]
    [re-frame.core :refer [subscribe dispatch]]
-   [reagent.core :as r]
-   [braid.uploads.s3 :as s3] ; FIXME use of non-public API
-   ))
+   [reagent.core :as r]))
 
 (defn new-custom-emoji-view
   []
@@ -26,11 +24,11 @@
                      :multiple false
                      :on-change (fn [e]
                                   (reset! uploading? true)
-                                  (s3/upload
-                                    (aget (.. e -target -files) 0)
-                                    (fn [url]
-                                      (reset! uploading? false)
-                                      (reset! image-url url))))}])]
+                                  (dispatch [:braid.uploads/upload!
+                                             (aget (.. e -target -files) 0)
+                                             (fn [url]
+                                               (reset! uploading? false)
+                                               (reset! image-url url))]))}])]
        [:button
         {:disabled (or (string/blank? @shortcode)
                        (string/blank? @image-url)

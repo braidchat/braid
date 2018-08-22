@@ -1,6 +1,5 @@
 (ns braid.core.client.ui.views.upload
   (:require
-   [braid.uploads.s3 :as s3]
    [re-frame.core :refer [dispatch]]
    [reagent.core :as r]))
 
@@ -13,11 +12,11 @@
                          (if (> (.-size file) max-avatar-size)
                            (dispatch [:braid.notices/display! [:avatar-set-fail "Avatar image too large" :error]])
                            (do (reset! uploading? true)
-                               (s3/upload
-                                 file
-                                 (fn [url]
-                                   (reset! uploading? false)
-                                   (on-upload url)))))))]
+                               (dispatch [:braid.uploads/upload!
+                                          file
+                                          (fn [url]
+                                            (reset! uploading? false)
+                                            (on-upload url))])))))]
     (fn [{:keys [on-upload dragging-change] :as args}]
       [:div.upload
        (if @uploading?

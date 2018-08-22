@@ -7,7 +7,6 @@
    [reagent.core :as r]
    [braid.core.client.helpers :as helpers]
    [braid.core.client.routes :as routes]
-   [braid.uploads.s3 :as s3]
    [braid.core.client.ui.views.card-border :refer [card-border-view]]
    [braid.core.client.ui.views.message :refer [message-view]]
    [braid.core.client.ui.views.new-message :refer [new-message-view]]
@@ -251,12 +250,14 @@
           (if (> (.-size file) max-file-size)
             (dispatch [:braid.notices/display! [:upload-fail "File too big to upload, sorry" :error]])
             (do (set-uploading! true)
-                (s3/upload file (fn [url]
-                                  (set-uploading! false)
-                                  (dispatch [:braid.uploads/create-upload
-                                             {:url url
-                                              :thread-id (thread :id)
-                                              :group-id (thread :group-id)}]))))))]
+                (dispatch [:braid.uploads/upload!
+                           file
+                           (fn [url]
+                             (set-uploading! false)
+                             (dispatch [:braid.uploads/create-upload!
+                                        {:url url
+                                         :thread-id (thread :id)
+                                         :group-id (thread :group-id)}]))]))))]
 
     (fn [thread]
       (let [{:keys [dragging? uploading?]} @state
