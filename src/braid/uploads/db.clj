@@ -2,7 +2,21 @@
   (:require
    [datomic.api :as d]
    [braid.core.server.db :as db]
-   [braid.core.server.db.common :refer [create-entity-txn db->upload upload-pull-pattern]]))
+   [braid.core.server.db.common :refer [create-entity-txn]]))
+
+(def upload-pull-pattern
+  [:upload/id
+   :upload/url
+   :upload/uploaded-at
+   {:upload/thread [:thread/id]}
+   {:upload/uploaded-by [:user/id]}])
+
+(defn db->upload [e]
+  {:id (:upload/id e)
+   :uploaded-at (:upload/uploaded-at e)
+   :thread-id (get-in e [:upload/thread :thread/id])
+   :uploader-id (get-in e [:upload/uploaded-by :user/id])
+   :url (:upload/url e)})
 
 ;; Queries
 
