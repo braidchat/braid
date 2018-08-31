@@ -243,16 +243,18 @@
 
    [:>.autocomplete-wrapper
 
-    [:>textarea
-     {:width "100%"
-      :resize "none"
-      :border "none"
-      :box-sizing "border-box"
-      :min-height (em 3.5)
-      :padding-left (rem 2.5)}
+    [:.textarea
 
-     [:&:focus
-      {:outline "none"}]]
+     [:>textarea
+      {:width "100%"
+       :resize "none"
+       :border "none"
+       :box-sizing "border-box"
+       :min-height (em 3.5)
+       :padding-left (rem 2.5)}
+
+      [:&:focus
+       {:outline "none"}]]]
 
     [:>.autocomplete
      {:z-index 1000

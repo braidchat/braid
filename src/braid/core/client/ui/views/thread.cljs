@@ -97,7 +97,9 @@
         (fn [component]
           (when-let [node @messages-node]
             (when @at-bottom?
-              (set! (.-scrollTop node) (.-scrollHeight node)))))]
+              (set! (.-scrollTop node)
+                    (- (.-scrollHeight node)
+                       (.-clientHeight node))))))]
 
     (r/create-class
       {:display-name "thread"
@@ -110,7 +112,7 @@
 
          (let [resize-observer
                (js/ResizeObserver. (fn [entries]
-                                     (js/setTimeout (fn [] (scroll-to-bottom! c)) 0)))]
+                                     (scroll-to-bottom! c)))]
            (.. resize-observer (observe @messages-node))))
 
        :component-did-update
@@ -126,9 +128,10 @@
        (fn [thread-id]
          [:div.messages
           {:ref ref-cb
-           :on-scroll (fn [_] (if @first-scroll?
-                               (reset! first-scroll? false)
-                               (check-at-bottom!)))}
+           :on-scroll (fn [_]
+                        (if @first-scroll?
+                          (reset! first-scroll? false)
+                          (check-at-bottom!)))}
           (let [sorted-messages
                 (->> @messages
                      (sort-by :created-at)

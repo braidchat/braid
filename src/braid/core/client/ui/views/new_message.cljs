@@ -15,11 +15,16 @@
 
 (defn- resize-textbox [el]
   (set! (.. el -style -height) "auto")
-  (set! (.. el -style -height)
-        (str (+ 5 (min 300 (.-scrollHeight el))) "px")))
+  (let [new-height (str (min 300 (.-scrollHeight el)) "px")]
+    (set! (.. el -style -height) new-height)
+    ;; also change the height of the parent node
+    ;; which has a fixed height and overflow: hidden
+    ;; to prevent browser from firing an extra scroll event
+    ;; because of the 2 resizes that occur in the above
+    (set! (.. el -parentNode -style -height) new-height)))
 
-(defn textarea-view [{:keys [text set-text! config on-key-down on-change]}]
-  (let [this-elt (r/atom nil)
+(defn textarea-view [{:keys [config]}]
+  (let [this-elt (atom nil)
         connected? (subscribe [:connected?])
         focused? (subscribe [:thread-focused? (config :thread-id)])
         send-message!
@@ -32,34 +37,31 @@
         _ (run! (do
                   (when (and @focused? @this-elt)
                     (.focus @this-elt))))]
-
-    (r/create-class
-      {:display-name "textarea"
-       :component-did-mount
-       (fn [c]
-         (resize-textbox (r/dom-node c))
-         (reset! this-elt (r/dom-node c)))
-
-       :component-did-update
-       (fn [c]
-         (resize-textbox (r/dom-node c)))
-
-       :reagent-render
-       (fn [{:keys [text set-text! config on-key-down on-change]}]
-         [:textarea {:placeholder (config :placeholder)
-                     :value text
-                     :disabled (not @connected?)
-                     :on-focus (fn [e]
-                                 (dispatch [:focus-thread (config :thread-id)]))
-                     :on-change (on-change
-                                  {:on-change
-                                   (fn [e]
-                                     (set-text! (.. e -target -value))
-                                     (resize-textbox (.. e -target)))})
-                     :on-key-down (on-key-down
-                                    {:on-submit (fn [e]
-                                                  (send-message! config text)
-                                                  (set-text! ""))})}])})))
+    (fn [{:keys [text set-text! config on-key-down on-change]}]
+      ;; wrap with a div that has a fixed height and overflow: hidden
+      ;; so that the auto-resize behaviour of the textarea does not cause
+      ;; double scroll events
+      [:div.textarea {:style {:overflow "hidden"
+                              ;; height gets overriden by JS
+                              :height "0px"}}
+       [:textarea {:placeholder (config :placeholder)
+                   :value text
+                   :ref (fn [x]
+                          (when (and x (nil? @this-elt))
+                            (reset! this-elt x)
+                            (resize-textbox @this-elt)))
+                   :disabled (not @connected?)
+                   :on-focus (fn [e]
+                               (dispatch [:focus-thread (config :thread-id)]))
+                   :on-change (on-change
+                                {:on-change
+                                 (fn [e]
+                                   (set-text! (.. e -target -value))
+                                   (resize-textbox (.. e -target)))})
+                   :on-key-down (on-key-down
+                                  {:on-submit (fn [e]
+                                                (send-message! config text)
+                                                (set-text! ""))})}]])))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
   [:div.autocomplete
