@@ -25,7 +25,7 @@
           :class "uploads"
           :icon \uf0ee
           :priority 0
-          :route-fn routes/page-path
+          :route-fn routes/group-page-path
           :route-args {:page-id "uploads"}})
 
        (core/register-state!

@@ -38,7 +38,8 @@
 (defn- public-group-view
   [group]
   [:a.group {:style {:background-color (->color (:id group))}
-             :href (routes/inbox-page-path {:group-id (:id group)})}
+             :href (routes/group-page-path {:group-id (:id group)
+                                            :page-id "inbox"})}
    [:div.name (:name group)]
    [:div.info
     [:div (:intro group)]

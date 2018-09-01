@@ -31,7 +31,7 @@
           :class "starred"
           :icon \uf005
           :priority 9
-          :route-fn routes/page-path
+          :route-fn routes/group-page-path
           :route-args {:page-id "starred"}})
 
        (core/register-thread-header-item!

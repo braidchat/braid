@@ -13,7 +13,7 @@
         open-group-id (subscribe [:open-group-id])
         current-path (subscribe [:page-path])]
     (fn []
-      (let [path (routes/page-path {:group-id @open-group-id
+      (let [path (routes/group-page-path {:group-id @open-group-id
                                     :page-id "me"})]
         [:a.user-info {:href path
                        :class (when (= current-path path) "active")}
@@ -26,15 +26,16 @@
   (hooks/register!
     (atom
       [{:body "Manage Subscriptions"
-        :route-fn routes/page-path
+        :route-fn routes/group-page-path
         :route-args {:page-id "tags"}
         :icon \uf02c
         :priority 10}
        {:body "Invite a Person"
-        :route-fn routes/invite-page-path
+        :route-fn routes/group-page-path
+        :route-args {:page-id "invite"}
         :icon \uf1e0
         :priority 9}
-       {:route-fn routes/page-path
+       {:route-fn routes/group-page-path
         :route-args {:page-id "me"}
         :body "Edit Your Profile"
         :icon \uf2bd
@@ -55,7 +56,7 @@
         :icon \uf235
         :priority -1}
        #_{:body "See Changelog"
-          :route-fn routes/page-path
+          :route-fn routes/system-page-path
           :route-args {:page-id "changelog"}
           :icon \uf1da
           :priority 6}])

@@ -207,7 +207,7 @@
 (reg-sub
   :search-query
   (fn [state _]
-    (get-in state [:page :search-query])))
+    (get-in state [:page :query])))
 
 (reg-sub
   :messages-for-thread

@@ -28,11 +28,13 @@
   (hooks/register!
     (atom
       [{:title "Inbox"
-        :route-fn routes/inbox-page-path
+        :route-fn routes/group-page-path
+        :route-args {:page-id "inbox"}
         :icon \uf01c
         :priority 10}
        {:title "Recently Closed"
-        :route-fn routes/recent-page-path
+        :route-fn routes/group-page-path
+        :route-args {:page-id "recent"}
         :icon \uf1da
         :priority 5}])
     [GroupHeaderItem]))
@@ -58,10 +60,12 @@
 
 (def admin-header-items
   [{:class "settings"
-    :route-fn routes/group-settings-path
+    :route-fn routes/group-page-path
+    :route-args {:page-id "settings"}
     :body "Group Settings"}
    {:class "group-bots"
-    :route-fn routes/bots-path
+    :route-fn routes/group-page-path
+    :route-args {:page-id "bots"}
     :body "Bots"}])
 
 (defn admin-header-view []

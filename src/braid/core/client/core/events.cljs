@@ -338,14 +338,14 @@
   (fn [{db :db} [_ [query {:keys [threads thread-ids] :as reply}]]]
     {:db (-> db
              (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-             (update-in [:page] (fn [p] (if (= (p :search-query) query)
+             (update-in [:page] (fn [p] (if (= (p :query) query)
                                           (assoc p :thread-ids thread-ids)
                                           p))))}))
 
 (reg-event-fx
   :set-search-query
   (fn [{db :db} [_ query]]
-    {:db (assoc-in db [:page :search-query] query)}))
+    {:db (assoc-in db [:page :query] query)}))
 
 (reg-event-fx
   :search-history
@@ -532,7 +532,8 @@
        (if-let [group-id (-> (helpers/ordered-groups state)
                              first
                              :id)]
-         (routes/inbox-page-path {:group-id group-id})
+         (routes/group-page-path {:group-id group-id
+                                  :page-id "inbox"})
          (routes/system-page-path {:page-id "group-explore"}))}
       {})))
 
@@ -568,7 +569,8 @@
        (cond->
            (and (= (:id group) (:open-group-id state))
                 (= :readonly (get-in state [:page :type])))
-         (assoc :redirect-to (routes/inbox-page-path {:group-id (:id group)}))))))
+         (assoc :redirect-to (routes/group-page-path {:group-id (:id group)
+                                                      :page-id "inbox"}))))))
 
 (reg-event-fx
   :notify-if-client-out-of-date
