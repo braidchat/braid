@@ -22,11 +22,7 @@
      :color "#CCC"}
 
     [:&::before
-     (mixins/fontawesome \uf091)]
-
-    ;; make it easier to transition cursor to the menu
-    [:&:hover
-     {:padding-left (em 5)}]]
+     (mixins/fontawesome \uf091)]]
 
    [:.quests-menu
     (mixins/context-menu)
