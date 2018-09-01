@@ -11,6 +11,7 @@
           [braid.core.client.ui.styles.hover-cards]
           [braid.core.client.bots.views.bots-page :refer [bots-page-view]]
           [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
+          [braid.core.client.invites.views.invite-page :refer [invite-page-view]]
           [braid.core.client.ui.views.pages.recent :refer [recent-page-view]]
           [braid.core.client.ui.views.pages.tags :refer [tags-page-view]]
           [braid.core.client.ui.views.pages.search :refer [search-page-view]]
@@ -73,6 +74,10 @@
        (core/register-group-page!
          {:key :me
           :view me-page-view})
+
+       (core/register-group-page!
+         {:key :invite
+          :view invite-page-view})
 
        (core/register-group-page!
          {:key :search
