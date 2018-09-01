@@ -119,7 +119,7 @@
          :styles  (optional) garden styles for the page
 
        Link for page can be generated using:
-        (braid.core.client.routes/page-path
+        (braid.core.client.routes/group-page-path
              {:group-id __
               :page-id __))"
        [page]

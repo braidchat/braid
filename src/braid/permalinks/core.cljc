@@ -16,7 +16,7 @@
           (fn [thread]
             [:a.control.permalink
              {:title "Go to Permalink"
-              :href (routes/page-path
+              :href (routes/group-page-path
                       {:query-params {:thread-id (thread :id)}
                        :page-id "thread"
                        :group-id (thread :group-id)})}

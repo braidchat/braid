@@ -41,7 +41,7 @@
   (dispatch [:braid.core.client.gateway.events/initialize :join-group])
   (dispatch [:set-group-and-page [nil {:type :login}]]))
 
-(defroute page-path "/groups/:group-id/:page-id" [group-id page-id query-params]
+(defroute group-page-path "/groups/:group-id/:page-id" [group-id page-id query-params]
   (let [page (merge {:type (keyword page-id)
                      :page-id (keyword page-id)
                      :group-id (uuid group-id)}

@@ -53,9 +53,10 @@
            "Uploaded by "
            [mentions/user-mention-view (upload :uploader-id)]]
           [:td.uploaded-thread
-           [:a {:href (routes/page-path {:group-id @group-id
-                                         :page-id "thread"
-                                         :query-params {:thread-id (upload :thread-id)}})}
+           [:a {:href (routes/group-page-path
+                        {:group-id @group-id
+                         :page-id "thread"
+                         :query-params {:thread-id (upload :thread-id)}})}
             (str "Uploaded at " (helpers/format-date (upload :uploaded-at)))]
            [:br]
            (if @thread
