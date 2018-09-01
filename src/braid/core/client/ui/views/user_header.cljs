@@ -31,7 +31,8 @@
         :icon \uf02c
         :priority 10}
        {:body "Invite a Person"
-        :route-fn routes/invite-page-path
+        :route-fn routes/group-page-path
+        :route-args {:page-id "invite"}
         :icon \uf1e0
         :priority 9}
        {:route-fn routes/group-page-path

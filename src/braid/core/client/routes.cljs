@@ -19,9 +19,6 @@
                           (dispatch [:set-page-loading false])
                           (dispatch [:set-page-error true]))}]))
 
-(defroute invite-page-path "/groups/:group-id/invite" [group-id ]
-  (dispatch [:set-group-and-page [(uuid group-id) {:type :invite}]]))
-
 (defroute search-page-path "/groups/:group-id/search/:query" [group-id query]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :search
                                                    :search-query query}]])
