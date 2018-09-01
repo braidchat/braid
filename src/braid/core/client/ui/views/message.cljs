@@ -214,9 +214,10 @@
                       (routes/group-page-path {:group-id @current-group
                                                :page-id "bots"})
 
-                      :else (routes/search-page-path
+                      :else (routes/group-page-path
                               {:group-id @current-group
-                               :query (str "@" (:id sender))}))]
+                               :page-id "search"
+                               :query-params {:query (str "@" (:id sender))}}))]
     [:div.message {:class (str " " (when (:collapse? message) "collapse")
                                " " (if (:unseen? message) "unseen" "seen")
                                " " (when (:first-unseen? message) "first-unseen")

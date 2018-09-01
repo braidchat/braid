@@ -31,8 +31,9 @@
                      (if (string/blank? query)
                        (exit-search!)
                        (do (dispatch [:search-history [query @open-group-id]])
-                           (routes/go-to! (routes/search-page-path {:group-id @open-group-id
-                                                                    :query query})))))
+                           (routes/go-to! (routes/group-page-path {:group-id @open-group-id
+                                                                   :page-id "search"
+                                                                   :query-params {:query query}})))))
                    (recur)))))))
 
        :component-will-unmount

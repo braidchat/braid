@@ -338,14 +338,14 @@
   (fn [{db :db} [_ [query {:keys [threads thread-ids] :as reply}]]]
     {:db (-> db
              (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-             (update-in [:page] (fn [p] (if (= (p :search-query) query)
+             (update-in [:page] (fn [p] (if (= (p :query) query)
                                           (assoc p :thread-ids thread-ids)
                                           p))))}))
 
 (reg-event-fx
   :set-search-query
   (fn [{db :db} [_ query]]
-    {:db (assoc-in db [:page :search-query] query)}))
+    {:db (assoc-in db [:page :query] query)}))
 
 (reg-event-fx
   :search-history

@@ -8,12 +8,6 @@
 (defn go-to! [path]
   (router/go-to path))
 
-(defroute search-page-path "/groups/:group-id/search/:query" [group-id query]
-  (dispatch [:set-group-and-page [(uuid group-id) {:type :search
-                                                   :search-query query}]])
-  (dispatch [:set-page-loading true])
-  (dispatch [:search-history [query (uuid group-id)]]))
-
 (defroute join-group-path "/groups/:group-id/join" [group-id]
   (dispatch [:braid.core.client.gateway.events/initialize :join-group])
   (dispatch [:set-group-and-page [nil {:type :login}]]))
