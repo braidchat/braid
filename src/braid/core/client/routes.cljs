@@ -22,9 +22,6 @@
 (defroute invite-page-path "/groups/:group-id/invite" [group-id ]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :invite}]]))
 
-(defroute bots-path "/groups/:group-id/bots" [group-id]
-  (dispatch [:set-group-and-page [(uuid group-id) {:type :bots}]]))
-
 (defroute group-settings-path "/groups/:group-id/settings" [group-id]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :settings}]]))
 

@@ -62,7 +62,8 @@
     :route-fn routes/group-settings-path
     :body "Group Settings"}
    {:class "group-bots"
-    :route-fn routes/bots-path
+    :route-fn routes/group-page-path
+    :route-args {:page-id "bots"}
     :body "Bots"}])
 
 (defn admin-header-view []

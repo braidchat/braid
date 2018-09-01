@@ -211,7 +211,8 @@
                       (nil? sender) ""
 
                       (:bot? sender)
-                      (routes/bots-path {:group-id @current-group})
+                      (routes/group-page-path {:group-id @current-group
+                                               :page-id "bots"})
 
                       :else (routes/search-page-path
                               {:group-id @current-group
