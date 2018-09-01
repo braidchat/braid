@@ -1,13 +1,12 @@
-(ns braid.core.client.uploads.views.uploads-page
+(ns braid.uploads-page.views.uploads-page
   (:require
-   [braid.core.client.helpers :as helpers]
-   [braid.core.client.routes :as routes]
-   [braid.core.client.ui.views.mentions :as mentions]
-   [braid.core.client.ui.views.thread :as thread]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
-   [reagent.ratom :refer-macros [run!]]))
+   [braid.core.client.helpers :as helpers]
+   [braid.core.client.routes :as routes]
+   [braid.core.client.ui.views.mentions :as mentions]
+   [braid.core.client.ui.views.thread :as thread]))
 
 (defn file-view [url]
   (cond
@@ -20,7 +19,7 @@
       :controls true}]))
 
 (defn upload-view
-  [upload on-delete]
+  [upload]
   (let [group-id (subscribe [:open-group-id])
         thread-id (r/atom (upload :thread-id))
         user-id (subscribe [:user-id])
@@ -33,7 +32,7 @@
          (reset! thread-id (new-upload :thread-id)))
 
        :reagent-render
-       (fn [upload on-delete]
+       (fn [upload]
          [:tr.upload
           [:td.uploaded-file
            [file-view (upload :url)]
@@ -48,8 +47,7 @@
                  (when (js/confirm (str "Delete this uploaded file?\n"
                                         "If this was uploading using Braid, it"
                                         " will remove the file from S3 as well."))
-                   (on-delete)
-                   (dispatch [:core.uploads/delete-upload (:id upload)])))}
+                   (dispatch [:braid.uploads-page/delete-upload @group-id (upload :id)])))}
               \uf1f8])]
           [:td.uploader
            "Uploaded by "
@@ -70,33 +68,21 @@
 
 (defn uploads-page-view
   []
-  (let [group-id (subscribe [:open-group-id])
-        uploads (r/atom :initial)
-        error (r/atom nil)
-        ; TODO: will need to page this when it gets big?
-        ; FIXME: breaks the re-frame style, should dispatch and
-        ; subscribe independently
-        get-uploads (run! (dispatch [:get-group-uploads
-                                     {:group-id @group-id
-                                      :on-success (partial reset! uploads)
-                                      :on-error (partial reset! error)}]))]
-    (fn []
-      (let [_ @get-uploads]
-        [:div.page.uploads
-         [:div.title "Uploads"]
-         [:div.content
-          (cond
-            @error [:div.error @error]
-            (= :initial @uploads) [:div.loading "Loading..."]
-            (empty? @uploads) [:p "No uploads in this group yet"]
-            :else
-            [:table.uploads
-             [:thead
-              [:tr [:th ""] [:th ""] [:th ""] [:th ""]]]
-             [:tbody
-              (doall
-                (for [upload @uploads]
-                  ^{:key (upload :id)}
-                  [upload-view upload
-                   (fn [] (swap! uploads
-                                (partial remove #(= % upload))))]))]])]]))))
+  (let [uploads @(subscribe [:braid.uploads-page/uploads])]
+    [:div.page.uploads
+     [:div.title "Uploads"]
+     [:div.content
+      (cond
+        (nil? uploads)
+        [:p "Loading..."]
+
+        (empty? uploads)
+        [:p "No uploads in this group yet"]
+
+        :else
+        [:table.uploads
+         [:tbody
+          (doall
+            (for [upload uploads]
+              ^{:key (upload :id)}
+              [upload-view upload]))]])]]))

@@ -1,18 +1,19 @@
-(ns braid.core.server.s3
+(ns braid.uploads.s3
   (:require
-   [braid.core.server.conf :refer [config]]
-   [braid.core.server.crypto :as crypto :refer [hmac-sha256 str->bytes]]
-   [clj-time.core :as t]
-   [clj-time.format :as f]
-   [clojure.data.json :as json]
-   [clojure.string :as string])
+    [clojure.data.json :as json]
+    [clojure.string :as string]
+    [clj-time.core :as t]
+    [clj-time.format :as f]
+    [org.httpkit.client :as http]
+    [braid.core.server.conf :refer [config]]
+    [braid.core.server.crypto :as crypto :refer [hmac-sha256 str->bytes]])
   (:import
-   (org.joda.time DateTime DateTimeZone Period)
-   (org.joda.time.format ISODateTimeFormat)))
+    (org.joda.time DateTime DateTimeZone Period)
+    (org.joda.time.format ISODateTimeFormat)))
 
 (defn generate-policy
   []
-  (when-let [secret (config :s3-upload-secret)]
+  (when-let [secret (config :aws-secret-key)]
     ;; why is this using joda via java interop instead of clj-time?
     (let [policy (-> {:expiration (.. (DateTime. (DateTimeZone/UTC))
                                       (plus (Period/minutes 5))
@@ -28,7 +29,7 @@
                      crypto/base64-encode)]
       {:bucket (config :aws-domain)
        :auth {:policy policy
-              :key (config :s3-upload-key)
+              :key (config :aws-access-key)
               :signature (crypto/b64-sha1-encode policy secret)}})))
 
 (defn signing-key
@@ -95,3 +96,18 @@
     (-> req (assoc-in [:headers "Authorization"] auth)
         (dissoc :path)
         (assoc :url (str "https://s3.amazonaws.com/" (config :aws-domain) path)))))
+
+(defn upload-url-path
+  [url]
+  (some->
+    (re-pattern (str "^https://s3.amazonaws.com/"
+                     (config :aws-domain)
+                     "(/.*)$"))
+    (re-matches url)
+    second))
+
+(defn delete-upload
+  [upload-path]
+  @(http/request (make-request {:method :delete
+                                :body ""
+                                :path upload-path})))

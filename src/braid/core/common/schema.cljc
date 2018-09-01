@@ -108,10 +108,3 @@
    :invitee-email string?
    :group-id uuid?
    :group-name string?})
-
-(def Upload
-  {:id uuid?
-   :thread-id uuid?
-   :uploader-id uuid?
-   :uploaded-at inst?
-   :url string?})

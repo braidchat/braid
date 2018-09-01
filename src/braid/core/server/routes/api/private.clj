@@ -2,11 +2,9 @@
   (:require
    [braid.core.server.db :as db]
    [braid.core.server.db.group :as group]
-   [braid.core.server.db.user :as user]
    [braid.core.server.events :as events]
    [braid.core.server.markdown :refer [markdown->hiccup]]
    [braid.core.server.routes.helpers :as helpers :refer [error-response edn-response]]
-   [braid.core.server.s3 :as s3]
    [clojure.java.io :as io]
    [clojure.string :as string]
    [compojure.core :refer [GET PUT DELETE defroutes]]
@@ -100,17 +98,4 @@
     (edn-response {:braid/ok
                    (-> (io/resource "CHANGELOG.md")
                        slurp
-                       markdown->hiccup)}))
-
-  (GET "/s3-policy" req
-    (if (user/user-id-exists? (get-in req [:session :user-id]))
-      (if-let [policy (s3/generate-policy)]
-        {:status 200
-         :headers {"Content-Type" "application/edn"}
-         :body (pr-str policy)}
-        {:status 500
-         :headers {"Content-Type" "application/edn"}
-         :body (pr-str {:error "No S3 secret for upload"})})
-      {:status 403
-       :headers {"Content-Type" "application/edn"}
-       :body (pr-str {:error "Unauthorized"})})))
+                       markdown->hiccup)})))

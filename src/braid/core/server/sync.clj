@@ -18,7 +18,6 @@
     [braid.core.server.db.message :as message]
     [braid.core.server.db.tag :as tag]
     [braid.core.server.db.thread :as thread]
-    [braid.core.server.db.upload :as upload]
     [braid.core.server.db.user :as user]
     [braid.core.server.digest :as digest]
     [braid.core.server.events :as events]
@@ -28,7 +27,6 @@
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
-    [braid.core.server.uploads :as s3-uploads]
     [braid.core.server.util :refer [valid-url?]]))
 
 (defn user-can-delete-message?
@@ -458,34 +456,6 @@
   (let [bot (bot/bot-by-id ?data)]
     (when (and bot (group/user-is-group-admin? user-id (bot :group-id)) ?reply-fn)
       (?reply-fn {:braid/ok bot}))))
-
-(defmethod event-msg-handler :braid.server/create-upload
-  [{:as ev-msg :keys [?data user-id]}]
-  (let [upload (assoc ?data
-                 :uploaded-at (java.util.Date.)
-                 :uploader-id user-id)]
-    (when (and (util/valid? schema/Upload upload)
-               (let [thread-group-id (thread/thread-group-id (upload :thread-id))]
-                 (or (nil? thread-group-id) (= thread-group-id (upload :group-id))))
-               (group/user-in-group? user-id (upload :group-id)))
-      (db/run-txns! (upload/create-upload-txn upload)))))
-
-(defmethod event-msg-handler :braid.server/uploads-in-group
-  [{:as ev-msg :keys [?data user-id ?reply-fn]}]
-  (when ?reply-fn
-    (if (group/user-in-group? user-id ?data)
-      (?reply-fn {:braid/ok (upload/uploads-in-group ?data)})
-      (?reply-fn {:braid/error "Not allowed"}))))
-
-(defmethod event-msg-handler :braid.server/delete-upload
-  [{:as ev-msg :keys [?data user-id ?reply-fn]}]
-  (let [upload (upload/upload-info ?data)]
-    (when (or (= user-id (:user-id upload))
-              (group/user-is-group-admin? user-id (:group-id upload)))
-      (when-let [path (s3-uploads/upload-url-path (:url upload))]
-        (s3-uploads/delete-upload path))
-      (db/run-txns!
-        (upload/retract-upload-txn (:id upload))))))
 
 (defmethod event-msg-handler :braid.server.anon/load-group
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]

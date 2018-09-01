@@ -92,6 +92,5 @@
          {:key :group-explore
           :on-load (fn [_]
                      (dispatch [::load-public-groups]))
-          :view views/group-explore-page-view})
-
-       (core/register-styles! styles/group-explore-page))))
+          :view views/group-explore-page-view
+          :styles styles/>group-explore-page}))))

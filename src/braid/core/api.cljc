@@ -14,6 +14,7 @@
           [braid.core.client.ui.views.header]
           [braid.core.client.ui.views.user-header]
           [braid.core.client.ui.views.autocomplete]
+          [braid.core.client.ui.views.new-message-action-button]
           [braid.core.client.group-admin.views.group-settings-page]]
          :clj
          [[braid.core.server.conf]
@@ -80,30 +81,42 @@
        {:pre [(util/valid? braid.core.client.ui.views.thread/thread-control-dataspec config)]}
        (swap! braid.core.client.ui.views.thread/thread-controls conj config))
 
+     (defn register-styles!
+       "Add Garden CSS styles to the page styles"
+       [styles]
+       {:pre [(util/valid? braid.core.client.ui.views.styles/style-dataspec styles)]}
+       (swap! braid.core.client.ui.views.styles/module-styles conj styles))
+
      (defn register-system-page!
        "Registers a system page with its own URL.
 
        Expects a map with the following keys:
          :key      keyword
-         :on-load  optional function to call
+         :on-load  (optional) function to call
                    when page is navigated to
          :view   reagent view fn
+         :styles  (optional) garden styles for the page
 
        Link for page can be generated using:
         (braid.core.client.routes/system-page-path
              {:page-id __})"
        [page]
        {:pre [(util/valid? braid.core.client.pages/page-dataspec page)]}
-       (swap! braid.core.client.pages/pages assoc (page :key) page))
+       (swap! braid.core.client.pages/pages assoc (page :key) page)
+       (when (page :styles)
+         (register-styles!
+           [:#app>.app>.main
+            (page :styles)])))
 
      (defn register-group-page!
        "Registers a group page with its own URL.
 
        Expects a map with the following keys:
          :key      keyword
-         :on-load  optional function to call
+         :on-load  (optional) function to call
                    when page is navigated to
          :view   reagent view fn
+         :styles  (optional) garden styles for the page
 
        Link for page can be generated using:
         (braid.core.client.routes/page-path
@@ -111,7 +124,11 @@
               :page-id __))"
        [page]
        {:pre [(util/valid? braid.core.client.pages/page-dataspec page)]}
-       (swap! braid.core.client.pages/pages assoc (page :key) page))
+       (swap! braid.core.client.pages/pages assoc (page :key) page)
+       (when (page :styles)
+         (register-styles!
+           [:#app>.app>.main
+            (page :styles)])))
 
      (defn register-events!
        "Registers multiple re-frame event handlers, as if passed to reg-event-fx.
@@ -170,12 +187,6 @@
        {:pre [(fn? view)]}
        (swap! braid.core.client.ui.views.message/footer-views conj view))
 
-     (defn register-styles!
-       "Add Garden CSS styles to the page styles"
-       [styles]
-       {:pre [(util/valid? braid.core.client.ui.views.styles/style-dataspec styles)]}
-       (swap! braid.core.client.ui.views.styles/module-styles conj styles))
-
      (defn register-state!
        "Add a key and initial value to the default app state, plus an associated spec."
        [state spec]
@@ -204,7 +215,12 @@
        "Register a view to add to the group settings page. The view will recieve the group map as an argument."
        [view]
        {:pre [(fn? view)]}
-       (swap! braid.core.client.group-admin.views.group-settings-page/extra-group-settings conj view)))
+       (swap! braid.core.client.group-admin.views.group-settings-page/extra-group-settings conj view))
+
+     (defn register-new-message-action-menu-item!
+       [menu-item]
+       {:pre [(util/valid? braid.core.client.ui.views.header-item/HeaderItem menu-item)]}
+       (swap! braid.core.client.ui.views.new-message-action-button/menu-items conj menu-item)))
 
    :clj
    (do

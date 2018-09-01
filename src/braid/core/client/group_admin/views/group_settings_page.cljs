@@ -5,7 +5,6 @@
     [re-frame.core :refer [dispatch subscribe]]
     [braid.core.hooks :as hooks]
     [braid.core.client.routes :as routes]
-    [braid.core.client.s3 :as s3]
     [braid.core.client.ui.views.upload :refer [avatar-upload-view]]))
 
 (defn intro-message-view

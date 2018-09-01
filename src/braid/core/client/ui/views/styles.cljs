@@ -25,7 +25,6 @@
    [braid.core.client.ui.styles.sidebar]
    [braid.core.client.ui.styles.thread]
    [braid.core.client.ui.styles.vars :as vars]
-   [braid.core.client.uploads.views.uploads-page-styles]
    [garden.core :refer [css]]
    [reagent.core :as r]))
 
@@ -92,7 +91,6 @@
                  braid.core.client.ui.styles.pages.tags/tags-page
                  braid.core.client.ui.styles.pages.me/me-page
                  braid.core.client.group-admin.views.group-settings-page-styles/group-settings-page
-                 braid.core.client.uploads.views.uploads-page-styles/uploads-page
                  braid.core.client.invites.views.invite-page-styles/invite-page
                  braid.core.client.bots.views.bots-page-styles/bots-page
                  braid.core.client.ui.styles.pages.search/search-user-card

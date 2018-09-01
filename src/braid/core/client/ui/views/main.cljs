@@ -19,7 +19,6 @@
    [braid.core.client.ui.views.pages.tags :refer [tags-page-view]]
    [braid.core.client.ui.views.reconnect-overlay :refer [reconnect-overlay-view]]
    [braid.core.client.ui.views.sidebar :refer [sidebar-view]]
-   [braid.core.client.uploads.views.uploads-page :refer [uploads-page-view]]
    [braid.core.client.ui.views.pages.readonly :refer [readonly-inbox-page-view]]
    [re-frame.core :refer [dispatch subscribe]]))
 
@@ -36,7 +35,6 @@
       :invite [invite-page-view]
       :create-group [create-group-page-view]
       :bots [bots-page-view]
-      :uploads [uploads-page-view]
       :settings [group-settings-page-view]
       :global-settings [global-settings-page-view]
       :changelog [changelog-view]

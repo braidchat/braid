@@ -17,7 +17,6 @@
     [braid.core.server.invite :as invites]
     [braid.core.server.markdown :refer [markdown->hiccup]]
     [braid.core.server.routes.helpers :refer [current-user error-response edn-response]]
-    [braid.core.server.s3 :as s3]
     [braid.core.server.sync :as sync]))
 
 (defn join-group

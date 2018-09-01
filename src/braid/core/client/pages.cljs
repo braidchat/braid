@@ -1,11 +1,13 @@
 (ns braid.core.client.pages
   (:require
+    [spec-tools.data-spec :as ds]
     [braid.core.hooks :as hooks]))
 
 (def page-dataspec
   {:key keyword?
-   :on-load fn?
-   :view fn?})
+   :view fn?
+   (ds/opt :on-load) fn?
+   (ds/opt :styles) vector?})
 
 (defonce pages
   (hooks/register! (atom {}) {keyword? page-dataspec}))
