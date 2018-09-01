@@ -1,7 +1,6 @@
 (ns braid.core.client.ui.views.main
   (:require
    [braid.core.hooks :as hooks]
-   [braid.core.client.bots.views.bots-page :refer [bots-page-view]]
    [braid.core.client.gateway.views :refer [gateway-view]]
    [braid.core.client.gateway.forms.user-auth.views :refer [user-auth-view]]
    [braid.core.client.group-admin.views.group-settings-page :refer [group-settings-page-view]]
@@ -34,7 +33,6 @@
       :me [me-page-view]
       :invite [invite-page-view]
       :create-group [create-group-page-view]
-      :bots [bots-page-view]
       :settings [group-settings-page-view]
       :global-settings [global-settings-page-view]
       :changelog [changelog-view]
