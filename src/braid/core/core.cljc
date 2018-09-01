@@ -13,6 +13,7 @@
           [braid.core.client.ui.views.pages.recent :refer [recent-page-view]]
           [braid.core.client.ui.views.pages.tags :refer [tags-page-view]]
           [braid.core.client.ui.views.pages.search :refer [search-page-view]]
+          [braid.core.client.ui.views.pages.me :refer [me-page-view]]
           [braid.core.client.group-admin.views.group-settings-page :refer [group-settings-page-view]]])))
 
 (defn init! []
@@ -63,6 +64,10 @@
        (core/register-group-page!
          {:key :tags
           :view tags-page-view})
+
+       (core/register-group-page!
+         {:key :me
+          :view me-page-view})
 
        (core/register-group-page!
          {:key :search
