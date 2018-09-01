@@ -10,7 +10,8 @@
           [braid.core.client.ui.styles.hover-menu]
           [braid.core.client.ui.styles.hover-cards]
           [braid.core.client.bots.views.bots-page :refer [bots-page-view]]
-          [braid.core.client.ui.views.pages.recent :refer [recent-page-view]]])))
+          [braid.core.client.ui.views.pages.recent :refer [recent-page-view]]
+          [braid.core.client.group-admin.views.group-settings-page :refer [group-settings-page-view]]])))
 
 (defn init! []
   #?(:cljs
@@ -51,5 +52,9 @@
                                                 (dispatch [:set-page-loading false]))
                                  :on-error (fn [e]
                                              (dispatch [:set-page-loading false])
-                                             (dispatch [:set-page-error true]))}]))}))))
+                                             (dispatch [:set-page-error true]))}]))})
+
+       (core/register-group-page!
+         {:key :settings
+          :view group-settings-page-view}))))
 
