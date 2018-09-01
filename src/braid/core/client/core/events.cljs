@@ -532,7 +532,8 @@
        (if-let [group-id (-> (helpers/ordered-groups state)
                              first
                              :id)]
-         (routes/inbox-page-path {:group-id group-id})
+         (routes/group-page-path {:group-id group-id
+                                  :page-id "inbox"})
          (routes/system-page-path {:page-id "group-explore"}))}
       {})))
 
@@ -568,7 +569,8 @@
        (cond->
            (and (= (:id group) (:open-group-id state))
                 (= :readonly (get-in state [:page :type])))
-         (assoc :redirect-to (routes/inbox-page-path {:group-id (:id group)}))))))
+         (assoc :redirect-to (routes/group-page-path {:group-id (:id group)
+                                                      :page-id "inbox"}))))))
 
 (reg-event-fx
   :notify-if-client-out-of-date

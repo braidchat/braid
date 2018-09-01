@@ -28,7 +28,8 @@
   (hooks/register!
     (atom
       [{:title "Inbox"
-        :route-fn routes/inbox-page-path
+        :route-fn routes/group-page-path
+        :route-args {:page-id "inbox"}
         :icon \uf01c
         :priority 10}
        {:title "Recently Closed"

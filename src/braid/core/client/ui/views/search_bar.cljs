@@ -16,7 +16,8 @@
         kill-chan (chan)
         search-chan (chan)
         exit-search! (fn []
-                       (routes/go-to! (routes/inbox-page-path {:group-id @open-group-id})))]
+                       (routes/go-to! (routes/group-page-path {:group-id @open-group-id
+                                                               :page-id "inbox"})))]
     (r/create-class
       {:component-will-mount
        (fn []

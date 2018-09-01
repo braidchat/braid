@@ -8,9 +8,6 @@
 (defn go-to! [path]
   (router/go-to path))
 
-(defroute inbox-page-path "/groups/:group-id" [group-id]
-  (dispatch [:set-group-and-page [(uuid group-id) {:type :inbox}]]))
-
 (defroute recent-page-path "/groups/:group-id/recent" [group-id]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :recent}]])
   (dispatch [:set-page-loading true])

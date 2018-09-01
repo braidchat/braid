@@ -65,7 +65,8 @@
      ;; need to do a full redirect, because the sign-up flow via gateway.js
      ;; doesn't have any of the other assets
      ;; :redirect-to (routes/inbox-page-path {:group-id group-id})
-     :dispatch [::redirect (routes/inbox-page-path {:group-id group-id})]}))
+     :dispatch [::redirect (routes/group-page-path {:group-id group-id
+                                                    :page-id "inbox"})]}))
 
 (reg-event-fx
   ::redirect
