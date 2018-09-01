@@ -59,7 +59,8 @@
 
 (def admin-header-items
   [{:class "settings"
-    :route-fn routes/group-settings-path
+    :route-fn routes/group-page-path
+    :route-args {:page-id "settings"}
     :body "Group Settings"}
    {:class "group-bots"
     :route-fn routes/group-page-path

@@ -102,7 +102,8 @@
                                      :route-args {:page-id "inbox"}
                                      :class "inbox"}
                                     {:title "Settings"
-                                     :route-fn routes/group-settings-path
+                                     :route-fn routes/group-page-path
+                                     :route-args {:page-id "settings"}
                                      :class "settings"}]]]])))
 
 (defn inbox-view [toggle-draw-ch]

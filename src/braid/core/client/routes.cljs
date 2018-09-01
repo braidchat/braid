@@ -22,9 +22,6 @@
 (defroute invite-page-path "/groups/:group-id/invite" [group-id ]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :invite}]]))
 
-(defroute group-settings-path "/groups/:group-id/settings" [group-id]
-  (dispatch [:set-group-and-page [(uuid group-id) {:type :settings}]]))
-
 (defroute search-page-path "/groups/:group-id/search/:query" [group-id query]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :search
                                                    :search-query query}]])
