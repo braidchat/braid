@@ -10,6 +10,7 @@
           [braid.core.client.ui.styles.hover-menu]
           [braid.core.client.ui.styles.hover-cards]
           [braid.core.client.bots.views.bots-page :refer [bots-page-view]]
+          [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
           [braid.core.client.ui.views.pages.recent :refer [recent-page-view]]
           [braid.core.client.ui.views.pages.tags :refer [tags-page-view]]
           [braid.core.client.ui.views.pages.search :refer [search-page-view]]
@@ -39,6 +40,10 @@
 
        (popovers/register-popover-styles!
          (braid.core.client.ui.styles.hover-menu/>hover-menu))
+
+       (core/register-system-page!
+         {:key :global-settings
+          :view global-settings-page-view})
 
        (core/register-group-page!
          {:key :bots
