@@ -8,17 +8,6 @@
 (defn go-to! [path]
   (router/go-to path))
 
-(defroute recent-page-path "/groups/:group-id/recent" [group-id]
-  (dispatch [:set-group-and-page [(uuid group-id) {:type :recent}]])
-  (dispatch [:set-page-loading true])
-  (dispatch [:load-recent-threads
-             {:group-id (uuid group-id)
-              :on-complete (fn [_]
-                             (dispatch [:set-page-loading false]))
-              :on-error (fn [e]
-                          (dispatch [:set-page-loading false])
-                          (dispatch [:set-page-error true]))}]))
-
 (defroute search-page-path "/groups/:group-id/search/:query" [group-id query]
   (dispatch [:set-group-and-page [(uuid group-id) {:type :search
                                                    :search-query query}]])

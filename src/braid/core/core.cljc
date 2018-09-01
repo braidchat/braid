@@ -3,12 +3,14 @@
   (:require
     [braid.core.api :as core]
     #?@(:cljs
-         [[braid.core.client.ui.views.autocomplete]
+         [[re-frame.core :refer [dispatch]]
+          [braid.core.client.ui.views.autocomplete]
           [braid.core.client.store]
           [braid.popovers.api :as popovers]
           [braid.core.client.ui.styles.hover-menu]
           [braid.core.client.ui.styles.hover-cards]
-          [braid.core.client.bots.views.bots-page :refer [bots-page-view]]])))
+          [braid.core.client.bots.views.bots-page :refer [bots-page-view]]
+          [braid.core.client.ui.views.pages.recent :refer [recent-page-view]]])))
 
 (defn init! []
   #?(:cljs
@@ -36,4 +38,18 @@
 
        (core/register-group-page!
          {:key :bots
-          :view bots-page-view}))))
+          :view bots-page-view})
+
+       (core/register-group-page!
+         {:key :recent
+          :view recent-page-view
+          :on-load (fn [page]
+                     (dispatch [:set-page-loading true])
+                     (dispatch [:load-recent-threads
+                                {:group-id (page :group-id)
+                                 :on-complete (fn [_]
+                                                (dispatch [:set-page-loading false]))
+                                 :on-error (fn [e]
+                                             (dispatch [:set-page-loading false])
+                                             (dispatch [:set-page-error true]))}]))}))))
+
