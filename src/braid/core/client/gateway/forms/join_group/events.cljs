@@ -18,7 +18,7 @@
                :headers {"x-csrf-token" (state :csrf-token)}
                :on-complete
                (fn [response]
-                 (set! js/window.location (str "/groups/" (get-url-group-id))))
+                 (set! js/window.location (str "/groups/" (get-url-group-id) "/inbox")))
                :on-error
                (fn [error]
                  (when-let [k (get-in error [:response :error])]
