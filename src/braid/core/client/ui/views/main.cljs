@@ -6,7 +6,6 @@
    [braid.core.client.pages :as pages]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.header :refer [header-view readonly-header-view]]
-   [braid.core.client.ui.views.pages.changelog :refer [changelog-view]]
    [braid.core.client.ui.views.pages.create-group :refer [create-group-page-view]]
    [braid.core.client.ui.views.pages.inbox :refer [inbox-page-view]]
    [braid.core.client.ui.views.reconnect-overlay :refer [reconnect-overlay-view]]
@@ -21,7 +20,6 @@
       :readonly [readonly-inbox-page-view]
       :login [gateway-view]
       :create-group [create-group-page-view]
-      :changelog [changelog-view]
       (when-let [view (pages/get-view id)]
         [view]))))
 

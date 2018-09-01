@@ -56,7 +56,7 @@
         :icon \uf235
         :priority -1}
        #_{:body "See Changelog"
-          :route-fn routes/group-page-path
+          :route-fn routes/system-page-path
           :route-args {:page-id "changelog"}
           :icon \uf1da
           :priority 6}])
