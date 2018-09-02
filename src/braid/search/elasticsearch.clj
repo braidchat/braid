@@ -1,4 +1,4 @@
-(ns braid.core.server.search.elasticsearch
+(ns braid.search.elasticsearch
   (:require
    [braid.core.server.conf :refer [config]]
    [braid.core.server.db :as db]

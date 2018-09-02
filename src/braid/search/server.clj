@@ -1,8 +1,8 @@
-(ns braid.core.server.search
+(ns braid.search.server
   (:require
    [braid.core.server.db :as db]
    [braid.core.server.db.thread :as thread]
-   [braid.core.server.search.elasticsearch :as elastic]
+   [braid.search.elasticsearch :as elastic]
    [clojure.set :refer [intersection]]
    [clojure.string :as string]
    [datomic.api :as d]

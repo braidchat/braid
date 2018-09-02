@@ -12,7 +12,7 @@
     [braid.core.server.db.user :as user]
     [braid.core.common.schema :as schema]
     [braid.core.common.util :as util]
-    [braid.core.server.search :as search]
+    [braid.search.server :as search]
     [braid.test.fixtures.db :refer [drop-db]]
     [braid.test.server.test-utils :refer [fetch-messages]]))
 
