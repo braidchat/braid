@@ -94,6 +94,8 @@
          :key      keyword
          :on-load  (optional) function to call
                    when page is navigated to
+         :on-exit  (optional) function to call
+                   when page is navigated away from
          :view   reagent view fn
          :styles  (optional) garden styles for the page
 
@@ -115,6 +117,8 @@
          :key      keyword
          :on-load  (optional) function to call
                    when page is navigated to
+         :on-exit  (optional) function to call
+                   when page is navigated away from
          :view   reagent view fn
          :styles  (optional) garden styles for the page
 
