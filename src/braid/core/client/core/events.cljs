@@ -1,12 +1,12 @@
 (ns braid.core.client.core.events
   (:require
    [braid.core.client.desktop.notify :as notify]
-   [braid.core.client.router :as router]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
    [braid.core.client.state :refer [reg-event-fx]]
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
    [braid.core.client.state.fx.dispatch-debounce :as fx.debounce]
+   [braid.core.client.state.fx.redirect :as fx.redirect]
    [braid.core.client.sync :as sync]
    [braid.core.client.xhr :refer [edn-xhr]]
    [braid.core.common.util :as util]
@@ -40,7 +40,7 @@
 ; TODO: handle callbacks declaratively too?
 (reg-fx :edn-xhr (fn [args] (edn-xhr args)))
 
-(reg-fx :redirect-to (fn [route] (when route (router/go-to route))))
+(reg-fx :redirect-to fx.redirect/redirect-to)
 
 (reg-fx :window-title (fn [title] (when title (set! (.-title js/document) title))))
 
