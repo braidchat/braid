@@ -15,6 +15,7 @@
     [braid.popovers.core]
     [braid.quests.core]
     [braid.rss.core]
+    [braid.search.core]
     [braid.stars.core]
     [braid.uploads.core]
     [braid.uploads-page.core]
@@ -39,6 +40,7 @@
   (braid.quests.core/init!)
   (braid.rss.core/init!)
   (braid.stars.core/init!)
+  (braid.search.core/init!)
   (braid.uploads.core/init!)
   (braid.uploads-page.core/init!)
   (braid.video-embeds.core/init!)
