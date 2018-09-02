@@ -7,8 +7,8 @@
           [braid.search.server :as search]]
          :cljs
          [[clojure.string :as string]
-          [spec-tools.data-spec :as ds]
           [re-frame.core :refer [dispatch]]
+          [spec-tools.data-spec :as ds]
           [braid.core.client.routes :as routes]
           [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
           [braid.search.ui.search-page :refer [search-page-view]]
