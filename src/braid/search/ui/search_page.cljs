@@ -1,8 +1,6 @@
 (ns braid.search.ui.search-page
   (:require
    [re-frame.core :refer [dispatch subscribe]]
-   [reagent.core :as r]
-   [reagent.ratom :include-macros true :refer-macros [reaction]]
    [braid.core.client.ui.views.thread :refer [thread-view]]))
 
 (defn search-page-view
