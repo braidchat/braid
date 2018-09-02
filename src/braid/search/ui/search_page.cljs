@@ -29,7 +29,7 @@
         [:button
          {:on-click
           (fn [_]
-            (dispatch [:braid.search/search-history! [query @(subscribe [:open-group-id])]]))}
+            (dispatch [:braid.search/search-history! query @(subscribe [:open-group-id])]))}
          "Try again"]]]
 
       (:done-results :loading)

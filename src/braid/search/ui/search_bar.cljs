@@ -1,58 +1,22 @@
 (ns braid.search.ui.search-bar
-  (:require-macros
-    [cljs.core.async.macros :refer [go]])
   (:require
-    [cljs.core.async :as async :refer [<! put! chan alts!]]
-    [clojure.string :as string]
     [re-frame.core :refer [subscribe dispatch]]
-    [reagent.core :as r]
-    [braid.core.client.helpers :refer [debounce ->color]]
-    [braid.core.client.routes :as routes]))
+    [braid.core.client.routes :as routes]
+    [braid.core.client.helpers :refer [->color]]))
 
 (defn search-bar-view
   []
-  (let [open-group-id (subscribe [:open-group-id])
-        search-query (subscribe [:braid.search/query])
-        kill-chan (chan)
-        search-chan (chan)
-        exit-search! (fn []
-                       (routes/go-to! (routes/group-page-path {:group-id @open-group-id
-                                                               :page-id "inbox"})))]
-    (r/create-class
-      {:component-will-mount
-       (fn []
-         (let [search (debounce search-chan 500)]
-           (go
-             (loop []
-               (let [[v ch] (alts! [search kill-chan])]
-                 (when (= ch search)
-                   (let [{:keys [query]} v]
-                     (dispatch [:braid.search/set-results! [query {}]])
-                     (if (string/blank? query)
-                       (exit-search!)
-                       (do (dispatch [:braid.search/search-history! [query @open-group-id]])
-                           (routes/go-to! (routes/group-page-path {:group-id @open-group-id
-                                                                   :page-id "search"
-                                                                   :query-params {:query query}})))))
-                   (recur)))))))
-
-       :component-will-unmount
-       (fn []
-         (put! kill-chan (js/Date.)))
-
-       :reagent-render
-       (fn []
-         [:div.search-bar
-          [:input {:type "text"
-                   :placeholder "Search..."
-                   :value @search-query
-                   :on-change
-                   (fn [e]
-                     (let [query (.. e -target -value)]
-                       (dispatch [:braid.search/set-query! query])
-                       (put! search-chan {:query query})))}]
-          (if (seq @search-query)
-            [:div.action.clear {:on-click (fn []
-                                            (exit-search!))
-                                :style {:color (->color @open-group-id)}}]
-            [:div.action.search])])})))
+  (let [search-query @(subscribe [:braid.search/query])]
+    [:div.search-bar
+     [:input {:type "text"
+              :placeholder "Search..."
+              :value search-query
+              :on-change
+              (fn [e]
+                (dispatch [:braid.search/update-query! (.. e -target -value)]))}]
+     (if search-query
+       [:a.action.clear
+        {:href (routes/group-page-path {:group-id @(subscribe [:open-group-id])
+                                        :page-id "inbox"})
+         :style {:color (->color @(subscribe [:open-group-id]))}}]
+       [:div.action.search])]))

@@ -9,6 +9,7 @@
          [[clojure.string :as string]
           [spec-tools.data-spec :as ds]
           [re-frame.core :refer [dispatch]]
+          [braid.core.client.routes :as routes]
           [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
           [braid.search.ui.search-page :refer [search-page-view]]
           [braid.search.ui.search-page-styles :refer [>search-page]]])))
@@ -27,12 +28,25 @@
                    :loading? boolean?}})
 
        (core/register-events!
-         {:braid.search/set-query!
+         {:braid.search/update-query!
+          (fn [{db :db} [_ query]]
+            {:dispatch [::set-query! query]
+             :dispatch-debounce [:search-redirect
+                                 [:go-to
+                                  (if (string/blank? query)
+                                    (routes/group-page-path {:group-id (db :open-group-id)
+                                                             :page-id "inbox"})
+                                    (routes/group-page-path {:group-id (db :open-group-id)
+                                                             :page-id "search"
+                                                             :query-params {:query query}}))]
+                                 350]})
+
+          ::set-query!
           (fn [{db :db} [_ query]]
             {:db (assoc-in db [::state :query] query)})
 
-          :braid.search/set-results!
-          (fn [{db :db} [_ [query {:keys [threads thread-ids] :as reply}]]]
+          ::set-results!
+          (fn [{db :db} [_ query {:keys [threads thread-ids]}]]
             {:db (-> db
                      (update-in [:threads] #(merge-with merge % (key-by-id threads)))
                      (assoc-in [::state :loading?] false)
@@ -48,9 +62,10 @@
                      (assoc-in [::state :loading?] false))})
 
           :braid.search/search-history!
-          (fn [{db :db} [_ [query group-id]]]
+          (fn [{db :db} [_ query group-id]]
             (when-not (string/blank? query)
               {:db (-> db
+                       (assoc-in [::state :thread-ids] nil)
                        (assoc-in [::state :error?] false)
                        (assoc-in [::state :loading?] true))
                :websocket-send
@@ -59,10 +74,10 @@
                  15000
                  (fn [reply]
                    (if (:thread-ids reply)
-                     (dispatch [:braid.search/set-results! [query reply]])
+                     (dispatch [::set-results! query reply])
                      (dispatch [::set-error!]))))}))
 
-          :braid.search/clear-search!
+          ::clear-search!
           (fn [{db :db} _]
             {:db (assoc db ::state {:query nil
                                     :thread-ids nil
@@ -82,10 +97,10 @@
          {:key :search
           :view search-page-view
           :on-load (fn [page]
-                     (dispatch [:braid.search/set-query! (page :query)])
-                     (dispatch [:braid.search/search-history! [(page :query) (page :group-id)]]))
+                     (dispatch [::set-query! (page :query)])
+                     (dispatch [:braid.search/search-history! (page :query) (page :group-id)]))
           :on-exit (fn [page]
-                     (dispatch [:braid.search/clear-search!]))
+                     (dispatch [::clear-search!]))
           :styles >search-page}))
 
      :clj
