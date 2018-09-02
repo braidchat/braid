@@ -6,7 +6,9 @@
           [braid.core.server.db.thread :as thread]
           [braid.search.server :as search]]
          :cljs
-         [[re-frame.core :refer [dispatch]]
+         [[clojure.string :as string]
+          [spec-tools.data-spec :as ds]
+          [re-frame.core :refer [dispatch]]
           [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
           [braid.search.ui.search-page :refer [search-page-view]]
           [braid.search.ui.search-page-styles :refer [>search-page]]])))
@@ -14,50 +16,82 @@
 (defn init! []
   #?(:cljs
      (do
+       (core/register-state!
+         {::state {:query nil
+                   :thread-ids nil
+                   :loading? false
+                   :error? false}}
+         {::state {:query (ds/maybe string?)
+                   :thread-ids (ds/maybe [any?])
+                   :error? boolean?
+                   :loading? boolean?}})
+
        (core/register-events!
          {:braid.search/set-query!
           (fn [{db :db} [_ query]]
-            {:db (assoc-in db [:page :query] query)})
+            {:db (assoc-in db [::state :query] query)})
 
           :braid.search/set-results!
           (fn [{db :db} [_ [query {:keys [threads thread-ids] :as reply}]]]
             {:db (-> db
                      (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-                     (update-in [:page] (fn [p] (if (= (p :query) query)
-                                                  (assoc p :thread-ids thread-ids)
-                                                  p))))})
+                     (assoc-in [::state :loading?] false)
+                     (update-in [::state] (fn [s]
+                                            (if (= (s :query) query)
+                                              (assoc s :thread-ids thread-ids)
+                                              s))))})
+
+          ::set-error!
+          (fn [{db :db} _]
+            {:db (-> db
+                     (assoc-in [::state :error?] true)
+                     (assoc-in [::state :loading?] false))})
 
           :braid.search/search-history!
-          (fn [{state :db} [_ [query group-id]]]
-            (when query
-              {:websocket-send
+          (fn [{db :db} [_ [query group-id]]]
+            (when-not (string/blank? query)
+              {:db (-> db
+                       (assoc-in [::state :error?] false)
+                       (assoc-in [::state :loading?] true))
+               :websocket-send
                (list
-                 [::search [query group-id]]
+                 [::search-ws [query group-id]]
                  15000
                  (fn [reply]
-                   (dispatch [:set-page-loading false])
                    (if (:thread-ids reply)
                      (dispatch [:braid.search/set-results! [query reply]])
-                     (dispatch [:set-page-error true]))))
-               :dispatch [:set-page-error false]}))})
+                     (dispatch [::set-error!]))))}))
+
+          :braid.search/clear-search!
+          (fn [{db :db} _]
+            {:db (assoc db ::state {:query nil
+                                    :thread-ids nil
+                                    :error? false
+                                    :loading? false})})})
 
        (core/register-subs!
          {:braid.search/query
           (fn [state _]
-            (get-in state [:page :query]))})
+            (get-in state [::state :query]))
+
+          :braid.search/state
+          (fn [state _]
+            (state ::state))})
 
        (core/register-group-page!
          {:key :search
           :view search-page-view
           :on-load (fn [page]
-                     (dispatch [:set-page-loading true])
+                     (dispatch [:braid.search/set-query! (page :query)])
                      (dispatch [:braid.search/search-history! [(page :query) (page :group-id)]]))
+          :on-exit (fn [page]
+                     (dispatch [:braid.search/clear-search!]))
           :styles >search-page}))
 
      :clj
      (do
        (core/register-server-message-handlers!
-         {::search
+         {::search-ws
           (fn [{:as ev-msg :keys [?data ?reply-fn user-id]}]
             ; this can take a while, so move it to a future
             (future

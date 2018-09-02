@@ -5,37 +5,37 @@
 
 (defn search-page-view
   []
-  (let [page (subscribe [:page])
-        threads (subscribe [:threads])
-        query (subscribe [:braid.search/query])
+  (let [threads (subscribe [:threads])
+        {:keys [query thread-ids
+                error? loading?]} @(subscribe [:braid.search/state])
         group-id (subscribe [:open-group-id])
-       status (cond
-                   (@page :search-error?) :error
-                   (@page :loading?) :loading
-                   (not (contains? @page :thread-ids)) :searching
-                   (seq (@page :thread-ids)) :done-results
-                   :else :done-empty)]
+        status (cond
+                 error? :error
+                 loading? :loading
+                 (nil? thread-ids) :searching
+                 (seq thread-ids) :done-results
+                 :else :done-empty)]
     (case status
       :searching
       [:div.page.search
-       [:div.title (str "Search for \"" @query "\"")]
+       [:div.title (str "Search for \"" query "\"")]
        [:div.content
         [:div.description
          "Searching..."]]]
 
       :error
       [:div.page.search
-       [:div.title (str "Search for \"" @query "\"")]
+       [:div.title (str "Search for \"" query "\"")]
        [:div.content
         [:p "Search timed out"]
         [:button
          {:on-click
           (fn [_]
-            (dispatch [:braid.search/search-history! [(@page :query) @group-id]]))}
+            (dispatch [:braid.search/search-history! [query @group-id]]))}
          "Try again"]]]
 
       (:done-results :loading)
-      (let [loaded-threads (vals (select-keys @threads (@page :thread-ids)))
+      (let [loaded-threads (vals (select-keys @threads thread-ids))
             sorted-threads (->> loaded-threads
                                         ; sort-by last reply, newest first
                                (sort-by
@@ -44,28 +44,28 @@
                                        :messages)
                                  #(compare %2 %1)))]
         [:div.page.search
-         [:div.title (str "Search for \"" @query "\"")]
+         [:div.title (str "Search for \"" query "\"")]
          [:div.content
           [:div.description
            (if (= status :loading)
              "Loading more results..."
              (str "Displaying " (count loaded-threads) "/"
-                  (count (@page :thread-ids))))]]
+                  (count thread-ids)))]]
          [:div.threads
           {:on-scroll ; page in more results as the user scrolls
            (fn [e]
              (let [div (.. e -target)]
                (when (and (= (.-className div) "threads")
                           (= status :done-results)
-                          (< (count loaded-threads) (count (@page :thread-ids)))
+                          (< (count loaded-threads) (count thread-ids))
                           (> 100 (- (.-scrollWidth div)
                                     (+ (.-scrollLeft div) (.-offsetWidth div)))
                              0))
                  (dispatch [:set-page-loading true])
                  (let [already-have (set (map :id loaded-threads))
-                       to-load (->> (@page :thread-ids)
-                                   (remove already-have)
-                                   (take 25))]
+                       to-load (->> thread-ids
+                                    (remove already-have)
+                                    (take 25))]
                    (dispatch [:load-threads
                               {:thread-ids to-load
                                :on-complete
@@ -88,6 +88,6 @@
 
       :done-empty
       [:div.page.search
-       [:div.title (str "Search for \"" @query "\"")]
+       [:div.title (str "Search for \"" query "\"")]
        [:div.content
         [:div.description "No results."]]])))
