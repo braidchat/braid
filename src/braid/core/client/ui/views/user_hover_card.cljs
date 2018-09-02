@@ -1,7 +1,7 @@
 (ns braid.core.client.ui.views.user-hover-card
   (:require
     [re-frame.core :refer [dispatch subscribe]]
-    [braid.core.client.ui.views.search-button :refer [search-button-view]]
+    [braid.search.ui.search-button :refer [search-button-view]]
     [braid.core.client.ui.views.pills :refer [user-pill-view]]
     [braid.core.client.helpers :as helpers]))
 

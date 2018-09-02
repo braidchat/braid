@@ -1,4 +1,4 @@
-(ns braid.core.client.ui.views.search-bar
+(ns braid.search.ui.search-bar
   (:require-macros
    [cljs.core.async.macros :refer [go]])
   (:require

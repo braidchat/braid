@@ -6,11 +6,21 @@
           [braid.core.server.db.tag :as tag]
           [braid.core.server.db.thread :as thread]]
          :cljs
-         [])))
+         [[re-frame.core :refer [dispatch]]
+          [braid.search.ui.search-page-styles :refer [>search-page]]
+          [braid.search.ui.search-page :refer [search-page-view]]])))
 
 (defn init! []
   #?(:cljs
-     (do)
+     (do
+       (core/register-group-page!
+         {:key :search
+          :view search-page-view
+          :on-load (fn [page]
+                     (dispatch [:set-page-loading true])
+                     (dispatch [:search-history [(page :query) (page :group-id)]]))
+          :styles >search-page}))
+
      :clj
      (do
        (core/register-server-message-handlers!

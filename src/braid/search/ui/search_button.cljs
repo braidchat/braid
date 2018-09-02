@@ -1,4 +1,4 @@
-(ns braid.core.client.ui.views.search-button
+(ns braid.search.ui.search-button
   (:require
     [re-frame.core :refer [dispatch subscribe]]
     [braid.core.client.routes :as routes]))

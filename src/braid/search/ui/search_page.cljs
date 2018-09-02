@@ -1,4 +1,4 @@
-(ns braid.core.client.ui.views.pages.search
+(ns braid.search.ui.search-page
   (:require
    [braid.core.client.ui.views.user-hover-card :refer [user-hover-card-view]]
    [braid.core.client.ui.views.thread :refer [thread-view]]

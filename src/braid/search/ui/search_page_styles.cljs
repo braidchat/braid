@@ -1,8 +1,8 @@
-(ns braid.core.client.ui.styles.pages.search
+(ns braid.search.ui.search-page-styles
   (:require
-   [braid.core.client.ui.styles.mixins :as mixins]
-   [braid.core.client.ui.styles.vars :as vars]
-   [garden.units :refer [rem em px]]))
+    [garden.units :refer [rem em px]]
+    [braid.core.client.ui.styles.mixins :as mixins]
+    [braid.core.client.ui.styles.vars :as vars]))
 
 (def avatar-size (rem 4))
 
@@ -10,8 +10,10 @@
   [:>.card
    {:margin-bottom "50%"
     :max-width (rem 25)}
+
    [:>.header
     {:overflow "auto"}
+
     [:>.pill.off
      :>.pill.on
      {:color [["white" "!important"]]}]
@@ -44,9 +46,11 @@
      (mixins/fontawesome \uf017)
      {:margin-left (em 0.25)}]]])
 
-(def search-user-card
-  [:.page.search
+(def >search-page
+  [:>.page.search
+
    [:>.threads
     card-style]
+
    [:>.content
     card-style]])
