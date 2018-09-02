@@ -36,12 +36,12 @@
       (let [threads @(subscribe [:threads])
             loaded-threads (vals (select-keys threads thread-ids))
             sorted-threads (->> loaded-threads
-                                        ; sort-by last reply, newest first
-                               (sort-by
-                                 (comp (partial apply max)
-                                       (partial map :created-at)
-                                       :messages)
-                                 #(compare %2 %1)))]
+                                ;; sort-by last reply, newest first
+                                (sort-by
+                                  (comp (partial apply max)
+                                        (partial map :created-at)
+                                        :messages)
+                                  #(compare %2 %1)))]
         [:div.page.search
          [:div.title (str "Search for \"" query "\"")]
          [:div.content
@@ -74,10 +74,10 @@
            (fn [e]
              (let [target-classes (.. e -target -classList)
                    this-elt (.. e -target)]
-                                        ; TODO: check if threads-div needs to scroll?
+               ;; TODO: check if threads-div needs to scroll?
                (when (and (or (.contains target-classes "thread")
                               (.contains target-classes "threads"))
-                          (= 0 (.-deltaX e) (.-deltaZ e)))
+                       (= 0 (.-deltaX e) (.-deltaZ e)))
                  (set! (.-scrollLeft this-elt)
                        (- (.-scrollLeft this-elt) (.-deltaY e))))))}
           (doall
