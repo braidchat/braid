@@ -47,7 +47,7 @@
 (defn search-threads-as
   "Return the ids of all threads, visible to the user, in the given group,
   matching the provided query.
-  The query can speficy tags by prefixing them with an octothope; for example,
+  The query can specify tags by prefixing them with an octothorpe; for example,
   the query 'foo #bar' will find any threads tagged with 'bar' containing the
   text 'foo'"
   [user-id [query group-id]]
