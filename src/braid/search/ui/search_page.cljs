@@ -12,7 +12,7 @@
   []
   (let [page (subscribe [:page])
         threads (subscribe [:threads])
-        query (subscribe [:search-query])
+        query (subscribe [:braid.search/query])
         group-id (subscribe [:open-group-id])
         user-search (some->> @query (re-find user-uuid-re)
                              second uuid)

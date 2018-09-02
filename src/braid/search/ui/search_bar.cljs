@@ -12,7 +12,7 @@
 (defn search-bar-view
   []
   (let [open-group-id (subscribe [:open-group-id])
-        search-query (subscribe [:search-query])
+        search-query (subscribe [:braid.search/query])
         kill-chan (chan)
         search-chan (chan)
         exit-search! (fn []

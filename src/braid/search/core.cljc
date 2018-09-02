@@ -41,6 +41,11 @@
                      (dispatch [:set-page-error true]))))
                :dispatch [:set-page-error false]}))})
 
+       (core/register-subs!
+         {:braid.search/query
+          (fn [state _]
+            (get-in state [:page :query]))})
+
        (core/register-group-page!
          {:key :search
           :view search-page-view
