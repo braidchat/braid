@@ -1,10 +1,10 @@
 (ns braid.search.ui.search-page
   (:require
-   [braid.core.client.ui.views.user-hover-card :refer [user-hover-card-view]]
-   [braid.core.client.ui.views.thread :refer [thread-view]]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
-   [reagent.ratom :include-macros true :refer-macros [reaction]]))
+   [reagent.ratom :include-macros true :refer-macros [reaction]]
+   [braid.core.client.ui.views.thread :refer [thread-view]]
+   [braid.core.client.ui.views.user-hover-card :refer [user-hover-card-view]]))
 
 (def user-uuid-re #"@([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})")
 

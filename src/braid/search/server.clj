@@ -1,12 +1,12 @@
 (ns braid.search.server
   (:require
-   [braid.core.server.db :as db]
-   [braid.core.server.db.thread :as thread]
-   [braid.search.elasticsearch :as elastic]
-   [clojure.set :refer [intersection]]
-   [clojure.string :as string]
-   [datomic.api :as d]
-   [instaparse.core :as insta]))
+    [clojure.set :refer [intersection]]
+    [clojure.string :as string]
+    [datomic.api :as d]
+    [instaparse.core :as insta]
+    [braid.core.server.db :as db]
+    [braid.core.server.db.thread :as thread]
+    [braid.search.elasticsearch :as elastic]))
 
 ; TODO: some way to search for a tag with spaces in it?
 (def query-parser

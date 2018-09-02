@@ -2,14 +2,14 @@
   (:require
     [braid.core.api :as core]
     #?@(:clj
-         [[braid.search.server :as search]
-          [braid.core.server.db.tag :as tag]
-          [braid.core.server.db.thread :as thread]]
+         [[braid.core.server.db.tag :as tag]
+          [braid.core.server.db.thread :as thread]
+          [braid.search.server :as search]]
          :cljs
          [[re-frame.core :refer [dispatch]]
           [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
-          [braid.search.ui.search-page-styles :refer [>search-page]]
-          [braid.search.ui.search-page :refer [search-page-view]]])))
+          [braid.search.ui.search-page :refer [search-page-view]]
+          [braid.search.ui.search-page-styles :refer [>search-page]]])))
 
 (defn init! []
   #?(:cljs
