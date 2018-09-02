@@ -334,35 +334,6 @@
       {:dispatch [:set-preference [:notification-rules new-rules]]})))
 
 (reg-event-fx
-  :set-search-results
-  (fn [{db :db} [_ [query {:keys [threads thread-ids] :as reply}]]]
-    {:db (-> db
-             (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-             (update-in [:page] (fn [p] (if (= (p :query) query)
-                                          (assoc p :thread-ids thread-ids)
-                                          p))))}))
-
-(reg-event-fx
-  :set-search-query
-  (fn [{db :db} [_ query]]
-    {:db (assoc-in db [:page :query] query)}))
-
-(reg-event-fx
-  :search-history
-  (fn [{state :db} [_ [query group-id]]]
-    (when query
-      {:websocket-send
-       (list
-         [:braid.server/search [query group-id]]
-         15000
-         (fn [reply]
-           (dispatch [:set-page-loading false])
-           (if (:thread-ids reply)
-             (dispatch [:set-search-results [query reply]])
-             (dispatch [:set-page-error true]))))
-       :dispatch [:set-page-error false]})))
-
-(reg-event-fx
   :add-threads
   (fn [{db :db} [_ threads ?open]]
     {:db (-> db

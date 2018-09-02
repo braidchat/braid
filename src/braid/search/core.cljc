@@ -7,12 +7,40 @@
           [braid.core.server.db.thread :as thread]]
          :cljs
          [[re-frame.core :refer [dispatch]]
+          [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
           [braid.search.ui.search-page-styles :refer [>search-page]]
           [braid.search.ui.search-page :refer [search-page-view]]])))
 
 (defn init! []
   #?(:cljs
      (do
+       (core/register-events!
+         {:set-search-query
+          (fn [{db :db} [_ query]]
+            {:db (assoc-in db [:page :query] query)})
+
+          :set-search-results
+          (fn [{db :db} [_ [query {:keys [threads thread-ids] :as reply}]]]
+            {:db (-> db
+                     (update-in [:threads] #(merge-with merge % (key-by-id threads)))
+                     (update-in [:page] (fn [p] (if (= (p :query) query)
+                                                  (assoc p :thread-ids thread-ids)
+                                                  p))))})
+
+          :search-history
+          (fn [{state :db} [_ [query group-id]]]
+            (when query
+              {:websocket-send
+               (list
+                 [:braid.server/search [query group-id]]
+                 15000
+                 (fn [reply]
+                   (dispatch [:set-page-loading false])
+                   (if (:thread-ids reply)
+                     (dispatch [:set-search-results [query reply]])
+                     (dispatch [:set-page-error true]))))
+               :dispatch [:set-page-error false]}))})
+
        (core/register-group-page!
          {:key :search
           :view search-page-view
