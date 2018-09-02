@@ -6,6 +6,7 @@
    [braid.core.client.schema :as schema]
    [braid.core.client.state :refer [reg-event-fx]]
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
+   [braid.core.client.state.fx.dispatch-debounce :as fx.debounce]
    [braid.core.client.sync :as sync]
    [braid.core.client.xhr :refer [edn-xhr]]
    [braid.core.common.util :as util]
@@ -26,6 +27,12 @@
   [event-map]
   (doseq [[k f] event-map]
     (reg-event-fx k f)))
+
+(reg-fx :dispatch-debounce
+        fx.debounce/dispatch)
+
+(reg-fx :stop-debounce
+        fx.debounce/stop)
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
