@@ -1,6 +1,6 @@
 (ns braid.search.ui.search-button
   (:require
-    [re-frame.core :refer [dispatch subscribe]]
+    [re-frame.core :refer [subscribe]]
     [braid.core.client.routes :as routes]))
 
 (defn search-button-view [query]
