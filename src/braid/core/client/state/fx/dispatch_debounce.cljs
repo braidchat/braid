@@ -1,4 +1,6 @@
-(ns braid.core.client.state.fx.dispatch-debounce)
+(ns braid.core.client.state.fx.dispatch-debounce
+  (:require
+    [re-frame.core :as re-frame]))
 
 (defonce timeouts
   (atom {}))
@@ -8,7 +10,7 @@
   (js/clearTimeout (@timeouts id))
   (swap! timeouts assoc id
          (js/setTimeout (fn []
-                          (dispatch event-vec)
+                          (re-frame/dispatch event-vec)
                           (swap! timeouts dissoc id))
                         n)))
 
