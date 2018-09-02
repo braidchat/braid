@@ -34,7 +34,7 @@
                  [org.clojars.leanpixel/cljs-utils "0.4.2"]
                  [cljs-ajax "0.5.8"]
                  [secretary "1.2.3"]
-                 [venantius/accountant "0.2.0"]
+                 [venantius/accountant "0.2.4"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [clj-fuzzy "0.3.2"]
