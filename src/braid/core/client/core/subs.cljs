@@ -205,11 +205,6 @@
     (get-in state [:groups (:open-group-id state) :users user-id :avatar])))
 
 (reg-sub
-  :search-query
-  (fn [state _]
-    (get-in state [:page :query])))
-
-(reg-sub
   :messages-for-thread
   (fn [state [_ thread-id]]
     (get-in state [:threads thread-id :messages])))

@@ -1,11 +1,11 @@
-(ns braid.core.server.search.elasticsearch
+(ns braid.search.elasticsearch
   (:require
-   [braid.core.server.conf :refer [config]]
-   [braid.core.server.db :as db]
-   [braid.core.server.db.thread :as thread]
-   [clojure.data.json :as json]
-   [datomic.api :as d]
-   [org.httpkit.client :as http]))
+    [clojure.data.json :as json]
+    [datomic.api :as d]
+    [org.httpkit.client :as http]
+    [braid.core.server.conf :refer [config]]
+    [braid.core.server.db :as db]
+    [braid.core.server.db.thread :as thread]))
 
 (defn elasticsearch-enabled? []
   (some? (config :elasticsearch-url)))

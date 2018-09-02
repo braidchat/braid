@@ -1,12 +1,12 @@
-(ns braid.core.server.search
+(ns braid.search.server
   (:require
-   [braid.core.server.db :as db]
-   [braid.core.server.db.thread :as thread]
-   [braid.core.server.search.elasticsearch :as elastic]
-   [clojure.set :refer [intersection]]
-   [clojure.string :as string]
-   [datomic.api :as d]
-   [instaparse.core :as insta]))
+    [clojure.set :refer [intersection]]
+    [clojure.string :as string]
+    [datomic.api :as d]
+    [instaparse.core :as insta]
+    [braid.core.server.db :as db]
+    [braid.core.server.db.thread :as thread]
+    [braid.search.elasticsearch :as elastic]))
 
 ; TODO: some way to search for a tag with spaces in it?
 (def query-parser
@@ -47,7 +47,7 @@
 (defn search-threads-as
   "Return the ids of all threads, visible to the user, in the given group,
   matching the provided query.
-  The query can speficy tags by prefixing them with an octothope; for example,
+  The query can specify tags by prefixing them with an octothorpe; for example,
   the query 'foo #bar' will find any threads tagged with 'bar' containing the
   text 'foo'"
   [user-id [query group-id]]

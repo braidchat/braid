@@ -29,8 +29,6 @@
      :groups {uuid? app-schema/Group}
      :page {:type (ds/maybe keyword?)
             (ds/opt :id) uuid?
-            (ds/opt :thread-ids) (ds/maybe [uuid?])
-            (ds/opt :query) string?
             (ds/opt :loading?) boolean?
             (ds/opt :error?) boolean?}
      :session (ds/maybe {:user-id uuid?})

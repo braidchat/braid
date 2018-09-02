@@ -15,7 +15,6 @@
           [braid.core.client.ui.views.pages.changelog :refer [changelog-view]]
           [braid.core.client.ui.views.pages.recent :refer [recent-page-view]]
           [braid.core.client.ui.views.pages.tags :refer [tags-page-view]]
-          [braid.core.client.ui.views.pages.search :refer [search-page-view]]
           [braid.core.client.ui.views.pages.me :refer [me-page-view]]
           [braid.core.client.group-admin.views.group-settings-page :refer [group-settings-page-view]]])))
 
@@ -82,12 +81,5 @@
 
        (core/register-system-page!
          {:key :changelog
-          :view changelog-view})
-
-       (core/register-group-page!
-         {:key :search
-          :view search-page-view
-          :on-load (fn [page]
-                     (dispatch [:set-page-loading true])
-                     (dispatch [:search-history [(page :query) (page :group-id)]]))}))))
+          :view changelog-view}))))
 

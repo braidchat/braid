@@ -4,7 +4,7 @@
     [braid.core.hooks :as hooks]
     [braid.core.client.helpers :refer [->color]]
     [braid.core.client.routes :as routes]
-    [braid.core.client.ui.views.search-bar :refer [search-bar-view]]
+    [braid.search.ui.search-bar :refer [search-bar-view]]
     [braid.core.client.ui.views.user-header :refer [user-header-view]]
     [braid.core.client.ui.views.header-item :refer [header-item-view HeaderItem]]))
 

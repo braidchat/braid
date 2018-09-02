@@ -23,7 +23,6 @@
     [braid.core.server.events :as events]
     [braid.core.server.invite :as invites]
     [braid.core.server.message-format :refer [parse-tags-and-mentions]]
-    [braid.core.server.search :as search]
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
@@ -227,18 +226,6 @@
     (when (group/user-is-group-admin? user-id group-id)
       (db/run-txns! (tag/retract-tag-txn tag-id))
       (broadcast-group-change group-id [:braid.client/retract-tag tag-id]))))
-
-(defmethod event-msg-handler :braid.server/search
-  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-  ; this can take a while, so move it to a future
-  (future
-    (let [user-tags (tag/tag-ids-for-user user-id)
-          filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
-          thread-ids (search/search-threads-as user-id ?data)
-          threads (map (comp filter-tags thread/thread-by-id)
-                       (take 25 thread-ids))]
-      (when ?reply-fn
-        (?reply-fn {:threads threads :thread-ids thread-ids})))))
 
 (defmethod event-msg-handler :braid.server/load-recent-threads
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]

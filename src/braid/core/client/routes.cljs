@@ -17,6 +17,7 @@
                      :page-id (keyword page-id)
                      :group-id (uuid group-id)}
                     query-params)]
+    (pages/on-exit! (:page-id @(subscribe [:page])) @(subscribe [:page]))
     (dispatch [:set-group-and-page [(uuid group-id) page]])
     (pages/on-load! (keyword page-id) page)))
 
@@ -24,6 +25,7 @@
   (let [page (merge {:type (keyword page-id)
                      :page-id (keyword page-id)}
                     query-params)]
+    (pages/on-exit! (:page-id @(subscribe [:page])) @(subscribe [:page]))
     (dispatch [:set-group-and-page [nil page]])
     (pages/on-load! (keyword page-id) page)))
 

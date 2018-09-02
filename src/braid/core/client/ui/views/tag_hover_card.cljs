@@ -2,7 +2,7 @@
   (:require
     [re-frame.core :refer [subscribe]]
     [braid.core.client.helpers :as helpers]
-    [braid.core.client.ui.views.search-button :refer [search-button-view]]
+    [braid.search.ui.search-button :refer [search-button-view]]
     [braid.core.client.ui.views.subscribe-button :refer [subscribe-button-view]]
     [braid.core.client.ui.views.pills :refer [tag-pill-view]]))
 

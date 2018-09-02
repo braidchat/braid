@@ -1,11 +1,12 @@
 (ns braid.core.client.core.events
   (:require
    [braid.core.client.desktop.notify :as notify]
-   [braid.core.client.router :as router]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
    [braid.core.client.state :refer [reg-event-fx]]
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
+   [braid.core.client.state.fx.dispatch-debounce :as fx.debounce]
+   [braid.core.client.state.fx.redirect :as fx.redirect]
    [braid.core.client.sync :as sync]
    [braid.core.client.xhr :refer [edn-xhr]]
    [braid.core.common.util :as util]
@@ -27,13 +28,19 @@
   (doseq [[k f] event-map]
     (reg-event-fx k f)))
 
+(reg-fx :dispatch-debounce
+        fx.debounce/dispatch)
+
+(reg-fx :stop-debounce
+        fx.debounce/stop)
+
 ; TODO: handle callbacks declaratively too?
 (reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :edn-xhr (fn [args] (edn-xhr args)))
 
-(reg-fx :redirect-to (fn [route] (when route (router/go-to route))))
+(reg-fx :redirect-to fx.redirect/redirect-to)
 
 (reg-fx :window-title (fn [title] (when title (set! (.-title js/document) title))))
 
@@ -332,35 +339,6 @@
                           (get (helpers/get-user-preferences state)
                             :notification-rules []))]
       {:dispatch [:set-preference [:notification-rules new-rules]]})))
-
-(reg-event-fx
-  :set-search-results
-  (fn [{db :db} [_ [query {:keys [threads thread-ids] :as reply}]]]
-    {:db (-> db
-             (update-in [:threads] #(merge-with merge % (key-by-id threads)))
-             (update-in [:page] (fn [p] (if (= (p :query) query)
-                                          (assoc p :thread-ids thread-ids)
-                                          p))))}))
-
-(reg-event-fx
-  :set-search-query
-  (fn [{db :db} [_ query]]
-    {:db (assoc-in db [:page :query] query)}))
-
-(reg-event-fx
-  :search-history
-  (fn [{state :db} [_ [query group-id]]]
-    (when query
-      {:websocket-send
-       (list
-         [:braid.server/search [query group-id]]
-         15000
-         (fn [reply]
-           (dispatch [:set-page-loading false])
-           (if (:thread-ids reply)
-             (dispatch [:set-search-results [query reply]])
-             (dispatch [:set-page-error true]))))
-       :dispatch [:set-page-error false]})))
 
 (reg-event-fx
   :add-threads
