@@ -3,10 +3,7 @@
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
    [reagent.ratom :include-macros true :refer-macros [reaction]]
-   [braid.core.client.ui.views.thread :refer [thread-view]]
-   [braid.core.client.ui.views.user-hover-card :refer [user-hover-card-view]]))
-
-(def user-uuid-re #"@([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})")
+   [braid.core.client.ui.views.thread :refer [thread-view]]))
 
 (defn search-page-view
   []
@@ -14,8 +11,6 @@
         threads (subscribe [:threads])
         query (subscribe [:braid.search/query])
         group-id (subscribe [:open-group-id])
-        user-search (some->> @query (re-find user-uuid-re)
-                             second uuid)
        status (cond
                    (@page :search-error?) :error
                    (@page :loading?) :loading
@@ -28,8 +23,7 @@
        [:div.title (str "Search for \"" @query "\"")]
        [:div.content
         [:div.description
-         "Searching..."]
-        (when user-search [user-hover-card-view user-search])]]
+         "Searching..."]]]
 
       :error
       [:div.page.search
@@ -40,8 +34,7 @@
          {:on-click
           (fn [_]
             (dispatch [:braid.search/search-history! [(@page :query) @group-id]]))}
-         "Try again"]
-        (when user-search [user-hover-card-view user-search])]]
+         "Try again"]]]
 
       (:done-results :loading)
       (let [loaded-threads (vals (select-keys @threads (@page :thread-ids)))
@@ -90,7 +83,6 @@
                           (= 0 (.-deltaX e) (.-deltaZ e)))
                  (set! (.-scrollLeft this-elt)
                        (- (.-scrollLeft this-elt) (.-deltaY e))))))}
-          (when user-search [user-hover-card-view user-search])
           (doall
             (for [thread sorted-threads]
               ^{:key (:id thread)}
@@ -100,5 +92,4 @@
       [:div.page.search
        [:div.title (str "Search for \"" @query "\"")]
        [:div.content
-        [:div.description "No results."]
-        (when user-search [user-hover-card-view user-search])]])))
+        [:div.description "No results."]]])))
