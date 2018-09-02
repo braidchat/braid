@@ -27,10 +27,10 @@
                (let [[v ch] (alts! [search kill-chan])]
                  (when (= ch search)
                    (let [{:keys [query]} v]
-                     (dispatch [:set-search-results [query {}]])
+                     (dispatch [:braid.search/set-results! [query {}]])
                      (if (string/blank? query)
                        (exit-search!)
-                       (do (dispatch [:search-history [query @open-group-id]])
+                       (do (dispatch [:braid.search/search-history! [query @open-group-id]])
                            (routes/go-to! (routes/group-page-path {:group-id @open-group-id
                                                                    :page-id "search"
                                                                    :query-params {:query query}})))))
@@ -49,7 +49,7 @@
                    :on-change
                    (fn [e]
                      (let [query (.. e -target -value)]
-                       (dispatch [:set-search-query query])
+                       (dispatch [:braid.search/set-query! query])
                        (put! search-chan {:query query})))}]
           (if (seq @search-query)
             [:div.action.clear {:on-click (fn []

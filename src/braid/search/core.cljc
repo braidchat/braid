@@ -15,11 +15,11 @@
   #?(:cljs
      (do
        (core/register-events!
-         {:set-search-query
+         {:braid.search/set-query!
           (fn [{db :db} [_ query]]
             {:db (assoc-in db [:page :query] query)})
 
-          :set-search-results
+          :braid.search/set-results!
           (fn [{db :db} [_ [query {:keys [threads thread-ids] :as reply}]]]
             {:db (-> db
                      (update-in [:threads] #(merge-with merge % (key-by-id threads)))
@@ -27,17 +27,17 @@
                                                   (assoc p :thread-ids thread-ids)
                                                   p))))})
 
-          :search-history
+          :braid.search/search-history!
           (fn [{state :db} [_ [query group-id]]]
             (when query
               {:websocket-send
                (list
-                 [:braid.server/search [query group-id]]
+                 [::search [query group-id]]
                  15000
                  (fn [reply]
                    (dispatch [:set-page-loading false])
                    (if (:thread-ids reply)
-                     (dispatch [:set-search-results [query reply]])
+                     (dispatch [:braid.search/set-results! [query reply]])
                      (dispatch [:set-page-error true]))))
                :dispatch [:set-page-error false]}))})
 
@@ -46,13 +46,13 @@
           :view search-page-view
           :on-load (fn [page]
                      (dispatch [:set-page-loading true])
-                     (dispatch [:search-history [(page :query) (page :group-id)]]))
+                     (dispatch [:braid.search/search-history! [(page :query) (page :group-id)]]))
           :styles >search-page}))
 
      :clj
      (do
        (core/register-server-message-handlers!
-         {:braid.server/search
+         {::search
           (fn [{:as ev-msg :keys [?data ?reply-fn user-id]}]
             ; this can take a while, so move it to a future
             (future

@@ -39,7 +39,7 @@
         [:button
          {:on-click
           (fn [_]
-            (dispatch [:search-history [(@page :query) @group-id]]))}
+            (dispatch [:braid.search/search-history! [(@page :query) @group-id]]))}
          "Try again"]
         (when user-search [user-hover-card-view user-search])]]
 
