@@ -5,10 +5,8 @@
 
 (defn search-page-view
   []
-  (let [threads (subscribe [:threads])
-        {:keys [query thread-ids
+  (let [{:keys [query thread-ids
                 error? loading?]} @(subscribe [:braid.search/state])
-        group-id (subscribe [:open-group-id])
         status (cond
                  error? :error
                  loading? :loading
@@ -31,11 +29,12 @@
         [:button
          {:on-click
           (fn [_]
-            (dispatch [:braid.search/search-history! [query @group-id]]))}
+            (dispatch [:braid.search/search-history! [query @(subscribe [:open-group-id])]]))}
          "Try again"]]]
 
       (:done-results :loading)
-      (let [loaded-threads (vals (select-keys @threads thread-ids))
+      (let [threads @(subscribe [:threads])
+            loaded-threads (vals (select-keys threads thread-ids))
             sorted-threads (->> loaded-threads
                                         ; sort-by last reply, newest first
                                (sort-by
