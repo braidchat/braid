@@ -11,4 +11,7 @@
     [:>.setting
      [:form.password
       [:label
-       {:display "block"}]]]]])
+       {:display "block"}]]
+     [:>.nickname
+      [:input.error
+       {:border-color "red"}]]]]])

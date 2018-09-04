@@ -14,7 +14,8 @@
         set-format-error! (fn [error?] (reset! format-error error?))
         set-error! (fn [err] (reset! error err))
         user-id (subscribe [:user-id])
-        nickname (subscribe [:nickname] [user-id])]
+        nickname (subscribe [:nickname] [user-id])
+        new-nickname (r/atom "")]
     (fn []
       [:div.setting
        [:h2 "Update Nickname"]
@@ -24,22 +25,23 @@
        (when @error
          [:span.error @error])
        ; TODO: check if nickname is taken while typing
-       [:input.new-name
-        {:class (when @format-error "error")
-         :placeholder "New Nickname"
-         :on-key-up
-         (fn [e]
-           (let [text (.. e -target -value)]
-             (set-format-error! (not (valid-nickname? text)))))
-         :on-key-down
-         (fn [e]
-           (set-error! nil)
-           (let [nickname (.. e -target -value)]
-             (when (and (= KeyCodes.ENTER e.keyCode)
-                     (re-matches #"\S+" nickname))
-               (dispatch [:set-user-nickname
-                          {:nickname nickname
-                           :on-error (fn [err] (set-error! err))}]))))}]]])))
+        [:form {:on-submit (fn [e]
+                             (.preventDefault e)
+                             (set-error! nil)
+                             (when (valid-nickname? @new-nickname)
+                               (dispatch [:set-user-nickname
+                                          {:nickname @new-nickname
+                                           :on-error (fn [err] (set-error! err))}])
+                               (reset! new-nickname "")))}
+         [:input.new-name
+          {:class (when @format-error "error")
+           :placeholder "New Nickname"
+           :value @new-nickname
+           :on-change (fn [e]
+                        (->> (.. e -target -value)
+                            (reset! new-nickname))
+                        (set-format-error! (not (valid-nickname? @new-nickname))))}]
+         [:input {:type "submit" :value "Update"}]]]])))
 
 (defn avatar-view
   []
