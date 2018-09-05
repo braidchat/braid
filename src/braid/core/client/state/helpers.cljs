@@ -21,7 +21,7 @@
           {ord true unord false} (group-by ordered? groups)
           by-id (group-by :id groups)]
       (concat
-        (map (comp first by-id) group-order)
+        (remove nil? (map (comp first by-id) group-order))
         unord))))
 
 ; ALL HELPERS BELOW SHOULD TAKE STATE AS FIRST ARG

@@ -1,5 +1,6 @@
 (ns braid.core.client.core.subs
   (:require
+   [braid.core.client.state.helpers :refer [order-groups]]
    [re-frame.core :refer [subscribe reg-sub reg-sub-raw]]
    [reagent.ratom :include-macros true :refer-macros [reaction]])
   (:import
@@ -30,20 +31,6 @@
   :group
   (fn [state [_ q-group-id] [d-group-id]]
     (get-in state [:groups (or d-group-id q-group-id)])))
-
-(defn order-groups
-  "Helper function to impose an order on groups.
-  This is a seperate function (instead of inline in :ordered-groups because the
-  index route needs to be able to call this to find the first group"
-  [groups group-order]
-  (if (nil? group-order)
-    groups
-    (let [ordered? (comp boolean (set group-order) :id)
-          {ord true unord false} (group-by ordered? groups)
-          by-id (group-by :id groups)]
-      (concat
-        (map (comp first by-id) group-order)
-        unord))))
 
 (reg-sub
   :ordered-groups
