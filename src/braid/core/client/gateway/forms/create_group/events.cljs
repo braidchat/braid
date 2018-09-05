@@ -71,7 +71,8 @@
 (reg-event-fx
   ::redirect
   (fn [_ [_ url]]
-    (set! js/window.location url)))
+    (set! js/window.location url)
+    {}))
 
 (reg-event-fx
   ::handle-registration-error
