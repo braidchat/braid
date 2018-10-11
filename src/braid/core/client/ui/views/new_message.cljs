@@ -23,52 +23,53 @@
     ;; because of the 2 resizes that occur in the above
     (set! (.. el -parentNode -style -height) new-height)))
 
-(defn textarea-view [{:keys [config]}]
-  (let [this-elt (atom nil)
-        connected? (subscribe [:connected?])
-        focused? (subscribe [:thread-focused? (config :thread-id)])
-        send-message!
-        (fn [config text]
-          (dispatch [:new-message {:thread-id (config :thread-id)
-                                   :group-id (config :group-id)
-                                   :content text
-                                   :mentioned-user-ids (config :mentioned-user-ids)
-                                   :mentioned-tag-ids (config :mentioned-tag-ids)}]))
-        _ (run! (do
-                  (when (and @focused? @this-elt)
-                    (.focus @this-elt))))]
+(defn textarea-view [_]
+  (let [this-elt (atom nil)]
     (r/create-class
       {:component-did-update
-       (fn [this [_ new-props]]
+       (fn [this [_ old-props]]
          (when (not= (:text (r/props this))
-                     (:text new-props))
-           (resize-textbox! @this-elt)))
+                     (:text old-props))
+           (resize-textbox! @this-elt))
+         (when (and (not (:focused? old-props))
+                    (:focused? (r/props this)))
+           (.focus @this-elt)))
 
        :reagent-render
-       (fn [{:keys [text set-text! config on-key-down on-change]}]
+       (fn [{:keys [text set-text! config on-key-down on-change focused?]}]
          ;; wrap with a div that has a fixed height and overflow: hidden
          ;; so that the auto-resize behaviour of the textarea does not cause
          ;; double scroll events
          [:div.textarea {:style {:overflow "hidden"
                                  ;; height gets overriden by JS
                                  :height "0px"}}
-          [:textarea {:placeholder (config :placeholder)
-                      :value text
-                      :ref (fn [x]
-                             (when (and x (nil? @this-elt))
-                               (reset! this-elt x)
-                               (resize-textbox! @this-elt)))
-                      :disabled (not @connected?)
-                      :on-focus (fn [e]
-                                  (dispatch [:focus-thread (config :thread-id)]))
-                      :on-change (on-change
-                                   {:on-change
-                                    (fn [e]
-                                      (set-text! (.. e -target -value)))})
-                      :on-key-down (on-key-down
-                                     {:on-submit (fn [e]
-                                                   (send-message! config text)
-                                                   (set-text! ""))})}]])})))
+          [:textarea
+           {:placeholder (config :placeholder)
+            :value text
+            :ref (fn [x]
+                   (when (and x (nil? @this-elt))
+                     (reset! this-elt x)
+                     (resize-textbox! @this-elt)
+                     (when focused?
+                       (.focus @this-elt))))
+            :disabled (not @(subscribe [:connected?]))
+            :on-focus (fn [e]
+                        (dispatch [:focus-thread (config :thread-id)]))
+            :on-change (on-change
+                         {:on-change
+                          (fn [e]
+                            (set-text! (.. e -target -value)))})
+            :on-key-down
+            (on-key-down
+              {:on-submit
+               (fn [e]
+                 (dispatch [:new-message
+                            {:thread-id (config :thread-id)
+                             :group-id (config :group-id)
+                             :content text
+                             :mentioned-user-ids (config :mentioned-user-ids)
+                             :mentioned-tag-ids (config :mentioned-tag-ids)}])
+                 (set-text! ""))})}]])})))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
   [:div.autocomplete
@@ -251,6 +252,7 @@
          [:div.autocomplete-wrapper
           [textarea-view {:text (@state :text)
                           :config config
+                          :focused? @(subscribe [:thread-focused? (config :thread-id)])
                           :on-key-down autocomplete-on-key-down
                           :on-change autocomplete-on-change
                           :set-text! set-text!}]
