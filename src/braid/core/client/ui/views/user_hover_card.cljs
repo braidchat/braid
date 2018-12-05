@@ -24,7 +24,7 @@
         [:img.avatar {:src (user :avatar)}]]
 
        [:div.info
-        [:div.local-time (helpers/format-date (js/Date.))]
+        [:div.local-time (helpers/smart-format-date (js/Date.))]
         #_[:div.since "member since"]
         [:div.description
          #_"If I had a profile, it would be here"]]

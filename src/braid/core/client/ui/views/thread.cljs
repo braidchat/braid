@@ -137,6 +137,10 @@
                      (cons nil)
                      (partition 2 1)
                      (map (fn [[prev-message message]]
+                            (let [new-date?
+                                  (or (nil? prev-message)
+                                      (not= (helpers/format-date "yyyyMMdd" (:created-at message))
+                                            (helpers/format-date "yyyyMMdd" (:created-at prev-message))))]
                             (assoc message
                               :unseen?
                               (unseen? message)
@@ -144,19 +148,26 @@
                               (and
                                 (unseen? message)
                                 (not (unseen? prev-message)))
+                              :show-date-divider?
+                              new-date?
                               :collapse?
                               (and
+                                (not new-date?)
                                 (= (:user-id message)
                                    (:user-id prev-message))
                                 (> (* 2 60 1000) ; 2 minutes
                                    (- (:created-at message)
                                       (or (:created-at prev-message) 0)))
                                 ; TODO should instead check if there was an embed triggered
-                                (not (helpers/contains-urls? (prev-message :content))))))))]
+                                (not (helpers/contains-urls? (prev-message :content)))))))))]
             (doall
               (for [message sorted-messages]
                  ^{:key (message :id)}
-                 [message-view (assoc message :thread-id thread-id)])))])})))
+                [:<>
+                 (when (message :show-date-divider?)
+                   [:div.divider
+                    [:div.date (helpers/format-date "yyyy-MM-dd" (message :created-at))]])
+                 [message-view (assoc message :thread-id thread-id)]])))])})))
 
 (def header-item-dataspec
   {:priority number?

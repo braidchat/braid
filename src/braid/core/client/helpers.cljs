@@ -13,6 +13,10 @@
    (goog Uri)))
 
 (defn format-date
+  [format-string datetime]
+  (f/unparse (f/formatter format-string) (t/to-default-time-zone datetime)))
+
+(defn smart-format-date
   "Turn a Date object into a nicely formatted string"
   [datetime]
   (let [datetime (t/to-default-time-zone datetime)

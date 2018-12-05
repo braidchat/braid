@@ -95,7 +95,26 @@
   [:>.messages
    {:position "relative"
     :overflow-y "auto"
-    :overflow-x "hidden"}])
+    :overflow-x "hidden"}
+
+   [:>.divider
+    {:text-align "center"
+     :height "1em"
+     :color "#999"
+     :padding "0 0.5rem 0.5rem"}
+
+    [:>.date
+     {:display "inline-block"
+      :padding "0 0.5em"
+      :background "white"
+      :letter-spacing "0.02em"}]
+
+    [:&:after
+     {:content "\"\""
+      :border-bottom "1px solid #ccc"
+      :margin-top "-0.5em"
+      :width "100%"
+      :display "block"}]]])
 
 (defn thread [pad]
   [:>.thread

@@ -43,8 +43,8 @@
    [:div.name (:name group)]
    [:div.info
     [:div (:intro group)]
-    [:div "Last Updated " (helpers/format-date (:updated-at group))]
-    [:div "Created " (helpers/format-date (:created-at group))]]
+    [:div "Last Updated " (helpers/smart-format-date (:updated-at group))]
+    [:div "Created " (helpers/smart-format-date (:created-at group))]]
    [:div.users (let [count (:users-count group)]
                  (str count " user" (when (not= 1 count) "s")))]])
 
