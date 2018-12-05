@@ -57,7 +57,7 @@
                         {:group-id @group-id
                          :page-id "thread"
                          :query-params {:thread-id (upload :thread-id)}})}
-            (str "Uploaded at " (helpers/format-date (upload :uploaded-at)))]
+            (str "Uploaded at " (helpers/smart-format-date (upload :uploaded-at)))]
            [:br]
            (if @thread
              [:span "Tagged with " [thread/thread-tags-view @thread]]
