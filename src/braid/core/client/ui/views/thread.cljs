@@ -162,8 +162,10 @@
                                 (not (helpers/contains-urls? (prev-message :content)))))))))]
             (doall
               (for [message sorted-messages]
-                 ^{:key (message :id)}
-                [:<>
+                ;; [BUG] Reagent 0.8.1 has a bug where metadata doesn't get
+                ;; applied to fragments properly, so we need to set
+                ;; the key in this way instead
+                [:<> {:key (message :id)}
                  (when (message :show-date-divider?)
                    [:div.divider
                     [:div.date (helpers/format-date "yyyy-MM-dd" (message :created-at))]])
