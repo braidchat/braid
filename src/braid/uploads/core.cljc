@@ -61,6 +61,7 @@
                      :id "uploader"
                      :style {:display "none"}
                      :on-change (fn [e]
+                                  (.persist e) ; react dom thing
                                   (dispatch [:braid.uploads/upload!
                                              (aget (.. e -target -files) 0)
                                              (fn [url]
