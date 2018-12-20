@@ -39,19 +39,19 @@
             {})
 
           :braid.uploads/create-upload!
-          (fn [{db :db} [_ url]]
-            (let [thread-id (get-in db [::upload-config :thread-id])
-                  group-id (get-in db [::upload-config :group-id])]
-              {:websocket-send (list [:braid.server/create-upload
-                                      {:id (uuid/make-random-squuid)
-                                       :url url
-                                       :thread-id thread-id
-                                       :group-id group-id}])
-               :dispatch [:new-message {:content url
-                                        :thread-id thread-id
-                                        :group-id group-id
-                                        :mentioned-user-ids []
-                                        :mentioned-tag-ids []}]}))})
+          (fn [{db :db} [_ {:keys [url thread-id group-id]
+                           :or {thread-id (get-in db [::upload-config :thread-id])
+                                group-id (get-in db [::upload-config :group-id])}}]]
+            {:websocket-send (list [:braid.server/create-upload
+                                    {:id (uuid/make-random-squuid)
+                                     :url url
+                                     :thread-id thread-id
+                                     :group-id group-id}])
+             :dispatch [:new-message {:content url
+                                      :thread-id thread-id
+                                      :group-id group-id
+                                      :mentioned-user-ids []
+                                      :mentioned-tag-ids []}]})})
 
        (core/register-root-view!
          (fn []
@@ -64,7 +64,7 @@
                                   (dispatch [:braid.uploads/upload!
                                              (aget (.. e -target -files) 0)
                                              (fn [url]
-                                               (dispatch [:braid.uploads/create-upload! url])
+                                               (dispatch [:braid.uploads/create-upload! {:url url}])
                                                ;; clear the value of this input field
                                                ;; so that it can be re-used with the same file if need be
                                                (set! (.. e -target -value) nil))]))}]]))
