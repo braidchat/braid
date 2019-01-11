@@ -1,9 +1,9 @@
-(ns braid.core.client.ui.views.reconnect-overlay
+(ns braid.disconnect-notice.ui
   (:require
    [reagent.core :as r]
    [re-frame.core :refer [subscribe dispatch]]))
 
-(defn reconnect-overlay-view []
+(defn disconnect-notice-view []
   (let [websocket-state (subscribe [:core/websocket-state])
         seconds-to-reconnect (r/atom nil)]
     (fn []
@@ -14,7 +14,7 @@
                                     (.valueOf (js/Date.)))
                                  1000))))]
         (when-not (@websocket-state :connected?)
-          [:div.reconnect-overlay
+          [:div.disconnect-notice
            {:ref (fn [_]
                    (tick!)
                    (js/setTimeout (fn [_]

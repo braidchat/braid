@@ -8,7 +8,6 @@
    [braid.core.client.ui.views.header :refer [header-view readonly-header-view]]
    [braid.core.client.ui.views.pages.create-group :refer [create-group-page-view]]
    [braid.core.client.ui.views.pages.inbox :refer [inbox-page-view]]
-   [braid.core.client.ui.views.reconnect-overlay :refer [reconnect-overlay-view]]
    [braid.core.client.ui.views.sidebar :refer [sidebar-view]]
    [braid.core.client.ui.views.pages.readonly :refer [readonly-inbox-page-view]]
    [re-frame.core :refer [dispatch subscribe]]))
@@ -56,8 +55,7 @@
 
     (into
       [:div.main]
-      (concat [[reconnect-overlay-view]
-               [sidebar-view]
+      (concat [[sidebar-view]
                (when @(subscribe [:open-group-id])
                  [header-view])
                [page-view]]
