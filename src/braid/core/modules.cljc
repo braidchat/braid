@@ -47,4 +47,4 @@
   (braid.video-embeds.core/init!)
   (braid.website-embeds.core/init!)
   (braid.youtube-embeds.core/init!)
-  (braid.maps-embeds.core/init!))
+  (braid.map-embeds.core/init!))
