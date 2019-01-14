@@ -10,4 +10,3 @@
      (do
        (core/register-root-view! ui/disconnect-notice-view)
        (core/register-styles! [:#app>.app>.main styles/disconnect-notice]))))
-
