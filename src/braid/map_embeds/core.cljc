@@ -31,11 +31,13 @@
          (fn [request]
            (let [{:keys [lat lng]} (request :params)]
              (if-let [key (config :google-maps-api-key)]
-               {:status 200
-                :body (:body
-                       @(http/request
-                         {:method :get
-                          :url (str "https://maps.googleapis.com/maps/api/staticmap?center=" lat "," lng "&key=" key "&size=300x200&zoom=13")}))}
+               (let [resp @(http/request
+                             {:method :get
+                              :url (str "https://maps.googleapis.com/maps/api/staticmap?center=" lat "," lng "&key=" key "&size=300x200&zoom=13")})]
+                 {:status 200
+                  :headers {"Content-Type" (get-in resp [:headers :content-type])
+                            "Content-Length" (get-in resp [:headers :content-length])}
+                  :body (:body resp)})
                {:status 500
                 :body nil})))]))
 
