@@ -7,7 +7,7 @@
        [[org.httpkit.client :as http]
         [braid.core.server.conf :refer [config]]])))
 
-(def google-regex #"^https://www.google.com/maps/.*/@\-?(\d+\.\d+),\-?(\d+.\.\d+).*")
+(def google-regex #"^https://www.google.com/maps/.*/@(\-?\d+\.\d+),(\-?\d+.\.\d+).*")
 
 #?(:cljs
    (defn- map-embed-view
