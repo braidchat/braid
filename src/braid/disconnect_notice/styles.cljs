@@ -1,11 +1,11 @@
-(ns braid.core.client.ui.styles.reconnect-overlay
+(ns braid.disconnect-notice.styles
   (:require
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
    [garden.arithmetic :as m]))
 
-(def reconnect-overlay
-  [:>.reconnect-overlay
+(def disconnect-notice
+  [:>.disconnect-notice
    {:position "absolute"
     :bottom 0
     :left 0

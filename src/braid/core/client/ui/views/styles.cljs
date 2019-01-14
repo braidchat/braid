@@ -20,7 +20,6 @@
    [braid.core.client.ui.styles.pages.me]
    [braid.core.client.ui.styles.pages.tags]
    [braid.core.client.ui.styles.pills]
-   [braid.core.client.ui.styles.reconnect-overlay]
    [braid.core.client.ui.styles.sidebar]
    [braid.core.client.ui.styles.thread]
    [braid.core.client.ui.styles.vars :as vars]
@@ -65,7 +64,6 @@
                  (braid.core.client.ui.styles.header/header vars/pad)
 
                  braid.core.client.ui.styles.sidebar/sidebar
-                 braid.core.client.ui.styles.reconnect-overlay/reconnect-overlay
                  braid.core.client.ui.styles.page/page
 
                  [:.gateway
