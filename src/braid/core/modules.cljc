@@ -22,7 +22,8 @@
     [braid.uploads-page.core]
     [braid.video-embeds.core]
     [braid.website-embeds.core]
-    [braid.youtube-embeds.core]))
+    [braid.youtube-embeds.core]
+    [braid.map-embeds.core]))
 
 (defn init! []
   (hooks/reset-all!)
@@ -47,5 +48,5 @@
   (braid.uploads-page.core/init!)
   (braid.video-embeds.core/init!)
   (braid.website-embeds.core/init!)
-  (braid.youtube-embeds.core/init!))
-
+  (braid.youtube-embeds.core/init!)
+  (braid.map-embeds.core/init!))

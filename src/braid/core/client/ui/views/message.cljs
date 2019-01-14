@@ -245,7 +245,7 @@
          (:nickname sender)]
         [:span.nickname "[DELETED]"])
       [:span.time {:title (message :created-at)}
-       (helpers/format-date (message :created-at))]]
+       (helpers/smart-format-date (message :created-at))]]
 
      (into [:div.content] (format-message (message :content)))
 
