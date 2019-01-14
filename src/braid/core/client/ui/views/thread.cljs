@@ -215,7 +215,7 @@
           (if @(subscribe [:thread-open? (thread :id)])
             [:div.control.close
              {:title "Close"
-              :tabindex 0
+              :tabIndex 0
               :role "button"
               :on-click (fn [e]
                           ; Need to preventDefault & propagation when using
