@@ -14,3 +14,4 @@ figwheel_server.log
 *.iml
 .cljs_rhino_repl/
 /notes/
+datomic-pro-0.9.5201
