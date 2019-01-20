@@ -7,3 +7,9 @@
     (reset! impl/popover
             {:target (.-currentTarget e)
              :view view})))
+
+(defn on-touch-start
+  [view]
+  (fn [e]
+    (reset! impl/popover {:target (.-currentTarget e)
+                          :view view})))
