@@ -128,10 +128,13 @@
   (if (valid-nickname? (?data :nickname))
     (try
       (do (db/run-txns! (user/set-nickname-txn user-id (?data :nickname)))
-          (helpers/broadcast-user-change user-id [:braid.client/name-change
-                                          {:user-id user-id
-                                           :group-ids (map :id (group/user-groups user-id))
-                                           :nickname (?data :nickname)}])
+          (doseq [group (group/user-groups user-id)]
+            (helpers/broadcast-group-change
+              (group :id)
+              [:braid.client/name-change
+               {:user-id user-id
+                :group-id (group :id)
+                :nickname (?data :nickname)}]))
           (when ?reply-fn (?reply-fn {:ok true})))
       (catch java.util.concurrent.ExecutionException _
         (when ?reply-fn (?reply-fn {:error "Nickname taken"}))))

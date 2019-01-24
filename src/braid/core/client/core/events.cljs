@@ -278,10 +278,8 @@
 
 (reg-event-fx
   :update-user-nickname
-  (fn [{db :db} [_ {:keys [nickname user-id group-ids]}]]
-    {:db (reduce (fn [state group-id]
-                   (assoc-in state [:groups group-id :users user-id :nickname] nickname))
-                 db group-ids)}))
+  (fn [{db :db} [_ {:keys [nickname user-id group-id] :as args}]]
+    {:db (assoc-in db [:groups group-id :users user-id :nickname] nickname)}))
 
 (reg-event-fx
   :set-user-nickname
@@ -291,12 +289,8 @@
        [:braid.server/set-nickname {:nickname nickname}]
        1000
        (fn [reply]
-         (if-let [msg (reply :error)]
-           (on-error msg)
-           (dispatch [:update-user-nickname
-                      {:nickname nickname
-                       :user-id (helpers/current-user-id state)
-                       :group-ids (keys (state :groups))}]))))}))
+         (when-let [msg (reply :error)]
+           (on-error msg))))}))
 
 (reg-event-fx
   :set-user-avatar
