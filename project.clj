@@ -150,8 +150,7 @@
                                   [figwheel-sidecar "0.5.16"
                                    :exclusions
                                    [org.clojure/google-closure-library-third-party
-                                    com.google.javascript/closure-compiler
-                                    org.clojure/tools.nrepl]]
+                                    com.google.javascript/closure-compiler]]
                                   [com.bhauman/rebel-readline "0.1.2"]
                                   [day8.re-frame/re-frame-10x "0.3.3"]]}
              :prod {:global-vars {*assert* false}
