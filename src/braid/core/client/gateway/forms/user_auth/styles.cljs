@@ -15,6 +15,25 @@
      [:button
       (vars/small-button-mixin)]]
 
+    [:.alternative-auth
+
+     [:h3
+      {:margin "3em 0 2em 0"
+       :padding "0 1.5em"
+       :text-align "center"
+       :background "#bbb"
+       :line-height "0.1em"
+       :letter-spacing "0.1em"}
+
+      [:>span
+       {:background "white"
+        :padding "0 10px"
+        :color "#2e939469" }]]
+
+     [:button
+      {:width "100%"}
+      (vars/small-button-mixin)]]
+
     [:.auth-providers
      {:display "inline"}
 
