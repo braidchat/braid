@@ -46,19 +46,6 @@
     (doseq [anon-id (@anonymous-group-readers (thread :group-id))]
       (chsk-send! anon-id [:braid.client/thread thread]))))
 
-(defn broadcast-user-change
-  "Broadcast user info change to clients that can see this user"
-  [user-id info]
-  (let [ids-to-send-to (disj
-                         (intersection
-                           (set (:any @connected-uids))
-                           (into
-                             #{} (map :id)
-                             (user/users-for-user user-id)))
-                         user-id)]
-    (doseq [uid ids-to-send-to]
-      (chsk-send! uid info))))
-
 (defn broadcast-group-change
   "Broadcast group change to clients that are in the group"
   [group-id info]
