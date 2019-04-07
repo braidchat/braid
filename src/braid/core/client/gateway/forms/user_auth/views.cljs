@@ -19,6 +19,12 @@
                      (dispatch-sync [:braid.core.client.gateway.forms.user-auth.events/open-oauth-window provider]))}
         (string/capitalize (name provider))]))])
 
+(defn alternative-auth [text]
+  [:div.alternative-auth
+   [:h3
+    [:span text]]
+   [auth-providers-view]])
+
 (defn returning-email-field-view []
   [field-view
    {:id :email
@@ -29,8 +35,7 @@
     :type "email"
     :placeholder "you@awesome.com"
     :auto-complete "on"
-    :auto-focus true
-    :help-text [:span "Or, log in with: " [auth-providers-view]]}])
+    :auto-focus true}])
 
 (defn returning-password-field-view []
   [field-view
@@ -145,6 +150,7 @@
    [returning-email-field-view]
    [returning-password-field-view]
    [login-button-view]
+   [alternative-auth "Or, log in with"]
    [error-view]])
 
 (defn new-password-field-view []
@@ -168,8 +174,7 @@
     :type "email"
     :auto-complete "on"
     :auto-focus true
-    :placeholder "you@awesome.com"
-    :help-text [:span "Or, register with: " [auth-providers-view]]}])
+    :placeholder "you@awesome.com"}])
 
 (defn register-button-view []
   (let [fields-valid?
@@ -202,6 +207,7 @@
    [new-email-field-view]
    [new-password-field-view]
    [register-button-view]
+   [alternative-auth "Or, register with"]
    [error-view]])
 
 (defn authed-user-view []
