@@ -147,11 +147,10 @@
                                    :exclusions [joda-time
                                                 com.google.guava/guava
                                                 org.slf4j/slf4j-api]]
-                                  [figwheel-sidecar "0.5.16"
+                                  [figwheel-sidecar "0.5.18"
                                    :exclusions
                                    [org.clojure/google-closure-library-third-party
-                                    com.google.javascript/closure-compiler
-                                    org.clojure/tools.nrepl]]
+                                    com.google.javascript/closure-compiler]]
                                   [com.bhauman/rebel-readline "0.1.2"]
                                   [day8.re-frame/re-frame-10x "0.3.3"]]}
              :prod {:global-vars {*assert* false}
@@ -159,10 +158,11 @@
                                     :exclusions [joda-time
                                                  com.google.guava/guava]]
                                    [org.postgresql/postgresql "9.3-1103-jdbc4"]]}
-             :cider [:dev {:dependencies [[com.cemerick/piggieback "0.2.1"]]
-                           :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
-                           :plugins [[cider/cider-nrepl "0.15.0-SNAPSHOT"]
-                                     [refactor-nrepl "2.3.0-SNAPSHOT"]]}]
+             :cider [:dev {:dependencies [[cider/piggieback "0.3.10"]]
+                           :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
+                           :plugins [[cider/cider-nrepl "0.20.0"]
+                                     [refactor-nrepl "2.4.0"]
+                                    ]}]
              :test [:dev]
              :uberjar [:prod
                        {:aot [braid.core]
