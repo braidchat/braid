@@ -16,6 +16,8 @@
       (vars/small-button-mixin)]]
 
     [:.alternative-auth
+     :.switch-to-register-button
+     :.switch-to-login-button
 
      [:h3
       {:margin "3em 0 2em 0"
