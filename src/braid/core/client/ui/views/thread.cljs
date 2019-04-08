@@ -64,7 +64,8 @@
      (for [tag-id (thread :tag-ids)]
        ^{:key tag-id}
        [tag-mention-view tag-id]))
-   [add-tag-button-view thread]])
+   (when-not (:readonly thread)
+     [add-tag-button-view thread])])
 
 (defn messages-view [thread-id]
   ; Closing over thread-id, but the only time a thread's id changes is the new
