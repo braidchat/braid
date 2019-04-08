@@ -129,6 +129,17 @@
    [password-reset-button-view]
    [error-view]])
 
+(defn switch-to-register-button
+  []
+  [:div.switch-to-register-button
+   [:h3 [:span "Don't have an account?"]]
+   [:button
+    {:type "button"
+     :on-click (fn [e]
+                 (.preventDefault e)
+                 (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :register]))}
+    "Register"]])
+
 (defn returning-user-view []
   [form-view
    {:title "Log in to Braid"
@@ -140,18 +151,12 @@
                  {:validate-fields [:email
                                     :password]
                   :dispatch-when-valid [:braid.core.client.gateway.forms.user-auth.events/remote-log-in]}]))}
-   [:p "Don't have an account?"
-    [:button
-     {:type "button"
-      :on-click (fn [e]
-                  (.preventDefault e)
-                  (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :register]))}
-     "Register"]]
    [returning-email-field-view]
    [returning-password-field-view]
    [login-button-view]
    [alternative-auth "Or, log in with"]
-   [error-view]])
+   [error-view]
+   [switch-to-register-button]])
 
 (defn new-password-field-view []
   [field-view
@@ -186,6 +191,17 @@
       :class (when-not fields-valid? "disabled")}
      "Create a Braid Account"]))
 
+(defn switch-to-login-view
+  []
+  [:div.switch-to-login-button
+   [:h3 [:span "Already registered?"]]
+   [:button
+    {:type "button"
+     :on-click (fn [e]
+                 (.preventDefault e)
+                 (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :log-in]))}
+    "Log In"]])
+
 (defn new-user-view []
   [form-view
    {:title "Create a Braid Account"
@@ -197,18 +213,12 @@
                  {:validate-fields [:email
                                     :new-password]
                   :dispatch-when-valid [:braid.core.client.gateway.forms.user-auth.events/remote-register]}]))}
-   [:p "Already have one?"
-    [:button
-     {:type "button"
-      :on-click (fn [e]
-                  (.preventDefault e)
-                  (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :log-in]))}
-     "Log In"]]
    [new-email-field-view]
    [new-password-field-view]
    [register-button-view]
    [alternative-auth "Or, register with"]
-   [error-view]])
+   [error-view]
+   [switch-to-login-view]])
 
 (defn authed-user-view []
   (let [user @(subscribe [:braid.core.client.gateway.forms.user-auth.subs/user])]
