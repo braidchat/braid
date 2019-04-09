@@ -9,6 +9,7 @@
           [braid.popovers.api :as popovers]
           [braid.core.client.ui.styles.hover-menu]
           [braid.core.client.ui.styles.hover-cards]
+          [braid.core.client.ui.styles.thread]
           [braid.core.client.bots.views.bots-page :refer [bots-page-view]]
           [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
           [braid.core.client.invites.views.invite-page :refer [invite-page-view]]
@@ -41,6 +42,9 @@
 
        (popovers/register-popover-styles!
          (braid.core.client.ui.styles.hover-menu/>hover-menu))
+
+       (popovers/register-popover-styles!
+         braid.core.client.ui.styles.thread/add-tag-popover-styles)
 
        (core/register-system-page!
          {:key :global-settings

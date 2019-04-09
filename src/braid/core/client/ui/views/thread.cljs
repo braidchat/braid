@@ -1,58 +1,63 @@
 (ns braid.core.client.ui.views.thread
   (:require
-   [clojure.set :refer [difference]]
-   [clojure.string :as string]
-   [cljsjs.resize-observer-polyfill]
-   [re-frame.core :refer [dispatch subscribe]]
-   [reagent.core :as r]
    [braid.core.client.helpers :as helpers]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.card-border :refer [card-border-view]]
+   [braid.core.client.ui.views.mentions :refer [user-mention-view tag-mention-view]]
    [braid.core.client.ui.views.message :refer [message-view]]
    [braid.core.client.ui.views.new-message :refer [new-message-view]]
-   [braid.core.client.ui.views.mentions :refer [user-mention-view tag-mention-view]]
-   [braid.core.hooks :as hooks])
+   [braid.core.hooks :as hooks]
+   [braid.popovers.helpers :as popovers]
+   [cljsjs.resize-observer-polyfill]
+   [clojure.set :refer [difference]]
+   [clojure.string :as string]
+   [re-frame.core :refer [dispatch subscribe]]
+   [reagent.core :as r])
   (:import
    (goog.events KeyCodes)))
 
 (def max-file-size (* 10 1024 1024))
 
-(defn tag-option-view [tag thread-id close-list!]
+(defn tag-option-view [tag thread-id]
   [:div.tag-option
    {:on-click (fn []
-                (close-list!)
+                (popovers/close!)
                 (dispatch [:add-tag-to-thread {:thread-id thread-id
                                                :tag-id (tag :id)}]))}
    [:div.rect {:style {:background (helpers/->color (tag :id))}}]
    [:span {:style {:color (helpers/->color (tag :id))}}
     "#" (tag :name)]])
 
-(defn add-tag-list-view [thread close-list!]
-  (let [group-tags (subscribe [:open-group-tags])]
-    (fn [thread close-list!]
+(defn add-tag-list-view [thread]
+  (let [search-query (r/atom "")]
+    (fn [thread]
       (let [thread-tag-ids (set (thread :tag-ids))
-            tags (->> @group-tags
+            tags (->> @(subscribe [:open-group-tags])
                       (remove (fn [tag]
                                 (contains? thread-tag-ids (tag :id))))
+                      (filter (fn [tag]
+                                (or (string/blank? @search-query)
+                                    (string/includes? (tag :name) @search-query))))
                       (sort-by :name))]
         [:div.tag-list
+         [:input.search
+          {:placeholder "Search for tag/user"
+           :value @search-query
+           :on-change (fn [e] (reset! search-query
+                                      (.. e -target -value)))}]
          (if (seq tags)
            (doall
              (for [tag tags]
                ^{:key (tag :id)}
-               [tag-option-view tag (thread :id) close-list!]))
+               [tag-option-view tag (thread :id)]))
            [:div.name "All tags used already."])]))))
 
 (defn add-tag-button-view [thread]
-  (let [show-list? (r/atom false)
-        close-list! (fn []
-                      (reset! show-list? false))]
-    (fn [thread]
-      [:div.add
-       [:span.pill {:on-click (fn [] (swap! show-list? not))}
-        (if @show-list? "×" "+")]
-       (when @show-list?
-         [add-tag-list-view thread close-list!])])))
+  [:div.add
+   [:span.pill {:on-click (popovers/on-click
+                            (fn []
+                              [add-tag-list-view thread]))}
+    "+"]])
 
 (defn thread-tags-view [thread]
   [:div.tags

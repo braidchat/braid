@@ -3,6 +3,7 @@
    [braid.core.client.ui.styles.misc :refer [drag-and-drop]]
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
+   [braid.popovers.api :as popovers]
    [garden.arithmetic :as m]
    [garden.units :refer [px em rem]]))
 
@@ -18,43 +19,12 @@
    [:>.tags
     {:display "inline"}
 
-    [:>.add
+    [:.add
      {:position "relative"}
 
      [:>span.pill
       mixins/pill-button
-      {:letter-spacing "normal !important"}]
-
-     [:>.tag-list
-      {:position "absolute"
-       :left "100%"
-       :margin-left (em 0.5)
-       :top "-0.5em"
-       :background "white"
-       :z-index 100
-       :max-height (em 12)
-       :overflow-x "auto"}
-      (mixins/box-shadow)
-
-      [:>.tag-option
-       {:cursor "pointer"
-        :white-space "nowrap"
-        :padding (em 0.25)}
-
-       [:&:hover
-        {:background "#eee"}]
-
-       [:>.rect
-        {:width (em 1)
-         :height (em 2)
-         :display "inline-block"
-         :vertical-align "middle"
-         :border-radius (px 3)}]
-
-       [:>span
-        {:margin (rem 0.25)
-         :display "inline-block"
-         :vertical-align "middle"}]]]]
+      {:letter-spacing "normal !important"}]]
 
     [:>.user :>.tag :>.add
      {:display "inline-block"
@@ -326,3 +296,41 @@
       [:&.highlight
        [:.name
         {:font-weight "bold"}]]]]]])
+
+
+(def add-tag-popover-styles
+  [:>.tag-list
+   {:position "absolute"
+    :background-color "white"
+    :margin-left (em 0.5)
+    :margin-bottom (em 0.5)
+    :background "white"
+    :z-index 100
+    :width "50vw"
+    :max-height "50vh"
+    :overflow-x "auto"}
+   (mixins/box-shadow)
+
+   [:>.search
+    {:width "100%"
+     :font-size "1.2em"}]
+
+   [:>.tag-option
+    {:cursor "pointer"
+     :white-space "nowrap"
+     :padding (em 0.25)}
+
+    [:&:hover
+     {:background "#eee"}]
+
+    [:>.rect
+     {:width (em 1)
+      :height (em 2)
+      :display "inline-block"
+      :vertical-align "middle"
+      :border-radius (px 3)}]
+
+    [:>span
+     {:margin (rem 0.25)
+      :display "inline-block"
+      :vertical-align "middle"}]]])
