@@ -110,10 +110,20 @@
   [{:as ev-msg :keys [?data user-id]}]
   (let [{:keys [thread-id tag-id]} ?data]
     (let [group-id (tag/tag-group-id tag-id)]
-      (db/run-txns! (thread/tag-thread-txn group-id thread-id tag-id))
-      (helpers/broadcast-thread thread-id []))))
-    ; TODO do we need to notify-users and notify-bots
+      (when (group/user-in-group? user-id group-id)
+        ;; [TODO] do we need to notify-users and notify-bots
+        (db/run-txns! (thread/tag-thread-txn group-id thread-id tag-id))
+        (helpers/broadcast-thread thread-id [])))))
 
+(defmethod event-msg-handler :braid.server/mention-thread
+  [{:as ev-msg :keys [?data] tagger-id :user-id}]
+  (let [{:keys [thread-id user-id group-id]} ?data]
+    (when (and (group/user-in-group? tagger-id group-id)
+               (group/user-in-group? user-id group-id)
+               (or (nil? (thread/thread-by-id thread-id))
+                   (= group-id (:group-id (thread/thread-by-id thread-id)))))
+      (db/run-txns! (thread/mention-thread-txn group-id thread-id user-id))
+      (helpers/broadcast-thread thread-id []))))
 
 (defmethod event-msg-handler :braid.server/subscribe-to-tag
   [{:as ev-msg :keys [?data user-id]}]

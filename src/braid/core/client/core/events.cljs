@@ -645,7 +645,8 @@
            (update-in db [:groups group-id :users] dissoc user-id)
            db)}))
 
-(reg-event-fx :add-tag-to-thread
+(reg-event-fx
+  :add-tag-to-thread
   (fn [{state :db} [_ {:keys [thread-id tag-id local-only?]}]]
     (if (get-in state [:threads thread-id])
       {:db (update-in state [:threads thread-id :tag-ids] conj tag-id)
@@ -655,6 +656,20 @@
                                                       :tag-id tag-id}]))}
       {:db (update-in state [:temp-threads (state :open-group-id) :tag-ids]
                       conj tag-id)})))
+
+(reg-event-fx
+  :add-user-to-thread
+  (fn [{state :db} [_ {:keys [thread-id user-id local-only?]}]]
+    (if (get-in state [:threads thread-id])
+      {:db (update-in state [:threads thread-id :mentioned-ids] conj user-id)
+       :websocket-send
+       (when-not local-only?
+         (list
+           [:braid.server/mention-thread {:thread-id thread-id
+                                          :group-id (state :open-group-id)
+                                          :user-id user-id}]))}
+      {:db (update-in state [:temp-threads (state :open-group-id) :mentioned-ids]
+                      conj user-id)})))
 
 (reg-event-fx
   :go-to
