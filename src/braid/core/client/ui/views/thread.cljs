@@ -102,6 +102,8 @@
                       (swap! selected-row (comp (partial max 0) dec))
 
                       "ArrowDown"
+                      ;; not guarding this because the above `run!`
+                      ;; will make sure that it stays in bounds
                       (swap! selected-row inc)
 
                       "Enter"
