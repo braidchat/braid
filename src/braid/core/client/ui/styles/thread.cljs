@@ -3,7 +3,6 @@
    [braid.core.client.ui.styles.misc :refer [drag-and-drop]]
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
-   [braid.popovers.api :as popovers]
    [garden.arithmetic :as m]
    [garden.units :refer [px em rem]]))
 
