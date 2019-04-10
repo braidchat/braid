@@ -26,7 +26,8 @@
                 (popovers/close!)
                 (dispatch [:add-tag-to-thread {:thread-id thread-id
                                                :tag-id (tag :id)}]))
-    :class (when selected? "selected")}
+    :class (when selected? "selected")
+    :ref (fn [ref] (when (and selected? ref) (.scrollIntoView ref false)))}
    [:div.rect {:style {:background (helpers/->color (tag :id))}}]
    [:span {:style {:color (helpers/->color (tag :id))}}
     "#" (tag :name)]])
@@ -38,7 +39,8 @@
                 (popovers/close!)
                 (dispatch [:add-user-to-thread {:thread-id thread-id
                                                 :user-id (user :id)}]))
-    :class (when selected? "selected")}
+    :class (when selected? "selected")
+    :ref (fn [ref] (when (and selected? ref) (.scrollIntoView ref false)))}
    [:div.rect {:style {:background (helpers/->color (user :id))}}]
    [:span {:style {:color (helpers/->color (user :id))}}
     "@" (user :nickname)]])
