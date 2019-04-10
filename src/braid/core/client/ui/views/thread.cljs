@@ -72,12 +72,18 @@
                         vec))
             selected (reaction (get-in [@tags @users] [@selected-column @selected-row]))]
         (run!
-          (->> (get (mapv (comp dec count) [@tags @users]) @selected-column)
-              (min @selected-row)
-              (reset! selected-row)))
+          (let [counts (mapv count [@tags @users])
+                cur-count (get counts @selected-column)
+                other-count (get counts (mod (inc @selected-column) 2))]
+            (if (and (zero? cur-count)
+                     (not (zero? other-count)))
+              (do
+                (swap! selected-column (comp #(mod % 2) inc))
+                (swap! selected-row #(max 0 (min % (dec other-count)))))
+              (swap! selected-row #(max 0 (min % (dec cur-count)))))))
         [:div.add-mention-popup
          [:input.search
-          {:placeholder "Search for tag/user"
+          {:placeholder "Search for tag/user to add to thread"
            :auto-focus true
            :value @search-query
            :on-change (fn [e] (reset! search-query
@@ -90,10 +96,7 @@
                     (.stopPropagation e)
                     (case k
                       ("ArrowRight" "ArrowLeft")
-                      (let [other-col (mod (inc @selected-column) 2)
-                            other-count (count (get [@tags @users] other-col))]
-                        (when-not (zero? other-count)
-                          (swap! selected-column (comp #(mod % 2) inc))))
+                      (swap! selected-column (comp #(mod % 2) inc))
 
                       "ArrowUp"
                       (swap! selected-row (comp (partial max 0) dec))
@@ -102,7 +105,7 @@
                       (swap! selected-row inc)
 
                       "Enter"
-                      (do
+                      (when @selected
                         (popovers/close!)
                         (case @selected-column
                           0 (dispatch [:add-tag-to-thread
