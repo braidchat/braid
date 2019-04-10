@@ -28,29 +28,58 @@
    [:span {:style {:color (helpers/->color (tag :id))}}
     "#" (tag :name)]])
 
+(defn user-option-view
+  [user thread-id]
+  [:div.user-option
+   {:on-click (fn []
+                (popovers/close!)
+                (dispatch [:add-user-to-thread {:thread-id thread-id
+                                                :user-id (user :id)}]))}
+   [:div.rect {:style {:background (helpers/->color (user :id))}}]
+   [:span {:style {:color (helpers/->color (user :id))}}
+    "@" (user :nickname)]])
+
 (defn add-tag-list-view [thread]
   (let [search-query (r/atom "")]
     (fn [thread]
       (let [thread-tag-ids (set (thread :tag-ids))
+            thread-user-ids (set (thread :mentioned-ids))
             tags (->> @(subscribe [:open-group-tags])
                       (remove (fn [tag]
                                 (contains? thread-tag-ids (tag :id))))
                       (filter (fn [tag]
                                 (or (string/blank? @search-query)
                                     (string/includes? (tag :name) @search-query))))
-                      (sort-by :name))]
-        [:div.tag-list
+                      (sort-by :name))
+            users (->> @(subscribe [:users])
+                      (remove (fn [user] (contains? thread-user-ids (user :id))))
+                      (filter (fn [user]
+                                (or (string/blank? @search-query)
+                                    (string/includes? (user :nickname) @search-query))))
+                      (sort-by :nickname))]
+        [:div.add-mention-popup
          [:input.search
           {:placeholder "Search for tag/user"
            :value @search-query
            :on-change (fn [e] (reset! search-query
-                                      (.. e -target -value)))}]
-         (if (seq tags)
-           (doall
-             (for [tag tags]
-               ^{:key (tag :id)}
-               [tag-option-view tag (thread :id)]))
-           [:div.name "All tags used already."])]))))
+                                     (.. e -target -value)))}]
+         [:div.search-results
+
+          [:div.tag-list
+           (if (seq tags)
+             (doall
+               (for [tag tags]
+                 ^{:key (tag :id)}
+                 [tag-option-view tag (thread :id)]))
+             [:div.name "All tags used already."])]
+
+          [:div.user-list
+           (if (seq users)
+             (doall
+               (for [user users]
+                 ^{:key (user :id)}
+                 [user-option-view user (thread :id)]))
+             [:div.name "All users already mentioned."])]]]))))
 
 (defn add-tag-button-view [thread]
   [:div.add

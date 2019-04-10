@@ -298,7 +298,7 @@
 
 
 (def add-tag-popover-styles
-  [:>.tag-list
+  [:>.add-mention-popup
    {:position "absolute"
     :background-color "white"
     :margin-left (em 0.5)
@@ -306,30 +306,40 @@
     :background "white"
     :z-index 100
     :width "50vw"
-    :max-height "50vh"
-    :overflow-x "auto"}
+    :height "50vh"
+    :overflow-x "hidden"
+    :display "flex"
+    :flex-direction "column"}
    (mixins/box-shadow)
 
    [:>.search
-    {:width "100%"
-     :font-size "1.2em"}]
+    {:font-size "1.2em"}]
 
-   [:>.tag-option
-    {:cursor "pointer"
-     :white-space "nowrap"
-     :padding (em 0.25)}
+   [:>.search-results
+    {:display "flex"
+     :flex-direction "row"}
 
-    [:&:hover
-     {:background "#eee"}]
+    [:>.tag-list
+     :>.user-list
+     {:flex-grow "1"}
 
-    [:>.rect
-     {:width (em 1)
-      :height (em 2)
-      :display "inline-block"
-      :vertical-align "middle"
-      :border-radius (px 3)}]
+     [:>.tag-option
+      :>.user-option
+      {:cursor "pointer"
+       :white-space "nowrap"
+       :padding (em 0.25)}
 
-    [:>span
-     {:margin (rem 0.25)
-      :display "inline-block"
-      :vertical-align "middle"}]]])
+      [:&:hover
+       {:background "#eee"}]
+
+      [:>.rect
+       {:width (em 1)
+        :height (em 2)
+        :display "inline-block"
+        :vertical-align "middle"
+        :border-radius (px 3)}]
+
+      [:>span
+       {:margin (rem 0.25)
+        :display "inline-block"
+        :vertical-align "middle"}]]]]])
