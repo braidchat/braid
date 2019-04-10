@@ -18,7 +18,6 @@
                             (reset! popover nil)))
         :on-click (fn [e]
                     (.stopPropagation e)
-                    (prn "CLICK")
                     (when (= (.-target e) (.-currentTarget e))
                       (reset! popover nil)))
         :on-touch-start (fn [e]
