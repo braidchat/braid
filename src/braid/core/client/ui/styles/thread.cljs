@@ -317,11 +317,14 @@
 
    [:>.search-results
     {:display "flex"
-     :flex-direction "row"}
+     :flex-direction "row"
+     :flex-grow "2"
+     :min-height "0px"}
 
     [:>.tag-list
      :>.user-list
-     {:flex-grow "1"}
+     {:flex-grow "1"
+      :overflow-y "scroll"}
 
      [:>.tag-option
       :>.user-option
