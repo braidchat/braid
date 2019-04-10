@@ -309,11 +309,14 @@
     :height "50vh"
     :overflow-x "hidden"
     :display "flex"
-    :flex-direction "column"}
-   (mixins/box-shadow)
+    :flex-direction "column"
+    :border-radius "0.25em"}
 
    [:>.search
     {:font-size "1.2em"}]
+
+   [:>.cancel
+    (mixins/settings-button)]
 
    [:>.search-results
     {:display "flex"
