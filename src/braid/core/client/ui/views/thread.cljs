@@ -12,80 +12,128 @@
    [clojure.set :refer [difference]]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]
-   [reagent.core :as r])
+   [reagent.core :as r]
+   [reagent.ratom :refer-macros [run! reaction]])
   (:import
    (goog.events KeyCodes)))
 
 (def max-file-size (* 10 1024 1024))
 
-(defn tag-option-view [tag thread-id]
+(defn tag-option-view
+  [tag thread-id selected?]
   [:div.tag-option
    {:on-click (fn []
                 (popovers/close!)
                 (dispatch [:add-tag-to-thread {:thread-id thread-id
-                                               :tag-id (tag :id)}]))}
+                                               :tag-id (tag :id)}]))
+    :class (when selected? "selected")}
    [:div.rect {:style {:background (helpers/->color (tag :id))}}]
    [:span {:style {:color (helpers/->color (tag :id))}}
     "#" (tag :name)]])
 
 (defn user-option-view
-  [user thread-id]
+  [user thread-id selected?]
   [:div.user-option
    {:on-click (fn []
                 (popovers/close!)
                 (dispatch [:add-user-to-thread {:thread-id thread-id
-                                                :user-id (user :id)}]))}
+                                                :user-id (user :id)}]))
+    :class (when selected? "selected")}
    [:div.rect {:style {:background (helpers/->color (user :id))}}]
    [:span {:style {:color (helpers/->color (user :id))}}
     "@" (user :nickname)]])
 
-(defn add-tag-list-view [thread]
-  (let [search-query (r/atom "")]
+(defn add-tag-user-popover-view
+  [thread]
+  (let [search-query (r/atom "")
+        selected-column (r/atom 0)
+        selected-row (r/atom 0)]
     (fn [thread]
       (let [thread-tag-ids (set (thread :tag-ids))
             thread-user-ids (set (thread :mentioned-ids))
-            tags (->> @(subscribe [:open-group-tags])
-                      (remove (fn [tag]
-                                (contains? thread-tag-ids (tag :id))))
-                      (filter (fn [tag]
-                                (or (string/blank? @search-query)
-                                    (string/includes? (tag :name) @search-query))))
-                      (sort-by :name))
-            users (->> @(subscribe [:users])
-                      (remove (fn [user] (contains? thread-user-ids (user :id))))
-                      (filter (fn [user]
-                                (or (string/blank? @search-query)
-                                    (string/includes? (user :nickname) @search-query))))
-                      (sort-by :nickname))]
+            tags (reaction
+                   (->> @(subscribe [:open-group-tags])
+                       (remove (fn [tag]
+                                 (contains? thread-tag-ids (tag :id))))
+                       (filter (fn [tag]
+                                 (or (string/blank? @search-query)
+                                     (string/includes? (tag :name) @search-query))))
+                       (sort-by :name)
+                       vec))
+            users (reaction
+                    (->> @(subscribe [:users])
+                        (remove (fn [user] (contains? thread-user-ids (user :id))))
+                        (filter (fn [user]
+                                  (or (string/blank? @search-query)
+                                      (string/includes? (user :nickname) @search-query))))
+                        (sort-by :nickname)
+                        vec))
+            selected (reaction (get-in [@tags @users] [@selected-column @selected-row]))]
+        (run!
+          (->> (get (mapv (comp dec count) [@tags @users]) @selected-column)
+              (min @selected-row)
+              (reset! selected-row)))
         [:div.add-mention-popup
          [:input.search
           {:placeholder "Search for tag/user"
+           :auto-focus true
            :value @search-query
            :on-change (fn [e] (reset! search-query
-                                     (.. e -target -value)))}]
+                                     (.. e -target -value)))
+           :on-key-down
+           (fn [e] (when-let [k (#{"ArrowUp" "ArrowDown" "ArrowLeft" "ArrowRight"
+                                 "Escape" "Enter"}
+                                 (.-key e))]
+                    (.preventDefault e)
+                    (.stopPropagation e)
+                    (case k
+                      ("ArrowRight" "ArrowLeft")
+                      (let [other-col (mod (inc @selected-column) 2)
+                            other-count (count (get [@tags @users] other-col))]
+                        (when-not (zero? other-count)
+                          (swap! selected-column (comp #(mod % 2) inc))))
+
+                      "ArrowUp"
+                      (swap! selected-row (comp (partial max 0) dec))
+
+                      "ArrowDown"
+                      (swap! selected-row inc)
+
+                      "Enter"
+                      (do
+                        (popovers/close!)
+                        (case @selected-column
+                          0 (dispatch [:add-tag-to-thread
+                                       {:thread-id (thread :id)
+                                        :tag-id (@selected :id)}])
+                          1 (dispatch [:add-user-to-thread
+                                       {:thread-id (thread :id)
+                                        :user-id (@selected :id)}])))
+
+                      "Escape" (popovers/close!))))}]
          [:div.search-results
 
           [:div.tag-list
-           (if (seq tags)
+           (if (seq @tags)
              (doall
-               (for [tag tags]
+               (for [tag @tags]
                  ^{:key (tag :id)}
-                 [tag-option-view tag (thread :id)]))
-             [:div.name "All tags used already."])]
+                 [tag-option-view tag (thread :id) (= tag @selected)]))
+             [:div.name "No unused tags matching"])]
 
           [:div.user-list
-           (if (seq users)
+           (if (seq @users)
              (doall
-               (for [user users]
+               (for [user @users]
                  ^{:key (user :id)}
-                 [user-option-view user (thread :id)]))
-             [:div.name "All users already mentioned."])]]]))))
+                 [user-option-view user (thread :id) (= user @selected)]))
+             [:div.name "No unmentioned users matching"])]]]))))
 
 (defn add-tag-button-view [thread]
   [:div.add
    [:span.pill {:on-click (popovers/on-click
                             (fn []
-                              [add-tag-list-view thread]))}
+                              [add-tag-user-popover-view thread]))}
     "+"]])
 
 (defn thread-tags-view [thread]

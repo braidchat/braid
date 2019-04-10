@@ -332,6 +332,10 @@
       [:&:hover
        {:background "#eee"}]
 
+      [:&.selected
+       {:font-weight "bold"
+        :background-color "rgba(0, 0, 0, 0.1)"}]
+
       [:>.rect
        {:width (em 1)
         :height (em 2)
