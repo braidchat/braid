@@ -127,7 +127,9 @@
                (for [user @users]
                  ^{:key (user :id)}
                  [user-option-view user (thread :id) (= user @selected)]))
-             [:div.name "No unmentioned users matching"])]]]))))
+             [:div.name "No unmentioned users matching"])]]
+
+         [:button.cancel {:on-click (fn [_] (popovers/close!))} "Cancel"]]))))
 
 (defn add-tag-button-view [thread]
   [:div.add
