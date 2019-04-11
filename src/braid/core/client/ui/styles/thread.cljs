@@ -18,43 +18,12 @@
    [:>.tags
     {:display "inline"}
 
-    [:>.add
+    [:.add
      {:position "relative"}
 
      [:>span.pill
       mixins/pill-button
-      {:letter-spacing "normal !important"}]
-
-     [:>.tag-list
-      {:position "absolute"
-       :left "100%"
-       :margin-left (em 0.5)
-       :top "-0.5em"
-       :background "white"
-       :z-index 100
-       :max-height (em 12)
-       :overflow-x "auto"}
-      (mixins/box-shadow)
-
-      [:>.tag-option
-       {:cursor "pointer"
-        :white-space "nowrap"
-        :padding (em 0.25)}
-
-       [:&:hover
-        {:background "#eee"}]
-
-       [:>.rect
-        {:width (em 1)
-         :height (em 2)
-         :display "inline-block"
-         :vertical-align "middle"
-         :border-radius (px 3)}]
-
-       [:>span
-        {:margin (rem 0.25)
-         :display "inline-block"
-         :vertical-align "middle"}]]]]
+      {:letter-spacing "normal !important"}]]
 
     [:>.user :>.tag :>.add
      {:display "inline-block"
@@ -326,3 +295,61 @@
       [:&.highlight
        [:.name
         {:font-weight "bold"}]]]]]])
+
+
+(def add-tag-popover-styles
+  [:>.add-mention-popup
+   {:position "absolute"
+    :background-color "white"
+    :margin-left (em 0.5)
+    :margin-bottom (em 0.5)
+    :background "white"
+    :z-index 100
+    :width "50vw"
+    :height "50vh"
+    :overflow-x "hidden"
+    :display "flex"
+    :flex-direction "column"
+    :border-radius "0.25em"}
+
+   [:>.search
+    {:font-size "1.2em"}]
+
+   [:>.cancel
+    (mixins/settings-button)]
+
+   [:>.search-results
+    {:display "flex"
+     :flex-direction "row"
+     :flex-grow "2"
+     :min-height "0px"}
+
+    [:>.tag-list
+     :>.user-list
+     {:flex-grow "1"
+      :overflow-y "scroll"}
+
+     [:>.tag-option
+      :>.user-option
+      {:cursor "pointer"
+       :white-space "nowrap"
+       :padding (em 0.25)}
+
+      [:&:hover
+       {:background "#eee"}]
+
+      [:&.selected
+       {:font-weight "bold"
+        :background-color "rgba(0, 0, 0, 0.1)"}]
+
+      [:>.rect
+       {:width (em 1)
+        :height (em 2)
+        :display "inline-block"
+        :vertical-align "middle"
+        :border-radius (px 3)}]
+
+      [:>span
+       {:margin (rem 0.25)
+        :display "inline-block"
+        :vertical-align "middle"}]]]]])

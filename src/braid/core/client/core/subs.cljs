@@ -56,7 +56,7 @@
 (reg-sub
   :users
   (fn [{:keys [open-group-id] :as state} _]
-    (get state [:groups open-group-id :users])))
+    (vals (get-in state [:groups open-group-id :users]))))
 
 (reg-sub
   :user-is-group-admin?

@@ -256,6 +256,29 @@
       (difference (set (tag/users-subscribed-to-tag tag-id))
                   (set (users-subscribed-to-thread thread-id))))))
 
+(defn mention-thread-txn
+  [group-id thread-id user-id]
+  (concat
+    ; upsert-thread
+    (if-not (d/entity (db/db) [:thread/id thread-id])
+      [{:db/id (d/tempid :entities)
+        :thread/id thread-id
+        :thread/group [:group/id group-id]}]
+      [])
+    ; add user to thread
+    [[:db/add [:thread/id thread-id]
+      :thread/mentioned [:user/id user-id]]]
+    ; open and subscribe thread for users mentioned
+    ; ...unless they're already subscribed, which means they've seen it
+    (mapcat
+      (fn [user-id]
+        [[:db/add [:user/id user-id]
+          :user/subscribed-thread [:thread/id thread-id]]
+         [:db/add [:user/id user-id]
+          :user/open-thread [:thread/id thread-id]]])
+      (difference #{user-id}
+                  (set (users-subscribed-to-thread thread-id))))))
+
 ;; Misc
 
 (defn thread-add-last-open-at
