@@ -318,7 +318,7 @@
              \uf00d]
             [:div.control.unread
              {:title "Mark Unread"
-              :tabindex 0
+              :tabIndex 0
               :role "button"
               :on-click (fn [e]
                           ; Need to preventDefault & propagation when using
