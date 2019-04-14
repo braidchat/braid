@@ -4,6 +4,7 @@
     #?@(:clj
          [[braid.core.server.db.tag :as tag]
           [braid.core.server.db.thread :as thread]
+          [braid.search.lucene :as lucene]
           [braid.search.server :as search]]
          :cljs
          [[clojure.string :as string]
@@ -105,6 +106,10 @@
 
      :clj
      (do
+       (core/register-config-var! :lucene-store-location)
+
+       (core/register-new-message-callback! lucene/index-message!)
+
        (core/register-server-message-handlers!
          {::search-ws
           (fn [{:as ev-msg :keys [?data ?reply-fn user-id]}]

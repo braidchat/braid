@@ -6,7 +6,8 @@
     [instaparse.core :as insta]
     [braid.core.server.db :as db]
     [braid.core.server.db.thread :as thread]
-    [braid.search.elasticsearch :as elastic]))
+    [braid.search.elasticsearch :as elastic]
+    [braid.search.lucene :as lucene]))
 
 ; TODO: some way to search for a tag with spaces in it?
 (def query-parser
@@ -99,19 +100,7 @@
                         (elastic/search-for {:text text
                                              :group-id group-id
                                              :user-id user-id})
-                        (set (d/q '[:find ?t-id (max ?time)
-                                    :in $ ?txt ?g-id
-                                    :where
-                                    [?g :group/id ?g-id]
-                                    [?tag :tag/group ?g]
-                                    [?t :thread/id ?t-id]
-                                    [?t :thread/tag ?tag]
-                                    [?m :message/thread ?t]
-                                    [?m :message/created-at ?time]
-                                    [(fulltext $ :message/content ?txt) [[?m]]]]
-                                  search-db
-                                  text
-                                  group-id))))
+                        (lucene/search group-id text)))
         results [text-search tag-search user-search]]
     (->> (remove nil? results)
          (apply intersection)

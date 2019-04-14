@@ -121,3 +121,12 @@
                                          :user-id (user-2 :id)
                                          :created-at (java.util.Date.)
                                          :content "Hi!"})))]))
+
+(defn import-messages!
+  []
+  (require '[braid.search.lucene])
+  (doseq [msg (->> (datomic.api/q '[:find [(pull ?m pull-pattern) ...] :in $ pull-pattern :where [?m :message/id _]] (db/db)
+                                 braid.core.server.db.common/message-pull-pattern)
+
+                  (map braid.core.server.db.common/db->message))]
+    (braid.search.lucene/index-message! msg)))
