@@ -11,10 +11,11 @@
 ; TODO: some way to search for a tag with spaces in it?
 (def query-parser
   (insta/parser
-    "S ::= ( TAG / DOT ) *
-    DOT ::= #'(?s).'
+    "S   ::= ( TAG / USER / DOT ) *
+    DOT  ::= #'(?s).'
     <ws> ::= #'\\s*'
-    TAG ::= <'#'> #'[^ ]+'
+    TAG  ::= <'#'> #'[^ ]+'
+    USER ::= <'@'> #'[^ ]+'
     "))
 
 (defn squash
@@ -31,18 +32,28 @@
         text-query (->> parsed
                         (insta/transform
                           {:DOT str
-                           :TAG (constantly "")})
+                           :TAG (constantly "")
+                           :USER (constantly "")})
                         rest
                         (string/join "")
                         squash)
         tag-query (->> parsed
                        (insta/transform
                          {:DOT (constantly nil)
-                          :TAG identity})
+                          :TAG identity
+                          :USER (constantly nil)})
+                       rest
+                       (remove nil?))
+        user-query (->> parsed
+                       (insta/transform
+                         {:DOT (constantly nil)
+                          :TAG (constantly nil)
+                          :USER identity})
                        rest
                        (remove nil?))]
     {:text text-query
-     :tags tag-query}))
+     :tags tag-query
+     :users user-query}))
 
 (defn search-threads-as
   "Return the ids of all threads, visible to the user, in the given group,
@@ -52,7 +63,7 @@
   text 'foo'"
   [user-id [query group-id]]
   ; TODO: pagination?
-  (let [{:keys [text tags]} (parse-query query)
+  (let [{:keys [text tags users]} (parse-query query)
         search-db (db/db)
         tag-search (when (seq tags)
                      (set (d/q '[:find ?t-id (max ?time)
@@ -69,6 +80,20 @@
                                search-db
                                tags
                                group-id)))
+        user-search (when (seq users)
+                      (set (d/q '[:find ?t-id (max ?time)
+                                  :in $ [?user-name ...] ?g-id
+                                  :where
+                                  [?g :group/id ?g-id]
+                                  [?user :user/nickname ?user-name]
+                                  [?g :group/user ?user]
+                                  [?t :thread/id ?t-id]
+                                  [?t :thread/mentioned ?user]
+                                  [?m :message/thread ?t]
+                                  [?m :message/created-at ?time]]
+                                search-db
+                                users
+                                group-id)))
         text-search (when-not (string/blank? text)
                       (if (elastic/elasticsearch-enabled?)
                         (elastic/search-for {:text text
@@ -86,10 +111,10 @@
                                     [(fulltext $ :message/content ?txt) [[?m]]]]
                                   search-db
                                   text
-                                  group-id))))]
-    (->> (if (every? some? [text-search tag-search])
-           (intersection text-search tag-search)
-           (first (remove nil? [text-search tag-search])))
+                                  group-id))))
+        results [text-search tag-search user-search]]
+    (->> (remove nil? results)
+         (apply intersection)
          (filter (comp (partial thread/user-can-see-thread? user-id) first))
          ; sorting the ids so we can have a consistent order of results
          (sort-by second #(compare %2 %1))
