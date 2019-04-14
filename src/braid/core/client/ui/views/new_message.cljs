@@ -111,7 +111,8 @@
         state (r/atom {:text thread-text
                        :force-close? false
                        :highlighted-result-index 0
-                       :results nil})
+                       :results nil
+                       :pos 0})
 
         reset-state! (fn []
                        (swap! state assoc
@@ -161,8 +162,11 @@
                       (update-thread-text! thread-id text)))
 
         update-text! (fn [f]
-                       (swap! state update :text f)
-                       (update-thread-text! thread-id (@state :text)))
+                       (let [{:keys [text pos]} @state
+                             updated-text (f (.slice text 0 pos))
+                             new-text (str updated-text (.slice text pos))]
+                         (swap! state assoc :text new-text)
+                         (update-thread-text! thread-id (@state :text))))
 
         choose-result!
         (fn [result]
@@ -175,9 +179,9 @@
                          ;TODO
 
 
-        handle-text-change! (fn [text]
+        handle-text-change! (fn [cursor text]
                               (clear-force-close!)
-                              (put! autocomplete-chan text))
+                              (put! autocomplete-chan {:text text :pos cursor}))
 
         ; returns a function that can be used in a textarea's :on-key-down handler
         ; takes a callback fn, the textareas intended submit action
@@ -215,7 +219,9 @@
         autocomplete-on-change
         (fn [{:keys [on-change]}]
           (fn [e]
-            (handle-text-change! (.. e -target -value))
+            (let [cursor-pos (.. e -target -selectionStart)]
+              (handle-text-change! cursor-pos (.. e -target -value))
+              (swap! state assoc :pos cursor-pos))
             (on-change e)))]
 
     (r/create-class
@@ -224,12 +230,14 @@
        (fn [c]
          (let [config (r/props c)]
            (go (loop []
-                 (let [[text ch] (alts! [throttled-autocomplete-chan kill-chan])]
+                 (let [[data ch] (alts! [throttled-autocomplete-chan kill-chan])]
                    (when (= ch throttled-autocomplete-chan)
-                     (when-not (inside-code-block? text)
-                       (set-results!
-                         (seq (mapcat (fn [e] (e text)) @autocomplete-engines)))
-                       (highlight-first!))
+                     (let [{:keys [text pos]} data
+                           text (.slice text 0 pos)]
+                       (when-not (inside-code-block? text)
+                         (set-results!
+                           (seq (mapcat (fn [e] (e text)) @autocomplete-engines)))
+                         (highlight-first!)))
                      (recur)))))
            (go (loop []
                  (let [[v ch] (alts! [throttled-thread-text-chan
