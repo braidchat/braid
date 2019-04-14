@@ -74,6 +74,8 @@
   (doseq [{group-id :id} (group/user-groups user-id)]
     (broadcast-group-change group-id [:braid.client/user-disconnected [group-id user-id]])))
 
+(defonce new-message-callbacks (hooks/register! (atom []) [fn?]))
+
 (defmethod event-msg-handler :braid.server/new-message
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [new-message (-> ?data
@@ -86,6 +88,9 @@
         (db/run-txns! (message/create-message-txn new-message))
         (when-let [cb ?reply-fn]
           (cb :braid/ok))
+        ;; [TODO] should we put these in a future?
+        (doseq [callback @new-message-callbacks]
+          (callback new-message))
         (helpers/broadcast-thread (new-message :thread-id) [])
         (helpers/notify-users new-message)
         (notify-bots new-message))
