@@ -5,12 +5,15 @@
    [clucie.core :as clucie]
    [clucie.store :as store]
    [clucie.query :as query]
-   [clojure.string :as string])
+   [clojure.string :as string]
+   [datomic.api :as d]
+   [braid.core.server.db :as db]
+   [braid.core.server.db.common :as common])
   (:import
+   (org.apache.lucene.index IndexNotFoundException)
    (org.apache.lucene.analysis.core LowerCaseFilter)
    (org.apache.lucene.analysis.icu ICUNormalizer2CharFilterFactory)
-   (org.apache.lucene.analysis.standard StandardTokenizer)
-   ))
+   (org.apache.lucene.analysis.standard StandardTokenizer)))
 
 (extend-protocol query/FormParsable
   java.util.UUID
@@ -37,30 +40,61 @@
       s)))
 
 (defn index-message!
-  [message]
-  (prn "INDEXING" message)
-  (clucie/add!
-    (store)
-    [(update message :created-at (memfn getTime))]
-    [:group-id :content #_:mentioned-tag-ids #_:mentioned-user-ids]
-    analyzer))
+  ([message]
+   (with-open [writer (store/store-writer (store) analyzer)]
+     (index-message! writer (store) message)))
+  ([writer reader message]
+   (let [message (update message :created-at (memfn getTime))]
+     (if-let [existing (try
+                         (first
+                           (clucie/search reader {:group-id (:group-id message)
+                                                  :thread-id (:thread-id message)}
+                                          1))
+                           (catch IndexNotFoundException _
+                             nil))]
+       (clucie/update!
+         writer
+         (-> existing
+             (update :content str (:content message))
+             (update :created-at #(max (:created-at message) (Long. %))))
+         [:group-id :thread-id :content]
+         :thread-id (:thread-id message))
+       (clucie/add!
+         writer
+         [message]
+         [:group-id :thread-id :content #_:mentioned-tag-ids #_:mentioned-user-ids])))))
 
 (defn search
-  [group-id text]
-  (->> (clucie/search
-        (store)
-        {:group-id group-id
-         :content (string/split text #"\s+")}
-        1000
-        analyzer
-        0
-        100)
-      (map (fn [{:keys [thread-id created-at] :as res}]
-             (prn "search res" res)
-             {:thread-id (java.util.UUID/fromString thread-id)
-              :created-at (java.util.Date. (Long. created-at))}))
-      (group-by :thread-id)
-      (into #{}
-            (map (fn [[thread-id threads]]
-                   (prn "CREATED ATS" (map :created-at threads))
-                   [thread-id (apply max (map :created-at threads))])))))
+  ([group-id text] (search (store) group-id text))
+  ([reader group-id text]
+   (->> (clucie/search
+         reader
+         {:group-id group-id
+          :content (string/split text #"\s+")}
+         1000
+         analyzer
+         0
+         100)
+       (map (fn [{:keys [thread-id created-at] :as res}]
+              {:thread-id (java.util.UUID/fromString thread-id)
+               :created-at (Long. created-at)}))
+       (group-by :thread-id)
+       (into #{}
+             (map (fn [[thread-id threads]]
+                    [thread-id (java.util.Date. (apply max (map :created-at threads)))]))))))
+
+(defn import-messages!
+  []
+  (index-message! {:content "hello" :group-id (java.util.UUID/randomUUID)
+                   :thread-id (java.util.UUID/randomUUID) :created-at (java.util.Date.)})
+  (with-open [reader (store/store-reader (store))
+              writer (store/store-writer (store) analyzer)]
+    (doseq [msg (->> (d/q '[:find [(pull ?m pull-pattern) ...]
+                           :in $ pull-pattern
+                           :where [?m :message/id _]]
+                         (db/db)
+                         common/message-pull-pattern)
+                    (map common/db->message))]
+      (when (and (:group-id msg) (:thread-id msg) (:content msg)
+                 (:created-at msg))
+        (index-message! writer reader msg)))))
