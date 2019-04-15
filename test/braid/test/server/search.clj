@@ -38,7 +38,7 @@
             :tags ["foo" "baz"]
             :users ["bar"]}))))
 
-#_(deftest searching-threads
+(deftest searching-threads
   (let [[user-1 user-2] (db/run-txns!
                           (concat (user/create-user-txn {:id (db/uuid)
                                                          :email "foo@bar.com"
