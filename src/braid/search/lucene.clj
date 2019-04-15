@@ -84,7 +84,9 @@
                     [thread-id (java.util.Date. (apply max (map :created-at threads)))]))))))
 
 (defn import-messages!
+  "Import all existing messages into Lucene"
   []
+  ;; Need to have an index created to make a reader, so just insert a dummy record
   (index-message! {:content "hello" :group-id (java.util.UUID/randomUUID)
                    :thread-id (java.util.UUID/randomUUID) :created-at (java.util.Date.)})
   (with-open [reader (store/store-reader (store))
