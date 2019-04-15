@@ -115,7 +115,7 @@
        (core/register-server-message-handlers!
          {::search-ws
           (fn [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-            ; this can take a while, so move it to a future
+            ;; this can take a while, so move it to a future
             (future
               (let [user-tags (tag/tag-ids-for-user user-id)
                     filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
