@@ -267,6 +267,13 @@
               (every? fn? (vals handler-defs))]}
        (swap! braid.core.server.sync-handler/message-handlers merge handler-defs))
 
+     (defn register-new-message-callback!
+       "Register a function that will be called when a new message is created.
+       The function will be passed a map containing the new message."
+       [callback]
+       {:pre [(fn? callback)]}
+       (swap! braid.core.server.sync/new-message-callbacks conj callback))
+
      (defn register-public-http-route!
        "Add a public HTTP route.
         Expects a route defined as:

@@ -50,7 +50,7 @@
   '[:message/id
     :message/content
     {:message/user [:user/id]}
-    {:message/thread [:thread/id]}
+    {:message/thread [:thread/id {:thread/group [:group/id]}]}
     :message/created-at])
 
 (defn db->message
@@ -59,6 +59,7 @@
    :content (:message/content e)
    :user-id (:user/id (:message/user e))
    :thread-id (:thread/id (:message/thread e))
+   :group-id (get-in e [:message/thread :thread/group :group/id])
    :created-at (:message/created-at e)})
 
 (defn db->invitation [e]

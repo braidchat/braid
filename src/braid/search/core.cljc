@@ -4,6 +4,7 @@
     #?@(:clj
          [[braid.core.server.db.tag :as tag]
           [braid.core.server.db.thread :as thread]
+          [braid.search.lucene :as lucene]
           [braid.search.server :as search]]
          :cljs
          [[clojure.string :as string]
@@ -105,10 +106,16 @@
 
      :clj
      (do
+       (core/register-config-var! :lucene-store-location)
+
+       ;; [TODO] also register for when a message is deleted to remove
+       ;; text from index?
+       (core/register-new-message-callback! lucene/index-message!)
+
        (core/register-server-message-handlers!
          {::search-ws
           (fn [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-            ; this can take a while, so move it to a future
+            ;; this can take a while, so move it to a future
             (future
               (let [user-tags (tag/tag-ids-for-user user-id)
                     filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))

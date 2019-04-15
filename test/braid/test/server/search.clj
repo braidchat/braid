@@ -15,19 +15,28 @@
   (testing "can properly parse queries"
     (is (= (search/parse-query "#baz")
            {:text ""
-            :tags ["baz"]}))
+            :tags ["baz"]
+            :users ()}))
     (is (= (search/parse-query "#baz #quux")
            {:text ""
-            :tags ["baz" "quux"]}))
+            :tags ["baz" "quux"]
+            :users ()}))
     (is (= (search/parse-query "baz")
            {:text "baz"
-            :tags []}))
+            :tags []
+            :users ()}))
     (is (= (search/parse-query "foo bar #baz quux")
            {:text "foo bar quux"
-            :tags ["baz"]}))
+            :tags ["baz"]
+            :users ()}))
     (is (= (search/parse-query "#foo bar #baz quux")
            {:text "bar quux"
-            :tags ["foo" "baz"]}))))
+            :tags ["foo" "baz"]
+            :users ()}))
+    (is (= (search/parse-query "#foo a @bar #baz quux")
+           {:text "a quux"
+            :tags ["foo" "baz"]
+            :users ["bar"]}))))
 
 (deftest searching-threads
   (let [[user-1 user-2] (db/run-txns!
