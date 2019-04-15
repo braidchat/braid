@@ -55,7 +55,7 @@
        (clucie/update!
          writer
          (-> existing
-             (update :content str (:content message))
+             (update :content str "\n" (:content message))
              (update :created-at #(max (:created-at message) (Long. %))))
          [:group-id :thread-id :content]
          :thread-id (:thread-id message))
