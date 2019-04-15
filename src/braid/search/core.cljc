@@ -108,6 +108,8 @@
      (do
        (core/register-config-var! :lucene-store-location)
 
+       ;; [TODO] also register for when a message is deleted to remove
+       ;; text from index?
        (core/register-new-message-callback! lucene/index-message!)
 
        (core/register-server-message-handlers!
