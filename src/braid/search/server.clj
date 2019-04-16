@@ -87,11 +87,14 @@
                                   :in $ [?user-name ...] ?g-id
                                   :where
                                   [?g :group/id ?g-id]
-                                  [?user :user/nickname ?user-name]
-                                  [?g :group/user ?user]
+                                  [?t :thread/group ?g]
                                   [?t :thread/id ?t-id]
-                                  [?t :thread/mentioned ?user]
-                                  [?m :message/thread ?t]
+                                  (or (and [?t :thread/mentioned ?user]
+                                           [?m :message/thread ?t])
+                                      (and [?m :message/thread ?t]
+                                           [?m :message/user ?user]))
+                                  [?g :group/user ?user]
+                                  [?user :user/nickname ?user-name]
                                   [?m :message/created-at ?time]]
                                 search-db
                                 users
