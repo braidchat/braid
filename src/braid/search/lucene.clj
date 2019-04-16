@@ -5,20 +5,25 @@
    [clucie.core :as clucie]
    [clucie.store :as store]
    [clucie.query :as query]
+   [clucie.utils]
    [clojure.string :as string]
    [datomic.api :as d]
    [braid.core.server.db :as db]
    [braid.core.server.db.common :as common])
   (:import
-   (org.apache.lucene.index IndexNotFoundException)
    (org.apache.lucene.analysis.core LowerCaseFilter)
    (org.apache.lucene.analysis.icu ICUNormalizer2CharFilterFactory)
-   (org.apache.lucene.analysis.standard StandardTokenizer)))
+   (org.apache.lucene.analysis.standard StandardTokenizer)
+   (org.apache.lucene.index IndexNotFoundException)
+   (org.apache.lucene.search BooleanClause$Occur)
+   (org.apache.lucene.util QueryBuilder)))
 
 (extend-protocol query/FormParsable
   java.util.UUID
-  (parse-formt [u opts]
-    (query/parse-formt (str u) opts)))
+  (parse-formt [u {:keys [^QueryBuilder builder key]}]
+    ;; UUIDs should always match exactly
+    (.createBooleanQuery builder (clucie.utils/stringify-value key) (str u)
+                         BooleanClause$Occur/MUST)))
 
 (def analyzer
   (analysis/build-analyzer
