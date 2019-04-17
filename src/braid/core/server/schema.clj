@@ -58,11 +58,6 @@
     :db/cardinality :db.cardinality/many
     :db/id #db/id [:db.part/db]
     :db.install/_attribute :db.part/db}
-   {:db/ident :user/is-bot?
-    :db/valueType :db.type/boolean
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
 
    ; user preference - key
    {:db/ident :user.preference/key
@@ -215,61 +210,6 @@
     :db.install/_attribute :db.part/db}
    {:db/ident :invite/created-at
     :db/valueType :db.type/instant
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-
-   ; bots
-   {:db/ident :bot/id
-    :db/valueType :db.type/uuid
-    :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/identity
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-   {:db/ident :bot/token
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-   {:db/ident :bot/name
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-   {:db/ident :bot/avatar
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-   {:db/ident :bot/webhook-url
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-   {:db/ident :bot/event-webhook-url
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-   {:db/ident :bot/group
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-   {:db/ident :bot/user
-    :db/doc "Fake user bot posts under"
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-   {:db/ident :bot/watched
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/many
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
-   {:db/ident :bot/notify-all-messages?
-    :db/doc "Indicates that this bot should recieve all visible messages in its group"
-    :db/valueType :db.type/boolean
     :db/cardinality :db.cardinality/one
     :db/id #db/id [:db.part/db]
     :db.install/_attribute :db.part/db}])

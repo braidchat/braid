@@ -1,7 +1,5 @@
 (ns braid.core.server.sync-helpers
   (:require
-   [braid.core.server.bots :as bots]
-   [braid.core.server.db.bot :as bot]
    [braid.core.server.db.group :as group]
    [braid.core.server.db.tag :as tag]
    [braid.core.server.db.thread :as thread]
@@ -46,6 +44,8 @@
     (doseq [anon-id (@anonymous-group-readers (thread :group-id))]
       (chsk-send! anon-id [:braid.client/thread thread]))))
 
+(defonce group-change-broadcast-hooks (atom []) [fn?])
+
 (defn broadcast-group-change
   "Broadcast group change to clients that are in the group"
   [group-id info]
@@ -57,8 +57,8 @@
       (chsk-send! uid info)))
   (doseq [anon-id (@anonymous-group-readers group-id)]
     (chsk-send! anon-id info))
-  (doseq [bot (bot/bots-for-event group-id)]
-    (bots/send-event-notification bot info)))
+  (doseq [hook @group-change-broadcast-hooks]
+    (hook group-id info)))
 
 ; TODO: when using clojure.spec, use spec to validate this
 (defn user-can-message? [user-id ?data]
@@ -103,17 +103,6 @@
                         user-id mentioned-id)
                     false))))
           (?data :mentioned-user-ids)))))
-
-(defn notify-bots [new-message]
-  ; Notify bots mentioned in the message
-  (when-let [bot-name (second (re-find #"^/(\w+)\b" (:content new-message)))]
-    (when-let [bot (bot/bot-by-name-in-group bot-name (new-message :group-id))]
-      (timbre/debugf "notifying bot %s" bot)
-      (bots/send-message-notification bot new-message)))
-  ; Notify bots subscribed to the thread
-  (doseq [bot (bot/bots-watching-thread (new-message :thread-id))]
-    (timbre/debugf "notifying bot %s" bot)
-    (bots/send-message-notification bot new-message)))
 
 (defn notify-users [new-message]
   (let [subscribed-user-ids (->>

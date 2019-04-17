@@ -274,6 +274,14 @@
        {:pre [(fn? callback)]}
        (swap! braid.core.server.sync/new-message-callbacks conj callback))
 
+     (defn register-group-broadcast-hook!
+       "Add a function to be called when broadcasting a group change.
+       The function will receive the group-id and a map of the change
+       information."
+       [hook-fn]
+       {:pre [(fn? hook-fn)]}
+       (swap! braid.core.server.sync-helpers/group-change-broadcast-hooks conj hook-fn))
+
      (defn register-public-http-route!
        "Add a public HTTP route.
         Expects a route defined as:
@@ -303,6 +311,15 @@
        [route]
        {:pre [(util/valid? braid.core.server.routes.api.modules/route? route)]}
        (swap! braid.core.server.routes.api.modules/module-private-http-routes conj route))
+
+     (defn register-raw-http-handler!
+       "Add an HTTP handler that expects to handle all its own middleware
+        Expects a ring handler function
+
+        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
+        handler-fn should return a ring-compatible response "
+       [handler]
+       (swap! braid.core.server.routes.api.modules/module-raw-http-routes conj handler))
 
      (defn register-daily-job!
        "Add a recurring job that will run once a day. Expects a zero-arity function."

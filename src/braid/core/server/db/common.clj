@@ -103,50 +103,6 @@
    :tag-ids (into #{} (map :tag/id) (thread :thread/tag))
    :mentioned-ids (into #{} (map :user/id) (thread :thread/mentioned))})
 
-(def bot-pull-pattern
-  [:bot/id
-   :bot/name
-   :bot/token
-   :bot/avatar
-   :bot/webhook-url
-   :bot/event-webhook-url
-   :bot/notify-all-messages?
-   {:bot/group [:group/id]}
-   {:bot/user [:user/id]}])
-
-(defn db->bot [e]
-  {:id (:bot/id e)
-   :user-id (get-in e [:bot/user :user/id])
-   :group-id (get-in e [:bot/group :group/id])
-   :name (:bot/name e)
-   :avatar (:bot/avatar e)
-   :webhook-url (:bot/webhook-url e)
-   :event-webhook-url (:bot/event-webhook-url e)
-   :notify-all-messages? (:bot/notify-all-messages? e)
-   :token (:bot/token e)})
-
-(def bot-display-pull-pattern
-  "Like bot-pull-pattern but for the publicy-visible bot attributes"
-  [:bot/id
-   :bot/name
-   :bot/avatar
-   {:bot/user [:user/id]}])
-
-(defn db->bot-display
-  "Like db->bot but for the publicly-visible bot attributes"
-  [e]
-  {:id (:bot/id e)
-   :user-id (get-in e [:bot/user :user/id])
-   :nickname (:bot/name e)
-   :avatar (:bot/avatar e)})
-
-(defn bot->display
-  "Convert a private bot to public "
-  [b]
-  (-> b
-      (rename-keys {:name :nickname})
-      (select-keys (keys (db->bot-display nil)))))
-
 (def group-pull-pattern
   [:group/id
    :group/slug
@@ -172,4 +128,3 @@
                         (map (juxt :id identity)))
                   (:group/user e))
      :users-count (count (:group/user e))}))
-

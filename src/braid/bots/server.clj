@@ -1,4 +1,4 @@
-(ns braid.core.server.bots
+(ns braid.bots.server
   "Sending notification of messages and events to bots"
   (:require
    [braid.core.server.crypto :as crypto]

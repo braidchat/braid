@@ -1,8 +1,8 @@
-(ns braid.core.server.routes.bots
+(ns braid.bots.routes
   (:require
     [braid.core.common.schema :as schema]
     [braid.core.server.db :as db]
-    [braid.core.server.db.bot :as bot]
+    [braid.bots.db :as bot]
     [braid.core.server.db.group :as group]
     [braid.core.server.db.message :as message]
     [braid.core.server.db.tag :as tag]
@@ -11,7 +11,7 @@
     [braid.core.server.sync-helpers :as sync-helpers]
     [braid.core.common.util :as util]
     [clojure.string :as string]
-    [compojure.core :refer [GET POST PUT defroutes]]
+    [compojure.core :refer [GET POST PUT defroutes context]]
     [ring.middleware.transit :as transit]
     [taoensso.timbre :as timbre])
   (:import
@@ -65,7 +65,7 @@
 
       :else true)))
 
-(defroutes bot-routes'
+(defroutes -bot-routes
   (POST "/message" req
     (let [bot-id (get req ::bot-id)
           bot (bot/bot-by-id bot-id)
@@ -171,7 +171,7 @@
    :body "Malformed transit body"})
 
 (def bot-routes
-  (-> bot-routes'
+  (-> (context [] "/bots" -bot-routes)
       wrap-basic-auth
       (transit/wrap-transit-body {:keywords? true
                                   :malformed-response-fn bad-transit-resp-fn})))

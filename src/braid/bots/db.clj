@@ -1,10 +1,118 @@
-(ns braid.core.server.db.bot
+(ns braid.bots.db
   (:require
     [braid.core.server.crypto :as crypto :refer [random-nonce]]
     [braid.core.server.db :as db]
-    [braid.core.server.db.common :refer [bot-pull-pattern db->bot]]
     [braid.core.server.db.user :as user]
     [datomic.api :as d]))
+
+(def schema
+  [;; need to add some extra info to user
+   ;; [TODO] are we actually using this? seems like the front-end is
+   ;; just checking if the user id is the same as a bot's user-id
+   {:db/ident :user/is-bot?
+    :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+
+   ;; bot stuff
+   {:db/ident :bot/id
+    :db/valueType :db.type/uuid
+    :db/cardinality :db.cardinality/one
+    :db/unique :db.unique/identity
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+   {:db/ident :bot/token
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+   {:db/ident :bot/name
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+   {:db/ident :bot/avatar
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+   {:db/ident :bot/webhook-url
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+   {:db/ident :bot/event-webhook-url
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+   {:db/ident :bot/group
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+   {:db/ident :bot/user
+    :db/doc "Fake user bot posts under"
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+   {:db/ident :bot/watched
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}
+   {:db/ident :bot/notify-all-messages?
+    :db/doc "Indicates that this bot should recieve all visible messages in its group"
+    :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one
+    :db/id #db/id [:db.part/db]
+    :db.install/_attribute :db.part/db}])
+
+(def bot-pull-pattern
+  [:bot/id
+   :bot/name
+   :bot/token
+   :bot/avatar
+   :bot/webhook-url
+   :bot/event-webhook-url
+   :bot/notify-all-messages?
+   {:bot/group [:group/id]}
+   {:bot/user [:user/id]}])
+
+(defn db->bot [e]
+  {:id (:bot/id e)
+   :user-id (get-in e [:bot/user :user/id])
+   :group-id (get-in e [:bot/group :group/id])
+   :name (:bot/name e)
+   :avatar (:bot/avatar e)
+   :webhook-url (:bot/webhook-url e)
+   :event-webhook-url (:bot/event-webhook-url e)
+   :notify-all-messages? (:bot/notify-all-messages? e)
+   :token (:bot/token e)})
+
+(def bot-display-pull-pattern
+  "Like bot-pull-pattern but for the publicy-visible bot attributes"
+  [:bot/id
+   :bot/name
+   :bot/avatar
+   {:bot/user [:user/id]}])
+
+(defn db->bot-display
+  "Like db->bot but for the publicly-visible bot attributes"
+  [e]
+  {:id (:bot/id e)
+   :user-id (get-in e [:bot/user :user/id])
+   :nickname (:bot/name e)
+   :avatar (:bot/avatar e)})
+
+(defn bot->display
+  "Convert a private bot to public "
+  [b]
+  (-> b
+      (rename-keys {:name :nickname})
+      (select-keys (keys (db->bot-display nil)))))
 
 (defn bots-in-group
   [group-id]

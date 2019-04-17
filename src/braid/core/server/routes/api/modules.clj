@@ -1,6 +1,7 @@
 (ns braid.core.server.routes.api.modules
   (:require
     [clout.core :as clout]
+    [compojure.core :as compojure]
     [braid.core.hooks :as hooks]
     [braid.core.server.routes.helpers :as helpers]))
 
@@ -16,6 +17,9 @@
 
 (defonce module-private-http-routes
   (hooks/register! (atom []) [route?]))
+
+(defonce module-raw-http-routes
+  (hooks/register! (atom []) [any?]))
 
 ;; XXX: the way this works means that routes with wrap-logged-in?
 ;; won't fall-through to other routes in the handler (because it
@@ -82,3 +86,4 @@
 (def public-handler (dynamic-handler module-public-http-routes))
 (def private-handler (-> (dynamic-handler module-private-http-routes)
                          wrap-logged-in?))
+(def raw-handler (fn [req] (apply compojure/routing req @module-raw-http-routes)))

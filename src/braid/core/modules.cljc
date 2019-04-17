@@ -3,6 +3,7 @@
     [braid.core.hooks :as hooks]
     ; modules:
     [braid.big-emoji.core]
+    [braid.bots.core]
     [braid.core.core]
     [braid.custom-emoji.core]
     [braid.disconnect-notice.core]
@@ -29,6 +30,7 @@
   (hooks/reset-all!)
 
   (braid.big-emoji.core/init!)
+  (braid.bots.core/init!)
   (braid.custom-emoji.core/init!)
   (braid.core.core/init!)
   (braid.disconnect-notice.core/init!)
