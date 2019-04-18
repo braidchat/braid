@@ -1,4 +1,4 @@
-(ns braid.core.client.bots.views.bots-page-styles
+(ns braid.bots.client.views.bots-page-styles
   (:require
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]

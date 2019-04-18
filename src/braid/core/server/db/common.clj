@@ -109,8 +109,7 @@
    :group/name
    :group/settings
    {:group/admins [:user/id]}
-   {:group/user user-pull-pattern}
-   {:bot/_group bot-display-pull-pattern}])
+   {:group/user user-pull-pattern}])
 
 (defn db->group [e]
   (let [settings (-> e (get :group/settings "{}") edn/read-string)]
@@ -121,7 +120,6 @@
      :intro (settings :intro)
      :avatar (settings :avatar)
      :public? (get settings :public? false)
-     :bots (into #{} (map db->bot-display) (:bot/_group e))
      :users (into {}
                   (comp (map db->user)
                         (map #(dissoc % :group-ids :email))

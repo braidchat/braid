@@ -1,7 +1,6 @@
 (ns braid.core.client.ui.views.styles
   (:require
    [braid.core.hooks :as hooks]
-   [braid.core.client.bots.views.bots-page-styles]
    [braid.core.client.gateway.forms.create-group.styles]
    [braid.core.client.gateway.forms.user-auth.styles]
    [braid.core.client.gateway.styles-vars :as gateway-vars]
@@ -89,7 +88,6 @@
                  braid.core.client.ui.styles.pages.me/me-page
                  braid.core.client.group-admin.views.group-settings-page-styles/group-settings-page
                  braid.core.client.invites.views.invite-page-styles/invite-page
-                 braid.core.client.bots.views.bots-page-styles/bots-page
                  braid.core.client.ui.styles.pages.global-settings/global-settings-page
 
                  [:>.page

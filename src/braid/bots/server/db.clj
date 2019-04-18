@@ -1,8 +1,9 @@
-(ns braid.bots.db
+(ns braid.bots.server.db
   (:require
     [braid.core.server.crypto :as crypto :refer [random-nonce]]
     [braid.core.server.db :as db]
     [braid.core.server.db.user :as user]
+    [braid.core.server.db.group :as group]
     [datomic.api :as d]))
 
 (def schema
@@ -123,6 +124,14 @@
               [?b :bot/group ?g]]
             (db/db) bot-pull-pattern group-id)
        (into #{} (map db->bot))))
+
+(defn bots-for-user-groups
+  "Get the bots for the user's groups"
+  [user-id]
+  (into {}
+        (map (juxt identity
+                   (comp set (partial map bot->display) bots-in-group)))
+        (group/user-groups user-id)))
 
 (defn bot-by-name-in-group
   [name group-id]

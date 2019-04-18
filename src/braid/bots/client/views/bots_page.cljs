@@ -1,7 +1,7 @@
-(ns braid.core.client.bots.views.bots-page
+(ns braid.bots.client.views.bots-page
   (:require
     [braid.core.client.ui.views.upload :refer [avatar-upload-view]]
-    [braid.core.common.util :refer [bot-name-re]]
+    [braid.bots.util :refer [bot-name-re]]
     [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]]
     [reagent.core :as r]

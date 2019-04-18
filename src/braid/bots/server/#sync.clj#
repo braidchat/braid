@@ -1,7 +1,8 @@
-(ns braid.bots.sync
+(ns braid.bots.server.sync
   (:require
    [braid.bots.server :as bots]
-   [braid.bots.db :as db]))
+   [braid.bots.server.db :as db]
+   [braid.bots.util :as util]))
 
 (defn notify-bots! [new-message]
   ; Notify bots mentioned in the message
@@ -49,7 +50,7 @@
            (let [[created] (db/run-txns! (bot/create-bot-txn bot))]
              {:reply! {:braid/ok created}
               :group-broadcast! [(bot :group-id)
-                                 [:braid.client/new-bot
+                                 [:braid.client.bots/new-bot
                                   [(bot :group-id) (bot->display created)]]]})))))
 
    :braid.server/edit-bot
@@ -96,7 +97,7 @@
              (timbre/debugf "Updated bot: %s" updated)
              {:reply! {:braid/ok updated}
               :group-broadcast! [(orig-bot :group-id)
-                                 [:braid.client/edit-bot
+                                 [:braid.client.bot/edit-bot
                                   [(orig-bot :group-id) (bot->display updated)]]]})))))
 
    :braid.server/retract-bot

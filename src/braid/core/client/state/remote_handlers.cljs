@@ -108,18 +108,6 @@
   [[_ [group-id publicity]]]
   (dispatch [:set-group-publicity [group-id publicity]]))
 
-(defmethod sync/event-handler :braid.client/new-bot
-  [[_ [group-id bot]]]
-  (dispatch [:add-group-bot [group-id bot]]))
-
-(defmethod sync/event-handler :braid.client/retract-bot
-  [[_ [group-id bot-id]]]
-  (dispatch [:remove-group-bot [group-id bot-id]]))
-
-(defmethod sync/event-handler :braid.client/edit-bot
-  [[_ [group-id bot]]]
-  (dispatch [:update-group-bot [group-id bot]]))
-
 (defmethod sync/event-handler :braid.client/notify-message
   [[_ message]]
   (dispatch [:core/show-message-notification message]))

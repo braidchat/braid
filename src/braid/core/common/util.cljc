@@ -39,9 +39,6 @@
   (fn [& args]
     (apply f (reverse args))))
 
-(def bot-name-re
-  #"(?:\w|\d){1,30}")
-
 (defn valid-email? [email]
   (let [pattern #"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"]
     (and (string? email) (re-matches pattern email))))

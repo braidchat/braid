@@ -1,0 +1,11 @@
+diff a/src/braid/core/client/ui/views/thread.cljs b/src/braid/core/client/ui/views/thread.cljs	(rejected hunks)
+@@ -162,8 +162,7 @@
+                                 (not (helpers/contains-urls? (prev-message :content)))))))))]
+             (doall
+               (for [message sorted-messages]
+-                 ^{:key (message :id)}
+-                [:<>
++                [:<> {:key (message :id)}
+                  (when (message :show-date-divider?)
+                    [:div.divider
+                     [:div.date (helpers/format-date "yyyy-MM-dd" (message :created-at))]])

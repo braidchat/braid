@@ -10,7 +10,6 @@
           [braid.core.client.ui.styles.hover-menu]
           [braid.core.client.ui.styles.hover-cards]
           [braid.core.client.ui.styles.thread]
-          [braid.core.client.bots.views.bots-page :refer [bots-page-view]]
           [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
           [braid.core.client.invites.views.invite-page :refer [invite-page-view]]
           [braid.core.client.ui.views.pages.changelog :refer [changelog-view]]
@@ -22,8 +21,6 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-autocomplete-engine!
-         braid.core.client.ui.views.autocomplete/bot-autocomplete-engine)
 
        (core/register-autocomplete-engine!
          braid.core.client.ui.views.autocomplete/user-autocomplete-engine)
@@ -49,10 +46,6 @@
        (core/register-system-page!
          {:key :global-settings
           :view global-settings-page-view})
-
-       (core/register-group-page!
-         {:key :bots
-          :view bots-page-view})
 
        (core/register-group-page!
          {:key :recent

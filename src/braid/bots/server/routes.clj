@@ -1,8 +1,8 @@
-(ns braid.bots.routes
+(ns braid.bots.server.routes
   (:require
     [braid.core.common.schema :as schema]
     [braid.core.server.db :as db]
-    [braid.bots.db :as bot]
+    [braid.bots.server.db :as bot]
     [braid.core.server.db.group :as group]
     [braid.core.server.db.message :as message]
     [braid.core.server.db.tag :as tag]
