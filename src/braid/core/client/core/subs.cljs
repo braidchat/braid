@@ -42,16 +42,9 @@
 (reg-sub
   :user
   (fn [{:keys [open-group-id] :as state} [_ q-user-id] [d-user-id]]
-    ; TODO refactor so that bots isn't mixed up in here
     (let [user-id (or d-user-id q-user-id)]
-      (if-let [u (get-in state [:groups open-group-id :users user-id])]
-        u
-        (let [g-id (state :open-group-id)
-              group-bots (get-in state [:groups g-id :bots])]
-          (some-> group-bots
-                  (->> (filter (fn [b] (= (b :user-id) user-id))))
-                  first
-                  (assoc :bot? true)))))))
+      (when-let [u (get-in state [:groups open-group-id :users user-id])]
+        u))))
 
 (reg-sub
   :users

@@ -86,4 +86,5 @@
 (def public-handler (dynamic-handler module-public-http-routes))
 (def private-handler (-> (dynamic-handler module-private-http-routes)
                          wrap-logged-in?))
-(def raw-handler (fn [req] (apply compojure/routing req @module-raw-http-routes)))
+(defn raw-handlers []
+  (apply compojure/routes @module-raw-http-routes))

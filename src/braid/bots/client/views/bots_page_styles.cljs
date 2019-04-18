@@ -2,10 +2,18 @@
   (:require
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
-   [garden.units :refer [rem em]]))
+   [garden.units :refer [rem em px]]))
+
+(def bot-notice
+  [:>.thread>.card>.messages>.message>.info>.bot-notice
+   {:background-color "#c0afc0"
+    :border-radius (px 5)
+    :padding (rem 0.25)
+    :font-weight "bold"
+    :color "#413f42"}])
 
 (def bots-page
-  [:>.page.bots
+  [:.app>.main>.page.bots
    [:>.title
     {:font-size "large"}]
    [:>.content

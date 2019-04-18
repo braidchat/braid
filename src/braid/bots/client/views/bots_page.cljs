@@ -103,7 +103,7 @@
 
 (defn group-bots-view []
   (let [group-id (subscribe [:open-group-id])
-        group-bots (subscribe [:group-bots] [group-id])]
+        group-bots (subscribe [:bots/group-bots] [group-id])]
     (fn []
       [:div.bots
        [:h2 "Group Bots"]

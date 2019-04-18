@@ -10,6 +10,7 @@
         [braid.bots.client.events :as events]
         [braid.bots.client.views.bots-page :as views]
         [braid.bots.client.views.bots-page-styles :as styles]
+        [braid.bots.client.views.bot-sender-view :as sender-view]
         [braid.bots.client.subs :as subs]
         [braid.bots.client.remote-handlers :as remote-handlers]])))
 
@@ -18,6 +19,9 @@
      (do
        (core/register-initial-user-data-handler!
          (fn [db data]
+           (prn "bots" (::bots data))
+           ;; [TODO] to preserve same interface, putting bots inside groups
+           ;; but probably could have that be a separate key
            (reduce (fn [db [group-id bots]]
                      (assoc-in db [:groups group-id :bots] bots))
                    db (::bots data))))
@@ -27,17 +31,18 @@
        (core/register-group-page!
          {:key :bots
           :view views/bots-page-view})
-       (core/register-styles!
-         [:.app>.main styles/bot-page])
+       (core/register-styles! styles/bots-page)
+       (core/register-styles! styles/bot-notice)
        (core/register-incoming-socket-message-handlers!
-         remote-handlers/handlers))
+         remote-handlers/handlers)
+       (core/register-message-sender-view! sender-view/sender-view))
 
      :clj
      (do
-       (core/regiter-db-schema! db/schema)
+       (core/register-db-schema! db/schema)
        (core/register-new-message-callback! sync/notify-bots!)
        (core/register-group-broadcast-hook! sync/group-change-broadcast!)
        (core/register-server-message-handlers! sync/server-message-handlers)
        (core/register-raw-http-handler! routes/bot-routes)
        (core/register-initial-user-data!
-         (fn [user-id] [::bots (db/bots-for-user-groups user-id)])))))
+         (fn [user-id] {::bots (db/bots-for-user-groups user-id)})))))

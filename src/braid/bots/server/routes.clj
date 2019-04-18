@@ -171,7 +171,7 @@
    :body "Malformed transit body"})
 
 (def bot-routes
-  (-> (context [] "/bots" -bot-routes)
+  (-> (context "/bots" [] -bot-routes)
       wrap-basic-auth
       (transit/wrap-transit-body {:keywords? true
                                   :malformed-response-fn bad-transit-resp-fn})))

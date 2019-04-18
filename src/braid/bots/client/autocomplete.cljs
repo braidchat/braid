@@ -5,7 +5,7 @@
    [re-frame.core :refer [subscribe dispatch]]))
 
 ; /<bot-name> -> autocompletes bots
-(defn bot-autocomplete-engine [text]
+(defn bots-autocomplete-engine [text]
   (let [pattern #"^/(\w+)$"
         open-group (subscribe [:open-group-id])]
     (when-let [bot-name (second (re-find pattern text))]
@@ -25,4 +25,4 @@
                              [:div.info
                               [:div.name (b :nickname)]
                               [:div.extra]]])})))
-            @(subscribe [:group-bots] [open-group])))))
+            @(subscribe [:bots/group-bots] [open-group])))))

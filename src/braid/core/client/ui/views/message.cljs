@@ -200,24 +200,38 @@
         rest
         post-transform)))
 
+(defonce message-sender-views
+  (hooks/register! (atom []) [fn?]))
+
+(defn default-sender-views
+  [sender-id]
+  (let [sender @(subscribe [:user sender-id])
+        current-group (subscribe [:open-group-id])
+        sender-path (if (nil? sender)
+                      ""
+                      (routes/group-page-path
+                        {:group-id @current-group
+                         :page-id "search"
+                         :query-params {:query (str "@" (:id sender))}}))]
+    {:avatar [:a.avatar {:href sender-path
+                         :tab-index -1}
+              [:img {:src (:avatar sender)
+                     :style {:background-color (->color (:id sender))}}]]
+     :info nil
+     :name (if (nil? sender)
+             [:span.nickname "[DELETED]"]
+             [:a.nickname {:tab-index -1
+                           :href sender-path}
+              (:nickname sender)])}))
+
 (defn message-view
   [message]
-  (let [sender @(subscribe [:user (message :user-id)])
-        current-group (subscribe [:open-group-id])
+  (let [current-group (subscribe [:open-group-id])
         current-user @(subscribe [:user-id])
         admin? @(subscribe [:current-user-is-group-admin?] [current-group])
-
-        sender-path (cond
-                      (nil? sender) ""
-
-                      (:bot? sender)
-                      (routes/group-page-path {:group-id @current-group
-                                               :page-id "bots"})
-
-                      :else (routes/group-page-path
-                              {:group-id @current-group
-                               :page-id "search"
-                               :query-params {:query (str "@" (:id sender))}}))]
+        {:keys [avatar info name]} (some (fn [f] (f (message :user-id)))
+                                         (conj @message-sender-views
+                                               default-sender-views))]
     [:div.message {:class (str " " (when (:collapse? message) "collapse")
                                " " (if (:unseen? message) "unseen" "seen")
                                " " (when (:first-unseen? message) "first-unseen")
@@ -232,18 +246,10 @@
                   (fn [_] (dispatch [:resend-message message]))}
          "Resend"]])
 
-     [:a.avatar {:href sender-path
-                 :tab-index -1}
-      [:img {:src (:avatar sender)
-             :style {:background-color (->color (:id sender))}}]]
+     avatar
      [:div.info
-      (when (:bot? sender)
-        [:span.bot-notice "BOT"])
-      (if sender
-        [:a.nickname {:tab-index -1
-                      :href sender-path}
-         (:nickname sender)]
-        [:span.nickname "[DELETED]"])
+      info
+      name
       [:span.time {:title (message :created-at)}
        (helpers/smart-format-date (message :created-at))]]
 

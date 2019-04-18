@@ -224,7 +224,15 @@
      (defn register-new-message-action-menu-item!
        [menu-item]
        {:pre [(util/valid? braid.core.client.ui.views.header-item/HeaderItem menu-item)]}
-       (swap! braid.core.client.ui.views.new-message-action-button/menu-items conj menu-item)))
+       (swap! braid.core.client.ui.views.new-message-action-button/menu-items conj menu-item))
+
+     (defn register-message-sender-view!
+       "Sender-views is a function that will recieve the id of the
+       sender and should return a map with the keys :avatar, :info,
+       and :name, which will be reagent views."
+       [sender-views]
+       {:pre [(fn? sender-views)]}
+       (swap! braid.core.client.ui.views.message/message-sender-views conj sender-views)))
 
    :clj
    (do

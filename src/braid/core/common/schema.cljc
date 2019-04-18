@@ -71,8 +71,7 @@
    :avatar (ds/maybe string?)
    :public? boolean?
    :users-count integer?
-   :users {UserId User}
-   :bots #{BotDisplay}})
+   :users {UserId User}})
 
 (def Tag
   {:id uuid?

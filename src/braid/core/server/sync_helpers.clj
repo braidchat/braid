@@ -1,5 +1,6 @@
 (ns braid.core.server.sync-helpers
   (:require
+   [braid.core.hooks :as hooks]
    [braid.core.server.db.group :as group]
    [braid.core.server.db.tag :as tag]
    [braid.core.server.db.thread :as thread]
@@ -44,7 +45,8 @@
     (doseq [anon-id (@anonymous-group-readers (thread :group-id))]
       (chsk-send! anon-id [:braid.client/thread thread]))))
 
-(defonce group-change-broadcast-hooks (atom []) [fn?])
+(defonce group-change-broadcast-hooks
+  (hooks/register! (atom []) [fn?]))
 
 (defn broadcast-group-change
   "Broadcast group change to clients that are in the group"

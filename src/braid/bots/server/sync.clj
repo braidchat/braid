@@ -1,8 +1,14 @@
 (ns braid.bots.server.sync
   (:require
    [braid.bots.server :as bots]
-   [braid.bots.server.db :as db]
-   [braid.bots.util :as util]))
+   [braid.bots.server.db :as bot :refer [bot->display]]
+   [braid.bots.util :as util]
+   [braid.core.server.db :as db]
+   [braid.core.server.db.group :as group]
+   [braid.core.server.db.thread :as thread]
+   [braid.core.server.util :refer [valid-url?]]
+   [clojure.string :as string]
+   [taoensso.timbre :as timbre]))
 
 (defn notify-bots! [new-message]
   ; Notify bots mentioned in the message
@@ -112,10 +118,10 @@
    :braid.server/get-bot-info
    (fn [{:as ev-msg :keys [?data user-id]}]
      (let [bot (bot/bot-by-id ?data)]
-       (when (and bot (group/user-is-group-admin? user-id (bot :group-id)) ?reply-fn)
+       (when (and bot (group/user-is-group-admin? user-id (bot :group-id)))
          {:reply! {:braid/ok bot}})))})
 
 (defn group-change-broadcast!
   [group-id info]
-  (doseq [bot (db/bots-for-event group-id)]
+  (doseq [bot (bot/bots-for-event group-id)]
     (bots/send-event-notification bot info)))

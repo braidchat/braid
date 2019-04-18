@@ -50,7 +50,7 @@
     ([id interceptors handler-fn]
      (re-frame/reg-event-fx
        id
-       [#_validate-schema-interceptor
+       [validate-schema-interceptor
         interceptors]
        handler-fn)))
   (def reg-event-fx re-frame/reg-event-fx))

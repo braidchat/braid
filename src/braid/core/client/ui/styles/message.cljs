@@ -65,13 +65,6 @@
      :overflow "hidden"
      :white-space "nowrap"}
 
-    [:>.bot-notice
-     {:background-color "#c0afc0"
-      :border-radius (px 5)
-      :padding (rem 0.25)
-      :font-weight "bold"
-      :color "#413f42"}]
-
     [:>.nickname
      {:display "inline"
       :font-weight "bold"

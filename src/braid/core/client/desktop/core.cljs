@@ -1,7 +1,5 @@
 (ns braid.core.client.desktop.core
   (:require
-   [braid.core.client.bots.events]
-   [braid.core.client.bots.subs]
    [braid.core.client.core.events]
    [braid.core.client.core.subs]
    [braid.core.client.gateway.events]
