@@ -61,6 +61,12 @@
                  ;;mobile
                  [garden "1.3.2"]]
 
+  :jvm-opts ~(let [version     (System/getProperty "java.version")
+                   [major _ _] (clojure.string/split version #"\.")]
+               (if (>= (java.lang.Integer/parseInt major) 9)
+                 ["--add-modules" "java.xml.bind"]
+                 []))
+
   :main braid.core
 
   :plugins [[lein-environ "1.0.0"]
