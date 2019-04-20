@@ -68,7 +68,6 @@
 (def -bot-routes
   [[:post "/message"
     (fn [req]
-      (prn "BOT POST" req)
       (let [bot-id (get req ::bot-id)
             bot (bot/bot-by-id bot-id)
             msg (assoc (req :body)
@@ -99,7 +98,6 @@
    ;; [XXX]: Deprecated, use POST route instead
    [:put "/message"
     (fn [req]
-      (prn "BOT PUT" req)
       (let [bot-id (get req ::bot-id)
             bot (bot/bot-by-id bot-id)
             msg (assoc (req :body)

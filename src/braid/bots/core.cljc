@@ -19,7 +19,6 @@
      (do
        (core/register-initial-user-data-handler!
          (fn [db data]
-           (prn "bots" (::bots data))
            ;; [TODO] to preserve same interface, putting bots inside groups
            ;; but probably could have that be a separate key
            (reduce (fn [db [group-id bots]]
