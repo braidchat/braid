@@ -102,9 +102,10 @@
                  [updated] (db/run-txns! (bot/update-bot-txn updating))]
              (timbre/debugf "Updated bot: %s" updated)
              {:reply! {:braid/ok updated}
-              :group-broadcast! [(orig-bot :group-id)
-                                 [:braid.client.bots/edit-bot
-                                  [(orig-bot :group-id) (bot->display updated)]]]})))))
+              :group-broadcast!
+              [(orig-bot :group-id)
+               [:braid.client.bots/edit-bot
+                [(orig-bot :group-id) (bot->display updated)]]]})))))
 
    :braid.server/retract-bot
    (fn [{:as ev-msg bot-id :?data user-id :user-id}]
