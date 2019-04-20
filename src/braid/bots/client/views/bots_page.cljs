@@ -24,7 +24,7 @@
           [:button.dangerous.delete
            {:on-click (fn [_]
                         (when (js/confirm "Permanently remove this bot?")
-                          (dispatch [:retract-bot {:bot-id (bot :id)}])))}
+                          (dispatch [:bots/retract-bot {:bot-id (bot :id)}])))}
            \uf1f8]
           (if-let [info @detailed-info]
             [:div
@@ -38,7 +38,7 @@
                [:button
                 {:on-click (fn [_]
                              (dispatch
-                               [:edit-bot
+                               [:bots/edit-bot
                                 {:bot @edited-info
                                  :on-complete
                                  (fn [updated]
@@ -95,7 +95,7 @@
             [:button
              {:on-click (fn [_]
                           (dispatch
-                            [:get-bot-info
+                            [:bots/get-bot-info
                              {:bot-id (bot :id)
                               :on-complete (fn [info]
                                              (reset! detailed-info info))}]))}
@@ -119,7 +119,7 @@
         admin? (subscribe [:current-user-is-group-admin?] [group-id])
         dragging? (r/atom false)
         error (r/atom nil)
-        new-bot (r/atom {})
+        new-bot (r/atom {:avatar "https://s3.amazonaws.com/chat.leanpixel.com/uploads/5730f31a-8b10-451d-a1b0-3c515045481c/ptero.gif"})
         state (r/atom :initial)
         bot-valid? (reaction (and
                                (and (string? (@new-bot :name))
@@ -147,7 +147,7 @@
                             (reset! error nil)
                             (reset! state :creating)
                             (swap! new-bot assoc :group-id @group-id)
-                            (dispatch [:new-bot
+                            (dispatch [:bots/new-bot
                                        {:bot @new-bot
                                         :on-complete
                                         (fn [created]
