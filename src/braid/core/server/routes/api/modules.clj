@@ -1,7 +1,6 @@
 (ns braid.core.server.routes.api.modules
   (:require
     [clout.core :as clout]
-    [compojure.core :as compojure]
     [braid.core.hooks :as hooks]
     [braid.core.server.routes.helpers :as helpers]))
 
@@ -86,5 +85,4 @@
 (def public-handler (dynamic-handler module-public-http-routes))
 (def private-handler (-> (dynamic-handler module-private-http-routes)
                          wrap-logged-in?))
-(defn raw-handlers []
-  (apply compojure/routes @module-raw-http-routes))
+(def raw-handlers (dynamic-handler module-raw-http-routes))

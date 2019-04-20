@@ -67,7 +67,7 @@
 
 (def api-server-app
   (-> (routes
-        (modules/raw-handlers)
+        modules/raw-handlers
 
         (-> api-public-routes
             (wrap-defaults (-> site-defaults

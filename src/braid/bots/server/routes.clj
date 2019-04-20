@@ -65,102 +65,107 @@
 
       :else true)))
 
-(defroutes -bot-routes
-  (POST "/message" req
-    (let [bot-id (get req ::bot-id)
-          bot (bot/bot-by-id bot-id)
-          msg (assoc (req :body)
-                :user-id (bot :user-id)
-                :group-id (bot :group-id)
-                :created-at (java.util.Date.))]
-      (if (util/valid? schema/NewMessage msg)
-        (if (bot-can-message? bot-id msg)
-          (do
-            (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
-            (db/run-txns! (message/create-message-txn msg))
-            (sync-helpers/broadcast-thread (msg :thread-id) [])
-            (sync-helpers/notify-users msg)
-            {:status 201
-             :headers {"Content-Type" "text/plain"}
-             :body "ok"})
-          (do
-            (timbre/debugf "bot %s tried to create illegal message %s"
-                           bot-id msg)
-            {:status 403
-             :headers {"Content-Type" "text/plain"}
-             :body "not allowed to do that"}))
-        {:status 400
-         :headers {"Content-Type" "text/plain"}
-         ; TODO: when we have clojure.spec, use that to explain failure
-         :body "malformed message content"})))
-
-  ; TODO: switch bots to using POST instead, this doesn't make sense as PUT
-  ; XXX: Deprecated, use POST route instead
-  (PUT "/message" req
-    (let [bot-id (get req ::bot-id)
-          bot (bot/bot-by-id bot-id)
-          msg (assoc (req :body)
-                :user-id (bot :user-id)
-                :group-id (bot :group-id)
-                :created-at (java.util.Date.))]
-      (timbre/warnf "Bot %s hitting deprecated PUT message endpoint" bot-id)
-      (if (util/valid? schema/NewMessage msg)
-        (if (bot-can-message? bot-id msg)
-          (do
-            (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
-            (db/run-txns! (message/create-message-txn msg))
-            (sync-helpers/broadcast-thread (msg :thread-id) [])
-            {:status 201
-             :headers {"Content-Type" "text/plain"}
-             :body "ok"})
-          (do
-            (timbre/debugf "bot %s tried to create illegal message %s"
-                           bot-id msg)
-            {:status 403
-             :headers {"Content-Type" "text/plain"}
-             :body "not allowed to do that"}))
-        {:status 400
-         :headers {"Content-Type" "text/plain"}
-         ; TODO: when we have clojure.spec, use that to explain failure
-         :body "malformed message content"})))
-
-  (GET "/names/:user-id" [user-id :as req]
-    (let [bot-id (get req ::bot-id)
-          bot (bot/bot-by-id bot-id)]
-      (if-let [user-id (try (java.util.UUID/fromString user-id)
-                         (catch IllegalArgumentException _ nil))]
-        (if (group/user-in-group? user-id (bot :group-id))
-          {:status 200
+(def -bot-routes
+  [[:post "/message"
+    (fn [req]
+      (prn "BOT POST" req)
+      (let [bot-id (get req ::bot-id)
+            bot (bot/bot-by-id bot-id)
+            msg (assoc (req :body)
+                       :user-id (bot :user-id)
+                       :group-id (bot :group-id)
+                       :created-at (java.util.Date.))]
+        (if (util/valid? schema/NewMessage msg)
+          (if (bot-can-message? bot-id msg)
+            (do
+              (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
+              (db/run-txns! (message/create-message-txn msg))
+              (sync-helpers/broadcast-thread (msg :thread-id) [])
+              (sync-helpers/notify-users msg)
+              {:status 201
+               :headers {"Content-Type" "text/plain"}
+               :body "ok"})
+            (do
+              (timbre/debugf "bot %s tried to create illegal message %s"
+                             bot-id msg)
+              {:status 403
+               :headers {"Content-Type" "text/plain"}
+               :body "not allowed to do that"}))
+          {:status 400
            :headers {"Content-Type" "text/plain"}
-           :body (:nickname (user/user-by-id user-id))}
-          {:status 403
+           ;; TODO: when we have clojure.spec, use that to explain failure
+           :body "malformed message content"})))]
+   ;; [TODO]: switch bots to using POST instead, this doesn't make sense as PUT
+   ;; [XXX]: Deprecated, use POST route instead
+   [:put "/message"
+    (fn [req]
+      (prn "BOT PUT" req)
+      (let [bot-id (get req ::bot-id)
+            bot (bot/bot-by-id bot-id)
+            msg (assoc (req :body)
+                       :user-id (bot :user-id)
+                       :group-id (bot :group-id)
+                       :created-at (java.util.Date.))]
+        (timbre/warnf "Bot %s hitting deprecated PUT message endpoint" bot-id)
+        (if (util/valid? schema/NewMessage msg)
+          (if (bot-can-message? bot-id msg)
+            (do
+              (timbre/debugf "Creating message from bot: %s %s" bot-id msg)
+              (db/run-txns! (message/create-message-txn msg))
+              (sync-helpers/broadcast-thread (msg :thread-id) [])
+              {:status 201
+               :headers {"Content-Type" "text/plain"}
+               :body "ok"})
+            (do
+              (timbre/debugf "bot %s tried to create illegal message %s"
+                             bot-id msg)
+              {:status 403
+               :headers {"Content-Type" "text/plain"}
+               :body "not allowed to do that"}))
+          {:status 400
            :headers {"Content-Type" "text/plain"}
-           :body "Can't lookup user in a different group"})
-        {:status 400
-         :headers {"Content-Type" "text/plain"}
-         :body "Invalid user id"})))
+           ;; TODO: when we have clojure.spec, use that to explain failure
+           :body "malformed message content"})))]
 
-  ; TODO: allow unsubscribed by sending DELETE
-  (PUT "/subscribe/:thread-id" [thread-id :as req]
-    (let [bot-id (get req ::bot-id)
-          bot (bot/bot-by-id bot-id)]
-      (if-let [thread-id (try (java.util.UUID/fromString thread-id)
-                           (catch IllegalArgumentException _ nil))]
-        (if (= (bot :group-id) (thread/thread-group-id thread-id))
-          (do
-            (db/run-txns! (bot/bot-watch-thread-txn bot-id thread-id))
-            {:status 201
+   [:get "/names/:user-id"
+    (fn [{{:keys [user-id]} :params :as req}]
+      (let [bot-id (get req ::bot-id)
+            bot (bot/bot-by-id bot-id)]
+        (if-let [user-id (try (java.util.UUID/fromString user-id)
+                              (catch IllegalArgumentException _ nil))]
+          (if (group/user-in-group? user-id (bot :group-id))
+            {:status 200
              :headers {"Content-Type" "text/plain"}
-             :body "ok"})
-          (do
-            (timbre/warnf "bot %s tried to add to thread in other group %s"
-                          bot-id thread-id)
+             :body (:nickname (user/user-by-id user-id))}
             {:status 403
              :headers {"Content-Type" "text/plain"}
-             :body "Can't subscribe to a thread in a different group"}))
-        {:status 400
-         :headers {"Content-Type" "text/plain"}
-         :body "Invalid thread id"}))))
+             :body "Can't lookup user in a different group"})
+          {:status 400
+           :headers {"Content-Type" "text/plain"}
+           :body "Invalid user id"})))]
+
+   ;; TODO: allow unsubscribed by sending DELETE
+   [:put "/subscribe/:thread-id"
+    (fn [{{:keys [thread-id]} :params :as req}]
+      (let [bot-id (get req ::bot-id)
+            bot (bot/bot-by-id bot-id)]
+        (if-let [thread-id (try (java.util.UUID/fromString thread-id)
+                                (catch IllegalArgumentException _ nil))]
+          (if (= (bot :group-id) (thread/thread-group-id thread-id))
+            (do
+              (db/run-txns! (bot/bot-watch-thread-txn bot-id thread-id))
+              {:status 201
+               :headers {"Content-Type" "text/plain"}
+               :body "ok"})
+            (do
+              (timbre/warnf "bot %s tried to add to thread in other group %s"
+                            bot-id thread-id)
+              {:status 403
+               :headers {"Content-Type" "text/plain"}
+               :body "Can't subscribe to a thread in a different group"}))
+          {:status 400
+           :headers {"Content-Type" "text/plain"}
+           :body "Invalid thread id"})))]])
 
 (defn bad-transit-resp-fn
   [ex req handler]
@@ -170,8 +175,26 @@
    :headers {"Content-Type" "text/plain"}
    :body "Malformed transit body"})
 
+(defn wrap-middleware
+  [routes middlewares]
+  (mapv (fn [[method route handler]]
+          [method route
+           (reduce (fn [handler middleware]
+                     (middleware handler))
+                   handler middlewares)])
+        routes))
+
+(defn with-context
+  [routes ctx]
+  (mapv (fn [[method route handler]]
+          [method (str ctx route) handler])
+        routes))
+
 (def bot-routes
-  (-> (context "/bots" [] -bot-routes)
-      wrap-basic-auth
-      (transit/wrap-transit-body {:keywords? true
-                                  :malformed-response-fn bad-transit-resp-fn})))
+  (-> -bot-routes
+      (with-context "/bots")
+      (wrap-middleware
+        [wrap-basic-auth
+         #(transit/wrap-transit-body
+            % {:keywords? true
+               :malformed-response-fn bad-transit-resp-fn})])))
