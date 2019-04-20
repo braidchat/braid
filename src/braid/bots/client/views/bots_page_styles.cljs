@@ -5,7 +5,7 @@
    [garden.units :refer [rem em px]]))
 
 (def bot-notice
-  [:>.thread>.card>.messages>.message>.info>.bot-notice
+  [:.thread>.card>.messages>.message>.info>.bot-notice
    {:background-color "#c0afc0"
     :border-radius (px 5)
     :padding (rem 0.25)
