@@ -345,16 +345,6 @@
       (db/run-txns! (group/group-set-txn group-id :public? publicity))
       (broadcast-group-change group-id [:braid.client/publicity-changed [group-id publicity]]))))
 
-(defmethod event-msg-handler :braid.server.anon/load-group
-  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
-  (when-let [group (group/group-by-id ?data)]
-    (if (:public? group)
-      (do (?reply-fn {:tags (group/group-tags ?data)
-                      :group (assoc group :readonly true)
-                      :threads (thread/public-threads ?data)})
-          (helpers/add-anonymous-reader ?data user-id))
-      (?reply-fn :braid/error))))
-
 (defonce initial-user-data (hooks/register! (atom [])))
 
 (defmethod event-msg-handler :braid.server/start
