@@ -47,13 +47,17 @@
   (when ?reply-fn
     (?reply-fn {:umatched-event-as-echoed-from-from-server event})))
 
+(defonce anonymous-load-group (hooks/register! (atom []) [fn?]))
+
 (defmethod anon-msg-handler :braid.server.anon/load-group
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (when-let [group (group/group-by-id ?data)]
     (when (:public? group)
-      (?reply-fn {:tags (group/group-tags ?data)
-                  :group group
-                  :threads (thread/public-threads ?data)})
+      (?reply-fn (reduce (fn [m f] (f (group :id) m))
+                         {:tags (group/group-tags ?data)
+                          :group group
+                          :threads (thread/public-threads ?data)}
+                         @anonymous-load-group))
       (helpers/add-anonymous-reader ?data (get-in ev-msg [:ring-req :session :fake-id])))))
 
 (defmethod anon-msg-handler :chsk/uidport-close

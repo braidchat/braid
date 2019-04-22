@@ -267,6 +267,12 @@
        {:pre [(fn? f)]}
        (swap! braid.core.server.sync/initial-user-data conj f))
 
+     (defn register-anonymous-group-load!
+       "Add function that will recieve the group id and information for the anonymous group being loaded and should return an updated map of data."
+       [f]
+       {:pre [(fn? f)]}
+       (swap! braid.core.server.sync-handler/anonymous-load-group conj f))
+
      (defn register-server-message-handlers!
        "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"
        [handler-defs]
