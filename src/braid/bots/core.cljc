@@ -45,4 +45,7 @@
        (doseq [route routes/bot-routes]
          (core/register-raw-http-handler! route))
        (core/register-initial-user-data!
-         (fn [user-id] {::bots (db/bots-for-user-groups user-id)})))))
+         (fn [user-id] {::bots (db/bots-for-user-groups user-id)}))
+       (core/register-anonymous-group-load!
+         (fn [group-id info]
+           (assoc-in info [:group :bots] (db/bots-in-group group-id)))))))
