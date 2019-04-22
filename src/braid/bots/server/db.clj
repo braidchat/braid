@@ -244,22 +244,3 @@
             (get-in (d/entity db-after [:thread/id thread-id]) [:thread/group :group/id]))
          (format "Bot %s tried to watch thread not in its group %s" bot-id thread-id)))}
    [:db/add [:bot/id bot-id] :bot/watched [:thread/id thread-id]]])
-
-(comment
-  {:notify-all-messages? nil, :webhook-url "https://bots.braid.chat/giphybot/bloom/message", :group-id #uuid "572e4ed2-a786-45bd-9859-430b7a68cc70", :name "giphybot", :user-id #uuid "575c5960-5ae5-48c8-88be-96caab2d1cf3", :token "PevlOatUfuY32MWc3X7EjuPKMF7J1uFT83uzywer", :id #uuid "575c5960-f810-44a3-af53-410a1102f8fd", :event-webhook-url nil, :avatar "https://s3.amazonaws.com/chat.leanpixel.com/uploads/5730f31a-8b10-451d-a1b0-3c515045481c/ptero.gif"}
-
-  (let [user-id (d/tempid :entities)
-        bot-id (d/tempid :entities)]
-    @(d/transact
-      db/conn
-      [{:db/id user-id
-        :user/id (d/squuid)
-        :user/is-bot? true}
-       {:db/id bot-id
-        :bot/id #uuid "575c5960-f810-44a3-af53-410a1102f8fd",
-        :bot/token "PevlOatUfuY32MWc3X7EjuPKMF7J1uFT83uzywer",
-        :bot/name "giphybot",
-        :bot/avatar "https://s3.amazonaws.com/chat.leanpixel.com/uploads/5730f31a-8b10-451d-a1b0-3c515045481c/ptero.gif",
-        :bot/webhook-url "https://bots.braid.chat/giphybot/bloom/message",
-        :bot/group [:group/id #uuid "5cb8ad79-0851-4968-acb5-ffe3f4ec5809"]
-        :bot/user user-id}])))
