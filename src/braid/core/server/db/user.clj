@@ -4,7 +4,7 @@
    [braid.core.hooks :as hooks]
    [braid.core.server.db :as db]
    [braid.core.server.db.common :refer :all]
-   [clavatar.core :refer [gravatar]]
+   [braid.core.server.util.gravatar :refer [gravatar]]
    [clojure.edn :as edn]
    [clojure.string :as string]
    [crypto.password.scrypt :as password]
