@@ -26,7 +26,6 @@
                  [com.fasterxml.jackson.core/jackson-core "2.8.7"]
                  [com.cognitect/transit-clj "0.8.300" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [ring-transit "0.1.6" :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [clavatar "0.3.0"]
                  [clout "2.1.2"]
 
                  ;;client
@@ -60,12 +59,6 @@
 
                  ;;mobile
                  [garden "1.3.2"]]
-
-  :jvm-opts ~(let [version     (System/getProperty "java.version")
-                   [major _ _] (clojure.string/split version #"\.")]
-               (if (>= (java.lang.Integer/parseInt major) 9)
-                 ["--add-modules" "java.xml.bind"]
-                 []))
 
   :main braid.core
 

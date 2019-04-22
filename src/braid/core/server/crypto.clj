@@ -84,3 +84,9 @@
       (.digest)))
 
 (def hex-hash (comp bytes->hex sha256 str->bytes))
+
+(defn md5
+  ^bytes [^String s]
+  (-> (doto (MessageDigest/getInstance "MD5")
+        (.reset))
+      (.digest (.getBytes s "UTF-8"))))
