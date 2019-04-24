@@ -144,7 +144,6 @@
        (core/register-private-http-route!
          [:get "/s3-policy"
           (fn [req]
-            (println (get-in req [:session :user-id]))
             (if (user/user-id-exists? (get-in req [:session :user-id]))
               (if-let [policy (s3/generate-policy)]
                 {:status 200
