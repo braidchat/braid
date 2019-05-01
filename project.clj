@@ -7,8 +7,8 @@
                  [commons-codec "1.10"]
                  [commons-validator "1.5.1"]
                  [http-kit "2.3.0"]
-                 [ring/ring-core "1.6.3"]
-                 [ring/ring-defaults "0.3.1" :exclusions [ring/ring-core]]
+                 [ring/ring-core "1.7.1"]
+                 [ring/ring-defaults "0.3.2" :exclusions [ring/ring-core]]
                  [fogus/ring-edn "0.3.0"]
                  [ring-cors "0.1.12"]
                  [compojure "1.5.1"]
@@ -55,7 +55,7 @@
                  [metosin/spec-tools "0.7.0"]
                  [org.clojure/test.check "0.9.0"] ; b/c spec-tools breaks without it
                  [com.taoensso/truss "1.3.6"]
-                 [com.taoensso/sente "1.11.0" :exclusions [org.clojure/tools.reader taoensso.timbre com.taoensso/truss]]
+                 [com.taoensso/sente "1.14.0-RC2" :exclusions [org.clojure/tools.reader taoensso.timbre com.taoensso/truss]]
 
                  ;;mobile
                  [garden "1.3.2"]]

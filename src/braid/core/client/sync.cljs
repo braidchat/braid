@@ -24,7 +24,7 @@
                  ; cognitect.transit or schema gets upset
                  {:handlers {"u" cljs.core/uuid}})
         {:keys [chsk ch-recv send-fn state]}
-        (sente/make-channel-socket! "/chsk"
+        (sente/make-channel-socket! "/chsk" ""
                                     {:host domain
                                      :ws-kalive-ms 5000
                                      :path "/chsk"
@@ -77,7 +77,7 @@
 
 (defmethod event-msg-handler :chsk/handshake
   [{:as ev-msg :keys [?data]}]
-  (let [[?uid ?csrf-token ?handshake-data] ?data]
+  (let [[?uid _ ?handshake-data] ?data]
     (debugf "Handshake: %s" ?data)))
 
 (def router_ (atom nil))
