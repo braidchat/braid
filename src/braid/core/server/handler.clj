@@ -97,7 +97,8 @@
                               assoc-cookie-conf
                               assoc-csrf-conf))
            (wrap-restful-format :formats [:edn :transit-json])))
-      (wrap-cors :access-control-allow-origin [#".*"]
+      (wrap-cors :access-control-allow-origin [#"https://(m\.)?braid\.chat"
+                                               #"http://localhost:\d+"]
                  :access-control-allow-credentials true
                  :access-control-allow-methods [:get :put :post :delete])
       wrap-edn-params))
