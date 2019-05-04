@@ -3,6 +3,7 @@
    [cljs.core.async.macros :refer [go]])
   (:require
    [braid.core.client.store :as store]
+   [braid.core.client.xhr :as xhr]
    [cljs.core.async :as async]
    [clojure.string :as string]
    [goog.string :as gstring]
@@ -15,7 +16,7 @@
 ; Change to :debug to get detailed info in dev
 (timbre/set-level! :info)
 
-(defn make-socket! []
+(defn make-socket! [csrf-token]
   (let [domain (aget js/window "api_domain")
         packer (sente-transit/get-transit-packer
                  :json
@@ -24,7 +25,7 @@
                  ; cognitect.transit or schema gets upset
                  {:handlers {"u" cljs.core/uuid}})
         {:keys [chsk ch-recv send-fn state]}
-        (sente/make-channel-socket! "/chsk" ""
+        (sente/make-channel-socket! "/chsk" csrf-token
                                     {:host domain
                                      :ws-kalive-ms 5000
                                      :path "/chsk"
@@ -111,8 +112,11 @@
 
 (defn connect! []
   (if-not chsk
-    (do
-      (make-socket!)
-      (start-router!)
-      (start-ping-loop))
+    (xhr/edn-xhr
+      {:uri "/csrf"
+       :method :get
+       :on-complete (fn [resp]
+                      (make-socket! (:token resp))
+                      (start-router!)
+                      (start-ping-loop))})
     (reconnect!)))

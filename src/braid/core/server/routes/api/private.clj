@@ -12,6 +12,8 @@
 
 (defroutes api-private-routes
 
+  (GET "/csrf" req (edn-response {:token (helpers/session-token)}))
+
   ; get current logged in user
   (GET "/session" req
     (if-let [user (helpers/current-user req)]
