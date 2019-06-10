@@ -1,5 +1,6 @@
 (ns braid.core.client.ui.styles.thread
   (:require
+   [braid.core.client.ui.styles.header :as headers]
    [braid.core.client.ui.styles.misc :refer [drag-and-drop]]
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
@@ -150,7 +151,11 @@
 
     (drag-and-drop pad)
     (head pad)
-    (messages pad)]])
+    (messages pad)
+
+    [:>.join
+     (headers/header-button pad)
+     {:margin-bottom "0.5em"}]]])
 
 (defn notice [pad]
   [:>.thread

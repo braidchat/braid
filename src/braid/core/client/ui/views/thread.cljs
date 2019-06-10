@@ -448,7 +448,11 @@
           (when uploading?
             [:div.uploading-indicator "\uf110"])
 
-          (when-not (:readonly thread)
+          (if (:readonly thread)
+            [:button.join
+             {:on-click (fn [_] (dispatch [:core/join-public-group (thread :group-id)]))
+              :style {:background-color (helpers/->color (thread :group-id))}}
+             "Join Group to Reply"]
             [new-message-view {:thread-id (thread :id)
                                :group-id (thread :group-id)
                                :placeholder (if new?
