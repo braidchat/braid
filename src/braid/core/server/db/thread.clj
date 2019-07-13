@@ -66,9 +66,9 @@
   (d/q '[:find [?user-id ...]
          :in $ ?thread-id
          :where
-         [?user :user/id ?user-id]
+         [?thread :thread/id ?thread-id]
          [?user :user/open-thread ?thread]
-         [?thread :thread/id ?thread-id]]
+         [?user :user/id ?user-id]]
        (db/db)
        thread-id))
 
