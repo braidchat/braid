@@ -34,10 +34,9 @@
           ; Open a new message with the selected user on click
           [:a.pm
             {:on-click
-              (fn [e]
+              (fn [_]
                 (dispatch [:new-conversation
                             { :group-id @open-group-id
-                              :content ""
                               :mentioned-user-ids [user-id]}]))}
             "PM"]
         #_[:a.mute "Mute"]

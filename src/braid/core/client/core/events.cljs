@@ -148,14 +148,9 @@
     (let [message (schema/make-message
                     {:user-id (helpers/current-user-id state)
                      :content ":wave:"
-                     :thread-id (data :thread-id)
                      :group-id (data :group-id)
-                     :mentioned-tag-ids (concat
-                                          (data :mentioned-tag-ids)
-                                          (extract-tag-ids state (data :content)))
-                     :mentioned-user-ids (concat
-                                           (data :mentioned-user-ids)
-                                           (extract-user-ids state (data :content)))})]
+                     :mentioned-tag-ids (data :mentioned-tag-ids)
+                     :mentioned-user-ids (data :mentioned-user-ids)})]
       {:websocket-send
        (list
          [:braid.server/new-message message]
