@@ -140,6 +140,31 @@
                                              (assoc msg :failed? true)
                                              msg))))}))
 
+; @TODO: Stop this from sending any messages, and 
+; instead open up a chat without sending anything to the server
+(reg-event-fx
+  :new-conversation
+  (fn [{state :db} [_ data]]
+    (let [message (schema/make-message
+                    {:user-id (helpers/current-user-id state)
+                     :content ":wave:"
+                     :group-id (data :group-id)
+                     :mentioned-tag-ids (data :mentioned-tag-ids)
+                     :mentioned-user-ids (data :mentioned-user-ids)})]
+      {:websocket-send
+       (list
+         [:braid.server/new-message message]
+         2000
+         (fn [reply]
+           (when (not= :braid/ok reply)
+             (dispatch [:braid.notices/display! [(keyword "failed-to-send" (message :id))
+                                                 "Message failed to send!"
+                                                 :error]])
+             (dispatch [:set-message-failed message]))))
+       :db (-> state
+               (helpers/add-message message)
+               (helpers/maybe-reset-temp-thread (data :thread-id)))})))
+
 (reg-event-fx
   :new-message
   (fn [{state :db} [_ data]]

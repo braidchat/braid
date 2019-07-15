@@ -30,7 +30,15 @@
          #_"If I had a profile, it would be here"]]
 
        [:div.actions
-        #_[:a.pm "PM"]
+
+          ; Open a new message with the selected user on click
+          [:a.pm
+            {:on-click
+              (fn [_]
+                (dispatch [:new-conversation
+                            { :group-id @open-group-id
+                              :mentioned-user-ids [user-id]}]))}
+            "PM"]
         #_[:a.mute "Mute"]
 
         [search-button-view (str "@" (user :nickname))]
