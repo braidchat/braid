@@ -35,11 +35,9 @@
           [:a.pm
             {:on-click
               (fn [e]
-                (.preventDefault e)
-                (println "Opening new chat with user: " user-id " in group: " @open-group-id)
-                (dispatch [:new-message
+                (dispatch [:new-conversation
                             { :group-id @open-group-id
-                              :content (str "Hi @" user-id "!")
+                              :content ""
                               :mentioned-user-ids [user-id]}]))}
             "PM"]
         #_[:a.mute "Mute"]
