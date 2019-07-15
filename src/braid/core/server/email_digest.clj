@@ -3,7 +3,7 @@
    [braid.core.server.conf :refer [config]]
    [braid.core.server.db.thread :as thread]
    [braid.core.server.db.user :as user]
-   [braid.core.server.message-format :refer [parse-tags-and-mentions]]
+   [braid.core.server.message-format :as message-format]
    [braid.core.server.scheduler :refer [scheduler]]
    [clj-time.coerce :refer [to-date-time]]
    [clj-time.core :as time]
@@ -50,14 +50,15 @@
             (filter (partial last-message-after? cutoff))
             (map
               (fn [t]
-                (let [thread-last-open
+                (let [parse-tags-and-mentions (message-format/make-tags-and-mentions-parser (t :group-id))
+                      thread-last-open
                       (to-date-time
                         (thread/thread-last-open-at t user-id))]
                   (update t :messages
                           (partial map
                                    (fn [{sender-id :user-id :as m}]
                                      (-> m
-                                         (update :content (partial parse-tags-and-mentions user-id))
+                                         (update :content parse-tags-and-mentions)
                                          (assoc :unseen
                                            (if (time/before?
                                                  (to-date-time (m :created-at))

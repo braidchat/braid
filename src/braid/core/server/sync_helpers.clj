@@ -6,7 +6,7 @@
    [braid.core.server.db.thread :as thread]
    [braid.core.server.db.user :as user]
    [braid.core.server.email-digest :as email]
-   [braid.core.server.message-format :refer [parse-tags-and-mentions]]
+   [braid.core.server.message-format :as message-format]
    [braid.core.server.notify-rules :as notify-rules]
    [braid.core.server.socket :refer [chsk-send! connected-uids]]
    [clojure.set :refer [difference intersection]]
@@ -107,27 +107,29 @@
           (?data :mentioned-user-ids)))))
 
 (defn notify-users [new-message]
-  (let [subscribed-user-ids (->>
-                              (thread/users-subscribed-to-thread
-                                (new-message :thread-id))
+  (let [thread-id (new-message :thread-id)
+        subscribed-user-ids (->>
+                              (thread/users-subscribed-to-thread thread-id)
                               (remove (partial = (:user-id new-message))))
         online? (intersection
                   (set subscribed-user-ids)
-                  (set (:any @connected-uids)))]
+                  (set (:any @connected-uids)))
+        parse-tags-and-mentions (message-format/make-tags-and-mentions-parser (new-message :group-id))]
     (doseq [uid subscribed-user-ids]
       (when-let [rules (user/user-get-preference uid :notification-rules)]
         (when (notify-rules/notify? uid rules new-message)
-          (let [msg (update new-message :content
-                            (partial parse-tags-and-mentions uid))]
-            (if (online? uid)
-              (chsk-send! uid [:braid.client/notify-message msg])
+          (if (online? uid)
+            (let [msg (update new-message :content
+                              parse-tags-and-mentions)]
+              (chsk-send! uid [:braid.client/notify-message msg]))
+            (future
               (let [update-msgs
                     (partial
                       map
                       (fn [m] (update m :content
-                                     (partial parse-tags-and-mentions uid))))]
+                                      parse-tags-and-mentions)))]
                 (-> (email/create-message
-                      [(-> (thread/thread-by-id (msg :thread-id))
+                      [(-> (thread/thread-by-id thread-id)
                            (update :messages update-msgs))])
                     (assoc :subject "Notification from Braid")
                     (->> (email/send-message (user/user-email uid))))))))))))

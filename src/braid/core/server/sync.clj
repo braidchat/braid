@@ -19,7 +19,6 @@
     [braid.core.server.digest :as digest]
     [braid.core.server.events :as events]
     [braid.core.server.invite :as invites]
-    [braid.core.server.message-format :refer [parse-tags-and-mentions]]
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
