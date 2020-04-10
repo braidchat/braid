@@ -6,6 +6,13 @@ Braid is an experimental **team chat application** with a novel UI: instead of c
 
 You can [read more about Braid](https://www.braidchat.com) and then [give Braid a try](https://braid.chat/try).
 
+```
+Hi HN! 
+If you'd like to use Braid with your team, but it's missing a certain something, let me know and we'll try to make it happen.
+If you'd like to contribute, even if you're not experienced with Clojure(script), I'm available to pair remotely and help you get your first PR started.
+- Raf (raf@braidchat.com)
+```  
+
 ![Braid Screenshot](./docs/images/screenshot.png)
 
 Braid's not as polished as Slack yet, but it's got most of the features you'd expect from other chat clients:
