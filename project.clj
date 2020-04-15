@@ -152,7 +152,8 @@
                                    [org.clojure/google-closure-library-third-party
                                     com.google.javascript/closure-compiler]]
                                   [com.bhauman/rebel-readline "0.1.2"]
-                                  [day8.re-frame/re-frame-10x "0.3.3"]]}
+                                  ;; uncomment to enable re-frame-10x (event debugger)
+                                  #_[day8.re-frame/re-frame-10x "0.3.3"]]}
              :prod {:global-vars {*assert* false}
                     :dependencies [[com.datomic/datomic-pro "0.9.5201"
                                     :exclusions [joda-time
