@@ -162,8 +162,7 @@
              :cider [:dev {:dependencies [[cider/piggieback "0.3.10"]]
                            :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
                            :plugins [[cider/cider-nrepl "0.20.0"]
-                                     [refactor-nrepl "2.4.0"]
-                                    ]}]
+                                     [refactor-nrepl "2.4.0"]]}]
              :test [:dev]
              :uberjar [:prod
                        {:aot [braid.core]
