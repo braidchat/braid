@@ -16,9 +16,7 @@
      [{:db/ident :group/slug
        :db/valueType :db.type/string
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/value
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/unique :db.unique/value}
       ; retract :group/name uniqueness constraint
       [:db/retract :group/name :db/unique :db.unique/identity]
       [:db/add :db.part/db :db.alter/attribute :group/name]])
@@ -47,9 +45,7 @@
      [{:db/ident :bot/notify-all-messages?
        :db/doc "Indicates that this bot should recieve all visible messages in its group"
        :db/valueType :db.type/boolean
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/one}]))
 
 (defn migrate-2017-04-11
   "add bot change events"
@@ -58,9 +54,7 @@
      db/conn
      [{:db/ident :bot/event-webhook-url
        :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/one}]))
 
 (defn migrate-2016-08-18
   "schema change for quests"
@@ -71,29 +65,19 @@
       {:db/ident :quest-record/id
        :db/valueType :db.type/uuid
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/identity
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/unique :db.unique/identit}
       {:db/ident :quest-record/quest-id
        :db/valueType :db.type/keyword
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :quest-record/user
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :quest-record/state
        :db/valueType :db.type/keyword
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :quest-record/progress
        :db/valueType :db.type/long
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}])
+       :db/cardinality :db.cardinality/one}])
 
   (let [user-ids (->> (d/q '[:find ?user-id
                              :in $
@@ -112,9 +96,7 @@
   (d/transact db/conn
     [{:db/ident :bot/watched
       :db/valueType :db.type/ref
-      :db/cardinality :db.cardinality/many
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}]))
+      :db/cardinality :db.cardinality/many}]))
 
 (defn migrate-2016-06-27
   "Add uploads schema"
@@ -123,31 +105,21 @@
     [{:db/ident :upload/id
       :db/valueType :db.type/uuid
       :db/cardinality :db.cardinality/one
-      :db/unique :db.unique/identity
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/unique :db.unique/identity}
      {:db/ident :upload/thread
       :db/doc "The thread this upload is associated with"
       :db/valueType :db.type/ref
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/cardinality :db.cardinality/one}
      {:db/ident :upload/url
       :db/valueType :db.type/string
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/cardinality :db.cardinality/one}
      {:db/ident :upload/uploaded-at
       :db/valueType :db.type/instant
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/cardinality :db.cardinality/one}
      {:db/ident :upload/uploaded-by
       :db/doc "User that uploaded this file"
       :db/valueType :db.type/ref
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}]))
+      :db/cardinality :db.cardinality/one}]))
 
 (defn migrate-2016-06-08
   "Add bot schema"
@@ -155,47 +127,31 @@
   (d/transact db/conn
     [{:db/ident :user/is-bot?
       :db/valueType :db.type/boolean
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/cardinality :db.cardinality/one}
 
      {:db/ident :bot/id
       :db/valueType :db.type/uuid
       :db/cardinality :db.cardinality/one
-      :db/unique :db.unique/identity
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/unique :db.unique/identity}
      {:db/ident :bot/token
       :db/valueType :db.type/string
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/cardinality :db.cardinality/one}
      {:db/ident :bot/name
       :db/valueType :db.type/string
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/cardinality :db.cardinality/one}
      {:db/ident :bot/avatar
       :db/valueType :db.type/string
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/cardinality :db.cardinality/one}
      {:db/ident :bot/webhook-url
       :db/valueType :db.type/string
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/cardinality :db.cardinality/one}
      {:db/ident :bot/group
       :db/valueType :db.type/ref
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}
+      :db/cardinality :db.cardinality/one}
      {:db/ident :bot/user
       :db/doc "Fake user bot posts under"
       :db/valueType :db.type/ref
-      :db/cardinality :db.cardinality/one
-      :db/id #db/id [:db.part/db]
-      :db.install/_attribute :db.part/db}]))
+      :db/cardinality :db.cardinality/one}]))
 
 
 (defn migrate-2016-06-04
@@ -215,9 +171,7 @@
   @(d/transact db/conn
      [{:db/ident :thread/group
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}])
+       :db/cardinality :db.cardinality/one}])
   (let [threads (->> (d/q '[:find [?t ...]
                             :where
                             [?t :thread/id]]
@@ -277,20 +231,14 @@
   @(d/transact db/conn
      [{:db/ident :user/preferences
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/many
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/many}
 
       {:db/ident :user.preference/key
        :db/valueType :db.type/keyword
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :user.preference/value
        :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}])
+       :db/cardinality :db.cardinality/one}])
 
   ; migrate to new style
   (let [prefs (d/q '[:find (pull ?u [:user/id :user/preferences-old])
@@ -308,9 +256,7 @@
   @(d/transact db/conn
      [{:db/ident :tag/description
        :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/one}]))
 
 (defn migrate-2016-04-29
   "Add group admins"
@@ -318,9 +264,7 @@
   @(d/transact db/conn
      [{:db/ident :group/admins
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/many
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/many}]))
 
 (defn migrate-2016-03-28
   "Add group settings"
@@ -328,9 +272,7 @@
   @(d/transact db/conn
      [{:db/ident :group/settings
        :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/one}]))
 
 (defn migrate-2016-03-21
   "Add user preferences"
@@ -338,9 +280,7 @@
   @(d/transact db/conn
      [{:db/ident :user/preferences
        :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/one}]))
 
 (defn migrate-2016-03-04
   "Add extension type as attribute"
@@ -348,9 +288,7 @@
   @(d/transact db/conn
      [{:db/ident :extension/type
        :db/valueType :db.type/keyword
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/one}]))
 
 (defn migrate-2016-03-02
   "Add extension user"
@@ -358,9 +296,7 @@
   @(d/transact db/conn
      [{:db/ident :extension/user
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/one}]))
 
 (defn migrate-2016-02-26
   "Add extension schema"
@@ -369,34 +305,22 @@
      [{:db/ident :extension/id
        :db/valueType :db.type/uuid
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/identity
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/unique :db.unique/identity}
       {:db/ident :extension/group
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :extension/token
        :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :extension/refresh-token
        :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :extension/config
        :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :extension/watched-threads
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/many
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/many}]))
 
 
 (defn migrate-2016-01-14
@@ -417,13 +341,10 @@
   []
   @(d/transact db/conn
      [{:db/id :user/email
-       :db/unique :db.unique/value
-       :db.alter/_attribute :db.part/db}
+       :db/unique :db.unique/value}
       {:db/ident :thread/mentioned
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/many
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/many}]))
 
 (defn migrate-2015-12-19
   "Add user nicknames"
@@ -432,9 +353,7 @@
      [{:db/ident :user/nickname
        :db/valueType :db.type/string
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/value
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/unique :db.unique/value}]))
 
 (defn migrate-2015-12-12
   "Make content fulltext"
@@ -444,9 +363,7 @@
   @(d/transact db/conn [{:db/ident :message/content
                          :db/valueType :db.type/string
                          :db/fulltext true
-                         :db/cardinality :db.cardinality/one
-                         :db/id #db/id [:db.part/db]
-                         :db.install/_attribute :db.part/db}])
+                         :db/cardinality :db.cardinality/one}])
   (let [messages (->> (d/q '[:find (pull ?e [:message/id
                                              :message/content-old
                                              :message/created-at
@@ -467,28 +384,20 @@
   @(d/transact db/conn
      [{:db/ident :tag/group
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
 
       ; groups
       {:db/ident :group/id
        :db/valueType :db.type/uuid
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/identity
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/unique :db.unique/identity}
       {:db/ident :group/name
        :db/valueType :db.type/string
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/identity
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/unique :db.unique/identity}
       {:db/ident :group/user
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/many
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}])
+       :db/cardinality :db.cardinality/many}])
   (println "You'll now need to create a group and add existing users & tags to that group"))
 
 (defn create-group-for-users-and-tags
@@ -510,28 +419,18 @@
       {:db/ident :invite/id
        :db/valueType :db.type/uuid
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/identity
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/unique :db.unique/identity}
       {:db/ident :invite/group
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :invite/from
        :db/valueType :db.type/ref
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :invite/to
        :db/valueType :db.type/string
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}
+       :db/cardinality :db.cardinality/one}
       {:db/ident :invite/created-at
        :db/valueType :db.type/instant
-       :db/cardinality :db.cardinality/one
-       :db/id #db/id [:db.part/db]
-       :db.install/_attribute :db.part/db}]))
+       :db/cardinality :db.cardinality/one}]))
 
 

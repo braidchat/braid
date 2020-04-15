@@ -143,7 +143,7 @@
                    :global-vars {*assert* true}
                    :repl-options {:timeout 120000
                                   :init-ns braid.dev.core}
-                   :dependencies [[com.datomic/datomic-free "0.9.5201"
+                   :dependencies [[com.datomic/datomic-free "0.9.5697"
                                    :exclusions [joda-time
                                                 com.google.guava/guava
                                                 org.slf4j/slf4j-api]]

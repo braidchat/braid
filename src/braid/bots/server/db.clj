@@ -13,64 +13,42 @@
    ;; just checking if the user id is the same as a bot's user-id
    {:db/ident :user/is-bot?
     :db/valueType :db.type/boolean
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
 
    ;; bot stuff
    {:db/ident :bot/id
     :db/valueType :db.type/uuid
     :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/identity
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/unique :db.unique/identity}
    {:db/ident :bot/token
     :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :bot/name
     :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :bot/avatar
     :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :bot/webhook-url
     :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :bot/event-webhook-url
     :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :bot/group
     :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :bot/user
     :db/doc "Fake user bot posts under"
     :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :bot/watched
     :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/many
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/many}
    {:db/ident :bot/notify-all-messages?
     :db/doc "Indicates that this bot should recieve all visible messages in its group"
     :db/valueType :db.type/boolean
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id [:db.part/db]
-    :db.install/_attribute :db.part/db}])
+    :db/cardinality :db.cardinality/one}])
 
 (def bot-pull-pattern
   [:bot/id

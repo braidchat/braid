@@ -9,27 +9,19 @@
   [{:db/ident :custom-emoji/id
     :db/valueType :db.type/uuid
     :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/identity
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/unique :db.unique/identity}
    {:db/ident :custom-emoji/shortcode
     :db/doc "Shortcode to type the emoji - e.g. code `foo` means one can type `:foo:` to get the emoji"
     :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :custom-emoji/image
     :db/doc "URL for the image to display for said emoji"
     :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :custom-emoji/group
     :db/doc "The group the emoji is registered in"
     :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}])
+    :db/cardinality :db.cardinality/one}])
 
 (def emoji-pull-pattern
   [:custom-emoji/id

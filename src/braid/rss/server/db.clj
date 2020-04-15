@@ -10,39 +10,27 @@
     :db/valueType :db.type/uuid
     :db/doc "Identifer of the RSS feed"
     :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/identity
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/unique :db.unique/identity}
    {:db/ident :rss/feed-url
     :db/valueType :db.type/string
     :db/doc "URL of the feed to fetch"
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :rss/last-fetched
     :db/valueType :db.type/string
     :db/doc "Unique identifier of the last fetched feed item. Either the item <guid> or a hash of the content."
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :rss/group
     :db/valueType :db.type/ref
     :db/doc "The group the feed entries will be posted to"
-    :db/cardinality :db.cardinality/one
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/cardinality :db.cardinality/one}
    {:db/ident :rss/user
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one
-    :db/doc "The user which the items will be posted as"
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}
+    :db/doc "The user which the items will be posted as"}
    {:db/ident :rss/tags
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many
-    :db/doc "Tags which will be applied to feed items"
-    :db/id #db/id[:db.part/db]
-    :db.install/_attribute :db.part/db}])
+    :db/doc "Tags which will be applied to feed items"}])
 
 (def rss-pull-pattern
   [:rss/id

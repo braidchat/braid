@@ -128,9 +128,7 @@
        (core/register-db-schema!
          [{:db/ident :user/starred-thread
            :db/valueType :db.type/ref
-           :db/cardinality :db.cardinality/many
-           :db/id #db/id [:db.part/db]
-           :db.install/_attribute :db.part/db}])
+           :db/cardinality :db.cardinality/many}])
 
        (core/register-initial-user-data!
          (fn [user-id]

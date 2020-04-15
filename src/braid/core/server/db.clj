@@ -11,7 +11,6 @@
              (concat
                ; partition for our data
                [{:db/ident :entities
-                 :db/id #db/id [:db.part/db]
                  :db.install/_partition :db.part/db}]
                @schema)))
 
