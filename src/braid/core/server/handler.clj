@@ -15,12 +15,11 @@
 (def session-max-age (* 60 60 24 365))
 
 ; NOT using config here, b/c it won't have started when this runs
-(if (= (env :environment) "prod")
+(if (env :redis-uri)
   (do
     (require 'taoensso.carmine.ring)
     (def ^:dynamic *redis-conf* {:pool {}
-                                 :spec {:host "127.0.0.1"
-                                        :port 6379}})
+                                 :spec {:uri (env :redis-uri)}})
     (let [carmine-store (ns-resolve 'taoensso.carmine.ring 'carmine-store)]
       (def session-store
         (carmine-store '*redis-conf* {:expiration-secs session-max-age
