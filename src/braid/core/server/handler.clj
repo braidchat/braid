@@ -32,7 +32,13 @@
 (defn assoc-cookie-conf [defaults]
   (-> defaults
       (assoc-in [:session :cookie-name] "braid")
-      (assoc-in [:session :cookie-attrs :secure] (= (env :environment) "prod"))
+      (assoc-in [:session :cookie-attrs :secure] (cond
+                                                   (env :http-only)
+                                                   false
+                                                   (= (env :environment) "prod")
+                                                   true
+                                                   :else
+                                                   false))
       (assoc-in [:session :cookie-attrs :max-age] session-max-age)
       (assoc-in [:session :store] session-store)))
 
