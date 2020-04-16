@@ -80,7 +80,8 @@
                 :source-paths ["src/braid"
                                "src/retouch"]
                 :compiler {:main braid.core.client.desktop.core
-                           :preloads [day8.re-frame-10x.preload]
+                           ;; uncomment to enable re-frame-10x (event debugger)
+                           ;; :preloads [day8.re-frame-10x.preload]
                            :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}
                            :asset-path "/js/dev/desktop/"
                            :output-to "resources/public/js/dev/desktop.js"
