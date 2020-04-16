@@ -25,9 +25,9 @@
         (carmine-store '*redis-conf* {:expiration-secs session-max-age
                                       :key-prefix "braid"}))))
   (do
-    (require 'ring.middleware.session.memory)
-    (let [memory-store (ns-resolve 'ring.middleware.session.memory 'memory-store)]
-      (def session-store (memory-store)))))
+    (require 'ring.middleware.session.cookie)
+    (let [cookie-store (ns-resolve 'ring.middleware.session.cookie 'cookie-store)]
+      (def session-store (cookie-store)))))
 
 (defn assoc-cookie-conf [defaults]
   (-> defaults
