@@ -165,7 +165,7 @@
                               [day8.re-frame/re-frame-10x "0.3.3"]]}]
 
              :prod
-             [:datomic-pro
+             [:datomic-free
               {:global-vars {*assert* false}}]
 
              :cider
