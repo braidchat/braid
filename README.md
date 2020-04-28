@@ -59,7 +59,7 @@ Thank you to [all of our contributors](./CONTRIBUTORS.edn)!
 
 To get Braid working locally, see: [Developing Braid](./docs/dev/getting-up-and-running-in-development.md)
 
-If you want to deploy it in production, see [Deploying Braid](./docs/drafts/deploying-to-production.md)
+If you want to deploy it in production, see [Deploying Braid](./docs/on-prem/installing-on-prem.md)
 
 If you just want to use Braid, but not set it up yourself, you can get a hosted account at: https://www.braidchat.com
 
