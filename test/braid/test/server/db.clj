@@ -3,7 +3,7 @@
     [clojure.set :refer [rename-keys]]
     [clojure.test :refer :all]
     [braid.core.server.db :as db]
-    [braid.core.server.db.bot :as bot]
+    [braid.bots.server.db :as bot]
     [braid.core.server.db.group :as group]
     [braid.core.server.db.invitation :as invitation]
     [braid.core.server.db.message :as message]
