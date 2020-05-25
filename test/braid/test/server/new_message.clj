@@ -29,7 +29,7 @@
             [message] (db/run-txns! (message/create-message-txn message-data))]
 
         (testing "returns message"
-          (is (= (dissoc message-data :group-id) message)))
+          (is (= message-data message)))
 
         (testing "user has thread open"
           (is (contains?
@@ -52,7 +52,7 @@
             [message-2] (db/run-txns! (message/create-message-txn message-2-data))]
 
         (testing "returns message"
-          (is (= (dissoc message-2-data :group-id) message-2)))
+          (is (= message-2-data message-2)))
 
         (testing "user has thread open"
           (is (contains?

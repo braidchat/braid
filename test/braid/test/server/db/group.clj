@@ -25,8 +25,7 @@
                            :intro nil
                            :avatar nil
                            :public? false
-                           :users-count 0
-                           :bots #{}}
+                           :users-count 0}
                           data))))
 
     (testing "groups have no admins by default"
