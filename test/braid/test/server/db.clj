@@ -4,6 +4,7 @@
     [clojure.test :refer :all]
     [braid.core.server.db :as db]
     [braid.bots.server.db :as bot]
+    [braid.bots.schema :as bot-schema]
     [braid.core.server.db.group :as group]
     [braid.core.server.db.invitation :as invitation]
     [braid.core.server.db.message :as message]
@@ -472,9 +473,9 @@
                                  (select-keys [:id :name :avatar :user-id])
                                  (rename-keys {:name :nickname})))]
 
-    (is (util/valid? schema/Bot b1))
-    (is (util/valid? schema/Bot b2))
-    (is (util/valid? schema/Bot b3))
+    (is (util/valid? bot-schema/Bot b1))
+    (is (util/valid? bot-schema/Bot b2))
+    (is (util/valid? bot-schema/Bot b3))
     (testing "can create bots & retrieve by group"
       (is (= #{b1 b2} (bot/bots-in-group (g1 :id))))
       (is (= (into #{} (map bot->display) [b1 b2])
