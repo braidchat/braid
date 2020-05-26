@@ -102,9 +102,13 @@
                               assoc-cookie-conf
                               assoc-csrf-conf))
            (wrap-restful-format :formats [:edn :transit-json])))
-      (wrap-cors :access-control-allow-origin [(re-pattern (env :site-url))
-                                               (re-pattern (env :mobile-site-url))
-                                               #"http://localhost:\d+"]
+      (wrap-cors :access-control-allow-origin (->>
+                                                [(when-let [site (env :site-url)]
+                                                   (re-pattern (java.util.regex.Pattern/quote site)))
+                                                 (when-let [mobile-site (env :mobile-site-url)]
+                                                   (re-pattern (java.util.regex.Pattern/quote mobile-site)))
+                                                 #"http://localhost:\d+"]
+                                                  (remove nil?))
                  :access-control-allow-credentials true
                  :access-control-allow-methods [:get :put :post :delete])
       wrap-edn-params))
