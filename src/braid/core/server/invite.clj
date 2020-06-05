@@ -106,7 +106,7 @@
          "&expiry=" expiry "&mac=" mac)))
 
 (defn link-signup-page
-  [group-id logged-in?]
+  [group-id]
   (let [now (.getTime (java.util.Date.))
         group (group/group-by-id group-id)
         form-hmac (hmac (config :hmac-secret) (str now group-id))
@@ -116,8 +116,7 @@
                                 :now now
                                 :form-hmac form-hmac
                                 :group-id group-id
-                                :group-name (group :name)
-                                :logged-in-p logged-in?})))
+                                :group-name (group :name)})))
 
 ;; reset paswords
 

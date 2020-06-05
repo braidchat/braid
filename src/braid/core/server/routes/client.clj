@@ -59,13 +59,11 @@
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Bad invite link, sorry"}))
 
   ; invite link
-  (GET "/invite" [group-id :<< as-uuid nonce expiry mac :as req]
+  (GET "/invite" [group-id :<< as-uuid nonce expiry mac]
     (if (and group-id nonce expiry mac)
       (if (invites/verify-hmac mac (str nonce group-id expiry))
         {:status 200 :headers {"Content-Type" "text/html"}
-         :body (invites/link-signup-page
-                 group-id
-                 (boolean (some-> req :session :user-id user/user-by-id)))}
+         :body (invites/link-signup-page group-id)}
         {:status 400 :headers {"Content-Type" "text/plain"} :body "Parameter verification failed"})
       {:status 400 :headers {"Content-Type" "text/plain"} :body "Missing required parameters"}))
 

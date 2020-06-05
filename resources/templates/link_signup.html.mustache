@@ -201,8 +201,9 @@ body textarea, body input {
           </div>
         </div>
 
-        <div class="gateway">
-          {{^logged-in-p}}
+
+        <div id="join-and-register">
+          <div class="gateway">
             <h1 class="header">Welcome to Braid</h1>
             <div class="section user-auth">
               <h2>Join the group {{group-name}}</h2>
@@ -217,9 +218,11 @@ body textarea, body input {
               </form>
               <p>If you already have an account <a href="/">Log in</a> first, then come back here</p>
             </div>
-          {{/logged-in-p}}
+          </div>
+        </div>
 
-          {{#logged-in-p}}
+        <div id="join" style="display: none;">
+          <div class="gateway">
             <h1 class="header">Welcome Back to Braid</h1>
             <div class="section user-auth">
               <form action="//{{api-domain}}/link-join" method="POST">
@@ -231,9 +234,20 @@ body textarea, body input {
                 </fieldset>
               </form>
             </div>
-          {{/logged-in-p}}
+          </div>
         </div>
+
       </div>
     </div>
+    <script type="text/javascript">
+      fetch(`${window.location.protocol}//{{api-domain}}/session`,
+            {credentials: "include"})
+        .then(r => {
+          if (r.ok) {
+            document.getElementById("join").style.display = "block";
+            document.getElementById("join-and-register").style.display = "none";
+          }
+        })
+    </script>
   </body>
 </html>
