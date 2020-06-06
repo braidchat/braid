@@ -66,7 +66,11 @@
    {:class "group-bots"
     :route-fn routes/group-page-path
     :route-args {:page-id "bots"}
-    :body "Bots"}])
+    :body "Bots"}
+   {:class "users"
+    :route-fn routes/group-page-path
+    :route-args {:page-id "users"}
+    :body "Users"}])
 
 (defn admin-header-view []
   (let [user-id (subscribe [:user-id])
