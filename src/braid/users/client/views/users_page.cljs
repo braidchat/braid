@@ -1,5 +1,28 @@
-(ns braid.users.client.views.users-page)
+(ns braid.users.client.views.users-page
+  (:require
+   [re-frame.core :refer [subscribe]]))
+
+(defn user-view
+  [user]
+  (let [nickname (:nickname user)]
+    [:tr.user [:td.nickname nickname]]))
 
 (defn users-page-view []
-  [:div.page.users
-   [:div.title "Users"]])
+  (let [users @(subscribe [:users])]
+    [:div.page.uploads
+     [:div.title "Users"]
+     [:div.content
+      (cond
+        (nil? users)
+        [:p "Loading..."]
+
+        (empty? users)
+        [:p "No users yet"]
+
+        :else
+        [:table.users
+         [:tbody
+          (doall
+           (for [user users]
+             ^{:key (user :id)}
+             [user-view user]))]])]]))
