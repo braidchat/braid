@@ -5,7 +5,12 @@
 (defn user-view
   [user]
   (let [nickname (:nickname user)]
-    [:tr.user [:td.nickname nickname]]))
+    [:tr.user
+     [:td.nickname nickname]
+     [:td.action [:button.make-admin
+                  {:on-click
+                   (fn [_])}
+                  "Make Admin"]]]))
 
 (defn users-page-view []
   (let [users @(subscribe [:users])]
@@ -23,7 +28,8 @@
         [:table.users
          [:thead
           [:tr
-           [:th "Nickname"]]]
+           [:th "Nickname"]
+           [:th "Action"]]]
          [:tbody
           (doall
            (for [user users]
