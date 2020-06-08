@@ -21,6 +21,9 @@
 
         :else
         [:table.users
+         [:thead
+          [:tr
+           [:th "Nickname"]]]
          [:tbody
           (doall
            (for [user users]
