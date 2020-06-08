@@ -58,15 +58,14 @@
         [search-bar-view]]
        [loading-indicator-view @group-id]])))
 
-(def admin-header-items
-  [{:class "settings"
-    :route-fn routes/group-page-path
-    :route-args {:page-id "settings"}
-    :body "Group Settings"}
-   {:class "group-bots"
-    :route-fn routes/group-page-path
-    :route-args {:page-id "bots"}
-    :body "Bots"}])
+(defonce admin-header-items
+  (hooks/register!
+    (atom
+      [{:class "settings"
+        :route-fn routes/group-page-path
+        :route-args {:page-id "settings"}
+        :body "Group Settings"}])
+    [map?]))
 
 (defn admin-header-view []
   (let [user-id (subscribe [:user-id])
@@ -79,7 +78,7 @@
          [:div.options
           [:div.content
            (doall
-             (for [header-item admin-header-items]
+             (for [header-item @admin-header-items]
                ^{:key (header-item :class)}
                [header-item-view header-item]))]]]))))
 

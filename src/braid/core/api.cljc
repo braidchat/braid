@@ -160,6 +160,12 @@
        {:pre [(fn? view)]}
        (swap! braid.core.client.ui.views.header/header-views conj view))
 
+     (defn register-admin-header-item!
+       "Add a new entry to the admin menu"
+       [item]
+       (swap! braid.core.client.ui.views.header/admin-header-items
+              conj item))
+
      (defn register-event-listener!
        "Register a function to intercept re-frame events."
        [f]
