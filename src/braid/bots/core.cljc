@@ -11,6 +11,7 @@
         [braid.bots.client.views.bots-page :as views]
         [braid.bots.client.views.bots-page-styles :as styles]
         [braid.bots.client.views.bot-sender-view :as sender-view]
+        [braid.core.client.routes :as routes]
         [braid.bots.client.subs :as subs]
         [braid.bots.client.remote-handlers :as remote-handlers]])))
 
@@ -27,6 +28,11 @@
        (core/register-events! events/events)
        (core/register-subs! subs/subs)
        (core/register-autocomplete-engine! autocomplete/bots-autocomplete-engine)
+       (core/register-admin-header-item!
+         {:class "group-bots"
+          :route-fn routes/group-page-path
+          :route-args {:page-id "bots"}
+          :body "Bots"})
        (core/register-group-page!
          {:key :bots
           :view views/bots-page-view})
