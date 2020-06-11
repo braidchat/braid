@@ -25,7 +25,7 @@
 
 (defn user-joined-at
   [user-id group-id]
-  (d/q '[:find [?group-id ?inst]
+  (d/q '[:find [?inst ...]
          :in $ ?user-id ?group-id
          :where
          [?u :user/id ?user-id]
@@ -44,8 +44,9 @@
    :email (:user/email e)
    ; TODO currently leaking all group-ids to the client
    :group-ids (map :group/id (:group/_user e))
-   :joined-at (map (partial user-joined-at (:user/id e))
-                   (map :group/id (:group/_user e)))})
+   :joined-at (reduce into
+                      (map (fn [g] {g (first (user-joined-at (:user/id e) g))})
+                   (map :group/id (:group/_user e))))})
 
 (def private-user-pull-pattern
   '[:user/id

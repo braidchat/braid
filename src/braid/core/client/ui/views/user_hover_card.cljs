@@ -11,7 +11,7 @@
     (let [open-group-id (subscribe [:open-group-id])
           admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
           viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])
-          joined-at (second (first (filter #(= (first %) @open-group-id) (user :joined-at))))]
+          joined-at (get (user :joined-at) @open-group-id)]
       [:div.user.card
 
        [:div.header {:style {:background-color (helpers/->color user-id)}}
