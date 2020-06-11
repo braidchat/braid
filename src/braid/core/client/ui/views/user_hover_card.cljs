@@ -10,7 +10,8 @@
   (if-let [user @(subscribe [:user user-id])]
     (let [open-group-id (subscribe [:open-group-id])
           admin? (subscribe [:user-is-group-admin? user-id] [open-group-id])
-          viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
+          viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])
+          joined-at (second (first (filter #(= (first %) @open-group-id) (user :joined-at))))]
       [:div.user.card
 
        [:div.header {:style {:background-color (helpers/->color user-id)}}
@@ -25,7 +26,8 @@
 
        [:div.info
         [:div.local-time (helpers/smart-format-date (js/Date.))]
-        #_[:div.since "member since"]
+        [:div.since
+         "member since " (helpers/smart-format-date joined-at)]
         [:div.description
          #_"If I had a profile, it would be here"]]
 

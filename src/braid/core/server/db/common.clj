@@ -2,6 +2,7 @@
   (:require
     [clojure.edn :as edn]
     [clojure.set :refer [rename-keys]]
+    [braid.core.server.db :as db]
     [datomic.api :as d]))
 
 (defn create-entity-txn
@@ -22,6 +23,19 @@
     :user/avatar
     {:group/_user [:group/id]}])
 
+(defn user-joined-at
+  [user-id group-id]
+  (d/q '[:find [?group-id ?inst]
+         :in $ ?user-id ?group-id
+         :where
+         [?u :user/id ?user-id]
+         [?g :group/id ?group-id]
+         [?g :group/user ?t ?tx ?op]
+         [?tx :db/txInstant ?inst]]
+       (d/history (db/db))
+       user-id
+       group-id))
+
 (defn db->user
   [e]
   {:id (:user/id e)
@@ -29,7 +43,9 @@
    :avatar (:user/avatar e)
    :email (:user/email e)
    ; TODO currently leaking all group-ids to the client
-   :group-ids (map :group/id (:group/_user e))})
+   :group-ids (map :group/id (:group/_user e))
+   :joined-at (map (partial user-joined-at (:user/id e))
+                   (map :group/id (:group/_user e)))})
 
 (def private-user-pull-pattern
   '[:user/id
