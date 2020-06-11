@@ -30,7 +30,7 @@
          :where
          [?u :user/id ?user-id]
          [?g :group/id ?group-id]
-         [?g :group/user ?t ?tx ?op]
+         [?g :group/user ?t ?tx true]
          [?tx :db/txInstant ?inst]]
        (d/history (db/db))
        user-id
