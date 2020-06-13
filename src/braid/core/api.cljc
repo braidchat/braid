@@ -63,6 +63,15 @@
        {:pre [(util/valid? braid.core.client.ui.views.user-header/UserHeaderItem config)]}
        (swap! braid.core.client.ui.views.user-header/user-header-menu-items conj config))
 
+     (defn register-user-profile-item!
+       "Add a new section on the user profile page
+       Expects a map with the following keys
+       :view        reagent component
+       :priority    number, for ordering"
+       [config]
+       {:pre [(util/valid? braid.core.client.ui.views.pages.me/profile-item-dataspec config)]}
+       (swap! braid.core.client.ui.views.pages.me/user-profile-items conj config))
+
      (defn register-thread-header-item!
        "Adds a new view to a thread's header.
         Expects a map with the following keys:

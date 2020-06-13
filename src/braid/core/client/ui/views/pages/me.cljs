@@ -3,9 +3,17 @@
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.upload :refer [avatar-upload-view]]
    [braid.core.common.util :refer [valid-nickname?]]
+   [braid.core.hooks :as hooks]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]))
+
+(def profile-item-dataspec
+  {:priority number?
+   :view fn?})
+
+(defonce user-profile-items
+  (hooks/register! (atom []) [profile-item-dataspec]))
 
 (defn nickname-view
   []
@@ -102,10 +110,17 @@
   []
   [:div.page.me
    [:div.title "Me!"]
-   [:div.content
-    [nickname-view]
-    [avatar-view]
-    [password-view]
-    [:p
-     [:a {:href (routes/system-page-path {:page-id "global-settings"})}
-      "Go to Global Settings"]]]])
+   (into
+    [:div.content]
+    (conj
+     (->> @user-profile-items
+          (sort-by :priority)
+          reverse
+          (mapv (fn [el]
+                  [(:view el)])))
+     [nickname-view]
+     [avatar-view]
+     [password-view]
+     [:p
+      [:a {:href (routes/system-page-path {:page-id "global-settings"})}
+       "Go to Global Settings"]]))])
