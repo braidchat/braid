@@ -75,7 +75,8 @@
                  false))
          (or (boolean (if-let [cur-group (thread/thread-group-id (?data :thread-id))]
                         (= (?data :group-id) cur-group)
-                        true)))]
+                        true)))
+         (group/user-in-group? user-id (?data :group-id))]
         (map
           (fn [tag-id]
             (and
