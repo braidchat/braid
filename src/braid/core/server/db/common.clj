@@ -26,7 +26,7 @@
 (defn user-joined-at
   [user-id group-id]
   (->>
-   (d/q '[:find ?inst
+   (d/q '[:find [?inst ...]
           :in $ ?user-id ?group-id
           :where
           [?u :user/id ?user-id]
@@ -36,8 +36,7 @@
         (d/history (db/db))
         user-id
         group-id)
-   (reduce min)
-   (first)))
+   (reduce #(if (.before %1 %2) %1 %2))))
 
 (defn db->user
   [e]
