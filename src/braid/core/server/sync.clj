@@ -20,7 +20,7 @@
     [braid.core.server.events :as events]
     [braid.core.server.invite :as invites]
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
-    [braid.core.server.sync-handler :refer [event-msg-handler]]
+    [braid.core.server.sync-handler :as sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
     [braid.core.server.util :refer [valid-url?]]))
 
@@ -374,3 +374,18 @@
           :invitations (invitation/invites-for-user user-id)
           :tags (tag/tags-for-user user-id)}
          dynamic-data)])))
+
+;; need to duplicate the anonymous handler for logged in users; this
+;; is used when clicking on a public group from group explore while
+;; logged in. Difference is we want to add the "anonymous" reader as
+;; the logged-in user
+(defmethod event-msg-handler :braid.server.anon/load-group
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  (when-let [group (group/group-by-id ?data)]
+    (when (:public? group)
+      (?reply-fn (reduce (fn [m f] (f (group :id) m))
+                         {:tags (group/group-tags ?data)
+                          :group (assoc group :readonly true)
+                          :threads (thread/public-threads ?data)}
+                         @sync-handler/anonymous-load-group))
+      (helpers/add-anonymous-reader ?data user-id))))
