@@ -1,7 +1,6 @@
 (ns braid.core.server.db.common
   (:require
     [clojure.edn :as edn]
-    [clojure.set :refer [rename-keys]]
     [braid.core.server.db :as db]
     [datomic.api :as d]))
 
