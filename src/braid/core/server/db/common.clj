@@ -45,7 +45,8 @@
    :email (:user/email e)
    ; TODO currently leaking all group-ids to the client
    :group-ids (map :group/id (:group/_user e))
-   :joined-at (->> (:group/_user e)
+   ;; temporarily disabling until we resolve perf issues
+   #_#_:joined-at (->> (:group/_user e)
                    (map :group/id)
                    (map (fn [group-id]
                           [group-id (user-joined-at (:user/id e) group-id)]))

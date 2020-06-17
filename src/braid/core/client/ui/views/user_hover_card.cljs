@@ -26,7 +26,8 @@
 
        [:div.info
         [:div.local-time (helpers/smart-format-date (js/Date.))]
-        [:div.since
+        ;; temporarily disabling until we resolve perf issues
+        #_[:div.since
          "member since " (helpers/smart-format-date joined-at)]
         [:div.description
          #_"If I had a profile, it would be here"]]
