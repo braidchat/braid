@@ -62,16 +62,30 @@
             (db/db) group-id)
        (map (comp db->tag first))))
 
+(defn group-users-joined-at
+  [group-id]
+  (->>
+    (d/q '[:find ?user-id (min ?inst)
+           :in $ ?group-id
+           :where
+           [?g :group/id ?group-id]
+           [?u :user/id ?user-id]
+           [?g :group/user ?u ?tx true]
+           [?tx :db/txInstant ?inst]]
+         (d/history (db/db))
+         group-id)
+    (into {})))
+
 (defn user-groups
   [user-id]
   (->> (d/q '[:find [(pull ?g pull-pattern) ...]
-              :in $ ?user-id pull-pattern
-              :where
-              [?u :user/id ?user-id]
-              [?g :group/user ?u]]
-            (db/db) user-id group-pull-pattern)
-       (map db->group)
-       set))
+             :in $ ?user-id pull-pattern
+             :where
+             [?u :user/id ?user-id]
+             [?g :group/user ?u]]
+           (db/db) user-id group-pull-pattern)
+      (map db->group)
+      set))
 
 (defn user-in-group?
   [user-id group-id]

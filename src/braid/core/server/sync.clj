@@ -367,7 +367,15 @@
                               (digest/from-file "public/js/dev/desktop.js"))
           :user-groups
           (->> (group/user-groups user-id)
-              (map (fn [group] (update group :users update-user-statuses))))
+              (map (fn [group] (update group :users update-user-statuses)))
+              (map (fn [group]
+                     (->> (group/group-users-joined-at (:id group))
+                         (reduce (fn [group [user-id joined-at]]
+                                   (assoc-in
+                                     group
+                                     [:users user-id :joined-at]
+                                     joined-at))
+                                 group)))))
           :user-threads (thread/open-threads-for-user user-id)
           :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)
           :user-preferences (user/user-get-preferences user-id)
