@@ -269,14 +269,18 @@
 (defmethod event-msg-handler :braid.server/invitation-accept
   [{:as ev-msg :keys [?data user-id]}]
   (if-let [invite (invitation/invite-by-id (?data :id))]
-    (do
+    (let [joined-at (group/group-users-joined-at (invite :group-id))]
       (events/user-join-group! user-id (invite :group-id))
       (db/run-txns! (invitation/retract-invitation-txn (invite :id)))
       (chsk-send! user-id [:braid.client/joined-group
                            {:group (group/group-by-id (invite :group-id))
                             :tags (group/group-tags (invite :group-id))}])
-      (chsk-send! user-id [:braid.client/update-users
-                           [(invite :group-id) (user/users-for-user user-id)]]))
+      (chsk-send! user-id
+                  [:braid.client/update-users
+                   [(invite :group-id)
+                    (->> (user/users-for-user user-id)
+                        (map (fn [user]
+                               (assoc user :joined-at (joined-at (user :id))))))]]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                   user-id (?data :id))))
 
@@ -291,13 +295,17 @@
   [{:as ev-msg :keys [?data user-id]}]
   (let [group (group/group-by-id ?data)]
     (if (:public? group)
-      (do
+      (let [joined-at (group/group-users-joined-at (:id group))]
         (events/user-join-group! user-id (group :id))
         (chsk-send! user-id [:braid.client/joined-group
                              {:group group
                               :tags (group/group-tags (group :id))}])
-        (chsk-send! user-id [:braid.client/update-users
-                             [(group :id) (user/users-for-user user-id)]]))
+        (chsk-send! user-id
+                    [:braid.client/update-users
+                     [(group :id)
+                      (->> (user/users-for-user user-id)
+                          (map (fn [user]
+                                 (assoc user :joined-at (joined-at (user :id))))))]]))
       (timbre/warnf "User %s attempted to join nonexistant or private group %s"
                     user-id ?data))))
 
