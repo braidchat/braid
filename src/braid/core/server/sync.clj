@@ -31,12 +31,6 @@
         user-id
         (message/message-group message-id))))
 
-(defn broadcast-new-user-to-group
-  [user-id group-id]
-  (broadcast-group-change
-    group-id
-    [:braid.client/new-user [(user/user-by-id user-id) group-id]]))
-
 ;; Handlers
 
 (defmethod event-msg-handler :chsk/ws-ping
