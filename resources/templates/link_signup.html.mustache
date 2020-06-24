@@ -110,10 +110,14 @@ body textarea, body input {
   background-image: url(/images/braid-logo-color.svg);
 }
 
-.app >.main .gateway >.section {
+.app >.main .gateway >.section-wrapper{
+  text-align: center;
+}
+
+.app >.main .gateway >.section-wrapper >.section {
   background: #ffffff;
+  display: inline-block;
   border: 1px solid #e0e0e0;
-  max-width: 32em;
   padding: 2rem;
   margin: 0 auto;
   box-sizing: border-box;
@@ -121,24 +125,24 @@ body textarea, body input {
   border-radius: 3px;
 }
 
-.app >.main .gateway >.section >form >fieldset {
+.app >.main .gateway >.section-wrapper >.section >form >fieldset {
   margin: 0;
   padding: 0;
   border: none;
 }
 
-.app >.main .gateway >.section >form >fieldset >h1 {
+.app >.main .gateway >.section-wrapper >.section >form >fieldset >h1 {
   margin: 0 0 1.5rem;
   color: #2bb8ba;
   font-size: 1.2em;
 }
 
-.app >.main .gateway >.section >form >fieldset >.option {
+.app >.main .gateway >.section-wrapper >.section >form >fieldset >.option {
   margin: 0 0 2rem;
   position: relative;
 }
 
-.app >.main .gateway >.section >form >fieldset >.option >h2 {
+.app >.main .gateway >.section-wrapper >.section >form >fieldset >.option >h2 {
   font-size: 1em;
   color: #444444;
   margin: 0 0 0.5rem 0;
@@ -165,6 +169,12 @@ body textarea, body input {
   -webkit-transition: background 0.2s ease-in-out;
   background: #2bb8ba;
   color: white;
+}
+
+.app >.main .gateway button.submit >.group-name {
+  max-width: 25vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app >.main .gateway button.submit::after {
@@ -205,18 +215,20 @@ body textarea, body input {
         <div id="join-and-register">
           <div class="gateway">
             <h1 class="header">Welcome to Braid</h1>
-            <div class="section user-auth">
-              <h2>Join the group {{group-name}}</h2>
-              <form action="//{{api-domain}}/link-register" method="POST">
-                <input type="hidden" name="group-id" value="{{group-id}}">
-                <input type="hidden" name="now" value="{{now}}">
-                <input type="hidden" name="form-hmac" value="{{form-hmac}}">
-                <fieldset>
-                  <input type="email" name="email" placeholder="email address">
-                  <button class="submit" type="submit">Register</button>
-                </fieldset>
-              </form>
-              <p>If you already have an account <a href="/">Log in</a> first, then come back here</p>
+            <div class="section-wrapper">
+              <div class="section user-auth">
+                <h2>Join the group {{group-name}}</h2>
+                <form action="//{{api-domain}}/link-register" method="POST">
+                  <input type="hidden" name="group-id" value="{{group-id}}">
+                  <input type="hidden" name="now" value="{{now}}">
+                  <input type="hidden" name="form-hmac" value="{{form-hmac}}">
+                  <fieldset>
+                    <input type="email" name="email" placeholder="email address">
+                    <button class="submit" type="submit">Register</button>
+                  </fieldset>
+                </form>
+                <p>If you already have an account <a href="/">Log in</a> first, then come back here</p>
+              </div>
             </div>
           </div>
         </div>
@@ -224,15 +236,17 @@ body textarea, body input {
         <div id="join" style="display: none;">
           <div class="gateway">
             <h1 class="header">Welcome Back to Braid</h1>
-            <div class="section user-auth">
-              <form action="//{{api-domain}}/link-join" method="POST">
-                <input type="hidden" name="now" value="{{now}}">
-                <input type="hidden" name="form-hmac" value="{{form-hmac}}">
-                <input type="hidden" name="group-id" value="{{group-id}}">
-                <fieldset>
-                  <button class="submit" type="submit">Join the {{group-name}} group</button>
-                </fieldset>
-              </form>
+            <div class="section-wrapper">
+              <div class="section user-auth">
+                <form action="//{{api-domain}}/link-join" method="POST">
+                  <input type="hidden" name="now" value="{{now}}">
+                  <input type="hidden" name="form-hmac" value="{{form-hmac}}">
+                  <input type="hidden" name="group-id" value="{{group-id}}">
+                  <fieldset>
+                    <button class="submit" type="submit">Join the "<span class="group-name">{{group-name}}</span>" group</button>
+                  </fieldset>
+                </form>
+              </div>
             </div>
           </div>
         </div>
