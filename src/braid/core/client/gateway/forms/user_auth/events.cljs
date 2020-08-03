@@ -163,6 +163,7 @@
                         :state state}
                :on-complete
                (fn [user]
+                 (js/window.removeEventListener "message" message-event-handler)
                  (dispatch [::remote-check-auth]))
                :on-error
                (fn [error]
