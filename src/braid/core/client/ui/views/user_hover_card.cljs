@@ -25,7 +25,8 @@
 
        [:div.info
         [:div.local-time (helpers/smart-format-date (js/Date.))]
-        #_[:div.since "member since"]
+        [:div.since
+         "member since " (helpers/smart-format-date (user :joined-at))]
         [:div.description
          #_"If I had a profile, it would be here"]]
 

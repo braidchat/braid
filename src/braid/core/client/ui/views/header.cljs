@@ -20,7 +20,7 @@
 (defn group-name-view []
   (let [group (subscribe [:active-group])]
     (fn []
-      [:div.group-name (@group :name)])))
+      [:div.group-name (:name @group)])))
 
 (def GroupHeaderItem HeaderItem)
 

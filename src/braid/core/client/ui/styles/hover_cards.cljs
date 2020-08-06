@@ -6,7 +6,7 @@
     [braid.core.client.ui.styles.vars :as vars]))
 
 (def offset (px 5))
-(def avatar-size (rem 2.5))
+(def avatar-size (rem 1.0))
 
 (defn card []
   [:&
@@ -75,7 +75,8 @@
 
    [:>.header
     ; reserve room for avatar, which is absolutely positioned
-    {:padding-right avatar-size}
+    {:padding-right avatar-size
+     :position "relative"}
 
     [:>.status
      {:display "inline-block"

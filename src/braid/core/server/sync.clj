@@ -20,7 +20,7 @@
     [braid.core.server.events :as events]
     [braid.core.server.invite :as invites]
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
-    [braid.core.server.sync-handler :refer [event-msg-handler]]
+    [braid.core.server.sync-handler :as sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
     [braid.core.server.util :refer [valid-url?]]))
 
@@ -30,12 +30,6 @@
       (group/user-is-group-admin?
         user-id
         (message/message-group message-id))))
-
-(defn broadcast-new-user-to-group
-  [user-id group-id]
-  (broadcast-group-change
-    group-id
-    [:braid.client/new-user [(user/user-by-id user-id) group-id]]))
 
 ;; Handlers
 
@@ -269,14 +263,18 @@
 (defmethod event-msg-handler :braid.server/invitation-accept
   [{:as ev-msg :keys [?data user-id]}]
   (if-let [invite (invitation/invite-by-id (?data :id))]
-    (do
+    (let [joined-at (group/group-users-joined-at (invite :group-id))]
       (events/user-join-group! user-id (invite :group-id))
       (db/run-txns! (invitation/retract-invitation-txn (invite :id)))
       (chsk-send! user-id [:braid.client/joined-group
                            {:group (group/group-by-id (invite :group-id))
                             :tags (group/group-tags (invite :group-id))}])
-      (chsk-send! user-id [:braid.client/update-users
-                           [(invite :group-id) (user/users-for-user user-id)]]))
+      (chsk-send! user-id
+                  [:braid.client/update-users
+                   [(invite :group-id)
+                    (->> (user/users-for-user user-id)
+                        (map (fn [user]
+                               (assoc user :joined-at (joined-at (user :id))))))]]))
     (timbre/warnf "User %s attempted to accept nonexistant invitaiton %s"
                   user-id (?data :id))))
 
@@ -291,13 +289,17 @@
   [{:as ev-msg :keys [?data user-id]}]
   (let [group (group/group-by-id ?data)]
     (if (:public? group)
-      (do
+      (let [joined-at (group/group-users-joined-at (:id group))]
         (events/user-join-group! user-id (group :id))
         (chsk-send! user-id [:braid.client/joined-group
                              {:group group
                               :tags (group/group-tags (group :id))}])
-        (chsk-send! user-id [:braid.client/update-users
-                             [(group :id) (user/users-for-user user-id)]]))
+        (chsk-send! user-id
+                    [:braid.client/update-users
+                     [(group :id)
+                      (->> (user/users-for-user user-id)
+                          (map (fn [user]
+                                 (assoc user :joined-at (joined-at (user :id))))))]]))
       (timbre/warnf "User %s attempted to join nonexistant or private group %s"
                     user-id ?data))))
 
@@ -367,10 +369,33 @@
                               (digest/from-file "public/js/dev/desktop.js"))
           :user-groups
           (->> (group/user-groups user-id)
-              (map (fn [group] (update group :users update-user-statuses))))
+              (map (fn [group] (update group :users update-user-statuses)))
+              (map (fn [group]
+                     (->> (group/group-users-joined-at (:id group))
+                         (reduce (fn [group [user-id joined-at]]
+                                   (assoc-in
+                                     group
+                                     [:users user-id :joined-at]
+                                     joined-at))
+                                 group)))))
           :user-threads (thread/open-threads-for-user user-id)
           :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)
           :user-preferences (user/user-get-preferences user-id)
           :invitations (invitation/invites-for-user user-id)
           :tags (tag/tags-for-user user-id)}
          dynamic-data)])))
+
+;; need to duplicate the anonymous handler for logged in users; this
+;; is used when clicking on a public group from group explore while
+;; logged in. Difference is we want to add the "anonymous" reader as
+;; the logged-in user
+(defmethod event-msg-handler :braid.server.anon/load-group
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
+  (when-let [group (group/group-by-id ?data)]
+    (when (:public? group)
+      (?reply-fn (reduce (fn [m f] (f (group :id) m))
+                         {:tags (group/group-tags ?data)
+                          :group (assoc group :readonly true)
+                          :threads (thread/public-threads ?data)}
+                         @sync-handler/anonymous-load-group))
+      (helpers/add-anonymous-reader ?data user-id))))

@@ -5,6 +5,8 @@
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.mentions :refer [tag-mention-view user-mention-view]]
     [braid.core.client.ui.views.card-border :refer [card-border-view]]
+    [braid.core.client.ui.views.user-hover-card :refer [user-hover-card-view]]
+    [braid.popovers.helpers :as popover]
     [cljsjs.highlight.langs.clojure]
     [cljsjs.highlight.langs.css]
     [cljsjs.highlight.langs.javascript]
@@ -220,8 +222,10 @@
      :info nil
      :name (if (nil? sender)
              [:span.nickname "[DELETED]"]
-             [:a.nickname {:tab-index -1
-                           :href sender-path}
+             [:span.nickname {:on-click (popover/on-mouse-enter
+                                          (fn []
+                                            [user-hover-card-view (:id sender)]))
+                              :style {:cursor "pointer"}}
               (:nickname sender)])}))
 
 (defn message-view

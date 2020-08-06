@@ -1,7 +1,6 @@
 (ns braid.core.server.db.common
   (:require
     [clojure.edn :as edn]
-    [clojure.set :refer [rename-keys]]
     [datomic.api :as d]))
 
 (defn create-entity-txn

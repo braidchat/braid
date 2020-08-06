@@ -119,7 +119,8 @@
 
 (defn notification-settings-view
   []
-  (let [notifications-enabled (r/atom (notify/enabled?))]
+  (let [notifications-enabled (r/atom (and (notify/has-notify?)
+                                           (notify/enabled?)))]
     (fn []
       [:div.setting
        [:h2 "Notification Preferences"]
@@ -133,10 +134,10 @@
              [:button
               {:on-click
                (fn [_] (notify/request-permission
-                        (fn [perm]
-                          (when (= perm "granted")
-                            (reset! notifications-enabled true)
-                            (notify/notify {:msg "Notifications Enabled!"})))))}
+                         (fn [perm]
+                           (when (= perm "granted")
+                             (reset! notifications-enabled true)
+                             (notify/notify {:msg "Notifications Enabled!"})))))}
               "Enable Desktop Notifications"])
            [notification-rules-view]]
           [:p "The browser you're currently using doesn't support notifications. "

@@ -36,7 +36,7 @@
 
 (defn exchange-token
   [code state]
-  (let [info (transit->form (Base64/decodeBase64 state))]
+  (let [info (some-> state Base64/decodeBase64 transit->form)]
     (when (and (map? info)
             ; TODO: use spec to validate state when we can use 1.9
             (crypto/hmac-verify {:secret (config :hmac-secret)
@@ -56,7 +56,8 @@
                                :code code
                                :redirect_uri (redirect-uri)
                                :state state}})]
-        (when-let [parsed-resp (json/read-str (:body resp) :key-fn keyword)]
+        (when-let [parsed-resp (some-> resp :body
+                                       (json/read-str :key-fn keyword))]
           (assoc parsed-resp
             :braid.server.api/register? (info ::register?)
             :braid.server.api/group-id (info ::group-id)))))))

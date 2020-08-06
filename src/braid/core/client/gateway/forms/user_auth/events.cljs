@@ -5,7 +5,8 @@
    [braid.core.client.router :as router]
    [braid.core.client.state :refer [reg-event-fx]]
    [clojure.string :as string]
-   [re-frame.core :refer [dispatch]]))
+   [re-frame.core :refer [dispatch]]
+   [goog.object :as o]))
 
 (reg-event-fx
   ::initialize
@@ -133,7 +134,11 @@
   This is a named function to prevent the handler from being added
   multiple times."
   [e]
-  (dispatch [::remote-oauth (.. e -data -code) (.. e -data -state)]))
+  (when (object? (.-data e))
+    (let [[code state] (->> (.-data e)
+                            ((juxt #(o/get % "code") #(o/get % "state"))))]
+      (when (and code state)
+        (dispatch [::remote-oauth code state])))))
 
 (reg-event-fx
   ::open-oauth-window
@@ -158,6 +163,7 @@
                         :state state}
                :on-complete
                (fn [user]
+                 (js/window.removeEventListener "message" message-event-handler)
                  (dispatch [::remote-check-auth]))
                :on-error
                (fn [error]

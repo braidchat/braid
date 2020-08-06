@@ -6,7 +6,7 @@
                  [javax.servlet/servlet-api "2.5"]
                  [commons-codec "1.10"]
                  [commons-validator "1.5.1"]
-                 [http-kit "2.3.0"]
+                 [http-kit "2.4.0-beta1"]
                  [ring/ring-core "1.7.1"]
                  [ring/ring-defaults "0.3.2" :exclusions [ring/ring-core]]
                  [fogus/ring-edn "0.3.0"]

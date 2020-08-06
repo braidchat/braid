@@ -62,9 +62,8 @@
   (doseq [hook @group-change-broadcast-hooks]
     (hook group-id info)))
 
-; TODO: when using clojure.spec, use spec to validate this
+;; TODO: when using clojure.spec, use spec to validate this
 (defn user-can-message? [user-id ?data]
-  ; TODO: also check that thread in group
   (every?
       true?
       (concat
@@ -75,7 +74,8 @@
                  false))
          (or (boolean (if-let [cur-group (thread/thread-group-id (?data :thread-id))]
                         (= (?data :group-id) cur-group)
-                        true)))]
+                        true)))
+         (group/user-in-group? user-id (?data :group-id))]
         (map
           (fn [tag-id]
             (and
