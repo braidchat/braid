@@ -13,25 +13,27 @@
                   "Make Admin"]]]))
 
 (defn users-page-view []
-  (let [users @(subscribe [:users])]
-    [:div.page.uploads
-     [:div.title "Users"]
-     [:div.content
-      (cond
-        (nil? users)
-        [:p "Loading..."]
+  (when @(subscribe [:current-user-is-group-admin?]
+                    [(subscribe [:open-group-id])])
+    (let [users @(subscribe [:users])]
+      [:div.page.users
+       [:div.title "Users"]
+       [:div.content
+        (cond
+          (nil? users)
+          [:p.users "Loading..."]
 
-        (empty? users)
-        [:p "No users yet"]
+          (empty? users)
+          [:p.users "No users yet"]
 
-        :else
-        [:table.users
-         [:thead
-          [:tr
-           [:th "Nickname"]
-           [:th "Action"]]]
-         [:tbody
-          (doall
-           (for [user users]
-             ^{:key (user :id)}
-             [user-view user]))]])]]))
+          :else
+          [:table.users
+           [:thead
+            [:tr
+             [:th "Nickname"]
+             [:th "Actions"]]]
+           [:tbody
+            (doall
+              (for [user users]
+                ^{:key (user :id)}
+                [user-view user]))]])]])))
