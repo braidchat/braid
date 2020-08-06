@@ -207,16 +207,10 @@
 
 (defn default-sender-views
   [sender-id]
-  (let [sender @(subscribe [:user sender-id])
-        current-group (subscribe [:open-group-id])
-        sender-path (if (nil? sender)
-                      ""
-                      (routes/group-page-path
-                        {:group-id @current-group
-                         :page-id "search"
-                         :query-params {:query (str "@" (:id sender))}}))]
-    {:avatar [:a.avatar {:href sender-path
-                         :tab-index -1}
+  (let [sender @(subscribe [:user sender-id])]
+    {:avatar [:span.avatar {:on-click (popover/on-mouse-enter
+                                        (fn []
+                                          [user-hover-card-view (:id sender)]))}
               [:img {:src (:avatar sender)
                      :style {:background-color (->color (:id sender))}}]]
      :info nil
