@@ -3,9 +3,8 @@
    [braid.core.api :as core]
    #?@(:cljs
        [[braid.users.client.views.users-page :as views]
+        [braid.users.client.views.users-page-styles :as styles]
         [braid.core.client.routes :as routes]])))
-
-
 
 (defn init! []
   #?(:cljs
@@ -17,4 +16,5 @@
         {:class "users"
          :route-fn routes/group-page-path
          :route-args {:page-id "users"}
-         :body "Users"}))))
+         :body "Users"})
+       (core/register-styles! styles/users-page))))
