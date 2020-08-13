@@ -29,7 +29,7 @@
   [:>.threads
    mixins/flex
    {:position "absolute"
-    :top vars/pad
+    :top "2.6rem"
     :right 0
     :bottom 0
     :left 0
