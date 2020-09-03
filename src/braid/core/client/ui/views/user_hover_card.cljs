@@ -48,9 +48,10 @@
           [:button.ban
            {:on-click
             (fn [_]
-              (dispatch [:remove-from-group
-                         {:group-id @open-group-id
-                          :user-id user-id}]))}
+              (when (js/confirm (str "Really remove " (user :nickname) " from this group?"))
+                (dispatch [:remove-from-group
+                           {:group-id @open-group-id
+                            :user-id user-id}])))}
            "Kick"])
 
         (when (and @viewer-admin? (not @admin?))
