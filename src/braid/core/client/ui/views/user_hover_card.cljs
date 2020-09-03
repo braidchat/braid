@@ -37,8 +37,8 @@
             {:on-click
               (fn [_]
                 (dispatch [:new-conversation
-                            { :group-id @open-group-id
-                              :mentioned-user-ids [user-id]}]))}
+                           {:group-id @open-group-id
+                            :mentioned-user-ids [user-id]}]))}
             "PM"]
         #_[:a.mute "Mute"]
 
