@@ -68,8 +68,8 @@
                              :group-id (config :group-id)
                              :content text
                              :mentioned-user-ids (config :mentioned-user-ids)
-                             :mentioned-tag-ids (config :mentioned-tag-ids)}])
-                 (set-text! ""))})}]])})))
+                             :mentioned-tag-ids (config :mentioned-tag-ids)
+                             :on-added (fn [] (set-text! ""))}]))})}]])})))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
   [:div.autocomplete

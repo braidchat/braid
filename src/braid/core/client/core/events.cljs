@@ -46,6 +46,11 @@
 
 (reg-fx :notify notify/notify)
 
+(reg-fx :confirm (fn [{:keys [prompt on-confirm on-cancel]}]
+                   (if (js/confirm prompt)
+                     (on-confirm)
+                     (when on-cancel (on-cancel)))))
+
 (defn name->open-tag-id
   "Lookup tag by name in the open group"
   [state tag-name]
@@ -153,32 +158,50 @@
 
 (reg-event-fx
   :new-message
-  (fn [{state :db} [_ data]]
+  (fn [{db :db} [_ data]]
     (when-not (string/blank? (data :content))
       (let [message (schema/make-message
-                      {:user-id (helpers/current-user-id state)
-                       :content (identify-mentions state (data :content))
+                      {:user-id (helpers/current-user-id db)
+                       :content (identify-mentions db (data :content))
                        :thread-id (data :thread-id)
                        :group-id (data :group-id)
                        :mentioned-tag-ids (concat
                                             (data :mentioned-tag-ids)
-                                            (extract-tag-ids state (data :content)))
+                                            (extract-tag-ids db (data :content)))
                        :mentioned-user-ids (concat
                                              (data :mentioned-user-ids)
-                                             (extract-user-ids state (data :content)))})]
-        {:websocket-send
-         (list
-           [:braid.server/new-message message]
-           2000
-           (fn [reply]
-             (when (not= :braid/ok reply)
-               (dispatch [:braid.notices/display! [(keyword "failed-to-send" (message :id))
-                                                   "Message failed to send!"
-                                                   :error]])
-               (dispatch [:set-message-failed message]))))
-         :db (-> state
-                 (helpers/add-message message)
-                 (helpers/maybe-reset-temp-thread (data :thread-id)))}))))
+                                             (extract-user-ids db (data :content)))})
+            thread-id (data :thread-id)]
+        (if (and
+              ;; thread already exists...
+              (not= thread-id (get-in db [:temp-threads (db :open-group-id) :id]))
+              ;; doesn't have any tags yet...
+              (empty? (get-in db [:threads thread-id :tag-ids]))
+              ;; about to add a tag
+              (seq (message :mentioned-tag-ids)))
+          {:confirm {:prompt "You're about to make a private thread public"
+                     :on-confirm (fn []
+                                   (when-let [added (data :on-added)] (added))
+                                   (dispatch [::persist-new-message message thread-id]))}}
+          (do (when-let [added (data :on-added)] (added))
+              {:dispatch [::persist-new-message message thread-id]}))))))
+
+(reg-event-fx
+  ::persist-new-message
+  (fn [{state :db} [_ message created-thread-id]]
+    {:websocket-send
+     (list
+       [:braid.server/new-message message]
+       2000
+       (fn [reply]
+         (when (not= :braid/ok reply)
+           (dispatch [:braid.notices/display! [(keyword "failed-to-send" (message :id))
+                                               "Message failed to send!"
+                                               :error]])
+           (dispatch [:set-message-failed message]))))
+     :db (-> state
+             (helpers/add-message message)
+             (helpers/maybe-reset-temp-thread created-thread-id))}))
 
 (reg-event-fx
   :core/retract-message
