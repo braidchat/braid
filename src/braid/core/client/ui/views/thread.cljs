@@ -150,7 +150,11 @@
    (doall
      (for [user-id (thread :mentioned-ids)]
        ^{:key user-id}
-       [user-mention-view user-id]))
+       [:<> [user-mention-view user-id]
+        (when (thread :new?)
+          [:span.remove-mention
+           {:on-click (fn [] (dispatch [:remove-new-thread-mention user-id]))}
+           "x"])]))
    (doall
      (for [tag-id (thread :tag-ids)]
        ^{:key tag-id}

@@ -19,6 +19,11 @@
    [:>.tags
     {:display "inline"}
 
+    [:>.remove-mention
+     mixins/pill-button
+     {:margin-left "-0.25rem"
+      :margin-right "0.25rem"}]
+
     [:.add
      {:position "relative"}
 

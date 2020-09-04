@@ -157,6 +157,12 @@
                 (get-in state [:temp-threads (data :group-id) :id])]}))
 
 (reg-event-fx
+  :remove-new-thread-mention
+  (fn [{db :db} [_ user-id]]
+    {:db (update-in db [:temp-threads (db :open-group-id) :mentioned-ids]
+                    disj user-id)}))
+
+(reg-event-fx
   :new-message
   (fn [{db :db} [_ data]]
     (when-not (string/blank? (data :content))
