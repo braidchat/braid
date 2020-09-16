@@ -357,6 +357,17 @@
                                      (empty? (thread :tag-ids))
                                      (empty? (thread :mentioned-ids))))
 
+        thread-stale? (fn [thread]
+                        (let [[start end] (->> (thread :messages)
+                                               (map :created-at)
+                                               (reduce (fn [[f l] d] [(min f d) (max l d)])
+                                                       [(js/Date.) (js/Date. 0)]))
+                              age (- (.getTime end) (.getTime start)) ]
+                          (and
+                            (not (thread :new?))
+                            (> (count (thread :messages)) 10)
+                            (> age (* 1000 60 60 24 7)))))
+
         ; Closing over thread-id, but the only time a thread's id changes is the new
         ; thread box, which is always open
         open? (subscribe [:thread-open? (thread :id)])
@@ -380,13 +391,15 @@
             new? (thread :new?)
             private? (thread-private? thread)
             limbo? (thread-limbo? thread)
-            archived? (and (not @open?) (not new?))]
+            archived? (and (not @open?) (not new?))
+            stale? (thread-stale? thread)]
 
         [:div.thread
          {:class
           (string/join " " [(when new? "new")
                             (when private? "private")
                             (when limbo? "limbo")
+                            (when stale? "stale")
                             (when @focused? "focused")
                             (when dragging? "dragging")
                             (when archived? "archived")])
@@ -433,10 +446,16 @@
               (when (< 0 (.-length file-list))
                 (maybe-upload-file! thread (aget file-list 0)))))}
 
-         (when limbo?
-           [:div.notice "No one can see this conversation yet. Mention a @user or #tag in a reply."])
+         (cond
+           limbo?
+           [:div.notice "No one can see this conversation yet. Mention a @user or #tag in a reply."]
 
-         (when private?
+           stale?
+           [:div.notice
+            "This thread has been going on for a long time." [:br]
+            "Consider starting a new one"]
+
+           private?
            [:div.notice
             "This is a private conversation." [:br]
             "Only @mentioned users can see it."])
