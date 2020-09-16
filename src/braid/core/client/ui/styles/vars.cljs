@@ -24,6 +24,8 @@
 
 (def limbo-thread-accent-color "#CA1414")
 
+(def stale-thread-accent-color "#555500")
+
 (def archived-thread-accent-color "#AAAAAA")
 
 (def page-background-color "#f3f3f3")

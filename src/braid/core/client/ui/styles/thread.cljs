@@ -175,13 +175,14 @@
       :margin-right (rem 0.5)
       :content "\"\""}]]
 
-   [:&.private :&.limbo
+   [:&.private :&.limbo :&.stale
     [:>.card
      {; needs to be a better way
       ; which is based on the height of the notice
       :max-height "85%"}]]
 
    [:&.private
+    ;[:>.card {:border-top "5px solid #D2E7FF"}]
     [:>.notice
      {:background "#D2E7FF"
       :color vars/private-thread-accent-color}
@@ -195,8 +196,16 @@
       :color vars/limbo-thread-accent-color}
 
      [:&::before
-      (mixins/fontawesome \uf071)]]]])
+      (mixins/fontawesome \uf071)]]]
 
+   [:&.stale
+    :&.stale.private
+    [:>.notice
+     {:background "#cccc00"
+      :color vars/stale-thread-accent-color}
+    [:&::before
+     (mixins/fontawesome \uf071)]]]
+   ])
 
 (defn new-message [pad]
   [:>.message.new

@@ -452,8 +452,7 @@
 
            stale?
            [:div.notice
-            "This thread has been going on for a long time." [:br]
-            "Consider starting a new one"]
+            "This thread has been going on for a long time; consider starting a new one"]
 
            private?
            [:div.notice
