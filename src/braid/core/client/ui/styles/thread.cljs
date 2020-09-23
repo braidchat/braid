@@ -5,7 +5,7 @@
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
    [garden.arithmetic :as m]
-   [garden.units :refer [px em rem]]))
+   [garden.units :as units :refer [px em rem]]))
 
 (defn head [pad]
   [:>.head
@@ -162,10 +162,15 @@
      (headers/header-button pad)
      {:margin-bottom "0.5em"}]]])
 
+(defn css->str
+  [css-unit]
+  (str (:magnitude css-unit) (name (:unit css-unit))))
+
 (defn notice [pad]
   [:>.thread
    [:>.notice
     {:box-shadow [[0 (px 1) (px 2) 0 "#ccc"]]
+     :height vars/avatar-size
      :padding pad
      :margin-bottom pad}
 
@@ -177,35 +182,36 @@
 
    [:&.private :&.limbo :&.stale
     [:>.card
-     {; needs to be a better way
-      ; which is based on the height of the notice
-      :max-height "85%"}]]
+     {:max-height (str "calc(100% - ("
+                        (css->str vars/avatar-size)
+                        " + 2px"
+                        " + 3*" (css->str pad) "))")}]]
+   [:&.private.stale
+    [:>.card
+     {:max-height (str "calc(100% - 2*("
+                        (css->str vars/avatar-size)
+                        " + 1px"
+                        " + 3*" (css->str pad) "))")}]]
 
-   [:&.private
-    ;[:>.card {:border-top "5px solid #D2E7FF"}]
-    [:>.notice
-     {:background "#D2E7FF"
-      :color vars/private-thread-accent-color}
+   [:>.notice.private
+    {:background "#D2E7FF"
+     :color vars/private-thread-accent-color}
 
-     [:&::before
-      (mixins/fontawesome \uf21b)]]]
-
-   [:&.limbo
-    [:>.notice
-     {:background "#ffe4e4"
-      :color vars/limbo-thread-accent-color}
-
-     [:&::before
-      (mixins/fontawesome \uf071)]]]
-
-   [:&.stale
-    :&.stale.private
-    [:>.notice
-     {:background "#cccc00"
-      :color vars/stale-thread-accent-color}
     [:&::before
-     (mixins/fontawesome \uf071)]]]
-   ])
+     (mixins/fontawesome \uf21b)]]
+
+   [:>.notice.limbo
+    {:background "#ffe4e4"
+     :color vars/limbo-thread-accent-color}
+
+    [:&::before
+     (mixins/fontawesome \uf071)]]
+
+   [:>.notice.stale
+    {:background "#cccc00"
+     :color vars/stale-thread-accent-color}
+    [:&::before
+     (mixins/fontawesome \uf071)]]])
 
 (defn new-message [pad]
   [:>.message.new

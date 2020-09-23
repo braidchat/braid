@@ -446,16 +446,16 @@
               (when (< 0 (.-length file-list))
                 (maybe-upload-file! thread (aget file-list 0)))))}
 
-         (cond
-           limbo?
-           [:div.notice "No one can see this conversation yet. Mention a @user or #tag in a reply."]
+         (when limbo?
+           [:div.notice.limbo
+            "No one can see this conversation yet. Mention a @user or #tag in a reply."])
 
-           stale?
-           [:div.notice
-            "This thread has been going on for a long time; consider starting a new one"]
+         (when stale?
+           [:div.notice.stale
+            "This thread has been going on for a long time; consider starting a new one"])
 
-           private?
-           [:div.notice
+         (when private?
+           [:div.notice.private
             "This is a private conversation." [:br]
             "Only @mentioned users can see it."])
 
