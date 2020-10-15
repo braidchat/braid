@@ -109,7 +109,7 @@ To run Datomic:
 
 You will need to keep this process running during development. You can kill the process when you're not using it and restart it using the command above.
 
-In your Braid project, you'll need to create a `profiles.cljs` with the following (and restart the REPL to pick up the changes).
+In your Braid project, you'll need to create a `profiles.clj` with the following (and restart the REPL to pick up the changes).
 
   ```clojure
   {:user {:env {:db-url "datomic:free://localhost:4334/braid"}}
