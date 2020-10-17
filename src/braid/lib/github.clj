@@ -1,4 +1,4 @@
-(ns braid.core.server.api.github
+(ns braid.lib.github
   (:require
     [clojure.data.json :as json]
     [clojure.string :as string]

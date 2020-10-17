@@ -1,13 +1,13 @@
 (ns braid.core.server.routes.client
   (:require
    [braid.core.hooks :as hooks]
-   [braid.core.server.api.github :as github]
    [braid.core.server.conf :refer [config]]
    [braid.core.server.db.group :as group]
    [braid.core.server.db.invitation :as invitation]
    [braid.core.server.db.user :as user]
    [braid.core.server.invite :as invites]
    [braid.core.server.routes.helpers :as helpers]
+   [braid.lib.github :as github]
    [braid.lib.digest :as digest]
    [cljstache.core :as cljstache]
    [compojure.coercions :refer [as-uuid]]
