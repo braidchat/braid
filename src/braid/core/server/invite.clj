@@ -1,6 +1,6 @@
 (ns braid.core.server.invite
   (:require
-   [braid.core.server.cache :refer [cache-set! cache-get cache-del!]]
+   [braid.base.server.cache :refer [cache-set! cache-get cache-del!]]
    [braid.core.server.conf :refer [config]]
    [braid.core.server.db.group :as group]
    [braid.lib.crypto :refer [hmac constant-comp random-nonce]]

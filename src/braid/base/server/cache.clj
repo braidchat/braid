@@ -1,4 +1,4 @@
-(ns braid.core.server.cache
+(ns braid.base.server.cache
   (:require
    [environ.core :refer [env]]
    [taoensso.carmine :as car]))
@@ -28,6 +28,3 @@
     (car/wcar redis-conn (car/del k))
     (swap! dev-cache dissoc k)))
 
-(def redis-conn {:pool {}
-                 :spec {:host "127.0.0.1"
-                        :port 6379}})
