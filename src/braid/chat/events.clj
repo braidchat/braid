@@ -1,4 +1,4 @@
-(ns braid.core.server.events
+(ns braid.chat.events
   (:require
     [braid.core.server.db :as db]
     [braid.chat.db.group :as group]

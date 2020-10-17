@@ -14,7 +14,7 @@
     [braid.chat.db.tag :as tag]
     [braid.chat.db.thread :as thread]
     [braid.chat.db.user :as user]
-    [braid.core.server.events :as events]
+    [braid.chat.events :as events]
     [braid.core.server.invite :as invites]
     [braid.base.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :as sync-handler :refer [event-msg-handler]]

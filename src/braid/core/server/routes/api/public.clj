@@ -11,7 +11,7 @@
     [braid.chat.db.group :as group]
     [braid.chat.db.invitation :as invitation]
     [braid.chat.db.user :as user]
-    [braid.core.server.events :as events]
+    [braid.chat.events :as events]
     [braid.core.server.invite :as invites]
     [braid.core.server.routes.helpers :refer [current-user error-response edn-response]]
     [braid.core.server.sync :as sync]
