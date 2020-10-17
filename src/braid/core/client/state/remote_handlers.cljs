@@ -1,6 +1,6 @@
 (ns braid.core.client.state.remote-handlers
   (:require
-   [braid.core.client.router :as router]
+   [braid.base.client.router :as router]
    [braid.core.client.sync :as sync]
    [braid.core.hooks :as hooks]
    [re-frame.core :refer [dispatch]]

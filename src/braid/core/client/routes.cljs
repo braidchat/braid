@@ -1,6 +1,6 @@
 (ns braid.core.client.routes
   (:require
-   [braid.core.client.router :as router]
+   [braid.base.client.router :as router]
    [braid.core.client.pages :as pages]
    [re-frame.core :refer [dispatch subscribe]]
    [secretary.core :as secretary :refer-macros [defroute]]))

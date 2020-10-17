@@ -9,7 +9,7 @@
    [braid.core.client.mobile.auth-flow.routes]
    [braid.core.client.mobile.auth-flow.subs]
    [braid.core.client.mobile.views :refer [app-view]]
-   [braid.core.client.router :as router]
+   [braid.base.client.router :as router]
    [braid.core.client.routes]
    [braid.core.client.state.remote-handlers]
    [braid.core.modules :as modules]

@@ -1,4 +1,4 @@
-(ns braid.core.client.router
+(ns braid.base.client.router
   (:require
    [accountant.core :as accountant]
    [secretary.core :as secretary])

@@ -9,7 +9,7 @@
    [braid.core.client.group-admin.subs]
    [braid.core.client.invites.events]
    [braid.core.client.invites.subs]
-   [braid.core.client.router :as router]
+   [braid.base.client.router :as router]
    [braid.core.client.state.remote-handlers]
    [braid.core.client.ui.views.app :refer [app-view]]
    [braid.core.modules :as modules]
