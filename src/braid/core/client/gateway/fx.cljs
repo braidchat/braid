@@ -1,6 +1,6 @@
 (ns braid.core.client.gateway.fx
   (:require
-   [braid.core.client.xhr :as xhr]
+   [braid.lib.xhr :as xhr]
    [braid.core.client.state.fx.dispatch-debounce :as fx.debounce]
    [re-frame.core :refer [dispatch reg-fx]]))
 

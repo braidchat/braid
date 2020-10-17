@@ -1,4 +1,4 @@
-(ns braid.core.client.xhr
+(ns braid.lib.xhr
   (:require
     [ajax.core :refer [ajax-request json-request-format json-response-format]]
     [ajax.edn :refer [edn-request-format edn-response-format]]))

@@ -1,7 +1,7 @@
 (ns braid.website-embeds.views
   (:require
     [braid.core.client.helpers :refer [->color url->color]]
-    [braid.core.client.xhr :refer [edn-xhr]]
+    [braid.lib.xhr :refer [edn-xhr]]
     [reagent.core :as r]))
 
 (defn- website-embed-view

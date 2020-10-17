@@ -1,6 +1,6 @@
 (ns braid.core.client.ui.views.pages.changelog
   (:require
-   [braid.core.client.xhr :as xhr]
+   [braid.lib.xhr :as xhr]
    [reagent.core :as r]))
 
 (defn changelog-view []

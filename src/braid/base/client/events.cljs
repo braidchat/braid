@@ -4,8 +4,8 @@
     [braid.core.client.desktop.notify :as notify]
     [braid.core.client.state.fx.dispatch-debounce :as fx.debounce]
     [braid.core.client.state.fx.redirect :as fx.redirect]
-    [braid.core.client.xhr :refer [edn-xhr]]
     [braid.core.client.sync :as sync]
+    [braid.lib.xhr :refer [edn-xhr]]
     [braid.core.hooks :as hooks]
     [re-frame.core :as re-frame :refer [reg-fx]]))
 

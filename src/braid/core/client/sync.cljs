@@ -3,7 +3,7 @@
    [cljs.core.async.macros :refer [go]])
   (:require
    [braid.core.client.store :as store]
-   [braid.core.client.xhr :as xhr]
+   [braid.lib.xhr :as xhr]
    [cljs.core.async :as async]
    [clojure.string :as string]
    [goog.string :as gstring]
