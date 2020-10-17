@@ -75,7 +75,7 @@
              :-webkit-text-stroke "#999 0.5px"
              :text-shadow "-1px 0 1px #999"}]]])
 
-       (core/register-state!
+       (base/register-state!
          {:braid.stars/starred-thread-ids {}}
          {:braid.stars/starred-thread-ids {uuid? #{uuid?}}})
 
@@ -110,7 +110,7 @@
           (fn [db [_ thread-id]]
             (contains? (get-in db [:braid.stars/starred-thread-ids (db :open-group-id)]) thread-id))})
 
-       (core/register-incoming-socket-message-handlers!
+       (base/register-incoming-socket-message-handlers!
          {:braid.stars.ws/star-thread!
           (fn [_ thread-id]
             (dispatch [:braid.stars/star-thread! thread-id]))
@@ -127,7 +127,7 @@
 
      :clj
      (do
-       (core/register-db-schema!
+       (base/register-db-schema!
          [{:db/ident :user/starred-thread
            :db/valueType :db.type/ref
            :db/cardinality :db.cardinality/many}])
@@ -149,7 +149,7 @@
                            (update memo group-id (fnil conj #{}) thread-id))
                          {}))}))
 
-       (core/register-server-message-handlers!
+       (base/register-server-message-handlers!
          {:braid.stars.ws/star-thread!
           (fn [{user-id :user-id thread-id :?data}]
             {:db-run-txns! [[:db/add [:user/id user-id] :user/starred-thread [:thread/id thread-id]]]

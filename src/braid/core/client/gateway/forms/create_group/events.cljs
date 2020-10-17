@@ -2,7 +2,7 @@
   (:require
    [braid.core.client.gateway.forms.create-group.validations :refer [validations]]
    [braid.core.client.gateway.helpers :as helpers]
-   [braid.core.client.state :refer [reg-event-fx]]
+   [braid.base.client.state :refer [reg-event-fx]] ;; TODO should use base.api/register-events!
    [braid.core.common.util :refer [slugify]]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch]]

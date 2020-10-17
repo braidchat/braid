@@ -5,14 +5,38 @@
          [[braid.base.client.events]
           [braid.base.client.subs]
           [braid.base.client.pages]
-          [braid.base.client.styles]]
+          [braid.base.client.styles]
+          [braid.base.client.state]
+          [braid.base.client.remote-handlers]
+          [braid.base.client.root-view]]
          :clj
          [[braid.base.conf]
           [braid.base.server.jobs]
-          [braid.base.server.http-api-routes]])))
+          [braid.base.server.http-api-routes]
+          [braid.base.server.spa]
+          [braid.base.server.schema]
+          [braid.base.server.ws-handler]])))
 
 #?(:cljs
    (do
+     (defn register-state!
+       "Add a key and initial value to the default app state, plus an associated spec."
+       [state spec]
+       {:pre [(map? state)
+              (map? spec)]}
+       (braid.base.client.state/register-state! state spec))
+
+     (defn register-incoming-socket-message-handlers!
+       "Registers multiple server-side socket message handlers.
+
+       Expects map of event-keys and handler-fns.
+       Handler fn will be called with user-id and data arguments"
+       [handler-map]
+       {:pre [(map? handler-map)
+              (every? keyword? (keys handler-map))
+              (every? fn? (vals handler-map))]}
+       (swap! braid.base.client.remote-handlers/incoming-socket-message-handlers merge handler-map))
+
      (defn register-events!
        "Registers multiple re-frame event handlers, as if passed to reg-event-fx.
 
@@ -38,6 +62,13 @@
               (every? keyword? (keys sub-map))
               (every? fn? (vals sub-map))]}
        (braid.base.client.subs/register-subs! sub-map))
+
+     (defn register-root-view!
+       "Add a new view to the app (when user is logged in).
+       Will be put under body > #app > .app > .main >"
+       [view]
+       {:pre [(fn? view)]}
+       (swap! braid.base.client.root-view/root-views conj view))
 
      (defn register-styles!
        "Add Garden CSS styles to the page styles"
@@ -70,11 +101,33 @@
 
    :clj
    (do
+
+     (defn register-additional-script!
+       "Add a javascript script tag to client html. Values can be a map with a `:src` or `:body` key or a function with no arguments, returing the same."
+       [tag]
+       {:pre [(util/valid? braid.base.server.spa/additional-script-dataspec tag)]}
+       (swap! braid.base.server.spa/additional-scripts conj tag))
+
+     (defn register-db-schema!
+       "Add new datoms to the db schema"
+       [schema]
+       {:pre [(vector? schema)
+              (every? (partial util/valid? braid.base.server.schema/rule-dataspec) schema)]}
+       (swap! braid.base.server.schema/schema concat schema))
+
      (defn register-config-var!
        "Add a keyword to be read from `env` and added to the `config` state"
        [k]
        {:pre [(keyword? k)]}
        (swap! braid.base.conf/config-vars conj k))
+
+     (defn register-server-message-handlers!
+       "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"
+       [handler-defs]
+       {:pre [(map? handler-defs)
+              (every? keyword? (keys handler-defs))
+              (every? fn? (vals handler-defs))]}
+       (swap! braid.base.server.ws-handler/message-handlers merge handler-defs))
 
     (defn register-public-http-route!
        "Add a public HTTP route.

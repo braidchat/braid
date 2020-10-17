@@ -1,6 +1,6 @@
 (ns braid.core.client.invites.events
   (:require
-   [braid.core.client.state :refer [reg-event-fx]]
+   [braid.base.client.state :refer [reg-event-fx]] ;; TODO should use base.api/register-events!
    [cljs-uuid-utils.core :as uuid]))
 
 (defn make-invitation [data]

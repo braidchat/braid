@@ -2,7 +2,7 @@
   (:require
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
-   [braid.core.client.state :refer [reg-event-fx]]
+   [braid.base.client.state :refer [reg-event-fx]] ;; should use base.api/register-events!
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
    [braid.core.client.sync :as sync]
    [braid.core.common.util :as util]
@@ -82,7 +82,7 @@
 (reg-event-fx
   :initialize-db
   (fn [{db :db} _]
-    {:db (braid.core.client.state/initialize-state db)
+    {:db (braid.base.client.state/initialize-state db)
      :dispatch [:braid.core.client.gateway.events/initialize :log-in]}))
 
 (reg-event-fx

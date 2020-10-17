@@ -12,7 +12,7 @@
    [braid.core.client.mobile.views :refer [app-view]]
    [braid.base.client.router :as router]
    [braid.core.client.routes]
-   [braid.core.client.state.remote-handlers]
+   [braid.base.client.remote-handlers]
    [braid.core.modules :as modules]
    [re-frame.core :refer [dispatch-sync dispatch]]
    [reagent.core :as r]))

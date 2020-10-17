@@ -29,7 +29,7 @@
           :route-fn routes/group-page-path
           :route-args {:page-id "uploads"}})
 
-       (core/register-state!
+       (base/register-state!
          {::uploads {}}
          {::uploads {uuid? (ds/maybe [{:id uuid?
                                        :url string?

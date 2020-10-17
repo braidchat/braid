@@ -1,4 +1,4 @@
-(ns braid.core.client.state
+(ns braid.base.client.state
   (:require
     [clojure.spec.alpha :as s]
     [spec-tools.data-spec :as ds]

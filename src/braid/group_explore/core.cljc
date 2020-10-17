@@ -53,7 +53,7 @@
 
      :cljs
      (do
-       (core/register-state!
+       (base/register-state!
          {::public-groups #{}}
          {::public-groups #{PublicGroup}})
 

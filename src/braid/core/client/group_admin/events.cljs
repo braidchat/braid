@@ -1,6 +1,7 @@
 (ns braid.core.client.group-admin.events
   (:require
-    [braid.core.client.state :refer [reg-event-fx]]))
+    [braid.base.client.state :refer [reg-event-fx]] ;; TODO should use base.apie/register-events!
+    ))
 
 (reg-event-fx
   :set-group-intro

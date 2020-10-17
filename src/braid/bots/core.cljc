@@ -40,16 +40,16 @@
           :view views/bots-page-view})
        (base/register-styles! styles/bots-page)
        (base/register-styles! styles/bot-notice)
-       (core/register-incoming-socket-message-handlers!
+       (base/register-incoming-socket-message-handlers!
          remote-handlers/handlers)
        (core/register-message-sender-view! sender-view/sender-view))
 
      :clj
      (do
-       (core/register-db-schema! db/schema)
+       (base/register-db-schema! db/schema)
        (core/register-new-message-callback! sync/notify-bots!)
        (core/register-group-broadcast-hook! sync/group-change-broadcast!)
-       (core/register-server-message-handlers! sync/server-message-handlers)
+       (base/register-server-message-handlers! sync/server-message-handlers)
        (doseq [route routes/bot-routes]
          (base/register-raw-http-handler! route))
        (core/register-initial-user-data!

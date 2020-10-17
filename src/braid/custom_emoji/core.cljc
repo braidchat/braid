@@ -21,16 +21,16 @@
        (emoji/register-emoji!
          {:shortcode-lookup autocomplete/lookup})
        (base/register-styles! settings-page)
-       (core/register-state! state/initial-state state/state-spec)
+       (base/register-state! state/initial-state state/state-spec)
        (chat/register-initial-user-data-handler! state/initial-data-handler)
        (core/register-group-setting! extra-emoji-settings-view)
        (base/register-events! state/events)
        (base/register-subs! state/subscriptions)
-       (core/register-incoming-socket-message-handlers!
+       (base/register-incoming-socket-message-handlers!
          state/socket-message-handlers))
 
      :clj
      (do
-       (core/register-db-schema! db-schema)
+       (base/register-db-schema! db-schema)
        (core/register-initial-user-data! initial-user-data-fn)
-       (core/register-server-message-handlers! server-message-handlers))))
+       (base/register-server-message-handlers! server-message-handlers))))

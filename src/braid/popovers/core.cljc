@@ -10,11 +10,11 @@
       (fn []
         [view-to-show]))}"
   (:require
-    [braid.core.api :as core]
+    [braid.base.api :as base]
     #?@(:cljs
          [[braid.popovers.impl :as impl]])))
 
 (defn init! []
   #?(:cljs
      (do
-       (core/register-root-view! impl/view))))
+       (base/register-root-view! impl/view))))

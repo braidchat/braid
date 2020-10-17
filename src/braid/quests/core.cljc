@@ -26,7 +26,7 @@
        (base/register-styles! quests-header)
        (chat/register-initial-user-data-handler! initial-data-handler)
        (base/register-event-listener! event-listener)
-       (core/register-state! initial-state schema)
+       (base/register-state! initial-state schema)
        (base/register-events! events)
        (base/register-subs!
          {:quests/active-quest-records
@@ -35,7 +35,7 @@
 
      :clj
      (do
-       (core/register-db-schema! db-schema)
+       (base/register-db-schema! db-schema)
        (core/register-initial-user-data! initial-user-data-fn)
-       (core/register-server-message-handlers! server-message-handlers)
+       (base/register-server-message-handlers! server-message-handlers)
        (chat/register-post-create-user-txn! activate-first-quests-txn))))

@@ -1,6 +1,5 @@
 (ns braid.notices.core
   (:require
-    [braid.core.api :as core]
     [braid.base.api :as base]
     #?@(:cljs
          [[clojure.spec.alpha :as s]
@@ -18,7 +17,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-state!
+       (base/register-state!
          {::state {}}
          {::state {keyword? ErrorSpec}})
 
@@ -41,7 +40,7 @@
                                                    :message message
                                                    :class error-class})})})
 
-       (core/register-root-view!
+       (base/register-root-view!
          (fn []
            [:div.notices
             (doall

@@ -16,9 +16,9 @@
   []
   #?(:clj
      (do
-       (core/register-db-schema! db/schema)
+       (base/register-db-schema! db/schema)
 
-       (core/register-server-message-handlers!
+       (base/register-server-message-handlers!
          {:braid.server.rss/load-feeds
           (fn [{user-id :user-id group-id :?data}]
             (when (group-db/user-in-group? user-id group-id)
@@ -76,7 +76,7 @@
                                [:.new-rss-feed
                                 [:label {:display "block"}]
                                 [:.error {:color "red"}]]])
-       (core/register-state! {:rss/feeds {}} {:rss/feeds any?})
+       (base/register-state! {:rss/feeds {}} {:rss/feeds any?})
        (base/register-subs! {:rss/feeds
                              (fn [db [_ group-id]]
                                (get-in db [:rss/feeds (or group-id

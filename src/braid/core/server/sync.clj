@@ -17,7 +17,9 @@
     [braid.chat.events :as events]
     [braid.core.server.invite :as invites]
     [braid.base.server.socket :refer [chsk-send! connected-uids]]
-    [braid.core.server.sync-handler :as sync-handler :refer [event-msg-handler]]
+    ;; FIXME: should register handlers via base.api/*
+    [braid.base.server.ws-handler :refer [event-msg-handler]]
+    [braid.core.server.sync-handler :as sync-handler]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
     [braid.lib.digest :as digest]
     [braid.lib.url :refer [valid-url?]]))

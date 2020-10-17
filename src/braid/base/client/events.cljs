@@ -1,6 +1,6 @@
 (ns braid.base.client.events
   (:require
-    [braid.core.client.state :refer [reg-event-fx]]
+    [braid.base.client.state :refer [reg-event-fx]]
     [braid.core.client.desktop.notify :as notify]
     [braid.core.client.state.fx.dispatch-debounce :as fx.debounce]
     [braid.core.client.state.fx.redirect :as fx.redirect]

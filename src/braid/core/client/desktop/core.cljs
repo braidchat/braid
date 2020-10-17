@@ -11,7 +11,7 @@
    [braid.core.client.invites.events]
    [braid.core.client.invites.subs]
    [braid.base.client.router :as router]
-   [braid.core.client.state.remote-handlers]
+   [braid.base.client.remote-handlers]
    [braid.core.client.ui.views.app :refer [app-view]]
    [braid.core.modules :as modules]
    [re-frame.core :as rf :refer [dispatch-sync dispatch]]

@@ -19,7 +19,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-state!
+       (base/register-state!
          {::state {:query nil
                    :thread-ids nil
                    :loading? false
@@ -113,7 +113,7 @@
        ;; text from index?
        (core/register-new-message-callback! lucene/index-message!)
 
-       (core/register-server-message-handlers!
+       (base/register-server-message-handlers!
          {::search-ws
           (fn [{:as ev-msg :keys [?data ?reply-fn user-id]}]
             ;; this can take a while, so move it to a future

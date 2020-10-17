@@ -54,7 +54,7 @@
                                       :mentioned-user-ids []
                                       :mentioned-tag-ids []}]})})
 
-       (core/register-root-view!
+       (base/register-root-view!
          (fn []
            [:div.uploads
             [:input {:type "file"
@@ -83,7 +83,7 @@
      :clj
      (do
 
-       (core/register-db-schema!
+       (base/register-db-schema!
          [{:db/ident :upload/id
            :db/valueType :db.type/uuid
            :db/cardinality :db.cardinality/one
@@ -103,7 +103,7 @@
            :db/valueType :db.type/ref
            :db/cardinality :db.cardinality/one}])
 
-       (core/register-server-message-handlers!
+       (base/register-server-message-handlers!
          {:braid.server/create-upload
           (fn [{:as ev-msg :keys [?data user-id]}]
             (let [upload (assoc ?data

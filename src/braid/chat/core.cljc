@@ -3,8 +3,11 @@
   (:require
     [braid.core.api :as core]
     [braid.base.api :as base]
-    #?@(:cljs
+    #?@(:clj
+         [[braid.chat.schema :as schema]]
+        :cljs
          [[re-frame.core :refer [dispatch]]
+          [braid.chat.client.remote-handlers]
           [braid.core.client.ui.views.autocomplete]
           [braid.core.client.store]
           [braid.popovers.api :as popovers]
@@ -22,6 +25,7 @@
 (defn init! []
   #?(:clj
      (do
+       (base/register-db-schema! schema/schema)
        ;; TODO some of these might better belong elsewhere
        (doseq [k [:api-domain
                   :asana-client-id
@@ -43,14 +47,14 @@
 
      :cljs
      (do
-
+       (braid.chat.client.remote-handlers/init!)
        (core/register-autocomplete-engine!
          braid.core.client.ui.views.autocomplete/user-autocomplete-engine)
 
        (core/register-autocomplete-engine!
          braid.core.client.ui.views.autocomplete/tag-autocomplete-engine)
 
-       (core/register-state! braid.core.client.store/initial-state
+       (base/register-state! braid.core.client.store/initial-state
                              braid.core.client.store/AppState)
 
        (popovers/register-popover-styles!
@@ -101,4 +105,3 @@
        (base/register-system-page!
          {:key :changelog
           :view changelog-view}))))
-
