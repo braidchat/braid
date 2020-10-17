@@ -2,6 +2,7 @@
   "If a message contains a link, displays a generic website embed"
   (:require
     [braid.core.api :as core]
+    [braid.base.api :as base]
     #?@(:cljs
          [[braid.embeds.api :as embeds]
           [braid.website-embeds.styles :as styles]
@@ -18,7 +19,7 @@
           :priority -1}))
      :clj
      (do
-       (core/register-public-http-route!
+       (base/register-public-http-route!
          [:get "/extract"
           (fn [request]
             (let [url (get-in request [:params :url])]

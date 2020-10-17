@@ -1,4 +1,4 @@
-(ns braid.core.server.routes.api.modules
+(ns braid.base.server.http-api-routes
   (:require
     [clout.core :as clout]
     [braid.core.hooks :as hooks]

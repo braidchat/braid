@@ -3,6 +3,7 @@
   (:require
    [braid.embeds.api :as embeds]
    [braid.core.api :as core]
+   [braid.base.api :as base]
    #?@(:clj
        [[org.httpkit.client :as http]
         [braid.core.server.conf :refer [config]]])))
@@ -26,7 +27,7 @@
      (do
        (core/register-config-var! :google-maps-api-key)
 
-       (core/register-private-http-route!
+       (base/register-private-http-route!
         [:get "/maps-embeds/static-map"
          (fn [request]
            (let [{:keys [lat lng]} (request :params)]

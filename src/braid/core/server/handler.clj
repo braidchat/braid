@@ -2,7 +2,7 @@
   (:require
    [braid.core.server.routes.api.private :refer [api-private-routes]]
    [braid.core.server.routes.api.public :refer [api-public-routes]]
-   [braid.core.server.routes.api.modules :as modules]
+   [braid.base.server.http-api-routes :as modules]
    [braid.core.server.routes.client :refer [desktop-client-routes mobile-client-routes resource-routes]]
    [braid.core.server.routes.socket :refer [sync-routes]]
    [compojure.core :refer [routes context]]

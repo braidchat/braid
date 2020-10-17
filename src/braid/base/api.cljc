@@ -1,10 +1,12 @@
 (ns braid.base.api
   (:require
+    [braid.core.common.util :as util]
     #?@(:cljs
          [[braid.base.client.events]
           [braid.base.client.subs]]
          :clj
-         [[braid.base.server.jobs]])))
+         [[braid.base.server.jobs]
+          [braid.base.server.http-api-routes]])))
 
 #?(:cljs
    (do
@@ -36,6 +38,45 @@
 
    :clj
    (do
+    (defn register-public-http-route!
+       "Add a public HTTP route.
+        Expects a route defined as:
+        [:method \"pattern\" handler-fn]
+
+        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
+        handler-fn should return a ring-compatible response (if it is a clojure data structure, it will be converted to edn or transit-json, based on the accepts header)
+        ex.
+        [:get \"/foo/:bar\" (fn [request]
+                              {:status 200
+                               :body (get-in request [:params :bar])})]"
+       [route]
+       {:pre [(util/valid? braid.base.server.http-api-routes/route? route)]}
+       (swap! braid.base.server.http-api-routes/module-public-http-routes conj route))
+
+     (defn register-private-http-route!
+       "Add a private HTTP route (one that requires a user to be logged in).
+        Expects a route defined as:
+        [:method \"pattern\" handler-fn]
+
+        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
+        handler-fn should return a ring-compatible response (if it is a clojure data structure, it will be converted to edn or transit-json, based on the accepts header)
+        ex.
+        [:get \"/foo/:bar\" (fn [request]
+                              {:status 200
+                               :body (get-in request [:params :bar])})]"
+       [route]
+       {:pre [(util/valid? braid.base.server.http-api-routes/route? route)]}
+       (swap! braid.base.server.http-api-routes/module-private-http-routes conj route))
+
+     (defn register-raw-http-handler!
+       "Add an HTTP handler that expects to handle all its own middleware
+        Expects a ring handler function
+
+        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
+        handler-fn should return a ring-compatible response "
+       [handler]
+       (swap! braid.base.server.http-api-routes/module-raw-http-routes conj handler))
+
      (defn register-daily-job!
        "Add a recurring job that will run once a day. Expects a zero-arity function."
        [job-fn]

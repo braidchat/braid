@@ -17,7 +17,6 @@
          :clj
          [[braid.core.server.conf]
           [braid.core.server.routes.client]
-          [braid.core.server.routes.api.modules]
           [braid.core.server.schema]
           [braid.core.server.sync]
           [braid.core.server.sync-handler]])))
@@ -262,45 +261,4 @@
        information."
        [hook-fn]
        {:pre [(fn? hook-fn)]}
-       (swap! braid.core.server.sync-helpers/group-change-broadcast-hooks conj hook-fn))
-
-     (defn register-public-http-route!
-       "Add a public HTTP route.
-        Expects a route defined as:
-        [:method \"pattern\" handler-fn]
-
-        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
-        handler-fn should return a ring-compatible response (if it is a clojure data structure, it will be converted to edn or transit-json, based on the accepts header)
-        ex.
-        [:get \"/foo/:bar\" (fn [request]
-                              {:status 200
-                               :body (get-in request [:params :bar])})]"
-       [route]
-       {:pre [(util/valid? braid.core.server.routes.api.modules/route? route)]}
-       (swap! braid.core.server.routes.api.modules/module-public-http-routes conj route))
-
-     (defn register-private-http-route!
-       "Add a private HTTP route (one that requires a user to be logged in).
-        Expects a route defined as:
-        [:method \"pattern\" handler-fn]
-
-        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
-        handler-fn should return a ring-compatible response (if it is a clojure data structure, it will be converted to edn or transit-json, based on the accepts header)
-        ex.
-        [:get \"/foo/:bar\" (fn [request]
-                              {:status 200
-                               :body (get-in request [:params :bar])})]"
-       [route]
-       {:pre [(util/valid? braid.core.server.routes.api.modules/route? route)]}
-       (swap! braid.core.server.routes.api.modules/module-private-http-routes conj route))
-
-     (defn register-raw-http-handler!
-       "Add an HTTP handler that expects to handle all its own middleware
-        Expects a ring handler function
-
-        handler-fn will be passed a ring request object (with query-params and body-params in :params key)
-        handler-fn should return a ring-compatible response "
-       [handler]
-       (swap! braid.core.server.routes.api.modules/module-raw-http-routes conj handler))
-
-     ))
+       (swap! braid.core.server.sync-helpers/group-change-broadcast-hooks conj hook-fn))))

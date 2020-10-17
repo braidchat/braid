@@ -51,7 +51,7 @@
        (core/register-group-broadcast-hook! sync/group-change-broadcast!)
        (core/register-server-message-handlers! sync/server-message-handlers)
        (doseq [route routes/bot-routes]
-         (core/register-raw-http-handler! route))
+         (base/register-raw-http-handler! route))
        (core/register-initial-user-data!
          (fn [user-id] {::bots (db/bots-for-user-groups user-id)}))
        (core/register-anonymous-group-load!

@@ -132,7 +132,7 @@
                 (?reply-fn {:braid/ok (db.uploads/uploads-in-group ?data)})
                 (?reply-fn {:braid/error "Not allowed"}))))})
 
-       (core/register-private-http-route!
+       (base/register-private-http-route!
          [:get "/s3-policy"
           (fn [req]
             (if (user/user-id-exists? (get-in req [:session :user-id]))

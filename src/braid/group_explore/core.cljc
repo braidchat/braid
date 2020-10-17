@@ -45,7 +45,7 @@
 (defn init! []
   #?(:clj
      (do
-       (core/register-public-http-route!
+       (base/register-public-http-route!
          [:get "/groups"
           (fn [_]
             {:status 200
