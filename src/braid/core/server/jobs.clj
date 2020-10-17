@@ -1,7 +1,7 @@
 (ns braid.core.server.jobs
   (:require
    [braid.core.hooks :as hooks]
-   [braid.core.server.scheduler :refer [scheduler]]
+   [braid.base.server.scheduler :refer [scheduler]]
    [clojurewerkz.quartzite.jobs :as j :refer [defjob]]
    [clojurewerkz.quartzite.schedule.cron :as cron]
    [clojurewerkz.quartzite.scheduler :as qs]

@@ -4,7 +4,7 @@
    [braid.chat.db.thread :as thread]
    [braid.chat.db.user :as user]
    [braid.core.server.message-format :as message-format]
-   [braid.core.server.scheduler :refer [scheduler]]
+   [braid.base.server.scheduler :refer [scheduler]]
    [clj-time.coerce :refer [to-date-time]]
    [clj-time.core :as time]
    [clj-time.format :as format]

@@ -1,4 +1,4 @@
-(ns braid.core.server.scheduler
+(ns braid.base.server.scheduler
   (:require
    [clojurewerkz.quartzite.scheduler :as qs]
    [mount.core :as mount :refer [defstate]]))
