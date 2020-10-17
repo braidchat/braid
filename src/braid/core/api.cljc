@@ -6,6 +6,7 @@
           [braid.core.client.ui.views.message]
           [braid.core.client.state]
           [braid.core.client.state.remote-handlers]
+          [braid.base.client.events]
           [braid.core.client.core.events]
           [braid.core.client.core.subs]
           [braid.core.client.pages]
@@ -142,7 +143,7 @@
        {:pre [(map? event-map)
               (every? keyword? (keys event-map))
               (every? fn? (vals event-map))]}
-       (braid.core.client.core.events/register-events! event-map))
+       (braid.base.client.events/register-events! event-map))
 
      (defn register-subs!
        "Registers multiple re-frame subscription handlers, as if passed to reg-sub.
@@ -170,7 +171,7 @@
        "Register a function to intercept re-frame events."
        [f]
        {:pre [(fn? f)]}
-       (swap! braid.core.client.core.events/event-listeners conj f))
+       (swap! braid.base.client.events/event-listeners conj f))
 
      (defn register-autocomplete-engine!
        "Provide a sequence of functions that will act as autocomplete Handlers. The functions will recieve the current typed text as an argument and should return a sequence of autocomplete values."

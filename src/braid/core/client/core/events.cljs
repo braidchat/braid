@@ -1,55 +1,15 @@
 (ns braid.core.client.core.events
   (:require
-   [braid.core.client.desktop.notify :as notify]
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
    [braid.core.client.state :refer [reg-event-fx]]
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
-   [braid.core.client.state.fx.dispatch-debounce :as fx.debounce]
-   [braid.core.client.state.fx.redirect :as fx.redirect]
    [braid.core.client.sync :as sync]
-   [braid.core.client.xhr :refer [edn-xhr]]
    [braid.core.common.util :as util]
    [braid.core.hooks :as hooks]
    [clojure.set :as set]
    [clojure.string :as string]
-   [re-frame.core :as re-frame :refer [dispatch reg-fx]]))
-
-(defonce event-listeners
-  (hooks/register! (atom []) [fn?]))
-
-(re-frame/add-post-event-callback
-  (fn [event _]
-    (doseq [handler @event-listeners]
-      (handler event))))
-
-(defn register-events!
-  [event-map]
-  (doseq [[k f] event-map]
-    (reg-event-fx k f)))
-
-(reg-fx :dispatch-debounce
-        fx.debounce/dispatch)
-
-(reg-fx :stop-debounce
-        fx.debounce/stop)
-
-; TODO: handle callbacks declaratively too?
-(reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
-
-; TODO: handle callbacks declaratively too?
-(reg-fx :edn-xhr (fn [args] (edn-xhr args)))
-
-(reg-fx :redirect-to fx.redirect/redirect-to)
-
-(reg-fx :window-title (fn [title] (when title (set! (.-title js/document) title))))
-
-(reg-fx :notify notify/notify)
-
-(reg-fx :confirm (fn [{:keys [prompt on-confirm on-cancel]}]
-                   (if (js/confirm prompt)
-                     (on-confirm)
-                     (when on-cancel (on-cancel)))))
+   [re-frame.core :refer [dispatch]]))
 
 (defn name->open-tag-id
   "Lookup tag by name in the open group"

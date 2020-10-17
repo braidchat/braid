@@ -1,5 +1,6 @@
 (ns braid.core.client.mobile.core
   (:require
+   [braid.base.client.events]
    [braid.core.client.core.events]
    [braid.core.client.core.subs]
    [braid.core.client.gateway.events]
