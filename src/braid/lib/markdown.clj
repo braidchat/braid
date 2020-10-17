@@ -1,4 +1,4 @@
-(ns braid.core.server.markdown
+(ns braid.lib.markdown
   (:require
    [clojure.string :as string]
    [instaparse.core :as insta]))

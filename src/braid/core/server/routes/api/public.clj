@@ -15,9 +15,9 @@
     [braid.core.server.db.user :as user]
     [braid.core.server.events :as events]
     [braid.core.server.invite :as invites]
-    [braid.core.server.markdown :refer [markdown->hiccup]]
     [braid.core.server.routes.helpers :refer [current-user error-response edn-response]]
-    [braid.core.server.sync :as sync]))
+    [braid.core.server.sync :as sync]
+    [braid.lib.markdown :refer [markdown->hiccup]]))
 
 (defn join-group
   [user-id group-id]
