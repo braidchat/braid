@@ -1,4 +1,4 @@
-(ns braid.core.client.core.events
+(ns braid.chat.client.events
   (:require
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]

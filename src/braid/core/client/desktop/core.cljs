@@ -2,8 +2,8 @@
   (:require
    [braid.base.client.events]
    [braid.base.client.subs]
+   [braid.chat.client.events]
    [braid.chat.client.subs]
-   [braid.core.client.core.events]
    [braid.core.client.gateway.events]
    [braid.core.client.gateway.subs]
    [braid.core.client.group-admin.events]

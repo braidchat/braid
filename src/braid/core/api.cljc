@@ -8,8 +8,8 @@
           [braid.core.client.state.remote-handlers]
           [braid.base.client.events]
           [braid.base.client.subs]
+          [braid.chat.client.events]
           [braid.chat.client.subs]
-          [braid.core.client.core.events]
           [braid.core.client.pages]
           [braid.core.client.ui.views.main]
           [braid.core.client.ui.views.styles]
@@ -221,7 +221,7 @@
        "Add a handler that will run with the initial db & user-info recieved from the server. See `:register-initial-user-data` under `:clj`"
        [f]
        {:pre [(fn? f)]}
-       (swap! braid.core.client.core.events/initial-user-data-handlers conj f))
+       (swap! braid.chat.client.events/initial-user-data-handlers conj f))
 
      (defn register-group-setting!
        "Register a view to add to the group settings page. The view will recieve the group map as an argument."
