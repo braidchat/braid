@@ -21,7 +21,7 @@
           [braid.core.server.routes.client]
           [braid.chat.db.user]
           [braid.core.server.routes.api.modules]
-          [braid.core.server.jobs]
+          [braid.base.server.jobs]
           [braid.core.server.schema]
           [braid.core.server.sync]
           [braid.core.server.sync-handler]])))
@@ -345,4 +345,4 @@
        "Add a recurring job that will run once a day. Expects a zero-arity function."
        [job-fn]
        {:pre [(fn? job-fn)]}
-       (braid.core.server.jobs/register-daily-job! job-fn))))
+       (braid.base.server.jobs/register-daily-job! job-fn))))

@@ -1,4 +1,4 @@
-(ns braid.core.server.jobs
+(ns braid.base.server.jobs
   (:require
    [braid.core.hooks :as hooks]
    [braid.base.server.scheduler :refer [scheduler]]
