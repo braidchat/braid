@@ -2,7 +2,7 @@
   (:require
    [braid.core.hooks :as hooks]
    [braid.core.server.db :as db]
-   [braid.core.server.socket :as socket]
+   [braid.base.server.socket :as socket]
    [braid.core.server.sync-helpers :as helpers]
    [mount.core :refer [defstate]]
    [taoensso.sente :as sente]

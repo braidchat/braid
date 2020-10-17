@@ -1,9 +1,7 @@
 (ns braid.core.server.sync
   (:require
-    [clojure.set :refer [difference intersection]]
     [clojure.string :as string]
     [environ.core :refer [env]]
-    [mount.core :refer [defstate]]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
     [braid.core.hooks :as hooks]
@@ -18,7 +16,7 @@
     [braid.chat.db.user :as user]
     [braid.core.server.events :as events]
     [braid.core.server.invite :as invites]
-    [braid.core.server.socket :refer [chsk-send! connected-uids]]
+    [braid.base.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :as sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
     [braid.lib.digest :as digest]

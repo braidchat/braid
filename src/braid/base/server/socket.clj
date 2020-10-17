@@ -1,4 +1,4 @@
-(ns braid.core.server.socket
+(ns braid.base.server.socket
   (:require
     [mount.core :as mount :refer [defstate]]
     [taoensso.sente.server-adapters.http-kit :refer [get-sch-adapter]]

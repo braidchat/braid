@@ -8,7 +8,7 @@
    [braid.core.server.email-digest :as email]
    [braid.core.server.message-format :as message-format]
    [braid.core.server.notify-rules :as notify-rules]
-   [braid.core.server.socket :refer [chsk-send! connected-uids]]
+   [braid.base.server.socket :refer [chsk-send! connected-uids]]
    [clojure.set :refer [difference intersection]]
    [taoensso.timbre :as timbre]))
 
