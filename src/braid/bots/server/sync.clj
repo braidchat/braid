@@ -6,7 +6,7 @@
    [braid.core.server.db :as db]
    [braid.core.server.db.group :as group]
    [braid.core.server.db.thread :as thread]
-   [braid.core.server.util :refer [valid-url?]]
+   [braid.lib.url :refer [valid-url?]]
    [clojure.string :as string]
    [taoensso.timbre :as timbre]))
 

@@ -22,7 +22,7 @@
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :as sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
-    [braid.core.server.util :refer [valid-url?]]))
+    [braid.lib.url :refer [valid-url?]]))
 
 (defn user-can-delete-message?
   [user-id message-id]

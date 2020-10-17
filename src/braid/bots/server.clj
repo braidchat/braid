@@ -2,7 +2,7 @@
   "Sending notification of messages and events to bots"
   (:require
    [braid.core.server.crypto :as crypto]
-   [braid.core.server.util :refer [->transit]]
+   [braid.lib.transit :refer [->transit]]
    [org.httpkit.client :as http]
    [taoensso.timbre :as timbre])
   (:import
