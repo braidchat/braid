@@ -16,12 +16,12 @@
     [braid.core.server.db.tag :as tag]
     [braid.core.server.db.thread :as thread]
     [braid.core.server.db.user :as user]
-    [braid.core.server.digest :as digest]
     [braid.core.server.events :as events]
     [braid.core.server.invite :as invites]
     [braid.core.server.socket :refer [chsk-send! connected-uids]]
     [braid.core.server.sync-handler :as sync-handler :refer [event-msg-handler]]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
+    [braid.lib.digest :as digest]
     [braid.lib.url :refer [valid-url?]]))
 
 (defn user-can-delete-message?

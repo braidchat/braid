@@ -1,4 +1,4 @@
-(ns braid.core.server.digest
+(ns braid.lib.digest
   (:require
     [clojure.java.io :as io])
   (:import
