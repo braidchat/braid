@@ -89,7 +89,7 @@
                         (map first))
                   (:groups db)))})
 
-       (core/register-system-page!
+       (base/register-system-page!
          {:key :group-explore
           :on-load (fn [_]
                      (dispatch [::load-public-groups]))

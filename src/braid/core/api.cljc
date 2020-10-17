@@ -1,14 +1,13 @@
 (ns braid.core.api
   (:require
     [braid.core.common.util :as util]
+    [braid.base.api :as base]
     #?@(:cljs
          [[braid.core.client.ui.views.new-message]
           [braid.core.client.ui.views.message]
           [braid.core.client.state]
           [braid.core.client.state.remote-handlers]
-          [braid.core.client.pages]
           [braid.core.client.ui.views.main]
-          [braid.core.client.ui.views.styles]
           [braid.core.client.ui.views.header]
           [braid.core.client.ui.views.user-header]
           [braid.core.client.ui.views.autocomplete]
@@ -75,35 +74,6 @@
        {:pre [(util/valid? braid.core.client.ui.views.thread/thread-control-dataspec config)]}
        (swap! braid.core.client.ui.views.thread/thread-controls conj config))
 
-     (defn register-styles!
-       "Add Garden CSS styles to the page styles"
-       [styles]
-       {:pre [(util/valid? braid.core.client.ui.views.styles/style-dataspec styles)]}
-       (swap! braid.core.client.ui.views.styles/module-styles conj styles))
-
-     (defn register-system-page!
-       "Registers a system page with its own URL.
-
-       Expects a map with the following keys:
-         :key      keyword
-         :on-load  (optional) function to call
-                   when page is navigated to
-         :on-exit  (optional) function to call
-                   when page is navigated away from
-         :view   reagent view fn
-         :styles  (optional) garden styles for the page
-
-       Link for page can be generated using:
-        (braid.core.client.routes/system-page-path
-             {:page-id __})"
-       [page]
-       {:pre [(util/valid? braid.core.client.pages/page-dataspec page)]}
-       (swap! braid.core.client.pages/pages assoc (page :key) page)
-       (when (page :styles)
-         (register-styles!
-           [:#app>.app>.main
-            (page :styles)])))
-
      (defn register-group-page!
        "Registers a group page with its own URL.
 
@@ -121,16 +91,8 @@
              {:group-id __
               :page-id __))"
        [page]
-       {:pre [(util/valid? braid.core.client.pages/page-dataspec page)]}
-       (swap! braid.core.client.pages/pages assoc (page :key) page)
-       (when (page :styles)
-         (register-styles!
-           [:#app>.app>.main
-            (page :styles)])))
-
-
-
-
+       ;; at the moment, is the same
+       (base/register-system-page! page))
 
      (defn register-header-view!
        "Add a new view to appear in the header row at the top"

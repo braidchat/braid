@@ -23,7 +23,7 @@
   #?(:cljs
      (do
        (core/register-header-view! quests-header-view)
-       (core/register-styles! quests-header)
+       (base/register-styles! quests-header)
        (chat/register-initial-user-data-handler! initial-data-handler)
        (base/register-event-listener! event-listener)
        (core/register-state! initial-state schema)

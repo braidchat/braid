@@ -1,5 +1,6 @@
 (ns braid.users.core
   (:require
+   [braid.base.api :as base]
    [braid.core.api :as core]
    #?@(:cljs
        [[braid.users.client.views.users-page :as views]
@@ -17,4 +18,4 @@
          :route-fn routes/group-page-path
          :route-args {:page-id "users"}
          :body "Users"})
-       (core/register-styles! styles/users-page))))
+       (base/register-styles! styles/users-page))))

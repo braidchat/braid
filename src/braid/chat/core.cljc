@@ -65,7 +65,7 @@
        (popovers/register-popover-styles!
          braid.core.client.ui.styles.thread/add-tag-popover-styles)
 
-       (core/register-system-page!
+       (base/register-system-page!
          {:key :global-settings
           :view global-settings-page-view})
 
@@ -98,7 +98,7 @@
          {:key :invite
           :view invite-page-view})
 
-       (core/register-system-page!
+       (base/register-system-page!
          {:key :changelog
           :view changelog-view}))))
 

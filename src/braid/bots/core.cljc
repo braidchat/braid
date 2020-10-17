@@ -38,8 +38,8 @@
        (core/register-group-page!
          {:key :bots
           :view views/bots-page-view})
-       (core/register-styles! styles/bots-page)
-       (core/register-styles! styles/bot-notice)
+       (base/register-styles! styles/bots-page)
+       (base/register-styles! styles/bot-notice)
        (core/register-incoming-socket-message-handlers!
          remote-handlers/handlers)
        (core/register-message-sender-view! sender-view/sender-view))

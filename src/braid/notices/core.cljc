@@ -55,7 +55,7 @@
                   {:on-click (fn [_] (dispatch [:braid.notices/clear! key]))}
                   "×"]]))]))
 
-       (core/register-styles!
+       (base/register-styles!
          [:#app>.app>.main
           [:>.notices
            {:z-index 9999

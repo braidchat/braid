@@ -72,7 +72,7 @@
     :cljs
      (do
        (core/register-group-setting! views/rss-feed-settings-view)
-       (core/register-styles! [:.settings.rss-feeds
+       (base/register-styles! [:.settings.rss-feeds
                                [:.new-rss-feed
                                 [:label {:display "block"}]
                                 [:.error {:color "red"}]]])

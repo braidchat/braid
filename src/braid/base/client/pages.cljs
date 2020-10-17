@@ -1,4 +1,4 @@
-(ns braid.core.client.pages
+(ns braid.base.client.pages
   (:require
     [spec-tools.data-spec :as ds]
     [braid.core.hooks :as hooks]))

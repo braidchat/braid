@@ -1,6 +1,5 @@
 (ns braid.core.client.ui.views.styles
   (:require
-   [braid.core.hooks :as hooks]
    [braid.core.client.gateway.forms.create-group.styles]
    [braid.core.client.gateway.forms.user-auth.styles]
    [braid.core.client.gateway.styles-vars :as gateway-vars]
@@ -25,13 +24,9 @@
    [garden.core :refer [css]]
    [reagent.core :as r]))
 
-(def style-dataspec
-  #(or (vector? %) (map? %)))
-
-(defonce module-styles
-  (hooks/register!
-    (atom [] [style-dataspec])))
-
+;; don't add to here
+;; use base.api/register-styles! instead
+;; the following is still around from the 'pre-module' days
 (defn styles-view []
   [:style
    {:type "text/css"
@@ -51,8 +46,6 @@
                braid.core.client.ui.styles.misc/page-headers
                (braid.core.client.ui.styles.pills/tag)
                (braid.core.client.ui.styles.pills/user)
-
-               @module-styles
 
                [:#app
                 braid.core.client.ui.styles.misc/status]

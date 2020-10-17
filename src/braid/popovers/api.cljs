@@ -1,9 +1,9 @@
 (ns braid.popovers.api
   (:require
-    [braid.core.api :as core]))
+    [braid.base.api :as base]))
 
 (defn register-popover-styles! [styles]
-  (core/register-styles!
+  (base/register-styles!
     [:#app>.app>.main
      [:>.popover
       styles]]))

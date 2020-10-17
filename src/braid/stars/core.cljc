@@ -55,7 +55,7 @@
                                 (dispatch [:braid.stars/star-thread! (thread :id)])))}
                  \uf005])))})
 
-       (core/register-styles!
+       (base/register-styles!
          [:.head
           [:>.star
            {:display "inline-block"

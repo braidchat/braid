@@ -3,7 +3,7 @@
    [braid.core.hooks :as hooks]
    [braid.core.client.gateway.views :refer [gateway-view]]
    [braid.core.client.gateway.forms.user-auth.views :refer [user-auth-view]]
-   [braid.core.client.pages :as pages]
+   [braid.base.client.pages :as pages]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.header :refer [header-view readonly-header-view]]
    [braid.core.client.ui.views.pages.create-group :refer [create-group-page-view]]

@@ -3,7 +3,9 @@
     [braid.core.common.util :as util]
     #?@(:cljs
          [[braid.base.client.events]
-          [braid.base.client.subs]]
+          [braid.base.client.subs]
+          [braid.base.client.pages]
+          [braid.base.client.styles]]
          :clj
          [[braid.base.conf]
           [braid.base.server.jobs]
@@ -35,7 +37,36 @@
        {:pre [(map? sub-map)
               (every? keyword? (keys sub-map))
               (every? fn? (vals sub-map))]}
-       (braid.base.client.subs/register-subs! sub-map)))
+       (braid.base.client.subs/register-subs! sub-map))
+
+     (defn register-styles!
+       "Add Garden CSS styles to the page styles"
+       [styles]
+       {:pre [(util/valid? braid.base.client.styles/style-dataspec styles)]}
+       (swap! braid.base.client.styles/module-styles conj styles))
+
+     (defn register-system-page!
+       "Registers a system page with its own URL.
+
+       Expects a map with the following keys:
+         :key      keyword
+         :on-load  (optional) function to call
+                   when page is navigated to
+         :on-exit  (optional) function to call
+                   when page is navigated away from
+         :view   reagent view fn
+         :styles  (optional) garden styles for the page
+
+       Link for page can be generated using:
+        (braid.core.client.routes/system-page-path
+             {:page-id __})"
+       [page]
+       {:pre [(util/valid? braid.base.client.pages/page-dataspec page)]}
+       (swap! braid.base.client.pages/pages assoc (page :key) page)
+       (when (page :styles)
+         (register-styles!
+           [:#app>.app>.main
+            (page :styles)]))))
 
    :clj
    (do

@@ -20,7 +20,7 @@
      (do
        (emoji/register-emoji!
          {:shortcode-lookup autocomplete/lookup})
-       (core/register-styles! settings-page)
+       (base/register-styles! settings-page)
        (core/register-state! state/initial-state state/state-spec)
        (chat/register-initial-user-data-handler! state/initial-data-handler)
        (core/register-group-setting! extra-emoji-settings-view)
