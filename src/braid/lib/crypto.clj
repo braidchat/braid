@@ -1,4 +1,4 @@
-(ns braid.core.server.crypto
+(ns braid.lib.crypto
   (:require
    [clojure.string :as string])
   (:import

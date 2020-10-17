@@ -1,7 +1,7 @@
 (ns braid.bots.server
   "Sending notification of messages and events to bots"
   (:require
-   [braid.core.server.crypto :as crypto]
+   [braid.lib.crypto :as crypto]
    [braid.lib.transit :refer [->transit]]
    [org.httpkit.client :as http]
    [taoensso.timbre :as timbre])

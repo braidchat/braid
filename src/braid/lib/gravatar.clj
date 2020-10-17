@@ -1,7 +1,7 @@
 (ns braid.lib.gravatar
   (:require
     [clojure.string :as string]
-    [braid.core.server.crypto :as crypto]))
+    [braid.lib.crypto :as crypto]))
 
 (def ^:private gravatar-base-url ".gravatar.com/avatar/")
 

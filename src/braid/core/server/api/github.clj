@@ -4,7 +4,7 @@
     [clojure.string :as string]
     [org.httpkit.client :as http]
     [braid.core.server.conf :refer [config]]
-    [braid.core.server.crypto :as crypto]
+    [braid.lib.crypto :as crypto]
     [braid.lib.url :refer [map->query-str]]
     [braid.lib.transit :refer [->transit transit->form]])
   (:import
