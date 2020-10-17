@@ -1,15 +1,10 @@
-(ns braid.core.client.core.subs
+(ns braid.chat.client.subs
   (:require
    [braid.core.client.state.helpers :refer [order-groups]]
    [re-frame.core :refer [subscribe reg-sub reg-sub-raw]]
    [reagent.ratom :include-macros true :refer-macros [reaction]])
   (:import
    (goog Uri)))
-
-(defn register-subs!
-  [sub-map]
-  (doseq [[k f] sub-map]
-    (reg-sub k f)))
 
 (reg-sub
   :open-group-id

@@ -7,8 +7,9 @@
           [braid.core.client.state]
           [braid.core.client.state.remote-handlers]
           [braid.base.client.events]
+          [braid.base.client.subs]
+          [braid.chat.client.subs]
           [braid.core.client.core.events]
-          [braid.core.client.core.subs]
           [braid.core.client.pages]
           [braid.core.client.ui.views.main]
           [braid.core.client.ui.views.styles]
@@ -153,7 +154,7 @@
        {:pre [(map? sub-map)
               (every? keyword? (keys sub-map))
               (every? fn? (vals sub-map))]}
-       (braid.core.client.core.subs/register-subs! sub-map))
+       (braid.base.client.subs/register-subs! sub-map))
 
      (defn register-header-view!
        "Add a new view to appear in the header row at the top"
