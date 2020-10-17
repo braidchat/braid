@@ -1,8 +1,8 @@
 (ns braid.core.server.email-digest
   (:require
    [braid.core.server.conf :refer [config]]
-   [braid.core.server.db.thread :as thread]
-   [braid.core.server.db.user :as user]
+   [braid.chat.db.thread :as thread]
+   [braid.chat.db.user :as user]
    [braid.core.server.message-format :as message-format]
    [braid.core.server.scheduler :refer [scheduler]]
    [clj-time.coerce :refer [to-date-time]]

@@ -3,8 +3,8 @@
     [clojure.string :as string]
     [clojure.test :refer :all]
     [braid.core.server.db :as db]
-    [braid.core.server.db.user :as user]
-    [braid.core.server.db.group :as group]
+    [braid.chat.db.user :as user]
+    [braid.chat.db.group :as group]
     [braid.test.fixtures.db :refer [drop-db]]))
 
 (use-fixtures :each drop-db)

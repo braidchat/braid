@@ -19,7 +19,7 @@
          :clj
          [[braid.core.server.conf]
           [braid.core.server.routes.client]
-          [braid.core.server.db.user]
+          [braid.chat.db.user]
           [braid.core.server.routes.api.modules]
           [braid.core.server.jobs]
           [braid.core.server.schema]
@@ -258,7 +258,7 @@
        "Add a function that will return a sequence of datomic txns to be called when a new user is created. The function will recieve the datomic id of the new user as an argument."
        [f]
        {:pre [(fn? f)]}
-       (swap! braid.core.server.db.user/post-create-txns conj f))
+       (swap! braid.chat.db.user/post-create-txns conj f))
 
      (defn register-db-schema!
        "Add new datoms to the db schema"

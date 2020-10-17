@@ -1,9 +1,9 @@
-(ns braid.core.server.db.message
+(ns braid.chat.db.message
   (:require
     [braid.core.server.db :as db]
-    [braid.core.server.db.common :refer [message-pull-pattern db->message]]
-    [braid.core.server.db.tag :as tag]
-    [braid.core.server.db.thread :as thread]
+    [braid.chat.db.common :refer [message-pull-pattern db->message]]
+    [braid.chat.db.tag :as tag]
+    [braid.chat.db.thread :as thread]
     [datomic.api :as d]))
 
 ;; Queries

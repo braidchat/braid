@@ -2,8 +2,8 @@
   (:require
     [braid.core.api :as core]
     #?@(:clj
-         [[braid.core.server.db.tag :as tag]
-          [braid.core.server.db.thread :as thread]
+         [[braid.chat.db.tag :as tag]
+          [braid.chat.db.thread :as thread]
           [braid.search.lucene :as lucene]
           [braid.search.server :as search]]
          :cljs

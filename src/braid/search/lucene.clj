@@ -9,7 +9,7 @@
    [clojure.string :as string]
    [datomic.api :as d]
    [braid.core.server.db :as db]
-   [braid.core.server.db.common :as common])
+   [braid.chat.db.common :as common])
   (:import
    (org.apache.lucene.analysis.core LowerCaseFilter)
    (org.apache.lucene.analysis.icu ICUNormalizer2CharFilterFactory)

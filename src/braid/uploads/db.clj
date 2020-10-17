@@ -2,7 +2,7 @@
   (:require
    [datomic.api :as d]
    [braid.core.server.db :as db]
-   [braid.core.server.db.common :refer [create-entity-txn]]))
+   [braid.chat.db.common :refer [create-entity-txn]]))
 
 (def upload-pull-pattern
   [:upload/id

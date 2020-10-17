@@ -1,8 +1,8 @@
 (ns braid.bots.server.db
   (:require
     [braid.core.server.db :as db]
-    [braid.core.server.db.user :as user]
-    [braid.core.server.db.group :as group]
+    [braid.chat.db.user :as user]
+    [braid.chat.db.group :as group]
     [braid.lib.crypto :as crypto :refer [random-nonce]]
     [clojure.set :refer [rename-keys]]
     [datomic.api :as d]))

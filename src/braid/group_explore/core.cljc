@@ -4,8 +4,8 @@
     #?@(:clj
          [[datomic.api :as d]
           [braid.core.server.db :as db]
-          [braid.core.server.db.group :as group]
-          [braid.core.server.db.common :refer [db->group group-pull-pattern]]]
+          [braid.chat.db.group :as group]
+          [braid.chat.db.common :refer [db->group group-pull-pattern]]]
         :cljs
          [[re-frame.core :refer [dispatch]]
           [braid.group-explore.views :as views]

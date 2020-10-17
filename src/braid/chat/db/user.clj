@@ -1,4 +1,4 @@
-(ns braid.core.server.db.user
+(ns braid.chat.db.user
   (:require
     [clojure.edn :as edn]
     [clojure.string :as string]
@@ -7,7 +7,7 @@
     [braid.core.common.util :refer [slugify]]
     [braid.core.hooks :as hooks]
     [braid.core.server.db :as db]
-    [braid.core.server.db.common :refer :all]
+    [braid.chat.db.common :refer :all]
     [braid.lib.gravatar :as gravatar]))
 
 (defn email-taken?

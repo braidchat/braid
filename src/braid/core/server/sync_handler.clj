@@ -7,8 +7,8 @@
    [mount.core :refer [defstate]]
    [taoensso.sente :as sente]
    [taoensso.timbre :as timbre :refer [debugf]]
-   [braid.core.server.db.group :as group]
-   [braid.core.server.db.thread :as thread]))
+   [braid.chat.db.group :as group]
+   [braid.chat.db.thread :as thread]))
 
 (defonce message-handlers
   (hooks/register! (atom {}) {keyword? fn?}))

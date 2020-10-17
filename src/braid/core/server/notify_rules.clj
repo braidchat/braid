@@ -1,8 +1,8 @@
 (ns braid.core.server.notify-rules
   (:require
     [clojure.set :as set]
-    [braid.core.server.db.tag :as tag]
-    [braid.core.server.db.thread :as thread]
+    [braid.chat.db.tag :as tag]
+    [braid.chat.db.thread :as thread]
     [braid.core.common.util :as util]
     [braid.core.common.schema :as schema]))
 

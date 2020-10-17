@@ -1,7 +1,7 @@
-(ns braid.core.server.db.invitation
+(ns braid.chat.db.invitation
   (:require
    [braid.core.server.db :as db]
-   [braid.core.server.db.common :refer [create-entity-txn db->invitation]]
+   [braid.chat.db.common :refer [create-entity-txn db->invitation]]
    [datomic.api :as d]))
 
 ;; Queries

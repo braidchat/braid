@@ -1,7 +1,7 @@
 (ns braid.core.server.routes.api.private
   (:require
    [braid.core.server.db :as db]
-   [braid.core.server.db.group :as group]
+   [braid.chat.db.group :as group]
    [braid.core.server.events :as events]
    [braid.core.server.routes.helpers :as helpers :refer [error-response edn-response]]
    [braid.lib.markdown :refer [markdown->hiccup]]

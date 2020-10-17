@@ -1,4 +1,4 @@
-(ns braid.core.server.db.common
+(ns braid.chat.db.common
   (:require
     [clojure.edn :as edn]
     [datomic.api :as d]))

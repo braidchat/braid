@@ -1,11 +1,11 @@
-(ns braid.core.server.db.group
+(ns braid.chat.db.group
   (:require
     [clojure.edn :as edn]
     [datomic.api :as d]
     [braid.core.server.db :as db]
-    [braid.core.server.db.common :refer [create-entity-txn db->group db->user db->tag group-pull-pattern user-pull-pattern]]
-    [braid.core.server.db.thread :as thread]
-    [braid.core.server.db.user :as user]))
+    [braid.chat.db.common :refer [create-entity-txn db->group db->user db->tag group-pull-pattern user-pull-pattern]]
+    [braid.chat.db.thread :as thread]
+    [braid.chat.db.user :as user]))
 
 (defn group-exists?
   [group-name]

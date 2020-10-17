@@ -1,8 +1,8 @@
-(ns braid.core.server.db.tag
+(ns braid.chat.db.tag
   (:require
     [datomic.api :as d]
     [braid.core.server.db :as db]
-    [braid.core.server.db.common :refer [create-entity-txn db->tag]]))
+    [braid.chat.db.common :refer [create-entity-txn db->tag]]))
 
 ;; Queries
 

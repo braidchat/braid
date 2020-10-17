@@ -1,8 +1,8 @@
-(ns braid.core.server.db.thread
+(ns braid.chat.db.thread
   (:require
    [braid.core.server.db :as db]
-   [braid.core.server.db.common :refer :all]
-   [braid.core.server.db.tag :as tag]
+   [braid.chat.db.common :refer :all]
+   [braid.chat.db.tag :as tag]
    [clj-time.coerce :refer [to-date-time to-long]]
    [clj-time.core :as t]
    [clojure.set :refer [difference]]

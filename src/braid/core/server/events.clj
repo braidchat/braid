@@ -1,9 +1,9 @@
 (ns braid.core.server.events
   (:require
     [braid.core.server.db :as db]
-    [braid.core.server.db.group :as group]
-    [braid.core.server.db.thread :as thread]
-    [braid.core.server.db.user :as user]
+    [braid.chat.db.group :as group]
+    [braid.chat.db.thread :as thread]
+    [braid.chat.db.user :as user]
     [braid.core.server.sync-helpers :as sync-helpers]))
 
 (defn user-join-group!

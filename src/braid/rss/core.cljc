@@ -5,7 +5,7 @@
    #?@(:clj
        [[braid.rss.server.db :as db]
         [braid.rss.server.fetching :as fetching]
-        [braid.core.server.db.group :as group-db]
+        [braid.chat.db.group :as group-db]
         [taoensso.timbre :as timbre]]
        :cljs
        [[braid.rss.client.views :as views]

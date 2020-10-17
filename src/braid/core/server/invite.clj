@@ -2,7 +2,7 @@
   (:require
    [braid.base.server.cache :refer [cache-set! cache-get cache-del!]]
    [braid.core.server.conf :refer [config]]
-   [braid.core.server.db.group :as group]
+   [braid.chat.db.group :as group]
    [braid.lib.crypto :refer [hmac constant-comp random-nonce]]
    [clj-time.coerce :as c]
    [clj-time.core :as t]

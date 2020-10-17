@@ -9,10 +9,10 @@
          [[braid.uploads.s3 :as s3]
           [braid.core.common.util :as util]
           [braid.core.server.db :as db]
-          [braid.core.server.db.thread :as thread]
-          [braid.core.server.db.group :as group]
+          [braid.chat.db.thread :as thread]
+          [braid.chat.db.group :as group]
           [braid.uploads.db :as db.uploads]
-          [braid.core.server.db.user :as user]])))
+          [braid.chat.db.user :as user]])))
 
 (def Upload
   {:id uuid?

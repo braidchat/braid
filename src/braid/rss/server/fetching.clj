@@ -2,7 +2,7 @@
   "Fetching items from an RSS feed"
   (:require
    [braid.core.server.db :as db]
-   [braid.core.server.db.message :as message]
+   [braid.chat.db.message :as message]
    [braid.core.server.sync-helpers :as sync-helpers]
    [braid.rss.server.db :as rss-db]
    [clj-time.format :as f]
