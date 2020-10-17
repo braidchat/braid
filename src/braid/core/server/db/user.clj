@@ -1,14 +1,14 @@
 (ns braid.core.server.db.user
   (:require
-   [braid.core.common.util :refer [slugify]]
-   [braid.core.hooks :as hooks]
-   [braid.core.server.db :as db]
-   [braid.core.server.db.common :refer :all]
-   [braid.core.server.util.gravatar :refer [gravatar]]
-   [clojure.edn :as edn]
-   [clojure.string :as string]
-   [crypto.password.scrypt :as password]
-   [datomic.api :as d]))
+    [clojure.edn :as edn]
+    [clojure.string :as string]
+    [crypto.password.scrypt :as password]
+    [datomic.api :as d]
+    [braid.core.common.util :refer [slugify]]
+    [braid.core.hooks :as hooks]
+    [braid.core.server.db :as db]
+    [braid.core.server.db.common :refer :all]
+    [braid.lib.gravatar :as gravatar]))
 
 (defn email-taken?
   [email]
@@ -167,9 +167,9 @@
        {:db/id new-id
         :user/id id
         :user/email (string/lower-case email)
-        :user/avatar (gravatar email
-                               :rating :g
-                               :default :identicon)
+        :user/avatar (gravatar/url email
+                                   :rating :g
+                                   :default :identicon)
         :user/nickname (generate-nickname-from-email email)}]
       (mapcat #(% new-id) @post-create-txns))))
 

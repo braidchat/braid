@@ -1,7 +1,7 @@
-(ns braid.core.server.util.gravatar
+(ns braid.lib.gravatar
   (:require
-   [braid.core.server.crypto :as crypto]
-   [clojure.string :as string]))
+    [clojure.string :as string]
+    [braid.core.server.crypto :as crypto]))
 
 (def ^:private gravatar-base-url ".gravatar.com/avatar/")
 
@@ -17,7 +17,7 @@
   [& {size :size default :default rating :rating}]
   (format "?s=%s&r=%s&d=%s&" size (name rating) (name default)))
 
-(defn gravatar
+(defn url
   "Generate a gravatar url.
   Based on https://github.com/Raynes/clavatar, updated to not use
   java.xml.bind, to avoid java 9+ module issues."
