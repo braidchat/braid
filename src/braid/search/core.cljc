@@ -1,6 +1,7 @@
 (ns braid.search.core
   (:require
     [braid.core.api :as core]
+    [braid.base.api :as base]
     #?@(:clj
          [[braid.chat.db.tag :as tag]
           [braid.chat.db.thread :as thread]
@@ -28,7 +29,7 @@
                    :error? boolean?
                    :loading? boolean?}})
 
-       (core/register-events!
+       (base/register-events!
          {:braid.search/update-query!
           (fn [{db :db} [_ query]]
             {:dispatch [::set-query! query]
@@ -85,7 +86,7 @@
                                     :error? false
                                     :loading? false})})})
 
-       (core/register-subs!
+       (base/register-subs!
          {:braid.search/query
           (fn [state _]
             (get-in state [::state :query]))

@@ -2,6 +2,7 @@
   "Extension to post updates from RSS feeds as messages in a given group"
   (:require
    [braid.core.api :as core]
+   [braid.base.api :as base]
    #?@(:clj
        [[braid.rss.server.db :as db]
         [braid.rss.server.fetching :as fetching]
@@ -58,7 +59,7 @@
                 {:db-run-txns! (db/remove-feed-txn feed-id)
                  :reply! :braid/ok})))})
 
-       (core/register-daily-job!
+       (base/register-daily-job!
          (fn []
            (timbre/debugf "Running RSS job")
            (doseq [feed (db/all-feeds)]
@@ -76,11 +77,11 @@
                                 [:label {:display "block"}]
                                 [:.error {:color "red"}]]])
        (core/register-state! {:rss/feeds {}} {:rss/feeds any?})
-       (core/register-subs! {:rss/feeds
+       (base/register-subs! {:rss/feeds
                              (fn [db [_ group-id]]
                                (get-in db [:rss/feeds (or group-id
                                                           (db :open-group-id))]))})
-       (core/register-events!
+       (base/register-events!
          {:rss/load-group-feeds
           (fn [_ [_ group-id]]
             {:websocket-send (list [:braid.server.rss/load-feeds group-id]

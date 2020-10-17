@@ -1,6 +1,8 @@
 (ns braid.bots.core
   (:require
    [braid.core.api :as core]
+   [braid.chat.api :as chat]
+   [braid.base.api :as base]
    #?@(:clj
        [[braid.bots.server.db :as db]
         [braid.bots.server.sync :as sync]
@@ -18,15 +20,15 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-initial-user-data-handler!
+       (chat/register-initial-user-data-handler!
          (fn [db data]
            ;; [TODO] to preserve same interface, putting bots inside groups
            ;; but probably could have that be a separate key
            (reduce (fn [db [group-id bots]]
                      (assoc-in db [:groups group-id :bots] bots))
                    db (::bots data))))
-       (core/register-events! events/events)
-       (core/register-subs! subs/subs)
+       (base/register-events! events/events)
+       (base/register-subs! subs/subs)
        (core/register-autocomplete-engine! autocomplete/bots-autocomplete-engine)
        (core/register-admin-header-item!
          {:class "group-bots"

@@ -1,6 +1,7 @@
 (ns braid.notices.core
   (:require
     [braid.core.api :as core]
+    [braid.base.api :as base]
     #?@(:cljs
          [[clojure.spec.alpha :as s]
           [garden.units :refer [rem em]]
@@ -21,12 +22,12 @@
          {::state {}}
          {::state {keyword? ErrorSpec}})
 
-       (core/register-subs!
+       (base/register-subs!
          {::sub
           (fn [state _]
             (vals (state ::state)))})
 
-       (core/register-events!
+       (base/register-events!
          {:braid.notices/clear!
           (fn [{db :db} [_ korks]]
             {:db (update db ::state (fn [errors]

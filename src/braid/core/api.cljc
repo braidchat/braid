@@ -6,10 +6,6 @@
           [braid.core.client.ui.views.message]
           [braid.core.client.state]
           [braid.core.client.state.remote-handlers]
-          [braid.base.client.events]
-          [braid.base.client.subs]
-          [braid.chat.client.events]
-          [braid.chat.client.subs]
           [braid.core.client.pages]
           [braid.core.client.ui.views.main]
           [braid.core.client.ui.views.styles]
@@ -21,9 +17,7 @@
          :clj
          [[braid.core.server.conf]
           [braid.core.server.routes.client]
-          [braid.chat.db.user]
           [braid.core.server.routes.api.modules]
-          [braid.base.server.jobs]
           [braid.core.server.schema]
           [braid.core.server.sync]
           [braid.core.server.sync-handler]])))
@@ -136,25 +130,9 @@
            [:#app>.app>.main
             (page :styles)])))
 
-     (defn register-events!
-       "Registers multiple re-frame event handlers, as if passed to reg-event-fx.
 
-        Expects a map of event-keys to event-handler-fns."
-       [event-map]
-       {:pre [(map? event-map)
-              (every? keyword? (keys event-map))
-              (every? fn? (vals event-map))]}
-       (braid.base.client.events/register-events! event-map))
 
-     (defn register-subs!
-       "Registers multiple re-frame subscription handlers, as if passed to reg-sub.
 
-        Expects a map of sub-keys to sub-handler-fns."
-       [sub-map]
-       {:pre [(map? sub-map)
-              (every? keyword? (keys sub-map))
-              (every? fn? (vals sub-map))]}
-       (braid.base.client.subs/register-subs! sub-map))
 
      (defn register-header-view!
        "Add a new view to appear in the header row at the top"
@@ -167,12 +145,6 @@
        [item]
        (swap! braid.core.client.ui.views.header/admin-header-items
               conj item))
-
-     (defn register-event-listener!
-       "Register a function to intercept re-frame events."
-       [f]
-       {:pre [(fn? f)]}
-       (swap! braid.base.client.events/event-listeners conj f))
 
      (defn register-autocomplete-engine!
        "Provide a sequence of functions that will act as autocomplete Handlers. The functions will recieve the current typed text as an argument and should return a sequence of autocomplete values."
@@ -217,12 +189,6 @@
               (every? fn? (vals handler-map))]}
        (swap! braid.core.client.state.remote-handlers/incoming-socket-message-handlers merge handler-map))
 
-     (defn register-initial-user-data-handler!
-       "Add a handler that will run with the initial db & user-info recieved from the server. See `:register-initial-user-data` under `:clj`"
-       [f]
-       {:pre [(fn? f)]}
-       (swap! braid.chat.client.events/initial-user-data-handlers conj f))
-
      (defn register-group-setting!
        "Register a view to add to the group settings page. The view will recieve the group map as an argument."
        [view]
@@ -255,12 +221,6 @@
        [tag]
        {:pre [(util/valid? braid.core.server.routes.client/additional-script-dataspec tag)]}
        (swap! braid.core.server.routes.client/additional-scripts conj tag))
-
-     (defn register-post-create-user-txn!
-       "Add a function that will return a sequence of datomic txns to be called when a new user is created. The function will recieve the datomic id of the new user as an argument."
-       [f]
-       {:pre [(fn? f)]}
-       (swap! braid.chat.db.user/post-create-txns conj f))
 
      (defn register-db-schema!
        "Add new datoms to the db schema"
@@ -343,8 +303,4 @@
        [handler]
        (swap! braid.core.server.routes.api.modules/module-raw-http-routes conj handler))
 
-     (defn register-daily-job!
-       "Add a recurring job that will run once a day. Expects a zero-arity function."
-       [job-fn]
-       {:pre [(fn? job-fn)]}
-       (braid.base.server.jobs/register-daily-job! job-fn))))
+     ))

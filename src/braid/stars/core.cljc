@@ -2,6 +2,8 @@
   "Allows users to star threads (for themselves) and view starred threads seperately."
   (:require
     [braid.core.api :as core]
+    [braid.chat.api :as chat]
+    [braid.base.api :as base]
     #?@(:cljs
          [[re-frame.core :refer [subscribe dispatch]]
           [braid.core.client.routes :as routes]
@@ -77,7 +79,7 @@
          {:braid.stars/starred-thread-ids {}}
          {:braid.stars/starred-thread-ids {uuid? #{uuid?}}})
 
-       (core/register-events!
+       (base/register-events!
          {:braid.stars/load-starred-threads!
           (fn [{db :db} _]
             {:dispatch [:load-threads {:thread-ids (get-in db [:braid.stars/starred-thread-ids (db :open-group-id)])}]})
@@ -98,7 +100,7 @@
                 {:db (update-in db [:braid.stars/starred-thread-ids group-id] disj thread-id)
                  :websocket-send [[:braid.stars.ws/unstar-thread! thread-id]]})))})
 
-       (core/register-subs!
+       (base/register-subs!
          {:braid.stars/starred-threads
           (fn [db _]
             (let [thread-ids (get-in db [:braid.stars/starred-thread-ids (db :open-group-id)])]
@@ -117,7 +119,7 @@
           (fn [_ thread-id]
             (dispatch [:braid.stars/unstar-thread! thread-id]))})
 
-       (core/register-initial-user-data-handler!
+       (chat/register-initial-user-data-handler!
          (fn
            [db data]
            (assoc db :braid.stars/starred-thread-ids

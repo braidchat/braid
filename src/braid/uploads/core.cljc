@@ -1,6 +1,7 @@
 (ns braid.uploads.core
   (:require
     [braid.core.api :as core]
+    [braid.base.api :as base]
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
           [re-frame.core :refer [subscribe dispatch dispatch-sync]]
@@ -24,7 +25,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-events!
+       (base/register-events!
          {::initiate-upload!
           (fn [{db :db} [_ {:keys [group-id thread-id]}]]
             (.. js/document (getElementById "uploader") click)

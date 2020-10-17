@@ -1,6 +1,7 @@
 (ns braid.group-explore.core
   (:require
     [braid.core.api :as core]
+    [braid.base.api :as base]
     #?@(:clj
          [[datomic.api :as d]
           [braid.core.server.db :as db]
@@ -56,7 +57,7 @@
          {::public-groups #{}}
          {::public-groups #{PublicGroup}})
 
-       (core/register-events!
+       (base/register-events!
          {::-store-public-groups
           (fn [{db :db} [_ groups]]
             {:db (assoc db ::public-groups groups)})
@@ -76,7 +77,7 @@
                             "Failed to load public groups list"
                             :error]]))}})})
 
-       (core/register-subs!
+       (base/register-subs!
          {:braid.group-explore/public-groups
           (fn [state _]
             (state ::public-groups))

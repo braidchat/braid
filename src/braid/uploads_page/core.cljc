@@ -1,6 +1,7 @@
 (ns braid.uploads-page.core
   (:require
     [braid.core.api :as core]
+    [braid.base.api :as base]
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
           [re-frame.core :refer [subscribe dispatch]]
@@ -34,12 +35,12 @@
                                        :url string?
                                        :thread-id uuid?}])}})
 
-       (core/register-subs!
+       (base/register-subs!
          {:braid.uploads-page/uploads
           (fn [db _]
             (get-in db [::uploads (db :open-group-id)]))})
 
-       (core/register-events!
+       (base/register-events!
          {::store-group-uploads!
           (fn [{db :db} [_ group-id uploads]]
             {:db (assoc-in db [::uploads group-id] uploads)})
