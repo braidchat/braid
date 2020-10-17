@@ -2,7 +2,7 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]
     [braid.core.hooks :as hooks]
-    [braid.core.client.helpers :refer [->color]]
+    [braid.lib.color :as color]
     [braid.core.client.routes :as routes]
     [braid.search.ui.search-bar :refer [search-bar-view]]
     [braid.core.client.ui.views.user-header :refer [user-header-view]]
@@ -15,7 +15,7 @@
        {:class (cond
                  (@page :loading?) "loading"
                  (@page :error?) "error")
-        :style {:color (->color group-id)}}])))
+        :style {:color (color/->color group-id)}}])))
 
 (defn group-name-view []
   (let [group (subscribe [:active-group])]
@@ -50,7 +50,7 @@
   (let [group-id (subscribe [:open-group-id])]
     (fn []
       [:div.group-header
-       [:div.bar {:style {:background-color (->color @group-id)}}
+       [:div.bar {:style {:background-color (color/->color @group-id)}}
         [group-name-view]
         [group-header-buttons-view (->> @group-header-buttons
                                         (sort-by :priority)
@@ -74,7 +74,7 @@
     (fn []
       (when @admin?
         [:div.admin-header
-         [:div.admin-icon {:style {:color (->color @user-id)}}]
+         [:div.admin-icon {:style {:color (color/->color @user-id)}}]
          [:div.options
           [:div.content
            (doall
@@ -90,11 +90,11 @@
   (let [group @(subscribe [:active-group])]
     [:div.header
      [:div.group-header
-      [:div.bar {:style {:background-color (->color (group :id))}}
+      [:div.bar {:style {:background-color (color/->color (group :id))}}
        [:div.group-name (group :name)]]]
      [:div.user-header
       [:div.bar {:style {:background-color
-                         (->color (or @(subscribe [:user-id]) (group :id)))}}
+                         (color/->color (or @(subscribe [:user-id]) (group :id)))}}
        [:button.join
         {:on-click (fn [_] (dispatch [:core/join-public-group (:id group)]))}
         "Join Group"]]]]))

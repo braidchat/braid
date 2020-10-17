@@ -3,7 +3,8 @@
     [re-frame.core :refer [dispatch subscribe]]
     [braid.search.ui.search-button :refer [search-button-view]]
     [braid.core.client.ui.views.pills :refer [user-pill-view]]
-    [braid.core.client.helpers :as helpers]))
+    [braid.lib.color :as color]
+    [braid.lib.date :as date]))
 
 (defn user-hover-card-view
   [user-id]
@@ -13,7 +14,7 @@
           viewer-admin? (subscribe [:current-user-is-group-admin?] [open-group-id])]
       [:div.user.card
 
-       [:div.header {:style {:background-color (helpers/->color user-id)}}
+       [:div.header {:style {:background-color (color/->color user-id)}}
         [user-pill-view user-id]
         [:div.status
          (user :status)
@@ -24,9 +25,9 @@
         [:img.avatar {:src (user :avatar)}]]
 
        [:div.info
-        [:div.local-time (helpers/smart-format-date (js/Date.))]
+        [:div.local-time (date/smart-format-date (js/Date.))]
         [:div.since
-         "member since " (helpers/smart-format-date (user :joined-at))]
+         "member since " (date/smart-format-date (user :joined-at))]
         [:div.description
          #_"If I had a profile, it would be here"]]
 
@@ -64,6 +65,6 @@
            "Make Admin"])]])
 
     [:div.user.card
-     [:div.header {:style {:background-color (helpers/->color user-id)}}
+     [:div.header {:style {:background-color (color/->color user-id)}}
       [user-pill-view user-id]]
      [:div.info "No longer in group"]]))

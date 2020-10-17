@@ -1,13 +1,13 @@
 (ns braid.core.client.ui.views.pills
   (:require
     [re-frame.core :refer [dispatch subscribe]]
-    [braid.core.client.helpers :as helpers]))
+    [braid.lib.color :as color]))
 
 (defn tag-pill-view
   [tag-id]
   (let [tag (subscribe [:tag tag-id])
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])
-        color (helpers/->color tag-id)]
+        color (color/->color tag-id)]
     [:span.pill {:class (if @user-subscribed-to-tag? "on" "off")
                  :tab-index -1
                  :style {:background-color color
@@ -20,7 +20,7 @@
   (let [user (or @(subscribe [:user user-id])
                  {:nickname "DELETED"
                   :status :offline})
-        color (helpers/->color user-id)]
+        color (color/->color user-id)]
     [:span.pill {:class (str (case (user :status) :online "on" "off"))
                  :tab-index -1
                  :style {:background-color color

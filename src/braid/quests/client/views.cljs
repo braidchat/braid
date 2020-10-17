@@ -1,6 +1,6 @@
 (ns braid.quests.client.views
   (:require
-   [braid.core.client.helpers :refer [->color]]
+   [braid.lib.color :as color]
    [braid.quests.client.list :refer [quests-by-id]]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]))
@@ -69,5 +69,5 @@
     (fn []
       [:div.quests-header
        [:div.quests-icon {:style {:color (when (seq @active-quest-records)
-                                           (->color @user-id))}}]
+                                           (color/->color @user-id))}}]
        [quests-menu-view]])))

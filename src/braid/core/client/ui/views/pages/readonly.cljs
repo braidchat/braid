@@ -1,6 +1,5 @@
 (ns braid.core.client.ui.views.pages.readonly
   (:require
-   [braid.core.client.helpers :refer [->color]]
    [braid.core.client.ui.views.header :refer [group-header-buttons-view]]
    [braid.core.client.ui.views.threads :refer [threads-view]]
    [braid.core.client.routes :as routes]

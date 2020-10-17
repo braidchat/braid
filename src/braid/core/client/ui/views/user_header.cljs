@@ -2,7 +2,7 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]
     [braid.core.hooks :as hooks]
-    [braid.core.client.helpers :as helpers]
+    [braid.lib.color :as color]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.header-item :refer [header-item-view HeaderItem]]))
 
@@ -66,7 +66,7 @@
   (let [user-id (subscribe [:user-id])]
     (fn []
       [:div.user-header
-       [:div.bar {:style {:background-color (helpers/->color @user-id)}}
+       [:div.bar {:style {:background-color (color/->color @user-id)}}
         [current-user-button-view]
         [:div.more]]
        [:div.options

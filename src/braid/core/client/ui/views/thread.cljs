@@ -1,5 +1,8 @@
 (ns braid.core.client.ui.views.thread
   (:require
+   [braid.lib.color :as color]
+   [braid.lib.date :as date]
+   [braid.lib.url :as url]
    [braid.core.client.helpers :as helpers]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.card-border :refer [card-border-view]]
@@ -28,8 +31,8 @@
                                                :tag-id (tag :id)}]))
     :class (when selected? "selected")
     :ref (fn [ref] (when (and selected? ref) (.scrollIntoView ref false)))}
-   [:div.rect {:style {:background (helpers/->color (tag :id))}}]
-   [:span {:style {:color (helpers/->color (tag :id))}}
+   [:div.rect {:style {:background (color/->color (tag :id))}}]
+   [:span {:style {:color (color/->color (tag :id))}}
     "#" (tag :name)]])
 
 (defn user-option-view
@@ -41,8 +44,8 @@
                                                 :user-id (user :id)}]))
     :class (when selected? "selected")
     :ref (fn [ref] (when (and selected? ref) (.scrollIntoView ref false)))}
-   [:div.rect {:style {:background (helpers/->color (user :id))}}]
-   [:span {:style {:color (helpers/->color (user :id))}}
+   [:div.rect {:style {:background (color/->color (user :id))}}]
+   [:span {:style {:color (color/->color (user :id))}}
     "@" (user :nickname)]])
 
 (defn add-tag-user-popover-view
@@ -235,8 +238,8 @@
                      (map (fn [[prev-message message]]
                             (let [new-date?
                                   (or (nil? prev-message)
-                                      (not= (helpers/format-date "yyyyMMdd" (:created-at message))
-                                            (helpers/format-date "yyyyMMdd" (:created-at prev-message))))]
+                                      (not= (date/format-date "yyyyMMdd" (:created-at message))
+                                            (date/format-date "yyyyMMdd" (:created-at prev-message))))]
                             (assoc message
                               :unseen?
                               (unseen? message)
@@ -255,7 +258,7 @@
                                    (- (:created-at message)
                                       (or (:created-at prev-message) 0)))
                                 ; TODO should instead check if there was an embed triggered
-                                (not (helpers/contains-urls? (prev-message :content)))))))))]
+                                (not (url/contains-urls? (prev-message :content)))))))))]
             (doall
               (for [message sorted-messages]
                 ;; [BUG] Reagent 0.8.1 has a bug where metadata doesn't get
@@ -264,7 +267,7 @@
                 [:<> {:key (message :id)}
                  (when (message :show-date-divider?)
                    [:div.divider
-                    [:div.date (helpers/format-date "yyyy-MM-dd" (message :created-at))]])
+                    [:div.date (date/format-date "yyyy-MM-dd" (message :created-at))]])
                  [message-view (assoc message :thread-id thread-id)]])))])})))
 
 (def header-item-dataspec
@@ -455,7 +458,7 @@
           (if (:readonly thread)
             [:button.join
              {:on-click (fn [_] (dispatch [:core/join-public-group (thread :group-id)]))
-              :style {:background-color (helpers/->color (thread :group-id))}}
+              :style {:background-color (color/->color (thread :group-id))}}
              "Join Group to Reply"]
             [new-message-view {:thread-id (thread :id)
                                :group-id (thread :group-id)

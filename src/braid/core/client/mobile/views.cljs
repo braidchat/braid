@@ -1,7 +1,7 @@
 (ns braid.core.client.mobile.views
   (:require
    [braid.core.client.gateway.views :refer [gateway-view]]
-   [braid.core.client.helpers :refer [->color]]
+   [braid.lib.color :as color]
    [braid.core.client.mobile.auth-flow.views :refer [auth-flow-view]]
    [braid.core.client.mobile.style :refer [styles]]
    [braid.core.client.routes :as routes]
@@ -90,7 +90,7 @@
 (defn header-view [toggle-draw-ch]
   (let [group-id (subscribe [:open-group-id])]
     (fn [_]
-      [:div.group-header {:style {:background-color (->color @group-id)}}
+      [:div.group-header {:style {:background-color (color/->color @group-id)}}
        [:div.bar
         [:span.buttons
          [:a.open-sidebar {:on-click (fn [] (a/put! toggle-draw-ch true))}]]

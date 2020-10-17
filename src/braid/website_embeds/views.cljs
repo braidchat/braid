@@ -1,13 +1,13 @@
 (ns braid.website-embeds.views
   (:require
-    [braid.core.client.helpers :refer [->color url->color]]
+    [braid.lib.color :as color]
     [braid.lib.xhr :refer [edn-xhr]]
     [reagent.core :as r]))
 
 (defn- website-embed-view
   [content]
   [:div.website
-   {:style {:background-color (url->color (content :original_url))}}
+   {:style {:background-color (color/url->color (content :original_url))}}
    (if-let [img (get-in content [:images 0])]
      [:img.image {:src (img :url)}]
      [:img.image {:src (:favicon_url content)}])

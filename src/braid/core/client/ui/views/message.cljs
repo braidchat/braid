@@ -1,7 +1,9 @@
 (ns braid.core.client.ui.views.message
   (:require
     [braid.core.hooks :as hooks]
-    [braid.core.client.helpers :as helpers :refer [->color]]
+    [braid.lib.color :as color]
+    [braid.lib.url :as url]
+    [braid.lib.date :as date]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.mentions :refer [tag-mention-view user-mention-view]]
     [braid.core.client.ui.views.card-border :refer [card-border-view]]
@@ -21,7 +23,7 @@
   "Given a full url, returns 'domain.com/*.png' where"
   [url]
   (let [char-limit 30
-        {:keys [domain path]} (helpers/url->parts url)]
+        {:keys [domain path]} (url/url->parts url)]
     (let [url-and-path (str domain path)]
       (if (> char-limit (count url-and-path))
         url-and-path
@@ -33,8 +35,8 @@
 (defn link-pill-view [url]
   [:a.external {:href url
                 :title url
-                :style {:background-color (helpers/url->color url)
-                        :border-color (helpers/url->color url)}
+                :style {:background-color (color/url->color url)
+                        :border-color (color/url->color url)}
                 :on-click (fn [e] (.stopPropagation e))
                 :target "_blank"
                 ; rel to address vuln caused by target=_blank
@@ -45,7 +47,7 @@
 
 (def replacements
   {:urls
-   {:pattern helpers/url-re
+   {:pattern url/url-re
     :replace (fn [url]
                [link-pill-view url])}
    :users
@@ -212,7 +214,7 @@
                                         (fn []
                                           [user-hover-card-view (:id sender)]))}
               [:img {:src (:avatar sender)
-                     :style {:background-color (->color (:id sender))}}]]
+                     :style {:background-color (color/->color (:id sender))}}]]
      :info nil
      :name (if (nil? sender)
              [:span.nickname "[DELETED]"]
@@ -249,7 +251,7 @@
       info
       name
       [:span.time {:title (message :created-at)}
-       (helpers/smart-format-date (message :created-at))]]
+       (date/smart-format-date (message :created-at))]]
 
      (into [:div.content] (format-message (message :content)))
 

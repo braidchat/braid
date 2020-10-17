@@ -1,8 +1,8 @@
 (ns braid.group-explore.views
   (:require
-   [braid.core.client.helpers :as helpers :refer [->color]]
+   [braid.lib.color :as color]
+   [braid.lib.date :as date]
    [braid.core.client.routes :as routes]
-   [clojure.string :as string]
    [cljs-time.core :as t]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r])
@@ -37,14 +37,14 @@
 
 (defn- public-group-view
   [group]
-  [:a.group {:style {:background-color (->color (:id group))}
+  [:a.group {:style {:background-color (color/->color (:id group))}
              :href (routes/group-page-path {:group-id (:id group)
                                             :page-id "inbox"})}
    [:div.name (:name group)]
    [:div.info
     [:div (:intro group)]
-    [:div "Last Updated " (helpers/smart-format-date (:updated-at group))]
-    [:div "Created " (helpers/smart-format-date (:created-at group))]]
+    [:div "Last Updated " (date/smart-format-date (:updated-at group))]
+    [:div "Created " (date/smart-format-date (:created-at group))]]
    [:div.users (let [count (:users-count group)]
                  (str count " user" (when (not= 1 count) "s")))]])
 
