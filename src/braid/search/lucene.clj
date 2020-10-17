@@ -1,6 +1,6 @@
 (ns braid.search.lucene
   (:require
-   [braid.core.server.conf :refer [config]]
+   [braid.base.conf :refer [config]]
    [clucie.analysis :as analysis]
    [clucie.core :as clucie]
    [clucie.store :as store]

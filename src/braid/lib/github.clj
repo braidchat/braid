@@ -3,7 +3,7 @@
     [clojure.data.json :as json]
     [clojure.string :as string]
     [org.httpkit.client :as http]
-    [braid.core.server.conf :refer [config]]
+    [braid.base.conf :refer [config]]
     [braid.lib.crypto :as crypto]
     [braid.lib.url :refer [map->query-str]]
     [braid.lib.transit :refer [->transit transit->form]])

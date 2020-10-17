@@ -15,8 +15,7 @@
           [braid.core.client.ui.views.new-message-action-button]
           [braid.core.client.group-admin.views.group-settings-page]]
          :clj
-         [[braid.core.server.conf]
-          [braid.core.server.routes.client]
+         [[braid.core.server.routes.client]
           [braid.core.server.schema]
           [braid.core.server.sync]
           [braid.core.server.sync-handler]])))
@@ -209,12 +208,6 @@
 
    :clj
    (do
-     (defn register-config-var!
-       "Add a keyword to be read from `env` and added to the `config` state"
-       [var]
-       {:pre [(keyword? var)]}
-       (swap! braid.core.server.conf/config-vars conj var))
-
      (defn register-additional-script!
        "Add a javascript script tag to client html. Values can be a map with a `:src` or `:body` key or a function with no arguments, returing the same."
        [tag]

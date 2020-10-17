@@ -5,7 +5,8 @@
          [[braid.base.client.events]
           [braid.base.client.subs]]
          :clj
-         [[braid.base.server.jobs]
+         [[braid.base.conf]
+          [braid.base.server.jobs]
           [braid.base.server.http-api-routes]])))
 
 #?(:cljs
@@ -38,6 +39,12 @@
 
    :clj
    (do
+     (defn register-config-var!
+       "Add a keyword to be read from `env` and added to the `config` state"
+       [k]
+       {:pre [(keyword? k)]}
+       (swap! braid.base.conf/config-vars conj k))
+
     (defn register-public-http-route!
        "Add a public HTTP route.
         Expects a route defined as:

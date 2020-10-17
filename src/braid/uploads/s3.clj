@@ -5,7 +5,7 @@
     [clj-time.core :as t]
     [clj-time.format :as f]
     [org.httpkit.client :as http]
-    [braid.core.server.conf :refer [config]]
+    [braid.base.conf :refer [config]]
     [braid.lib.crypto :as crypto :refer [hmac-sha256 str->bytes]])
   (:import
     (org.joda.time DateTime DateTimeZone Period)

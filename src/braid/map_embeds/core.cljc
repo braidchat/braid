@@ -6,7 +6,7 @@
    [braid.base.api :as base]
    #?@(:clj
        [[org.httpkit.client :as http]
-        [braid.core.server.conf :refer [config]]])))
+        [braid.base.conf :refer [config]]])))
 
 (def google-regex #"^https://www.google.com/maps/.*/@(\-?\d+\.\d+),(\-?\d+.\.\d+).*")
 
@@ -25,7 +25,7 @@
 (defn init! []
   #?(:clj
      (do
-       (core/register-config-var! :google-maps-api-key)
+       (base/register-config-var! :google-maps-api-key)
 
        (base/register-private-http-route!
         [:get "/maps-embeds/static-map"

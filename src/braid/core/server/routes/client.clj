@@ -1,7 +1,7 @@
 (ns braid.core.server.routes.client
   (:require
    [braid.core.hooks :as hooks]
-   [braid.core.server.conf :refer [config]]
+   [braid.base.conf :refer [config]]
    [braid.chat.db.group :as group]
    [braid.chat.db.invitation :as invitation]
    [braid.chat.db.user :as user]

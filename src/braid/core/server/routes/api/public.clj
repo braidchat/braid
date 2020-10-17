@@ -6,7 +6,7 @@
     [compojure.core :refer [GET PUT POST defroutes]]
     [braid.core.common.util :refer [valid-nickname? valid-email?]]
     [braid.core.hooks :as hooks]
-    [braid.core.server.conf :refer [config]]
+    [braid.base.conf :refer [config]]
     [braid.core.server.db :as db]
     [braid.chat.db.group :as group]
     [braid.chat.db.invitation :as invitation]

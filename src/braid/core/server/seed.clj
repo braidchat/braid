@@ -1,6 +1,6 @@
 (ns braid.core.server.seed
   (:require
-    [braid.core.server.conf :refer [config]]
+    [braid.base.conf :refer [config]]
     [braid.core.server.db :as db]
     [braid.chat.db.group :as group]
     [braid.chat.db.message :as message]

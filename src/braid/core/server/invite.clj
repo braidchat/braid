@@ -1,7 +1,7 @@
 (ns braid.core.server.invite
   (:require
    [braid.base.server.cache :refer [cache-set! cache-get cache-del!]]
-   [braid.core.server.conf :refer [config]]
+   [braid.base.conf :refer [config]]
    [braid.chat.db.group :as group]
    [braid.lib.crypto :refer [hmac constant-comp random-nonce]]
    [clj-time.coerce :as c]

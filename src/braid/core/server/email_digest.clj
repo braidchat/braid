@@ -1,6 +1,6 @@
 (ns braid.core.server.email-digest
   (:require
-   [braid.core.server.conf :refer [config]]
+   [braid.base.conf :refer [config]]
    [braid.chat.db.thread :as thread]
    [braid.chat.db.user :as user]
    [braid.core.server.message-format :as message-format]
