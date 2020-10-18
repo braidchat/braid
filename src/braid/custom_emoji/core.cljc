@@ -21,7 +21,7 @@
          {:shortcode-lookup autocomplete/lookup})
        (base/register-styles! settings-page)
        (base/register-state! state/initial-state state/state-spec)
-       (chat/register-initial-user-data-handler! state/initial-data-handler)
+       (base/register-initial-user-data-handler! state/initial-data-handler)
        (chat/register-group-setting! extra-emoji-settings-view)
        (base/register-events! state/events)
        (base/register-subs! state/subscriptions)
@@ -31,5 +31,5 @@
      :clj
      (do
        (base/register-db-schema! db-schema)
-       (chat/register-initial-user-data! initial-user-data-fn)
+       (base/register-initial-user-data! initial-user-data-fn)
        (base/register-server-message-handlers! server-message-handlers))))

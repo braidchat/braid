@@ -4,13 +4,16 @@
     [braid.base.api :as base]
     [braid.chat.api :as chat]
     #?@(:clj
-         [[braid.chat.schema :as schema]]
+         [[braid.chat.schema :as schema]
+          [braid.chat.server.initial-data :as initial-data]]
         :cljs
          [[re-frame.core :refer [dispatch]]
           [braid.chat.client.remote-handlers]
           [braid.core.client.ui.views.autocomplete]
           [braid.core.client.store]
           [braid.popovers.api :as popovers]
+          [braid.core.client.schema :as schema]
+          [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
           [braid.core.client.ui.styles.hover-menu]
           [braid.core.client.ui.styles.hover-cards]
           [braid.core.client.ui.styles.thread]
@@ -43,7 +46,9 @@
                   :mailgun-domain
                   :mailgun-password
                   :site-url]]
-         (base/register-config-var! k)))
+         (base/register-config-var! k))
+
+       (base/register-initial-user-data! initial-data/initial-data-for-user))
 
      :cljs
      (do
@@ -72,6 +77,30 @@
        (base/register-system-page!
          {:key :global-settings
           :view global-settings-page-view})
+
+       (base/register-initial-user-data-handler!
+         (fn [db data]
+           (-> db
+               (assoc :session {:user-id (data :user-id)})
+               (assoc-in [:user :subscribed-tag-ids]
+                 (set (data :user-subscribed-tag-ids)))
+               (assoc :groups (key-by-id (data :user-groups)))
+               (assoc :invitations (data :invitations))
+               (assoc :threads (key-by-id (data :user-threads)))
+               (assoc :group-threads
+                 (into {}
+                       (map (fn [[g t]] [g (into #{} (map :id) t)]))
+                       (group-by :group-id (data :user-threads))))
+               (assoc-in [:user :open-thread-ids]
+                 (set (map :id (data :user-threads))))
+               (assoc :temp-threads (->> (data :user-groups)
+                                         (map :id)
+                                         (reduce (fn [memo group-id]
+                                                   (->> (schema/make-temp-thread group-id)
+                                                        (assoc memo group-id)))
+                                                 {})))
+               (helpers/add-tags (data :tags))
+               (helpers/set-preferences (data :user-preferences)))))
 
        (chat/register-group-page!
          {:key :recent

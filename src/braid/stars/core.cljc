@@ -118,7 +118,7 @@
           (fn [_ thread-id]
             (dispatch [:braid.stars/unstar-thread! thread-id]))})
 
-       (chat/register-initial-user-data-handler!
+       (base/register-initial-user-data-handler!
          (fn
            [db data]
            (assoc db :braid.stars/starred-thread-ids
@@ -131,7 +131,7 @@
            :db/valueType :db.type/ref
            :db/cardinality :db.cardinality/many}])
 
-       (chat/register-initial-user-data!
+       (base/register-initial-user-data!
          (fn [user-id]
            {:braid.stars/starred-thread-ids
             (->> (d/q '[:find ?thread-id ?group-id

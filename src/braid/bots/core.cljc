@@ -19,7 +19,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (chat/register-initial-user-data-handler!
+       (base/register-initial-user-data-handler!
          (fn [db data]
            ;; [TODO] to preserve same interface, putting bots inside groups
            ;; but probably could have that be a separate key
@@ -51,7 +51,7 @@
        (base/register-server-message-handlers! sync/server-message-handlers)
        (doseq [route routes/bot-routes]
          (base/register-raw-http-handler! route))
-       (chat/register-initial-user-data!
+       (base/register-initial-user-data!
          (fn [user-id] {::bots (db/bots-for-user-groups user-id)}))
        (chat/register-anonymous-group-load!
          (fn [group-id info]

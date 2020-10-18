@@ -1,7 +1,6 @@
 (ns braid.core.server.sync
   (:require
     [clojure.string :as string]
-    [environ.core :refer [env]]
     [taoensso.timbre :as timbre :refer [debugf]]
     [taoensso.truss :refer [have]]
     [braid.core.hooks :as hooks]
@@ -21,7 +20,6 @@
     [braid.base.server.ws-handler :refer [event-msg-handler]]
     [braid.core.server.sync-handler :as sync-handler]
     [braid.core.server.sync-helpers :as helpers :refer [broadcast-group-change]]
-    [braid.lib.digest :as digest]
     [braid.lib.url :refer [valid-url?]]))
 
 (defn user-can-delete-message?
@@ -345,45 +343,6 @@
     (when (and group-id (group/user-is-group-admin? user-id group-id))
       (db/run-txns! (group/group-set-txn group-id :public? publicity))
       (broadcast-group-change group-id [:braid.client/publicity-changed [group-id publicity]]))))
-
-(defonce initial-user-data (hooks/register! (atom [])))
-
-(defmethod event-msg-handler :braid.server/start
-  [{:as ev-msg :keys [user-id]}]
-  (let [connected (set (:any @connected-uids))
-        dynamic-data (->> @initial-user-data
-                         (into {} (map (fn [f] (f user-id)))))
-        user-status (fn [user] (if (connected (user :id)) :online :offline))
-        update-user-statuses (fn [users]
-                               (reduce-kv
-                                 (fn [m id u]
-                                   (assoc m id (assoc u :status (user-status u))))
-                                 {} users))]
-    (chsk-send!
-      user-id
-      [:braid.client/init-data
-       (merge
-         {:user-id user-id
-          :version-checksum (if (= "prod" (env :environment))
-                              (digest/from-file "public/js/prod/desktop.js")
-                              (digest/from-file "public/js/dev/desktop.js"))
-          :user-groups
-          (->> (group/user-groups user-id)
-              (map (fn [group] (update group :users update-user-statuses)))
-              (map (fn [group]
-                     (->> (group/group-users-joined-at (:id group))
-                         (reduce (fn [group [user-id joined-at]]
-                                   (assoc-in
-                                     group
-                                     [:users user-id :joined-at]
-                                     joined-at))
-                                 group)))))
-          :user-threads (thread/open-threads-for-user user-id)
-          :user-subscribed-tag-ids (tag/subscribed-tag-ids-for-user user-id)
-          :user-preferences (user/user-get-preferences user-id)
-          :invitations (invitation/invites-for-user user-id)
-          :tags (tag/tags-for-user user-id)}
-         dynamic-data)])))
 
 ;; need to duplicate the anonymous handler for logged in users; this
 ;; is used when clicking on a public group from group explore while

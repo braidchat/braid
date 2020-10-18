@@ -1,8 +1,6 @@
 (ns braid.chat.client.remote-handlers
   (:require
-   [braid.base.client.router :as router]
    [braid.base.api :as base]
-   [braid.core.client.sync :as sync]
    [re-frame.core :refer [dispatch]]))
 
 (defn init! []
@@ -11,17 +9,6 @@
      (fn [_ data]
        (dispatch [:add-open-thread data])
        (dispatch [:maybe-increment-unread]))
-
-     :braid.client/init-data
-     (fn [_ data]
-       (dispatch [:set-init-data data])
-       (router/dispatch-current-path!)
-       (dispatch [:notify-if-client-out-of-date (data :version-checksum)]))
-
-     :socket/connected
-     (fn [_ _]
-       ;; FIXME: avoid direct use of chsk-send!
-       (sync/chsk-send! [:braid.server/start nil]))
 
      :braid.client/create-tag
      (fn [_ data]

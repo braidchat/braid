@@ -1,13 +1,13 @@
 (ns braid.base.client.remote-handlers
   (:require
     [braid.core.hooks :as hooks]
-    [braid.core.client.sync :as sync]
+    [braid.base.client.socket :as socket]
     [taoensso.timbre :as timbre :refer-macros [errorf]]))
 
 (defonce incoming-socket-message-handlers
   (hooks/register! (atom {}) {keyword? fn?}))
 
-(defmethod sync/event-handler :default
+(defmethod socket/event-handler :default
   [[id data]]
   (if-let [handler (@incoming-socket-message-handlers id)]
     (handler id data)

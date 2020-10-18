@@ -13,12 +13,19 @@
          [[braid.base.conf]
           [braid.base.server.jobs]
           [braid.base.server.http-api-routes]
+          [braid.base.server.initial-data]
           [braid.base.server.spa]
           [braid.base.server.schema]
           [braid.base.server.ws-handler]])))
 
 #?(:cljs
    (do
+     (defn register-initial-user-data-handler!
+       "Add a handler that will run with the initial db & user-info recieved from the server. See `:register-initial-user-data` under `:clj`"
+       [f]
+       {:pre [(fn? f)]}
+       (swap! braid.base.client.events/initial-user-data-handlers conj f))
+
      (defn register-state!
        "Add a key and initial value to the default app state, plus an associated spec."
        [state spec]
@@ -27,7 +34,7 @@
        (braid.base.client.state/register-state! state spec))
 
      (defn register-incoming-socket-message-handlers!
-       "Registers multiple server-side socket message handlers.
+       "Registers multiple client-side socket message handlers.
 
        Expects map of event-keys and handler-fns.
        Handler fn will be called with user-id and data arguments"
@@ -101,6 +108,11 @@
 
    :clj
    (do
+     (defn register-initial-user-data!
+       "Add a map of key -> fn for getting the initial user data to be sent to the client. `fn` will recieve the user-id as its argument. See `:register-initial-user-data-handler` under `:cljs`"
+       [f]
+       {:pre [(fn? f)]}
+       (swap! braid.base.server.initial-data/initial-user-data conj f))
 
      (defn register-additional-script!
        "Add a javascript script tag to client html. Values can be a map with a `:src` or `:body` key or a function with no arguments, returing the same."

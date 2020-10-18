@@ -4,7 +4,7 @@
     [braid.core.client.desktop.notify :as notify]
     [braid.core.client.state.fx.dispatch-debounce :as fx.debounce]
     [braid.core.client.state.fx.redirect :as fx.redirect]
-    [braid.core.client.sync :as sync]
+    [braid.base.client.socket :as socket]
     [braid.lib.xhr :refer [edn-xhr]]
     [braid.core.hooks :as hooks]
     [re-frame.core :as re-frame :refer [reg-fx]]))
@@ -29,7 +29,7 @@
         fx.debounce/stop)
 
 ; TODO: handle callbacks declaratively too?
-(reg-fx :websocket-send (fn [args] (when args (apply sync/chsk-send! args))))
+(reg-fx :websocket-send (fn [args] (when args (apply socket/chsk-send! args))))
 
 ; TODO: handle callbacks declaratively too?
 (reg-fx :edn-xhr (fn [args] (edn-xhr args)))
@@ -44,3 +44,6 @@
                    (if (js/confirm prompt)
                      (on-confirm)
                      (when on-cancel (on-cancel)))))
+
+(defonce initial-user-data-handlers
+  (hooks/register! (atom []) [fn?]))

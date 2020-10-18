@@ -1,17 +1,15 @@
-(ns braid.core.client.sync
+(ns braid.base.client.socket
   (:require-macros
-   [cljs.core.async.macros :refer [go]])
+    [cljs.core.async.macros :refer [go]])
   (:require
-   [braid.core.client.store :as store]
-   [braid.lib.xhr :as xhr]
-   [cljs.core.async :as async]
-   [clojure.string :as string]
-   [goog.string :as gstring]
-   [goog.string.format]
-   [re-frame.core :refer [dispatch]]
-   [taoensso.sente :as sente]
-   [taoensso.sente.packers.transit :as sente-transit]
-   [taoensso.timbre :as timbre :refer-macros [debugf]]))
+    [braid.lib.xhr :as xhr]
+    [cljs.core.async :as async]
+    [clojure.string :as string]
+    [goog.string.format]
+    [re-frame.core :refer [dispatch]]
+    [taoensso.sente :as sente]
+    [taoensso.sente.packers.transit :as sente-transit]
+    [taoensso.timbre :as timbre :refer-macros [debugf]]))
 
 ; Change to :debug to get detailed info in dev
 (timbre/set-level! :info)

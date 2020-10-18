@@ -2,9 +2,9 @@
   (:require
    [braid.core.client.routes :as routes]
    [braid.core.client.schema :as schema]
-   [braid.base.client.state :refer [reg-event-fx]] ;; should use base.api/register-events!
+   [braid.base.client.state :refer [reg-event-fx]] ;; FIXME should use base.api/register-events!
    [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
-   [braid.core.client.sync :as sync]
+   [braid.base.client.socket :as socket] ;; FIXME should not directly access
    [braid.core.common.util :as util]
    [braid.core.hooks :as hooks]
    [clojure.set :as set]
@@ -424,13 +424,13 @@
 (reg-event-fx
   :start-anon-socket
   (fn [_ [_ _]]
-    (sync/connect!)
+    (socket/connect!)
     {}))
 
 (reg-event-fx
   :start-socket
   (fn [_ [_ _]]
-    (sync/connect!)
+    (socket/connect!)
     {:dispatch [:set-login-state :ws-connect]}))
 
 (reg-event-fx
@@ -469,9 +469,9 @@
   (fn [_ [_ _]]
     {:edn-xhr {:uri "/session"
                :method :delete
-               :headers {"x-csrf-token" (:csrf-token @sync/chsk-state)}
+               :headers {"x-csrf-token" (:csrf-token @socket/chsk-state)}
                :on-complete (fn [data]
-                              (sync/disconnect!)
+                              (socket/disconnect!)
                               (dispatch [:initialize-db])
                               (dispatch [:set-login-state :gateway])
                               (dispatch [:go-to "/"]))}}))
@@ -551,39 +551,6 @@
       {:dispatch [:braid.notices/display!
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))
-
-(defonce initial-user-data-handlers
-  (hooks/register! (atom []) [fn?]))
-
-(reg-event-fx
-  :set-init-data
-  (fn [{state :db} [_ data]]
-    {:dispatch-n (list [:set-login-state :app])
-     :db (-> state
-             (assoc :session {:user-id (data :user-id)})
-             (assoc-in [:user :subscribed-tag-ids]
-                       (set (data :user-subscribed-tag-ids)))
-             (assoc :groups (key-by-id (data :user-groups)))
-             (assoc :invitations (data :invitations))
-             (assoc :threads (key-by-id (data :user-threads)))
-             (assoc :group-threads
-                    (into {}
-                          (map (fn [[g t]] [g (into #{} (map :id) t)]))
-                          (group-by :group-id (data :user-threads))))
-             (assoc-in [:user :open-thread-ids]
-                       (set (map :id (data :user-threads))))
-             (assoc :temp-threads (->> (data :user-groups)
-                                      (map :id)
-                                      (reduce (fn [memo group-id]
-                                                (->> (schema/make-temp-thread group-id)
-                                                    (assoc memo group-id)))
-                                              {})))
-             (helpers/add-tags (data :tags))
-             (helpers/set-preferences (data :user-preferences))
-             (as-> <>
-                 (reduce (fn [db f] (f db data))
-                         <>
-                         @initial-user-data-handlers)))}))
 
 (reg-event-fx
   :leave-group
@@ -743,5 +710,5 @@
 (reg-event-fx
   :core/reconnect
   (fn [_ _]
-    (sync/reconnect!)
+    (socket/reconnect!)
     {}))

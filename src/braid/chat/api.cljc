@@ -21,11 +21,6 @@
 
 #?(:cljs
    (do
-     (defn register-initial-user-data-handler!
-       "Add a handler that will run with the initial db & user-info recieved from the server. See `:register-initial-user-data` under `:clj`"
-       [f]
-       {:pre [(fn? f)]}
-       (swap! braid.chat.client.events/initial-user-data-handlers conj f))
 
      (defn register-group-header-button!
        "Add a new button to appear in the group header
@@ -153,12 +148,6 @@
        [f]
        {:pre [(fn? f)]}
        (swap! braid.chat.db.user/post-create-txns conj f))
-
-     (defn register-initial-user-data!
-       "Add a map of key -> fn for getting the initial user data to be sent to the client. `fn` will recieve the user-id as its argument. See `:register-initial-user-data-handler` under `:cljs`"
-       [f]
-       {:pre [(fn? f)]}
-       (swap! braid.core.server.sync/initial-user-data conj f))
 
      (defn register-anonymous-group-load!
        "Add function that will recieve the group id and information for the anonymous group being loaded and should return an updated map of data."

@@ -2,6 +2,7 @@
   (:require
     [braid.core.hooks :as hooks]
     ; modules:
+    [braid.base.core]
     [braid.big-emoji.core]
     [braid.bots.core]
     [braid.chat.core]
@@ -30,7 +31,9 @@
 (defn init! []
   (hooks/reset-all!)
 
+  (braid.base.core/init!)
   (braid.chat.core/init!)
+
   (braid.big-emoji.core/init!)
   (braid.bots.core/init!)
   (braid.custom-emoji.core/init!)

@@ -1,8 +1,8 @@
 (ns braid.quests.client.remote-handlers
   (:require
-   [braid.core.client.sync :as sync]
+   [braid.base.client.socket :as socket] ;; FIXME should register! not use directly
    [re-frame.core :refer [dispatch]]))
 
-(defmethod sync/event-handler :braid.quests/upsert-quest-record
+(defmethod socket/event-handler :braid.quests/upsert-quest-record
   [[_ quest-record]]
   (dispatch [:quests/upsert-quest-record quest-record]))
