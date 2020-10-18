@@ -1,9 +1,8 @@
 (ns braid.quests.core
   "Provides 'quests' for Braid - activies that users can complete to introduce them to the system"
   (:require
-    [braid.core.api :as core]
-    [braid.chat.api :as chat]
     [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[braid.quests.client.views :refer [quests-header-view]]
           [braid.quests.client.styles :refer [quests-header]]
@@ -22,7 +21,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-header-view! quests-header-view)
+       (chat/register-header-view! quests-header-view)
        (base/register-styles! quests-header)
        (chat/register-initial-user-data-handler! initial-data-handler)
        (base/register-event-listener! event-listener)
@@ -36,6 +35,6 @@
      :clj
      (do
        (base/register-db-schema! db-schema)
-       (core/register-initial-user-data! initial-user-data-fn)
+       (chat/register-initial-user-data! initial-user-data-fn)
        (base/register-server-message-handlers! server-message-handlers)
        (chat/register-post-create-user-txn! activate-first-quests-txn))))

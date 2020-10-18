@@ -1,7 +1,7 @@
 (ns braid.users.core
   (:require
    [braid.base.api :as base]
-   [braid.core.api :as core]
+   [braid.chat.api :as chat]
    #?@(:cljs
        [[braid.users.client.views.users-page :as views]
         [braid.users.client.views.users-page-styles :as styles]
@@ -10,10 +10,10 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-group-page!
+       (chat/register-group-page!
         {:key :users
          :view views/users-page-view})
-       (core/register-admin-header-item!
+       (chat/register-admin-header-item!
         {:class "users"
          :route-fn routes/group-page-path
          :route-args {:page-id "users"}

@@ -1,9 +1,8 @@
 (ns braid.custom-emoji.core
   "Allows group admins to create custom emoji"
   (:require
-    [braid.core.api :as core]
-    [braid.chat.api :as chat]
     [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[braid.emoji.api :as emoji]
           [braid.custom-emoji.client.autocomplete :as autocomplete]
@@ -23,7 +22,7 @@
        (base/register-styles! settings-page)
        (base/register-state! state/initial-state state/state-spec)
        (chat/register-initial-user-data-handler! state/initial-data-handler)
-       (core/register-group-setting! extra-emoji-settings-view)
+       (chat/register-group-setting! extra-emoji-settings-view)
        (base/register-events! state/events)
        (base/register-subs! state/subscriptions)
        (base/register-incoming-socket-message-handlers!
@@ -32,5 +31,5 @@
      :clj
      (do
        (base/register-db-schema! db-schema)
-       (core/register-initial-user-data! initial-user-data-fn)
+       (chat/register-initial-user-data! initial-user-data-fn)
        (base/register-server-message-handlers! server-message-handlers))))

@@ -1,8 +1,8 @@
 (ns braid.rss.core
   "Extension to post updates from RSS feeds as messages in a given group"
   (:require
-   [braid.core.api :as core]
    [braid.base.api :as base]
+   [braid.chat.api :as chat]
    #?@(:clj
        [[braid.rss.server.db :as db]
         [braid.rss.server.fetching :as fetching]
@@ -71,7 +71,7 @@
                                 (ex-data ex))))))))
     :cljs
      (do
-       (core/register-group-setting! views/rss-feed-settings-view)
+       (chat/register-group-setting! views/rss-feed-settings-view)
        (base/register-styles! [:.settings.rss-feeds
                                [:.new-rss-feed
                                 [:label {:display "block"}]

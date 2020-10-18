@@ -1,6 +1,5 @@
 (ns braid.emoji.api
   (:require
-    [braid.core.api :as core]
     [braid.base.api :as base]
     #?@(:cljs
          [[braid.emoji.client.lookup :as lookup]])))

@@ -1,7 +1,7 @@
 (ns braid.uploads.core
   (:require
-    [braid.core.api :as core]
     [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
           [re-frame.core :refer [subscribe dispatch dispatch-sync]]
@@ -71,7 +71,7 @@
                                                ;; so that it can be re-used with the same file if need be
                                                (set! (.. e -target -value) nil))]))}]]))
 
-       (core/register-new-message-action-menu-item!
+       (chat/register-new-message-action-menu-item!
          {:body "Add File"
           :icon \uf093
           :priority 1

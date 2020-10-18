@@ -1,7 +1,7 @@
 (ns braid.permalinks.core
   "Includes a permalink in thread headers that leads to a dedicated page"
   (:require
-    [braid.core.api :as core]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[re-frame.core :refer [subscribe dispatch]]
           [braid.core.client.routes :as routes]
@@ -10,7 +10,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-thread-control!
+       (chat/register-thread-control!
          {:priority -1
           :view
           (fn [thread]
@@ -22,7 +22,7 @@
                        :group-id (thread :group-id)})}
              \uf0c1])})
 
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :thread
           :on-load (fn [page]
                      (dispatch [:load-threads {:thread-ids [(uuid (page :thread-id))]}]))

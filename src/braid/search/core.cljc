@@ -1,7 +1,7 @@
 (ns braid.search.core
   (:require
-    [braid.core.api :as core]
     [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:clj
          [[braid.chat.db.tag :as tag]
           [braid.chat.db.thread :as thread]
@@ -95,7 +95,7 @@
           (fn [state _]
             (state ::state))})
 
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :search
           :view search-page-view
           :on-load (fn [page]
@@ -111,7 +111,7 @@
 
        ;; [TODO] also register for when a message is deleted to remove
        ;; text from index?
-       (core/register-new-message-callback! lucene/index-message!)
+       (chat/register-new-message-callback! lucene/index-message!)
 
        (base/register-server-message-handlers!
          {::search-ws

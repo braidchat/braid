@@ -1,7 +1,7 @@
 (ns braid.uploads-page.core
   (:require
-    [braid.core.api :as core]
     [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
           [re-frame.core :refer [subscribe dispatch]]
@@ -13,7 +13,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :uploads
           :on-load (fn [_]
                      ;; TODO: will need to page this when it gets big?
@@ -21,7 +21,7 @@
           :view uploads-page-view
           :styles (>uploads-page)})
 
-       (core/register-group-header-button!
+       (chat/register-group-header-button!
          {:title "Uploads"
           :class "uploads"
           :icon \uf0ee

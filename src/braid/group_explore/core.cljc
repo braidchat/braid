@@ -1,6 +1,5 @@
 (ns braid.group-explore.core
   (:require
-    [braid.core.api :as core]
     [braid.base.api :as base]
     #?@(:clj
          [[datomic.api :as d]

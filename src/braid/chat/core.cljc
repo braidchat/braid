@@ -1,8 +1,8 @@
 (ns braid.chat.core
   "The majority of the core 'chat' functionality of Braid"
   (:require
-    [braid.core.api :as core]
     [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:clj
          [[braid.chat.schema :as schema]]
         :cljs
@@ -48,10 +48,10 @@
      :cljs
      (do
        (braid.chat.client.remote-handlers/init!)
-       (core/register-autocomplete-engine!
+       (chat/register-autocomplete-engine!
          braid.core.client.ui.views.autocomplete/user-autocomplete-engine)
 
-       (core/register-autocomplete-engine!
+       (chat/register-autocomplete-engine!
          braid.core.client.ui.views.autocomplete/tag-autocomplete-engine)
 
        (base/register-state! braid.core.client.store/initial-state
@@ -73,7 +73,7 @@
          {:key :global-settings
           :view global-settings-page-view})
 
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :recent
           :view recent-page-view
           :on-load (fn [page]
@@ -86,19 +86,19 @@
                                              (dispatch [:set-page-loading false])
                                              (dispatch [:set-page-error true]))}]))})
 
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :settings
           :view group-settings-page-view})
 
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :tags
           :view tags-page-view})
 
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :me
           :view me-page-view})
 
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :invite
           :view invite-page-view})
 

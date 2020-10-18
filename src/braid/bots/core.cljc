@@ -1,6 +1,5 @@
 (ns braid.bots.core
   (:require
-   [braid.core.api :as core]
    [braid.chat.api :as chat]
    [braid.base.api :as base]
    #?@(:clj
@@ -29,31 +28,31 @@
                    db (::bots data))))
        (base/register-events! events/events)
        (base/register-subs! subs/subs)
-       (core/register-autocomplete-engine! autocomplete/bots-autocomplete-engine)
-       (core/register-admin-header-item!
+       (chat/register-autocomplete-engine! autocomplete/bots-autocomplete-engine)
+       (chat/register-admin-header-item!
          {:class "group-bots"
           :route-fn routes/group-page-path
           :route-args {:page-id "bots"}
           :body "Bots"})
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :bots
           :view views/bots-page-view})
        (base/register-styles! styles/bots-page)
        (base/register-styles! styles/bot-notice)
        (base/register-incoming-socket-message-handlers!
          remote-handlers/handlers)
-       (core/register-message-sender-view! sender-view/sender-view))
+       (chat/register-message-sender-view! sender-view/sender-view))
 
      :clj
      (do
        (base/register-db-schema! db/schema)
-       (core/register-new-message-callback! sync/notify-bots!)
-       (core/register-group-broadcast-hook! sync/group-change-broadcast!)
+       (chat/register-new-message-callback! sync/notify-bots!)
+       (chat/register-group-broadcast-hook! sync/group-change-broadcast!)
        (base/register-server-message-handlers! sync/server-message-handlers)
        (doseq [route routes/bot-routes]
          (base/register-raw-http-handler! route))
-       (core/register-initial-user-data!
+       (chat/register-initial-user-data!
          (fn [user-id] {::bots (db/bots-for-user-groups user-id)}))
-       (core/register-anonymous-group-load!
+       (chat/register-anonymous-group-load!
          (fn [group-id info]
            (assoc-in info [:group :bots] (db/bots-in-group group-id)))))))

@@ -1,9 +1,8 @@
 (ns braid.stars.core
   "Allows users to star threads (for themselves) and view starred threads seperately."
   (:require
-    [braid.core.api :as core]
-    [braid.chat.api :as chat]
     [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[re-frame.core :refer [subscribe dispatch]]
           [braid.core.client.routes :as routes]
@@ -15,7 +14,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :starred
           :on-load (fn [_]
                      (dispatch [:braid.stars/load-starred-threads!]))
@@ -28,7 +27,7 @@
                         [:p "No starred threads"]]
                        [threads-view {:threads threads}])]))})
 
-       (core/register-group-header-button!
+       (chat/register-group-header-button!
          {:title "Starred Threads"
           :class "starred"
           :icon \uf005
@@ -36,7 +35,7 @@
           :route-fn routes/group-page-path
           :route-args {:page-id "starred"}})
 
-       (core/register-thread-header-item!
+       (chat/register-thread-header-item!
          {:priority 100
           :view
           (fn [thread]
@@ -132,7 +131,7 @@
            :db/valueType :db.type/ref
            :db/cardinality :db.cardinality/many}])
 
-       (core/register-initial-user-data!
+       (chat/register-initial-user-data!
          (fn [user-id]
            {:braid.stars/starred-thread-ids
             (->> (d/q '[:find ?thread-id ?group-id
