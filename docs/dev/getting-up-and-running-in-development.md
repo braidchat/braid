@@ -115,9 +115,9 @@ In your Braid project, you'll need to create a `profiles.clj` with the following
   ;; deprecated method
   {:user {:env {:db-url "datomic:free://localhost:4334/braid"}}
   ;; OR
-  ;; new method, requires you to start the repl like `lein with-profile +dev repl`
+  ;; new method, requires you to start the repl like `lein with-profile +braid repl`
   ;; instead of just `lein repl`
-  {:dev {:env {:db-url "datomic:free://localhost:4334/braid"}}
+  {:braid {:env {:db-url "datomic:free://localhost:4334/braid"}}
   ```
 
 In production, we recommend "Datomic Starter" instead (instructions [here](../drafts/deploying-to-production.md)).
