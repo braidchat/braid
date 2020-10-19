@@ -112,7 +112,12 @@ You will need to keep this process running during development. You can kill the 
 In your Braid project, you'll need to create a `profiles.clj` with the following (and restart the REPL to pick up the changes).
 
   ```clojure
+  ;; deprecated method
   {:user {:env {:db-url "datomic:free://localhost:4334/braid"}}
+  ;; OR
+  ;; new method, requires you to start the repl like `lein with-profile +dev repl`
+  ;; instead of just `lein repl`
+  {:dev {:env {:db-url "datomic:free://localhost:4334/braid"}}
   ```
 
 In production, we recommend "Datomic Starter" instead (instructions [here](../drafts/deploying-to-production.md)).
