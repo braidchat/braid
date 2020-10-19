@@ -16,10 +16,15 @@
 (defmethod event-msg-handler :default
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn user-id]}]
   (let [session (:session ring-req)
-        uid     (:uid     session)]
+        uid (:uid session)]
     (debugf "Unhandled event: %s" event)
     (when ?reply-fn
       (?reply-fn {:umatched-event-as-echoed-from-from-server event}))))
+
+(defmethod event-msg-handler :chsk/ws-ping
+  [ev-msg]
+  ;; Do nothing, just avoid unhandled event message
+  )
 
 (defmulti anon-msg-handler :id)
 

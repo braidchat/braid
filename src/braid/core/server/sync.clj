@@ -31,11 +31,6 @@
 
 ;; Handlers
 
-(defmethod event-msg-handler :chsk/ws-ping
-  [ev-msg])
-  ; Do nothing, just avoid unhandled event message
-
-
 (defmethod event-msg-handler :chsk/uidport-open
   [{:as ev-msg :keys [user-id]}]
   (doseq [{group-id :id} (group/user-groups user-id)]
