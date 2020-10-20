@@ -1,6 +1,6 @@
 (ns braid.uploads.s3
   (:require
-   [braid.core.client.xhr :refer [edn-xhr ajax-xhr]]
+   [braid.lib.xhr :refer [edn-xhr ajax-xhr]]
    [cljs-uuid-utils.core :as uuid]
    [clojure.string :refer [split]]
    [goog.events :as events]

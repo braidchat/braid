@@ -1,19 +1,16 @@
 (ns braid.test.server.db
   (:require
-    [clojure.set :refer [rename-keys]]
     [clojure.test :refer :all]
     [braid.core.server.db :as db]
+    [braid.chat.db.group :as group]
+    [braid.chat.db.invitation :as invitation]
+    [braid.chat.db.message :as message]
+    [braid.chat.db.tag :as tag]
+    [braid.chat.db.thread :as thread]
+    [braid.chat.db.user :as user]
     [braid.bots.server.db :as bot]
     [braid.bots.schema :as bot-schema]
-    [braid.core.server.db.group :as group]
-    [braid.core.server.db.invitation :as invitation]
-    [braid.core.server.db.message :as message]
-    [braid.core.server.db.tag :as tag]
-    [braid.core.server.db.thread :as thread]
-    [braid.core.server.db.user :as user]
-    [braid.core.common.schema :as schema]
     [braid.core.common.util :as util]
-    [braid.search.server :as search]
     [braid.test.fixtures.db :refer [drop-db]]
     [braid.test.server.test-utils :refer [fetch-messages]]))
 

@@ -4,9 +4,9 @@
    [braid.bots.server.db :as bot :refer [bot->display]]
    [braid.bots.util :as util]
    [braid.core.server.db :as db]
-   [braid.core.server.db.group :as group]
-   [braid.core.server.db.thread :as thread]
-   [braid.core.server.util :refer [valid-url?]]
+   [braid.chat.db.group :as group]
+   [braid.chat.db.thread :as thread]
+   [braid.lib.url :refer [valid-url?]]
    [clojure.string :as string]
    [taoensso.timbre :as timbre]))
 

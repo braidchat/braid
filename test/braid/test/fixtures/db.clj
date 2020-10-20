@@ -1,7 +1,7 @@
 (ns braid.test.fixtures.db
   (:require
    [braid.core.modules :as modules]
-   [braid.core.server.conf :as conf]
+   [braid.base.conf :as conf]
    [braid.core.server.db :as db]
    [mount.core :as mount]))
 

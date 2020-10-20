@@ -1,11 +1,11 @@
 (ns braid.core.server.seed
   (:require
-    [braid.core.server.conf :refer [config]]
+    [braid.base.conf :refer [config]]
     [braid.core.server.db :as db]
-    [braid.core.server.db.group :as group]
-    [braid.core.server.db.message :as message]
-    [braid.core.server.db.tag :as tag]
-    [braid.core.server.db.user :as user]))
+    [braid.chat.db.group :as group]
+    [braid.chat.db.message :as message]
+    [braid.chat.db.tag :as tag]
+    [braid.chat.db.user :as user]))
 
 (defn drop!
   "Drops the database (and also the database connection).

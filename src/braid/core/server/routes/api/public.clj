@@ -6,18 +6,18 @@
     [compojure.core :refer [GET PUT POST defroutes]]
     [braid.core.common.util :refer [valid-nickname? valid-email?]]
     [braid.core.hooks :as hooks]
-    [braid.core.server.api.github :as github]
-    [braid.core.server.conf :refer [config]]
-    [braid.core.server.crypto :refer [random-nonce]]
+    [braid.base.conf :refer [config]]
     [braid.core.server.db :as db]
-    [braid.core.server.db.group :as group]
-    [braid.core.server.db.invitation :as invitation]
-    [braid.core.server.db.user :as user]
-    [braid.core.server.events :as events]
+    [braid.chat.db.group :as group]
+    [braid.chat.db.invitation :as invitation]
+    [braid.chat.db.user :as user]
+    [braid.chat.events :as events]
     [braid.core.server.invite :as invites]
-    [braid.core.server.markdown :refer [markdown->hiccup]]
     [braid.core.server.routes.helpers :refer [current-user error-response edn-response]]
-    [braid.core.server.sync :as sync]))
+    [braid.core.server.sync :as sync]
+    [braid.lib.crypto :refer [random-nonce]]
+    [braid.lib.github :as github]
+    [braid.lib.markdown :refer [markdown->hiccup]]))
 
 (defn join-group
   [user-id group-id]

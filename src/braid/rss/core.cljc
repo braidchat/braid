@@ -1,11 +1,12 @@
 (ns braid.rss.core
   "Extension to post updates from RSS feeds as messages in a given group"
   (:require
-   [braid.core.api :as core]
+   [braid.base.api :as base]
+   [braid.chat.api :as chat]
    #?@(:clj
        [[braid.rss.server.db :as db]
         [braid.rss.server.fetching :as fetching]
-        [braid.core.server.db.group :as group-db]
+        [braid.chat.db.group :as group-db]
         [taoensso.timbre :as timbre]]
        :cljs
        [[braid.rss.client.views :as views]
@@ -15,9 +16,9 @@
   []
   #?(:clj
      (do
-       (core/register-db-schema! db/schema)
+       (base/register-db-schema! db/schema)
 
-       (core/register-server-message-handlers!
+       (base/register-server-message-handlers!
          {:braid.server.rss/load-feeds
           (fn [{user-id :user-id group-id :?data}]
             (when (group-db/user-in-group? user-id group-id)
@@ -58,7 +59,7 @@
                 {:db-run-txns! (db/remove-feed-txn feed-id)
                  :reply! :braid/ok})))})
 
-       (core/register-daily-job!
+       (base/register-daily-job!
          (fn []
            (timbre/debugf "Running RSS job")
            (doseq [feed (db/all-feeds)]
@@ -70,17 +71,17 @@
                                 (ex-data ex))))))))
     :cljs
      (do
-       (core/register-group-setting! views/rss-feed-settings-view)
-       (core/register-styles! [:.settings.rss-feeds
+       (chat/register-group-setting! views/rss-feed-settings-view)
+       (base/register-styles! [:.settings.rss-feeds
                                [:.new-rss-feed
                                 [:label {:display "block"}]
                                 [:.error {:color "red"}]]])
-       (core/register-state! {:rss/feeds {}} {:rss/feeds any?})
-       (core/register-subs! {:rss/feeds
+       (base/register-state! {:rss/feeds {}} {:rss/feeds any?})
+       (base/register-subs! {:rss/feeds
                              (fn [db [_ group-id]]
                                (get-in db [:rss/feeds (or group-id
                                                           (db :open-group-id))]))})
-       (core/register-events!
+       (base/register-events!
          {:rss/load-group-feeds
           (fn [_ [_ group-id]]
             {:websocket-send (list [:braid.server.rss/load-feeds group-id]

@@ -1,6 +1,6 @@
 (ns braid.core.server.routes.helpers
   (:require
-   [braid.core.server.db.user :as user]
+   [braid.chat.db.user :as user]
    [ring.middleware.anti-forgery :as anti-forgery]))
 
 (defn logged-in? [req]

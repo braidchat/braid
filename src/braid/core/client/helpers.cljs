@@ -2,36 +2,8 @@
   (:require-macros
    [cljs.core.async.macros :refer [go]])
   (:require
-   [clojure.string :as string]
    [cljs.core.async :refer [<! put! chan alts! timeout]]
-   [cljs-time.core :as t]
-   [cljs-time.format :as f]
-   [cljsjs.husl]
-   [garden.color :as color]
-   [goog.style :as gstyle])
-  (:import
-   (goog Uri)))
-
-(defn format-date
-  [format-string datetime]
-  (f/unparse (f/formatter format-string) (t/to-default-time-zone datetime)))
-
-(defn smart-format-date
-  "Turn a Date object into a nicely formatted string"
-  [datetime]
-  (let [datetime (t/to-default-time-zone datetime)
-        now (t/to-default-time-zone (t/now))
-        format (cond
-                 (= (f/unparse (f/formatter "yyyydM") now)
-                    (f/unparse (f/formatter "yyyydM") datetime))
-                 "h:mm A"
-
-                 (= (t/year now) (t/year datetime))
-                 "h:mm A MMM d"
-
-                 :else
-                 "h:mm A MMM d yyyy")]
-    (f/unparse (f/formatter format) datetime)))
+   [goog.style :as gstyle]))
 
 (defn debounce
   "Given the input channel source and a debouncing time of msecs, return a new
@@ -74,42 +46,6 @@
     (.. js/document -defaultView
         (getComputedStyle elt nil)
         (getPropertyValue prop))))
-
-(def url-re #"(http(?:s)?://\S+(?:\w|\d|/))")
-
-(defn extract-urls
-  "Given some text, returns a sequence of URLs contained in the text"
-  [text]
-  (map first (re-seq url-re text)))
-
-(defn contains-urls? [text]
-  (boolean (seq (extract-urls text))))
-
-(defn url->parts [url]
-  (let [url-info (.parse Uri url)]
-    {:domain (.getDomain url-info)
-     :path (.getPath url-info)
-     :scheme (.getScheme url-info)
-     :port (.getPort url-info)}))
-
-(defn site-url
-  []
-  (let [{:keys [domain scheme port]} (url->parts (.-location js/window))]
-    (str scheme "://" domain (when (or (and (= scheme "http")
-                                       (not= port 80))
-                                     (and (= scheme "https")
-                                       (not= port 443)))
-                             (str ":" port)))))
-
-(defn ->color [input]
-  (js/window.HUSL.toHex (mod (Math/abs (hash input)) 360) 95 50))
-
-(defn url->color [url]
-  (-> url
-      string/lower-case
-      url->parts
-      :domain
-      ->color))
 
 (defn stop-event! [e]
   (.stopPropagation e)

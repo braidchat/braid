@@ -1,11 +1,11 @@
 (ns braid.map-embeds.core
   "Detects google maps links and includes embeds a static image"
   (:require
+   [braid.base.api :as base]
    [braid.embeds.api :as embeds]
-   [braid.core.api :as core]
    #?@(:clj
        [[org.httpkit.client :as http]
-        [braid.core.server.conf :refer [config]]])))
+        [braid.base.conf :refer [config]]])))
 
 (def google-regex #"^https://www.google.com/maps/.*/@(\-?\d+\.\d+),(\-?\d+.\.\d+).*")
 
@@ -24,9 +24,9 @@
 (defn init! []
   #?(:clj
      (do
-       (core/register-config-var! :google-maps-api-key)
+       (base/register-config-var! :google-maps-api-key)
 
-       (core/register-private-http-route!
+       (base/register-private-http-route!
         [:get "/maps-embeds/static-map"
          (fn [request]
            (let [{:keys [lat lng]} (request :params)]

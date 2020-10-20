@@ -5,7 +5,7 @@
     [datomic.api :as d]
     [instaparse.core :as insta]
     [braid.core.server.db :as db]
-    [braid.core.server.db.thread :as thread]
+    [braid.chat.db.thread :as thread]
     [braid.search.lucene :as lucene])
   (:import
    (org.apache.lucene.index IndexNotFoundException)))

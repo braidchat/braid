@@ -3,7 +3,7 @@
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
-   [braid.core.client.helpers :as helpers]
+   [braid.lib.date :as date]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.mentions :as mentions]
    [braid.core.client.ui.views.thread :as thread]))
@@ -57,7 +57,7 @@
                         {:group-id @group-id
                          :page-id "thread"
                          :query-params {:thread-id (upload :thread-id)}})}
-            (str "Uploaded at " (helpers/smart-format-date (upload :uploaded-at)))]
+            (str "Uploaded at " (date/smart-format-date (upload :uploaded-at)))]
            [:br]
            (if @thread
              [:span "Tagged with " [thread/thread-tags-view @thread]]

@@ -1,6 +1,6 @@
 (ns braid.core.client.mobile.auth-flow.routes
   (:require
-   [braid.core.client.router :as router]
+   [braid.base.client.router :as router]
    [re-frame.core :refer [dispatch subscribe]]
    [secretary.core :as secretary :refer-macros [defroute]]))
 

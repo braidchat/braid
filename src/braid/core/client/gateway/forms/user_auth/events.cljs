@@ -2,8 +2,8 @@
   (:require
    [braid.core.client.gateway.forms.user-auth.validations :refer [validations]]
    [braid.core.client.gateway.helpers :as helpers]
-   [braid.core.client.router :as router]
-   [braid.core.client.state :refer [reg-event-fx]]
+   [braid.base.client.router :as router]
+   [braid.base.client.state :refer [reg-event-fx]] ;; TODO should use base.api/register-events!
    [clojure.string :as string]
    [re-frame.core :refer [dispatch]]
    [goog.object :as o]))

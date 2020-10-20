@@ -1,14 +1,14 @@
 (ns braid.core.server.sync-helpers
   (:require
    [braid.core.hooks :as hooks]
-   [braid.core.server.db.group :as group]
-   [braid.core.server.db.tag :as tag]
-   [braid.core.server.db.thread :as thread]
-   [braid.core.server.db.user :as user]
+   [braid.chat.db.group :as group]
+   [braid.chat.db.tag :as tag]
+   [braid.chat.db.thread :as thread]
+   [braid.chat.db.user :as user]
    [braid.core.server.email-digest :as email]
    [braid.core.server.message-format :as message-format]
    [braid.core.server.notify-rules :as notify-rules]
-   [braid.core.server.socket :refer [chsk-send! connected-uids]]
+   [braid.base.server.socket :refer [chsk-send! connected-uids]]
    [clojure.set :refer [difference intersection]]
    [taoensso.timbre :as timbre]))
 

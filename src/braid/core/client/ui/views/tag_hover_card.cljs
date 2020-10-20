@@ -1,7 +1,7 @@
 (ns braid.core.client.ui.views.tag-hover-card
   (:require
     [re-frame.core :refer [subscribe]]
-    [braid.core.client.helpers :as helpers]
+    [braid.lib.color :as color]
     [braid.search.ui.search-button :refer [search-button-view]]
     [braid.core.client.ui.views.subscribe-button :refer [subscribe-button-view]]
     [braid.core.client.ui.views.pills :refer [tag-pill-view]]))
@@ -11,7 +11,7 @@
   (let [tag (subscribe [:tag tag-id])
         user-subscribed-to-tag? (subscribe [:user-subscribed-to-tag? tag-id])]
     [:div.tag.card
-     [:div.header {:style {:background-color (helpers/->color tag-id)}}
+     [:div.header {:style {:background-color (color/->color tag-id)}}
       [tag-pill-view tag-id]
       [:div.subscribers.count
        {:title (str (@tag :subscribers-count) " Subscribers")}

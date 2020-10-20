@@ -2,10 +2,10 @@
   (:require
     [clojure.test :refer :all]
     [braid.core.server.db :as db]
-    [braid.core.server.db.group :as group]
-    [braid.core.server.db.message :as message]
-    [braid.core.server.db.tag :as tag]
-    [braid.core.server.db.user :as user]
+    [braid.chat.db.group :as group]
+    [braid.chat.db.message :as message]
+    [braid.chat.db.tag :as tag]
+    [braid.chat.db.user :as user]
     [braid.search.server :as search]
     [braid.test.fixtures.db :refer [drop-db]]))
 

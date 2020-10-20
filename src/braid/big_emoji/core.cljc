@@ -1,7 +1,7 @@
 (ns braid.big-emoji.core
   "If a message consists of a single emoji, displays it larger."
   (:require
-    [braid.core.api :as core]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[braid.emoji.client.views :refer [emoji-view]]])))
 
@@ -30,7 +30,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-message-formatter!
+       (chat/register-message-formatter!
          (fn [message]
            (if (single-emoji? message)
              (embiggen-emoji message)

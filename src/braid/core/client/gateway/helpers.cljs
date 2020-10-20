@@ -1,6 +1,6 @@
 (ns braid.core.client.gateway.helpers
   (:require
-   [braid.core.client.state :refer [reg-event-fx]]
+   [braid.base.client.state :refer [reg-event-fx]] ;; TODO should use base.api/register-events!
    [re-frame.core :refer [reg-sub dispatch]])
   (:import
    (goog Uri)))

@@ -1,7 +1,7 @@
 (ns braid.core.client.gateway.forms.join-group.events
   (:require
    [braid.core.client.gateway.helpers :as helpers :refer [get-url-group-id]]
-   [braid.core.client.state :refer [reg-event-fx]]
+   [braid.base.client.state :refer [reg-event-fx]] ;; TODO should use reg.base.api/register-events!
    [clojure.string :as string]
    [re-frame.core :refer [dispatch]]))
 

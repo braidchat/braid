@@ -1,7 +1,7 @@
 (ns braid.core.server.message-format
   (:require
     [clojure.string :as string]
-    [braid.core.server.db.group :as db.group]))
+    [braid.chat.db.group :as db.group]))
 
 (defn str->uuid
   [s]

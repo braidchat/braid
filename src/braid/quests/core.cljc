@@ -1,7 +1,8 @@
 (ns braid.quests.core
   "Provides 'quests' for Braid - activies that users can complete to introduce them to the system"
   (:require
-    [braid.core.api :as core]
+    [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[braid.quests.client.views :refer [quests-header-view]]
           [braid.quests.client.styles :refer [quests-header]]
@@ -20,20 +21,20 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-header-view! quests-header-view)
-       (core/register-styles! quests-header)
-       (core/register-initial-user-data-handler! initial-data-handler)
-       (core/register-event-listener! event-listener)
-       (core/register-state! initial-state schema)
-       (core/register-events! events)
-       (core/register-subs!
+       (chat/register-header-view! quests-header-view)
+       (base/register-styles! quests-header)
+       (base/register-initial-user-data-handler! initial-data-handler)
+       (base/register-event-listener! event-listener)
+       (base/register-state! initial-state schema)
+       (base/register-events! events)
+       (base/register-subs!
          {:quests/active-quest-records
           (fn [state _]
             (helpers/get-active-quest-records state))}))
 
      :clj
      (do
-       (core/register-db-schema! db-schema)
-       (core/register-initial-user-data! initial-user-data-fn)
-       (core/register-server-message-handlers! server-message-handlers)
-       (core/register-post-create-user-txn! activate-first-quests-txn))))
+       (base/register-db-schema! db-schema)
+       (base/register-initial-user-data! initial-user-data-fn)
+       (base/register-server-message-handlers! server-message-handlers)
+       (chat/register-post-create-user-txn! activate-first-quests-txn))))

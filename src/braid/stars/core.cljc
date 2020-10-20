@@ -1,7 +1,8 @@
 (ns braid.stars.core
   "Allows users to star threads (for themselves) and view starred threads seperately."
   (:require
-    [braid.core.api :as core]
+    [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[re-frame.core :refer [subscribe dispatch]]
           [braid.core.client.routes :as routes]
@@ -13,7 +14,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :starred
           :on-load (fn [_]
                      (dispatch [:braid.stars/load-starred-threads!]))
@@ -26,7 +27,7 @@
                         [:p "No starred threads"]]
                        [threads-view {:threads threads}])]))})
 
-       (core/register-group-header-button!
+       (chat/register-group-header-button!
          {:title "Starred Threads"
           :class "starred"
           :icon \uf005
@@ -34,7 +35,7 @@
           :route-fn routes/group-page-path
           :route-args {:page-id "starred"}})
 
-       (core/register-thread-header-item!
+       (chat/register-thread-header-item!
          {:priority 100
           :view
           (fn [thread]
@@ -53,7 +54,7 @@
                                 (dispatch [:braid.stars/star-thread! (thread :id)])))}
                  \uf005])))})
 
-       (core/register-styles!
+       (base/register-styles!
          [:.head
           [:>.star
            {:display "inline-block"
@@ -73,11 +74,11 @@
              :-webkit-text-stroke "#999 0.5px"
              :text-shadow "-1px 0 1px #999"}]]])
 
-       (core/register-state!
+       (base/register-state!
          {:braid.stars/starred-thread-ids {}}
          {:braid.stars/starred-thread-ids {uuid? #{uuid?}}})
 
-       (core/register-events!
+       (base/register-events!
          {:braid.stars/load-starred-threads!
           (fn [{db :db} _]
             {:dispatch [:load-threads {:thread-ids (get-in db [:braid.stars/starred-thread-ids (db :open-group-id)])}]})
@@ -98,7 +99,7 @@
                 {:db (update-in db [:braid.stars/starred-thread-ids group-id] disj thread-id)
                  :websocket-send [[:braid.stars.ws/unstar-thread! thread-id]]})))})
 
-       (core/register-subs!
+       (base/register-subs!
          {:braid.stars/starred-threads
           (fn [db _]
             (let [thread-ids (get-in db [:braid.stars/starred-thread-ids (db :open-group-id)])]
@@ -108,7 +109,7 @@
           (fn [db [_ thread-id]]
             (contains? (get-in db [:braid.stars/starred-thread-ids (db :open-group-id)]) thread-id))})
 
-       (core/register-incoming-socket-message-handlers!
+       (base/register-incoming-socket-message-handlers!
          {:braid.stars.ws/star-thread!
           (fn [_ thread-id]
             (dispatch [:braid.stars/star-thread! thread-id]))
@@ -117,7 +118,7 @@
           (fn [_ thread-id]
             (dispatch [:braid.stars/unstar-thread! thread-id]))})
 
-       (core/register-initial-user-data-handler!
+       (base/register-initial-user-data-handler!
          (fn
            [db data]
            (assoc db :braid.stars/starred-thread-ids
@@ -125,12 +126,12 @@
 
      :clj
      (do
-       (core/register-db-schema!
+       (base/register-db-schema!
          [{:db/ident :user/starred-thread
            :db/valueType :db.type/ref
            :db/cardinality :db.cardinality/many}])
 
-       (core/register-initial-user-data!
+       (base/register-initial-user-data!
          (fn [user-id]
            {:braid.stars/starred-thread-ids
             (->> (d/q '[:find ?thread-id ?group-id
@@ -147,7 +148,7 @@
                            (update memo group-id (fnil conj #{}) thread-id))
                          {}))}))
 
-       (core/register-server-message-handlers!
+       (base/register-server-message-handlers!
          {:braid.stars.ws/star-thread!
           (fn [{user-id :user-id thread-id :?data}]
             {:db-run-txns! [[:db/add [:user/id user-id] :user/starred-thread [:thread/id thread-id]]]

@@ -1,6 +1,6 @@
 (ns braid.custom-emoji.server.core
   (:require
-   [braid.core.server.db.group :as group-db] ;FIXME use of non-public API
+   [braid.chat.db.group :as group-db] ;FIXME use of non-public API
    [braid.custom-emoji.server.db :as emoji-db]))
 
 (defn initial-user-data-fn

@@ -1,7 +1,7 @@
 (ns braid.core.client.gateway.forms.create-group.validations
   (:require
    [clojure.string :as string]
-   [braid.core.client.xhr :as xhr]))
+   [braid.lib.xhr :as xhr]))
 
 (def validations
   {:group-name

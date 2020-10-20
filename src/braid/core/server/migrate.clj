@@ -1,8 +1,8 @@
 (ns braid.core.server.migrate
   (:require
    [braid.core.server.db :as db]
-   [braid.core.server.db.group :as group]
-   [braid.core.server.db.user :as user]
+   [braid.chat.db.group :as group]
+   [braid.chat.db.user :as user]
    [braid.quests.server.db :as quests]
    [clojure.edn :as edn]
    [clojure.set :as set]

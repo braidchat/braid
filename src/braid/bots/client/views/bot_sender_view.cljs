@@ -1,6 +1,6 @@
 (ns braid.bots.client.views.bot-sender-view
   (:require
-   [braid.core.client.helpers :refer [->color]]
+   [braid.lib.color :as color]
    [braid.core.client.routes :as routes]
    [re-frame.core :refer [subscribe]]))
 
@@ -14,7 +14,7 @@
       {:avatar [:a.avatar {:href sender-path
                            :tab-index -1}
                 [:img {:src (:avatar sender)
-                       :style {:background-color (->color (:id sender))}}]]
+                       :style {:background-color (color/->color (:id sender))}}]]
        :info [:span.bot-notice "BOT"]
        :name [:a.nickname {:tab-index -1
                            :href sender-path}

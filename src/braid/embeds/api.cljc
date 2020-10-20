@@ -1,6 +1,6 @@
 (ns braid.embeds.api
   (:require
-    [braid.core.api :as core]
+    [braid.base.api :as base]
     [braid.core.common.util :as util]
     #?@(:cljs
          [[braid.embeds.impl :as impl]])))
@@ -20,4 +20,4 @@
        {:pre [(util/valid? impl/embed-engine-dataspec embed)]}
        (swap! impl/embed-engines conj embed)
        (when styles
-         (core/register-styles! [:.embed styles])))))
+         (base/register-styles! [:.embed styles])))))

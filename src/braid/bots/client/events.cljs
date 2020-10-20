@@ -1,7 +1,7 @@
 (ns braid.bots.client.events
   (:require
    [braid.core.client.schema :as schema]
-   [braid.core.client.state :refer [reg-event-fx]]
+   [braid.base.client.state :refer [reg-event-fx]] ;; TODO should use base.api/register-events!
    [cljs-uuid-utils.core :as uuid]
    [re-frame.core :refer [dispatch]]))
 

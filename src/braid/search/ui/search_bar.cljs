@@ -2,7 +2,7 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]
     [braid.core.client.routes :as routes]
-    [braid.core.client.helpers :refer [->color]]))
+    [braid.lib.color :as color]))
 
 (defn search-bar-view
   []
@@ -18,5 +18,5 @@
        [:a.action.clear
         {:href (routes/group-page-path {:group-id @(subscribe [:open-group-id])
                                         :page-id "inbox"})
-         :style {:color (->color @(subscribe [:open-group-id]))}}]
+         :style {:color (color/->color @(subscribe [:open-group-id]))}}]
        [:div.action.search])]))

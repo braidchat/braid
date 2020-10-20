@@ -1,6 +1,7 @@
 (ns braid.uploads.core
   (:require
-    [braid.core.api :as core]
+    [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
           [re-frame.core :refer [subscribe dispatch dispatch-sync]]
@@ -9,10 +10,10 @@
          [[braid.uploads.s3 :as s3]
           [braid.core.common.util :as util]
           [braid.core.server.db :as db]
-          [braid.core.server.db.thread :as thread]
-          [braid.core.server.db.group :as group]
+          [braid.chat.db.thread :as thread]
+          [braid.chat.db.group :as group]
           [braid.uploads.db :as db.uploads]
-          [braid.core.server.db.user :as user]])))
+          [braid.chat.db.user :as user]])))
 
 (def Upload
   {:id uuid?
@@ -24,7 +25,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-events!
+       (base/register-events!
          {::initiate-upload!
           (fn [{db :db} [_ {:keys [group-id thread-id]}]]
             (.. js/document (getElementById "uploader") click)
@@ -53,7 +54,7 @@
                                       :mentioned-user-ids []
                                       :mentioned-tag-ids []}]})})
 
-       (core/register-root-view!
+       (base/register-root-view!
          (fn []
            [:div.uploads
             [:input {:type "file"
@@ -70,7 +71,7 @@
                                                ;; so that it can be re-used with the same file if need be
                                                (set! (.. e -target -value) nil))]))}]]))
 
-       (core/register-new-message-action-menu-item!
+       (chat/register-new-message-action-menu-item!
          {:body "Add File"
           :icon \uf093
           :priority 1
@@ -82,7 +83,7 @@
      :clj
      (do
 
-       (core/register-db-schema!
+       (base/register-db-schema!
          [{:db/ident :upload/id
            :db/valueType :db.type/uuid
            :db/cardinality :db.cardinality/one
@@ -102,7 +103,7 @@
            :db/valueType :db.type/ref
            :db/cardinality :db.cardinality/one}])
 
-       (core/register-server-message-handlers!
+       (base/register-server-message-handlers!
          {:braid.server/create-upload
           (fn [{:as ev-msg :keys [?data user-id]}]
             (let [upload (assoc ?data
@@ -131,7 +132,7 @@
                 (?reply-fn {:braid/ok (db.uploads/uploads-in-group ?data)})
                 (?reply-fn {:braid/error "Not allowed"}))))})
 
-       (core/register-private-http-route!
+       (base/register-private-http-route!
          [:get "/s3-policy"
           (fn [req]
             (if (user/user-id-exists? (get-in req [:session :user-id]))

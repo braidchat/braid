@@ -1,11 +1,11 @@
 (ns braid.group-explore.core
   (:require
-    [braid.core.api :as core]
+    [braid.base.api :as base]
     #?@(:clj
          [[datomic.api :as d]
           [braid.core.server.db :as db]
-          [braid.core.server.db.group :as group]
-          [braid.core.server.db.common :refer [db->group group-pull-pattern]]]
+          [braid.chat.db.group :as group]
+          [braid.chat.db.common :refer [db->group group-pull-pattern]]]
         :cljs
          [[re-frame.core :refer [dispatch]]
           [braid.group-explore.views :as views]
@@ -44,7 +44,7 @@
 (defn init! []
   #?(:clj
      (do
-       (core/register-public-http-route!
+       (base/register-public-http-route!
          [:get "/groups"
           (fn [_]
             {:status 200
@@ -52,11 +52,11 @@
 
      :cljs
      (do
-       (core/register-state!
+       (base/register-state!
          {::public-groups #{}}
          {::public-groups #{PublicGroup}})
 
-       (core/register-events!
+       (base/register-events!
          {::-store-public-groups
           (fn [{db :db} [_ groups]]
             {:db (assoc db ::public-groups groups)})
@@ -76,7 +76,7 @@
                             "Failed to load public groups list"
                             :error]]))}})})
 
-       (core/register-subs!
+       (base/register-subs!
          {:braid.group-explore/public-groups
           (fn [state _]
             (state ::public-groups))
@@ -88,7 +88,7 @@
                         (map first))
                   (:groups db)))})
 
-       (core/register-system-page!
+       (base/register-system-page!
          {:key :group-explore
           :on-load (fn [_]
                      (dispatch [::load-public-groups]))

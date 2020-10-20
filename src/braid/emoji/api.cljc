@@ -1,6 +1,6 @@
 (ns braid.emoji.api
   (:require
-    [braid.core.api :as core]
+    [braid.base.api :as base]
     #?@(:cljs
          [[braid.emoji.client.lookup :as lookup]])))
 
@@ -35,4 +35,4 @@
        (when ascii-lookup
          (swap! lookup/ascii-fns conj ascii-lookup))
        (when styles
-         (core/register-styles! styles)))))
+         (base/register-styles! styles)))))

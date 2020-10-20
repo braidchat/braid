@@ -1,10 +1,10 @@
 (ns braid.core.server.routes.api.private
   (:require
    [braid.core.server.db :as db]
-   [braid.core.server.db.group :as group]
-   [braid.core.server.events :as events]
-   [braid.core.server.markdown :refer [markdown->hiccup]]
+   [braid.chat.db.group :as group]
+   [braid.chat.events :as events]
    [braid.core.server.routes.helpers :as helpers :refer [error-response edn-response]]
+   [braid.lib.markdown :refer [markdown->hiccup]]
    [clojure.java.io :as io]
    [clojure.string :as string]
    [compojure.core :refer [GET PUT DELETE defroutes]]

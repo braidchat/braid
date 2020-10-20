@@ -1,9 +1,10 @@
 (ns braid.search.core
   (:require
-    [braid.core.api :as core]
+    [braid.base.api :as base]
+    [braid.chat.api :as chat]
     #?@(:clj
-         [[braid.core.server.db.tag :as tag]
-          [braid.core.server.db.thread :as thread]
+         [[braid.chat.db.tag :as tag]
+          [braid.chat.db.thread :as thread]
           [braid.search.lucene :as lucene]
           [braid.search.server :as search]]
          :cljs
@@ -18,7 +19,7 @@
 (defn init! []
   #?(:cljs
      (do
-       (core/register-state!
+       (base/register-state!
          {::state {:query nil
                    :thread-ids nil
                    :loading? false
@@ -28,7 +29,7 @@
                    :error? boolean?
                    :loading? boolean?}})
 
-       (core/register-events!
+       (base/register-events!
          {:braid.search/update-query!
           (fn [{db :db} [_ query]]
             {:dispatch [::set-query! query]
@@ -85,7 +86,7 @@
                                     :error? false
                                     :loading? false})})})
 
-       (core/register-subs!
+       (base/register-subs!
          {:braid.search/query
           (fn [state _]
             (get-in state [::state :query]))
@@ -94,7 +95,7 @@
           (fn [state _]
             (state ::state))})
 
-       (core/register-group-page!
+       (chat/register-group-page!
          {:key :search
           :view search-page-view
           :on-load (fn [page]
@@ -106,13 +107,13 @@
 
      :clj
      (do
-       (core/register-config-var! :lucene-store-location)
+       (base/register-config-var! :lucene-store-location)
 
        ;; [TODO] also register for when a message is deleted to remove
        ;; text from index?
-       (core/register-new-message-callback! lucene/index-message!)
+       (chat/register-new-message-callback! lucene/index-message!)
 
-       (core/register-server-message-handlers!
+       (base/register-server-message-handlers!
          {::search-ws
           (fn [{:as ev-msg :keys [?data ?reply-fn user-id]}]
             ;; this can take a while, so move it to a future

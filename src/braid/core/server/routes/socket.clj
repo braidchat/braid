@@ -1,6 +1,6 @@
 (ns braid.core.server.routes.socket
   (:require
-   [braid.core.server.socket :refer [ring-ajax-post ring-ajax-get-or-ws-handshake]]
+   [braid.base.server.socket :refer [ring-ajax-post ring-ajax-get-or-ws-handshake]]
    [compojure.core :refer [GET POST defroutes]]
    [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]))
 
