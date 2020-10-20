@@ -1,4 +1,4 @@
-(ns braid.uploads.s3
+(ns braid.lib.s3
   (:require
    [braid.lib.xhr :refer [edn-xhr ajax-xhr]]
    [cljs-uuid-utils.core :as uuid]

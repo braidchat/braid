@@ -2,13 +2,12 @@
   (:require
     [braid.base.api :as base]
     [braid.chat.api :as chat]
+    [braid.lib.s3 :as s3]
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
-          [re-frame.core :refer [subscribe dispatch dispatch-sync]]
-          [braid.uploads.s3 :as s3]]
+          [re-frame.core :refer [subscribe dispatch dispatch-sync]]]
          :clj
-         [[braid.uploads.s3 :as s3]
-          [braid.core.common.util :as util]
+         [[braid.core.common.util :as util]
           [braid.core.server.db :as db]
           [braid.chat.db.thread :as thread]
           [braid.chat.db.group :as group]

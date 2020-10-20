@@ -1,4 +1,4 @@
-(ns braid.uploads.s3
+(ns braid.lib.s3
   (:require
     [clojure.data.json :as json]
     [clojure.string :as string]
