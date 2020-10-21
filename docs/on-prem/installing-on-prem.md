@@ -128,7 +128,7 @@ Create a bucket (for this example 'braid-bucket'), with the following CORS:
 <?xml version="1.0" encoding="UTF-8"?>
 <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">>
  <CORSRule>
-   <AllowedOrigin>clientorigin.com</AllowedOrigin>
+   <AllowedOrigin>https://clientorigin.com</AllowedOrigin>
    <AllowedMethod>GET</AllowedMethod>
    <AllowedMethod>POST</AllowedMethod>
  </CORSRule>
