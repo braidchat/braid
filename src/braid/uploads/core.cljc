@@ -30,7 +30,7 @@
       {:href url
        :target "_blank"
        :rel "noopener noreferrer"}
-      [:img {:src (upload/->path url)}]]))
+      [:img {:src url}]]))
 
 (defn ->s3config [config]
   {:api-secret (config :aws-secret-key)
@@ -83,19 +83,18 @@
 
        (chat/register-message-transform!
          (fn [node]
-           (println node)
            (if (and (string? node) (upload/upload-path? node))
              (let [url node]
-               [:a.upload {:href url
-                             :title url
-                             :style {:background-color (color/url->color url)
-                                     :border-color (color/url->color url)}
-                             :on-click (fn [e] (.stopPropagation e))
-                             :target "_blank"
-                             ; rel to address vuln caused by target=_blank
-                             ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
-                             :rel "noopener noreferrer"
-                             :tab-index -1}
+               [:a.upload {:href (upload/->path url)
+                           :title url
+                           :style {:background-color (color/url->color url)
+                                   :border-color (color/url->color url)}
+                           :on-click (fn [e] (.stopPropagation e))
+                           :target "_blank"
+                           ; rel to address vuln caused by target=_blank
+                           ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+                           :rel "noopener noreferrer"
+                           :tab-index -1}
                 (last (string/split url #"/"))])
              node)))
 
@@ -122,7 +121,7 @@
                                 (some (fn [url]
                                         (re-matches #".*(png|jpg|jpeg|gif)$" url)))
                                 first)]
-              [image-embed-view url]))
+              [image-embed-view (upload/->path url)]))
 
           :styles
           [:>.image.upload
