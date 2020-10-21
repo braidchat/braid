@@ -190,10 +190,10 @@
         ; wrecked
         additional-formatters (reduce comp identity @stateless-formatters)
         stateless-transform (map (comp
-                                   additional-formatters
                                    tag-replace
                                    user-replace
-                                   url-replace))
+                                   url-replace
+                                   additional-formatters))
         statefull-transform (comp extract-code-blocks
                                   extract-code-inline
                                   extract-emphasized)

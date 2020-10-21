@@ -7,7 +7,9 @@
     [braid.lib.s3 :as s3]
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
+          [braid.lib.color :as color]
           [braid.lib.upload :as upload]
+          [braid.core.client.ui.styles.mixins :as mixins]
           [re-frame.core :refer [subscribe dispatch dispatch-sync]]]
          :clj
          [[braid.core.common.util :as util]
@@ -77,6 +79,40 @@
                                       :group-id group-id
                                       :mentioned-user-ids []
                                       :mentioned-tag-ids []}]})})
+
+
+       (chat/register-message-transform!
+         (fn [node]
+           (println node)
+           (if (and (string? node) (upload/upload-path? node))
+             (let [url node]
+               [:a.upload {:href url
+                             :title url
+                             :style {:background-color (color/url->color url)
+                                     :border-color (color/url->color url)}
+                             :on-click (fn [e] (.stopPropagation e))
+                             :target "_blank"
+                             ; rel to address vuln caused by target=_blank
+                             ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+                             :rel "noopener noreferrer"
+                             :tab-index -1}
+                (last (string/split url #"/"))])
+             node)))
+
+       (base/register-styles!
+         [:.message
+          [:>.content
+           [:a.upload
+            mixins/pill-box
+            {:background "#000000"
+             :max-width "inherit !important"}
+
+            ["&::before"
+             (mixins/fontawesome \uf15b)
+             {:display "inline"
+              :margin-right "0.25em"
+              :vertical-align "middle"
+              :font-size "0.8em"}]]]])
 
        (embeds/register-embed!
          {:handler
