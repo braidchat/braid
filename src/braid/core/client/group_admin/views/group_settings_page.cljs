@@ -3,6 +3,7 @@
     [reagent.core :as r]
     [reagent.ratom :include-macros true :refer-macros [reaction]]
     [re-frame.core :refer [dispatch subscribe]]
+    [braid.lib.upload :as upload]
     [braid.core.hooks :as hooks]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.upload :refer [avatar-upload-view]]))
@@ -37,13 +38,15 @@
        [:h2 "Group Avatar"]
        [:div
         (if (group :avatar)
-          [:img {:src (group :avatar)}]
+          [:img {:src (upload/->path (group :avatar))}]
           [:p "Avatar not set"])]
        [:div {:class (when @dragging? "dragging")}
         [avatar-upload-view {:on-upload (fn [url]
                                           (dispatch [:set-group-avatar
                                                      {:group-id (group :id)
                                                       :avatar url}]))
+                             :type "group-avatar"
+                             :group-id (group :id)
                              :dragging-change (partial reset! dragging?)}]]])))
 
 (defn publicity-view

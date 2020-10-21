@@ -4,7 +4,8 @@
     [braid.search.ui.search-button :refer [search-button-view]]
     [braid.core.client.ui.views.pills :refer [user-pill-view]]
     [braid.lib.color :as color]
-    [braid.lib.date :as date]))
+    [braid.lib.date :as date]
+    [braid.lib.upload :as upload]))
 
 (defn user-hover-card-view
   [user-id]
@@ -22,7 +23,7 @@
         [:div.badges
          (when @admin?
            [:div.admin {:title "admin"}])]
-        [:img.avatar {:src (user :avatar)}]]
+        [:img.avatar {:src (upload/->path (user :avatar))}]]
 
        [:div.info
         [:div.local-time (date/smart-format-date (js/Date.))]

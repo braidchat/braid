@@ -4,6 +4,7 @@
    [braid.lib.color :as color]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.styles.vars :as style-vars]
+   [braid.lib.upload :as upload]
    [clojure.string :as string]
    [goog.events :as events]
    [re-frame.core :refer [dispatch subscribe]]
@@ -131,7 +132,7 @@
              :style (merge
                       {:background-color (color/->color (group :id))}
                       (when-let [avatar (group :avatar)]
-                        {:background-image (str "url(" avatar ")")
+                        {:background-image (str "url(" (upload/->path avatar) ")")
                          :background-position "center"
                          :background-size "100%"})
                       (when (= group (@drag-state :grp))
@@ -155,7 +156,7 @@
                           :width (css->str style-vars/top-bar-height)
                           :height (css->str style-vars/top-bar-height)}
                          (when-let [avatar (drag-grp :avatar)]
-                           {:background-image (str "url(" avatar ")")
+                           {:background-image (str "url(" (upload/->path avatar) ")")
                             :background-position "center"
                             :background-size "100%"}))}
           (when-not (drag-grp :avatar)

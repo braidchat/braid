@@ -3,6 +3,7 @@
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.upload :refer [avatar-upload-view]]
    [braid.core.common.util :refer [valid-nickname?]]
+   [braid.lib.upload :as upload]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]))
@@ -52,8 +53,10 @@
       [:div.setting
        [:h2 "Update Avatar"]
        [:div.avatar {:class (when @dragging? "dragging")}
-        [:img.avatar {:src @user-avatar-url}]
+        [:img.avatar {:src (upload/->path @user-avatar-url)}]
         [avatar-upload-view {:on-upload (fn [u] (dispatch [:set-user-avatar u]))
+                             :type "user-avatar"
+                             :group-id @(subscribe [:open-group-id])
                              :dragging-change (partial reset! dragging?)}]]])))
 
 (defn password-view

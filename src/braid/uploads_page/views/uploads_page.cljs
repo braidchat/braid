@@ -4,6 +4,7 @@
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r]
    [braid.lib.date :as date]
+   [braid.lib.upload :as upload]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.mentions :as mentions]
    [braid.core.client.ui.views.thread :as thread]))
@@ -11,10 +12,10 @@
 (defn file-view [url]
   (cond
     (re-matches #".*(png|jpg|jpeg|gif)" url)
-    [:img {:src url}]
+    [:img {:src (upload/->path url)}]
     (re-matches #".*(mp4|mkv|mov)$" url)
     [:video
-     {:src url
+     {:src (upload/->path url)
       :preload "metadata"
       :controls true}]))
 
@@ -45,8 +46,7 @@
               {:on-click
                (fn [_]
                  (when (js/confirm (str "Delete this uploaded file?\n"
-                                        "If this was uploading using Braid, it"
-                                        " will remove the file from S3 as well."))
+                                        "This will also remove it from S3."))
                    (dispatch [:braid.uploads-page/delete-upload @group-id (upload :id)])))}
               \uf1f8])]
           [:td.uploader

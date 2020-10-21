@@ -1,5 +1,6 @@
 (ns braid.bots.client.views.bot-sender-view
   (:require
+   [braid.lib.upload :as upload]
    [braid.lib.color :as color]
    [braid.core.client.routes :as routes]
    [re-frame.core :refer [subscribe]]))
@@ -13,7 +14,7 @@
     (when sender
       {:avatar [:a.avatar {:href sender-path
                            :tab-index -1}
-                [:img {:src (:avatar sender)
+                [:img {:src (upload/->path (:avatar sender))
                        :style {:background-color (color/->color (:id sender))}}]]
        :info [:span.bot-notice "BOT"]
        :name [:a.nickname {:tab-index -1

@@ -33,9 +33,9 @@
        (doseq [k [:api-domain
                   :asana-client-id
                   :asana-client-secret
-                  :aws-access-key
-                  :aws-domain
+                  :aws-bucket
                   :aws-region
+                  :aws-access-key
                   :aws-secret-key
                   :db-url
                   :embedly-key

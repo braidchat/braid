@@ -2,6 +2,7 @@
   (:require
     [re-frame.core :refer [subscribe dispatch]]
     [braid.core.hooks :as hooks]
+    [braid.lib.upload :as upload]
     [braid.lib.color :as color]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.header-item :refer [header-item-view HeaderItem]]))
@@ -18,7 +19,7 @@
         [:a.user-info {:href path
                        :class (when (= current-path path) "active")}
          [:div.name (str "@" @user-nickname)]
-         [:img.avatar {:src @user-avatar-url}]]))))
+         [:img.avatar {:src (upload/->path @user-avatar-url)}]]))))
 
 (def UserHeaderItem HeaderItem)
 

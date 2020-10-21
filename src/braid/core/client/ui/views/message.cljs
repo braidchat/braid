@@ -4,6 +4,7 @@
     [braid.lib.color :as color]
     [braid.lib.url :as url]
     [braid.lib.date :as date]
+    [braid.lib.upload :as upload]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.views.mentions :refer [tag-mention-view user-mention-view]]
     [braid.core.client.ui.views.card-border :refer [card-border-view]]
@@ -213,7 +214,7 @@
     {:avatar [:span.avatar {:on-click (popover/on-mouse-enter
                                         (fn []
                                           [user-hover-card-view (:id sender)]))}
-              [:img {:src (:avatar sender)
+              [:img {:src (upload/->path (:avatar sender))
                      :style {:background-color (color/->color (:id sender))}}]]
      :info nil
      :name (if (nil? sender)

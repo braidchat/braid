@@ -1,6 +1,7 @@
 (ns braid.core.client.ui.views.autocomplete
   (:require
    [braid.lib.color :as color]
+   [braid.lib.upload :as upload]
    [braid.core.client.schema :as schema]
    [clj-fuzzy.metrics :as fuzzy]
    [clojure.string :as string]
@@ -65,7 +66,7 @@
                      :html
                      (fn []
                        [:div.user.match
-                        [:img.avatar {:src (user :avatar)}]
+                        [:img.avatar {:src (upload/->path (user :avatar))}]
                         [:div.info
                          [:div.name (user :nickname)]
                          [:div.extra (user :status)]]])})))))))

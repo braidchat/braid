@@ -370,13 +370,17 @@
             (dispatch [:braid.notices/display! [:upload-fail "File too big to upload, sorry" :error]])
             (do (set-uploading! true)
                 (dispatch [:braid.uploads/upload!
-                           file
-                           (fn [url]
-                             (set-uploading! false)
-                             (dispatch [:braid.uploads/create-upload!
-                                        {:url url
-                                         :thread-id (thread :id)
-                                         :group-id (thread :group-id)}]))]))))]
+                           {:file file
+                            :group-id (thread :group-id)
+                            :type "upload"
+                            :on-complete
+                            (fn [{:keys [url id]}]
+                              (set-uploading! false)
+                              (dispatch [:braid.uploads/create-upload!
+                                         {:url url
+                                          :upload-id id
+                                          :thread-id (thread :id)
+                                          :group-id (thread :group-id)}]))}]))))]
 
     (fn [thread]
       (let [{:keys [dragging? uploading?]} @state

@@ -1,6 +1,7 @@
 (ns braid.core.client.gateway.forms.user-auth.views
   (:require
    [braid.core.client.gateway.helper-views :refer [form-view field-view]]
+   [braid.lib.upload :as upload]
    [clojure.string :as string]
    [re-frame.core :refer [dispatch dispatch-sync subscribe]]))
 
@@ -224,7 +225,7 @@
   (let [user @(subscribe [:braid.core.client.gateway.forms.user-auth.subs/user])]
     [:div.section.user-auth.authed-user
      [:div.profile
-      [:img.avatar {:src (user :avatar)}]
+      [:img.avatar {:src (upload/->path (user :avatar))}]
       [:div.info
        [:div.nickname "@" (user :nickname)]
        [:div.email (user :email)]]]

@@ -1,6 +1,7 @@
 (ns braid.bots.client.views.bots-page
   (:require
     [braid.core.client.ui.views.upload :refer [avatar-upload-view]]
+    [braid.lib.upload :as upload]
     [braid.bots.util :refer [bot-name-re]]
     [clojure.string :as string]
     [re-frame.core :refer [dispatch subscribe]]
@@ -17,7 +18,7 @@
         dragging? (r/atom false)]
     (fn [bot]
       [:div.bot
-       [:img.avatar {:src (:avatar bot)}]
+       [:img.avatar {:src (upload/->path (:avatar bot))}]
        (str "/" (:nickname bot))
        (when @admin?
          [:div
@@ -69,9 +70,11 @@
                              [:div.new-avatar
                               {:class (when @dragging? "dragging")}
                               (when-let [avatar (get @edited-info :avatar)]
-                                [:img {:src avatar}])
+                                [:img {:src (upload/->path avatar)}])
                               [avatar-upload-view
                                {:on-upload (fn [url] (swap! edited-info assoc :avatar url))
+                                :group-id group-id
+                                :type "bot-avatar"
                                 :dragging-change (partial reset! dragging?)}]]
 
                              (:webhook-url :event-webhook-url)
@@ -181,8 +184,10 @@
             [:br]
             [:div.new-avatar {:class (when @dragging? "dragging")}
              (when-let [avatar (@new-bot :avatar)]
-               [:img {:src avatar}])
+               [:img {:src (upload/->path avatar)}])
              [avatar-upload-view {:on-upload (fn [url] (swap! new-bot assoc :avatar url))
+                                  :group-id group-id
+                                  :type "bot-avatar"
                                   :dragging-change (partial reset! dragging?)}]]
 
             [:br]

@@ -1,34 +1,36 @@
 (ns braid.lib.s3
   (:require
    [braid.lib.xhr :refer [edn-xhr ajax-xhr]]
-   [cljs-uuid-utils.core :as uuid]
-   [clojure.string :refer [split]]
-   [goog.events :as events]
-   [taoensso.timbre :as timbre :refer-macros [errorf]])
-  (:import
-   (goog.net XhrIo EventType)))
+   [taoensso.timbre :as timbre :refer-macros [errorf]]))
 
-(defn upload [file on-complete]
+(defn s3-path [bucket region & paths]
+  (str "https://" bucket ".s3." region ".amazonaws.com/" (apply str paths)))
+
+(defn upload
+  [{:keys [file prefix on-complete]}]
   (edn-xhr
     {:method :get
      :uri "/s3-policy"
      :on-error (fn [err]
                  (errorf "Error getting s3 authorization: %s" err))
      :on-complete
-     (fn [{:keys [bucket auth]}]
+     (fn [{:keys [bucket region auth]}]
        (let [file-name (.-name file)
-             file-dir (uuid/make-random-squuid)
-             file-url (str "https://s3.amazonaws.com/" bucket "/uploads/" file-dir
-                           "/" (js/encodeURIComponent file-name))]
+             file-key (str prefix (js/encodeURIComponent file-name))
+             file-url (s3-path bucket region file-key)]
          (ajax-xhr {:method :post
-                    :uri (str "https://s3.amazonaws.com/" bucket)
+                    :uri (s3-path bucket region)
                     :body (doto (js/FormData.)
-                            (.append "key" (str "uploads/" file-dir "/${filename}"))
-                            (.append "AWSAccessKeyId" (:key auth))
-                            (.append "acl" "public-read")
+                            (.append "key" (str prefix "${filename}"))
+                            (.append "acl" "private")
                             (.append "policy" (:policy auth))
-                            (.append "signature" (:signature auth))
+                            (.append "x-amz-algorithm" "AWS4-HMAC-SHA256")
+                            (.append "x-amz-credential" (:credential auth))
+                            (.append "x-amz-signature" (:signature auth))
+                            (.append "x-amz-date" (:date auth))
                             (.append "Content-Type" (.-type file))
                             (.append "file" file file-name))
-                    :on-complete (fn [e] (on-complete file-url))
+                    :on-complete (fn [_]
+                                   (on-complete {:key file-key
+                                                 :url file-url}))
                     :on-error (fn [e] (errorf "Error uploading: %s" (:error e)))})))}))

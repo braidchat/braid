@@ -120,6 +120,52 @@ You are now ready to try out Braid!
 
 `profiles.samples.clj` lists various other ENV variables you can set to enable certain features, such as email for password-recovery and digests (via mailgun), file uploads (via AWS S3), website auto-embeds (via embedly), and github-login.
 
+## Configuring S3
+
+Create a bucket (for this example 'braid-bucket'), with the following CORS:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">>
+ <CORSRule>
+   <AllowedOrigin>clientorigin.com</AllowedOrigin>
+   <AllowedMethod>GET</AllowedMethod>
+   <AllowedMethod>POST</AllowedMethod>
+ </CORSRule>
+</CORSConfiguration>
+```
+
+
+Create an IAM user with the following policy:
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::braid-bucket",
+                "arn:aws:s3:::braid-bucket/*"
+            ]
+        }
+    ]
+}
+```
+
+In profiles / ENV, provide the following keys (sample values provided below):
+```
+  :aws-bucket "braid-bucket"
+  :aws-region "us-east-1"
+  :aws-access-key "ABC123..."
+  :aws-secret-key "1234..."
+```
 
 ## (Optional) Reverse Proxy with Nginx
 

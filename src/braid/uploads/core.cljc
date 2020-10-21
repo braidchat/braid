@@ -1,18 +1,37 @@
 (ns braid.uploads.core
   (:require
+    [clojure.string :as string]
     [braid.base.api :as base]
+    [braid.embeds.api :as embeds]
     [braid.chat.api :as chat]
     [braid.lib.s3 :as s3]
     #?@(:cljs
          [[cljs-uuid-utils.core :as uuid]
+          [braid.lib.upload :as upload]
           [re-frame.core :refer [subscribe dispatch dispatch-sync]]]
          :clj
          [[braid.core.common.util :as util]
           [braid.core.server.db :as db]
+          [braid.base.conf :refer [config]]
           [braid.chat.db.thread :as thread]
           [braid.chat.db.group :as group]
           [braid.uploads.db :as db.uploads]
           [braid.chat.db.user :as user]])))
+
+#?(:cljs
+   (defn image-embed-view
+     [url]
+     [:a.image.upload
+      {:href url
+       :target "_blank"
+       :rel "noopener noreferrer"}
+      [:img {:src (upload/->path url)}]]))
+
+(defn ->s3config [config]
+  {:api-secret (config :aws-secret-key)
+   :api-key (config :aws-access-key)
+   :region  (config :aws-region)
+   :bucket (config :aws-bucket)})
 
 (def Upload
   {:id uuid?
@@ -32,18 +51,21 @@
                                             :thread-id thread-id})})
 
           :braid.uploads/upload!
-          (fn [{db :db} [_ file on-complete]]
-            (s3/upload
-              file
-              on-complete)
+          (fn [_ [_ {:keys [file type group-id on-complete]}]]
+            (let [id (uuid/make-random-squuid)]
+              (s3/upload
+                {:file file
+                 :prefix (str group-id "/" type "/" id "/")
+                 :on-complete (fn [info]
+                                (on-complete (assoc info :id id)))}))
             {})
 
           :braid.uploads/create-upload!
-          (fn [{db :db} [_ {:keys [url thread-id group-id]
-                           :or {thread-id (get-in db [::upload-config :thread-id])
-                                group-id (get-in db [::upload-config :group-id])}}]]
+          (fn [{db :db} [_ {:keys [url upload-id thread-id group-id]
+                            :or {thread-id (get-in db [::upload-config :thread-id])
+                                 group-id (get-in db [::upload-config :group-id])}}]]
             {:websocket-send (list [:braid.server/create-upload
-                                    {:id (uuid/make-random-squuid)
+                                    {:id upload-id
                                      :url url
                                      :thread-id thread-id
                                      :group-id group-id}])
@@ -52,6 +74,23 @@
                                       :group-id group-id
                                       :mentioned-user-ids []
                                       :mentioned-tag-ids []}]})})
+
+       (embeds/register-embed!
+         {:handler
+          (fn [{:keys [urls]}]
+            (when-let [url (->> urls
+                                (filter upload/upload-path?)
+                                (some (fn [url]
+                                        (re-matches #".*(png|jpg|jpeg|gif)$" url)))
+                                first)]
+              [image-embed-view url]))
+
+          :styles
+          [:>.image.upload
+           [:>img
+            {:width "100%"}]]
+
+          :priority 10})
 
        (base/register-root-view!
          (fn []
@@ -63,12 +102,17 @@
                      :on-change (fn [e]
                                   (.persist e) ; react dom thing
                                   (dispatch [:braid.uploads/upload!
+                                             {:file
                                              (aget (.. e -target -files) 0)
-                                             (fn [url]
-                                               (dispatch [:braid.uploads/create-upload! {:url url}])
+                                             :group-id @(subscribe [:open-group-id])
+                                             :type "upload"
+                                             :on-complete
+                                             (fn [{:keys [url id]}]
+                                               (dispatch [:braid.uploads/create-upload! {:upload-id id
+                                                                                         :url url}])
                                                ;; clear the value of this input field
                                                ;; so that it can be re-used with the same file if need be
-                                               (set! (.. e -target -value) nil))]))}]]))
+                                               (set! (.. e -target -value) nil))}]))}]]))
 
        (chat/register-new-message-action-menu-item!
          {:body "Add File"
@@ -120,7 +164,8 @@
               (when (or (= user-id (:user-id upload))
                         (group/user-is-group-admin? user-id (:group-id upload)))
                 (when-let [path (s3/upload-url-path (:url upload))]
-                  (s3/delete-upload path))
+                  (s3/delete-file! (->s3config config)
+                                   path))
                 (db/run-txns!
                   (db.uploads/retract-upload-txn (:id upload))))))
 
@@ -132,10 +177,28 @@
                 (?reply-fn {:braid/error "Not allowed"}))))})
 
        (base/register-private-http-route!
+         [:get "/upload/*"
+          (fn [request]
+            ;; TODO check group-id of asset to see if user can access it
+            ;; currently, it is possible for a user in another group to access a file
+            ;; IF they know its path (which, is behind a UUID, so, non-trivial to guess/enumerate)
+            (let [expires-seconds (* 1 24 60 60) ; one day
+                  asset-key (second (re-matches #"^/upload/(.*)" (request :uri)))]
+              {:status 302
+               :headers {"Cache-Control" (str "private, max-age=" expires-seconds)
+                         "Location" (s3/readable-s3-url
+                                      (->s3config config)
+                                      expires-seconds
+                                      asset-key)}}))])
+
+       (base/register-private-http-route!
          [:get "/s3-policy"
           (fn [req]
+            ;; TODO check if user is allowed to upload to this group
             (if (user/user-id-exists? (get-in req [:session :user-id]))
-              (if-let [policy (s3/generate-policy)]
+              (if-let [policy (s3/generate-s3-upload-policy
+                                (->s3config config)
+                                {:starts-with ""})]
                 {:status 200
                  :headers {"Content-Type" "application/edn"}
                  :body (pr-str policy)}

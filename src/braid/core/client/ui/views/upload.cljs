@@ -5,19 +5,23 @@
 
 (def max-avatar-size (* 2 1024 1024))
 
-(defn avatar-upload-view [args]
+(defn avatar-upload-view
+  [args]
   (let [uploading? (r/atom false)
-        start-upload (fn [on-upload file-list]
+        start-upload (fn [on-upload group-id type file-list]
                        (let [file (aget file-list 0)]
                          (if (> (.-size file) max-avatar-size)
                            (dispatch [:braid.notices/display! [:avatar-set-fail "Avatar image too large" :error]])
                            (do (reset! uploading? true)
                                (dispatch [:braid.uploads/upload!
-                                          file
-                                          (fn [url]
-                                            (reset! uploading? false)
-                                            (on-upload url))])))))]
-    (fn [{:keys [on-upload dragging-change] :as args}]
+                                          {:file file
+                                           :group-id group-id
+                                           :type type
+                                           :on-complete
+                                           (fn [{:keys [url]}]
+                                             (reset! uploading? false)
+                                             (on-upload url))}])))))]
+    (fn [{:keys [on-upload dragging-change group-id type] :as args}]
       [:div.upload
        (if @uploading?
          [:div
@@ -31,8 +35,8 @@
                       (.preventDefault e)
                       (dragging-change false)
                       (reset! uploading? true)
-                      (start-upload on-upload (.. e -dataTransfer -files)))}
+                      (start-upload on-upload group-id type (.. e -dataTransfer -files)))}
           [:label "Choose an avatar image"
            [:input {:type "file" :accept "image/*"
                     :on-change (fn [e]
-                                 (start-upload on-upload (.. e -target -files)))}]]])])))
+                                 (start-upload on-upload group-id type (.. e -target -files)))}]]])])))

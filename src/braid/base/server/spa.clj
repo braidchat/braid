@@ -1,6 +1,7 @@
 (ns braid.base.server.spa
   (:require
     [cljstache.core :as cljstache]
+    [braid.lib.s3 :as s3]
     [braid.core.hooks :as hooks]
     [braid.base.conf :refer [config]]
     [braid.lib.digest :as digest]))
@@ -27,6 +28,9 @@
               :basejs (when prod-js?
                         (str (digest/from-file (str "public/js/prod/base.js"))))
               :api_domain (config :api-domain)
+              :asset_domain (s3/s3-host
+                              {:bucket (config :aws-bucket)
+                               :region (config :aws-region)})
               :extra_scripts
               (->> @additional-scripts
                    (map (fn [s] (if (fn? s) (s) s)))

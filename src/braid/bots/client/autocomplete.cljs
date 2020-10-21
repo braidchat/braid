@@ -1,5 +1,6 @@
 (ns braid.bots.client.autocomplete
   (:require
+   [braid.lib.upload :as upload]
    [braid.core.client.ui.views.autocomplete :refer [fuzzy-matches?]]
    [clojure.string :as string]
    [re-frame.core :refer [subscribe dispatch]]))
@@ -21,7 +22,7 @@
                           :html
                           (constantly
                             [:div.bot.match
-                             [:img.avatar {:src (b :avatar)}]
+                             [:img.avatar {:src (upload/->path (b :avatar))}]
                              [:div.info
                               [:div.name (b :nickname)]
                               [:div.extra]]])})))

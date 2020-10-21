@@ -2,6 +2,7 @@
   (:require
    [clojure.string :as string]
    [re-frame.core :refer [subscribe dispatch]]
+   [braid.lib.upload :as upload]
    [reagent.core :as r]))
 
 (defn new-custom-emoji-view
@@ -25,10 +26,13 @@
                      :on-change (fn [e]
                                   (reset! uploading? true)
                                   (dispatch [:braid.uploads/upload!
-                                             (aget (.. e -target -files) 0)
-                                             (fn [url]
+                                             {:file
+                                              (aget (.. e -target -files) 0)
+                                              :type "custom-emoji"
+                                              :group-id @(subscribe [:open-group-id])
+                                              :on-complete (fn [{:keys [url]}]
                                                (reset! uploading? false)
-                                               (reset! image-url url))]))}])]
+                                               (reset! image-url url))}]))}])]
        [:button
         {:disabled (or (string/blank? @shortcode)
                        (string/blank? @image-url)
@@ -43,7 +47,7 @@
         "Add"]
        [:br]
        (when-let [url @image-url]
-         [:img {:src url :width "300"}])])))
+         [:img {:src (upload/->path url) :width "300"}])])))
 
 (defn extra-emoji-view
   [emoji]
@@ -68,7 +72,7 @@
             "Cancel"]]
           [:span (emoji :shortcode)
            [:button {:on-click (fn [_] (reset! editing? true))} "Edit"]])]
-       [:td [:img {:src (emoji :image)}]]
+       [:td [:img {:src (upload/->path (emoji :image))}]]
        [:td [:button.delete
              {:on-click (fn [_] (dispatch [:emoji/retract-emoji (emoji :id)]))}
              \uf1f8]]])))
