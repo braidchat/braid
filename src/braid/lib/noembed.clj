@@ -1,8 +1,7 @@
-(ns braid.core.server.api.noembed
-  (:require
-    [clojure.data.json :as json]
-    [org.httpkit.client :as http]
-    [taoensso.timbre :as timbre]))
+(ns braid.lib.noembed
+  (:require [clojure.data.json :as json]
+            [org.httpkit.client :as http]
+            [taoensso.timbre :as timbre]))
 
 (defn get-oembed
   [url]
