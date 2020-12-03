@@ -24,21 +24,26 @@
             (group/create-group-txn {:id (db/uuid) :slug "braid" :name "Braid"})
             (group/create-group-txn {:id (db/uuid) :slug "chat" :name "Chat"})))
 
+        user-1 {:id (db/uuid)
+                :email "foo@example.com"
+                :password "foofoofoo"}
+
+        user-2 {:id (db/uuid)
+                :email "bar@example.com"
+                :password "barbarbar"}
+
         _ (println "Create Users")
-        [user-1 user-2]
-        (db/run-txns!
-          (concat
+        _ (db/run-txns!
+           (concat
             (user/create-user-txn
-              {:id (db/uuid)
-               :email "foo@example.com"})
+             (select-keys user-1 [:id :email]))
             (user/create-user-txn
-              {:id (db/uuid)
-               :email "bar@example.com"})))
+             (select-keys user-2 [:id :email]))))
 
         _ (println "Set Passwords")
         _ (db/run-txns! (concat
-                          (user/set-user-password-txn (user-1 :id) "foofoofoo")
-                          (user/set-user-password-txn (user-2 :id) "barbarbar")))
+                         (user/set-user-password-txn (user-1 :id) (user-1 :password))
+                         (user/set-user-password-txn (user-2 :id) (user-2 :password))))
 
         _ (println "Add Users to Groups and Make Users Admins")
         _ (db/run-txns!
@@ -107,17 +112,21 @@
         new-thread-id (db/uuid)
         [msg5 msg6]
         (db/run-txns!
-          (concat
-            (message/create-message-txn {:id (db/uuid)
-                                         :user-id (user-1 :id)
-                                         :group-id (group-2 :id)
-                                         :thread-id new-thread-id
-                                         :created-at (java.util.Date.)
-                                         :content "Hello?"
-                                         :mentioned-tag-ids [(tag-3 :id)]})
-            (message/create-message-txn {:id (db/uuid)
-                                         :group-id (group-2 :id)
-                                         :thread-id new-thread-id
-                                         :user-id (user-2 :id)
-                                         :created-at (java.util.Date.)
-                                         :content "Hi!"})))]))
+         (concat
+          (message/create-message-txn {:id (db/uuid)
+                                       :user-id (user-1 :id)
+                                       :group-id (group-2 :id)
+                                       :thread-id new-thread-id
+                                       :created-at (java.util.Date.)
+                                       :content "Hello?"
+                                       :mentioned-tag-ids [(tag-3 :id)]})
+          (message/create-message-txn {:id (db/uuid)
+                                       :group-id (group-2 :id)
+                                       :thread-id new-thread-id
+                                       :user-id (user-2 :id)
+                                       :created-at (java.util.Date.)
+                                       :content "Hi!"})))]
+    (println "\nYou can log in with:\n "
+             (select-keys user-1 [:email :password])
+             "\n"
+             (select-keys user-2 [:email :password]))))
