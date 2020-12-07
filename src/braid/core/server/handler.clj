@@ -11,11 +11,12 @@
    [ring.middleware.cors :refer [wrap-cors]]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults secure-site-defaults site-defaults]]
    [ring.middleware.format :refer [wrap-restful-format]]
-   [ring.middleware.edn :refer [wrap-edn-params]]))
+   [ring.middleware.edn :refer [wrap-edn-params]]
+   [taoensso.timbre :as timbre]))
 
 (def session-max-age (* 60 60 24 365))
 
-; NOT using config here, b/c it won't have started when this runs
+;; NOT using config here, b/c it won't have started when this runs
 (if (env :redis-uri)
   (do
     (require 'taoensso.carmine.ring)
@@ -57,19 +58,29 @@
                :content-types          true
                :default-charset        "utf-8"}})
 
+(defn- wrap-log-requests
+  [handler]
+  (fn [{uri :uri method :request-method :as request}]
+    (let [t0 (System/currentTimeMillis)
+          {:keys [status] :as response} (handler request)]
+      (timbre/debugf "[%s +%4dms] %8.8s %s" status (- (System/currentTimeMillis) t0) method uri)
+      response)))
+
 (def mobile-client-app
   (-> (routes
-        resource-routes
-        mobile-client-routes)
+       resource-routes
+       mobile-client-routes)
       (wrap-defaults (-> static-site-defaults
-                         assoc-cookie-conf))))
+                         assoc-cookie-conf))
+      wrap-log-requests))
 
 (def desktop-client-app
   (-> (routes
-        resource-routes
-        desktop-client-routes)
+       resource-routes
+       desktop-client-routes)
       (wrap-defaults (-> static-site-defaults
-                         assoc-cookie-conf))))
+                         assoc-cookie-conf))
+      wrap-log-requests))
 
 (def api-server-app
   (-> (routes
@@ -112,4 +123,5 @@
                                                   (remove nil?))
                  :access-control-allow-credentials true
                  :access-control-allow-methods [:get :put :post :delete])
-      wrap-edn-params))
+      wrap-edn-params
+      wrap-log-requests))
