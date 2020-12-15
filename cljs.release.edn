@@ -1,0 +1,18 @@
+{:asset-path "/js/prod/"
+ :output-dir "resources/public/js/prod/out"
+ :optimizations :advanced
+ :pretty-print false
+ :elide-asserts true
+ :closure-defines {goog.DEBUG false}
+ :modules {:cljs-base
+           {:output-to "resources/public/js/prod/base.js"}
+           :desktop
+           {:output-to "resources/public/js/prod/desktop.js"
+            :entries #{braid.core.client.desktop.core}}
+           :gateway
+           {:output-to "resources/public/js/prod/gateway.js"
+            :entries #{braid.core.client.gateway.core}}
+           :mobile
+           {:output-to "resources/public/js/prod/mobile.js"
+            :entries #{braid.core.client.mobile.core}}}
+ :verbose true}
