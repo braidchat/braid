@@ -20,6 +20,7 @@
     [braid.recent-page.core]
     [braid.rss.core]
     [braid.search.core]
+    [braid.sidebar.core]
     [braid.stars.core]
     [braid.subscriptions-page.core]
     [braid.uploads.core]
@@ -46,6 +47,7 @@
   (braid.group-explore.core/init!)
   (braid.image-embeds.core/init!)
   (braid.notices.core/init!)
+  (braid.sidebar.core/init!)
   (braid.permalinks.core/init!)
   (braid.popovers.core/init!)
   (braid.quests.core/init!)

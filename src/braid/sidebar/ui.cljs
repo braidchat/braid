@@ -1,17 +1,16 @@
-(ns braid.core.client.ui.views.sidebar
+(ns braid.sidebar.ui
   (:require
-   [braid.core.client.helpers :refer [location element-offset get-style]]
-   [braid.lib.color :as color]
-   [braid.core.client.routes :as routes]
-   [braid.core.client.ui.styles.vars :as style-vars]
-   [braid.lib.upload :as upload]
-   [clojure.string :as string]
-   [goog.events :as events]
-   [re-frame.core :refer [dispatch subscribe]]
-   [reagent.core :as r]
-   [reagent.ratom :include-macros true :refer-macros [reaction]])
+    [clojure.string :as string]
+    [goog.events :as events]
+    [re-frame.core :refer [dispatch subscribe]]
+    [reagent.core :as r]
+    [braid.core.client.helpers :refer [location element-offset get-style]]
+    [braid.core.client.routes :as routes]
+    [braid.core.client.ui.styles.vars :as style-vars]
+    [braid.lib.color :as color]
+    [braid.lib.upload :as upload])
   (:import
-   (goog.events EventType)))
+    (goog.events EventType)))
 
 (def v- (partial mapv -))
 

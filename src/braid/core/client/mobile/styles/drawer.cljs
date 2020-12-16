@@ -1,6 +1,6 @@
 (ns braid.core.client.mobile.styles.drawer
   (:require
-    [braid.core.client.ui.styles.sidebar]
+    [braid.sidebar.styles]
     [garden.arithmetic :as m]
     [garden.units :refer [rem em px ex]]))
 
@@ -18,6 +18,6 @@
      [:>.groups
 
       [:>.group
-       (braid.core.client.ui.styles.sidebar/sidebar-button "15vw")
+       (braid.sidebar.styles/sidebar-button "15vw")
        {:margin [[0 0 pad 0]]
         :color "#222"}]]]]])
