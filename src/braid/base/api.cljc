@@ -70,6 +70,16 @@
               (every? fn? (vals sub-map))]}
        (braid.base.client.subs/register-subs! sub-map))
 
+     (defn register-subs-raw!
+       "Registers multiple re-frame subscription handlers, as if passed to reg-sub-raw.
+
+       Expects a map of sub-keys to sub-handler-fns."
+       [sub-map]
+       {:pre [(map? sub-map)
+              (every? keyword? (keys sub-map))
+              (every? fn? (vals sub-map))]}
+       (braid.base.client.subs/register-subs-raw! sub-map))
+
      (defn register-root-view!
        "Add a new view to the app (when user is logged in).
        Will be put under body > #app > .app > .main >"

@@ -125,17 +125,6 @@
         (doall (filter (fn [thread] (= (thread :group-id) group-id))
                        @open-threads))))))
 
-(reg-sub-raw
-  :recent-threads
-  (fn [state _ [group-id]]
-    (let [not-open? (reaction
-                      (complement (get-in @state [:user :open-thread-ids])))
-          threads (reaction (@state :threads))]
-      (reaction
-        (doall (filter (fn [{grp :group-id id :id}]
-                         (and (= grp group-id) (@not-open? id)))
-                       (vals @threads)))))))
-
 (reg-sub
   :users-in-group
   (fn [state [_ group-id]]

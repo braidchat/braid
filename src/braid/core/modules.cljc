@@ -17,6 +17,7 @@
     [braid.permalinks.core]
     [braid.popovers.core]
     [braid.quests.core]
+    [braid.recent-page.core]
     [braid.rss.core]
     [braid.search.core]
     [braid.stars.core]
@@ -47,6 +48,7 @@
   (braid.permalinks.core/init!)
   (braid.popovers.core/init!)
   (braid.quests.core/init!)
+  (braid.recent-page.core/init!)
   (braid.rss.core/init!)
   (braid.stars.core/init!)
   (braid.search.core/init!)
