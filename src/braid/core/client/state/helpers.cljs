@@ -1,14 +1,13 @@
 (ns braid.core.client.state.helpers
   (:require
    [braid.core.client.schema :as schema]
+   [braid.lib.misc :as misc]
    [cljs-utils.core :refer [flip]]
    [clojure.set :as set]))
 
-(defn key-by-id [coll]
-  (into {} (map (juxt :id identity)) coll))
+(def key-by misc/key-by)
 
-(defn key-by [k coll]
-  (into {} (map (juxt k identity)) coll))
+(def key-by-id (partial key-by :id))
 
 (defn order-groups
   "Helper function to impose an order on groups.
