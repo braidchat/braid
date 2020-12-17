@@ -65,7 +65,7 @@
       {:db/ident :quest-record/id
        :db/valueType :db.type/uuid
        :db/cardinality :db.cardinality/one
-       :db/unique :db.unique/identit}
+       :db/unique :db.unique/identity}
       {:db/ident :quest-record/quest-id
        :db/valueType :db.type/keyword
        :db/cardinality :db.cardinality/one}
