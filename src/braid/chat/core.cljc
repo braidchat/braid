@@ -20,7 +20,6 @@
           [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
           [braid.core.client.invites.views.invite-page :refer [invite-page-view]]
           [braid.core.client.ui.views.pages.changelog :refer [changelog-view]]
-          [braid.core.client.ui.views.pages.tags :refer [tags-page-view]]
           [braid.core.client.ui.views.pages.me :refer [me-page-view]]
           [braid.core.client.group-admin.views.group-settings-page :refer [group-settings-page-view]]])))
 
@@ -104,10 +103,6 @@
        (chat/register-group-page!
          {:key :settings
           :view group-settings-page-view})
-
-       (chat/register-group-page!
-         {:key :tags
-          :view tags-page-view})
 
        (chat/register-group-page!
          {:key :me

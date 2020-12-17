@@ -21,6 +21,7 @@
     [braid.rss.core]
     [braid.search.core]
     [braid.stars.core]
+    [braid.subscriptions-page.core]
     [braid.uploads.core]
     [braid.uploads-page.core]
     [braid.users.core]
@@ -52,6 +53,7 @@
   (braid.rss.core/init!)
   (braid.stars.core/init!)
   (braid.search.core/init!)
+  (braid.subscriptions-page.core/init!)
   (braid.uploads.core/init!)
   (braid.uploads-page.core/init!)
   (braid.users.core/init!)
