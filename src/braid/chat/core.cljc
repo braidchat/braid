@@ -5,6 +5,7 @@
     [braid.chat.api :as chat]
     #?@(:clj
          [[braid.chat.schema :as schema]
+          [braid.chat.seed :as seed]
           [braid.chat.server.initial-data :as initial-data]]
         :cljs
          [[re-frame.core :refer [dispatch]]
@@ -27,6 +28,7 @@
   #?(:clj
      (do
        (base/register-db-schema! schema/schema)
+       (base/register-db-seed-txns! seed/txns)
        ;; TODO some of these might better belong elsewhere
        (doseq [k [:api-domain
                   :asana-client-id
