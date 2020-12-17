@@ -31,12 +31,7 @@
         :route-fn routes/group-page-path
         :route-args {:page-id "inbox"}
         :icon \uf01c
-        :priority 10}
-       {:title "Recently Closed"
-        :route-fn routes/group-page-path
-        :route-args {:page-id "recent"}
-        :icon \uf1da
-        :priority 5}])
+        :priority 10}])
     [GroupHeaderItem]))
 
 (defn group-header-buttons-view [header-items]
