@@ -26,12 +26,7 @@
 (defonce user-header-menu-items
   (hooks/register!
     (atom
-      [{:body "Manage Subscriptions"
-        :route-fn routes/group-page-path
-        :route-args {:page-id "tags"}
-        :icon \uf02c
-        :priority 10}
-       {:body "Invite a Person"
+      [{:body "Invite a Person"
         :route-fn routes/group-page-path
         :route-args {:page-id "invite"}
         :icon \uf1e0

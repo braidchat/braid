@@ -1,4 +1,4 @@
-(ns braid.core.client.ui.views.pages.tags
+(ns braid.subscriptions-page.ui
   (:require
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]

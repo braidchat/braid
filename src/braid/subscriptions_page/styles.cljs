@@ -1,4 +1,4 @@
-(ns braid.core.client.ui.styles.pages.tags
+(ns braid.subscriptions-page.styles
   (:require
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
