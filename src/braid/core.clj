@@ -18,7 +18,7 @@
   "Entry point for prod"
   [port]
   ;; modules must run first
-  (modules/init!)
+  (modules/init! modules/default)
   (-> (mount/with-args {:port port})
       (mount/start)))
 

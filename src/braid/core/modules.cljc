@@ -31,35 +31,47 @@
     [braid.youtube-embeds.core]
     [braid.map-embeds.core]))
 
-(defn init! []
+(defn init! [module-fns]
   (hooks/reset-all!)
+  (doseq [module-fn module-fns]
+    (module-fn)))
 
-  (braid.base.core/init!)
-  (braid.chat.core/init!)
+(def default
+  [;; these expose an api and most modules use them
+   braid.base.core/init!
+   braid.chat.core/init!
+   ;; these expose an api
+   braid.popovers.core/init!
+   braid.embeds.core/init!
+   braid.emoji.core/init!
+   ;; rest do not expose api
+   braid.big-emoji.core/init!
+   braid.bots.core/init!
+   braid.custom-emoji.core/init!
+   braid.disconnect-notice.core/init!
+   braid.emojione-emoji.core/init!
+   braid.group-explore.core/init!
+   braid.image-embeds.core/init!
+   braid.notices.core/init!
+   braid.sidebar.core/init!
+   braid.permalinks.core/init!
+   braid.quests.core/init!
+   braid.recent-page.core/init!
+   braid.rss.core/init!
+   braid.stars.core/init!
+   braid.search.core/init!
+   braid.subscriptions-page.core/init!
+   braid.uploads.core/init!
+   braid.uploads-page.core/init!
+   braid.users.core/init!
+   braid.video-embeds.core/init!
+   braid.website-embeds.core/init!
+   braid.youtube-embeds.core/init!
+   braid.map-embeds.core/init!])
 
-  (braid.big-emoji.core/init!)
-  (braid.bots.core/init!)
-  (braid.custom-emoji.core/init!)
-  (braid.disconnect-notice.core/init!)
-  (braid.embeds.core/init!)
-  (braid.emoji.core/init!)
-  (braid.emojione-emoji.core/init!)
-  (braid.group-explore.core/init!)
-  (braid.image-embeds.core/init!)
-  (braid.notices.core/init!)
-  (braid.sidebar.core/init!)
-  (braid.permalinks.core/init!)
-  (braid.popovers.core/init!)
-  (braid.quests.core/init!)
-  (braid.recent-page.core/init!)
-  (braid.rss.core/init!)
-  (braid.stars.core/init!)
-  (braid.search.core/init!)
-  (braid.subscriptions-page.core/init!)
-  (braid.uploads.core/init!)
-  (braid.uploads-page.core/init!)
-  (braid.users.core/init!)
-  (braid.video-embeds.core/init!)
-  (braid.website-embeds.core/init!)
-  (braid.youtube-embeds.core/init!)
-  (braid.map-embeds.core/init!))
+(defn plus [base to-add]
+  (distinct (concat base to-add)))
+
+(defn minus [base to-subtract]
+  (let [to-subtract (set to-subtract)]
+    (remove to-subtract base)))

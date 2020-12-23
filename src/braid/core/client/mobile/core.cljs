@@ -23,11 +23,11 @@
   (r/render [app-view] (. js/document (getElementById "app"))))
 
 (defn ^:export init []
-  (modules/init!)
+  (modules/init! modules/default)
   (dispatch-sync [:initialize-db])
   (render)
   (router/init))
 
 (defn ^:export reload []
-  (modules/init!)
+  (modules/init! modules/default)
   (render))

@@ -6,7 +6,7 @@
    [mount.core :as mount]))
 
 (defn drop-db [t]
-  (modules/init!)
+  (modules/init! modules/default)
   (-> (mount/only #{#'conf/config #'db/conn})
       (mount/swap {#'conf/config
                    {:db-url "datomic:mem://chat-test"}})

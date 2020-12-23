@@ -22,8 +22,11 @@
 (defn render []
   (r/render [app-view] (.getElementById js/document "app")))
 
-(defn ^:export init []
-  (modules/init!)
+(defn ^:export init
+  ([] (init modules/default))
+  ([modules]
+   (modules/init! modules)
+
   (dispatch-sync [:initialize-db])
 
   (.addEventListener js/document "visibilitychange"
@@ -33,10 +36,10 @@
 
   (render)
 
-  (router/init))
+   (router/init)))
 
 (defn ^:export reload
   "Force a re-render. For use with figwheel"
   []
-  (modules/init!)
+  (modules/init! modules/default)
   (render))

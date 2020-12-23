@@ -13,7 +13,7 @@
   (r/render [gateway-view] (. js/document (getElementById "app"))))
 
 (defn ^:export init []
-  (modules/init!)
+  (modules/init! modules/default)
   (dispatch-sync [::events/initialize (keyword (aget js/window "gateway_action"))])
   (render))
 
