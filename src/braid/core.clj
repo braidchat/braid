@@ -20,7 +20,7 @@
   ;; modules must run first
   (modules/init!)
   (-> (mount/with-args {:port port})
-      (mount/start {:port port})))
+      (mount/start)))
 
 (defn stop!
   "Helper function for stopping all Braid components."
