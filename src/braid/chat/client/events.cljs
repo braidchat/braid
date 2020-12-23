@@ -351,22 +351,6 @@
                                 (map :id threads))))}))
 
 (reg-event-fx
-  :load-recent-threads
-  (fn [_ [_ {:keys [group-id on-error on-complete]}]]
-    {:websocket-send
-     (list
-       [:braid.server/load-recent-threads group-id]
-       5000
-       (fn [reply]
-         (if-let [threads (:braid/ok reply)]
-           (dispatch [:add-threads threads])
-           (cond
-             (= reply :chsk/timeout) (on-error "Timed out")
-             (:braid/error reply) (on-error (:braid/error reply))
-             :else (on-error "Something went wrong")))
-         (on-complete (some? (:braid/ok reply)))))}))
-
-(reg-event-fx
   :load-threads
   (fn [_ [_ {:keys [thread-ids on-complete]}]]
     {:websocket-send

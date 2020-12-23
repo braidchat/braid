@@ -12,6 +12,7 @@
          :clj
          [[braid.base.conf]
           [braid.base.server.jobs]
+          [braid.base.server.seed]
           [braid.base.server.http-api-routes]
           [braid.base.server.initial-data]
           [braid.base.server.spa]
@@ -70,6 +71,16 @@
               (every? fn? (vals sub-map))]}
        (braid.base.client.subs/register-subs! sub-map))
 
+     (defn register-subs-raw!
+       "Registers multiple re-frame subscription handlers, as if passed to reg-sub-raw.
+
+       Expects a map of sub-keys to sub-handler-fns."
+       [sub-map]
+       {:pre [(map? sub-map)
+              (every? keyword? (keys sub-map))
+              (every? fn? (vals sub-map))]}
+       (braid.base.client.subs/register-subs-raw! sub-map))
+
      (defn register-root-view!
        "Add a new view to the app (when user is logged in).
        Will be put under body > #app > .app > .main >"
@@ -126,6 +137,19 @@
        {:pre [(vector? schema)
               (every? (partial util/valid? braid.base.server.schema/rule-dataspec) schema)]}
        (swap! braid.base.server.schema/schema concat schema))
+
+     (defn register-db-seed-txns!
+       ;; have to take fns that return maps rather than just taking maps
+       ;; because some existing txn-functions require the db to alrady exist
+       ;; ex. braid.chat.db.user/create-user-txn
+       "Given a function that returns a map of strings -> txns,
+          ex.
+              (fn []
+                {\"Create Users\" [[:db/add ...] [:db/add ...]]})
+        will register those transactions for seeding, when base.server.seed/seed! is called"
+       [txn-map-fn]
+       {:pre [(fn? txn-map-fn)]}
+       (swap! braid.base.server.seed/seed-txns merge txn-map-fn))
 
      (defn register-config-var!
        "Add a keyword to be read from `env` and added to the `config` state"

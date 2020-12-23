@@ -8,7 +8,7 @@
    [braid.core.client.ui.views.header :refer [group-name-view group-header-buttons-view]]
    [braid.core.client.ui.views.new-message-action-button :refer [new-message-action-button-view]]
    [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
-   [braid.core.client.ui.views.sidebar :as sidebar]
+   [braid.sidebar.ui :as sidebar]
    [braid.core.client.ui.views.thread :refer [messages-view]]
    [cljs.core.async :as a]
    [re-frame.core :refer [subscribe dispatch]]

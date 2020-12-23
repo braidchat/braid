@@ -211,13 +211,6 @@
       (db/run-txns! (tag/retract-tag-txn tag-id))
       (broadcast-group-change group-id [:braid.client/retract-tag tag-id]))))
 
-(defmethod event-msg-handler :braid.server/load-recent-threads
-  [{:as ev-msg :keys [?data ?reply-fn user-id]}]
-  (when ?reply-fn
-    (?reply-fn {:braid/ok (thread/recent-threads
-                            {:group-id ?data
-                             :user-id user-id})})))
-
 (defmethod event-msg-handler :braid.server/load-threads
   [{:as ev-msg :keys [?data ?reply-fn user-id]}]
   (let [user-tags (tag/tag-ids-for-user user-id)

@@ -1,4 +1,4 @@
-(ns braid.core.client.ui.styles.sidebar
+(ns braid.sidebar.styles
   (:require
    [braid.core.client.ui.styles.mixins :as mixins]
    [braid.core.client.ui.styles.vars :as vars]
@@ -49,7 +49,7 @@
 
    badge])
 
-(def sidebar
+(def >sidebar
   [:>.sidebar
    {:position "fixed"
     :left 0

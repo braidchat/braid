@@ -33,7 +33,6 @@
 
                  ;;client
                  [org.clojure/clojurescript "1.10.238"]
-                 [org.clojars.leanpixel/cljs-utils "0.4.2"]
                  [cljs-ajax "0.5.8"]
                  [secretary "1.2.3"]
                  [venantius/accountant "0.2.4"]

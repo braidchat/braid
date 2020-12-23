@@ -17,9 +17,12 @@
     [braid.permalinks.core]
     [braid.popovers.core]
     [braid.quests.core]
+    [braid.recent-page.core]
     [braid.rss.core]
     [braid.search.core]
+    [braid.sidebar.core]
     [braid.stars.core]
+    [braid.subscriptions-page.core]
     [braid.uploads.core]
     [braid.uploads-page.core]
     [braid.users.core]
@@ -44,12 +47,15 @@
   (braid.group-explore.core/init!)
   (braid.image-embeds.core/init!)
   (braid.notices.core/init!)
+  (braid.sidebar.core/init!)
   (braid.permalinks.core/init!)
   (braid.popovers.core/init!)
   (braid.quests.core/init!)
+  (braid.recent-page.core/init!)
   (braid.rss.core/init!)
   (braid.stars.core/init!)
   (braid.search.core/init!)
+  (braid.subscriptions-page.core/init!)
   (braid.uploads.core/init!)
   (braid.uploads-page.core/init!)
   (braid.users.core/init!)

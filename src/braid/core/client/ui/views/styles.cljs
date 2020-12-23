@@ -16,9 +16,7 @@
    [braid.core.client.ui.styles.pages.global-settings]
    [braid.core.client.ui.styles.pages.inbox]
    [braid.core.client.ui.styles.pages.me]
-   [braid.core.client.ui.styles.pages.tags]
    [braid.core.client.ui.styles.pills]
-   [braid.core.client.ui.styles.sidebar]
    [braid.core.client.ui.styles.thread]
    [braid.core.client.ui.styles.vars :as vars]
    [garden.core :refer [css]]
@@ -55,7 +53,6 @@
                 [:>.main
                  (braid.core.client.ui.styles.header/header vars/pad)
 
-                 braid.core.client.ui.styles.sidebar/sidebar
                  braid.core.client.ui.styles.page/page
 
                  [:.gateway
@@ -77,7 +74,6 @@
                  ;; page styles
 
                  braid.core.client.ui.styles.pages.inbox/inbox-page
-                 braid.core.client.ui.styles.pages.tags/tags-page
                  braid.core.client.ui.styles.pages.me/me-page
                  braid.core.client.group-admin.views.group-settings-page-styles/group-settings-page
                  braid.core.client.invites.views.invite-page-styles/invite-page

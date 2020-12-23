@@ -5,6 +5,7 @@
     [braid.chat.api :as chat]
     #?@(:clj
          [[braid.chat.schema :as schema]
+          [braid.chat.seed :as seed]
           [braid.chat.server.initial-data :as initial-data]]
         :cljs
          [[re-frame.core :refer [dispatch]]
@@ -20,8 +21,6 @@
           [braid.core.client.ui.views.pages.global-settings :refer [global-settings-page-view]]
           [braid.core.client.invites.views.invite-page :refer [invite-page-view]]
           [braid.core.client.ui.views.pages.changelog :refer [changelog-view]]
-          [braid.core.client.ui.views.pages.recent :refer [recent-page-view]]
-          [braid.core.client.ui.views.pages.tags :refer [tags-page-view]]
           [braid.core.client.ui.views.pages.me :refer [me-page-view]]
           [braid.core.client.group-admin.views.group-settings-page :refer [group-settings-page-view]]])))
 
@@ -29,6 +28,7 @@
   #?(:clj
      (do
        (base/register-db-schema! schema/schema)
+       (base/register-db-seed-txns! seed/txns)
        ;; TODO some of these might better belong elsewhere
        (doseq [k [:api-domain
                   :asana-client-id
@@ -103,25 +103,8 @@
                (helpers/set-preferences (data :user-preferences)))))
 
        (chat/register-group-page!
-         {:key :recent
-          :view recent-page-view
-          :on-load (fn [page]
-                     (dispatch [:set-page-loading true])
-                     (dispatch [:load-recent-threads
-                                {:group-id (page :group-id)
-                                 :on-complete (fn [_]
-                                                (dispatch [:set-page-loading false]))
-                                 :on-error (fn [e]
-                                             (dispatch [:set-page-loading false])
-                                             (dispatch [:set-page-error true]))}]))})
-
-       (chat/register-group-page!
          {:key :settings
           :view group-settings-page-view})
-
-       (chat/register-group-page!
-         {:key :tags
-          :view tags-page-view})
 
        (chat/register-group-page!
          {:key :me
