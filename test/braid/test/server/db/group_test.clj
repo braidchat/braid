@@ -1,14 +1,14 @@
-(ns braid.test.server.db.group
+(ns braid.test.server.db.group-test
   (:require
-    [clojure.test :refer :all]
-    [braid.core.server.db :as db]
-    [braid.chat.db.group :as group]
-    [braid.chat.db.user :as user]
-    [braid.test.fixtures.db :refer [drop-db]]))
+   [clojure.test :refer :all]
+   [braid.core.server.db :as db]
+   [braid.chat.db.group :as group]
+   [braid.chat.db.user :as user]
+   [braid.test.fixtures.db :refer [drop-db]]))
 
 (use-fixtures :each drop-db)
 
-; Unit Tests
+                                        ; Unit Tests
 
 (deftest create-group
   (let [data {:id (db/uuid)
@@ -33,17 +33,17 @@
 
     (testing "error if slug is not unique"
       (is (thrown-with-msg?  Exception
-                            #"unique-conflict"
-                            (db/run-txns!
+                             #"unique-conflict"
+                             (db/run-txns!
                               (group/create-group-txn {:id (db/uuid)
                                                        :name "Dupe"
                                                        :slug (data :slug)})))))))
 
 (deftest group-with-slug-exists?
   (db/run-txns!
-    (group/create-group-txn {:id (db/uuid)
-                             :slug "existing-group"
-                             :name "Existing Group"}))
+   (group/create-group-txn {:id (db/uuid)
+                            :slug "existing-group"
+                            :name "Existing Group"}))
 
   (testing "returns true when a matching group exists"
     (is (= (group/group-with-slug-exists? "existing-group") true)))
@@ -52,7 +52,7 @@
     (is (= (group/group-with-slug-exists? "not-existing-group") false))))
 
 
-; BDD Tests
+                                        ; BDD Tests
 
 (deftest set-group-intro
   (testing "can set an existing group's intro"
