@@ -7,7 +7,7 @@
    [braid.core.modules :as modules]
    ;; all following requires are for mount:
    [braid.core.server.core]
-   [braid.core.server.email-digest :refer [email-jobs]]))
+   [braid.core.server.email-digest]))
 
 ;; because we often use http-kit as our http-client
 ;; including this so that SNI works
