@@ -15,6 +15,9 @@
 (defonce additional-scripts
   (hooks/register! (atom []) [additional-script-dataspec]))
 
+(defn init-script [client]
+  (str "braid.core.client." client ".core.init();"))
+
 (defn get-html [client vars]
   (let [prod-js? (= "prod" (config :environment))]
     (cljstache/render-resource
@@ -22,6 +25,7 @@
       (merge {:prod prod-js?
               :dev (not prod-js?)
               :algo "sha256"
+              :init_script (init-script client)
               :js (if prod-js?
                     (str (digest/from-file (str "public/js/prod/" client ".js")))
                     (str (digest/from-file (str "public/js/dev/" client ".js"))))
