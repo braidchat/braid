@@ -62,5 +62,13 @@
                  :extra-deps {figwheel-sidecar/figwheel-sidecar {:mvn/version "0.5.18"}}}
            :cljs-desktop {:main-opts ["-m" "cljs.main" "--compile-opts" "cljs.desktop.edn" "--compile"]}
            :cljs-gateway {:main-opts ["-m" "cljs.main" "--compile-opts" "cljs.gateway.edn" "--compile"]}
-           :cljs-release {:main-opts ["-m" "cljs.main" "--compile-opts" "cljs.release.edn" "--compile"]}}
- }
+           :cljs-release {:main-opts ["-m" "cljs.main" "--compile-opts" "cljs.release.edn" "--compile"]}
+           :test {:extra-paths ["test"]
+                  :extra-deps {com.datomic/datomic-free {:mvn/version "0.9.5697"}}}
+           ;; clj -M:test:project/test-clj
+           :project/test-clj {:main-opts ["-m" "cognitect.test-runner"]
+                              :extra-deps {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                                                                      :sha "b6b3193fcc42659d7e46ecd1884a228993441182"}}}
+           ;; clj -M:test:project/test-cljs
+           :project/test-cljs {:main-opts ["-m" "cljs-test-runner.main"]
+                               :extra-deps {olical/cljs-test-runner {:mvn/version "3.7.0"}}}}}
