@@ -1,76 +1,19 @@
 (defproject braid "0.0.1"
   :source-paths ["src"]
 
-  :dependencies [;;server
-                 [org.clojure/clojure "1.9.0"]
-                 [javax.servlet/servlet-api "2.5"]
-                 [commons-codec "1.10"]
-                 [commons-validator "1.5.1"]
-                 [http-kit "2.4.0-beta1"]
-                 [ring/ring-core "1.7.1"]
-                 [ring/ring-defaults "0.3.2" :exclusions [ring/ring-core]]
-                 [fogus/ring-edn "0.3.0"]
-                 [ring-cors "0.1.12"]
-                 [compojure "1.5.1"]
-                 [environ "1.0.3"]
-                 [com.taoensso/timbre "4.7.4" :exclusions [org.clojure/tools.reader com.taoensso/truss com.taoensso/encore]]
-                 [crypto-password "0.2.0"]
-                 [clj-time "0.12.0"]
-                 [instaparse "1.4.2"]
-                 [com.taoensso/carmine "2.13.1" :exclusions [com.taoensso/encore]]
-                 [image-resizer "0.1.9"]
-                 [clojurewerkz/quartzite "2.0.0"]
-                 [inliner "0.1.0"]
-                 [cljstache "2.0.1"]
-                 [mount "0.1.10"]
-                 [com.fasterxml.jackson.core/jackson-core "2.9.6"]
-                 [com.fasterxml.jackson.dataformat/jackson-dataformat-cbor "2.9.6"]
-                 [com.fasterxml.jackson.dataformat/jackson-dataformat-smile "2.9.6"]
-                 [com.fasterxml.jackson.core/jackson-databind "2.9.6"]
-                 [com.cognitect/transit-clj "0.8.300"]
-                 [ring-transit "0.1.6"]
-                 [clout "2.1.2"]
-
-                 ;;client
-                 [org.clojure/clojurescript "1.10.238"]
-                 [cljs-ajax "0.5.8"]
-                 [secretary "1.2.3"]
-                 [venantius/accountant "0.2.4"]
-                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
-                 [com.andrewmcveigh/cljs-time "0.4.0"]
-                 [clj-fuzzy "0.3.2"]
-                 [reagent  "0.8.1"]
-                 [re-frame "0.10.5" :exclusions [org.clojure/clojurescript]]
-                 [ring-middleware-format "0.7.4"]
-                 [cljsjs/husl "6.0.1-0"]
-                 [cljsjs/highlight "9.6.0-0"]
-                 [com.cognitect/transit-cljs "0.8.239"]
-                 [hickory "0.7.0" :exclusions [org.clojure/clojurescript]]
-                 [org.clojure/core.memoize "0.5.9"]
-                 [lein-doo "0.1.7"]
-                 [cljsjs/resize-observer-polyfill "1.4.2-0"]
-                 [clucie "0.4.2"]
-
-                 ;;shared
-                 [org.clojure/tools.reader "1.3.0-alpha3"]
-                 [org.clojure/core.async "0.4.474" :exclusions [org.clojure/tools.reader]]
-                 [metosin/spec-tools "0.7.0"]
-                 [org.clojure/test.check "0.9.0"] ; b/c spec-tools breaks without it
-                 [com.taoensso/truss "1.3.6"]
-                 [com.taoensso/sente "1.14.0-RC2" :exclusions [org.clojure/tools.reader taoensso.timbre com.taoensso/truss]]
-
-                 ;;mobile
-                 [garden "1.3.2"]]
-
   :main braid.core
 
   :plugins [[lein-environ "1.0.0"]
+            [lein-tools-deps "0.4.5"]
             [lein-cljsbuild "1.1.6" :exclusions [org.clojure/clojure]]
             [lein-doo "0.1.7"]]
 
-
   :clean-targets ^{:protect false}
   ["resources/public/js"]
+
+  :middleware [lein-tools-deps.plugin/resolve-dependencies-with-deps-edn]
+
+  :lein-tools-deps/config {:config-files [:install :user :project]}
 
   :figwheel {:server-port 3559}
 

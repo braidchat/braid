@@ -2,7 +2,6 @@
   (:require
    [braid.core.client.schema :as schema]
    [braid.lib.misc :as misc]
-   [cljs-utils.core :refer [flip]]
    [clojure.set :as set]))
 
 (def key-by misc/key-by)
@@ -116,5 +115,5 @@
   (let [group-threads (get-in state [:group-threads group-id])]
     (-> state
         (update-in [:threads] #(apply dissoc % group-threads))
-        (update-in [:group-threads] (flip dissoc group-id))
-        (update-in [:groups] (flip dissoc group-id)))))
+        (update-in [:group-threads] (misc/flip dissoc group-id))
+        (update-in [:groups] (misc/flip dissoc group-id)))))

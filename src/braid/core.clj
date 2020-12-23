@@ -7,7 +7,7 @@
    [braid.core.modules :as modules]
    ;; all following requires are for mount:
    [braid.core.server.core]
-   [braid.core.server.email-digest :refer [email-jobs]]))
+   [braid.core.server.email-digest]))
 
 ;; because we often use http-kit as our http-client
 ;; including this so that SNI works
@@ -20,7 +20,7 @@
   ;; modules must run first
   (modules/init!)
   (-> (mount/with-args {:port port})
-      (mount/start {:port port})))
+      (mount/start)))
 
 (defn stop!
   "Helper function for stopping all Braid components."
