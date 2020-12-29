@@ -1,7 +1,7 @@
 {:paths ["src" "resources"]
  :deps {;; Shared
         com.taoensso/sente {:mvn/version "1.16.0"} ; :exclusions [org.clojure/tools.reader taoensso.timbre com.taoensso/truss]
-        com.taoensso/timbre {:mvn/version "4.7.4"}
+        com.taoensso/timbre {:mvn/version "5.1.0"}
         com.taoensso/truss {:mvn/version "1.3.6"}
         metosin/spec-tools {:mvn/version "0.7.0"}
         org.clojure/core.async {:mvn/version "0.4.474"} ; :exclusions [org.clojure/tools.reader]
