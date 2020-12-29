@@ -1,11 +1,11 @@
-(ns braid.test.server.db.user
+(ns braid.test.server.db.user-test
   (:require
-    [clojure.string :as string]
-    [clojure.test :refer :all]
-    [braid.core.server.db :as db]
-    [braid.chat.db.user :as user]
-    [braid.chat.db.group :as group]
-    [braid.test.fixtures.db :refer [drop-db]]))
+   [clojure.string :as string]
+   [clojure.test :refer :all]
+   [braid.core.server.db :as db]
+   [braid.chat.db.user :as user]
+   [braid.chat.db.group :as group]
+   [braid.test.fixtures.db :refer [drop-db]]))
 
 (use-fixtures :each drop-db)
 
@@ -34,8 +34,8 @@
     (testing "user email must be unique"
       (is (thrown? java.util.concurrent.ExecutionException
                    (db/run-txns!
-                     (user/create-user-txn {:id (db/uuid)
-                                            :email (data :email)})))))
+                    (user/create-user-txn {:id (db/uuid)
+                                           :email (data :email)})))))
 
     (testing "user nickname must be unique"
       (let [other {:id (db/uuid)
@@ -43,7 +43,7 @@
         (is (some? (db/run-txns! (user/create-user-txn other))))
         (is (thrown? java.util.concurrent.ExecutionException
                      (db/run-txns!
-                       (user/set-nickname-txn (other :id) new-nickname))))))))
+                      (user/set-nickname-txn (other :id) new-nickname))))))))
 
 (deftest create-user
   (testing "id is required"
@@ -63,7 +63,7 @@
   (testing "email must be unique"
     (let [email "ooo@email.com"]
       (db/run-txns! (user/create-user-txn {:id (db/uuid)
-                                            :email email}))
+                                           :email email}))
       (is (thrown? java.util.concurrent.ExecutionException
                    (db/run-txns! (user/create-user-txn {:id (db/uuid)
                                                         :email email}))))))
@@ -175,8 +175,8 @@
         users (user/users-for-user (user-1 :id))]
     (testing "users-for-user"
       (testing "returns all users"
-       (is (= (set (map partial-user users))
-              (set (map partial-user [user-1 user-2]))))))))
+        (is (= (set (map partial-user users))
+               (set (map partial-user [user-1 user-2]))))))))
 
 (deftest only-see-users-in-group
   (let [[group-1] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "g1" :name "g1"}))
