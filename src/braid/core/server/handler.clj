@@ -1,5 +1,6 @@
 (ns braid.core.server.handler
   (:require
+   [braid.core.server.middleware :refer [wrap-universal-middleware session-config]]
    [braid.core.server.routes.api.private :refer [api-private-routes]]
    [braid.core.server.routes.api.public :refer [api-public-routes]]
    [braid.base.server.http-api-routes :as modules]
@@ -11,26 +12,7 @@
    [ring.middleware.cors :refer [wrap-cors]]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults secure-site-defaults site-defaults]]
    [ring.middleware.format :refer [wrap-restful-format]]
-   [ring.middleware.edn :refer [wrap-edn-params]]
-   [ring.middleware.session :refer [wrap-session]]
-   [taoensso.timbre :as timbre]))
-
-(def session-max-age (* 60 60 24 365))
-
-;; NOT using config here, b/c it won't have started when this runs
-(if (env :redis-uri)
-  (do
-    (require 'taoensso.carmine.ring)
-    (def ^:dynamic *redis-conf* {:pool {}
-                                 :spec {:uri (env :redis-uri)}})
-    (let [carmine-store (ns-resolve 'taoensso.carmine.ring 'carmine-store)]
-      (def session-store
-        (carmine-store '*redis-conf* {:expiration-secs session-max-age
-                                      :key-prefix "braid"}))))
-  (do
-    (require 'ring.middleware.session.cookie)
-    (let [cookie-store (ns-resolve 'ring.middleware.session.cookie 'cookie-store)]
-      (def session-store (cookie-store)))))
+   [ring.middleware.edn :refer [wrap-edn-params]]))
 
 (defn assoc-csrf-conf [defaults]
   (-> defaults
@@ -45,31 +27,6 @@
                :absolute-redirects     true
                :content-types          true
                :default-charset        "utf-8"}})
-
-(def session-config
-  {:cookie-name "braid",
-   :cookie-attrs {:secure (cond
-                            (env :http-only) false
-                            (= (env :environment) "prod") true
-                            :else false)
-                  :max-age session-max-age},
-   :store session-store})
-
-(defn- wrap-log-requests
-  [handler]
-  (fn [{uri :uri method :request-method :as request}]
-    (let [t0 (System/currentTimeMillis)
-          {:keys [status] :as response} (handler request)]
-      (timbre/debugf "[%s +%4dms] %8.8s %s" status (- (System/currentTimeMillis) t0) method uri)
-      response)))
-
-;; Here we define universal (as opposed to route-specific) middleware.
-(defn- wrap-universal-middleware
-  "Wrap the handler with middleware that is universally applicable across the site."
-  [handler options]
-  (-> handler
-      (wrap-session (options :session))
-      wrap-log-requests))
 
 (def mobile-client-app
   (-> (routes resource-routes mobile-client-routes)
