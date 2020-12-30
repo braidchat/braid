@@ -1,13 +1,14 @@
 (ns braid.core.server.core
-  (:require [braid.core.server.handler :refer [mobile-client-app
-                                               desktop-client-app
-                                               api-server-app]]
-            [braid.base.server.ws-handler] ; for mount
-            [braid.core.server.sync] ; for multimethods
-            [braid.base.server.jobs] ; for mount
-            [mount.core :as mount :refer [defstate]]
-            [org.httpkit.server :refer [run-server server-port server-stop!]]
-            [taoensso.timbre :as timbre]))
+  (:require
+   [braid.core.server.handler :refer [mobile-client-app
+                                      desktop-client-app
+                                      api-server-app]]
+   [braid.base.server.ws-handler] ; for mount
+   [braid.core.server.sync] ; for multimethods
+   [braid.base.server.jobs] ; for mount
+   [mount.core :as mount :refer [defstate]]
+   [org.httpkit.server :refer [run-server server-port server-stop!]]
+   [taoensso.timbre :as timbre]))
 
 ;; server
 
