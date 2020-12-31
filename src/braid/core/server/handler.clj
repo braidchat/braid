@@ -72,5 +72,4 @@
                                                (remove nil?))
                  :access-control-allow-credentials true
                  :access-control-allow-methods [:get :put :post :delete])
-      wrap-edn-params
-      (wrap-universal-middleware {:session session-config})))
+      wrap-edn-params))
