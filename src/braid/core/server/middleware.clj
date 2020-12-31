@@ -41,7 +41,7 @@
 ;; Here we define the universal (as opposed to route-specific) middleware stack.
 (defn wrap-universal-middleware
   "Wrap the handler with middleware that is universally applicable across the site."
-  [handler {:keys [session] :or {session session-config}}]
+  [handler {:keys [session]}]
   (-> handler
-      (wrap-session session)
+      (wrap-session (or session session-config))
       wrap-log-requests))

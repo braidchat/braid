@@ -17,18 +17,19 @@
         request {:uri "/write"}
         response (handler request)
         cookies (reduce merge (map parse-cookie (get-in response [:headers "Set-Cookie"])))
-        request {:uri "/read" :headers {"cookie" (write-cookies cookies)}}]
+        request {:request-method :get :uri "/read" :headers {"cookie" (write-cookies cookies)}}]
     (is (= {:message "Claude E. Shannon"} ((handler request) :session')))))
 
 (deftest custom-session-config-can-be-specified
   (let [key "0123456789012345"
-        session-options {:name "session" :secure true :maxage 100000 :store (cookie-store {:key key})}
+        session-options {:cookie-name "session" :cookie-attrs {:http-only true :secure false :max-age (* 60 60)} :store (cookie-store {:key key})}
         handler (wrap-universal-middleware handler {:session session-options})
-        request {:uri "/write"}
+        request {:request-method :get :uri "/write"}
         response (handler request)
         cookies (reduce merge (map parse-cookie (get-in response [:headers "Set-Cookie"])))]
+    (is (map? (cookies "session")))
     ;; imagine the server restarts...session management configuration is reconstituted...client retains cookies...
-    (let [session-options (assoc session-options :store (cookie-store {:key "0123456789012345"}))
+    (let [session-options (assoc session-options :store (cookie-store {:key key}))
           handler (wrap-universal-middleware handler {:session session-options})
-          request {:uri "/read" :headers {"cookie" (write-cookies cookies)}}]
+          request {:request-method :get :uri "/read" :headers {"cookie" (write-cookies cookies)}}]
       (is (= {:message "Claude E. Shannon"} ((handler request) :session'))))))
