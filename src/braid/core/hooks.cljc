@@ -7,7 +7,7 @@
   which calls (braid.core.modules/init!), which calls (reset-all!)
 
   On the server-side:
-  (braid.core.modules/init!) is called once, when the server is started (in braid.core.server.core)."
+  (braid.core.modules/init!) is called once, when the server is started (in braid.core)."
   (:require
     [braid.core.common.util :as util]))
 
