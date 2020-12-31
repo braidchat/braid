@@ -1,5 +1,6 @@
 (ns braid.core.server.core
   (:require
+   [braid.base.conf-extra :as conf] ; to update ports
    [braid.core.server.handler :refer [mobile-client-app
                                       desktop-client-app
                                       api-server-app]]
@@ -33,6 +34,10 @@
                             (start-server! :mobile mobile-port))
           api-server (do (timbre/debugf "starting api server on port %d" api-port)
                          (start-server! :api api-port))]
+      (swap! conf/ports-config assoc
+             :api-domain (str "localhost:" (server-port api-server)))
+      (swap! conf/ports-config assoc
+             :site-url (str "http://localhost:" (server-port desktop-server)))
       {:desktop desktop-server
        :mobile mobile-server
        :api api-server})))

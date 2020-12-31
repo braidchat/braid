@@ -35,11 +35,14 @@
   "Helper function to start Braid components in dev.
    Does not start the email worker."
   [port]
-  ; modules must run first
+  ;; modules must run first
   (modules/init! modules/default)
   (-> (mount/except #{#'braid.core.server.email-digest/email-jobs})
       (mount/with-args {:port port})
-      (mount/start)))
+      (mount/start))
+  (when (zero? port)
+    (mount/stop #'braid.base.conf/config)
+    (mount/start #'braid.base.conf/config)))
 
 (defn stop!
   "Helper function for stopping all Braid components."
