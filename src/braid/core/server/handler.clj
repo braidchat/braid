@@ -19,7 +19,8 @@
       (assoc-in [:security :anti-forgery] true)))
 
 (def static-site-defaults
-  {:params {:urlencoded true
+  {:session false
+   :params {:urlencoded true
             :multipart  true
             :nested     true
             :keywordize true}
@@ -44,24 +45,32 @@
 
        (-> api-public-routes
            (wrap-defaults (-> site-defaults
+                              (assoc :session false)
                               (assoc-in [:security :anti-forgery] false))))
 
        (-> modules/public-handler
            (wrap-defaults (-> site-defaults
+                              (assoc :session false)
                               (assoc-in [:security :anti-forgery] false)))
            (wrap-restful-format :formats [:edn :transit-json]))
 
        (-> sync-routes
-           (wrap-defaults (-> api-defaults assoc-csrf-conf)))
+           (wrap-defaults (-> api-defaults
+                              (assoc :session false)
+                              assoc-csrf-conf)))
 
        (-> api-private-routes
-           (wrap-defaults (-> api-defaults assoc-csrf-conf)))
+           (wrap-defaults (-> api-defaults
+                              (assoc :session false)
+                              assoc-csrf-conf)))
 
        ;; this needs to be last, because the middleware will return
        ;; 401 if not authorized & hence not fall-through to other
        ;; routes
        (-> modules/private-handler
-           (wrap-defaults (-> site-defaults assoc-csrf-conf))
+           (wrap-defaults (-> site-defaults
+                              (assoc :session false)
+                              assoc-csrf-conf))
            (wrap-restful-format :formats [:edn :transit-json])))
       (wrap-cors :access-control-allow-origin (->>
                                                [(when-let [site (env :site-url)]
