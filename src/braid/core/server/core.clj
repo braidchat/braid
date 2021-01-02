@@ -18,12 +18,11 @@
   [server port]
   (run-server server {:port port :legacy-return-value? false}))
 
-(defn start-servers! [opts]
-  (let [wrap (fn [handler] (wrap-universal-middleware handler (opts :middleware)))
-        desktop-port (:port opts)
+(defn start-servers! [{:keys [middleware port]}]
+  (let [wrap (fn [handler] (wrap-universal-middleware handler middleware))
         desktop-server (do
-                         (timbre/debugf "starting desktop server on port %d" desktop-port)
-                         (start-server! (wrap #'desktop-client-app) desktop-port))
+                         (timbre/debugf "starting desktop server on port %d" port)
+                         (start-server! (wrap #'desktop-client-app) port))
         desktop-port (server-port desktop-server)]
     (timbre/debugf "Started desktop server on port %d" desktop-port)
     (let [mobile-port (inc desktop-port)
