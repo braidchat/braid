@@ -18,6 +18,9 @@
   (-> defaults
       (assoc-in [:security :anti-forgery] true)))
 
+;; Here we define handlers for the various servers and subsets of the routes.  To allow late-binding/run-time configuration, we
+;; intentionally excise some middleware (e.g. session handling) from the ring default middleware configurations, sometimes even excising
+;; such middleware where it might not be included by default.
 (def static-site-defaults
   {:session false
    :params {:urlencoded true
