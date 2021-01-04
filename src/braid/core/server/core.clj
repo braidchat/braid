@@ -1,5 +1,6 @@
 (ns braid.core.server.core
   (:require
+   [braid.core.server.middleware :refer [wrap-universal-middleware]]
    [braid.base.conf-extra :as conf] ; to update ports
    [braid.core.server.handler :refer [mobile-client-app
                                       desktop-client-app
@@ -13,27 +14,23 @@
 
 ;; server
 
-(defn start-server!
-  [type port]
-  (let [app (case type
-              :api #'api-server-app
-              :desktop #'desktop-client-app
-              :mobile #'mobile-client-app)]
-    (run-server app {:port port :legacy-return-value? false})))
+(defn- start-server!
+  [server port]
+  (run-server server {:port port :legacy-return-value? false}))
 
-(defn start-servers! []
-  (let [desktop-port (:port (mount/args))
+(defn start-servers! [{:keys [middleware port]}]
+  (let [wrap (fn [handler] (wrap-universal-middleware handler middleware))
         desktop-server (do
-                         (timbre/debugf "starting desktop server on port %d" desktop-port)
-                         (start-server! :desktop desktop-port))
+                         (timbre/debugf "starting desktop server on port %d" port)
+                         (start-server! (wrap #'desktop-client-app) port))
         desktop-port (server-port desktop-server)]
     (timbre/debugf "Started desktop server on port %d" desktop-port)
     (let [mobile-port (inc desktop-port)
           api-port (inc mobile-port)
           mobile-server (do (timbre/debugf "starting mobile server on port %d" mobile-port)
-                            (start-server! :mobile mobile-port))
+                            (start-server! (wrap #'mobile-client-app) mobile-port))
           api-server (do (timbre/debugf "starting api server on port %d" api-port)
-                         (start-server! :api api-port))]
+                         (start-server! (wrap #'api-server-app) api-port))]
       (swap! conf/ports-config assoc
              :api-domain (str "localhost:" (server-port api-server)))
       (swap! conf/ports-config assoc
@@ -49,7 +46,7 @@
     @(server-stop! srv {:timeout 100})))
 
 (defstate servers
-  :start (start-servers!)
+  :start (start-servers! (mount/args))
   :stop (stop-servers! servers))
 
 ;; exceptions in background thread handler
