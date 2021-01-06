@@ -5,6 +5,9 @@
    [environ.core :refer [env]]
    [mount.core :as mount :refer [defstate]]))
 
+(when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
+  (println "WARNING: No :hmac-secret set, using an insecure default."))
+
 (defonce config-vars
   (hooks/register! (atom []) [keyword?]))
 

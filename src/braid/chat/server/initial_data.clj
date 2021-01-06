@@ -1,12 +1,12 @@
 (ns braid.chat.server.initial-data
   (:require
-    [environ.core :refer [env]]
+    [braid.base.conf :as conf]
     [braid.base.server.socket :refer [connected-uids]]
     [braid.chat.db.group :as group]
-    [braid.chat.db.thread :as thread]
-    [braid.chat.db.tag :as tag]
-    [braid.chat.db.user :as user]
     [braid.chat.db.invitation :as invitation]
+    [braid.chat.db.tag :as tag]
+    [braid.chat.db.thread :as thread]
+    [braid.chat.db.user :as user]
     [braid.lib.digest :as digest]))
 
 (defn initial-data-for-user
@@ -21,7 +21,7 @@
     {;; TODO could be part of braid.base
      :user-id user-id
      ;; TODO could be part of braid.base:
-     :version-checksum (if (= "prod" (env :environment))
+     :version-checksum (if (= "prod" (conf/config :environment))
                          (digest/from-file "public/js/prod/desktop.js")
                          (digest/from-file "public/js/dev/desktop.js"))
      :user-groups
@@ -40,4 +40,3 @@
      :user-preferences (user/user-get-preferences user-id)
      :invitations (invitation/invites-for-user user-id)
      :tags (tag/tags-for-user user-id)}))
-
