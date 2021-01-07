@@ -1,16 +1,17 @@
 (ns braid.dev.core
   "Starting namespace for Braid REPL. Utilities for dev."
   (:require
-    [mount.core :as mount]
-    [braid.base.server.seed :as seed]
-    [braid.core.modules :as modules]
-    [braid.base.conf :refer [config]]
-    [braid.chat.seed :as chat.seed]
-    [datomic.api :as d]
-    [braid.core.server.db :as db]
-    ; the following namespaces are required for their mount components:
-    [braid.core]
-    [braid.dev.figwheel]))
+   [braid.base.conf :refer [config]]
+   [braid.base.server.seed :as seed]
+   [braid.chat.seed :as chat.seed]
+   [braid.core.modules :as modules]
+   [braid.core.server.db :as db]
+   [datomic.api :as d]
+   [mount.core :as mount]
+   [environ.core :refer [env]]
+   ;; the following namespaces are required for their mount components:
+   [braid.core]
+   [braid.dev.figwheel]))
 
 (defn drop-db!
   "Drops the database (and also the database connection).
@@ -38,7 +39,7 @@
   ;; modules must run first
   (modules/init! modules/default)
   (-> (mount/except #{#'braid.core.server.email-digest/email-jobs})
-      (mount/with-args {:port port})
+      (mount/with-args (assoc env :port port))
       (mount/start))
   (when (zero? port)
     (mount/stop #'braid.base.conf/config)
