@@ -1,7 +1,6 @@
 (ns braid.core.server.middleware
   (:require
    [braid.base.conf :refer [config]]
-   [mount.core :as mount :refer [defstate]]
    [ring.middleware.cors :refer [wrap-cors]]
    [ring.middleware.session :refer [wrap-session]]
    [taoensso.timbre :as timbre]))
