@@ -2,7 +2,6 @@
   (:require
    [braid.base.conf-extra :refer [ports-config]]
    [braid.core.hooks :as hooks]
-   [environ.core :refer [env]]
    [mount.core :as mount :refer [defstate]]))
 
 (defonce config-vars
@@ -18,4 +17,4 @@
      :site-url (str "http://localhost:" (:port (mount/args)))
      :hmac-secret "secret"}
     @ports-config ; overrides api-domain & site url when port is automatically found
-    (select-keys env @config-vars)))
+    (select-keys (mount/args) @config-vars)))

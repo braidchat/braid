@@ -8,14 +8,10 @@
    [clj-time.core :as t]
    [clojure.string :as string]
    [cljstache.core :as cljstache]
-   [environ.core :refer [env]]
    [image-resizer.core :as img]
    [image-resizer.format :as img-format]
    [org.httpkit.client :as http]
    [taoensso.timbre :as timbre]))
-
-(when (and (= (env :environment) "prod") (empty? (env :hmac-secret)))
-  (println "WARNING: No :hmac-secret set, using an insecure default."))
 
 (defn verify-hmac
   [mac data]

@@ -1,9 +1,11 @@
 (ns braid.core
   (:gen-class)
   (:require
+   [environ.core :refer [env]]
    [mount.core :as mount]
    [org.httpkit.client]
    [org.httpkit.sni-client]
+   [braid.base.conf]
    [braid.core.modules :as modules]
    ;; all following requires are for mount:
    [braid.core.server.core]
@@ -16,14 +18,17 @@
 
 (defn start!
   "Entry point for prod"
-  [port]
-  ;; modules must run first
-  (modules/init! modules/default)
-  (-> (mount/with-args {:port port})
-      (mount/start))
-  (when (zero? port)
-    (mount/stop #'braid.base.conf/config)
-    (mount/start #'braid.base.conf/config)))
+  ([port] (start! port env))
+  ([port args]
+   ;; modules must run first
+   (when (and (= (args :environment) "prod") (empty? (args :hmac-secret)))
+     (println "WARNING: No :hmac-secret set, using an insecure default."))
+   (modules/init! modules/default)
+   (-> (mount/with-args (assoc args :port port))
+       (mount/start))
+   (when (zero? port)
+     (mount/stop #'braid.base.conf/config)
+     (mount/start #'braid.base.conf/config))))
 
 (defn stop!
   "Helper function for stopping all Braid components."

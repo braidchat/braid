@@ -8,8 +8,6 @@
    [braid.base.server.http-client-routes :refer [resource-routes]]
    [braid.core.server.routes.socket :refer [sync-routes]]
    [compojure.core :refer [routes context]]
-   [environ.core :refer [env]]
-   [ring.middleware.cors :refer [wrap-cors]]
    [ring.middleware.defaults :refer [wrap-defaults api-defaults secure-site-defaults site-defaults]]
    [ring.middleware.format :refer [wrap-restful-format]]
    [ring.middleware.edn :refer [wrap-edn-params]]))
@@ -34,13 +32,11 @@
 
 (def mobile-client-app
   (-> (routes resource-routes mobile-client-routes)
-      (wrap-defaults static-site-defaults)
-      (wrap-universal-middleware {:session session-config})))
+      (wrap-defaults static-site-defaults)))
 
 (def desktop-client-app
   (-> (routes resource-routes desktop-client-routes)
-      (wrap-defaults static-site-defaults)
-      (wrap-universal-middleware {:session session-config})))
+      (wrap-defaults static-site-defaults)))
 
 (def api-server-app
   (-> (routes
@@ -75,13 +71,4 @@
                               (assoc :session false)
                               assoc-csrf-conf))
            (wrap-restful-format :formats [:edn :transit-json])))
-      (wrap-cors :access-control-allow-origin (->>
-                                               [(when-let [site (env :site-url)]
-                                                  (re-pattern (java.util.regex.Pattern/quote site)))
-                                                (when-let [mobile-site (env :mobile-site-url)]
-                                                  (re-pattern (java.util.regex.Pattern/quote mobile-site)))
-                                                #"http://localhost:\d+"]
-                                               (remove nil?))
-                 :access-control-allow-credentials true
-                 :access-control-allow-methods [:get :put :post :delete])
       wrap-edn-params))

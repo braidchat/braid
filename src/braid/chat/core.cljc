@@ -33,9 +33,9 @@
        (doseq [k [:api-domain
                   :asana-client-id
                   :asana-client-secret
+                  :aws-access-key
                   :aws-bucket
                   :aws-region
-                  :aws-access-key
                   :aws-secret-key
                   :db-url
                   :embedly-key
@@ -43,8 +43,11 @@
                   :github-client-id
                   :github-client-secret
                   :hmac-secret
+                  :http-only
                   :mailgun-domain
                   :mailgun-password
+                  :mobile-site-url
+                  :redis-uri
                   :site-url]]
          (base/register-config-var! k))
 
