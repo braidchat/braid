@@ -1,9 +1,12 @@
 (ns unit.braid.core.server.middleware-test
   (:require
    [braid.core.server.middleware :refer :all]
-   [ring.middleware.session.cookie :refer [cookie-store]]
+   [braid.test.fixtures.conf :refer [start-config]]
+   [clojure.test :refer :all]
    [helpers.cookies :refer [write-cookies parse-cookie]]
-   [clojure.test :refer :all]))
+   [ring.middleware.session.cookie :refer [cookie-store]]))
+
+(use-fixtures :each start-config)
 
 (deftest can-wrap-handler
   (is (fn? (wrap-universal-middleware identity {}))))
