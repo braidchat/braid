@@ -5,10 +5,10 @@
    [org.httpkit.client :as http]
    [clojure.test :refer :all]))
 
-(def config {:api-secret "aws-secret-key"
-             :api-key "aws-access-key"
-             :region  "aws-region"
-             :bucket "aws-bucket"})
+(def config {:region  "aws-region"
+             :bucket "aws-bucket"
+             :aws/credentials-provider (constantly ["aws-access-key" "aws-secret-key"])})
+
 (deftest can-generate-s3-host
   (is (= "aws-bucket.s3.aws-region.amazonaws.com" (s3-host config))))
 
