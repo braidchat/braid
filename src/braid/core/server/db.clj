@@ -25,7 +25,10 @@
   (d/connect db-url))
 
 (defstate conn
-  :start (connect config))
+  :start (do
+           ;; txn checking uses assert, so we want to make sure they run
+           (set! *assert* true)
+           (connect config)))
 
 (defn db [] (d/db conn))
 
