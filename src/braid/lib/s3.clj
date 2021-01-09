@@ -54,7 +54,7 @@
                 :credential credential
                 :date date}}))))
 
-(defn get-signature
+(defn- get-signature
   [config utc-now path query-str]
   (let [{:keys [region api-secret bucket]} config]
     (->> ["AWS4-HMAC-SHA256"
