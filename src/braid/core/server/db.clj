@@ -25,10 +25,7 @@
   (d/connect db-url))
 
 (defstate conn
-  :start (do
-           ;; txn checking uses assert, so we want to make sure they run
-           (set! *assert* true)
-           (connect config)))
+  :start (connect config))
 
 (defn db [] (d/db conn))
 
@@ -54,7 +51,7 @@
       (let [test-db (d/with (db) txns)]
         (try
           (doseq [check checks]
-            (check test-db))
+            (binding [*assert* true] (check test-db)))
           (catch AssertionError e
             (throw (ex-info "Transaction Failed"
                             {::error (.getMessage e)}))))))
