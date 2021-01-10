@@ -10,11 +10,11 @@
    (org.apache.commons.codec.binary Base64 Hex)))
 
 (defn s3-host
-  [{:keys [bucket region]}]
+  [{bucket :aws-bucket region :aws-region}]
   (str bucket ".s3." region ".amazonaws.com"))
 
 (defn generate-s3-upload-policy
-  [{:aws/keys [credentials-provider] :keys [region bucket] :as config} {:keys [starts-with]}]
+  [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} {:keys [starts-with]}]
   (when credentials-provider
     (let [[api-key api-secret] (credentials-provider)
           utc-now (aws/utc-now)
@@ -54,7 +54,7 @@
               :date date}})))
 
 (defn- get-signature
-  [{:aws/keys [credentials-provider] :keys [region bucket] :as config} utc-now path query-str]
+  [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} utc-now path query-str]
   (let [[_ api-secret] (credentials-provider)]
     (->> ["AWS4-HMAC-SHA256"
           (.format utc-now aws/basic-date-time-format)
@@ -76,7 +76,7 @@
          aws/bytes->hex)))
 
 (defn readable-s3-url
-  [{:aws/keys [credentials-provider] :keys [region] :as config} expires-seconds path]
+  [{:aws/keys [credentials-provider] region :aws-region :as config} expires-seconds path]
   (let [[api-key _] (credentials-provider)
         utc-now (aws/utc-now)
         query-str (str "X-Amz-Algorithm=AWS4-HMAC-SHA256"
@@ -90,10 +90,9 @@
          "&X-Amz-Signature=" (get-signature config utc-now path query-str))))
 
 (defn- make-request
-  [{:aws/keys [credentials-provider] :keys [region bucket] :as config} {:keys [body method path] :as request}]
+  [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} {:keys [body method path] :as request}]
   (let [[api-key api-secret] (credentials-provider)
         utc-now (aws/utc-now)
-        {:keys [region api-secret api-key bucket]} config
         req (update request :headers
                     assoc
                     "x-amz-date" (.format utc-now aws/basic-date-time-format)
@@ -111,12 +110,11 @@
 
 (defn delete-file!
   [config path]
-  (let [{:keys [api-secret api-key region bucket]} config]
-    ;; always returns 204, even if file does not exist
-    @(http/delete (str "https://" (s3-host config) path)
-                  (make-request config {:method "DELETE"
-                                        :path path
-                                        :body ""}))))
+  ;; always returns 204, even if file does not exist
+  @(http/delete (str "https://" (s3-host config) path)
+                (make-request config {:method "DELETE"
+                                      :path path
+                                      :body ""})))
 
 (defn upload-url-path
   [url]
