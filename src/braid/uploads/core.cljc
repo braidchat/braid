@@ -32,12 +32,6 @@
        :rel "noopener noreferrer"}
       [:img {:src url}]]))
 
-(defn ->s3config [config]
-  {:api-secret (config :aws-secret-key)
-   :api-key (config :aws-access-key)
-   :region  (config :aws-region)
-   :bucket (config :aws-bucket)})
-
 (def Upload
   {:id uuid?
    :thread-id uuid?
@@ -202,8 +196,7 @@
               (when (or (= user-id (:user-id upload))
                         (group/user-is-group-admin? user-id (:group-id upload)))
                 (when-let [path (s3/upload-url-path (:url upload))]
-                  (s3/delete-file! (->s3config config)
-                                   path))
+                  (s3/delete-file! config path))
                 (db/run-txns!
                   (db.uploads/retract-upload-txn (:id upload))))))
 
@@ -224,19 +217,14 @@
                   asset-key (URLDecoder/decode (second (re-matches #"^/upload/(.*)" (request :uri))))]
               {:status 302
                :headers {"Cache-Control" (str "private, max-age=" expires-seconds)
-                         "Location" (s3/readable-s3-url
-                                      (->s3config config)
-                                      expires-seconds
-                                      asset-key)}}))])
+                         "Location" (s3/readable-s3-url config expires-seconds asset-key)}}))])
 
        (base/register-private-http-route!
          [:get "/s3-policy"
           (fn [req]
             ;; TODO check if user is allowed to upload to this group
             (if (user/user-id-exists? (get-in req [:session :user-id]))
-              (if-let [policy (s3/generate-s3-upload-policy
-                                (->s3config config)
-                                {:starts-with ""})]
+              (if-let [policy (s3/generate-s3-upload-policy config {:starts-with ""})]
                 {:status 200
                  :headers {"Content-Type" "application/edn"}
                  :body (pr-str policy)}
