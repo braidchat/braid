@@ -1,27 +1,27 @@
 (ns braid.uploads.core
   (:require
-    [clojure.string :as string]
-    [braid.base.api :as base]
-    [braid.embeds.api :as embeds]
-    [braid.chat.api :as chat]
-    [braid.lib.s3 :as s3]
-    #?@(:cljs
-         [[cljs-uuid-utils.core :as uuid]
-          [braid.lib.color :as color]
-          [braid.lib.upload :as upload]
-          [braid.core.client.ui.styles.mixins :as mixins]
-          [re-frame.core :refer [subscribe dispatch dispatch-sync]]]
-         :clj
-         [[braid.core.common.util :as util]
-          [braid.core.server.db :as db]
-          [braid.base.conf :refer [config]]
-          [braid.chat.db.thread :as thread]
-          [braid.chat.db.group :as group]
-          [braid.uploads.db :as db.uploads]
-          [braid.chat.db.user :as user]]))
-    (:import
-      #?@(:clj
-           [(java.net URLDecoder)])))
+   [clojure.string :as string]
+   [braid.base.api :as base]
+   [braid.embeds.api :as embeds]
+   [braid.chat.api :as chat]
+   [braid.lib.s3 :as s3]
+   #?@(:cljs
+       [[cljs-uuid-utils.core :as uuid]
+        [braid.lib.color :as color]
+        [braid.lib.upload :as upload]
+        [braid.core.client.ui.styles.mixins :as mixins]
+        [re-frame.core :refer [subscribe dispatch dispatch-sync]]]
+       :clj
+       [[braid.core.common.util :as util]
+        [braid.core.server.db :as db]
+        [braid.base.conf :refer [config]]
+        [braid.chat.db.thread :as thread]
+        [braid.chat.db.group :as group]
+        [braid.uploads.db :as db.uploads]
+        [braid.chat.db.user :as user]]))
+  (:import
+   #?@(:clj
+       [(java.net URLDecoder)])))
 
 #?(:cljs
    (defn image-embed-view
@@ -43,98 +43,98 @@
   #?(:cljs
      (do
        (base/register-events!
-         {::initiate-upload!
-          (fn [{db :db} [_ {:keys [group-id thread-id]}]]
-            (.. js/document (getElementById "uploader") click)
-            {:db (assoc db ::upload-config {:group-id group-id
-                                            :thread-id thread-id})})
+        {::initiate-upload!
+         (fn [{db :db} [_ {:keys [group-id thread-id]}]]
+           (.. js/document (getElementById "uploader") click)
+           {:db (assoc db ::upload-config {:group-id group-id
+                                           :thread-id thread-id})})
 
-          :braid.uploads/upload!
-          (fn [_ [_ {:keys [file type group-id on-complete]}]]
-            (let [id (uuid/make-random-squuid)]
-              (s3/upload
-                {:file file
-                 :prefix (str group-id "/" type "/" id "/")
-                 :on-complete (fn [info]
-                                (on-complete (assoc info :id id)))}))
-            {})
+         :braid.uploads/upload!
+         (fn [_ [_ {:keys [file type group-id on-complete]}]]
+           (let [id (uuid/make-random-squuid)]
+             (s3/upload
+              {:file file
+               :prefix (str group-id "/" type "/" id "/")
+               :on-complete (fn [info]
+                              (on-complete (assoc info :id id)))}))
+           {})
 
-          :braid.uploads/create-upload!
-          (fn [{db :db} [_ {:keys [url upload-id thread-id group-id]
-                            :or {thread-id (get-in db [::upload-config :thread-id])
-                                 group-id (get-in db [::upload-config :group-id])}}]]
-            {:websocket-send (list [:braid.server/create-upload
-                                    {:id upload-id
-                                     :url url
+         :braid.uploads/create-upload!
+         (fn [{db :db} [_ {:keys [url upload-id thread-id group-id]
+                           :or {thread-id (get-in db [::upload-config :thread-id])
+                                group-id (get-in db [::upload-config :group-id])}}]]
+           {:websocket-send (list [:braid.server/create-upload
+                                   {:id upload-id
+                                    :url url
+                                    :thread-id thread-id
+                                    :group-id group-id}])
+            :dispatch [:new-message {:content url
                                      :thread-id thread-id
-                                     :group-id group-id}])
-             :dispatch [:new-message {:content url
-                                      :thread-id thread-id
-                                      :group-id group-id
-                                      :mentioned-user-ids []
-                                      :mentioned-tag-ids []}]})})
+                                     :group-id group-id
+                                     :mentioned-user-ids []
+                                     :mentioned-tag-ids []}]})})
 
 
        (chat/register-message-transform!
-         (fn [node]
-           (if (and (string? node) (upload/upload-path? node))
-             (let [url node]
-               [:a.upload {:href (upload/->path url)
-                           :title url
-                           :style {:background-color (color/url->color url)
-                                   :border-color (color/url->color url)}
-                           :on-click (fn [e] (.stopPropagation e))
-                           :target "_blank"
-                           ; rel to address vuln caused by target=_blank
-                           ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
-                           :rel "noopener noreferrer"
-                           :tab-index -1}
-                (last (string/split url #"/"))])
-             node)))
+        (fn [node]
+          (if (and (string? node) (upload/upload-path? node))
+            (let [url node]
+              [:a.upload {:href (upload/->path url)
+                          :title url
+                          :style {:background-color (color/url->color url)
+                                  :border-color (color/url->color url)}
+                          :on-click (fn [e] (.stopPropagation e))
+                          :target "_blank"
+                                        ; rel to address vuln caused by target=_blank
+                                        ; https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+                          :rel "noopener noreferrer"
+                          :tab-index -1}
+               (last (string/split url #"/"))])
+            node)))
 
        (base/register-styles!
-         [:.message
-          [:>.content
-           [:a.upload
-            mixins/pill-box
-            {:background "#000000"
-             :max-width "inherit !important"}
+        [:.message
+         [:>.content
+          [:a.upload
+           mixins/pill-box
+           {:background "#000000"
+            :max-width "inherit !important"}
 
-            ["&::before"
-             (mixins/fontawesome \uf15b)
-             {:display "inline"
-              :margin-right "0.25em"
-              :vertical-align "middle"
-              :font-size "0.8em"}]]]])
+           ["&::before"
+            (mixins/fontawesome \uf15b)
+            {:display "inline"
+             :margin-right "0.25em"
+             :vertical-align "middle"
+             :font-size "0.8em"}]]]])
 
        (embeds/register-embed!
-         {:handler
-          (fn [{:keys [urls]}]
-            (when-let [url (->> urls
-                                (filter upload/upload-path?)
-                                (some (fn [url]
-                                        (re-matches #".*(png|jpg|jpeg|gif)$" url)))
-                                first)]
-              [image-embed-view (upload/->path url)]))
+        {:handler
+         (fn [{:keys [urls]}]
+           (when-let [url (->> urls
+                               (filter upload/upload-path?)
+                               (some (fn [url]
+                                       (re-matches #".*(png|jpg|jpeg|gif)$" url)))
+                               first)]
+             [image-embed-view (upload/->path url)]))
 
-          :styles
-          [:>.image.upload
-           [:>img
-            {:width "100%"}]]
+         :styles
+         [:>.image.upload
+          [:>img
+           {:width "100%"}]]
 
-          :priority 10})
+         :priority 10})
 
        (base/register-root-view!
-         (fn []
-           [:div.uploads
-            [:input {:type "file"
-                     :multiple false
-                     :id "uploader"
-                     :style {:display "none"}
-                     :on-change (fn [e]
-                                  (.persist e) ; react dom thing
-                                  (dispatch [:braid.uploads/upload!
-                                             {:file
+        (fn []
+          [:div.uploads
+           [:input {:type "file"
+                    :multiple false
+                    :id "uploader"
+                    :style {:display "none"}
+                    :on-change (fn [e]
+                                 (.persist e) ; react dom thing
+                                 (dispatch [:braid.uploads/upload!
+                                            {:file
                                              (aget (.. e -target -files) 0)
                                              :group-id @(subscribe [:open-group-id])
                                              :type "upload"
@@ -147,36 +147,36 @@
                                                (set! (.. e -target -value) nil))}]))}]]))
 
        (chat/register-new-message-action-menu-item!
-         {:body "Add File"
-          :icon \uf093
-          :priority 1
-          :on-click (fn [{:keys [thread-id group-id]}]
-                      (fn [_]
-                        ;; use dispatch-sync so that browser allows trigger of click
-                        (dispatch-sync [::initiate-upload! {:thread-id thread-id
-                                                            :group-id group-id}])))}))
+        {:body "Add File"
+         :icon \uf093
+         :priority 1
+         :on-click (fn [{:keys [thread-id group-id]}]
+                     (fn [_]
+                       ;; use dispatch-sync so that browser allows trigger of click
+                       (dispatch-sync [::initiate-upload! {:thread-id thread-id
+                                                           :group-id group-id}])))}))
      :clj
      (do
 
        (base/register-db-schema!
-         [{:db/ident :upload/id
-           :db/valueType :db.type/uuid
-           :db/cardinality :db.cardinality/one
-           :db/unique :db.unique/identity}
-          {:db/ident :upload/thread
-           :db/doc "The thread this upload is associated with"
-           :db/valueType :db.type/ref
-           :db/cardinality :db.cardinality/one}
-          {:db/ident :upload/url
-           :db/valueType :db.type/string
-           :db/cardinality :db.cardinality/one }
-          {:db/ident :upload/uploaded-at
-           :db/valueType :db.type/instant
-           :db/cardinality :db.cardinality/one}
-          {:db/ident :upload/uploaded-by
-           :db/doc "User that uploaded this file"
-           :db/valueType :db.type/ref
-           :db/cardinality :db.cardinality/one}])
+        [{:db/ident :upload/id
+          :db/valueType :db.type/uuid
+          :db/cardinality :db.cardinality/one
+          :db/unique :db.unique/identity}
+         {:db/ident :upload/thread
+          :db/doc "The thread this upload is associated with"
+          :db/valueType :db.type/ref
+          :db/cardinality :db.cardinality/one}
+         {:db/ident :upload/url
+          :db/valueType :db.type/string
+          :db/cardinality :db.cardinality/one }
+         {:db/ident :upload/uploaded-at
+          :db/valueType :db.type/instant
+          :db/cardinality :db.cardinality/one}
+         {:db/ident :upload/uploaded-by
+          :db/doc "User that uploaded this file"
+          :db/valueType :db.type/ref
+          :db/cardinality :db.cardinality/one}])
 
        (base/register-server-message-handlers!
          {:braid.server/create-upload
