@@ -37,6 +37,7 @@
                   :aws-bucket
                   :aws-region
                   :aws-secret-key
+                  :aws/credentials-provider
                   :db-url
                   :embedly-key
                   :environment
