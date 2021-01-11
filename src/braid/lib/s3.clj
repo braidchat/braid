@@ -1,13 +1,13 @@
 (ns braid.lib.s3
   (:require
-    [clojure.data.json :as json]
-    [clojure.string :as string]
-    [org.httpkit.client :as http]
-    [braid.base.conf :refer [config]]
-    [braid.lib.aws :as aws])
+   [clojure.data.json :as json]
+   [clojure.string :as string]
+   [org.httpkit.client :as http]
+   [braid.base.conf :refer [config]]
+   [braid.lib.aws :as aws])
   (:import
-    (java.time.temporal ChronoUnit)
-    (org.apache.commons.codec.binary Base64 Hex)))
+   (java.time.temporal ChronoUnit)
+   (org.apache.commons.codec.binary Base64 Hex)))
 
 (defn s3-host
   [config]
@@ -122,6 +122,6 @@
   [url]
   (when url
     (or ;; old style, with bucket after domain
-      (second (re-matches #"^https://s3\.amazonaws\.com/[^/]+(/.*)$" url))
-      ;; new style, with bucket in domain
-      (second (re-matches #"^https://.+\.amazonaws\.com(/.*)$" url)))))
+     (second (re-matches #"^https://s3\.amazonaws\.com/[^/]+(/.*)$" url))
+     ;; new style, with bucket in domain
+     (second (re-matches #"^https://.+\.amazonaws\.com(/.*)$" url)))))
