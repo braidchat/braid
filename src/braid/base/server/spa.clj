@@ -32,9 +32,7 @@
               :basejs (when prod-js?
                         (str (digest/from-file (str "public/js/prod/base.js"))))
               :api_domain (config :api-domain)
-              :asset_domain (s3/s3-host
-                              {:bucket (config :aws-bucket)
-                               :region (config :aws-region)})
+              :asset_domain (s3/s3-host config)
               :extra_scripts
               (->> @additional-scripts
                    (map (fn [s] (if (fn? s) (s) s)))

@@ -14,6 +14,7 @@
 (defmulti handler :uri)
 (defmethod handler "/read" [{session :session}] {:status 200 :session' session})
 (defmethod handler "/write" [_] {:status 200 :session {:message "Claude E. Shannon"}})
+(defmethod handler "/throw" [_] (throw (Exception. "WFT")))
 
 (deftest default-session-store-is-persistent
   (let [handler (wrap-universal-middleware handler {})
@@ -36,3 +37,12 @@
           handler (wrap-universal-middleware handler {:session session-options})
           request {:request-method :get :uri "/read" :headers {"cookie" (write-cookies cookies)}}]
       (is (= {:message "Claude E. Shannon"} ((handler request) :session'))))))
+
+(deftest exceptions-are-handled
+  (let [handler (wrap-universal-middleware handler {})
+        request {:uri "/throw"}
+        expected {:status 500
+	          :headers {"Content-Type" "text/plain; charset=us-ascii", "X-Exception" "WFT"}
+	          :body #"(?is).*something went wrong.*java.lang.Exception.*"}]
+    (is (= (select-keys expected [:status :headers]) (select-keys (handler request) [:status :headers])))
+    (is (re-matches (expected :body) ((handler request) :body)))))

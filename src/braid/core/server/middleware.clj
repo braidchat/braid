@@ -3,6 +3,7 @@
    [braid.base.conf :refer [config]]
    [ring.middleware.cors :refer [wrap-cors]]
    [ring.middleware.session :refer [wrap-session]]
+   [clojure.stacktrace]
    [taoensso.timbre :as timbre]))
 
 (def session-max-age (* 60 60 24 365))
@@ -41,6 +42,26 @@
                      status (- (System/currentTimeMillis) t0) method uri)
       response)))
 
+(letfn [(e-response [e] (let [stacktrace (with-out-str (clojure.stacktrace/print-cause-trace e))]
+                          (assoc-in {:status 500
+                                     :headers {"Content-Type" "text/plain; charset=us-ascii"}
+                                     :body (format "We're sorry, something went wrong.\n%s" stacktrace)}
+                                    [:headers "X-Exception"] (.getMessage e))))]
+  (defn wrap-failsafe
+    "Last ditch handler for exceptions" ;; NB: Don't do anything fancy here
+    [handler]
+    (fn failsafe
+      ([request]
+       (try (handler request)
+            (catch Throwable e
+              (timbre/error e "Failsafe handler caught a Throwable")
+              (e-response e))))
+      ([request respond raise]
+       (try (handler request respond raise)
+            (catch Throwable e
+              (timbre/error e "Failsafe handler caught a Throwable")
+              (respond (e-response e))))))))
+
 ;; Here we define the universal (as opposed to route-specific) middleware stack.
 (defn wrap-universal-middleware
   "Wrap the handler with middleware that is universally applicable across the site."
@@ -48,13 +69,14 @@
   (-> handler
       (wrap-cors :access-control-allow-origin
                  (->>
-                   [(when-let [site (config :site-url)]
-                      (re-pattern (java.util.regex.Pattern/quote site)))
-                    (when-let [mobile-site (config :mobile-site-url)]
-                      (re-pattern (java.util.regex.Pattern/quote mobile-site)))
-                    #"http://localhost:\d+"]
-                   (remove nil?))
+                  [(when-let [site (config :site-url)]
+                     (re-pattern (java.util.regex.Pattern/quote site)))
+                   (when-let [mobile-site (config :mobile-site-url)]
+                     (re-pattern (java.util.regex.Pattern/quote mobile-site)))
+                   #"http://localhost:\d+"]
+                  (remove nil?))
                  :access-control-allow-credentials true
                  :access-control-allow-methods [:get :put :post :delete])
       (wrap-session (or session @session-config))
-      wrap-log-requests))
+      wrap-log-requests
+      wrap-failsafe))
