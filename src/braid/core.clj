@@ -18,10 +18,12 @@
 
 (defn start!
   "Entry point for prod"
-  ([port] (let [env (if (:api-secret env)
-                      (assoc env :aws/credentials-provider ((juxt :api-key :api-secret) env))
-                      env)]
-            (start! port env)))
+  ([port]
+   (start! port
+           (cond-> env
+             (env :aws-access-key)
+             (assoc :aws/credentials-provider
+                    (constantly ((juxt :aws-access-key :aws-secret-key) env))))))
   ([port args]
    ;; modules must run first
    (when (and (= (args :environment) "prod") (empty? (args :hmac-secret)))
