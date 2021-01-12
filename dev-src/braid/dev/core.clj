@@ -39,7 +39,10 @@
   ;; modules must run first
   (modules/init! modules/default)
   (-> (mount/except #{#'braid.core.server.email-digest/email-jobs})
-      (mount/with-args (assoc env :port port))
+      (mount/with-args (cond-> (assoc env :port port)
+                         (env :aws-access-key)
+                         (assoc :aws/credentials-provider
+                                (constantly ((juxt :aws-access-key :aws-secret-key) env)))))
       (mount/start))
   (when (zero? port)
     (mount/stop #'braid.base.conf/config)
