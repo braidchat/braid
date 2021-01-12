@@ -1,4 +1,4 @@
-(ns braid.website-embeds.styles
+(ns braid.embeds-website.styles
   (:require
     [garden.arithmetic :as m]
     [garden.units :refer [rem]]

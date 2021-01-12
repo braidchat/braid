@@ -1,4 +1,4 @@
-(ns braid.website-embeds.views
+(ns braid.embeds-website.views
   (:require
     [braid.lib.color :as color]
     [braid.lib.xhr :refer [edn-xhr]]

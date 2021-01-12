@@ -1,4 +1,4 @@
-(ns braid.map-embeds.core
+(ns braid.embeds-map.core
   "Detects google maps links and includes embeds a static image"
   (:require
    [braid.base.api :as base]

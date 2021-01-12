@@ -1,4 +1,4 @@
-(ns braid.video-embeds.core
+(ns braid.embeds-video.core
   "If a message contains a link to a video, displays the video as an embed"
   (:require
     [braid.embeds.api :as embeds]))

@@ -1,4 +1,4 @@
-(ns braid.youtube-embeds.core
+(ns braid.embeds-youtube.core
   "Detects youtube links and includes embedded video player"
   (:require
     [braid.embeds.api :as embeds]))

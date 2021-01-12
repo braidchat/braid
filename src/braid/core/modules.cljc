@@ -9,10 +9,14 @@
     [braid.custom-emoji.core]
     [braid.disconnect-notice.core]
     [braid.embeds.core]
+    [braid.embeds-image.core]
+    [braid.embeds-map.core]
+    [braid.embeds-video.core]
+    [braid.embeds-website.core]
+    [braid.embeds-youtube.core]
     [braid.emoji.core]
     [braid.emojione-emoji.core]
     [braid.group-explore.core]
-    [braid.image-embeds.core]
     [braid.notices.core]
     [braid.permalinks.core]
     [braid.popovers.core]
@@ -25,11 +29,7 @@
     [braid.subscriptions-page.core]
     [braid.uploads.core]
     [braid.uploads-page.core]
-    [braid.users.core]
-    [braid.video-embeds.core]
-    [braid.website-embeds.core]
-    [braid.youtube-embeds.core]
-    [braid.map-embeds.core]))
+    [braid.users.core]))
 
 (defn init! [module-fns]
   (hooks/reset-all!)
@@ -49,9 +49,13 @@
    braid.bots.core/init!
    braid.custom-emoji.core/init!
    braid.disconnect-notice.core/init!
+   braid.embeds-image.core/init!
+   braid.embeds-map.core/init!
+   braid.embeds-video.core/init!
+   braid.embeds-website.core/init!
+   braid.embeds-youtube.core/init!
    braid.emojione-emoji.core/init!
    braid.group-explore.core/init!
-   braid.image-embeds.core/init!
    braid.notices.core/init!
    braid.sidebar.core/init!
    braid.permalinks.core/init!
@@ -63,11 +67,7 @@
    braid.subscriptions-page.core/init!
    braid.uploads.core/init!
    braid.uploads-page.core/init!
-   braid.users.core/init!
-   braid.video-embeds.core/init!
-   braid.website-embeds.core/init!
-   braid.youtube-embeds.core/init!
-   braid.map-embeds.core/init!])
+   braid.users.core/init!])
 
 (defn plus [base to-add]
   (distinct (concat base to-add)))

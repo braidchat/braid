@@ -1,4 +1,4 @@
-(ns braid.image-embeds.core
+(ns braid.embeds-image.core
   "If a message contains a link to an image, displays the image as an embed"
   (:require
     [braid.embeds.api :as embeds]))
