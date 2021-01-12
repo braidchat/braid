@@ -21,7 +21,7 @@
     {;; TODO could be part of braid.base
      :user-id user-id
      ;; TODO could be part of braid.base:
-     :version-checksum (if (= "prod" (conf/config :environment))
+     :version-checksum (if (boolean (conf/config :prod-js))
                          (digest/from-file "public/js/prod/desktop.js")
                          (digest/from-file "public/js/dev/desktop.js"))
      :user-groups

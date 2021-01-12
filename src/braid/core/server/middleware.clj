@@ -26,10 +26,7 @@
 
 (def session-config
   (delay {:cookie-name "braid",
-          :cookie-attrs {:secure (cond
-                                   (config :http-only) false
-                                   (= (config :environment) "prod") true
-                                   :else false)
+          :cookie-attrs {:secure (boolean (config :cookie-secure))
                          :max-age session-max-age},
           :store @session-store}))
 

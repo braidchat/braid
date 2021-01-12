@@ -26,7 +26,7 @@
                     (constantly ((juxt :aws-access-key :aws-secret-key) env))))))
   ([port args]
    ;; modules must run first
-   (when (and (= (args :environment) "prod") (empty? (args :hmac-secret)))
+   (when (empty? (args :hmac-secret))
      (println "WARNING: No :hmac-secret set, using an insecure default."))
    (modules/init! modules/default)
    (-> (mount/with-args (assoc args :port port))

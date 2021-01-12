@@ -19,7 +19,7 @@
   (str "braid.core.client." client ".core.init();"))
 
 (defn get-html [client vars]
-  (let [prod-js? (= "prod" (config :environment))]
+  (let [prod-js? (boolean (config :prod-js))]
     (cljstache/render-resource
       (str "public/" client ".html")
       (merge {:prod prod-js?

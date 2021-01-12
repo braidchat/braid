@@ -38,9 +38,9 @@
                   :aws-region
                   :aws-secret-key
                   :aws/credentials-provider
+                  :cookie-secure
                   :db-url
                   :embedly-key
-                  :environment
                   :github-client-id
                   :github-client-secret
                   :hmac-secret
@@ -48,6 +48,7 @@
                   :mailgun-domain
                   :mailgun-password
                   :mobile-site-url
+                  :prod-js
                   :redis-uri
                   :site-url]]
          (base/register-config-var! k))
