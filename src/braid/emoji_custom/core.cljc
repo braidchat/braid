@@ -1,17 +1,17 @@
-(ns braid.custom-emoji.core
+(ns braid.emoji-custom.core
   "Allows group admins to create custom emoji"
   (:require
     [braid.base.api :as base]
     [braid.chat.api :as chat]
     #?@(:cljs
          [[braid.emoji.api :as emoji]
-          [braid.custom-emoji.client.autocomplete :as autocomplete]
-          [braid.custom-emoji.client.styles :refer [settings-page]]
-          [braid.custom-emoji.client.state :as state]
-          [braid.custom-emoji.client.views :refer [extra-emoji-settings-view]]]
+          [braid.emoji-custom.client.autocomplete :as autocomplete]
+          [braid.emoji-custom.client.styles :refer [settings-page]]
+          [braid.emoji-custom.client.state :as state]
+          [braid.emoji-custom.client.views :refer [extra-emoji-settings-view]]]
          :clj
-         [[braid.custom-emoji.server.db :refer [db-schema]]
-          [braid.custom-emoji.server.core :refer [initial-user-data-fn
+         [[braid.emoji-custom.server.db :refer [db-schema]]
+          [braid.emoji-custom.server.core :refer [initial-user-data-fn
                                                   server-message-handlers]]])))
 
 (defn init! []

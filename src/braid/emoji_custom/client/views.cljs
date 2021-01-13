@@ -1,4 +1,4 @@
-(ns braid.custom-emoji.client.views
+(ns braid.emoji-custom.client.views
   (:require
    [clojure.string :as string]
    [re-frame.core :refer [subscribe dispatch]]

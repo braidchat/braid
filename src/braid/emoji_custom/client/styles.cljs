@@ -1,4 +1,4 @@
-(ns braid.custom-emoji.client.styles)
+(ns braid.emoji-custom.client.styles)
 
 (def settings-page
   [:.app>.main>.page.group-settings>.content

@@ -1,4 +1,4 @@
-(ns braid.custom-emoji.server.db
+(ns braid.emoji-custom.server.db
   (:require
    [datomic.api :as d]
    [datomic.db]

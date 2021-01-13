@@ -1,4 +1,4 @@
-(ns braid.custom-emoji.client.state
+(ns braid.emoji-custom.client.state
   (:require
     [clojure.set :as set]
     [re-frame.core :refer [dispatch]]))

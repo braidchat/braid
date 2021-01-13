@@ -1,4 +1,4 @@
-(ns braid.emojione-emoji.ref)
+(ns braid.emoji-emojione.ref)
 
 (def shortcodes
   {

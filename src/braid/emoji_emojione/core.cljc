@@ -1,9 +1,9 @@
-(ns braid.emojione-emoji.core
+(ns braid.emoji-emojione.core
   "Provides emojione-style emoji"
   (:require
     [braid.emoji.api :as emoji]
     #?@(:cljs
-         [[braid.emojione-emoji.impl :as impl]])))
+         [[braid.emoji-emojione.impl :as impl]])))
 
 (defn init! []
   #?(:cljs

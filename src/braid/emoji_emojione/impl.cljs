@@ -1,7 +1,7 @@
-(ns braid.emojione-emoji.impl
+(ns braid.emoji-emojione.impl
   (:require
     [garden.units :refer [rem em px ex]]
-    [braid.emojione-emoji.ref :as refs]))
+    [braid.emoji-emojione.ref :as refs]))
 
 ;; Taken from https://github.com/emojione/emojione/blob/2.2.7/assets/css/emojione.css#L1
 (def emojione-styles

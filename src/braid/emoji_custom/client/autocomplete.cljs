@@ -1,4 +1,4 @@
-(ns braid.custom-emoji.client.autocomplete
+(ns braid.emoji-custom.client.autocomplete
   (:require
     [clojure.string :as string]
     [re-frame.core :refer [subscribe]]

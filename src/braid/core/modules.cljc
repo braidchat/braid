@@ -3,10 +3,8 @@
     [braid.core.hooks :as hooks]
     ; modules:
     [braid.base.core]
-    [braid.big-emoji.core]
     [braid.bots.core]
     [braid.chat.core]
-    [braid.custom-emoji.core]
     [braid.disconnect-notice.core]
     [braid.embeds.core]
     [braid.embeds-image.core]
@@ -15,7 +13,9 @@
     [braid.embeds-website.core]
     [braid.embeds-youtube.core]
     [braid.emoji.core]
-    [braid.emojione-emoji.core]
+    [braid.emoji-big.core]
+    [braid.emoji-custom.core]
+    [braid.emoji-emojione.core]
     [braid.group-explore.core]
     [braid.notices.core]
     [braid.permalinks.core]
@@ -45,16 +45,16 @@
    braid.embeds.core/init!
    braid.emoji.core/init!
    ;; rest do not expose api
-   braid.big-emoji.core/init!
    braid.bots.core/init!
-   braid.custom-emoji.core/init!
    braid.disconnect-notice.core/init!
    braid.embeds-image.core/init!
    braid.embeds-map.core/init!
    braid.embeds-video.core/init!
    braid.embeds-website.core/init!
    braid.embeds-youtube.core/init!
-   braid.emojione-emoji.core/init!
+   braid.emoji-big.core/init!
+   braid.emoji-custom.core/init!
+   braid.emoji-emojione.core/init!
    braid.group-explore.core/init!
    braid.notices.core/init!
    braid.sidebar.core/init!
