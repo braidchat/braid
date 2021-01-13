@@ -5,6 +5,7 @@
    [mount.core :as mount]
    [org.httpkit.client]
    [org.httpkit.sni-client]
+   [taoensso.timbre :as timbre]
    [braid.base.conf]
    [braid.core.modules :as modules]
    ;; all following requires are for mount:
@@ -27,7 +28,7 @@
   ([port args]
    ;; modules must run first
    (when (empty? (args :hmac-secret))
-     (println "WARNING: No :hmac-secret set, using an insecure default."))
+     (timbre/warn "No :hmac-secret set, using an insecure default."))
    (modules/init! modules/default)
    (-> (mount/with-args (assoc args :port port))
        (mount/start))
