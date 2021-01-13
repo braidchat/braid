@@ -6,19 +6,21 @@ If you're interested in getting Braid running in production, read: [Deploying Br
 
 ## 0. Prep
 
-Before running Braid, you'll need to have Java and Leiningen installed.
+Before running Braid, you'll need to have Java, Leiningen, and Clojure CLI tools installed.
 
 1. Check if you have java installed by running `java -version` from your commandline. It should be at least version 1.8.0. If not, install openjdk or Oracle Java (the exact procedure depends on your OS, see Google).
 
 2. Check if you have leiningen installed by running `lein --help` from your commandline. If it's not installed, see the [Leiningen website](http://leiningen.org/) for instructions.
 
-3. Clone the braid repo (you may want to change the URL to your fork):
+3. Check if you have Clojure CLI Tools installed by running `clj -h` from your commandline. If they are not installed, see the [Clojure website](https://clojure.org/guides/getting_started) for instructions.
+
+4. Clone the braid repo (you may want to change the URL to your fork):
 
   ```bash
   git clone git@github.com:braidchat/braid.git
   ```
 
-4. Go into the project directory:
+5. Go into the project directory:
 
   ```bash
   cd braid
