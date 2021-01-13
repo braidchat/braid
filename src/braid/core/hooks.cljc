@@ -11,6 +11,7 @@
   (:require
     [braid.core.common.util :as util]))
 
+;; Atoms is a map of atoms to their initial values
 (defonce atoms (atom {}))
 
 (defn register!
