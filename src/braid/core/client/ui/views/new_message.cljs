@@ -226,7 +226,7 @@
 
     (r/create-class
       {:display-name "autocomplete"
-       :component-will-mount
+       :component-did-mount
        (fn [c]
          (let [config (r/props c)]
            (go (loop []
