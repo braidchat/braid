@@ -5,6 +5,7 @@
     [cljs.core.async :as async :refer [<! put! chan alts!]]
     [garden.core :refer [css]]
     [reagent.core :as r]
+    [reagent.dom :as r-dom]
     [reagent.ratom :include-macros true :refer-macros [reaction]]
     [retouch.common :refer [easing-fn]]
     [retouch.helpers :refer [debounce]]))
@@ -108,7 +109,7 @@
        (fn [component]
          (.addEventListener js/document "touchend" touch-end!)
          (.addEventListener js/document "touchstart" touch-start!)
-         (swap! state assoc :container (r/dom-node component)))
+         (swap! state assoc :container (r-dom/dom-node component)))
        :component-will-update
        (fn [this new-args]
          (swap! state assoc :panel-count (count (second new-args))))

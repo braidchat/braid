@@ -3,7 +3,8 @@
    [braid.core.client.ui.views.new-thread :refer [new-thread-view]]
    [braid.core.client.ui.views.thread :refer [thread-view]]
    [clojure.set :refer [difference]]
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [reagent.dom :as r-dom]))
 
 (defn threads-view
   [props]
@@ -37,7 +38,7 @@
        :component-did-mount
        (fn [this]
          (reset-threads! (props :threads))
-         (reset! this-elt (r/dom-node this)))
+         (reset! this-elt (r-dom/dom-node this)))
 
        :component-will-receive-props
        (fn [this [_ next-props]]

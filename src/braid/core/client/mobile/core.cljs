@@ -15,12 +15,12 @@
    [braid.base.client.remote-handlers]
    [braid.core.modules :as modules]
    [re-frame.core :refer [dispatch-sync dispatch]]
-   [reagent.core :as r]))
+   [reagent.dom :as r-dom]))
 
 (enable-console-print!)
 
 (defn render []
-  (r/render [app-view] (. js/document (getElementById "app"))))
+  (r-dom/render [app-view] (. js/document (getElementById "app"))))
 
 (defn ^:export init []
   (modules/init! modules/default)

@@ -5,7 +5,7 @@
 
   :plugins [[lein-environ "1.0.0"]
             [lein-tools-deps "0.4.5"]
-            [lein-cljsbuild "1.1.6" :exclusions [org.clojure/clojure]]
+            [lein-cljsbuild "1.1.8" :exclusions [org.clojure/clojure]]
             [lein-doo "0.1.7"]]
 
   :clean-targets ^{:protect false}
@@ -26,6 +26,7 @@
                                "src/retouch"]
                 :compiler {:main braid.core.client.desktop.core
                            ;; uncomment to enable re-frame-10x (event debugger)
+                           ;; will also need to uncomment below, under dev dependencies
                            ;; :preloads [day8.re-frame-10x.preload]
                            :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}
                            :asset-path "/js/dev/desktop/"
@@ -107,7 +108,8 @@
                                [org.clojure/google-closure-library-third-party
                                 com.google.javascript/closure-compiler]]
                               [com.bhauman/rebel-readline "0.1.2"]
-                              [day8.re-frame/re-frame-10x "0.3.3"]]}]
+                              ;; uncomment the below to use re-frame-10x
+                              #_[day8.re-frame/re-frame-10x "0.7.0"]]}]
 
              :prod
              [:datomic-free

@@ -15,12 +15,12 @@
    [braid.core.client.ui.views.app :refer [app-view]]
    [braid.core.modules :as modules]
    [re-frame.core :as rf :refer [dispatch-sync dispatch]]
-   [reagent.core :as r]))
+   [reagent.dom :as r-dom]))
 
 (enable-console-print!)
 
 (defn render []
-  (r/render [app-view] (.getElementById js/document "app")))
+  (r-dom/render [app-view] (.getElementById js/document "app")))
 
 (defn ^:export init
   ([] (init modules/default))

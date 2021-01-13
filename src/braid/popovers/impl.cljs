@@ -1,6 +1,6 @@
 (ns braid.popovers.impl
   (:require
-    [reagent.core :as r]))
+   [reagent.core :as r]))
 
 (def popover (r/atom nil))
 

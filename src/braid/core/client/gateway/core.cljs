@@ -5,12 +5,12 @@
    [braid.core.client.gateway.views :refer [gateway-view]]
    [braid.core.modules :as modules]
    [re-frame.core :refer [dispatch-sync]]
-   [reagent.core :as r]))
+   [reagent.dom :as r-dom]))
 
 (enable-console-print!)
 
 (defn render []
-  (r/render [gateway-view] (. js/document (getElementById "app"))))
+  (r-dom/render [gateway-view] (. js/document (getElementById "app"))))
 
 (defn ^:export init []
   (modules/init! modules/default)
