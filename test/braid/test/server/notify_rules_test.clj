@@ -67,8 +67,8 @@
                     :user-id (sender :id)
                     :content ""
                     :created-at (java.util.Date.)
-                    :mentioned-user-ids ()
-                    :mentioned-tag-ids ()})]
+                    :mentioned-user-ids []
+                    :mentioned-tag-ids []})]
 
     (is (rules/notify? (db/uuid) [[:any :any]] (msg)) ":any :any always gets notified")
     (let [new-msg (msg)]
