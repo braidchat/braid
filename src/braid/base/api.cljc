@@ -136,7 +136,7 @@
        [schema]
        {:pre [(vector? schema)
               (every? (partial util/valid? braid.base.server.schema/rule-dataspec) schema)]}
-       (swap! braid.base.server.schema/schema concat schema))
+       (swap! braid.base.server.schema/schema into schema))
 
      (defn register-db-seed-txns!
        ;; have to take fns that return maps rather than just taking maps
