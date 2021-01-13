@@ -54,7 +54,7 @@
                      (assoc-in [::state :loading?] false)
                      (update-in [::state] (fn [s]
                                             (if (= (s :query) query)
-                                              (assoc s :thread-ids thread-ids)
+                                              (assoc s :thread-ids (vec thread-ids))
                                               s))))})
 
           ::set-error!
