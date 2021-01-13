@@ -156,7 +156,8 @@
   the nickname and avatar are set based on the email;
   the id, email, and resulting nickname must be unique"
   [{:keys [id email]}]
-  {:pre [(not (user-id-exists? id))]}
+  (db/assert (not (user-id-exists? id))
+             (format "User with id %s already exists" id))
   (let [new-id (d/tempid :entities)]
     (into
       [^{:braid.core.server.db/return

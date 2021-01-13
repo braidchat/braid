@@ -217,7 +217,7 @@
   [bot-id thread-id]
   [^{:braid.core.server.db/check
      (fn [{:keys [db-after]}]
-       (assert
+       (db/assert
          (= (get-in (d/entity db-after [:bot/id bot-id]) [:bot/group :group/id])
             (get-in (d/entity db-after [:thread/id thread-id]) [:thread/group :group/id]))
          (format "Bot %s tried to watch thread not in its group %s" bot-id thread-id)))}

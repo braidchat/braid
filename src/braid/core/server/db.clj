@@ -1,4 +1,5 @@
 (ns braid.core.server.db
+  (:refer-clojure :exclude [assert])
   (:require
     [braid.base.conf :refer [config]]
     [braid.base.server.schema :refer [schema]] ; db needs schema state
@@ -33,6 +34,13 @@
   []
   (d/squuid))
 
+(defmacro assert
+  "Like clojure.core/assert, but without elision when *assert* is
+  false, because it needs to always work, even in production."
+  [x msg]
+  `(when-not ~x
+     (throw (AssertionError. (str "Assert failed: " ~msg "\n" (pr-str '~x))))))
+
 (defn run-txns!
   "Execute given transactions. Transactions may be annotated with metadata.
   If the metadata map contains a function under the key
@@ -51,7 +59,7 @@
       (let [test-db (d/with (db) txns)]
         (try
           (doseq [check checks]
-            (binding [*assert* true] (check test-db)))
+            (check test-db))
           (catch AssertionError e
             (throw (ex-info "Transaction Failed"
                             {::error (.getMessage e)}))))))
