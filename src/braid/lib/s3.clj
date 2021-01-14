@@ -16,7 +16,7 @@
 (defn generate-s3-upload-policy
   [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} {:keys [starts-with]}]
   (when credentials-provider
-    (let [[api-key api-secret] (credentials-provider)
+    (let [[api-key api-secret ?security-token] (credentials-provider)
           utc-now (aws/utc-now)
           day (.format utc-now aws/basic-date-format)
           date (.format utc-now aws/basic-date-time-format)
@@ -34,6 +34,9 @@
                        {"x-amz-algorithm" "AWS4-HMAC-SHA256"}
                        {"x-amz-credential" credential}
                        {"x-amz-date" date}]}
+                     (cond-> ?security-token
+                       (update :conditions conj
+                               {"x-amz-security-token" ?security-token}))
                      json/write-str
                      aws/str->bytes
                      Base64/encodeBase64String)]
@@ -77,7 +80,7 @@
 
 (defn readable-s3-url
   [{:aws/keys [credentials-provider] region :aws-region :as config} expires-seconds path]
-  (let [[api-key _] (credentials-provider)
+  (let [[api-key _ ?security-token] (credentials-provider)
         utc-now (aws/utc-now)
         query-str (str "X-Amz-Algorithm=AWS4-HMAC-SHA256"
                        "&X-Amz-Credential=" api-key "/" (.format utc-now aws/basic-date-format) "/" region "/s3/aws4_request"
@@ -87,11 +90,13 @@
     (str "https://" (s3-host config)
          "/" path
          "?" query-str
-         "&X-Amz-Signature=" (get-signature config utc-now path query-str))))
+         "&X-Amz-Signature=" (get-signature config utc-now path query-str)
+         (when ?security-token
+           (str "&X-Amz-Security-Token=" ?security-token)))))
 
 (defn- make-request
   [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} {:keys [body method path] :as request}]
-  (let [[api-key api-secret] (credentials-provider)
+  (let [[api-key api-secret ?session-token] (credentials-provider)
         utc-now (aws/utc-now)
         req (update request :headers
                     assoc
@@ -106,7 +111,12 @@
                                     :request req
                                     :aws-api-secret api-secret
                                     :aws-api-key api-key
-                                    :aws-region region})))))
+                                    :aws-region region}))
+        (cond->
+            ?session-token
+          (assoc-in [:headers "X-Amz-Security-Token"] ?session-token)))))
+
+
 
 (defn delete-file!
   [config path]
