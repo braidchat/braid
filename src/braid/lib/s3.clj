@@ -45,14 +45,14 @@
        :auth {:policy policy
               :key api-key
               :signature (->>
-                          (aws/str->bytes policy)
-                          (aws/hmac-sha256
-                           (aws/signing-key
-                            {:aws-api-secret api-secret
-                             :aws-region region
-                             :day day
-                             :service "s3"}))
-                          Hex/encodeHexString)
+                           (aws/str->bytes policy)
+                           (aws/hmac-sha256
+                             (aws/signing-key
+                               {:aws-api-secret api-secret
+                                :aws-region region
+                                :day day
+                                :service "s3"}))
+                           Hex/encodeHexString)
               :credential credential
               :date date}})))
 
