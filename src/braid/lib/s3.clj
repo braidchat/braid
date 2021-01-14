@@ -59,7 +59,7 @@
 
 (defn- get-signature
   [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} utc-now path query-str]
-  (let [[_ api-secret] (credentials-provider)]
+  (let [[_ api-secret ?security-token] (credentials-provider)]
     (->> ["AWS4-HMAC-SHA256"
           (.format utc-now aws/basic-date-time-format)
           (string/join "/" [(.format utc-now aws/basic-date-format) region "s3"
@@ -68,7 +68,9 @@
            {:method "GET"
             :path (str "/" path)
             :query-string query-str
-            :headers {"host" (str bucket ".s3." region ".amazonaws.com")}
+            :headers (cond-> {"host" (str bucket ".s3." region ".amazonaws.com")}
+                       ?security-token
+                       (assoc "x-amz-security-token" ?security-token))
             :body nil})]
          (string/join "\n")
          aws/str->bytes
@@ -87,23 +89,27 @@
                        "&X-Amz-Credential=" api-key "/" (.format utc-now aws/basic-date-format) "/" region "/s3/aws4_request"
                        "&X-Amz-Date=" (.format utc-now aws/basic-date-time-format)
                        (str "&X-Amz-Expires=" expires-seconds)
-                       "&X-Amz-SignedHeaders=host")]
+                       "&X-Amz-SignedHeaders=host"
+                       (when ?security-token
+                         (str "&X-Amz-Security-Token=" (URLEncoder/encode ?security-token "UTF-8"))) )]
     (str "https://" (s3-host config)
          "/" path
          "?" query-str
          "&X-Amz-Signature=" (get-signature config utc-now path query-str)
-         (when ?security-token
-           (str "&X-Amz-Security-Token=" (URLEncoder/encode ?security-token "UTF-8"))))))
+         )))
 
 (defn- make-request
   [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} {:keys [body method path] :as request}]
   (let [[api-key api-secret ?session-token] (credentials-provider)
         utc-now (aws/utc-now)
-        req (update request :headers
-                    assoc
-                    "x-amz-date" (.format utc-now aws/basic-date-time-format)
-                    "x-amz-content-sha256" (aws/hex-hash body)
-                    "Host" (str (s3-host config) ":443"))]
+        req (cond->
+                (update request :headers
+                        assoc
+                        "x-amz-date" (.format utc-now aws/basic-date-time-format)
+                        "x-amz-content-sha256" (aws/hex-hash body)
+                        "Host" (str (s3-host config) ":443"))
+              ?session-token (assoc-in [:headers "x-amz-security-token"]
+                                       ?session-token))]
     (-> req
         (dissoc :method :path :query-string)
         (assoc-in [:headers "Authorization"]
@@ -115,7 +121,7 @@
                                     :aws-region region}))
         (cond->
             ?session-token
-          (assoc-in [:headers "X-Amz-Security-Token"] ?session-token)))))
+          (assoc-in [:headers "x-amz-security-token"] ?session-token)))))
 
 
 
