@@ -59,7 +59,7 @@
         reagent/reagent {:mvn/version "1.0.0"}
         clj-commons/secretary {:mvn/version "1.2.4" :exclusions [com.cemerick/clojurescript.test]}
         venantius/accountant {:mvn/version "0.2.5"}
-        args4j {:mvn/version "2.33"}
+        args4j/args4j {:mvn/version "2.33"}
         }
  :aliases {:datomic-free {:extra-deps {com.datomic/datomic-free {:mvn/version "0.9.5697"}}}
            :dev {:extra-paths ["dev-src"]
