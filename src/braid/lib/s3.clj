@@ -6,6 +6,7 @@
    [braid.base.conf :refer [config]]
    [braid.lib.aws :as aws])
   (:import
+   (java.net URLEncoder)
    (java.time.temporal ChronoUnit)
    (org.apache.commons.codec.binary Base64 Hex)))
 
@@ -92,7 +93,7 @@
          "?" query-str
          "&X-Amz-Signature=" (get-signature config utc-now path query-str)
          (when ?security-token
-           (str "&X-Amz-Security-Token=" ?security-token)))))
+           (str "&X-Amz-Security-Token=" (URLEncoder/encode ?security-token "UTF-8"))))))
 
 (defn- make-request
   [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} {:keys [body method path] :as request}]
