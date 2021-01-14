@@ -13,7 +13,7 @@
     ;; TODO don't special case these here
     ;; ports should come from config
     {:db-url "datomic:mem://braid"
-     :api-domain (str "localhost:" (:port (mount/args)))
+     :api-domain (str "localhost:" (inc (:port (mount/args))))
      :site-url (str "http://localhost:" (:port (mount/args)))
      :hmac-secret "secret"}
     @ports-config ; overrides api-domain & site url when port is automatically found
