@@ -8,7 +8,7 @@
           [braid.core.client.ui.views.new-message]
           [braid.core.client.ui.views.message]
           [braid.core.client.ui.views.header]
-          [braid.core.client.ui.views.thread]
+          [braid.core.client.ui.views.thread-header]
           [braid.core.client.ui.views.user-header]
           [braid.core.client.ui.views.autocomplete]
           [braid.core.client.ui.views.new-message-action-button]
@@ -53,8 +53,8 @@
         :priority   number, of ordering
         :view       reagent view fn (given thread map as first argument)"
        [config]
-       {:pre [(util/valid? braid.core.client.ui.views.thread/header-item-dataspec config)]}
-       (swap! braid.core.client.ui.views.thread/thread-header-items conj config))
+       {:pre [(util/valid? braid.core.client.ui.views.thread-header/header-item-dataspec config)]}
+       (swap! braid.core.client.ui.views.thread-header/thread-header-items conj config))
 
      (defn register-thread-control!
        "Adds a new view to a thread's controls.
@@ -62,8 +62,8 @@
         :priority   number, of ordering
         :view       reagent view fn (given thread map as first argument)"
        [config]
-       {:pre [(util/valid? braid.core.client.ui.views.thread/thread-control-dataspec config)]}
-       (swap! braid.core.client.ui.views.thread/thread-controls conj config))
+       {:pre [(util/valid? braid.core.client.ui.views.thread-header/thread-control-dataspec config)]}
+       (swap! braid.core.client.ui.views.thread-header/thread-controls conj config))
 
      (defn register-group-page!
        "Registers a group page with its own URL.

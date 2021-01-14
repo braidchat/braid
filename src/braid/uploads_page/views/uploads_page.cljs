@@ -7,7 +7,7 @@
    [braid.lib.upload :as upload]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.mentions :as mentions]
-   [braid.core.client.ui.views.thread :as thread]))
+   [braid.core.client.ui.views.thread-header :as thread-header]))
 
 (defn file-view [url]
   (cond
@@ -60,7 +60,7 @@
             (str "Uploaded at " (date/smart-format-date (upload :uploaded-at)))]
            [:br]
            (if @thread
-             [:span "Tagged with " [thread/thread-tags-view @thread]]
+             [:span "Tagged with " [thread-header/thread-tags-view @thread]]
              [:button
               {:on-click (fn [_]
                            (dispatch [:load-threads
