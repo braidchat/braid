@@ -35,10 +35,10 @@
         ring-transit/ring-transit {:mvn/version "0.1.6"}
         ring/ring-core {:mvn/version "1.8.2"}
         ring/ring-defaults {:mvn/version "0.3.2"}
-        com.fasterxml.jackson.core/jackson-core {:mvn/version "2.9.6"}
-        com.fasterxml.jackson.dataformat/jackson-dataformat-cbor {:mvn/version "2.9.6"}
-        com.fasterxml.jackson.dataformat/jackson-dataformat-smile {:mvn/version "2.9.6"}
-        com.fasterxml.jackson.core/jackson-databind {:mvn/version "2.9.6"}
+        com.fasterxml.jackson.core/jackson-core {:mvn/version "2.10.2"}
+        com.fasterxml.jackson.dataformat/jackson-dataformat-cbor {:mvn/version "2.10.2"}
+        com.fasterxml.jackson.dataformat/jackson-dataformat-smile {:mvn/version "2.10.2"}
+        com.fasterxml.jackson.core/jackson-databind {:mvn/version "2.10.2"}
         org.clojure/core.cache {:mvn/version "1.0.207"}
         org.clojure/data.priority-map {:mvn/version "1.0.0"}
         org.clojure/core.memoize {:mvn/version "1.0.236"}
