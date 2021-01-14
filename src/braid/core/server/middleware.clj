@@ -68,8 +68,6 @@
                  (->>
                   [(when-let [site (config :site-url)]
                      (re-pattern (java.util.regex.Pattern/quote site)))
-                   (when-let [mobile-site (config :mobile-site-url)]
-                     (re-pattern (java.util.regex.Pattern/quote mobile-site)))
                    #"http://localhost:\d+"]
                   (remove nil?))
                  :access-control-allow-credentials true

@@ -47,7 +47,6 @@
                   :http-only
                   :mailgun-domain
                   :mailgun-password
-                  :mobile-site-url
                   :prod-js
                   :redis-uri
                   :site-url]]

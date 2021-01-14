@@ -2,8 +2,7 @@
   (:require
    [braid.core.server.middleware :refer [wrap-universal-middleware]]
    [braid.base.conf-extra :as conf] ; to update ports
-   [braid.core.server.handler :refer [mobile-client-app
-                                      desktop-client-app
+   [braid.core.server.handler :refer [desktop-client-app
                                       api-server-app]]
    [braid.base.server.ws-handler] ; for mount
    [braid.core.server.sync] ; for multimethods
@@ -25,10 +24,7 @@
                          (start-server! (wrap #'desktop-client-app) port))
         desktop-port (server-port desktop-server)]
     (timbre/debugf "Started desktop server on port %d" desktop-port)
-    (let [mobile-port (inc desktop-port)
-          api-port (inc mobile-port)
-          mobile-server (do (timbre/debugf "starting mobile server on port %d" mobile-port)
-                            (start-server! (wrap #'mobile-client-app) mobile-port))
+    (let [api-port (inc desktop-port)
           api-server (do (timbre/debugf "starting api server on port %d" api-port)
                          (start-server! (wrap #'api-server-app) api-port))]
       (swap! conf/ports-config assoc
@@ -36,7 +32,6 @@
       (swap! conf/ports-config assoc
              :site-url (str "http://localhost:" (server-port desktop-server)))
       {:desktop desktop-server
-       :mobile mobile-server
        :api api-server})))
 
 (defn stop-servers!

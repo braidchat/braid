@@ -86,6 +86,3 @@
   (GET "/*" []
     (spa/get-html "desktop" {})))
 
-(defroutes mobile-client-routes
-  (GET "/*" []
-    (spa/get-html "mobile" {})))

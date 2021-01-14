@@ -4,7 +4,7 @@
    [braid.core.server.routes.api.private :refer [api-private-routes]]
    [braid.core.server.routes.api.public :refer [api-public-routes]]
    [braid.base.server.http-api-routes :as modules]
-   [braid.core.server.routes.client :refer [desktop-client-routes mobile-client-routes]]
+   [braid.core.server.routes.client :refer [desktop-client-routes]]
    [braid.base.server.http-client-routes :refer [resource-routes]]
    [braid.core.server.routes.socket :refer [sync-routes]]
    [compojure.core :refer [routes context]]
@@ -29,10 +29,6 @@
                :absolute-redirects     true
                :content-types          true
                :default-charset        "utf-8"}})
-
-(def mobile-client-app
-  (-> (routes resource-routes mobile-client-routes)
-      (wrap-defaults static-site-defaults)))
 
 (def desktop-client-app
   (-> (routes resource-routes desktop-client-routes)

@@ -9,7 +9,7 @@
 
   ; add cache-control headers to js files)
   ; (since it uses a cache-busted url anyway)
-  (GET (str "/js/:build{desktop|mobile|gateway|base}.js") [build]
+  (GET (str "/js/:build{desktop|gateway|base}.js") [build]
     (if (boolean (config :prod-js))
       (if-let [response (resource-response (str "public/js/prod/" build ".js"))]
         (assoc-in response [:headers "Cache-Control"] "max-age=365000000, immutable")

@@ -270,11 +270,6 @@
     :quest/goal 3
     :quest/listener (fn [state [event args]]
                       false)}
-   {:quest/id :quest/mobile-client
-    :quest/name "Try the Braid mobile app"
-    :quest/goal 3
-    :quest/listener (fn [state [event args]]
-                      false)}
    {:quest/id :quest/web-client
     :quest/name "Try the Braid web app"
     :quest/goal 3

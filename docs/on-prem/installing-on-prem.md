@@ -75,8 +75,7 @@ java -server -Xmx1228m -Dfile.encoding=UTF8 \
 
 The above will start three servers:
   1. a desktop client server (port 5000)
-  2. a mobile client server (port 5001) (currently very WIP)
-  3. an api server (port 5002)
+  3. an api server (port 5001)
 
 You should be able to visit `http://localhost:5000` (or `http://your-server-ip:5000`) and see the Braid desktop client.
 

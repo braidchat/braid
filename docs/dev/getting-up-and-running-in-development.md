@@ -52,8 +52,7 @@ This will start all the various Braid components, including 3 web servers:
 | Server             | Port | Description                                                     |
 | ------------------ | ---- | --------------------------------------------------------------- |
 | desktop web client | 5555 | HTML, JS, CSS assets for desktop web client                     |
-| mobile web client  | 5556 | HTML, JS, CSS assets for mobile web client                      |
-| api                | 5557 | HTTP and Websocket API, communicates w/ db, etc.                |
+| api                | 5556 | HTTP and Websocket API, communicates w/ db, etc.                |
 | figwheel           | 3559 | cljs->js compiler and live-code reloader, do not visit directly |
 
 
@@ -128,21 +127,6 @@ In production, we recommend "Datomic Starter" instead (instructions [here](../dr
 ## Extras
 
 
-### Mobile Client
-
-To work on the mobile client:
-
-1. Run `figwheel` with the `mobile-dev` build:
-
-  ```bash
-  lein figwheel mobile-dev
-  ```
-
-2. Open `http://localhost:5556/` in your browser:
-
-  ```bash
-  open http://localhost:5556/
-  ```
 
 ### Using Emacs + CIDER instead of terminals
 

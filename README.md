@@ -68,7 +68,7 @@ If you just want to use Braid, but not set it up yourself, you can get a hosted 
 
   https://github.com/braidchat/braid
 
-  API server, desktop web client, mobile web client, docs
+  API server, desktop web client, docs
 
 
 - **[Native Desktop Client](https://github.com/braidchat/electron)**

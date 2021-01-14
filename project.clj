@@ -22,8 +22,7 @@
               :builds
               [{:id "desktop-dev"
                 :figwheel {:on-jsload "braid.core.client.desktop.core/reload"}
-                :source-paths ["src/braid"
-                               "src/retouch"]
+                :source-paths ["src/braid"]
                 :compiler {:main braid.core.client.desktop.core
                            ;; uncomment to enable re-frame-10x (event debugger)
                            ;; will also need to uncomment below, under dev dependencies
@@ -43,16 +42,6 @@
                            :output-to "resources/public/js/desktop/tests/out/all-tests.js"
                            :output-dir "resources/public/js/desktop/tests/out"}}
 
-               {:id "mobile-dev"
-                :figwheel {:on-jsload "braid.core.client.mobile.core/reload"}
-                :source-paths ["src/braid"
-                               "src/retouch"]
-                :compiler {:main braid.core.client.mobile.core
-                           :asset-path "/js/dev/mobile/"
-                           :output-to "resources/public/js/dev/mobile.js"
-                           :output-dir "resources/public/js/dev/mobile/"
-                           :verbose true}}
-
                {:id "gateway-dev"
                 :figwheel {:on-jsload "braid.core.client.gateway.core/reload"}
                 :source-paths ["src/braid"]
@@ -63,8 +52,7 @@
                            :verbose true}}
 
                {:id "release"
-                :source-paths ["src/braid"
-                               "src/retouch"]
+                :source-paths ["src/braid"]
                 :compiler {:asset-path "/js/prod/"
                            :output-dir "resources/public/js/prod/out"
                            :optimizations :advanced
@@ -78,10 +66,7 @@
                                       :entries #{"braid.core.client.desktop.core"}}
                                      :gateway
                                      {:output-to "resources/public/js/prod/gateway.js"
-                                      :entries #{"braid.core.client.gateway.core"}}
-                                     :mobile
-                                     {:output-to "resources/public/js/prod/mobile.js"
-                                      :entries #{"braid.core.client.mobile.core"}}}
+                                      :entries #{"braid.core.client.gateway.core"}}}
                            :verbose true}}]}
 
   :min-lein-version "2.5.0"
