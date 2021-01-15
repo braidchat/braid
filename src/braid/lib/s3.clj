@@ -59,7 +59,7 @@
 
 (defn- get-signature
   [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} utc-now path query-str]
-  (let [[_ api-secret ?security-token] (credentials-provider)]
+  (let [[_ api-secret] (credentials-provider)]
     (->> ["AWS4-HMAC-SHA256"
           (.format utc-now aws/basic-date-time-format)
           (string/join "/" [(.format utc-now aws/basic-date-format) region "s3"
@@ -68,9 +68,7 @@
            {:method "GET"
             :path (str "/" path)
             :query-string query-str
-            :headers (cond-> {"host" (str bucket ".s3." region ".amazonaws.com")}
-                       ?security-token
-                       (assoc "x-amz-security-token" ?security-token))
+            :headers {"host" (str bucket ".s3." region ".amazonaws.com")}
             :body nil})]
          (string/join "\n")
          aws/str->bytes
