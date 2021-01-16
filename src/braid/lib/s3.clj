@@ -66,18 +66,18 @@
           (string/join "/" [(.format utc-now aws/basic-date-format) region "s3"
                             "aws4_request"])
           (aws/canonical-request
-           {:method "GET"
-            :path (str "/" path)
-            :query-string query-str
-            :headers {"host" (str bucket ".s3." region ".amazonaws.com")}
-            :body nil})]
+            {:method "GET"
+             :path (str "/" path)
+             :query-string query-str
+             :headers {"host" (str bucket ".s3." region ".amazonaws.com")}
+             :body nil})]
          (string/join "\n")
          aws/str->bytes
          (aws/hmac-sha256
-          (aws/signing-key {:aws-api-secret api-secret
-                            :aws-region region
-                            :day (.format utc-now aws/basic-date-format)
-                            :service "s3"}))
+           (aws/signing-key {:aws-api-secret api-secret
+                             :aws-region region
+                             :day (.format utc-now aws/basic-date-format)
+                             :service "s3"}))
          aws/bytes->hex)))
 
 (defn readable-s3-url
@@ -93,12 +93,11 @@
                        (str "&X-Amz-Expires=" expires-seconds)
                        "&X-Amz-SignedHeaders=host"
                        (when ?security-token
-                         (str "&X-Amz-Security-Token=" (URLEncoder/encode ?security-token "UTF-8"))) )]
+                         (str "&X-Amz-Security-Token=" (URLEncoder/encode ?security-token "UTF-8"))))]
     (str "https://" (s3-host config)
          "/" path
          "?" query-str
-         "&X-Amz-Signature=" (get-signature config utc-now path query-str)
-         )))
+         "&X-Amz-Signature=" (get-signature config utc-now path query-str))))
 
 (defn- make-request
   [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} {:keys [body method path] :as request}]
