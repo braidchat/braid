@@ -66,9 +66,7 @@
     (if query-string
       (->> (string/split query-string #"&")
            (map #(string/split % #"="))
-           (map (fn [[k v]] (str (URLEncoder/encode k "UTF-8")
-                                 "="
-                                 (URLEncoder/encode v "UTF-8"))))
+           (map (fn [[k v]] (str k "=" v)))
            sort
            (string/join "&"))
       "")

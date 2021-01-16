@@ -85,7 +85,10 @@
   (let [[api-key _ ?security-token] (credentials-provider)
         utc-now (aws/utc-now)
         query-str (str "X-Amz-Algorithm=AWS4-HMAC-SHA256"
-                       "&X-Amz-Credential=" api-key "/" (.format utc-now aws/basic-date-format) "/" region "/s3/aws4_request"
+                       "&X-Amz-Credential="
+                       (URLEncoder/encode (str api-key "/"
+                                               (.format utc-now aws/basic-date-format)
+                                               "/" region "/s3/aws4_request"))
                        "&X-Amz-Date=" (.format utc-now aws/basic-date-time-format)
                        (str "&X-Amz-Expires=" expires-seconds)
                        "&X-Amz-SignedHeaders=host"
