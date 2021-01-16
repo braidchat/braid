@@ -28,6 +28,10 @@
                             (.append "x-amz-credential" (:credential auth))
                             (.append "x-amz-signature" (:signature auth))
                             (.append "x-amz-date" (:date auth))
+                            (cond->
+                                (:security-token auth)
+                              (.append "x-amz-security-token"
+                                       (:security-token auth)))
                             (.append "Content-Type" (.-type file))
                             (.append "file" file file-name))
                     :on-complete (fn [_]

@@ -55,7 +55,8 @@
                                 :service "s3"}))
                            Hex/encodeHexString)
               :credential credential
-              :date date}})))
+              :date date
+              :security-token ?security-token}})))
 
 (defn- get-signature
   [{:aws/keys [credentials-provider] region :aws-region bucket :aws-bucket :as config} utc-now path query-str]
