@@ -19,12 +19,13 @@
                          :key "aws-access-key"
                          :signature "d3230795fc4d3ffbd3387d9eb02c00250121361bb7e9a1ea68eb347a630f2634"
                          :credential "aws-access-key/20210101/aws-region/s3/aws4_request"
-                         :date "20210101T000000Z"}}]
+                         :date "20210101T000000Z"
+                         :security-token nil}}]
     (with-redefs [aws/utc-now (constantly (java.time.ZonedDateTime/parse "2021-01-01T00:00:00Z"))]
       (is (= expected (generate-s3-upload-policy config {:starts-with ""}))))))
 
 (deftest can-build-readable-s3-url
-  (let [expected "https://aws-bucket.s3.aws-region.amazonaws.com/dijkstra?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=aws-access-key/20210101/aws-region/s3/aws4_request&X-Amz-Date=20210101T000000Z&X-Amz-Expires=10000&X-Amz-SignedHeaders=host&X-Amz-Signature=a8f771795c835fd5f7ca75fb8ce54385cb8f591514b91d34cb34c7679fc45416"]
+  (let [expected "https://aws-bucket.s3.aws-region.amazonaws.com/dijkstra?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=aws-access-key%2F20210101%2Faws-region%2Fs3%2Faws4_request&X-Amz-Date=20210101T000000Z&X-Amz-Expires=10000&X-Amz-SignedHeaders=host&X-Amz-Signature=a8f771795c835fd5f7ca75fb8ce54385cb8f591514b91d34cb34c7679fc45416"]
     (with-redefs [aws/utc-now (constantly (java.time.ZonedDateTime/parse "2021-01-01T00:00:00Z"))]
       (is (= expected (readable-s3-url config 10000 "dijkstra"))))))
 
