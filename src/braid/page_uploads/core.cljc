@@ -1,4 +1,4 @@
-(ns braid.uploads-page.core
+(ns braid.page-uploads.core
   (:require
     [braid.base.api :as base]
     [braid.chat.api :as chat]
@@ -7,8 +7,8 @@
           [re-frame.core :refer [subscribe dispatch]]
           [spec-tools.data-spec :as ds]
           [braid.core.client.routes :as routes]
-          [braid.uploads-page.views.uploads-page-styles :refer [>uploads-page]]
-          [braid.uploads-page.views.uploads-page :refer [uploads-page-view]]])))
+          [braid.page-uploads.views.uploads-page-styles :refer [>uploads-page]]
+          [braid.page-uploads.views.uploads-page :refer [uploads-page-view]]])))
 
 (defn init! []
   #?(:cljs

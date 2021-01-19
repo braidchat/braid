@@ -1,4 +1,4 @@
-(ns braid.uploads-page.views.uploads-page
+(ns braid.page-uploads.views.uploads-page
   (:require
    [clojure.string :as string]
    [re-frame.core :refer [dispatch subscribe]]

@@ -1,4 +1,4 @@
-(ns braid.uploads-page.views.uploads-page-styles
+(ns braid.page-uploads.views.uploads-page-styles
   (:require
    [garden.units :refer [rem em]]
    [braid.core.client.ui.styles.mixins :as mixins]

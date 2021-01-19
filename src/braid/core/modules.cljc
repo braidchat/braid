@@ -18,17 +18,17 @@
     [braid.emoji-emojione.core]
     [braid.group-explore.core]
     [braid.notices.core]
+    [braid.page-recent.core]
+    [braid.page-subscriptions.core]
+    [braid.page-uploads.core]
     [braid.permalinks.core]
     [braid.popovers.core]
     [braid.quests.core]
-    [braid.recent-page.core]
     [braid.rss.core]
     [braid.search.core]
     [braid.sidebar.core]
     [braid.stars.core]
-    [braid.subscriptions-page.core]
     [braid.uploads.core]
-    [braid.uploads-page.core]
     [braid.users.core]))
 
 (defn init! [module-fns]
@@ -58,15 +58,15 @@
    braid.group-explore.core/init!
    braid.notices.core/init!
    braid.sidebar.core/init!
+   braid.page-recent.core/init!
+   braid.page-subscriptions.core/init!
+   braid.page-uploads.core/init!
    braid.permalinks.core/init!
    braid.quests.core/init!
-   braid.recent-page.core/init!
    braid.rss.core/init!
    braid.stars.core/init!
    braid.search.core/init!
-   braid.subscriptions-page.core/init!
    braid.uploads.core/init!
-   braid.uploads-page.core/init!
    braid.users.core/init!])
 
 (defn plus [base to-add]

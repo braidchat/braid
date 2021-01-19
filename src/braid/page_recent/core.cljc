@@ -1,4 +1,4 @@
-(ns braid.recent-page.core
+(ns braid.page-recent.core
   "Displays threads that were recently closed."
   (:require
    [braid.base.api :as base]

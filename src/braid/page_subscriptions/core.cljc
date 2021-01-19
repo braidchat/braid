@@ -1,12 +1,12 @@
-(ns braid.subscriptions-page.core
+(ns braid.page-subscriptions.core
   "Page for user to manage tag subscriptions"
   (:require
    [braid.base.api :as base]
    [braid.chat.api :as chat]
    #?@(:cljs
        [[braid.core.client.routes :as routes]
-        [braid.subscriptions-page.styles :as styles]
-        [braid.subscriptions-page.ui :as ui]])))
+        [braid.page-subscriptions.styles :as styles]
+        [braid.page-subscriptions.ui :as ui]])))
 
 (defn init! []
   #?(:cljs
