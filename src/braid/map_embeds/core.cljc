@@ -5,7 +5,9 @@
    [braid.embeds.api :as embeds]
    #?@(:clj
        [[org.httpkit.client :as http]
-        [braid.base.conf :refer [config]]])))
+        [braid.base.conf :refer [config]]]
+       :cljs
+       [[goog.object :as o]])))
 
 (def google-regex #"^https://www.google.com/maps/.*/@(\-?\d+\.\d+),(\-?\d+.\.\d+).*")
 
@@ -18,7 +20,7 @@
          :target "_blank"
          :rel "noopener noreferrer"}
         [:img
-         {:src (str "//" (aget js/window "api_domain") "/maps-embeds/static-map?lat=" lat "&lng=" lng)}]])))
+         {:src (str "//" (o/get js/window "api_domain") "/maps-embeds/static-map?lat=" lat "&lng=" lng)}]])))
 
 
 (defn init! []

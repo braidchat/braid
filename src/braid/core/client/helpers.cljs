@@ -3,6 +3,7 @@
    [cljs.core.async.macros :refer [go]])
   (:require
    [cljs.core.async :refer [<! put! chan alts! timeout]]
+   [goog.object :as o]
    [goog.style :as gstyle]))
 
 (defn debounce
@@ -40,7 +41,7 @@
   [elt prop]
   (cond
     (.-currentStyle elt)
-    (aget (.-currentStyle elt) prop)
+    (o/get (.-currentStyle elt) prop)
 
     (.-getComputedStyle js/window)
     (.. js/document -defaultView

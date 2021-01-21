@@ -9,6 +9,7 @@
    [braid.core.hooks :as hooks]
    [clojure.set :as set]
    [clojure.string :as string]
+   [goog.object :as o]
    [re-frame.core :refer [dispatch]]))
 
 (defn name->open-tag-id
@@ -531,7 +532,7 @@
 (reg-event-fx
   :notify-if-client-out-of-date
   (fn [_ [_ server-checksum]]
-    (if (not= (aget js/window "checksum") server-checksum)
+    (if (not= (o/get js/window "checksum") server-checksum)
       {:dispatch [:braid.notices/display!
                   [:client-out-of-date "Client out of date - please refresh" :info]]}
       {})))

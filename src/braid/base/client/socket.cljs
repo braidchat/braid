@@ -5,6 +5,7 @@
     [braid.lib.xhr :as xhr]
     [cljs.core.async :as async]
     [clojure.string :as string]
+    [goog.object :as o]
     [goog.string.format]
     [re-frame.core :refer [dispatch]]
     [taoensso.sente :as sente]
@@ -15,7 +16,7 @@
 (timbre/set-level! :info)
 
 (defn make-socket! [csrf-token]
-  (let [domain (aget js/window "api_domain")
+  (let [domain (o/get js/window "api_domain")
         packer (sente-transit/get-transit-packer
                  :json
                  {}

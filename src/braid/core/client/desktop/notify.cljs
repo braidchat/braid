@@ -1,8 +1,10 @@
-(ns braid.core.client.desktop.notify)
+(ns braid.core.client.desktop.notify
+  (:require
+   [goog.object :as o]))
 
 (defn has-notify?
   []
-  (some? (aget js/window "Notification")))
+  (some? (o/get js/window "Notification")))
 
 (defn enabled?
   []

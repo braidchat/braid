@@ -1,12 +1,13 @@
 (ns braid.lib.xhr
   (:require
     [ajax.core :refer [ajax-request json-request-format json-response-format]]
-    [ajax.edn :refer [edn-request-format edn-response-format]]))
+    [ajax.edn :refer [edn-request-format edn-response-format]]
+    [goog.object :as o]))
 
 (defn edn-xhr
   [args]
   (ajax-request (assoc args
-                  :uri (str "//" (aget js/window "api_domain") (args :uri))
+                  :uri (str "//" (o/get js/window "api_domain") (args :uri))
                   :with-credentials true
                   :format (edn-request-format)
                   :response-format (edn-response-format)

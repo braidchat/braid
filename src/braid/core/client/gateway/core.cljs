@@ -4,6 +4,7 @@
    [braid.core.client.gateway.subs]
    [braid.core.client.gateway.views :refer [gateway-view]]
    [braid.core.modules :as modules]
+   [goog.object :as o]
    [re-frame.core :refer [dispatch-sync]]
    [reagent.dom :as r-dom]))
 
@@ -14,7 +15,7 @@
 
 (defn ^:export init []
   (modules/init! modules/default)
-  (dispatch-sync [::events/initialize (keyword (aget js/window "gateway_action"))])
+  (dispatch-sync [::events/initialize (keyword (o/get js/window "gateway_action"))])
   (render))
 
 (defn ^:export reload []

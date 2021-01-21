@@ -10,6 +10,7 @@
    [braid.core.client.ui.views.thread-header :refer [thread-header-view]]
    [cljsjs.resize-observer-polyfill]
    [clojure.string :as string]
+   [goog.object :as o]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r])
   (:import
@@ -199,7 +200,7 @@
             (let [pasted-files (.. e -clipboardData -files)]
               (when (< 0 (.-length pasted-files))
                 (.preventDefault e)
-                (maybe-upload-file! thread (aget pasted-files 0)))))
+                (maybe-upload-file! thread (o/get pasted-files 0)))))
 
           :on-drag-over
           (fn [e]
@@ -216,7 +217,7 @@
             (set-dragging! false)
             (let [file-list (.. e -dataTransfer -files)]
               (when (< 0 (.-length file-list))
-                (maybe-upload-file! thread (aget file-list 0)))))}
+                (maybe-upload-file! thread (o/get file-list 0)))))}
 
          (when limbo?
            [:div.notice "No one can see this conversation yet. Mention a @user or #tag in a reply."])
