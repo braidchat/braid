@@ -6,7 +6,8 @@
    #?@(:clj
        [[braid.chat.schema :as schema]
         [braid.chat.seed :as seed]
-        [braid.chat.server.initial-data :as initial-data]]
+        [braid.chat.server.initial-data :as initial-data]
+        [braid.chat.socket-message-handlers :refer [socket-message-handlers]]]
        :cljs
        [[re-frame.core :refer [dispatch]]
         [braid.chat.client.remote-handlers]
@@ -44,7 +45,10 @@
                   :site-url]]
          (base/register-config-var! k))
 
-       (base/register-initial-user-data! initial-data/initial-data-for-user))
+       (base/register-initial-user-data! initial-data/initial-data-for-user)
+
+       (base/register-server-message-handlers!
+         socket-message-handlers))
 
      :cljs
      (do

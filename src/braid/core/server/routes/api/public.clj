@@ -1,11 +1,9 @@
 (ns braid.core.server.routes.api.public
   (:require
-    [clojure.java.io :as io]
     [clojure.string :as string]
     [compojure.coercions :refer [as-uuid]]
     [compojure.core :refer [GET PUT POST defroutes]]
-    [braid.core.common.util :refer [valid-nickname? valid-email?]]
-    [braid.core.hooks :as hooks]
+    [braid.core.common.util :refer [valid-email?]]
     [braid.base.conf :refer [config]]
     [braid.core.server.db :as db]
     [braid.chat.db.group :as group]
@@ -14,10 +12,7 @@
     [braid.chat.events :as events]
     [braid.core.server.invite :as invites]
     [braid.core.server.routes.helpers :refer [current-user error-response edn-response]]
-    [braid.core.server.sync :as sync]
-    [braid.lib.crypto :refer [random-nonce]]
-    [braid.lib.github :as github]
-    [braid.lib.markdown :refer [markdown->hiccup]]))
+    [braid.lib.github :as github]))
 
 (defn join-group
   [user-id group-id]

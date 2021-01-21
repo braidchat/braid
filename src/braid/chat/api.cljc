@@ -15,9 +15,9 @@
           [braid.core.client.group-admin.views.group-settings-page]]
          :clj
          [[braid.chat.db.user]
+          [braid.chat.socket-message-handlers]
           [braid.core.server.sync-handler]
-          [braid.core.server.sync-helpers]
-          [braid.core.server.sync]])))
+          [braid.core.server.sync-helpers]])))
 
 #?(:cljs
    (do
@@ -160,7 +160,7 @@
        The function will be passed a map containing the new message."
        [callback]
        {:pre [(fn? callback)]}
-       (swap! braid.core.server.sync/new-message-callbacks conj callback))
+       (swap! braid.chat.socket-message-handlers/new-message-callbacks conj callback))
 
      (defn register-group-broadcast-hook!
        "Add a function to be called when broadcasting a group change.
