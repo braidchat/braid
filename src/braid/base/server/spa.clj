@@ -32,6 +32,7 @@
               :basejs (when prod-js?
                         (str (digest/from-file (str "public/js/prod/base.js"))))
               :api_domain (config :api-domain)
+              :app_title (config :app-title)
               :asset_domain (s3/s3-host config)
               :extra_scripts
               (->> @additional-scripts

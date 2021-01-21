@@ -36,6 +36,10 @@
 
      :clj
      (do
+       ;; TODO transfer appropriate vars from braid.chat.core
+       (doseq [k [:app-title]]
+         (base/register-config-var! k))
+
        (base/register-server-message-handlers!
          {::server-start
           (fn [{:keys [user-id]}]
