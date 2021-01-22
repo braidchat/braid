@@ -77,7 +77,7 @@
                                            com.google.guava/guava
                                            org.slf4j/slf4j-api]]]}
              :datomic-pro
-             {:dependencies [[com.datomic/datomic-pro "0.9.5201"
+             {:dependencies [[com.datomic/datomic-pro "0.9.5697"
                               :exclusions [joda-time
                                            com.google.guava/guava]]
                              [org.postgresql/postgresql "9.3-1103-jdbc4"]]}
