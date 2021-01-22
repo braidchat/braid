@@ -10,10 +10,10 @@
                               "/"))))
 
 (defn ->path [url]
-  (string/replace
-   url
-   @regex
-   (str "//" (o/get js/window "api_domain") "/upload/")))
+  (some-> url
+          (string/replace
+            @regex
+            (str "//" (o/get js/window "api_domain") "/upload/"))))
 
 (defn upload-path? [url]
   (string/includes? url (o/get js/window "asset_domain")))
