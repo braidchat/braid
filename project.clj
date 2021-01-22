@@ -80,7 +80,7 @@
              {:dependencies [[com.datomic/datomic-pro "0.9.5697"
                               :exclusions [joda-time
                                            com.google.guava/guava]]
-                             [org.postgresql/postgresql "9.3-1103-jdbc4"]]}
+                             [org.postgresql/postgresql "42.2.2"]]}
 
              :dev
              [:datomic-free
