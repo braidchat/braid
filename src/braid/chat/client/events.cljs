@@ -425,7 +425,7 @@
              (assoc-in [:notifications :window-visible?] visible?)
              (update-in [:notifications :unread-count]
                         (if visible? (constantly 0) identity)))
-     :window-title (when visible? "Braid")}))
+     :window-title (when visible? (o/get js/window "app_title"))}))
 
 (reg-event-fx
   :auth
@@ -575,7 +575,7 @@
       (let [state (update-in state [:notifications :unread-count] inc)
             unread (get-in state [:notifications :unread-count])]
         {:db state
-         :window-title (str "Braid (" unread ")")}))))
+         :window-title (str (o/get js/window "app_title") " (" unread ")")}))))
 
 (reg-event-fx
   :update-user-status

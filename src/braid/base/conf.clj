@@ -15,6 +15,7 @@
     {:db-url "datomic:mem://braid"
      :api-domain (str "localhost:" (inc (:port (mount/args))))
      :site-url (str "http://localhost:" (:port (mount/args)))
-     :hmac-secret "secret"}
+     :hmac-secret "secret"
+     :app-title "Braid"}
     @ports-config ; overrides api-domain & site url when port is automatically found
     (select-keys (mount/args) @config-vars)))
