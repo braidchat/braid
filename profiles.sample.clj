@@ -13,8 +13,6 @@
    :aws-region "us-east-1"
    :aws-access-key "my_aws_key"
    :aws-secret-key "my_aws_secret"
-   ;; for link info extraction
-   :embedly-key "embedly api key"
    ;; for github login
    :github-client-id "..."
    :github-client-secret "..."

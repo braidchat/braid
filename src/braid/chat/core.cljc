@@ -35,7 +35,6 @@
                   :aws/credentials-provider
                   :cookie-secure
                   :db-url
-                  :embedly-key
                   :github-client-id
                   :github-client-secret
                   :hmac-secret
