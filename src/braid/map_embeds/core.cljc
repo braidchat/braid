@@ -20,7 +20,7 @@
          :target "_blank"
          :rel "noopener noreferrer"}
         [:img
-         {:src (str "//" (o/get js/window "api_domain") "/maps-embeds/static-map?lat=" lat "&lng=" lng)}]])))
+         {:src (str "/api/maps-embeds/static-map?lat=" lat "&lng=" lng)}]])))
 
 
 (defn init! []

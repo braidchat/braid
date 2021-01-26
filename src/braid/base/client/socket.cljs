@@ -16,18 +16,16 @@
 (timbre/set-level! :info)
 
 (defn make-socket! [csrf-token]
-  (let [domain (o/get js/window "api_domain")
-        packer (sente-transit/get-transit-packer
+  (let [packer (sente-transit/get-transit-packer
                  :json
                  {}
                  ; Need to decode UUIDs as clojurescript uuids, not
                  ; cognitect.transit or schema gets upset
                  {:handlers {"u" cljs.core/uuid}})
         {:keys [chsk ch-recv send-fn state]}
-        (sente/make-channel-socket! "/chsk" csrf-token
-                                    {:host domain
-                                     :ws-kalive-ms 5000
-                                     :path "/chsk"
+        (sente/make-channel-socket! "/api/chsk" csrf-token
+                                    {:ws-kalive-ms 5000
+                                     :path "/api/chsk"
                                      :packer packer})]
     (def chsk       chsk)
     (def ch-chsk    ch-recv)

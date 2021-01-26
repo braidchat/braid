@@ -170,8 +170,8 @@ In profiles / ENV, provide the following keys (sample values provided below):
 
 To use Braid with a custom domain and with HTTPS, the recommended strategy is to reverse proxy the Braid servers with Nginx and use LetsEncrypt.
 
-If you are using a custom domain, you should set the SITE_URL and API_DOMAIN variables
-  (ex. `SITE_URL="https://braid.example.com"` , `API_DOMAIN="braid-api.example.com"`)
+If you are using a custom domain, you should set the SITE_URL variable
+  (ex. `SITE_URL="https://braid.example.com"`)
 
 
 ## (Optional) Adding Redis

@@ -2,8 +2,7 @@
   (:require
    [braid.core.server.middleware :refer [wrap-universal-middleware]]
    [braid.base.conf-extra :as conf] ; to update ports
-   [braid.core.server.handler :refer [desktop-client-app
-                                      api-server-app]]
+   [braid.core.server.handler :as handler]
    [braid.base.server.ws-handler] ; for mount
    [braid.core.server.sync] ; for multimethods
    [braid.base.server.jobs] ; for mount
@@ -13,36 +12,24 @@
 
 ;; server
 
-(defn- start-server!
-  [server port]
-  (run-server server {:port port :legacy-return-value? false}))
-
-(defn start-servers! [{:keys [middleware port]}]
-  (let [wrap (fn [handler] (wrap-universal-middleware handler middleware))
-        desktop-server (do
-                         (timbre/debugf "starting desktop server on port %d" port)
-                         (start-server! (wrap #'desktop-client-app) port))
-        desktop-port (server-port desktop-server)]
+(defn start-server! [{:keys [middleware port]}]
+  (timbre/debugf "starting desktop server on port %d" port)
+  (let [server (run-server (wrap-universal-middleware #'handler/app middleware)
+                           {:port port :legacy-return-value? false})
+        desktop-port (server-port server)]
     (timbre/debugf "Started desktop server on port %d" desktop-port)
-    (let [api-port (inc desktop-port)
-          api-server (do (timbre/debugf "starting api server on port %d" api-port)
-                         (start-server! (wrap #'api-server-app) api-port))]
-      (swap! conf/ports-config assoc
-             :api-domain (str "localhost:" (server-port api-server)))
-      (swap! conf/ports-config assoc
-             :site-url (str "http://localhost:" (server-port desktop-server)))
-      {:desktop desktop-server
-       :api api-server})))
+    (swap! conf/ports-config assoc
+           :site-url (str "http://localhost:" (server-port server)))
+    server))
 
-(defn stop-servers!
-  [srvs]
-  (doseq [[typ srv] srvs]
-    (timbre/debugf "stopping server %s" (name typ))
-    @(server-stop! srv {:timeout 100})))
+(defn stop-server!
+  [srv]
+  (timbre/debugf "stopping server")
+  @(server-stop! srv {:timeout 100}))
 
-(defstate servers
-  :start (start-servers! (mount/args))
-  :stop (stop-servers! servers))
+(defstate server
+  :start (start-server! (mount/args))
+  :stop (stop-server! server))
 
 ;; exceptions in background thread handler
 

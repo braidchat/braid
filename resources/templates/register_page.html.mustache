@@ -203,7 +203,7 @@ body textarea, body input {
       <div class="gateway">
         <h1 class="header">Welcome to Braid!</h1>
         <div class="section user-auth">
-          <form action="//{{api_domain}}/register" method="POST" enctype="multipart/form-data">
+          <form action="/api/register" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="token" value="{{token}}">
             <input type="hidden" name="invite_id" value="{{invite_id}}">
             <input type="hidden" name="email" value="{{invitee_email}}">

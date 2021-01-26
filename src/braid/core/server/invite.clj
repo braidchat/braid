@@ -65,13 +65,11 @@
   [invite token]
   (let [now (.getTime (java.util.Date.))
         form-hmac (hmac (config :hmac-secret)
-                        (str now token (invite :id) (invite :invitee-email)))
-        api-domain (:api-domain config)]
+                        (str now token (invite :id) (invite :invitee-email)))]
     (cljstache/render-resource "templates/register_page.html.mustache"
                                {:invitee_email (invite :invitee-email)
                                 :inviter (invite :inviter-email)
                                 :group (invite :group-name)
-                                :api_domain api-domain
                                 :token token
                                 :invite_id (invite :id)
                                 :now now
@@ -105,11 +103,9 @@
   [group-id]
   (let [now (.getTime (java.util.Date.))
         group (group/group-by-id group-id)
-        form-hmac (hmac (config :hmac-secret) (str now group-id))
-        api-domain (:api-domain config)]
+        form-hmac (hmac (config :hmac-secret) (str now group-id))]
     (cljstache/render-resource "templates/link_signup.html.mustache"
-                               {:api-domain api-domain
-                                :now now
+                               {:now now
                                 :form-hmac form-hmac
                                 :group-id group-id
                                 :group-name (group :name)})))
@@ -163,11 +159,9 @@
 (defn reset-page
   [user token]
   (let [now (.getTime (java.util.Date.))
-        form-hmac (hmac (config :hmac-secret) (str now token (user :id)))
-        api-domain (config :api-domain)]
+        form-hmac (hmac (config :hmac-secret) (str now token (user :id)))]
     (cljstache/render-resource "templates/reset_page.html.mustache"
-                               {:api_domain api-domain
-                                :user_id (user :id)
+                               {:user_id (user :id)
                                 :now now
                                 :token token
                                 :form_hmac form-hmac})))

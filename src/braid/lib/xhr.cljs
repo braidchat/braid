@@ -7,7 +7,7 @@
 (defn edn-xhr
   [args]
   (ajax-request (assoc args
-                  :uri (str "//" (o/get js/window "api_domain") (args :uri))
+                  :uri (str "/api" (args :uri))
                   :with-credentials true
                   :format (edn-request-format)
                   :response-format (edn-response-format)

@@ -218,7 +218,7 @@ body textarea, body input {
             <div class="section-wrapper">
               <div class="section user-auth">
                 <h2>Join the group {{group-name}}</h2>
-                <form action="//{{api-domain}}/link-register" method="POST">
+                <form action="/api/link-register" method="POST">
                   <input type="hidden" name="group-id" value="{{group-id}}">
                   <input type="hidden" name="now" value="{{now}}">
                   <input type="hidden" name="form-hmac" value="{{form-hmac}}">
@@ -238,7 +238,7 @@ body textarea, body input {
             <h1 class="header">Welcome Back to Braid</h1>
             <div class="section-wrapper">
               <div class="section user-auth">
-                <form action="//{{api-domain}}/link-join" method="POST">
+                <form action="/api/link-join" method="POST">
                   <input type="hidden" name="now" value="{{now}}">
                   <input type="hidden" name="form-hmac" value="{{form-hmac}}">
                   <input type="hidden" name="group-id" value="{{group-id}}">
@@ -254,7 +254,7 @@ body textarea, body input {
       </div>
     </div>
     <script type="text/javascript">
-      fetch(`${window.location.protocol}//{{api-domain}}/session`,
+      fetch(`/api/session`,
             {credentials: "include"})
         .then(r => {
           if (r.ok) {

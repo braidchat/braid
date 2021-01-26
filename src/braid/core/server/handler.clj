@@ -30,41 +30,45 @@
                :content-types          true
                :default-charset        "utf-8"}})
 
-(def desktop-client-app
-  (-> (routes resource-routes desktop-client-routes)
-      (wrap-defaults static-site-defaults)))
+(def app
+  "Routes for application"
+  (routes
+    ;; API
+    (context "/api" []
+      (-> (routes
+            modules/raw-handlers
 
-(def api-server-app
-  (-> (routes
-       modules/raw-handlers
+            (-> api-public-routes
+                (wrap-defaults (-> site-defaults
+                                   (assoc :session false)
+                                   (assoc-in [:security :anti-forgery] false))))
 
-       (-> api-public-routes
-           (wrap-defaults (-> site-defaults
-                              (assoc :session false)
-                              (assoc-in [:security :anti-forgery] false))))
+            (-> modules/public-handler
+                (wrap-defaults (-> site-defaults
+                                   (assoc :session false)
+                                   (assoc-in [:security :anti-forgery] false)))
+                (wrap-restful-format :formats [:edn :transit-json]))
 
-       (-> modules/public-handler
-           (wrap-defaults (-> site-defaults
-                              (assoc :session false)
-                              (assoc-in [:security :anti-forgery] false)))
-           (wrap-restful-format :formats [:edn :transit-json]))
+            (-> sync-routes
+                (wrap-defaults (-> api-defaults
+                                   (assoc :session false)
+                                   assoc-csrf-conf)))
 
-       (-> sync-routes
-           (wrap-defaults (-> api-defaults
-                              (assoc :session false)
-                              assoc-csrf-conf)))
+            (-> api-private-routes
+                (wrap-defaults (-> api-defaults
+                                   (assoc :session false)
+                                   assoc-csrf-conf)))
 
-       (-> api-private-routes
-           (wrap-defaults (-> api-defaults
-                              (assoc :session false)
-                              assoc-csrf-conf)))
+            ;; this needs to be last, because the middleware will return
+            ;; 401 if not authorized & hence not fall-through to other
+            ;; routes
+            (-> modules/private-handler
+                (wrap-defaults (-> site-defaults
+                                   (assoc :session false)
+                                   assoc-csrf-conf))
+                (wrap-restful-format :formats [:edn :transit-json])))
+          wrap-edn-params))
 
-       ;; this needs to be last, because the middleware will return
-       ;; 401 if not authorized & hence not fall-through to other
-       ;; routes
-       (-> modules/private-handler
-           (wrap-defaults (-> site-defaults
-                              (assoc :session false)
-                              assoc-csrf-conf))
-           (wrap-restful-format :formats [:edn :transit-json])))
-      wrap-edn-params))
+    ;; Desktop
+    (-> (routes resource-routes desktop-client-routes)
+        (wrap-defaults static-site-defaults))))
