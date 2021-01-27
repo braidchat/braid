@@ -1,3 +1,10 @@
+## 27 January 2021
+
+  - Recent large architectural changes:
+    - `braid.core/start!` now has an arity-two form that takes the configuration as an explicit map, instead of from environment variables. In this form, the AWS credentials should be in a single key `:aws/credentials-provider` which should be a zero-argument function which returns a vector of access key, secret key, and optionally a session key.
+    - The mobile implementation was very bitrotted and has been removed
+    - The separate desktop & API servers have been merged; API routes are now on the same server as the desktop with the prefix `/api`
+
 ## 16 April 2017
 
   - Bot configurations are now editable after creation
