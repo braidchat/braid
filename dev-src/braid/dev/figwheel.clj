@@ -1,13 +1,16 @@
 (ns braid.dev.figwheel
   (:require
-    [figwheel-sidecar.repl-api :as ra]
+    [figwheel.main.api :as repl-api]
     [mount.core :refer [defstate]]))
 
-(defn repl
-  "Start a clojurescript repl"
-  []
-  (ra/cljs-repl))
-
 (defstate figwheel
-  :start (ra/start-figwheel!)
-  :stop (ra/stop-figwheel!))
+  :start (repl-api/start
+           {:mode :serve
+            :open-url false
+            :ring-server-options {:port 3559}
+            :connect-url "ws://[[client-hostname]]:[[server-port]]/figwheel-connect"
+            :watch-dirs ["src"]}
+           "dev")
+  :stop (repl-api/stop-all))
+
+

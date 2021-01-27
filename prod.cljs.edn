@@ -1,3 +1,4 @@
+^{:watch-dirs ["src"]}
 {:asset-path "/js/prod/"
  :output-dir "resources/public/js/prod/out"
  :optimizations :advanced
@@ -8,8 +9,8 @@
            {:output-to "resources/public/js/prod/base.js"}
            :desktop
            {:output-to "resources/public/js/prod/desktop.js"
-            :entries #{braid.core.client.desktop.core}}
+            :entries #{"braid.core.client.desktop.core"}}
            :gateway
            {:output-to "resources/public/js/prod/gateway.js"
-            :entries #{braid.core.client.gateway.core}}}
+            :entries #{"braid.core.client.gateway.core"}}}
  :verbose true}

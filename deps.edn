@@ -27,7 +27,6 @@
         image-resizer/image-resizer {:mvn/version "0.1.10"}
         inliner/inliner {:mvn/version "0.1.0"}
         instaparse/instaparse {:mvn/version "1.4.10"}
-        javax.servlet/servlet-api {:mvn/version "2.5"}
         mount/mount {:mvn/version "0.1.16"}
         org.clojure/clojure {:mvn/version "1.10.1"}
         ring-cors/ring-cors {:mvn/version "0.1.13"}
@@ -62,7 +61,8 @@
         }
  :aliases {:datomic-free {:extra-deps {com.datomic/datomic-free {:mvn/version "0.9.5697"}}}
            :dev {:extra-paths ["dev-src"]
-                 :extra-deps {figwheel-sidecar/figwheel-sidecar {:mvn/version "0.5.18"}}}
+                 :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.12"
+                                                         :exclusions [org.clojure/clojurescript]}}}
            :cljs-desktop {:main-opts ["-m" "cljs.main" "--compile-opts" "cljs.desktop.edn" "--compile"]}
            :cljs-gateway {:main-opts ["-m" "cljs.main" "--compile-opts" "cljs.gateway.edn" "--compile"]}
            :cljs-release {:main-opts ["-m" "cljs.main" "--compile-opts" "cljs.release.edn" "--compile"]}

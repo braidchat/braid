@@ -1,4 +1,5 @@
-(ns braid.core.client.desktop.core
+(ns ^:figwheel-hooks
+  braid.core.client.desktop.core
   (:require
    [braid.base.client.events]
    [braid.base.client.subs]
@@ -38,7 +39,7 @@
 
    (router/init)))
 
-(defn ^:export reload
+(defn ^:after-load reload
   "Force a re-render. For use with figwheel"
   []
   (modules/init! modules/default)

@@ -1,7 +1,8 @@
 {:main braid.core.client.desktop.core
- :closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}
  :asset-path "/js/dev/desktop/"
  :output-to "resources/public/js/dev/desktop.js"
  :output-dir "resources/public/js/dev/desktop/"
  :optimizations :none
- :verbose false}
+ :verbose false
+ :closure-defines {"goog.DEBUG" true}
+ :parallel-build true}
