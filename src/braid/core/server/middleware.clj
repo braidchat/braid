@@ -1,7 +1,6 @@
 (ns braid.core.server.middleware
   (:require
    [braid.base.conf :refer [config]]
-   [ring.middleware.cors :refer [wrap-cors]]
    [ring.middleware.session :refer [wrap-session]]
    [clojure.stacktrace]
    [taoensso.timbre :as timbre]))
@@ -64,14 +63,6 @@
   "Wrap the handler with middleware that is universally applicable across the site."
   [handler {:keys [session]}]
   (-> handler
-      (wrap-cors :access-control-allow-origin
-                 (->>
-                  [(when-let [site (config :site-url)]
-                     (re-pattern (java.util.regex.Pattern/quote site)))
-                   #"http://localhost:\d+"]
-                  (remove nil?))
-                 :access-control-allow-credentials true
-                 :access-control-allow-methods [:get :put :post :delete])
       (wrap-session (or session @session-config))
       wrap-log-requests
       wrap-failsafe))
