@@ -214,11 +214,6 @@
     (get-in state [:websocket-state :connected?])))
 
 (reg-sub
-  :temp-thread
-  (fn [state _]
-    (get-in state [:temp-threads (state :open-group-id)])))
-
-(reg-sub
   :user-preference
   (fn [state [_ pref]]
     (get-in state [:preferences pref])))

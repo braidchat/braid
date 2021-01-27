@@ -7,6 +7,7 @@
         org.clojure/spec.alpha {:mvn/version "0.2.194"}
         org.clojure/core.async {:mvn/version "1.3.610"} ; :exclusions [org.clojure/tools.reader]
         org.clojure/tools.reader {:mvn/version "1.3.4"}
+        tada/tada {:mvn/version "0.1.2"}
 
         ;; Clojure
         clj-time/clj-time {:mvn/version "0.15.2"}

@@ -205,6 +205,13 @@
 
 ;; Transactions
 
+(defn create-thread-txn
+  [{:keys [user-id thread-id group-id]}]
+  [{:thread/id thread-id
+    :thread/group [:group/id group-id]
+    :user/_open-thread [:user/id user-id]
+    :user/_subscribed-thread [:user/id user-id]}])
+
 (defn user-hide-thread-txn
   [user-id thread-id]
   [[:db/retract [:user/id user-id] :user/open-thread [:thread/id thread-id]]])

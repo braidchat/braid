@@ -38,13 +38,6 @@
      :user {:open-thread-ids #{uuid?}
             :subscribed-tag-ids #{uuid?}}
      :focused-thread-id (ds/maybe uuid?)
-     :temp-threads {uuid? {:id uuid?
-                           :new? boolean?
-                           :messages any?
-                           :group-id uuid?
-                           :mentioned-ids [uuid?]
-                           :tag-ids [uuid?]
-                           :new-message string?}}
      :action-disabled? boolean?}
     invites/InvitesAppState))
 
@@ -69,6 +62,5 @@
                      :unread-count 0}
      :user {:open-thread-ids #{}
             :subscribed-tag-ids #{}}
-     :focused-thread-id nil
-     :temp-threads {}}
+     :focused-thread-id nil}
     invites/init-state))

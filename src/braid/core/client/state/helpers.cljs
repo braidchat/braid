@@ -59,12 +59,6 @@
 
 ; threads and messages
 
-(defn maybe-reset-temp-thread [state thread-id]
-  (if (= thread-id (get-in state [:temp-threads (state :open-group-id) :id]))
-    (assoc-in state [:temp-threads (state :open-group-id)]
-              (schema/make-temp-thread (state :open-group-id)))
-    state))
-
 (defn update-thread-last-open-at [state thread-id]
   (if-let [thread (get-in state [:threads thread-id])]
     (let [latest-message (->> (thread :messages)
@@ -74,21 +68,37 @@
       (update-in state [:threads thread-id :last-open-at] (constantly new-last-open)))
     state))
 
-(defn maybe-create-thread [state thread-id group-id]
-  (let [state (update-in state [:user :open-thread-ids] conj thread-id)]
-    (if-not (get-in state [:threads thread-id])
-      (-> state
-          (assoc-in [:threads thread-id] {:id thread-id
-                                          :group-id group-id
-                                          :messages []
-                                          :tag-ids #{}
-                                          :mentioned-ids #{}})
-          (update-in [:group-threads group-id] #(conj (set %) thread-id)))
-      state)))
+(def blank-thread
+  {:id nil
+   :group-id nil
+   :tag-ids []
+   :mentioned-ids []
+   :new-message ""
+   :messages []})
+
+(defn add-to-open-threads [state thread-id]
+  (update-in state [:user :open-thread-ids] conj thread-id))
+
+(defn create-thread [state partial-thread]
+  {:pre [(contains? partial-thread :id)
+         (contains? partial-thread :group-id)]}
+  (let [thread (merge
+                 blank-thread
+                 partial-thread)]
+    (-> state
+        (assoc-in [:threads (:id thread)] thread)
+        (update-in [:group-threads (:group-id thread)] #(conj (set %) (:id thread))))))
+
+(defn maybe-create-thread [state partial-thread]
+  (if-not (get-in state [:threads (:id partial-thread)])
+    (create-thread state partial-thread)
+    state))
 
 (defn add-message [state message]
   (-> state
-      (maybe-create-thread (message :thread-id) (message :group-id))
+      (maybe-create-thread {:id (message :thread-id)
+                            :group-id (message :group-id)})
+      (add-to-open-threads (message :thread-id))
       (update-in [:threads (message :thread-id) :messages] conj message)
       (update-thread-last-open-at (message :thread-id))
       (update-in [:threads (message :thread-id) :tag-ids]
@@ -108,8 +118,7 @@
 
 (defn add-group [state group]
   (-> state
-      (assoc-in [:groups (group :id)] group)
-      (update-in [:temp-threads] assoc (group :id) (schema/make-temp-thread (group :id)))))
+      (assoc-in [:groups (group :id)] group)))
 
 (defn remove-group [state group-id]
   (let [group-threads (get-in state [:group-threads group-id])]

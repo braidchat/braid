@@ -13,6 +13,7 @@
          [[braid.base.conf]
           [braid.base.server.jobs]
           [braid.base.server.seed]
+          [braid.base.server.cqrs]
           [braid.base.server.http-api-routes]
           [braid.base.server.initial-data]
           [braid.base.server.spa]
@@ -119,6 +120,7 @@
 
    :clj
    (do
+
      (defn register-initial-user-data!
        "Add a map of key -> fn for getting the initial user data to be sent to the client. `fn` will recieve the user-id as its argument. See `:register-initial-user-data-handler` under `:cljs`"
        [f]
@@ -164,6 +166,21 @@
               (every? keyword? (keys handler-defs))
               (every? fn? (vals handler-defs))]}
        (swap! braid.base.server.ws-handler/message-handlers merge handler-defs))
+
+     (defn register-commands!
+       "Add a command, which also exposes a websocket server-handler for a message of the same name."
+       [commands]
+       (swap! braid.base.server.cqrs/commands
+              concat commands)
+
+       (braid.base.server.cqrs/update-registry!)
+
+       (register-server-message-handlers!
+         (->> commands
+              (map (fn [command]
+                     [(:id command)
+                      (braid.base.server.cqrs/->ws-handler command)]))
+              (into {}))))
 
     (defn register-public-http-route!
        "Add a public HTTP route.

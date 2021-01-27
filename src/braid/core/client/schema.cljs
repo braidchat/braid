@@ -30,11 +30,4 @@
    :public? false
    :bots #{}})
 
-(defn make-temp-thread [group-id]
-  {:id (uuid/make-random-squuid)
-   :group-id group-id
-   :tag-ids []
-   :mentioned-ids []
-   :new? true
-   :new-message ""
-   :messages []})
+

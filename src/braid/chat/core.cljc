@@ -4,7 +4,8 @@
    [braid.base.api :as base]
    [braid.chat.api :as chat]
    #?@(:clj
-       [[braid.chat.schema :as schema]
+       [[braid.chat.commands :as commands]
+        [braid.chat.schema :as schema]
         [braid.chat.seed :as seed]
         [braid.chat.server.initial-data :as initial-data]
         [braid.chat.socket-message-handlers :refer [socket-message-handlers]]]
@@ -48,7 +49,10 @@
        (base/register-initial-user-data! initial-data/initial-data-for-user)
 
        (base/register-server-message-handlers!
-         socket-message-handlers))
+         socket-message-handlers)
+
+       (base/register-commands!
+         commands/commands))
 
      :cljs
      (do
@@ -93,12 +97,6 @@
                            (group-by :group-id (data :user-threads))))
               (assoc-in [:user :open-thread-ids]
                         (set (map :id (data :user-threads))))
-              (assoc :temp-threads (->> (data :user-groups)
-                                        (map :id)
-                                        (reduce (fn [memo group-id]
-                                                  (->> (schema/make-temp-thread group-id)
-                                                       (assoc memo group-id)))
-                                                {})))
               (helpers/add-tags (data :tags))
               (helpers/set-preferences (data :user-preferences)))))
 

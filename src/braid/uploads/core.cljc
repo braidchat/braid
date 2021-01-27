@@ -68,11 +68,11 @@
                                     :url url
                                     :thread-id thread-id
                                     :group-id group-id}])
-            :dispatch [:new-message {:content url
-                                     :thread-id thread-id
-                                     :group-id group-id
-                                     :mentioned-user-ids []
-                                     :mentioned-tag-ids []}]})})
+            :dispatch [:new-message! {:content url
+                                      :thread-id thread-id
+                                      :group-id group-id
+                                      :mentioned-user-ids []
+                                      :mentioned-tag-ids []}]})})
 
 
        (chat/register-message-transform!

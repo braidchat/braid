@@ -14,7 +14,6 @@
    [braid.core.client.ui.styles.misc]
    [braid.core.client.ui.styles.page]
    [braid.core.client.ui.styles.pages.global-settings]
-   [braid.core.client.ui.styles.pages.inbox]
    [braid.core.client.ui.styles.pages.me]
    [braid.core.client.ui.styles.pills]
    [braid.core.client.ui.styles.thread]
@@ -73,7 +72,6 @@
 
                  ;; page styles
 
-                 braid.core.client.ui.styles.pages.inbox/inbox-page
                  braid.core.client.ui.styles.pages.me/me-page
                  braid.core.client.group-admin.views.group-settings-page-styles/group-settings-page
                  braid.core.client.invites.views.invite-page-styles/invite-page

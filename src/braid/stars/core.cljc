@@ -40,7 +40,7 @@
           :view
           (fn [thread]
             (let [starred? @(subscribe [:braid.stars/thread-starred? (thread :id)])]
-              (when-not (thread :new?)
+              (when-not (empty? (:messages thread))
                 [:div.star
                  {:class (if starred?
                            "starred"

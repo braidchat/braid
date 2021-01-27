@@ -1,6 +1,5 @@
 (ns braid.core.client.ui.views.threads
   (:require
-   [braid.core.client.ui.views.new-thread :refer [new-thread-view]]
    [braid.core.client.ui.views.thread :refer [thread-view]]
    [clojure.set :refer [difference]]
    [reagent.core :as r]
@@ -47,15 +46,15 @@
            (update-threads! (next-props :threads))))
 
        :reagent-render
-       (fn [{:keys [show-new-thread?
+       (fn [{:keys [new-thread-view
                     threads-opts]
              :or {threads-opts {}}}]
          [:div.threads
           (merge threads-opts
                  {:on-wheel scroll-horizontally})
 
-          (when show-new-thread?
-            [new-thread-view])
+          (when new-thread-view
+            new-thread-view)
 
           (doall
             (for [thread @threads]
