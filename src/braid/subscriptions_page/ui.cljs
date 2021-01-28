@@ -44,29 +44,26 @@
     (fn [data]
       [:div.new-tag
        [:h2 "Create a new tag"]
-       [:input
-        {:class (when @error "error")
-         :value @text
-         :on-change (fn [e]
-                      (reset! text (.. e -target -value))
-                      (when-not (string/blank? @text)
-                        (set-error! (not (valid-tag-name? @text)))) )
-         :on-key-down
+       [:form
+        {:on-submit
          (fn [e]
-           (when (= KeyCodes.ENTER e.keyCode)
-             (dispatch [:create-tag {:tag {:name @text
+           (.preventDefault e)
+           (when (and (not (string/blank? @text))
+                      (not @error))
+             (dispatch [:create-tag {:tag {:name (string/replace @text #"^#" "")
                                            :group-id (data :group-id)}}])
-             (.preventDefault e)
-             (reset! text "")))
-         :placeholder "New Tag"}]
-       [:button
-        {:on-click (fn [_]
-                     (when-not (string/blank? @text)
-                       (dispatch [:create-tag {:tag {:name @text
-                                                     :group-id (data :group-id)}}])
-                       (reset! text "")))
-         :disabled (or @error (string/blank? @text))}
-        "Create Tag"]])))
+             (reset! text "")))}
+        [:input
+         {:class (when @error "error")
+          :value @text
+          :on-change (fn [e]
+                       (reset! text (.. e -target -value))
+                       (set-error! (not (valid-tag-name?
+                                         (string/replace @text #"^#" "")))))
+          :placeholder "New Tag"}]
+        [:button
+         {:disabled (or @error (string/blank? @text))}
+         "Create Tag"]]])))
 
 (defn delete-tag-view
   [tag]
