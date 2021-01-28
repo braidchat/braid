@@ -214,7 +214,7 @@
             ;; currently, it is possible for a user in another group to access a file
             ;; IF they know its path (which, is behind a UUID, so, non-trivial to guess/enumerate)
             (let [expires-seconds (* 1 24 60 60) ; one day
-                  asset-key (URLDecoder/decode (second (re-matches #"^/upload/(.*)" (request :uri))))]
+                  asset-key (URLDecoder/decode (second (re-matches #"^/api/upload/(.*)" (request :uri))))]
               {:status 302
                :headers {"Cache-Control" (str "private, max-age=" expires-seconds)
                          "Location" (s3/readable-s3-url config expires-seconds asset-key)}}))])
