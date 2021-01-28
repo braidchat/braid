@@ -13,7 +13,7 @@
   (some-> url
           (string/replace
             @regex
-            (str "/api/upload/"))))
+            "/api/upload/")))
 
 (defn upload-path? [url]
   (string/includes? url (o/get js/window "asset_domain")))
