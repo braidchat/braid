@@ -3,33 +3,33 @@
     [braid.core.hooks :as hooks]
     ; modules:
     [braid.base.core]
-    [braid.big-emoji.core]
     [braid.bots.core]
     [braid.chat.core]
-    [braid.custom-emoji.core]
     [braid.disconnect-notice.core]
     [braid.embeds.core]
+    [braid.embeds-image.core]
+    [braid.embeds-map.core]
+    [braid.embeds-video.core]
+    [braid.embeds-website.core]
+    [braid.embeds-youtube.core]
     [braid.emoji.core]
-    [braid.emojione-emoji.core]
+    [braid.emoji-big.core]
+    [braid.emoji-custom.core]
+    [braid.emoji-emojione.core]
     [braid.group-explore.core]
-    [braid.image-embeds.core]
     [braid.notices.core]
+    [braid.page-recent.core]
+    [braid.page-subscriptions.core]
+    [braid.page-uploads.core]
     [braid.permalinks.core]
     [braid.popovers.core]
     [braid.quests.core]
-    [braid.recent-page.core]
     [braid.rss.core]
     [braid.search.core]
     [braid.sidebar.core]
     [braid.stars.core]
-    [braid.subscriptions-page.core]
     [braid.uploads.core]
-    [braid.uploads-page.core]
-    [braid.users.core]
-    [braid.video-embeds.core]
-    [braid.website-embeds.core]
-    [braid.youtube-embeds.core]
-    [braid.map-embeds.core]))
+    [braid.users.core]))
 
 (defn init! [module-fns]
   (hooks/reset-all!)
@@ -45,29 +45,29 @@
    braid.embeds.core/init!
    braid.emoji.core/init!
    ;; rest do not expose api
-   braid.big-emoji.core/init!
    braid.bots.core/init!
-   braid.custom-emoji.core/init!
    braid.disconnect-notice.core/init!
-   braid.emojione-emoji.core/init!
+   braid.embeds-image.core/init!
+   braid.embeds-map.core/init!
+   braid.embeds-video.core/init!
+   braid.embeds-website.core/init!
+   braid.embeds-youtube.core/init!
+   braid.emoji-big.core/init!
+   braid.emoji-custom.core/init!
+   braid.emoji-emojione.core/init!
    braid.group-explore.core/init!
-   braid.image-embeds.core/init!
    braid.notices.core/init!
    braid.sidebar.core/init!
+   braid.page-recent.core/init!
+   braid.page-subscriptions.core/init!
+   braid.page-uploads.core/init!
    braid.permalinks.core/init!
    braid.quests.core/init!
-   braid.recent-page.core/init!
    braid.rss.core/init!
    braid.stars.core/init!
    braid.search.core/init!
-   braid.subscriptions-page.core/init!
    braid.uploads.core/init!
-   braid.uploads-page.core/init!
-   braid.users.core/init!
-   braid.video-embeds.core/init!
-   braid.website-embeds.core/init!
-   braid.youtube-embeds.core/init!
-   braid.map-embeds.core/init!])
+   braid.users.core/init!])
 
 (defn plus [base to-add]
   (distinct (concat base to-add)))
