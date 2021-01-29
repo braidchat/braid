@@ -76,20 +76,25 @@
     {:text-align "center"
      :height "1em"
      :color "#999"
-     :padding "0 0.5rem 0.5rem"}
+     :padding "0 0.5rem 0.5rem"
+     :position "relative"}
 
     [:>.date
      {:display "inline-block"
       :padding "0 0.5em"
       :background "white"
-      :letter-spacing "0.02em"}]
+      :letter-spacing "0.02em"
+      ;; so that it gets a z-index
+      :position "relative"}]
 
-    [:&:after
+    [:&:before
      {:content "\"\""
       :border-bottom "1px solid #ccc"
-      :margin-top "-0.5em"
+      :margin-top "-1px"
       :width "100%"
-      :display "block"}]]])
+      :display "block"
+      :position "absolute"
+      :top "50%"}]]])
 
 (defn thread [pad]
   [:>.thread
