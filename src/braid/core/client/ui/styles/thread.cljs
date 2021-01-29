@@ -79,6 +79,9 @@
      :padding "0 0.5rem 0.5rem"
      :position "relative"}
 
+    [:>.border
+     (mixins/card-border "9px")]
+
     [:>.date
      {:display "inline-block"
       :padding "0 0.5em"

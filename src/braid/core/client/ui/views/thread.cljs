@@ -120,6 +120,8 @@
                 [:<> {:key (message :id)}
                  (when (message :show-date-divider?)
                    [:div.divider
+                    (when (:unseen? message)
+                      [:div.border {:style {:background (color/->color @(subscribe [:open-group-id]))}}])
                     [:div.date (date/format-date "yyyy-MM-dd" (message :created-at))]])
                  [message-view (assoc message :thread-id thread-id)]])))])})))
 
