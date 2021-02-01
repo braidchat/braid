@@ -16,6 +16,28 @@
                      )
           :view ui/inbox-page-view})
 
+       (base/register-subs!
+         {:open-threads
+          ;; TODO could be made more efficient by depending on other subs
+          ;; but register-subs! does not provide a way for that yet
+          (fn [state [_ group-id]]
+            (let [user-id (get-in state [:session :user-id])
+                  open-thread-ids (get-in state [:user :open-thread-ids])
+                  threads (state :threads)
+                  open-threads (vals (select-keys threads open-thread-ids))]
+              (->> open-threads
+                   (filter (fn [thread]
+                             (= (thread :group-id) group-id)))
+                   ;; sort by last message sent by logged-in user, most recent first
+                   (sort-by
+                     (fn [thread]
+                       (->> (thread :messages)
+                            (filter (fn [m] (= (m :user-id) user-id)))
+                            (map :created-at)
+                            (apply max))))
+                   reverse)))})
+
+
        (base/register-events!
          {:create-thread!
           (fn [{db :db} [_ thread-opts]]

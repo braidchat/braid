@@ -15,6 +15,7 @@
      {;; background is set inline to group-color
       :border-radius "50%"
       :border "none"
+      :flex-shrink 0
       :color "white"
       :font-size "4em"
       :width "5rem"
@@ -57,25 +58,13 @@
 
 (defn inbox-page-view
   []
-  (let [user-id (subscribe [:user-id])
-        group (subscribe [:active-group])
-        group-id (subscribe [:open-group-id])
-        open-threads (subscribe [:open-threads] [group-id])
-        sorted-threads (reaction
-                         (->> @open-threads
-                              ;; sort by last message sent by logged-in user, most recent first
-                              (sort-by
-                                (fn [thread]
-                                  (->> (thread :messages)
-                                       (filter (fn [m] (= (m :user-id) @user-id)))
-                                       (map :created-at)
-                                       (apply max))))
-                              reverse))]
-    (fn []
-      [:div.page.inbox
-       [:div.intro
-        (:intro @group)
-        [clear-inbox-button-view]]
-       [threads-view {:new-thread-view [new-thread-view {:group-id @group-id}]
-                      :group-id @group-id
-                      :threads @sorted-threads}]])))
+  (let [group-id @(subscribe [:open-group-id])
+        group @(subscribe [:active-group])
+        open-threads @(subscribe [:open-threads group-id])]
+    [:div.page.inbox
+     [:div.intro
+      (:intro group)
+      [clear-inbox-button-view]]
+     [threads-view {:new-thread-view [new-thread-view {:group-id group-id}]
+                    :group-id group-id
+                    :threads open-threads}]]))

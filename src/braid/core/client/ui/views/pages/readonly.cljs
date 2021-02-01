@@ -8,12 +8,11 @@
 
 (defn readonly-inbox-page-view
   []
-  (let [group (subscribe [:active-group])
-        group-id (subscribe [:open-group-id])
-        open-threads (subscribe [:open-threads] [group-id])]
+  (let [group @(subscribe [:active-group])
+        group-id @(subscribe [:open-group-id])
+        open-threads @(subscribe [:open-threads])]
     [:div.page.readonly-inbox
      [:div.intro
-      (:intro @group)]
-     [threads-view {:show-new-thread? false
-                    :group-id @group-id
-                    :threads (map #(assoc % :readonly true) @open-threads)}]]))
+      (:intro group)]
+     [threads-view {:group-id group-id
+                    :threads (map #(assoc % :readonly true) open-threads)}]]))

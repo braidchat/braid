@@ -6,7 +6,11 @@
    [reagent.dom :as r-dom]))
 
 (defn threads-view
-  [props]
+  [{:keys [new-thread-view group-id threads] :as props}]
+  ;; for a better user experience, this component maintains order of threads
+  ;; after mounting, any new threads that come in via props appended to the end of existing threads
+  ;; group-id prop is necessary to circumvent this 'thread caching' behaviour
+  ;; when navigating to a different group's inbox
   (let [threads (r/atom [])
         this-elt (r/atom nil)
         reset-threads! (fn [new-threads]
@@ -17,11 +21,14 @@
                  (fn [old-threads]
                    (let [old-thread-ids (set (map :id old-threads))
                          new-thread-ids (set (map :id new-threads))
+                         new-threads-by-id (zipmap
+                                             (map :id new-threads)
+                                             new-threads)
                          to-remove (difference old-thread-ids new-thread-ids)
                          to-add (difference new-thread-ids old-thread-ids)
                          ordered-ids (concat (remove to-remove old-thread-ids)
                                              (filter to-add new-thread-ids))]
-                     (mapv (comp first (group-by :id new-threads)) ordered-ids)))))
+                     (mapv new-threads-by-id ordered-ids)))))
         scroll-horizontally
         (fn [e]
           (let [target-classes (.. e -target -classList)]
@@ -46,12 +53,9 @@
            (update-threads! (next-props :threads))))
 
        :reagent-render
-       (fn [{:keys [new-thread-view
-                    threads-opts]
-             :or {threads-opts {}}}]
+       (fn [{:keys [new-thread-view]}]
          [:div.threads
-          (merge threads-opts
-                 {:on-wheel scroll-horizontally})
+          {:on-wheel scroll-horizontally}
 
           (when new-thread-view
             new-thread-view)
