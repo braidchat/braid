@@ -116,6 +116,8 @@
                                              (extract-user-ids db (data :content)))})
             thread-id (data :thread-id)]
         (if (and
+              ;; has messages
+              (seq (get-in db [:threads thread-id :messages]))
               ;; doesn't have any tags yet...
               (empty? (get-in db [:threads thread-id :tag-ids]))
               ;; about to add a tag
