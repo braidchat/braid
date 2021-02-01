@@ -8,27 +8,44 @@
 (defn threads-view
   [{:keys [new-thread-view group-id threads] :as props}]
   ;; for a better user experience, this component maintains order of threads
-  ;; after mounting, any new threads that come in via props appended to the end of existing threads
+  ;; after mounting, any new threads that come in via props are appended to the end of existing threads
+  ;; (except blank new threads, which are put at the front)
+
   ;; group-id prop is necessary to circumvent this 'thread caching' behaviour
   ;; when navigating to a different group's inbox
   (let [threads (r/atom [])
         this-elt (r/atom nil)
-        reset-threads! (fn [new-threads]
-                         (reset! threads (vec new-threads)))
+        reset-threads! (fn [threads']
+                         (reset! threads (vec threads')))
         update-threads!
-        (fn [new-threads]
+        (fn [target-threads]
           (swap! threads
-                 (fn [old-threads]
-                   (let [old-thread-ids (set (map :id old-threads))
-                         new-thread-ids (set (map :id new-threads))
-                         new-threads-by-id (zipmap
-                                             (map :id new-threads)
-                                             new-threads)
-                         to-remove (difference old-thread-ids new-thread-ids)
-                         to-add (difference new-thread-ids old-thread-ids)
-                         ordered-ids (concat (remove to-remove old-thread-ids)
-                                             (filter to-add new-thread-ids))]
-                     (mapv new-threads-by-id ordered-ids)))))
+                 (fn [existing-threads]
+                   ;; 'existing threads' are the threads currently displayed (via previous props)
+                   ;; 'target threads' are the threads we want displayed (via latest props)
+                   ;; 'target threads' likely overlap with 'existing threads'
+                   ;; 'blank threads' are target threads that have no messages
+                   (let [blank-thread-ids (->> target-threads
+                                               (filter (fn [thread]
+                                                         (empty? (thread :messages))))
+                                               (map :id)
+                                               (set))
+                         existing-thread-ids (set (map :id existing-threads))
+                         target-thread-ids (difference (set (map :id target-threads))
+                                                       blank-thread-ids)
+                         to-remove (difference existing-thread-ids target-thread-ids)
+                         to-add (difference target-thread-ids existing-thread-ids)
+                         ;; here's the overall order:
+                         ;;   blank threads (from target-threads)
+                         ;;   existing threads (in their existing order) (minus any closed threads)
+                         ;;   new threads (from target-threads)
+                         ordered-ids (concat blank-thread-ids
+                                             (remove to-remove existing-thread-ids)
+                                             (filter to-add target-thread-ids))
+                         target-threads-by-id (zipmap
+                                                (map :id target-threads)
+                                                target-threads)]
+                     (mapv target-threads-by-id ordered-ids)))))
         scroll-horizontally
         (fn [e]
           (let [target-classes (.. e -target -classList)]
