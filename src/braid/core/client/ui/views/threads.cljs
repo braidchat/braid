@@ -25,21 +25,23 @@
                    ;; 'target threads' are the threads we want displayed (via latest props)
                    ;; 'target threads' likely overlap with 'existing threads'
                    ;; 'blank threads' are target threads that have no messages
-                   (let [blank-thread-ids (->> target-threads
-                                               (filter (fn [thread]
-                                                         (empty? (thread :messages))))
-                                               (map :id)
-                                               (set))
-                         existing-thread-ids (set (map :id existing-threads))
-                         target-thread-ids (difference (set (map :id target-threads))
-                                                       blank-thread-ids)
+                   (let [existing-thread-ids (set (map :id existing-threads))
+                         target-thread-ids (set (map :id target-threads))
+                         ;; possible to have multiple blank threads
+                         ;; want only the 'new' ones to appear at front, rest stay as they were
+                         new-blank-thread-ids (difference (->> target-threads
+                                                               (filter (fn [thread]
+                                                                         (empty? (thread :messages))))
+                                                               (map :id)
+                                                               (set))
+                                                          existing-thread-ids)
                          to-remove (difference existing-thread-ids target-thread-ids)
-                         to-add (difference target-thread-ids existing-thread-ids)
+                         to-add (difference target-thread-ids existing-thread-ids new-blank-thread-ids)
                          ;; here's the overall order:
                          ;;   blank threads (from target-threads)
                          ;;   existing threads (in their existing order) (minus any closed threads)
                          ;;   new threads (from target-threads)
-                         ordered-ids (concat blank-thread-ids
+                         ordered-ids (concat new-blank-thread-ids
                                              (remove to-remove existing-thread-ids)
                                              (filter to-add target-thread-ids))
                          target-threads-by-id (zipmap
