@@ -65,6 +65,6 @@
      [:div.intro
       (:intro group)
       [clear-inbox-button-view]]
+     ^{:key group-id}
      [threads-view {:new-thread-view [new-thread-view {:group-id group-id}]
-                    :group-id group-id
                     :threads open-threads}]]))

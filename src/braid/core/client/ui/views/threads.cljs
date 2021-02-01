@@ -6,13 +6,12 @@
    [reagent.dom :as r-dom]))
 
 (defn threads-view
-  [{:keys [new-thread-view group-id threads] :as props}]
+  [{:keys [new-thread-view threads] :as props}]
+  ;; to avoid accidental re-use when switching groups, key this component with the group-id
+
   ;; for a better user experience, this component maintains order of threads
   ;; after mounting, any new threads that come in via props are appended to the end of existing threads
   ;; (except blank new threads, which are put at the front)
-
-  ;; group-id prop is necessary to circumvent this 'thread caching' behaviour
-  ;; when navigating to a different group's inbox
   (let [threads (r/atom [])
         this-elt (r/atom nil)
         reset-threads! (fn [threads']
@@ -67,8 +66,7 @@
 
        :component-will-receive-props
        (fn [this [_ next-props]]
-         (if (not= ((r/props this) :group-id) (next-props :group-id))
-           (reset-threads! (next-props :threads))
+         (when (not= ((r/props this) :threads) (next-props :threads))
            (update-threads! (next-props :threads))))
 
        :reagent-render
