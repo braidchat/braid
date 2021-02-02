@@ -14,8 +14,6 @@
   ;; (except blank new threads, which are put at the front)
   (let [threads (r/atom [])
         this-elt (r/atom nil)
-        reset-threads! (fn [threads']
-                         (reset! threads (vec threads')))
         update-threads!
         (fn [target-threads]
           (swap! threads
@@ -61,7 +59,7 @@
 
        :component-did-mount
        (fn [this]
-         (reset-threads! (props :threads))
+         (update-threads! (props :threads))
          (reset! this-elt (r-dom/dom-node this)))
 
        :component-will-receive-props
