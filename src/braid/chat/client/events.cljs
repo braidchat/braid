@@ -88,15 +88,8 @@
 
 (reg-event-fx
   :new-message-text
-  (fn [{db :db} [_ {:keys [group-id thread-id content]}]]
-    {:db (cond
-           (get-in db [:threads thread-id])
-           (assoc-in db [:threads thread-id :new-message] content)
-
-           (get-in db [:temp-threads group-id])
-           (assoc-in db [:temp-threads group-id :new-message] content)
-
-           :else db)}))
+  (fn [{db :db} [_ {:keys [thread-id content]}]]
+    {:db (assoc-in db [:threads thread-id :new-message] content)}))
 
 (reg-event-fx
   :set-message-failed
@@ -107,25 +100,8 @@
                                              msg))))}))
 
 (reg-event-fx
-  :new-conversation
-  (fn [{state :db} [_ data]]
-    {:db (assoc-in state
-                   [:temp-threads
-                    (data :group-id)
-                    :mentioned-ids]
-                   (set (data :mentioned-user-ids)))
-     :dispatch [:focus-thread
-                (get-in state [:temp-threads (data :group-id) :id])]}))
-
-(reg-event-fx
-  :remove-new-thread-mention
-  (fn [{db :db} [_ user-id]]
-    {:db (update-in db [:temp-threads (db :open-group-id) :mentioned-ids]
-                    disj user-id)}))
-
-(reg-event-fx
-  :new-message
-  (fn [{db :db} [_ data]]
+  :new-message!
+  (fn [{db :db} [_ data {:keys [on-added] :or {on-added (constantly nil)}}]]
     (when-not (string/blank? (data :content))
       (let [message (schema/make-message
                       {:user-id (helpers/current-user-id db)
@@ -140,17 +116,17 @@
                                              (extract-user-ids db (data :content)))})
             thread-id (data :thread-id)]
         (if (and
-              ;; thread already exists...
-              (not= thread-id (get-in db [:temp-threads (db :open-group-id) :id]))
+              ;; has messages
+              (seq (get-in db [:threads thread-id :messages]))
               ;; doesn't have any tags yet...
               (empty? (get-in db [:threads thread-id :tag-ids]))
               ;; about to add a tag
               (seq (message :mentioned-tag-ids)))
           {:confirm {:prompt "You're about to make a private thread public"
                      :on-confirm (fn []
-                                   (when-let [added (data :on-added)] (added))
+                                   (on-added)
                                    (dispatch [::persist-new-message message thread-id]))}}
-          (do (when-let [added (data :on-added)] (added))
+          (do (on-added)
               {:dispatch [::persist-new-message message thread-id]}))))))
 
 (reg-event-fx
@@ -167,8 +143,7 @@
                                                :error]])
            (dispatch [:set-message-failed message]))))
      :db (-> state
-             (helpers/add-message message)
-             (helpers/maybe-reset-temp-thread created-thread-id))}))
+             (helpers/add-message message))}))
 
 (reg-event-fx
   :core/retract-message
@@ -600,28 +575,22 @@
 (reg-event-fx
   :add-tag-to-thread
   (fn [{state :db} [_ {:keys [thread-id tag-id local-only?]}]]
-    (if (get-in state [:threads thread-id])
-      {:db (update-in state [:threads thread-id :tag-ids] conj tag-id)
-       :websocket-send (when-not local-only?
-                         (list
-                           [:braid.server/tag-thread {:thread-id thread-id
-                                                      :tag-id tag-id}]))}
-      {:db (update-in state [:temp-threads (state :open-group-id) :tag-ids]
-                      conj tag-id)})))
+    {:db (update-in state [:threads thread-id :tag-ids] conj tag-id)
+     :websocket-send (when-not local-only?
+                       (list
+                         [:braid.server/tag-thread {:thread-id thread-id
+                                                    :tag-id tag-id}]))}))
 
 (reg-event-fx
   :add-user-to-thread
   (fn [{state :db} [_ {:keys [thread-id user-id local-only?]}]]
-    (if (get-in state [:threads thread-id])
-      {:db (update-in state [:threads thread-id :mentioned-ids] conj user-id)
-       :websocket-send
-       (when-not local-only?
-         (list
-           [:braid.server/mention-thread {:thread-id thread-id
-                                          :group-id (state :open-group-id)
-                                          :user-id user-id}]))}
-      {:db (update-in state [:temp-threads (state :open-group-id) :mentioned-ids]
-                      conj user-id)})))
+    {:db (update-in state [:threads thread-id :mentioned-ids] conj user-id)
+     :websocket-send
+     (when-not local-only?
+       (list
+         [:braid.server/mention-thread {:thread-id thread-id
+                                        :group-id (state :open-group-id)
+                                        :user-id user-id}]))}))
 
 (reg-event-fx
   :go-to

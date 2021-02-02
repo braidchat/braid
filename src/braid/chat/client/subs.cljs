@@ -115,16 +115,6 @@
   (fn [state _]
     (get-in state [:page :id])))
 
-(reg-sub-raw
-  :open-threads
-  (fn [state _ [group-id]]
-    (let [open-thread-ids (reaction (get-in @state [:user :open-thread-ids]))
-          threads (reaction (@state :threads))
-          open-threads (reaction (vals (select-keys @threads @open-thread-ids)))]
-      (reaction
-        (doall (filter (fn [thread] (= (thread :group-id) group-id))
-                       @open-threads))))))
-
 (reg-sub
   :users-in-group
   (fn [state [_ group-id]]
@@ -212,11 +202,6 @@
   :connected?
   (fn [state _]
     (get-in state [:websocket-state :connected?])))
-
-(reg-sub
-  :temp-thread
-  (fn [state _]
-    (get-in state [:temp-threads (state :open-group-id)])))
 
 (reg-sub
   :user-preference

@@ -141,12 +141,7 @@
    (doall
      (for [user-id (thread :mentioned-ids)]
        ^{:key user-id}
-       [:<>
-        [user-mention-view user-id]
-        (when (empty? (:messages thread))
-          [:span.remove-mention
-           {:on-click (fn [] (dispatch [:remove-new-thread-mention user-id]))}
-           "x"])]))
+       [user-mention-view user-id]))
    (doall
      (for [tag-id (thread :tag-ids)]
        ^{:key tag-id}
@@ -181,8 +176,6 @@
                \uf1f6])
             :priority 0}])
     [thread-control-dataspec]))
-
-
 
 (defn thread-header-view [thread]
   (into

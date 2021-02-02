@@ -7,14 +7,12 @@
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.header :refer [header-view readonly-header-view]]
    [braid.core.client.ui.views.pages.create-group :refer [create-group-page-view]]
-   [braid.core.client.ui.views.pages.inbox :refer [inbox-page-view]]
    [braid.core.client.ui.views.pages.readonly :refer [readonly-inbox-page-view]]
    [re-frame.core :refer [dispatch subscribe]]))
 
 (defn page-view []
   (let [id (@(subscribe [:page]) :type)]
     (case id
-      :inbox [inbox-page-view]
       :readonly [readonly-inbox-page-view]
       :login [gateway-view]
       :create-group [create-group-page-view]

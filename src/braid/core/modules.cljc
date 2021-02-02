@@ -18,6 +18,7 @@
     [braid.emoji-emojione.core]
     [braid.group-explore.core]
     [braid.notices.core]
+    [braid.page-inbox.core]
     [braid.page-recent.core]
     [braid.page-subscriptions.core]
     [braid.page-uploads.core]
@@ -58,6 +59,7 @@
    braid.group-explore.core/init!
    braid.notices.core/init!
    braid.sidebar.core/init!
+   braid.page-inbox.core/init!
    braid.page-recent.core/init!
    braid.page-subscriptions.core/init!
    braid.page-uploads.core/init!

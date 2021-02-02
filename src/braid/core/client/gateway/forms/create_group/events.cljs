@@ -59,8 +59,7 @@
   (fn [{state :db} [_ {:keys [group-id group] :as response}]]
     {:db (-> state
              (assoc-in [:create-group :sending?] false)
-             (assoc-in [:groups group-id] group)
-             (assoc-in [:temp-threads group-id] (schema/make-temp-thread group-id)))
+             (assoc-in [:groups group-id] group))
 
      ;; need to do a full redirect, because the sign-up flow via gateway.js
      ;; doesn't have any of the other assets

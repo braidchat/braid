@@ -63,13 +63,11 @@
             (on-key-down
               {:on-submit
                (fn [e]
-                 (dispatch [:new-message
+                 (dispatch [:new-message!
                             {:thread-id (config :thread-id)
                              :group-id (config :group-id)
-                             :content text
-                             :mentioned-user-ids (config :mentioned-user-ids)
-                             :mentioned-tag-ids (config :mentioned-tag-ids)
-                             :on-added (fn [] (set-text! ""))}]))})}]])})))
+                             :content text}
+                            {:on-added (fn [] (set-text! ""))}]))})}]])})))
 
 (defn autocomplete-results-view [{:keys [results highlighted-result-index on-click]}]
   [:div.autocomplete

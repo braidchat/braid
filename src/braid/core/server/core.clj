@@ -4,7 +4,6 @@
    [braid.base.conf-extra :as conf] ; to update ports
    [braid.core.server.handler :as handler]
    [braid.base.server.ws-handler] ; for mount
-   [braid.core.server.sync] ; for multimethods
    [braid.base.server.jobs] ; for mount
    [mount.core :as mount :refer [defstate]]
    [org.httpkit.server :refer [run-server server-port server-stop!]]

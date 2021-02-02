@@ -45,5 +45,28 @@
                      (on-confirm)
                      (when on-cancel (on-cancel)))))
 
+(reg-fx :command
+        (fn
+          [[event-id event-params
+            {:keys [on-success on-error]
+             :or {on-success (constantly nil)
+                  on-error (fn [err]
+                             (.error js/console "tada.rpc request error: " (pr-str err)))}}]]
+          (socket/chsk-send!
+            [event-id event-params]
+            1000
+            (fn [reply]
+              (cond
+                ;; websocket error
+                (#{:chsk/closed :chsk/timeout :chsk/error} reply)
+                (on-error reply)
+
+                ;; tada/cqrs error
+                (:cqrs/error reply)
+                (on-error (:cqrs/error reply))
+
+                :else
+                (on-success reply))))))
+
 (defonce initial-user-data-handlers
   (hooks/register! (atom []) [fn?]))

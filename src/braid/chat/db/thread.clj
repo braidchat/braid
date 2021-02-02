@@ -85,15 +85,17 @@
     (contains? (-> (d/pull (db/db) [:thread/mentioned] [:thread/id thread-id])
                    :thread/mentioned set)
                user-id)
-    ;; ...or they are in the group of any tags on the thread
+    ;; ...or they are in the group of the thread
+    ;; and thread has at least one tag
     (seq (d/q '[:find (pull ?group [:group/id])
                 :in $ ?thread-id ?user-id
                 :where
+                [?user :user/id ?user-id]
                 [?thread :thread/id ?thread-id]
-                [?thread :thread/tag ?tag]
-                [?tag :tag/group ?group]
+                [?thread :thread/group ?group]
                 [?group :group/user ?user]
-                [?user :user/id ?user-id]]
+                ;; needs to have at least one tag
+                [?thread :thread/tag ?tag]]
               (db/db) thread-id user-id))
     ;; ...or they're in the group & already have a message in the thread
     ;; this is quite the edge case -- can happen if a user creates a
@@ -204,6 +206,13 @@
        (db/db) thread-id))
 
 ;; Transactions
+
+(defn create-thread-txn
+  [{:keys [user-id thread-id group-id]}]
+  [{:thread/id thread-id
+    :thread/group [:group/id group-id]
+    :user/_open-thread [:user/id user-id]
+    :user/_subscribed-thread [:user/id user-id]}])
 
 (defn user-hide-thread-txn
   [user-id thread-id]
