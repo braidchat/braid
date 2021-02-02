@@ -66,7 +66,8 @@
 
        :component-will-receive-props
        (fn [this [_ next-props]]
-         (when (not= ((r/props this) :threads) (next-props :threads))
+         (when (not= (set (map :id ((r/props this) :threads)))
+                     (set (map :id (next-props :threads))))
            (update-threads! (next-props :threads))))
 
        :reagent-render
