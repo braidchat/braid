@@ -62,11 +62,11 @@
          (update-threads! (props :threads))
          (reset! this-elt (r-dom/dom-node this)))
 
-       :component-will-receive-props
-       (fn [this [_ next-props]]
+       :component-did-update
+       (fn [this [_ prev-props]]
          (when (not= (set (map :id ((r/props this) :threads)))
-                     (set (map :id (next-props :threads))))
-           (update-threads! (next-props :threads))))
+                     (set (map :id (prev-props :threads))))
+           (update-threads! ((r/props this) :threads))))
 
        :reagent-render
        (fn [{:keys [new-thread-view]}]
