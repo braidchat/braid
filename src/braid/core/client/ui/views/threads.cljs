@@ -13,7 +13,7 @@
   ;; after mounting, any new threads that come in via props are appended to the end of existing threads
   ;; (except blank new threads, which are put at the front)
   (let [threads (r/atom [])
-        this-elt (r/atom nil)
+        this-elt (atom nil)
         update-threads!
         (fn [target-threads]
           (swap! threads
