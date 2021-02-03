@@ -51,7 +51,7 @@
            {:on-click
             (fn [_]
               (when (js/confirm (str "Really remove " (user :nickname) " from this group?"))
-                (dispatch [:remove-from-group
+                (dispatch [:remove-from-group!
                            {:group-id @open-group-id
                             :user-id user-id}])))}
            "Kick"])
@@ -60,7 +60,7 @@
           [:button.make-admin
            {:on-click
             (fn [_]
-              (dispatch [:make-admin
+              (dispatch [:make-admin!
                          {:group-id @open-group-id
                           :user-id user-id}]))}
            "Make Admin"])]])

@@ -176,11 +176,11 @@
             (let [sel (.getSelection js/window)
                   selection-size (- (.-anchorOffset sel) (.-focusOffset sel))]
               (when (zero? selection-size)
-                (dispatch [:focus-thread (thread :id)]))))
+                (dispatch [:focus-thread! (thread :id)]))))
 
           :on-blur
           (fn [e]
-            (dispatch [:mark-thread-read (thread :id)]))
+            (dispatch [:mark-thread-read! (thread :id)]))
 
           :on-key-down
           (fn [e]
@@ -233,7 +233,7 @@
 
           (if (:readonly thread)
             [:button.join
-             {:on-click (fn [_] (dispatch [:core/join-public-group (thread :group-id)]))
+             {:on-click (fn [_] (dispatch [:core/join-public-group! (thread :group-id)]))
               :style {:background-color (color/->color (thread :group-id))}}
              "Join Group to Reply"]
             [new-message-view {:thread-id (thread :id)

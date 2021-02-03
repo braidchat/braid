@@ -65,7 +65,7 @@
                               old-idx (index-of current-groups (group :id))
                               new-idx (+ old-idx by)
                               new-groups (move-idx current-groups old-idx new-idx)]
-                          (dispatch [:set-preference [:groups-order new-groups]])))
+                          (dispatch [:set-preference! [:groups-order new-groups]])))
         drag-state (r/atom {:grp nil
                             :elt-height 0
                             :click nil

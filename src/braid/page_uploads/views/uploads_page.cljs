@@ -63,7 +63,7 @@
              [:span "Tagged with " [thread-header/thread-tags-view @thread]]
              [:button
               {:on-click (fn [_]
-                           (dispatch [:load-threads
+                           (dispatch [:load-threads!
                                       {:thread-ids [(upload :thread-id)]}]))}
               "Load thread to see tags"])]])})))
 

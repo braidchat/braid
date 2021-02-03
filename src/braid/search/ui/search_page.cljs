@@ -60,16 +60,16 @@
                           (> 100 (- (.-scrollWidth div)
                                     (+ (.-scrollLeft div) (.-offsetWidth div)))
                              0))
-                 (dispatch [:set-page-loading true])
+                 (dispatch [:set-page-loading! true])
                  (let [already-have (set (map :id loaded-threads))
                        to-load (->> thread-ids
                                     (remove already-have)
                                     (take 25))]
-                   (dispatch [:load-threads
+                   (dispatch [:load-threads!
                               {:thread-ids to-load
                                :on-complete
                                (fn []
-                                 (dispatch [:set-page-loading false]))}])))))
+                                 (dispatch [:set-page-loading! false]))}])))))
            :on-wheel ; make the mouse wheel scroll horizontally
            (fn [e]
              (let [target-classes (.. e -target -classList)

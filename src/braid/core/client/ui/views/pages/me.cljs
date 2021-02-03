@@ -30,7 +30,7 @@
                              (.preventDefault e)
                              (set-error! nil)
                              (when (valid-nickname? @new-nickname)
-                               (dispatch [:set-user-nickname
+                               (dispatch [:set-user-nickname!
                                           {:nickname @new-nickname
                                            :on-error (fn [err] (set-error! err))}])
                                (reset! new-nickname "")))}
@@ -54,7 +54,7 @@
        [:h2 "Update Avatar"]
        [:div.avatar {:class (when @dragging? "dragging")}
         [:img.avatar {:src (upload/->path @user-avatar-url)}]
-        [avatar-upload-view {:on-upload (fn [u] (dispatch [:set-user-avatar u]))
+        [avatar-upload-view {:on-upload (fn [u] (dispatch [:set-user-avatar! u]))
                              :type "user-avatar"
                              :group-id @(subscribe [:open-group-id])
                              :dragging-change (partial reset! dragging?)}]]])))
@@ -73,7 +73,7 @@
                       (.stopPropagation e)
                       (when (and (not (string/blank? @new-pass))
                                  (= @new-pass @pass-confirm))
-                        (dispatch [:set-password
+                        (dispatch [:set-password!
                                    [@new-pass
                                     (fn []
                                       (reset! response {:ok true})

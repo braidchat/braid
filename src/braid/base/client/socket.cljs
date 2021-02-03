@@ -53,18 +53,18 @@
       (= :taoensso.sente/nil-uid (new-state :uid))
       ; reconnected, but session has expired
       ; user needs to log in again
-      (dispatch [:core/websocket-needs-auth])
+      (dispatch [:core/websocket-needs-auth!])
 
       (and (string? (new-state :uid))
            (string/starts-with? (new-state :uid) "FAKE"))
-      (dispatch [:core/websocket-anon-connected])
+      (dispatch [:core/websocket-anon-connected!])
 
       :else
-      (dispatch [:core/websocket-connected]))
-    (dispatch [:core/websocket-disconnected]))
+      (dispatch [:core/websocket-connected!]))
+    (dispatch [:core/websocket-disconnected!]))
 
   (when-let [next-reconnect (new-state :udt-next-reconnect)]
-    (dispatch [:core/websocket-update-next-reconnect next-reconnect]))
+    (dispatch [:core/websocket-update-next-reconnect! next-reconnect]))
 
   (event-handler [:socket/connected new-state]))
 
@@ -91,9 +91,9 @@
         (fn [reply]
           (if-not (sente/cb-success? reply)
             (let [reconnect-time (+ 10000 (.valueOf (js/Date.)))]
-              (dispatch [:core/websocket-disconnected])
-              (dispatch [:core/websocket-update-next-reconnect reconnect-time]))
-            (dispatch [:core/websocket-connected])))))))
+              (dispatch [:core/websocket-disconnected!])
+              (dispatch [:core/websocket-update-next-reconnect! reconnect-time]))
+            (dispatch [:core/websocket-connected!])))))))
 
 (defn stop-router! [] (when-let [stop-f @router_] (stop-f)))
 

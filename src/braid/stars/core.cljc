@@ -81,7 +81,7 @@
        (base/register-events!
          {:braid.stars/load-starred-threads!
           (fn [{db :db} _]
-            {:dispatch [:load-threads {:thread-ids (get-in db [:braid.stars/starred-thread-ids (db :open-group-id)])}]})
+            {:dispatch [:load-threads! {:thread-ids (get-in db [:braid.stars/starred-thread-ids (db :open-group-id)])}]})
 
           :braid.stars/star-thread!
           (fn [{db :db} [_ thread-id]]

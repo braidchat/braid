@@ -107,8 +107,8 @@
 (reg-event-fx
   ::display-group-readonly
   (fn [{db :db} [_ group]]
-    {:dispatch-n [[:set-login-state :anon-ws-connect]
-                  [:start-anon-socket]]
+    {:dispatch-n [[:set-login-state! :anon-ws-connect]
+                  [:start-anon-socket!]]
      :db (-> db
              (assoc
                   :open-group-id (:id group)

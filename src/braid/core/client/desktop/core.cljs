@@ -28,11 +28,11 @@
   ([modules]
    (modules/init! modules)
 
-  (dispatch-sync [:initialize-db])
+  (dispatch-sync [:initialize-db!])
 
   (.addEventListener js/document "visibilitychange"
                      (fn [e]
-                       (dispatch [:set-window-visibility
+                       (dispatch [:set-window-visibility!
                                   (= "visible" (.-visibilityState js/document))])))
 
   (render)

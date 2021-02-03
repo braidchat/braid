@@ -17,7 +17,7 @@
           (fn [_ data]
             (dispatch [::set-init-data! data])
             (router/dispatch-current-path!)
-            (dispatch [:notify-if-client-out-of-date (data :version-checksum)]))
+            (dispatch [:notify-if-client-out-of-date! (data :version-checksum)]))
 
           :socket/connected
           (fn [_ _]
@@ -26,8 +26,8 @@
        (base/register-events!
          {::set-init-data!
           (fn [{state :db} [_ data]]
-            ;; FIXME :set-login-state defined in chat
-            {:dispatch-n (list [:set-login-state :app])
+            ;; FIXME :set-login-state! defined in chat
+            {:dispatch-n (list [:set-login-state! :app])
              :db (-> state
                      (as-> <>
                        (reduce (fn [db f] (f db data))

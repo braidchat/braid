@@ -25,7 +25,7 @@
        (chat/register-group-page!
          {:key :thread
           :on-load (fn [page]
-                     (dispatch [:load-threads {:thread-ids [(uuid (page :thread-id))]}]))
+                     (dispatch [:load-threads! {:thread-ids [(uuid (page :thread-id))]}]))
           :view
           (fn []
             [:div.page

@@ -34,7 +34,7 @@
           (fn [{db :db} [_ query]]
             {:dispatch [::set-query! query]
              :dispatch-debounce [:search-redirect
-                                 [:go-to
+                                 [:go-to!
                                   (if (string/blank? query)
                                     (routes/group-page-path {:group-id (db :open-group-id)
                                                              :page-id "inbox"})

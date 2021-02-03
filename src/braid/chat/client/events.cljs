@@ -81,18 +81,18 @@
 
 
 (reg-event-fx
-  :initialize-db
+  :initialize-db!
   (fn [{db :db} _]
     {:db (braid.base.client.state/initialize-state db)
      :dispatch [:braid.core.client.gateway.events/initialize :log-in]}))
 
 (reg-event-fx
-  :new-message-text
+  :new-message-text!
   (fn [{db :db} [_ {:keys [thread-id content]}]]
     {:db (assoc-in db [:threads thread-id :new-message] content)}))
 
 (reg-event-fx
-  :set-message-failed
+  :set-message-failed!
   (fn [{db :db} [_ message]]
     {:db (update-in db [:threads (message :thread-id) :messages]
                     (partial map (fn [msg] (if (= (message :id) (msg :id))
@@ -125,12 +125,12 @@
           {:confirm {:prompt "You're about to make a private thread public"
                      :on-confirm (fn []
                                    (on-added)
-                                   (dispatch [::persist-new-message message thread-id]))}}
+                                   (dispatch [::persist-new-message! message thread-id]))}}
           (do (on-added)
-              {:dispatch [::persist-new-message message thread-id]}))))))
+              {:dispatch [::persist-new-message! message thread-id]}))))))
 
 (reg-event-fx
-  ::persist-new-message
+  ::persist-new-message!
   (fn [{state :db} [_ message created-thread-id]]
     {:command [:braid.chat/create-message!
                (-> message
@@ -141,12 +141,12 @@
                   (dispatch [:braid.notices/display! [(keyword "failed-to-send" (message :id))
                                                       "Message failed to send!"
                                                       :error]])
-                  (dispatch [:set-message-failed message]))}]
+                  (dispatch [:set-message-failed! message]))}]
      :db (-> state
              (helpers/add-message message))}))
 
 (reg-event-fx
-  :core/retract-message
+  :core/retract-message!
   (fn [{db :db} [_ {:keys [thread-id message-id remote?]}]]
     (when (get-in db [:threads thread-id])
       (cond-> {:db (update-in
@@ -157,7 +157,7 @@
                        (list [:braid.server/retract-message message-id]))))))
 
 (reg-event-fx
-  :resend-message
+  :resend-message!
   (fn [{state :db} [_ message]]
     {:command [:braid.chat/create-message!
                (-> message
@@ -169,7 +169,7 @@
                              [(keyword "failed-to-send" (message :id))
                               "Message failed to send!"
                               :error]])
-                    (dispatch [:set-message-failed message]))}]
+                    (dispatch [:set-message-failed! message]))}]
      :dispatch [:braid.notices/clear! (keyword "failed-to-send" (message :id))]
      :db (-> state
              (update-in [:threads (message :thread-id) :messages]
@@ -179,13 +179,13 @@
                                          msg)))))}))
 
 (reg-event-fx
-  :unsub-thread
+  :unsub-thread!
   (fn [_ [_ data]]
     {:websocket-send (list [:braid.server/unsub-thread (data :thread-id)])
      :dispatch [:hide-thread! {:thread-id (data :thread-id) :local-only? true}]}))
 
 (reg-event-fx
-  :create-tag
+  :create-tag!
   (fn [{state :db} [_ {:keys [tag local-only?]}]]
     (let [tag (merge (schema/make-tag) tag)]
       {:db (-> state
@@ -198,24 +198,24 @@
                     :name (:name tag)}
                    {:on-error
                     (fn [msg]
-                      (dispatch [:remove-tag {:tag-id (tag :id) :local-only? true}])
+                      (dispatch [:remove-tag! {:tag-id (tag :id) :local-only? true}])
                       (dispatch [:braid.notices/display! [(keyword "bad-tag" (tag :id)) msg :error]]))}])})))
 
 (reg-event-fx
-  :unsubscribe-from-tag
+  :unsubscribe-from-tag!
   (fn [{state :db} [_ tag-id]]
     {:websocket-send (list [:braid.server/unsubscribe-from-tag tag-id])
      :db (update-in state [:user :subscribed-tag-ids] disj tag-id)}))
 
 (reg-event-fx
-  :subscribe-to-tag
+  :subscribe-to-tag!
   (fn [{state :db} [_ {:keys [tag-id local-only?]}]]
     {:db (helpers/subscribe-to-tag state tag-id)
      :websocket-send (when-not local-only?
                        (list [:braid.server/subscribe-to-tag tag-id]))}))
 
 (reg-event-fx
-  :set-tag-description
+  :set-tag-description!
   (fn [{state :db} [_ {:keys [tag-id description local-only?]}]]
     {:db (assoc-in state [:tags tag-id :description] description)
      :websocket-send
@@ -225,7 +225,7 @@
                                              :description description}]))}))
 
 (reg-event-fx
-  :remove-tag
+  :remove-tag!
   (fn [{state :db} [_ {:keys [tag-id local-only?]}]]
     {:db
      (-> state
@@ -239,12 +239,12 @@
                        (list [:braid.server/retract-tag tag-id]))}))
 
 (reg-event-fx
-  :update-user-nickname
+  :update-user-nickname!
   (fn [{db :db} [_ {:keys [nickname user-id group-id] :as args}]]
     {:db (assoc-in db [:groups group-id :users user-id :nickname] nickname)}))
 
 (reg-event-fx
-  :set-user-nickname
+  :set-user-nickname!
   (fn [{state :db} [_ {:keys [nickname on-error]}]]
     {:websocket-send
      (list
@@ -255,19 +255,19 @@
            (on-error msg))))}))
 
 (reg-event-fx
-  :set-user-avatar
+  :set-user-avatar!
   (fn [{state :db} [_ avatar-url]]
     {:websocket-send (list [:braid.server/set-user-avatar avatar-url])}))
 
 (reg-event-fx
-  :update-user-avatar
+  :update-user-avatar!
   (fn [{db :db} [_ {:keys [user-id group-id avatar-url]}]]
     {:db (helpers/update-user-avatar db {:group-id group-id
                                          :user-id user-id
                                          :avatar-url avatar-url})}))
 
 (reg-event-fx
-  :set-password
+  :set-password!
   (fn [_ [_ [password on-success on-error]]]
     {:websocket-send
      (list
@@ -282,22 +282,22 @@
            true (on-success))))}))
 
 (reg-event-fx
-  :add-notification-rule
+  :add-notification-rule!
   (fn [{state :db} [_ rule]]
     (let [current-rules (get (helpers/get-user-preferences state)
                           :notification-rules [])]
-      {:dispatch [:set-preference [:notification-rules (conj current-rules rule)]]})))
+      {:dispatch [:set-preference! [:notification-rules (conj current-rules rule)]]})))
 
 (reg-event-fx
-  :remove-notification-rule
+  :remove-notification-rule!
   (fn [{state :db} [_ rule]]
     (let [new-rules (into [] (remove (partial = rule))
                           (get (helpers/get-user-preferences state)
                             :notification-rules []))]
-      {:dispatch [:set-preference [:notification-rules new-rules]]})))
+      {:dispatch [:set-preference! [:notification-rules new-rules]]})))
 
 (reg-event-fx
-  :add-threads
+  :add-threads!
   (fn [{db :db} [_ threads ?open]]
     {:db (-> db
              (update :threads #(merge-with merge % (key-by-id threads)))
@@ -313,7 +313,7 @@
                                 (map :id threads))))}))
 
 (reg-event-fx
-  :load-threads
+  :load-threads!
   (fn [_ [_ {:keys [thread-ids on-complete]}]]
     {:websocket-send
      (list
@@ -321,53 +321,53 @@
        5000
        (fn [reply]
          (when-let [threads (:threads reply)]
-           (dispatch [:add-threads threads]))
+           (dispatch [:add-threads! threads]))
          (when on-complete
            (on-complete))))}))
 
 (reg-event-fx
-  :mark-thread-read
+  :mark-thread-read!
   (fn [{state :db} [_ thread-id]]
     {:websocket-send (list [:braid.server/mark-thread-read thread-id])
      :db (helpers/update-thread-last-open-at state thread-id)}))
 
 (reg-event-fx
-  :focus-thread
+  :focus-thread!
   (fn [{db :db} [_ thread-id]]
     {:db (assoc-in db [:focused-thread-id] thread-id)}))
 
 (reg-event-fx
-  :make-admin
+  :make-admin!
   (fn [{state :db} [_ {:keys [group-id user-id local-only?] :as args}]]
     {:db (update-in state [:groups group-id :admins] conj user-id)
      :websocket-send (when-not local-only?
                        (list [:braid.server/make-user-admin args]))}))
 
 (reg-event-fx
-  :remove-from-group
+  :remove-from-group!
   (fn [_ [ _ {:keys [group-id user-id] :as args}]]
     {:websocket-send (list [:braid.server/remove-from-group args])
-     :dispatch [:redirect-from-root]}))
+     :dispatch [:redirect-from-root!]}))
 
 (reg-event-fx
-  :set-login-state
+  :set-login-state!
   (fn [{db :db} [_ login-state]]
     {:db (assoc db :login-state login-state)}))
 
 (reg-event-fx
-  :start-anon-socket
+  :start-anon-socket!
   (fn [_ [_ _]]
     (socket/connect!)
     {}))
 
 (reg-event-fx
-  :start-socket
+  :start-socket!
   (fn [_ [_ _]]
     (socket/connect!)
-    {:dispatch [:set-login-state :ws-connect]}))
+    {:dispatch [:set-login-state! :ws-connect]}))
 
 (reg-event-fx
-  :set-window-visibility
+  :set-window-visibility!
   (fn [{state :db} [_ visible?]]
     {:db (-> state
              (assoc-in [:notifications :window-visible?] visible?)
@@ -376,7 +376,7 @@
      :window-title (when visible? (o/get js/window "app_title"))}))
 
 (reg-event-fx
-  :auth
+  :auth!
   (fn [_ [_ data]]
     {:edn-xhr {:uri "/session"
                :method :put
@@ -385,32 +385,32 @@
                :on-complete (fn [_]
                               (when-let [cb (data :on-complete)]
                                 (cb))
-                              (dispatch [:start-socket]))
+                              (dispatch [:start-socket!]))
                :on-error (fn [_]
                            (when-let [cb (data :on-error)]
                              (cb)))}}))
 
 (reg-event-fx
-  :request-reset
+  :request-reset!
   (fn [_ [_ email]]
     {:edn-xhr {:uri "/request-reset"
                :method :post
                :params {:email email}}}))
 
 (reg-event-fx
-  :logout
+  :logout!
   (fn [_ [_ _]]
     {:edn-xhr {:uri "/session"
                :method :delete
                :headers {"x-csrf-token" (:csrf-token @socket/chsk-state)}
                :on-complete (fn [data]
                               (socket/disconnect!)
-                              (dispatch [:initialize-db])
-                              (dispatch [:set-login-state :gateway])
-                              (dispatch [:go-to "/"]))}}))
+                              (dispatch [:initialize-db!])
+                              (dispatch [:set-login-state! :gateway])
+                              (dispatch [:go-to! "/"]))}}))
 
 (reg-event-fx
-  :set-group-and-page
+  :set-group-and-page!
   (fn [{state :db} [_ [group-id page-id]]]
     (cond
       (and (= :gateway (:login-state state)) group-id)
@@ -427,10 +427,10 @@
       {:db (assoc state :open-group-id group-id :page page-id)}
 
       :else
-      {:dispatch [:core/load-readonly-group group-id]})))
+      {:dispatch [:core/load-readonly-group! group-id]})))
 
 (reg-event-fx
-  :redirect-from-root
+  :redirect-from-root!
   (fn [{state :db} _]
     (if (state :session)
       {:redirect-to
@@ -443,28 +443,28 @@
       {})))
 
 (reg-event-fx
-  :set-page-loading
+  :set-page-loading!
   (fn [{db :db} [_ bool]]
     {:db (assoc-in db [:page :loading?] bool)}))
 
 (reg-event-fx
-  :set-page-error
+  :set-page-error!
   (fn [{db :db} [_ bool]]
     {:db (assoc-in db [:page :error?] bool)}))
 
 (reg-event-fx
-  :set-preference
+  :set-preference!
   (fn [{state :db} [_ [k v]]]
     {:websocket-send (list [:braid.server/set-preferences {k v}])
      :db (helpers/set-preferences state {k v})}))
 
 (reg-event-fx
-  :add-users
+  :add-users!
   (fn [{db :db} [_ [group-id users]]]
     {:db (update-in db [:groups group-id :users] merge (key-by-id users))}))
 
 (reg-event-fx
-  :join-group
+  :join-group!
   (fn [{state :db} [_ {:keys [group tags]}]]
     (-> {:db (-> state
                  (helpers/add-tags tags)
@@ -478,7 +478,7 @@
                                                       :page-id "inbox"}))))))
 
 (reg-event-fx
-  :notify-if-client-out-of-date
+  :notify-if-client-out-of-date!
   (fn [_ [_ server-checksum]]
     (if (not= (o/get js/window "checksum") server-checksum)
       {:dispatch [:braid.notices/display!
@@ -486,7 +486,7 @@
       {})))
 
 (reg-event-fx
-  :leave-group
+  :leave-group!
   (fn [{state :db} [_ {:keys [group-id group-name]}]]
     {:dispatch-n
      [[:braid.notices/display!
@@ -494,7 +494,7 @@
         (str "You have been removed from " group-name)
         :info]]
       (when (= group-id (state :open-group-id))
-        [:redirect-from-root])]
+        [:redirect-from-root!])]
      :db
      (-> state
          (helpers/remove-group group-id)
@@ -504,7 +504,7 @@
                       (partial filterv #(not= % group-id)))))}))
 
 (reg-event-fx
-  :add-open-thread
+  :add-open-thread!
   (fn [{state :db} [_ thread]]
     (let [msg-ids (map (comp (partial str :failed-to-send) :id)
                        (:messages thread))]
@@ -517,7 +517,7 @@
            (update-in [:user :open-thread-ids] conj (thread :id)))})))
 
 (reg-event-fx
-  :maybe-increment-unread
+  :maybe-increment-unread!
   (fn [{state :db} _]
     (when-not (get-in state [:notifications :window-visible?])
       (let [state (update-in state [:notifications :unread-count] inc)
@@ -526,19 +526,19 @@
          :window-title (str (o/get js/window "app_title") " (" unread ")")}))))
 
 (reg-event-fx
-  :update-user-status
+  :update-user-status!
   (fn [{db :db} [_ [group-id user-id status]]]
     {:db (if (get-in db [:groups group-id :users user-id])
            (assoc-in db [:groups group-id :users user-id :status] status)
            db)}))
 
 (reg-event-fx
-  :add-user
+  :add-user!
   (fn [{db :db} [_ group-id user]]
     {:db (assoc-in db [:groups group-id :users (:id user)] user)}))
 
 (reg-event-fx
-  :remove-user-from-group
+  :remove-user-from-group!
   (fn [{db :db} [_ [group-id user-id]]]
     ;; TODO: remove mentions of that user from the group?
     {:db (if (get-in db [:groups group-id :users])
@@ -546,7 +546,7 @@
            db)}))
 
 (reg-event-fx
-  :add-tag-to-thread
+  :add-tag-to-thread!
   (fn [{state :db} [_ {:keys [thread-id tag-id local-only?]}]]
     {:db (update-in state [:threads thread-id :tag-ids] conj tag-id)
      :websocket-send (when-not local-only?
@@ -555,7 +555,7 @@
                                                     :tag-id tag-id}]))}))
 
 (reg-event-fx
-  :add-user-to-thread
+  :add-user-to-thread!
   (fn [{state :db} [_ {:keys [thread-id user-id local-only?]}]]
     {:db (update-in state [:threads thread-id :mentioned-ids] conj user-id)
      :websocket-send
@@ -566,36 +566,36 @@
                                         :user-id user-id}]))}))
 
 (reg-event-fx
-  :go-to
+  :go-to!
   (fn [_ [_ route]]
     {:redirect-to route}))
 
 (reg-event-fx
-  :core/websocket-disconnected
+  :core/websocket-disconnected!
   (fn [{state :db} _]
     {:db (assoc-in state [:websocket-state :connected?] false)}))
 
 (reg-event-fx
-  :core/websocket-connected
+  :core/websocket-connected!
   (fn [{state :db} _]
     {:db (assoc-in state [:websocket-state :connected?] true)}))
 
 (reg-event-fx
-  :core/websocket-needs-auth
+  :core/websocket-needs-auth!
   (fn [{state :db} _]
-    {:dispatch-n [[:initialize-db]
-                  [:set-login-state :gateway]]}))
+    {:dispatch-n [[:initialize-db!]
+                  [:set-login-state! :gateway]]}))
 
 (reg-event-fx
-  :core/websocket-anon-connected
+  :core/websocket-anon-connected!
   (fn [{db :db} _]
     (if (= :anon-ws-connect (:login-state db))
-      {:dispatch-n [[:set-login-state :anon-connected]
-                    [:core/load-readonly-group]]}
-      {:dispatch-n [[:core/websocket-needs-auth]]})))
+      {:dispatch-n [[:set-login-state! :anon-connected]
+                    [:core/load-readonly-group!]]}
+      {:dispatch-n [[:core/websocket-needs-auth!]]})))
 
 (reg-event-fx
-  :core/load-readonly-group
+  :core/load-readonly-group!
   (fn [{db :db} [_ ?group-id]]
     {:websocket-send
      (list [:braid.server.anon/load-group (or ?group-id (:open-group-id db))]
@@ -605,15 +605,15 @@
                :chsk/timeout (js/console.warn "Loading readonly group timed out")
                :braid/error (do (prn "private or nonexistant group")
                                 ;; should probably show warning here?
-                                (dispatch [:redirect-from-root]))
+                                (dispatch [:redirect-from-root!]))
 
-               (do (dispatch [:join-group (select-keys resp [:tags :group])])
-                   (dispatch [:add-threads (:threads resp) true])
+               (do (dispatch [:join-group! (select-keys resp [:tags :group])])
+                   (dispatch [:add-threads! (:threads resp) true])
                    (when ?group-id
-                     (dispatch [:set-group-and-page [?group-id {:type :readonly}]]))))))}))
+                     (dispatch [:set-group-and-page! [?group-id {:type :readonly}]]))))))}))
 
 (reg-event-fx
-  :core/join-public-group
+  :core/join-public-group!
   (fn [{db :db} [_ group-id]]
     (if (get-in db [:session :user-id])
       {:websocket-send
@@ -621,12 +621,12 @@
       {:redirect-to (routes/join-group-path {:group-id group-id})})))
 
 (reg-event-fx
-  :core/websocket-update-next-reconnect
+  :core/websocket-update-next-reconnect!
   (fn [{state :db} [_ next-reconnect]]
     {:db (assoc-in state [:websocket-state :next-reconnect] next-reconnect)}))
 
 (reg-event-fx
-  :core/show-message-notification
+  :core/show-message-notification!
   (fn [{db :db} [_ {:keys [content group-id user-id] :as msg}]]
     (let [sender (get-in db [:groups group-id :users user-id])]
       {:notify {:body (str (sender :nickname) ": " content)
@@ -635,7 +635,7 @@
                 :icon (sender :avatar)}})))
 
 (reg-event-fx
-  :core/reconnect
+  :core/reconnect!
   (fn [_ _]
     (socket/reconnect!)
     {}))
