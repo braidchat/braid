@@ -56,7 +56,7 @@
     :quest/goal 3
     :quest/listener (fn [state [event data]]
                       (and
-                        (= event :hide-thread)
+                        (= event :hide-thread!)
                         (not (data :local-only?))))}])
 
 

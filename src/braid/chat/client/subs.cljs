@@ -57,11 +57,6 @@
     (->> (get-in state [:session :user-id])
          (contains? (set (get-in state [:groups group-id :admins]))))))
 
-(reg-sub
-  :open-thread-ids
-  (fn [state _]
-    (get-in state [:user :open-thread-ids])))
-
 (reg-sub-raw
   :group-unread-count
   (fn [state [_ group-id]]

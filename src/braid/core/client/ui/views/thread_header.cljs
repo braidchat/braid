@@ -199,7 +199,7 @@
                         ; divs as controls, otherwise divs higher up also
                         ; get click events
                         (helpers/stop-event! e)
-                        (dispatch [:hide-thread {:thread-id (thread :id)}]))}
+                        (dispatch [:hide-thread! {:thread-id (thread :id)}]))}
            \uf00d]
           [:div.control.unread
            {:title "Mark Unread"
@@ -210,7 +210,7 @@
                         ; divs as controls, otherwise divs higher up also
                         ; get click events
                         (helpers/stop-event! e)
-                        (dispatch [:reopen-thread (thread :id)]))}
+                        (dispatch [:reopen-thread! (thread :id)]))}
            \uf0e2])]
 
        (into [:div.extras]

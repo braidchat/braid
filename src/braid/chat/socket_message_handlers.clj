@@ -167,17 +167,6 @@
      ;; TODO rewrite to use cofx
      {})
 
-   :braid.server/hide-thread
-   (fn [{:keys [?data user-id]}]
-     {:db-run-txns! (thread/user-hide-thread-txn user-id ?data)
-      :chsk-send! [user-id [:braid.client/hide-thread ?data]]})
-
-   :braid.server/show-thread
-   (fn [{:keys [?data user-id]}]
-     {:db-run-txns! (thread/user-show-thread-txn user-id ?data)
-      :chsk-send! [user-id [:braid.client/show-thread
-                            (thread/thread-by-id ?data)]]})
-
    :braid.server/unsub-thread
    (fn [{:keys [?data user-id]}]
      {:db-run-txns! (thread/user-unsubscribe-from-thread-txn user-id ?data)

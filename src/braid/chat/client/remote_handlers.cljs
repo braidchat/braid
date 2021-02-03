@@ -94,7 +94,7 @@
 
      :braid.client/hide-thread
      (fn [_ thread-id]
-       (dispatch [:hide-thread {:thread-id thread-id :local-only? true}]))
+       (dispatch [:hide-thread! {:thread-id thread-id :local-only? true}]))
 
      :braid.client/show-thread
      (fn [_ thread]

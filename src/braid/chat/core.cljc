@@ -95,8 +95,6 @@
                      (into {}
                            (map (fn [[g t]] [g (into #{} (map :id) t)]))
                            (group-by :group-id (data :user-threads))))
-              (assoc-in [:user :open-thread-ids]
-                        (set (map :id (data :user-threads))))
               (helpers/add-tags (data :tags))
               (helpers/set-preferences (data :user-preferences)))))
 

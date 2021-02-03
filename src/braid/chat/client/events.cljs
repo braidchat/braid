@@ -179,23 +179,10 @@
                                          msg)))))}))
 
 (reg-event-fx
-  :hide-thread
-  (fn [{state :db} [_ {:keys [thread-id local-only?]}]]
-    {:db (update-in state [:user :open-thread-ids] disj thread-id)
-     :websocket-send (when-not local-only?
-                       (list [:braid.server/hide-thread thread-id]))}))
-
-(reg-event-fx
-  :reopen-thread
-  (fn [{state :db} [_ thread-id]]
-    {:websocket-send (list [:braid.server/show-thread thread-id])
-     :db (update-in state [:user :open-thread-ids] conj  thread-id)}))
-
-(reg-event-fx
   :unsub-thread
   (fn [_ [_ data]]
     {:websocket-send (list [:braid.server/unsub-thread (data :thread-id)])
-     :dispatch [:hide-thread {:thread-id (data :thread-id) :local-only? true}]}))
+     :dispatch [:hide-thread! {:thread-id (data :thread-id) :local-only? true}]}))
 
 (reg-event-fx
   :create-tag
@@ -349,19 +336,6 @@
   :focus-thread
   (fn [{db :db} [_ thread-id]]
     {:db (assoc-in db [:focused-thread-id] thread-id)}))
-
-(reg-event-fx
-  :clear-inbox
-  (fn [{state :db} [_ _]]
-    {:dispatch-n
-     (into ()
-           (comp
-             (filter (fn [thread] (= (state :open-group-id) (thread :group-id))))
-             (map :id)
-             (map (fn [id] [:hide-thread {:thread-id id :local-only? false}])))
-           (-> (state :threads)
-               (select-keys (get-in state [:user :open-thread-ids]))
-               vals))}))
 
 (reg-event-fx
   :make-admin

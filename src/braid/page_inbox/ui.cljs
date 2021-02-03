@@ -53,7 +53,7 @@
       (when (< 5 (count @open-threads))
         [:button.clear-inbox
          {:on-click (fn [_]
-                      (dispatch [:clear-inbox]))}
+                      (dispatch [:clear-inbox!]))}
          "Clear Inbox"]))))
 
 (defn inbox-page-view
