@@ -7,6 +7,9 @@
 (defn ->color [input]
   (js/window.HUSL.toHex (mod (Math/abs (hash input)) 360) 95 50))
 
+(defn ->color-darker [input]
+  (js/window.HUSL.toHex (mod (Math/abs (hash input)) 360) 95 30))
+
 (defn url->color [url]
   (-> url
       string/lower-case
