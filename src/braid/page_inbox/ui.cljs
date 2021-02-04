@@ -65,6 +65,6 @@
      [:div.intro
       (:intro group)
       [clear-inbox-button-view]]
-     ^{:key group-id}
+     ^{:key group-id} ;; necessary to prevent component-reuse when switching groups
      [threads-view {:new-thread-view [new-thread-view {:group-id group-id}]
                     :threads open-threads}]]))
