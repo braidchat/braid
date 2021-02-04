@@ -4,13 +4,16 @@
     [braid.core.hooks :as hooks]
     [taoensso.timbre :as timbre]))
 
+(defn dispatch [command-id args]
+  (tada/do! command-id args))
+
 (defonce commands (hooks/register! (atom [])))
 
 (defn ->ws-handler [command]
   (fn [{:keys [user-id ?data ?reply-fn]}]
     (timbre/debug "Command:" (:id command) ?data)
     (try
-      (tada/do! (:id command)
+      (dispatch (:id command)
                 (assoc ?data
                   :user-id user-id))
       (?reply-fn :braid/ok)
