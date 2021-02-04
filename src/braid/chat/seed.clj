@@ -2,9 +2,9 @@
   (:require
     [braid.lib.uuid :as uuid]
     [braid.chat.db.group :as group]
-    [braid.chat.db.message :as message]
     [braid.chat.db.tag :as tag]
     [braid.chat.db.user :as user]
+    [braid.base.server.cqrs :as cqrs]
     [braid.core.server.db :as db]))
 
 (def groups
@@ -35,53 +35,65 @@
     :tag/name "abcde"}])
 
 (def threads
-  [{:thread/id (uuid/squuid)}
-   {:thread/id (uuid/squuid)}])
+  [{:thread/id (uuid/squuid)
+    :thread/user-id (get-in users [0 :user/id])
+    :thread/group-id (get-in groups [0 :group/id])}
+   {:thread/id (uuid/squuid)
+    :thread/group-id (get-in groups [1 :group/id])
+    :thread/user-id (get-in users [1 :user/id])}])
 
 (def messages
-  [{:id (uuid/squuid)
-    :group-id (get-in groups [0 :group/id])
-    :user-id (get-in users [0 :user/id])
+  [;; thread 0
+
+   {:id (uuid/squuid)
     :thread-id (get-in threads [0 :thread/id])
+    :user-id (get-in users [0 :user/id])
     :created-at (java.util.Date.)
     :content "Hello?"
+    :mentioned-user-ids []
     :mentioned-tag-ids [(get-in tags [0 :tag/id])]}
 
    {:id (uuid/squuid)
-    :group-id (get-in groups [0 :group/id])
     :thread-id (get-in threads [0 :thread/id])
     :user-id (get-in users [1 :user/id])
     :created-at (java.util.Date.)
-    :content "Hi!"}
+    :content "Hi!"
+    :mentioned-user-ids []
+    :mentioned-tag-ids []}
 
    {:id (uuid/squuid)
-    :group-id (get-in groups [0 :group/id])
     :thread-id (get-in threads [0 :thread/id])
     :user-id (get-in users [0 :user/id])
     :created-at (java.util.Date.)
-    :content "Oh, great, someone else is here."}
+    :content "Oh, great, someone else is here."
+    :mentioned-user-ids []
+    :mentioned-tag-ids []}
 
    {:id (uuid/squuid)
-    :group-id (get-in groups [0 :group/id])
     :thread-id (get-in threads [0 :thread/id])
     :user-id (get-in users [1 :user/id])
     :created-at (java.util.Date.)
-    :content "Yep!"}
+    :content "Yep!"
+    :mentioned-user-ids []
+    :mentioned-tag-ids []}
+
+   ;; thread 1
 
    {:id (uuid/squuid)
-    :group-id (get-in groups [1 :group/id])
     :thread-id (get-in threads [1 :thread/id])
-    :user-id (get-in users [0 :user/id])
+    :user-id (get-in users [1 :user/id])
     :created-at (java.util.Date.)
     :content "Hello?"
+    :mentioned-user-ids []
     :mentioned-tag-ids [(get-in tags [2 :tag/id])]}
 
    {:id (uuid/squuid)
-    :group-id (get-in groups [1 :group/id])
     :thread-id (get-in threads [1 :thread/id])
-    :user-id (get-in users [1 :user/id])
+    :user-id (get-in users [0 :user/id])
     :created-at (java.util.Date.)
-    :content "Hi!"}])
+    :content "Hi!"
+    :mentioned-user-ids []
+    :mentioned-tag-ids []}])
 
 (defn seed! []
   (println "Create Groups")
@@ -136,7 +148,20 @@
     (db/run-txns!
       (tag/user-subscribe-to-tag-txn (:user/id user) (:tag/id tag))))
 
+  (println "Create Threads")
+  (doseq [thread threads]
+    (println ".")
+    (cqrs/dispatch :braid.chat/create-thread!
+                   {:thread-id (:thread/id thread)
+                    :user-id (:thread/user-id thread)
+                    :group-id (:thread/group-id thread)}))
+
   (println "Create Messages")
   (doseq [message messages]
     (println ".")
-    (db/run-txns! (message/create-message-txn message))))
+    (cqrs/dispatch :braid.chat/create-message!
+                   (-> message
+                       (assoc :message-id (:id message))
+                       (dissoc :id)))))
+
+

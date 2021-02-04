@@ -108,12 +108,12 @@
                        :content (identify-mentions db (data :content))
                        :thread-id (data :thread-id)
                        :group-id (data :group-id)
-                       :mentioned-tag-ids (concat
-                                            (data :mentioned-tag-ids)
-                                            (extract-tag-ids db (data :content)))
-                       :mentioned-user-ids (concat
-                                             (data :mentioned-user-ids)
-                                             (extract-user-ids db (data :content)))})
+                       :mentioned-tag-ids (vec (concat
+                                                 (data :mentioned-tag-ids)
+                                                 (extract-tag-ids db (data :content))))
+                       :mentioned-user-ids (vec (concat
+                                                  (data :mentioned-user-ids)
+                                                  (extract-user-ids db (data :content))))})
             thread-id (data :thread-id)]
         (if (and
               ;; has messages
@@ -132,16 +132,16 @@
 (reg-event-fx
   ::persist-new-message
   (fn [{state :db} [_ message created-thread-id]]
-    {:websocket-send
-     (list
-       [:braid.server/new-message message]
-       2000
-       (fn [reply]
-         (when (not= :braid/ok reply)
-           (dispatch [:braid.notices/display! [(keyword "failed-to-send" (message :id))
-                                               "Message failed to send!"
-                                               :error]])
-           (dispatch [:set-message-failed message]))))
+    {:command [:braid.chat/create-message!
+               (-> message
+                   (assoc :message-id (:id message))
+                   (dissoc :id))
+               {:on-error
+                (fn []
+                  (dispatch [:braid.notices/display! [(keyword "failed-to-send" (message :id))
+                                                      "Message failed to send!"
+                                                      :error]])
+                  (dispatch [:set-message-failed message]))}]
      :db (-> state
              (helpers/add-message message))}))
 
@@ -159,17 +159,17 @@
 (reg-event-fx
   :resend-message
   (fn [{state :db} [_ message]]
-    {:websocket-send (list
-                       [:braid.server/new-message message]
-                       2000
-                       (fn [reply]
-                         (when (not= :braid/ok reply)
-                           (dispatch [:braid.notices/display!
-                                      [(keyword "failed-to-send" (message :id))
-                                       "Message failed to send!"
-                                       :error]])
-                           (dispatch [:set-message-failed message]))))
-
+    {:command [:braid.chat/create-message!
+               (-> message
+                   (assoc :message-id (:id message))
+                   (dissoc :id))
+               {:on-error
+                (fn []
+                  (dispatch [:braid.notices/display!
+                             [(keyword "failed-to-send" (message :id))
+                              "Message failed to send!"
+                              :error]])
+                    (dispatch [:set-message-failed message]))}]
      :dispatch [:braid.notices/clear! (keyword "failed-to-send" (message :id))]
      :db (-> state
              (update-in [:threads (message :thread-id) :messages]

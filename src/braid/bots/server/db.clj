@@ -158,15 +158,16 @@
        (into #{} (map db->bot))))
 
 (defn bots-for-message
-  "Get all bots in the given group that are subscribed to all messages"
-  [group-id]
+  "Get all bots in the group of the given thread that are subscribed to all messages"
+  [thread-id]
   (->> (d/q '[:find [(pull ?b pull-pattern) ...]
-              :in $ pull-pattern ?group-id
+              :in $ pull-pattern ?thread-id
               :where
-              [?b :bot/notify-all-messages? true]
-              [?g :group/id ?group-id]
-              [?b :bot/group ?g]]
-            (db/db) bot-pull-pattern group-id)
+              [?t :thread/id ?thread-id]
+              [?t :thread/group ?g]
+              [?b :bot/group ?g]
+              [?b :bot/notify-all-messages? true]]
+            (db/db) bot-pull-pattern thread-id)
        (into #{} (map db->bot))))
 
 ;; Transactions

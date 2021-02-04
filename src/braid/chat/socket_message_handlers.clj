@@ -44,30 +44,6 @@
      ;; TODO rewrite to use cofx
      {})
 
-   :braid.server/new-message
-   (fn [{:keys [?data ?reply-fn user-id]}]
-     (let [new-message (-> ?data
-                           (update :mentioned-tag-ids vec)
-                           (update :mentioned-user-ids vec)
-                           (update-in [:content] #(apply str (take 5000 %)))
-                           (assoc :created-at (java.util.Date.)))]
-       (if (util/valid? schema/NewMessage new-message)
-         (when (helpers/user-can-message? user-id new-message)
-           (db/run-txns! (message/create-message-txn new-message))
-           (when-let [cb ?reply-fn]
-             (cb :braid/ok))
-           ;; [TODO] should we put these in a future?
-           (doseq [callback @new-message-callbacks]
-             (callback new-message))
-           (helpers/broadcast-thread (new-message :thread-id) [])
-           (helpers/notify-users new-message))
-         (do
-           (timbre/warnf "Malformed new message: %s" (pr-str new-message))
-           (when-let [cb ?reply-fn]
-             (cb :braid/error)))))
-     ;; TODO rewrite to use cofx
-     {})
-
    :braid.server/retract-message
    (fn [{:keys [?data user-id]}]
      (let [message-id ?data]

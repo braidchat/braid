@@ -62,59 +62,16 @@
   (doseq [hook @group-change-broadcast-hooks]
     (hook group-id info)))
 
-;; TODO: when using clojure.spec, use spec to validate this
-(defn user-can-message? [user-id ?data]
-  (every?
-      true?
-      (concat
-        [(or (boolean (thread/user-can-see-thread? user-id (?data :thread-id)))
-             (do (timbre/warnf
-                   "User %s attempted to add message to disallowed thread %s"
-                   user-id (?data :thread-id))
-                 false))
-         (or (boolean (if-let [cur-group (thread/thread-group-id (?data :thread-id))]
-                        (= (?data :group-id) cur-group)
-                        true)))
-         (group/user-in-group? user-id (?data :group-id))]
-        (map
-          (fn [tag-id]
-            (and
-              (or (boolean (= (?data :group-id) (tag/tag-group-id tag-id)))
-                  (do
-                    (timbre/warnf
-                      "User %s attempted to add a tag %s from a different group"
-                      user-id tag-id)
-                    false))
-              (or (boolean (tag/user-in-tag-group? user-id tag-id))
-                  (do
-                    (timbre/warnf "User %s attempted to add a disallowed tag %s"
-                                  user-id tag-id)
-                    false))))
-          (?data :mentioned-tag-ids))
-        (map
-          (fn [mentioned-id]
-            (and
-              (or (boolean (group/user-in-group? user-id (?data :group-id)))
-                  (do (timbre/warnf
-                        "User %s attempted to mention disallowed user %s"
-                        user-id mentioned-id)
-                      false))
-              (or (boolean (user/user-visible-to-user? user-id mentioned-id))
-                  (do (timbre/warnf
-                        "User %s attempted to mention disallowed user %s"
-                        user-id mentioned-id)
-                    false))))
-          (?data :mentioned-user-ids)))))
-
 (defn notify-users [new-message]
   (let [thread-id (new-message :thread-id)
+        group-id (thread/thread-group-id thread-id)
         subscribed-user-ids (->>
                               (thread/users-subscribed-to-thread thread-id)
                               (remove (partial = (:user-id new-message))))
         online? (intersection
                   (set subscribed-user-ids)
                   (set (:any @connected-uids)))
-        parse-tags-and-mentions (message-format/make-tags-and-mentions-parser (new-message :group-id))]
+        parse-tags-and-mentions (message-format/make-tags-and-mentions-parser group-id)]
     (doseq [uid subscribed-user-ids]
       (when-let [rules (user/user-get-preference uid :notification-rules)]
         (when (notify-rules/notify? uid rules new-message)

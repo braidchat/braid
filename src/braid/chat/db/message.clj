@@ -42,16 +42,10 @@
 ;; Transactions
 
 (defn create-message-txn
-  [{:keys [thread-id group-id id content user-id created-at
+  [{:keys [thread-id id content user-id created-at
            mentioned-user-ids mentioned-tag-ids]}]
-
-  ; upsert-thread
-  (let [msg-id (d/tempid :entities)
-        thread (d/tempid :entities)]
+  (let [msg-id (d/tempid :entities)]
     (concat
-      [{:db/id thread
-        :thread/id thread-id
-        :thread/group [:group/id group-id]}]
       [; create message
        ^{:braid.core.server.db/return
          (fn [{:keys [db-after tempids]}]
@@ -62,33 +56,33 @@
         :message/id id
         :message/content content
         :message/user [:user/id user-id]
-        :message/thread thread
+        :message/thread [:thread/id thread-id]
         :message/created-at created-at}
        ; user who created message: show thread, subscribe to thread
-       [:db/add [:user/id user-id] :user/open-thread thread]
-       [:db/add [:user/id user-id] :user/subscribed-thread thread]]
+       [:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]
+       [:db/add [:user/id user-id] :user/subscribed-thread [:thread/id thread-id]]]
       ; for users subscribed to mentioned tags, open and subscribe them to
       ; the thread
       (mapcat
         (fn [tag-id]
           (into
-            [[:db/add thread :thread/tag [:tag/id tag-id]]]
+            [[:db/add [:thread/id thread-id] :thread/tag [:tag/id tag-id]]]
             (mapcat (fn [user-id]
-                      [[:db/add [:user/id user-id] :user/subscribed-thread thread]
-                       [:db/add [:user/id user-id] :user/open-thread thread]])
+                      [[:db/add [:user/id user-id] :user/subscribed-thread [:thread/id thread-id]]
+                       [:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
                     (tag/users-subscribed-to-tag tag-id))))
         mentioned-tag-ids)
       ; subscribe and open thread for users mentioned
       (mapcat
         (fn [user-id]
-          [[:db/add thread :thread/mentioned [:user/id user-id]]
-           [:db/add [:user/id user-id] :user/subscribed-thread thread]
-           [:db/add [:user/id user-id] :user/open-thread thread]])
+          [[:db/add [:thread/id thread-id] :thread/mentioned [:user/id user-id]]
+           [:db/add [:user/id user-id] :user/subscribed-thread [:thread/id thread-id]]
+           [:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]]])
         mentioned-user-ids)
       ; open thread for users already subscribed to thread
       (map
         (fn [user-id]
-          [:db/add [:user/id user-id] :user/open-thread thread])
+          [:db/add [:user/id user-id] :user/open-thread [:thread/id thread-id]])
         (thread/users-subscribed-to-thread thread-id)))))
 
 

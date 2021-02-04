@@ -2,7 +2,10 @@
   (:require
     [braid.core.server.db :as db]
     [braid.chat.cq-helpers :as h]
-    [braid.chat.db.thread :as db.thread]))
+    [braid.chat.db.thread :as db.thread]
+    [braid.chat.db.message :as db.message]
+    [braid.core.server.sync-helpers :as sync-helpers]
+    [braid.chat.socket-message-handlers :refer [new-message-callbacks]]))
 
 (def commands
   [{:id :braid.chat/create-thread!
@@ -24,5 +27,60 @@
       (db/run-txns! (db.thread/create-thread-txn
                       {:user-id user-id
                        :thread-id thread-id
-                       :group-id group-id})))}])
+                       :group-id group-id})))}
+
+   {:id :braid.chat/create-message!
+    :params {:user-id uuid?
+             :thread-id uuid?
+             :message-id uuid?
+             :content string?
+             ;; TODO should probably regenerate these from content
+             ;; rather than trusting the client side
+             :mentioned-tag-ids [uuid?]
+             :mentioned-user-ids [uuid?]}
+    :conditions
+    (fn [{:keys [user-id thread-id message-id content
+                 mentioned-tag-ids mentioned-user-ids]}]
+      (concat
+        [[#(h/user-exists? (db/db) user-id)
+          :not-found "User does not exist"]
+         [#(h/thread-exists? (db/db) thread-id)
+          :not-found "Thread does not exist"]
+         [#(not (h/message-exists? (db/db) message-id))
+          :forbidden "Message already exists"]
+         [#(< (count content) 5000)
+          :forbidden "Content too long. Max length is 5000 chars."]
+         [#(h/user-can-access-thread? (db/db) user-id thread-id)
+          :forbidden "User cannot access this thread."]]
+        (for [tag-id mentioned-tag-ids]
+          [#(h/tag-exists? (db/db) tag-id)
+           :forbidden (str "Tag " tag-id " does not exist")])
+        (for [user-id mentioned-user-ids]
+          [#(h/user-exists? (db/db) user-id)
+           :forbidden (str "User " user-id " does not exist")])
+        (for [tag-id mentioned-tag-ids]
+          [#(h/thread-tag-same-group? (db/db) thread-id tag-id)
+           :forbidden (str "Tag " tag-id " not in same group as thread")])
+        (for [user-id mentioned-user-ids]
+          [#(h/thread-user-same-group? (db/db) thread-id user-id)
+           :forbidden (str "User " user-id " not in same group as thread")])))
+    :effect
+    (fn [{:keys [user-id thread-id message-id content
+                 mentioned-tag-ids mentioned-user-ids]}]
+      (let [message {:id message-id
+                     :user-id user-id
+                     :thread-id thread-id
+                     :created-at (java.util.Date.)
+                     :content content
+                     :mentioned-tag-ids mentioned-tag-ids
+                     :mentioned-user-ids mentioned-user-ids}]
+        (db/run-txns! (db.message/create-message-txn message))
+
+        (doseq [callback @new-message-callbacks]
+          (callback message))
+
+        (sync-helpers/broadcast-thread (message :thread-id) [])
+
+        (sync-helpers/notify-users message)))}])
+
 

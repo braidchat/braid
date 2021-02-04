@@ -9,6 +9,7 @@
    [clojure.string :as string]
    [datomic.api :as d]
    [braid.core.server.db :as db]
+   [braid.chat.db.thread :as db.thread]
    [braid.chat.db.common :as common])
   (:import
    (org.apache.lucene.analysis.core LowerCaseFilter)
@@ -49,7 +50,9 @@
    (with-open [writer (store/store-writer (store) analyzer)]
      (index-message! writer (store) message)))
   ([writer reader message]
-   (let [message (update message :created-at (memfn getTime))]
+   (let [message (-> message
+                     (update :created-at (memfn getTime))
+                     (assoc :group-id (db.thread/thread-group-id (:thread-id message))))]
      (if-let [existing (try
                          (first
                            (clucie/search reader {:group-id (:group-id message)

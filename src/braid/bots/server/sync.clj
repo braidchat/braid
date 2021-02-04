@@ -21,7 +21,7 @@
     (timbre/debugf "notifying bot %s" bot)
     (future (bots/send-message-notification bot new-message)))
   ; Notify bots subscribed to all messages
-  (doseq [bot (bot/bots-for-message (new-message :group-id))]
+  (doseq [bot (bot/bots-for-message (new-message :thread-id))]
     (when (thread/thread-has-tags? (new-message :thread-id))
       (future (bots/send-message-notification bot new-message)))))
 

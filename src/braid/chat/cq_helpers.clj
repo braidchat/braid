@@ -3,35 +3,40 @@
     [datomic.api :as d]
     [braid.chat.db.thread :as db.thread]))
 
+;; *-exists?
+
+(defn ^:private exists?
+  [db id-key entity-id]
+  (->> (d/q '[:find ?entity .
+              :in $ ?entity-id ?key
+              :where
+              [?entity ?key ?entity-id]]
+            db
+            entity-id
+            id-key)
+       boolean))
+
 (defn user-exists?
   [db user-id]
-  (->> (d/q '[:find ?user .
-              :in $ ?user-id
-              :where
-              [?user :user/id ?user-id]]
-            db
-            user-id)
-       boolean))
+  (exists? db :user/id user-id))
 
 (defn group-exists?
   [db group-id]
-  (->> (d/q '[:find ?group .
-              :in $ ?group-id
-              :where
-              [?group :group/id ?user-id]]
-            db
-            group-id)
-       boolean))
+  (exists? db :group/id group-id))
 
 (defn thread-exists?
   [db thread-id]
-  (->> (d/q '[:find ?thread .
-              :in $ ?thread-id
-              :where
-              [?thread :thread/id ?thread-id]]
-            db
-            thread-id)
-       boolean))
+  (exists? db :thread/id thread-id))
+
+(defn tag-exists?
+  [db tag-id]
+  (exists? db :tag/id tag-id))
+
+(defn message-exists?
+  [db message-id]
+  (exists? db :message/id message-id))
+
+;; OTHER
 
 (defn user-in-group?
   [db user-id group-id]
@@ -62,4 +67,32 @@
 (defn user-can-access-thread?
   [db user-id thread-id]
   (->> (db.thread/user-can-see-thread? user-id thread-id)
+       boolean))
+
+(defn thread-user-same-group?
+  [db thread-id user-id]
+  (->> (d/q '[:find ?user .
+              :in $ ?user-id ?thread-id
+              :where
+              [?user :user/id ?user-id]
+              [?thread :thread/id ?thread-id]
+              [?thread :thread/group ?group]
+              [?group :group/user ?user]]
+            db
+            user-id
+            thread-id)
+       boolean))
+
+(defn thread-tag-same-group?
+  [db thread-id user-id]
+  (->> (d/q '[:find ?tag .
+              :in $ ?user-id ?thread-id
+              :where
+              [?thread :thread/id ?thread-id]
+              [?tag :tag/id ?tag-id]
+              [?tag :tag/group ?group]
+              [?thread :thread/group ?group]]
+            db
+            user-id
+            thread-id)
        boolean))
