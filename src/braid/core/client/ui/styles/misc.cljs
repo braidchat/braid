@@ -24,19 +24,6 @@
    [:.page.userpage>.title::before
     (mixins/fontawesome \uf007)]])
 
-
-(defn threads [pad]
-  [:>.threads
-   mixins/flex
-   {:position "absolute"
-    :top "2.6rem"
-    :right 0
-    :bottom 0
-    :left 0
-    :padding-left vars/pad
-    :align-items "flex-end"
-    :overflow-x "auto" }])
-
 (def status
   [:>.status
    mixins/flex

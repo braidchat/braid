@@ -10,13 +10,12 @@
    [braid.core.client.ui.styles.body]
    [braid.core.client.ui.styles.header]
    [braid.core.client.ui.styles.imports]
-   [braid.core.client.ui.styles.message]
    [braid.core.client.ui.styles.misc]
    [braid.core.client.ui.styles.page]
    [braid.core.client.ui.styles.pages.global-settings]
    [braid.core.client.ui.styles.pages.me]
    [braid.core.client.ui.styles.pills]
-   [braid.core.client.ui.styles.thread]
+   [braid.core.client.ui.styles.threads]
    [braid.core.client.ui.styles.vars :as vars]
    [garden.core :refer [css]]
    [reagent.core :as r]))
@@ -78,17 +77,4 @@
                  braid.core.client.ui.styles.pages.global-settings/global-settings-page
 
                  [:>.page
-                  (braid.core.client.ui.styles.misc/threads vars/pad)
-
-                  [:>.threads
-                   (braid.core.client.ui.styles.thread/thread vars/pad)
-                   (braid.core.client.ui.styles.thread/notice vars/pad)
-
-                   [:>.thread
-
-                    [:>.card
-
-                     [:>.messages
-                      braid.core.client.ui.styles.message/message]
-
-                     (braid.core.client.ui.styles.thread/new-message vars/pad)]]]]]])}}])
+                  (braid.core.client.ui.styles.threads/>threads)]]])}}])
