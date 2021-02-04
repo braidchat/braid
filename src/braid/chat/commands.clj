@@ -1,7 +1,7 @@
 (ns braid.chat.commands
   (:require
     [braid.core.server.db :as db]
-    [braid.chat.cq-helpers :as h]
+    [braid.chat.predicates :as p]
     [braid.chat.db.thread :as db.thread]
     [braid.chat.db.message :as db.message]
     [braid.core.server.sync-helpers :as sync-helpers]
@@ -14,13 +14,13 @@
              :user-id uuid?}
     :conditions
     (fn [{:keys [user-id thread-id group-id]}]
-      [[#(h/user-exists? (db/db) user-id)
+      [[#(p/user-exists? (db/db) user-id)
         :not-found "User does not exist"]
-       [#(h/group-exists? (db/db) group-id)
+       [#(p/group-exists? (db/db) group-id)
         :not-found "Group does not exist"]
-       [#(not (h/thread-exists? (db/db) thread-id))
+       [#(not (p/thread-exists? (db/db) thread-id))
         :forbidden "Thread already exists"]
-       [#(h/user-in-group? (db/db) user-id group-id)
+       [#(p/user-in-group? (db/db) user-id group-id)
         :forbidden "User does not belong to group"]])
     :effect
     (fn [{:keys [user-id thread-id group-id]}]
@@ -42,27 +42,27 @@
     (fn [{:keys [user-id thread-id message-id content
                  mentioned-tag-ids mentioned-user-ids]}]
       (concat
-        [[#(h/user-exists? (db/db) user-id)
+        [[#(p/user-exists? (db/db) user-id)
           :not-found "User does not exist"]
-         [#(h/thread-exists? (db/db) thread-id)
+         [#(p/thread-exists? (db/db) thread-id)
           :not-found "Thread does not exist"]
-         [#(not (h/message-exists? (db/db) message-id))
+         [#(not (p/message-exists? (db/db) message-id))
           :forbidden "Message already exists"]
          [#(< (count content) 5000)
           :forbidden "Content too long. Max length is 5000 chars."]
-         [#(h/user-can-access-thread? (db/db) user-id thread-id)
+         [#(p/user-can-access-thread? (db/db) user-id thread-id)
           :forbidden "User cannot access this thread."]]
         (for [tag-id mentioned-tag-ids]
-          [#(h/tag-exists? (db/db) tag-id)
+          [#(p/tag-exists? (db/db) tag-id)
            :forbidden (str "Tag " tag-id " does not exist")])
         (for [user-id mentioned-user-ids]
-          [#(h/user-exists? (db/db) user-id)
+          [#(p/user-exists? (db/db) user-id)
            :forbidden (str "User " user-id " does not exist")])
         (for [tag-id mentioned-tag-ids]
-          [#(h/thread-tag-same-group? (db/db) thread-id tag-id)
+          [#(p/thread-tag-same-group? (db/db) thread-id tag-id)
            :forbidden (str "Tag " tag-id " not in same group as thread")])
         (for [user-id mentioned-user-ids]
-          [#(h/thread-user-same-group? (db/db) thread-id user-id)
+          [#(p/thread-user-same-group? (db/db) thread-id user-id)
            :forbidden (str "User " user-id " not in same group as thread")])))
     :effect
     (fn [{:keys [user-id thread-id message-id content

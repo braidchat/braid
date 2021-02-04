@@ -2,7 +2,7 @@
   (:require
     [braid.core.server.db :as db]
     [braid.base.server.socket :as socket]
-    [braid.chat.cq-helpers :as h]
+    [braid.chat.predicates :as p]
     [braid.chat.db.thread :as db.thread]))
 
 (def commands
@@ -11,11 +11,11 @@
              :user-id uuid?}
     :conditions
     (fn [{:keys [user-id thread-id]}]
-      [[#(h/user-exists? (db/db) user-id)
+      [[#(p/user-exists? (db/db) user-id)
         :not-found "User does not exist"]
-       [#(h/thread-exists? (db/db) thread-id)
+       [#(p/thread-exists? (db/db) thread-id)
         :not-found "Thread does not exist"]
-       [#(h/user-has-thread-open? (db/db) user-id thread-id)
+       [#(p/user-has-thread-open? (db/db) user-id thread-id)
         :forbidden "User does not have thread open"]])
     :effect
     (fn [{:keys [user-id thread-id]}]
@@ -28,13 +28,13 @@
              :user-id uuid?}
     :conditions
     (fn [{:keys [user-id thread-id]}]
-      [[#(h/user-exists? (db/db) user-id)
+      [[#(p/user-exists? (db/db) user-id)
         :not-found "User does not exist"]
-       [#(h/thread-exists? (db/db) thread-id)
+       [#(p/thread-exists? (db/db) thread-id)
         :not-found "Thread does not exist"]
-       [#(not (h/user-has-thread-open? (db/db) user-id thread-id))
+       [#(not (p/user-has-thread-open? (db/db) user-id thread-id))
         :forbidden "User already has thread open"]
-       [#(h/user-can-access-thread? (db/db) user-id thread-id)
+       [#(p/user-can-access-thread? (db/db) user-id thread-id)
         :forbidden "User cannot access this thread"]])
     :effect
     (fn [{:keys [user-id thread-id]}]

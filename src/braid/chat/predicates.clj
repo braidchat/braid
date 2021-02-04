@@ -1,4 +1,4 @@
-(ns braid.chat.cq-helpers
+(ns braid.chat.predicates
   (:require
     [datomic.api :as d]
     [braid.chat.db.thread :as db.thread]))
