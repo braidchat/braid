@@ -13,7 +13,7 @@
       (tada/do! (:id command)
                 (assoc ?data
                   :user-id user-id))
-      (?reply-fn "OK")
+      (?reply-fn :braid/ok)
       (catch Exception e
         (timbre/debug "Command Error:" e)
         (?reply-fn {:cqrs/error {:message (.getMessage e)
