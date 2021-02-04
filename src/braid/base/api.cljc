@@ -140,18 +140,11 @@
               (every? (partial util/valid? braid.base.server.schema/rule-dataspec) schema)]}
        (swap! braid.base.server.schema/schema into schema))
 
-     (defn register-db-seed-txns!
-       ;; have to take fns that return maps rather than just taking maps
-       ;; because some existing txn-functions require the db to alrady exist
-       ;; ex. braid.chat.db.user/create-user-txn
-       "Given a function that returns a map of strings -> txns,
-          ex.
-              (fn []
-                {\"Create Users\" [[:db/add ...] [:db/add ...]]})
-        will register those transactions for seeding, when base.server.seed/seed! is called"
-       [txn-map-fn]
-       {:pre [(fn? txn-map-fn)]}
-       (swap! braid.base.server.seed/seed-txns merge txn-map-fn))
+     (defn register-db-seed-fn!
+       "Will register function to call when base.server.seed/seed! is called"
+       [f]
+       {:pre [(fn? f)]}
+       (swap! braid.base.server.seed/seed-fns conj f))
 
      (defn register-config-var!
        "Add a keyword to be read from `env` and added to the `config` state"

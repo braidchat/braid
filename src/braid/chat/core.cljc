@@ -30,7 +30,7 @@
   #?(:clj
      (do
        (base/register-db-schema! schema/schema)
-       (base/register-db-seed-txns! seed/txns)
+       (base/register-db-seed-fn! seed/seed!)
        ;; TODO some of these might better belong elsewhere
        (doseq [k [:aws-bucket
                   :aws-region

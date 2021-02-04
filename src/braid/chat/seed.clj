@@ -4,7 +4,8 @@
     [braid.chat.db.group :as group]
     [braid.chat.db.message :as message]
     [braid.chat.db.tag :as tag]
-    [braid.chat.db.user :as user]))
+    [braid.chat.db.user :as user]
+    [braid.core.server.db :as db]))
 
 (def groups
   [{:group/id (uuid/squuid)
@@ -82,57 +83,60 @@
     :created-at (java.util.Date.)
     :content "Hi!"}])
 
-(defn txns []
-  {"Create Groups"
-   (->> groups
-        (map (fn [group]
-               (group/create-group-txn
-                 {:id (:group/id group)
-                  :slug (:group/slug group)
-                  :name (:group/name group)})))
-        (apply concat))
-   "Create Users"
-   (->> users
-        (map (fn [user]
-               (user/create-user-txn
-                 {:id (:user/id user)
-                  :email (:user/email user)})))
-        (apply concat))
-   "Set user passwords"
-   (->> users
-        (map (fn [user]
-               (user/set-user-password-txn
-                 (:user/id user)
-                 (:user/password user))))
-        (apply concat))
-   "Add Users to Groups"
-   (->> (for [user users
-              group groups]
-          (group/user-add-to-group-txn (user :user/id)
-                                       (group :group/id)))
-        (apply concat))
-   "Make Users Admins"
-   (concat
-     (group/user-make-group-admin-txn
-       (get-in users [0 :user/id])
-       (get-in groups [0 :group/id]))
-     (group/user-make-group-admin-txn
-       (get-in users [1 :user/id])
-       (get-in groups [1 :group/id])))
-   "Create Tags"
-   (->> tags
-        (map (fn [tag]
-               (tag/create-tag-txn
-                 {:id (:tag/id tag)
-                  :name (:tag/name tag)
-                  :group-id (:tag/group-id tag)})))
-        (apply concat))
-   "Subscribe Users to Tags"
-   (->> (for [user users
-              tag tags]
-          (tag/user-subscribe-to-tag-txn (:user/id user) (:tag/id tag)))
-        (apply concat))
-   "Create Messages"
-   (->> (for [message messages]
-          (message/create-message-txn message))
-        (apply concat))})
+(defn seed! []
+  (println "Create Groups")
+  (doseq [group groups]
+    (db/run-txns! (group/create-group-txn
+                    {:id (:group/id group)
+                     :slug (:group/slug group)
+                     :name (:group/name group)})))
+
+  (println "Create Users")
+  (doseq [user users]
+    (println ".")
+    (db/run-txns! (user/create-user-txn
+                    {:id (:user/id user)
+                     :email (:user/email user)})))
+
+  (println "Set user passwords")
+  (doseq [user users]
+    (println ".")
+    (db/run-txns! (user/set-user-password-txn
+                    (:user/id user)
+                    (:user/password user))))
+
+  (println "Add Users to Groups")
+  (doseq [user users
+          group groups]
+    (println ".")
+    (db/run-txns!
+      (group/user-add-to-group-txn (user :user/id)
+                                   (group :group/id))))
+
+  (println "Make Users Admins")
+  (db/run-txns! (group/user-make-group-admin-txn
+                  (get-in users [0 :user/id])
+                  (get-in groups [0 :group/id])))
+  (db/run-txns! (group/user-make-group-admin-txn
+                  (get-in users [1 :user/id])
+                  (get-in groups [1 :group/id])))
+
+  (println "Create Tags")
+  (doseq [tag tags]
+    (println ".")
+    (db/run-txns! (tag/create-tag-txn
+                    {:id (:tag/id tag)
+                     :name (:tag/name tag)
+                     :group-id (:tag/group-id tag)})))
+
+  (println "Subscribe Users to Tags")
+  (doseq [user users
+          tag tags]
+    (println ".")
+    (db/run-txns!
+      (tag/user-subscribe-to-tag-txn (:user/id user) (:tag/id tag))))
+
+  (println "Create Messages")
+  (doseq [message messages]
+    (println ".")
+    (db/run-txns! (message/create-message-txn message))))
