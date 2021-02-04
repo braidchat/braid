@@ -15,7 +15,7 @@
                   :user-id user-id))
       (?reply-fn :braid/ok)
       (catch Exception e
-        (timbre/debug "Command Error:" e)
+        (timbre/warn "Command Error:" e)
         (?reply-fn {:cqrs/error {:message (.getMessage e)
                                  :data (ex-data e)}})))
     ;; returning {} here, b/c our socket-message-handlers
