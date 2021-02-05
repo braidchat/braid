@@ -11,23 +11,25 @@
    [re-frame.core :refer [dispatch subscribe]]))
 
 (defn page-view []
-  (let [id (@(subscribe [:page]) :type)]
+  (let [page @(subscribe [:page])
+        id (:type page)]
     (case id
       :readonly [readonly-inbox-page-view]
       :login [gateway-view]
       :create-group [create-group-page-view]
       (when-let [view (pages/get-view id)]
-        [view]))))
+        [view page]))))
 
 (defn readonly-page-view
   []
-  (let [id (:type @(subscribe [:page]))]
+  (let [page @(subscribe [:page])
+        id (:type page)]
     (case id
       (:inbox :readonly) [readonly-inbox-page-view]
       :login [gateway-view]
       :create-group [create-group-page-view]
       (when-let [view (pages/get-view id)]
-        [view]))))
+        [view page]))))
 
 (defn root-views []
   (into
