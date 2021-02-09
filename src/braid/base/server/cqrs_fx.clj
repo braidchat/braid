@@ -5,7 +5,7 @@
     [braid.core.server.sync-helpers :as helpers]
     [braid.core.server.db :as db]))
 
-(def run-txns! db/run-txns! )
+(def run-txns! db/run-txns!)
 
 (def chsk-send! socket/chsk-send!)
 
