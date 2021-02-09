@@ -191,16 +191,15 @@
       {:db (-> state
                (assoc-in [:tags (tag :id)] tag)
                (helpers/subscribe-to-tag (tag :id)))
-       :websocket-send
-       (when-not local-only?
-         (list
-           [:braid.server/create-tag tag]
-           1000
-           (fn [reply]
-             (when-let [msg (:error reply)]
-               (do
-                 (dispatch [:remove-tag {:tag-id (tag :id) :local-only? true}])
-                 (dispatch [:braid.notices/display! [(keyword "bad-tag" (tag :id)) msg :error]]))))))})))
+       :command (when-not local-only?
+                  [:braid.chat/create-tag!
+                   {:group-id (:group-id tag)
+                    :id (:id tag)
+                    :name (:name tag)}
+                   {:on-error
+                    (fn [msg]
+                      (dispatch [:remove-tag {:tag-id (tag :id) :local-only? true}])
+                      (dispatch [:braid.notices/display! [(keyword "bad-tag" (tag :id)) msg :error]]))}])})))
 
 (reg-event-fx
   :unsubscribe-from-tag

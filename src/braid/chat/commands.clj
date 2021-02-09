@@ -2,9 +2,13 @@
   (:require
     [braid.core.server.db :as db]
     [braid.chat.predicates :as p]
+    [braid.chat.db.tag :as db.tag]
+    [braid.chat.db.group :as db.group]
     [braid.chat.db.thread :as db.thread]
     [braid.chat.db.message :as db.message]
     [braid.core.server.sync-helpers :as sync-helpers]
+    [braid.base.server.cqrs-fx :as fx]
+    [braid.core.common.util :as util]
     [braid.chat.socket-message-handlers :refer [new-message-callbacks]]))
 
 (def commands
@@ -24,10 +28,41 @@
         :forbidden "User does not belong to group"]])
     :effect
     (fn [{:keys [user-id thread-id group-id]}]
-      (db/run-txns! (db.thread/create-thread-txn
+      (fx/run-txns! (db.thread/create-thread-txn
                       {:user-id user-id
                        :thread-id thread-id
                        :group-id group-id})))}
+
+   {:id :braid.chat/create-tag!
+    :params {:user-id uuid?
+             :group-id uuid?
+             :id uuid?
+             :name string?}
+    :conditions
+    (fn [{:keys [id user-id group-id name]}]
+      [;; TODO could be part of :params validation
+       [#(util/valid-tag-name? name) :forbidden "Tag name invalid"]
+       [#(p/user-exists? (db/db) user-id)
+        :not-found "User does not exist"]
+       [#(p/group-exists? (db/db) group-id)
+        :not-found "Group does not exist"]
+       [#(not (p/tag-exists? (db/db) id))
+        :forbidden "Tag with this id already exists"]
+       [#(p/user-in-group? (db/db) user-id group-id)
+        :forbidden "User does not belong to group"]])
+    :effect
+    (fn [{:keys [id name group-id]}]
+      (let [[new-tag] (fx/run-txns!
+                        (db.tag/create-tag-txn
+                          {:id id
+                           :name name
+                           :group-id group-id}))
+            users (db.group/group-users (:group-id new-tag))]
+        (fx/run-txns!
+          (mapcat
+            (fn [u] (db.tag/user-subscribe-to-tag-txn (u :id) id))
+            users))
+        (fx/group-broadcast! group-id [:braid.client/create-tag new-tag])))}
 
    {:id :braid.chat/create-message!
     :params {:user-id uuid?
@@ -74,7 +109,7 @@
                      :content content
                      :mentioned-tag-ids mentioned-tag-ids
                      :mentioned-user-ids mentioned-user-ids}]
-        (db/run-txns! (db.message/create-message-txn message))
+        (fx/run-txns! (db.message/create-message-txn message))
 
         (doseq [callback @new-message-callbacks]
           (callback message))

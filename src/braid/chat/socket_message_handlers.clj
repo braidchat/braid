@@ -154,30 +154,6 @@
      ;; TODO rewrite to use cofx
      {})
 
-   :braid.server/create-tag
-   (fn [{:keys [?data ?reply-fn user-id]}]
-     (if (group/user-in-group? user-id (?data :group-id))
-       (if (valid-tag-name? (?data :name))
-         (let [[new-tag] (db/run-txns!
-                           (tag/create-tag-txn (select-keys ?data [:id :name :group-id])))
-               users (group/group-users (:group-id new-tag))]
-           (db/run-txns!
-             (mapcat
-               (fn [u] (tag/user-subscribe-to-tag-txn (u :id) (new-tag :id)))
-               users))
-           (broadcast-group-change (:group-id new-tag) [:braid.client/create-tag new-tag])
-           (when ?reply-fn
-             (?reply-fn {:ok true})))
-         (do (timbre/warnf "User %s attempted to create a tag %s with an invalid name"
-                           user-id (?data :name))
-             (when ?reply-fn
-               (?reply-fn {:error "invalid tag name"}))))
-       ; TODO: indicate permissions error to user?
-       (timbre/warnf "User %s attempted to create a tag %s in a disallowed group"
-                     user-id (?data :name) (?data :group-id)))
-     ;; TODO rewrite to use cofx
-     {})
-
    :braid.server/set-tag-description
    (fn [{:keys [?data user-id]}]
      (let [{:keys [tag-id description]} ?data]
