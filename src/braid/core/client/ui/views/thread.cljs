@@ -125,7 +125,7 @@
                     [:div.date (date/format-date "yyyy-MM-dd" (message :created-at))]])
                  [message-view (assoc message :thread-id thread-id)]])))])})))
 
-(defn thread-view [thread]
+(defn thread-view [_]
   (let [state (r/atom {:dragging? false
                        :uploading? false})
         set-uploading! (fn [bool] (swap! state assoc :uploading? bool))
@@ -148,8 +148,9 @@
                                           :thread-id (thread :id)
                                           :group-id (thread :group-id)}]))}]))))]
 
-    (fn [thread]
-      (let [{:keys [dragging? uploading?]} @state
+    (fn [thread-id]
+      (let [thread @(subscribe [:thread thread-id])
+            {:keys [dragging? uploading?]} @state
             open? @(subscribe [:thread-open? (thread :id)])
             focused? @(subscribe [:thread-focused? (thread :id)])
             private? (and

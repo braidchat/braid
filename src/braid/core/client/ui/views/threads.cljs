@@ -79,4 +79,4 @@
           (doall
             (for [thread @threads]
               ^{:key (thread :id)}
-              [thread-view thread]))])})))
+              [thread-view (thread :id)]))])})))

@@ -83,7 +83,7 @@
           (doall
             (for [thread sorted-threads]
               ^{:key (:id thread)}
-              [thread-view thread]))]])
+              [thread-view (:id thread)]))]])
 
       :done-empty
       [:div.page.search
