@@ -177,47 +177,50 @@
             :priority 0}])
     [thread-control-dataspec]))
 
+(defn thread-controls-view [thread]
+  [:div.controls
+   [:div.main
+    (if @(subscribe [:thread-open? (thread :id)])
+      [:div.control.close
+       {:title "Close"
+        :tabIndex 0
+        :role "button"
+        :on-click (fn [e]
+                    ; Need to preventDefault & propagation when using
+                    ; divs as controls, otherwise divs higher up also
+                    ; get click events
+                    (helpers/stop-event! e)
+                    (dispatch [:hide-thread! {:thread-id (thread :id)}]))}
+       \uf00d]
+      [:div.control.unread
+       {:title "Mark Unread"
+        :tabIndex 0
+        :role "button"
+        :on-click (fn [e]
+                    ; Need to preventDefault & propagation when using
+                    ; divs as controls, otherwise divs higher up also
+                    ; get click events
+                    (helpers/stop-event! e)
+                    (dispatch [:reopen-thread! (thread :id)]))}
+       \uf0e2])]
+
+   (into [:div.extras]
+         (->> @thread-controls
+              (sort-by :priority)
+              reverse
+              (mapv (fn [el]
+                      [(el :view) thread]))))])
+
 (defn thread-header-view [thread]
+  (println @thread-header-items)
   (into
     [:div.head]
-    (conj
-      (->> @thread-header-items
-           (sort-by :priority)
-           reverse
-           (mapv (fn [el]
-                   [(el :view) thread])))
-
-      [:div.controls
-       [:div.main
-        (if @(subscribe [:thread-open? (thread :id)])
-          [:div.control.close
-           {:title "Close"
-            :tabIndex 0
-            :role "button"
-            :on-click (fn [e]
-                        ; Need to preventDefault & propagation when using
-                        ; divs as controls, otherwise divs higher up also
-                        ; get click events
-                        (helpers/stop-event! e)
-                        (dispatch [:hide-thread! {:thread-id (thread :id)}]))}
-           \uf00d]
-          [:div.control.unread
-           {:title "Mark Unread"
-            :tabIndex 0
-            :role "button"
-            :on-click (fn [e]
-                        ; Need to preventDefault & propagation when using
-                        ; divs as controls, otherwise divs higher up also
-                        ; get click events
-                        (helpers/stop-event! e)
-                        (dispatch [:reopen-thread! (thread :id)]))}
-           \uf0e2])]
-
-       (into [:div.extras]
-             (->> @thread-controls
-                  (sort-by :priority)
-                  reverse
-                  (mapv (fn [el]
-                          [(el :view) thread]))))]
-
-      [thread-tags-view thread])))
+    (->> (into @thread-header-items
+               [{:priority 1
+                 :view thread-controls-view}
+                {:priority 0
+                 :view thread-tags-view}])
+         (sort-by :priority)
+         reverse
+         (mapv (fn [el]
+                 [(el :view) thread])))))

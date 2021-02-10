@@ -14,10 +14,16 @@
     :width "100%"
     :flex-shrink 0
     :padding [[pad (m/* 2 pad) pad pad]]
-    :box-sizing "border-box"}
+    :box-sizing "border-box"
+    :display "flex"
+    :flex-wrap "wrap"
+    :align-items "center"
+    :gap (rem 0.25)}
 
    [:>.tags
-    {:display "inline"}
+    {:display "inline-flex"
+     :flex-wrap "wrap"
+     :gap (rem 0.25)}
 
     [:>.remove-mention
      mixins/pill-button
@@ -29,13 +35,7 @@
 
      [:>span.pill
       mixins/pill-button
-      {:letter-spacing "normal !important"}]]
-
-    [:>.user :>.tag :>.add
-     {:display "inline-block"
-      :vertical-align "middle"
-      :margin-bottom (rem 0.25)
-      :margin-right (rem 0.25)}]]
+      {:letter-spacing "normal !important"}]]]
 
    [:>.controls
     {:position "absolute"
