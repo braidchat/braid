@@ -7,6 +7,7 @@
          [[braid.page-inbox.commands :as commands]]
         :cljs
          [[braid.page-inbox.ui :as ui]
+          [braid.page-inbox.styles :as styles]
           [braid.core.client.state.helpers :as helpers]])))
 
 
@@ -94,5 +95,5 @@
                        {:thread-id thread-id}]})})
 
        (base/register-styles!
-         [:.app>.main ui/styles]))))
+         [:.app>.main styles/styles]))))
 
