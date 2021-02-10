@@ -130,21 +130,6 @@
                        :uploading? false})
         set-uploading! (fn [bool] (swap! state assoc :uploading? bool))
         set-dragging! (fn [bool] (swap! state assoc :dragging? bool))
-
-        thread-private? (fn [thread] (and
-                                       (seq (thread :messages))
-                                       (empty? (thread :tag-ids))
-                                       (seq (thread :mentioned-ids))))
-
-        thread-limbo? (fn [thread] (and
-                                     (seq (thread :messages))
-                                     (empty? (thread :tag-ids))
-                                     (empty? (thread :mentioned-ids))))
-
-        ; Closing over thread-id, but the only time a thread's id changes is the new
-        ; thread box, which is always open
-        open? (subscribe [:thread-open? (thread :id)])
-        focused? (subscribe [:thread-focused? (thread :id)])
         maybe-upload-file!
         (fn [thread file]
           (if (> (.-size file) max-file-size)
@@ -165,15 +150,23 @@
 
     (fn [thread]
       (let [{:keys [dragging? uploading?]} @state
-            private? (thread-private? thread)
-            limbo? (thread-limbo? thread)
-            archived? (not @open?)]
+            open? @(subscribe [:thread-open? (thread :id)])
+            focused? @(subscribe [:thread-focused? (thread :id)])
+            private? (and
+                       (seq (thread :messages))
+                       (empty? (thread :tag-ids))
+                       (seq (thread :mentioned-ids)))
+            limbo?  (and
+                      (seq (thread :messages))
+                      (empty? (thread :tag-ids))
+                      (empty? (thread :mentioned-ids)))
+            archived? (not open?)]
 
         [:div.thread
          {:class
           (string/join " " [(when private? "private")
                             (when limbo? "limbo")
-                            (when @focused? "focused")
+                            (when focused? "focused")
                             (when dragging? "dragging")
                             (when archived? "archived")])
 
