@@ -212,7 +212,6 @@
                       [(el :view) thread]))))])
 
 (defn thread-header-view [thread]
-  (println @thread-header-items)
   (into
     [:div.head]
     (->> (into @thread-header-items
