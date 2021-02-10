@@ -49,7 +49,7 @@
         :not-found "Group does not exist"]
        [#(not (p/tag-exists? (db/db) id))
         :forbidden "Tag with this id already exists"]
-       [#(not (p/tag-with-name-exists? (db/db) name))
+       [#(not (p/tag-in-group-with-name-exists? (db/db) group-id name))
         :forbidden "Tag with this name already exists"]
        [#(p/user-in-group? (db/db) user-id group-id)
         :forbidden "User does not belong to group"]])
