@@ -41,7 +41,8 @@
     :conditions
     (fn [{:keys [id user-id group-id name]}]
       [;; TODO could be part of :params validation
-       [#(util/valid-tag-name? name) :forbidden "Tag name invalid"]
+       [#(util/valid-tag-name? name)
+        :forbidden "Tag name invalid"]
        [#(p/user-exists? (db/db) user-id)
         :not-found "User does not exist"]
        [#(p/group-exists? (db/db) group-id)
@@ -58,12 +59,12 @@
                         (db.tag/create-tag-txn
                           {:id id
                            :name name
-                           :group-id group-id}))
-            users (db.group/group-users (:group-id new-tag))]
+                           :group-id group-id}))]
+        ;; subscribe all users in group
         (fx/run-txns!
           (mapcat
-            (fn [u] (db.tag/user-subscribe-to-tag-txn (u :id) id))
-            users))
+            (fn [user] (db.tag/user-subscribe-to-tag-txn (user :id) id))
+            (db.group/group-users (:group-id new-tag))))
         (fx/group-broadcast! group-id [:braid.client/create-tag new-tag])))}
 
    {:id :braid.chat/create-message!

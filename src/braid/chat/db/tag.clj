@@ -101,11 +101,11 @@
 ;; Transactions
 
 (defn create-tag-txn
-  [attrs]
+  [{:keys [id name group-id]}]
   (create-entity-txn
-    {:tag/id (attrs :id)
-     :tag/name (attrs :name)
-     :tag/group [:group/id (attrs :group-id)]}
+    {:tag/id id
+     :tag/name name
+     :tag/group [:group/id group-id]}
     db->tag))
 
 (defn retract-tag-txn
