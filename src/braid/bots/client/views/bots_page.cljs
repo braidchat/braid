@@ -25,7 +25,7 @@
           [:button.dangerous.delete
            {:on-click (fn [_]
                         (when (js/confirm "Permanently remove this bot?")
-                          (dispatch [:bots/retract-bot {:bot-id (bot :id)}])))}
+                          (dispatch [:bots/retract-bot! {:bot-id (bot :id)}])))}
            \uf1f8]
           (if-let [info @detailed-info]
             [:div
@@ -39,7 +39,7 @@
                [:button
                 {:on-click (fn [_]
                              (dispatch
-                               [:bots/edit-bot
+                               [:bots/edit-bot!
                                 {:bot @edited-info
                                  :on-complete
                                  (fn [updated]
@@ -98,7 +98,7 @@
             [:button
              {:on-click (fn [_]
                           (dispatch
-                            [:bots/get-bot-info
+                            [:bots/get-bot-info!
                              {:bot-id (bot :id)
                               :on-complete (fn [info]
                                              (reset! detailed-info info))}]))}
@@ -150,7 +150,7 @@
                             (reset! error nil)
                             (reset! state :creating)
                             (swap! new-bot assoc :group-id @group-id)
-                            (dispatch [:bots/new-bot
+                            (dispatch [:bots/new-bot!
                                        {:bot @new-bot
                                         :on-complete
                                         (fn [created]

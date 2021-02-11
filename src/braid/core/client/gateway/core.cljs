@@ -15,7 +15,7 @@
 
 (defn ^:export init []
   (modules/init! modules/default)
-  (dispatch-sync [::events/initialize (keyword (o/get js/window "gateway_action"))])
+  (dispatch-sync [::events/initialize! (keyword (o/get js/window "gateway_action"))])
   (render))
 
 (defn ^:export reload []

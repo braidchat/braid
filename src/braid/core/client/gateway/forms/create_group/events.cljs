@@ -10,7 +10,7 @@
    [braid.core.client.schema :as schema]))
 
 (reg-event-fx
-  ::initialize
+  ::initialize!
   (fn [{state :db}]
     {:db (-> state
              (assoc
@@ -19,11 +19,11 @@
                               :validations validations
                               :should-validate? false
                               :fields (helpers/init-fields validations)}))
-     :dispatch-n [[:braid.core.client.gateway.forms.user-auth.events/initialize :register]
+     :dispatch-n [[:braid.core.client.gateway.forms.user-auth.events/initialize! :register]
                   [::validate-all]]}))
 
 (reg-event-fx
-  ::guess-group-url
+  ::guess-group-url!
   (fn [{state :db} _]
     (let [group-name (get-in state [:create-group :fields :group-name :value])
           group-url (get-in state [:create-group :fields :group-url :value])]
@@ -36,7 +36,7 @@
                     [::validate-field :group-url]]})))
 
 (reg-event-fx
-  ::remote-create-group
+  ::remote-create-group!
   (fn [{state :db} _]
     {:db (assoc-in state [:create-group :sending?] true)
      :edn-xhr {:method :put
@@ -48,14 +48,14 @@
                 :type (get-in state [:create-group :fields :group-type :value])}
                :on-complete
                (fn [response]
-                 (dispatch [::handle-registration-response response]))
+                 (dispatch [::handle-registration-response! response]))
                :on-error
                (fn [error]
                  (when-let [k (get-in error [:response :error])]
-                   (dispatch [::handle-registration-error k])))}}))
+                   (dispatch [::handle-registration-error! k])))}}))
 
 (reg-event-fx
-  ::handle-registration-response
+  ::handle-registration-response!
   (fn [{state :db} [_ {:keys [group-id group] :as response}]]
     {:db (-> state
              (assoc-in [:create-group :sending?] false)
@@ -64,17 +64,17 @@
      ;; need to do a full redirect, because the sign-up flow via gateway.js
      ;; doesn't have any of the other assets
      ;; :redirect-to (routes/inbox-page-path {:group-id group-id})
-     :dispatch [::redirect (routes/group-page-path {:group-id group-id
+     :dispatch [::redirect! (routes/group-page-path {:group-id group-id
                                                     :page-id "inbox"})]}))
 
 (reg-event-fx
-  ::redirect
+  ::redirect!
   (fn [_ [_ url]]
     (set! js/window.location url)
     {}))
 
 (reg-event-fx
-  ::handle-registration-error
+  ::handle-registration-error!
   (fn [{state :db} [_ error]]
     {:db (-> state
              (assoc-in [:create-group :sending?] false)

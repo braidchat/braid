@@ -15,10 +15,10 @@
         inc-progress? ((quest :quest/listener) db [event args])
         local-only? (:local-only? args)]
     (when (and inc-progress? (not local-only?))
-      [:quests/increment-quest (quest-record :quest-record/id)])))
+      [:quests/increment-quest! (quest-record :quest-record/id)])))
 
 (def events
-  {:quests/activate-next-quest
+  {:quests/activate-next-quest!
    (fn [{db :db} _]
      (if-let [quest (helpers/get-next-quest db)]
        (let [quest-record (make-quest-record {:quest-id (quest :quest/id)})]
@@ -26,36 +26,36 @@
           :websocket-send (list [:braid.server.quests/upsert-quest-record quest-record])})
        {}))
 
-   :quests/skip-quest
+   :quests/skip-quest!
    (fn [{db :db} [_ quest-record-id]]
      (let [db (helpers/skip-quest db quest-record-id)]
        {:db db
         :websocket-send
         (list [:braid.server.quests/upsert-quest-record
                (helpers/get-quest-record db quest-record-id)])
-        :dispatch [:quests/activate-next-quest]}))
+        :dispatch [:quests/activate-next-quest!]}))
 
-   :quests/complete-quest
+   :quests/complete-quest!
    (fn [{db :db} [_ quest-record-id]]
      (let [db (helpers/complete-quest db quest-record-id)]
        {:db db
         :websocket-send
         (list [:braid.server.quests/upsert-quest-record
                (helpers/get-quest-record db quest-record-id)])
-        :dispatch [:quests/activate-next-quest]}))
+        :dispatch [:quests/activate-next-quest!]}))
 
-   :quests/increment-quest
+   :quests/increment-quest!
    (fn [{db :db} [_ quest-record-id]]
      (let [db (helpers/increment-quest db quest-record-id)]
        {:db db
         :websocket-send (list [:braid.server.quests/upsert-quest-record
                                (helpers/get-quest-record db quest-record-id)])}))
 
-   :quests/upsert-quest-record
+   :quests/upsert-quest-record!
    (fn [{db :db} [_ quest-record]]
      {:db (helpers/store-quest-record db quest-record)})
 
-   :quests/update-handler
+   :quests/update-handler!
    (fn [{db :db} [_ [event args]]]
      {:dispatch-n
       (into ()

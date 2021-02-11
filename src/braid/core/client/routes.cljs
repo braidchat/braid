@@ -9,7 +9,7 @@
   (router/go-to path))
 
 (defroute join-group-path "/groups/:group-id/join" [group-id]
-  (dispatch [:braid.core.client.gateway.events/initialize :join-group])
+  (dispatch [:braid.core.client.gateway.events/initialize! :join-group])
   (dispatch [:set-group-and-page! [nil {:type :login}]]))
 
 (defroute group-page-path "/groups/:group-id/:page-id" [group-id page-id query-params]

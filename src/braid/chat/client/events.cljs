@@ -84,7 +84,7 @@
   :initialize-db!
   (fn [{db :db} _]
     {:db (braid.base.client.state/initialize-state db)
-     :dispatch [:braid.core.client.gateway.events/initialize :log-in]}))
+     :dispatch [:braid.core.client.gateway.events/initialize! :log-in]}))
 
 (reg-event-fx
   :new-message-text!

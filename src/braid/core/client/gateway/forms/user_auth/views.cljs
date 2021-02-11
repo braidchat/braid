@@ -17,7 +17,7 @@
                      (.preventDefault e)
                      ; must use dispatch-sync
                      ; b/c dispatch triggers pop-up blocker
-                     (dispatch-sync [:braid.core.client.gateway.forms.user-auth.events/open-oauth-window provider]))}
+                     (dispatch-sync [:braid.core.client.gateway.forms.user-auth.events/open-oauth-window! provider]))}
         (string/capitalize (name provider))]))])
 
 (defn alternative-auth [text]
@@ -52,7 +52,7 @@
                  {:type "button"
                   :on-click (fn [e]
                               (.preventDefault e)
-                              (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :request-password-reset]))}
+                              (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode! :request-password-reset]))}
                  "Request a Password Reset"]]}])
 
 (defn login-button-view []
@@ -79,7 +79,7 @@
           {:type "button"
            :on-click (fn [e]
                        (.preventDefault e)
-                       (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :log-in]))}
+                       (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode! :log-in]))}
           "Log In"]]
         :no-such-email
         [:div.error-message
@@ -108,22 +108,22 @@
     :class "user-auth request-password-reset"
     :on-submit (fn [e]
                  (.preventDefault e)
-                 (dispatch [:braid.core.client.gateway.forms.user-auth.events/submit-form
+                 (dispatch [:braid.core.client.gateway.forms.user-auth.events/submit-form!
                             {:validate-fields [:email]
-                             :dispatch-when-valid [:braid.core.client.gateway.forms.user-auth.events/remote-request-password-reset]}]))}
+                             :dispatch-when-valid [:braid.core.client.gateway.forms.user-auth.events/remote-request-password-reset!]}]))}
    [:p
     [:button
      {:type "button"
       :on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :register]))}
+                  (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode! :register]))}
      "Register"]
 
     [:button
      {:type "button"
       :on-click (fn [e]
                   (.preventDefault e)
-                  (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :register]))}
+                  (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode! :register]))}
      "Log In"]]
 
    [returning-email-field-view]
@@ -138,7 +138,7 @@
     {:type "button"
      :on-click (fn [e]
                  (.preventDefault e)
-                 (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :register]))}
+                 (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode! :register]))}
     "Register"]])
 
 (defn returning-user-view []
@@ -148,10 +148,10 @@
     :on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:braid.core.client.gateway.forms.user-auth.events/submit-form
+      (dispatch [:braid.core.client.gateway.forms.user-auth.events/submit-form!
                  {:validate-fields [:email
                                     :password]
-                  :dispatch-when-valid [:braid.core.client.gateway.forms.user-auth.events/remote-log-in]}]))}
+                  :dispatch-when-valid [:braid.core.client.gateway.forms.user-auth.events/remote-log-in!]}]))}
    [returning-email-field-view]
    [returning-password-field-view]
    [login-button-view]
@@ -200,7 +200,7 @@
     {:type "button"
      :on-click (fn [e]
                  (.preventDefault e)
-                 (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode :log-in]))}
+                 (dispatch [:braid.core.client.gateway.forms.user-auth.events/set-mode! :log-in]))}
     "Log In"]])
 
 (defn new-user-view []
@@ -210,10 +210,10 @@
     :on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:braid.core.client.gateway.forms.user-auth.events/submit-form
+      (dispatch [:braid.core.client.gateway.forms.user-auth.events/submit-form!
                  {:validate-fields [:email
                                     :new-password]
-                  :dispatch-when-valid [:braid.core.client.gateway.forms.user-auth.events/remote-register]}]))}
+                  :dispatch-when-valid [:braid.core.client.gateway.forms.user-auth.events/remote-register!]}]))}
    [new-email-field-view]
    [new-password-field-view]
    [register-button-view]
@@ -233,7 +233,7 @@
       [:button
        {:type "button"
         :on-click (fn []
-                    (dispatch [:braid.core.client.gateway.forms.user-auth.events/switch-account]))}
+                    (dispatch [:braid.core.client.gateway.forms.user-auth.events/switch-account!]))}
        "Sign in with a different account"]]]))
 
 (defn checking-user-view []

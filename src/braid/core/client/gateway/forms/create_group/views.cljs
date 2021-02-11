@@ -16,7 +16,7 @@
     :type "text"
     :placeholder "Team Awesome"
     :on-blur (fn [e]
-               (dispatch [:braid.core.client.gateway.forms.create-group.events/guess-group-url]))
+               (dispatch [:braid.core.client.gateway.forms.create-group.events/guess-group-url!]))
     :help-text [:div
                 [:p "Your group's name will show up in menus and headings."]
                 [:p "It doesn't need to be formal and can always be changed later."]]}])
@@ -109,7 +109,7 @@
     :on-submit
     (fn [e]
       (.preventDefault e)
-      (dispatch [:braid.core.client.gateway.forms.create-group.events/submit-form
+      (dispatch [:braid.core.client.gateway.forms.create-group.events/submit-form!
                  {:validate-fields
                   [:group-name
                    :group-url

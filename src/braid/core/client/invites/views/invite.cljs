@@ -33,7 +33,7 @@
             [:option {:value :never} "Never"])]]
         [:button {:on-click (fn []
                               (dispatch
-                                [:generate-link
+                                [:generate-link!
                                  {:group-id @group-id
                                   :expires @link-expires
                                   :complete (fn [link] (reset! invite-link link))}]))}
@@ -67,7 +67,7 @@
            [:button.invite {:disabled (string/blank? @invitee-email)
                             :on-click
                             (fn [_]
-                              (dispatch [:invite {:group-id @group-id
+                              (dispatch [:invite! {:group-id @group-id
                                                   :invitee-email @invitee-email}])
                               (set-collapse! true)
                               (set-invitee-email! ""))}

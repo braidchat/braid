@@ -10,18 +10,18 @@
          data))
 
 (def events
-  {:bots/add-group-bot
+  {:bots/add-group-bot!
    (fn [{db :db} [_ [group-id bot]]]
      {:db (update-in db [:groups group-id :bots] conj bot)})
 
-   :bots/remove-group-bot
+   :bots/remove-group-bot!
    (fn [{db :db} [_ [group-id bot-id]]]
      {:db (update-in
             db
             [:groups group-id :bots]
             (partial into [] (remove (fn [b] (= bot-id (b :id))))))})
 
-   :bots/update-group-bot
+   :bots/update-group-bot!
    (fn [{db :db} [_ [group-id bot]]]
      {:db
       (update-in
@@ -30,7 +30,7 @@
                                (merge b bot)
                                b))))})
 
-   :bots/new-bot
+   :bots/new-bot!
    (fn [_ [_ {:keys [bot on-complete]}]]
      (let [bot (make-bot bot)]
        {:websocket-send
@@ -46,7 +46,7 @@
                           :error]]))
             (on-complete (:braid/ok reply))))}))
 
-   :bots/retract-bot
+   :bots/retract-bot!
    (fn [_ [_ {:keys [bot-id]}]]
      {:websocket-send
       (list [:braid.server/retract-bot bot-id]
@@ -59,7 +59,7 @@
                                  "Something went wrong retract bot")
                             :error]]))))})
 
-   :bots/edit-bot
+   :bots/edit-bot!
    (fn [_ [_ {:keys [bot on-complete]}]]
      {:websocket-send
       (list
@@ -74,7 +74,7 @@
                         :error]]))
           (on-complete (:braid/ok reply))))})
 
-   :bots/get-bot-info
+   :bots/get-bot-info!
    (fn [_ [_ {:keys [bot-id on-complete]}]]
      {:websocket-send
       (list

@@ -8,31 +8,31 @@
    [re-frame.core :refer [dispatch]]))
 
 (reg-event-fx
-  ::initialize
+  ::initialize!
   (fn [{state :db} [_ action]]
     {:db (-> state
              (assoc :action action)
              (assoc :action-disabled? true))
-     :dispatch [::handle-action]}))
+     :dispatch [::handle-action!]}))
 
 (reg-event-fx
-  ::handle-action
+  ::handle-action!
   (fn [{state :db} _]
     (case (state :action)
       :create-group
-      {:dispatch [::create-group/initialize]}
+      {:dispatch [::create-group/initialize!]}
 
       :log-in
-      {:dispatch [::user-auth/initialize :log-in]}
+      {:dispatch [::user-auth/initialize! :log-in]}
 
       :request-password-reset
-      {:dispatch [::user-auth/initialize :request-password-reset]}
+      {:dispatch [::user-auth/initialize! :request-password-reset]}
 
       :join-group
-      {:dispatch [::join-group/initialize]})))
+      {:dispatch [::join-group/initialize!]})))
 
 (reg-event-fx
-  ::change-user-status
+  ::change-user-status!
   (fn [{state :db} [_ logged-in?]]
     (merge
       {:db (assoc state :action-disabled? (not logged-in?))}
@@ -41,6 +41,6 @@
         {:dispatch [:start-socket!]}
 
         (and (= :join-group (state :action)) logged-in?)
-        {:dispatch [::join-group/remote-join-group]}
+        {:dispatch [::join-group/remote-join-group!]}
 
         :else {}))))

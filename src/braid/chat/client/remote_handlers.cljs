@@ -25,7 +25,7 @@
 
      :braid.client/invitation-received
      (fn [_ invite]
-       (dispatch [:add-invite invite]))
+       (dispatch [:add-invite! invite]))
 
      :braid.client/name-change
      (fn [_ {:keys [user-id nickname group-ids] :as data}]
@@ -74,19 +74,19 @@
 
      :braid.client/new-intro
      (fn [_ [group-id intro]]
-       (dispatch [:set-group-intro {:group-id group-id
+       (dispatch [:set-group-intro! {:group-id group-id
                                     :intro intro
                                     :local-only? true}]))
 
      :braid.client/group-new-avatar
      (fn [_ [group-id avatar]]
-       (dispatch [:set-group-avatar {:group-id group-id
+       (dispatch [:set-group-avatar! {:group-id group-id
                                      :avatar avatar
                                      :local-only? true}]))
 
      :braid.client/publicity-changed
      (fn [_ [group-id publicity]]
-       (dispatch [:set-group-publicity [group-id publicity]]))
+       (dispatch [:set-group-publicity! [group-id publicity]]))
 
      :braid.client/notify-message
      (fn [_ message]
