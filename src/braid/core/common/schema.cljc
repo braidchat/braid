@@ -7,7 +7,6 @@
   "A new message, before saved into thread - what the client sends"
   {:id uuid?
    :thread-id uuid?
-   :group-id uuid?
    :user-id uuid?
    :content string?
    :created-at inst?
