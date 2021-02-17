@@ -244,7 +244,7 @@
        [:div.error
         [:span "Message failed to send"]
         [:button {:on-click
-                  (fn [_] (dispatch [:resend-message message]))}
+                  (fn [_] (dispatch [:resend-message! message]))}
          "Resend"]])
 
      avatar
@@ -261,7 +261,7 @@
         {:on-click (fn [_]
                      (when (js/confirm (str "Delete this message?\n"
                                             "\"" (message :content) "\""))
-                       (dispatch [:core/retract-message
+                       (dispatch [:core/retract-message!
                                   {:thread-id (message :thread-id)
                                    :message-id (message :id)
                                    :remote? true}])))}

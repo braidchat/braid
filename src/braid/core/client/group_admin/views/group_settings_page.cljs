@@ -25,7 +25,7 @@
                    :on-change (fn [e] (reset! new-message (.. e -target -value)))}]
        [:br]
        [:button {:on-click (fn [_]
-                             (dispatch [:set-group-intro {:group-id (group :id)
+                             (dispatch [:set-group-intro! {:group-id (group :id)
                                                           :intro @new-message}])
                              (reset! new-message ""))}
         "Save"]])))
@@ -42,7 +42,7 @@
           [:p "Avatar not set"])]
        [:div {:class (when @dragging? "dragging")}
         [avatar-upload-view {:on-upload (fn [url]
-                                          (dispatch [:set-group-avatar
+                                          (dispatch [:set-group-avatar!
                                                      {:group-id (group :id)
                                                       :avatar url}]))
                              :type "group-avatar"

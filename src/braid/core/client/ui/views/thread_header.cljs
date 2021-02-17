@@ -15,7 +15,7 @@
   [:div.tag-option
    {:on-click (fn []
                 (popovers/close!)
-                (dispatch [:add-tag-to-thread {:thread-id thread-id
+                (dispatch [:add-tag-to-thread! {:thread-id thread-id
                                                :tag-id (tag :id)}]))
     :class (when selected? "selected")
     :ref (fn [ref] (when (and selected? ref) (.scrollIntoView ref false)))}
@@ -28,7 +28,7 @@
   [:div.user-option
    {:on-click (fn []
                 (popovers/close!)
-                (dispatch [:add-user-to-thread {:thread-id thread-id
+                (dispatch [:add-user-to-thread! {:thread-id thread-id
                                                 :user-id (user :id)}]))
     :class (when selected? "selected")
     :ref (fn [ref] (when (and selected? ref) (.scrollIntoView ref false)))}
@@ -101,10 +101,10 @@
                       (when @selected
                         (popovers/close!)
                         (case @selected-column
-                          0 (dispatch [:add-tag-to-thread
+                          0 (dispatch [:add-tag-to-thread!
                                        {:thread-id (thread :id)
                                         :tag-id (@selected :id)}])
-                          1 (dispatch [:add-user-to-thread
+                          1 (dispatch [:add-user-to-thread!
                                        {:thread-id (thread :id)
                                         :user-id (@selected :id)}])))
 
@@ -171,7 +171,7 @@
                             ; divs as controls, otherwise divs higher up also
                             ; get click events
                             (helpers/stop-event! e)
-                            (dispatch [:unsub-thread
+                            (dispatch [:unsub-thread!
                                        {:thread-id (thread :id)}]))}
                \uf1f6])
             :priority 0}])

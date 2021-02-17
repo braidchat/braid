@@ -12,13 +12,13 @@
         [:span.admin "Admin"]
         [:button.make-admin
          {:on-click (fn [_]
-                      (dispatch [:make-admin
+                      (dispatch [:make-admin!
                                  {:group-id @group-id
                                   :user-id id}]))}
          "Make Admin"])
       (when (not= id @(subscribe [:user-id]))
         [:button.ban {:on-click (fn []
-                                  (dispatch [:remove-from-group
+                                  (dispatch [:remove-from-group!
                                              {:group-id @group-id
                                               :user-id id}]))}
          "Kick from Group"])]]))

@@ -5,4 +5,4 @@
 
 (defmethod socket/event-handler :braid.quests/upsert-quest-record
   [[_ quest-record]]
-  (dispatch [:quests/upsert-quest-record quest-record]))
+  (dispatch [:quests/upsert-quest-record! quest-record]))

@@ -6,12 +6,12 @@
    [re-frame.core :refer [dispatch]]))
 
 (reg-event-fx
-  ::initialize
+  ::initialize!
   (fn [{state :db}]
-    {:dispatch-n [[:braid.core.client.gateway.forms.user-auth.events/initialize :log-in]]}))
+    {:dispatch-n [[:braid.core.client.gateway.forms.user-auth.events/initialize! :log-in]]}))
 
 (reg-event-fx
-  ::remote-join-group
+  ::remote-join-group!
   (fn [{state :db} _]
     {:edn-xhr {:method :put
                :uri (str "/groups/" (get-url-group-id) "/join")

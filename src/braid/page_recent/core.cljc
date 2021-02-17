@@ -33,7 +33,7 @@
              5000
              (fn [reply]
                (if-let [threads (:braid/ok reply)]
-                 (dispatch [:add-threads threads])
+                 (dispatch [:add-threads! threads])
                  (cond
                    (= reply :chsk/timeout) (on-error "Timed out")
                    (:braid/error reply) (on-error (:braid/error reply))
@@ -54,14 +54,14 @@
        (chat/register-group-page!
         {:key :recent
          :on-load (fn [page]
-                    (dispatch [:set-page-loading true])
+                    (dispatch [:set-page-loading! true])
                     (dispatch [:braid.recent-page/load-recent-threads
                                {:group-id (page :group-id)
                                 :on-complete (fn [_]
-                                               (dispatch [:set-page-loading false]))
+                                               (dispatch [:set-page-loading! false]))
                                 :on-error (fn [e]
-                                            (dispatch [:set-page-loading false])
-                                            (dispatch [:set-page-error true]))}]))
+                                            (dispatch [:set-page-loading! false])
+                                            (dispatch [:set-page-error! true]))}]))
          :view (fn []
                  (let [group-id (subscribe [:open-group-id])
                        threads (subscribe [:braid.recent-page/recent-threads] [group-id])

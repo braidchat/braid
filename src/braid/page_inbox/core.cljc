@@ -67,7 +67,7 @@
                :command [:braid.chat/create-thread!
                          {:thread-id (:id thread-opts)
                           :group-id (:group-id thread-opts)}]
-               :dispatch [:focus-thread (thread-opts :id)]}))
+               :dispatch [:focus-thread! (thread-opts :id)]}))
 
           :clear-inbox!
           (fn [{db :db} [_ _]]

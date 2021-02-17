@@ -34,7 +34,7 @@
           (fn [{db :db} [_ query]]
             {:dispatch [::set-query! query]
              :dispatch-debounce [:search-redirect
-                                 [:go-to
+                                 [:go-to!
                                   (if (string/blank? query)
                                     (routes/group-page-path {:group-id (db :open-group-id)
                                                              :page-id "inbox"})
@@ -57,7 +57,7 @@
                                               (assoc s :thread-ids (vec thread-ids))
                                               s))))})
 
-          ::set-error!
+          ::set-error!!
           (fn [{db :db} _]
             {:db (-> db
                      (assoc-in [::state :error?] true)
@@ -77,7 +77,7 @@
                  (fn [reply]
                    (if (:thread-ids reply)
                      (dispatch [::set-results! query reply])
-                     (dispatch [::set-error!]))))}))
+                     (dispatch [::set-error!!]))))}))
 
           ::clear-search!
           (fn [{db :db} _]

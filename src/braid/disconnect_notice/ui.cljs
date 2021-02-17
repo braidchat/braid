@@ -25,5 +25,5 @@
             [:div.message "Attempting to reconnect in " @seconds-to-reconnect " seconds... "
              [:button
               {:on-click (fn [_]
-                           (dispatch [:core/reconnect]))}
+                           (dispatch [:core/reconnect!]))}
               "Reconnect Now"]]]])))))

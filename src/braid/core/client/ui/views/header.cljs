@@ -91,7 +91,7 @@
       [:div.bar {:style {:background-color
                          (color/->color (or @(subscribe [:user-id]) (group :id)))}}
        [:button.join
-        {:on-click (fn [_] (dispatch [:core/join-public-group (:id group)]))}
+        {:on-click (fn [_] (dispatch [:core/join-public-group! (:id group)]))}
         "Join Group"]]]]))
 
 (defn logged-in-header-view

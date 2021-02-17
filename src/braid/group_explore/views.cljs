@@ -27,11 +27,11 @@
              [:br]
              [:button {:on-click
                        (fn [_]
-                         (dispatch [:accept-invite invite]))}
+                         (dispatch [:accept-invite! invite]))}
               "Accept"]
              [:button {:on-click
                        (fn [_]
-                         (dispatch [:decline-invite invite]))}
+                         (dispatch [:decline-invite! invite]))}
               "Decline"]])]
          [:div "No invitations."])])))
 

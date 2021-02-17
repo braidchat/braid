@@ -54,7 +54,7 @@
                        (.focus @this-elt))))
             :disabled (not @(subscribe [:connected?]))
             :on-focus (fn [e]
-                        (dispatch [:focus-thread (config :thread-id)]))
+                        (dispatch [:focus-thread! (config :thread-id)]))
             :on-change (on-change
                          {:on-change
                           (fn [e]
@@ -242,9 +242,9 @@
                                       thread-text-kill-chan])]
                    (if (= ch throttled-thread-text-chan)
                      (do
-                       (dispatch [:new-message-text (merge v {:group-id (config :group-id)}) v])
+                       (dispatch [:new-message-text! (merge v {:group-id (config :group-id)}) v])
                        (recur))
-                     (dispatch [:new-message-text {:group-id (config :group-id)
+                     (dispatch [:new-message-text! {:group-id (config :group-id)
                                                    :thread-id thread-id
                                                    :content (@state :text)}])))))))
 

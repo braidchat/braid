@@ -25,7 +25,7 @@
           [:button {:on-click
                     (fn [_]
                       (swap! editing? not)
-                      (dispatch [:set-tag-description {:tag-id (tag :id)
+                      (dispatch [:set-tag-description! {:tag-id (tag :id)
                                                        :description @new-description}]))}
            "Save"]
           [:button {:on-click (fn [_]
@@ -50,7 +50,7 @@
            (.preventDefault e)
            (when (and (not (string/blank? @text))
                       (not @error))
-             (dispatch [:create-tag {:tag {:name (string/replace @text #"^#" "")
+             (dispatch [:create-tag! {:tag {:name (string/replace @text #"^#" "")
                                            :group-id (data :group-id)}}])
              (reset! text "")))}
         [:input
@@ -67,7 +67,7 @@
 
 (defn delete-tag-view
   [tag]
-  [:button.delete {:on-click (fn [_] (dispatch [:remove-tag {:tag-id (tag :id)}]))}
+  [:button.delete {:on-click (fn [_] (dispatch [:remove-tag! {:tag-id (tag :id)}]))}
    \uf1f8])
 
 (defn tag-info-view

@@ -9,35 +9,35 @@
    :group-id (data :group-id)})
 
 (reg-event-fx
-  :invite
+  :invite!
   (fn [_ [_ data]]
     (let [invite (make-invitation data)]
       {:websocket-send (list [:braid.server/invite-to-group invite])})))
 
 (reg-event-fx
-  :remove-invite
+  :remove-invite!
   (fn [{db :db} [_ invite]]
     {:db (update-in db [:invitations] (partial remove (partial = invite)))}))
 
 (reg-event-fx
-  :accept-invite
+  :accept-invite!
   (fn [{state :db} [_ invite]]
     {:websocket-send (list [:braid.server/invitation-accept invite])
-     :dispatch [:remove-invite invite]}))
+     :dispatch [:remove-invite! invite]}))
 
 (reg-event-fx
-  :decline-invite
+  :decline-invite!
   (fn [{state :db} [_ invite]]
     {:websocket-send (list [:braid.server/invitation-decline invite])
-     :dispatch [:remove-invite invite]}))
+     :dispatch [:remove-invite! invite]}))
 
 (reg-event-fx
-  :add-invite
+  :add-invite!
   (fn [{db :db} [_ invite]]
     {:db (update-in db [:invitations] conj invite)}))
 
 (reg-event-fx
-  :generate-link
+  :generate-link!
   (fn [_ [_ {:keys [group-id expires complete]}]]
     {:websocket-send
      (list

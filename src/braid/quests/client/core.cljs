@@ -12,7 +12,7 @@
 (def event-listener
   (fn [event]
     (when (not= "quests" (namespace (first event)))
-      (re-frame/dispatch [:quests/update-handler event]))))
+      (re-frame/dispatch [:quests/update-handler! event]))))
 
 (def initial-state {::quest-records {}})
 (def schema {::quest-records

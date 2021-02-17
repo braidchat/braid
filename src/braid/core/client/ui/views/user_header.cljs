@@ -41,14 +41,14 @@
                     (let [group (subscribe [:active-group])
                           user-id (subscribe [:user-id])]
                       (when (js/confirm (str "Are you sure you want to leave " (@group :name) "?"))
-                        (dispatch [:remove-from-group
+                        (dispatch [:remove-from-group!
                                    {:group-id (@group :id)
                                     :user-id @user-id}]))))
         :priority 7
         :icon \uf08b}
        {:body "Log Out"
         :on-click (fn [_]
-                    (dispatch [:logout nil]))
+                    (dispatch [:logout! nil]))
         :icon \uf235
         :priority -1}
        #_{:body "See Changelog"

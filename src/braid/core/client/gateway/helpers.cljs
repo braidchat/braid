@@ -115,7 +115,7 @@
                          fields))))
 
   (reg-event-fx
-    (with-ns ns :submit-form)
+    (with-ns ns :submit-form!)
     (fn [{state :db} [_ {:keys [validate-fields
                                 dispatch-when-valid]}]]
       (if-let [all-valid? (->> validate-fields

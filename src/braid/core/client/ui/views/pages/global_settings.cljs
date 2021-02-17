@@ -24,7 +24,7 @@
         [:select {:value (or @email-freq :never)
                   :on-change (fn [e]
                                (let [v (keyword (.. e -target -value))]
-                                 (dispatch [:set-preference [:email-frequency v]])))}
+                                 (dispatch [:set-preference! [:email-frequency v]])))}
          (doall
            (for [freq [:never :weekly :daily]]
              ^{:key freq}
@@ -47,7 +47,7 @@
                 (str "In " (:name @group))
                 :tag [tag-pill-view condition])]
          [:td [:button {:on-click (fn [_]
-                                    (dispatch [:remove-notification-rule
+                                    (dispatch [:remove-notification-rule!
                                                [event condition]]))}
                "-"]]]))))
 
@@ -101,7 +101,7 @@
                     [:option {:value (tag :id)} (tag :name)]))]))])]
        [:td
         [:button {:on-click (fn [_]
-                              (dispatch [:add-notification-rule [@event @condition]]))}
+                              (dispatch [:add-notification-rule! [@event @condition]]))}
          "Save"]]])))
 
 (defn notification-rules-view
