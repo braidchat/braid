@@ -114,7 +114,7 @@
                   [:group-name
                    :group-url
                    :group-type]
-                  :dispatch-when-valid [:braid.core.client.gateway.forms.create-group.events/remote-create-group]}]))}
+                  :dispatch-when-valid [:braid.core.client.gateway.forms.create-group.events/remote-create-group!]}]))}
    [group-name-field-view]
    [group-url-field-view]
    [group-type-field-view]
