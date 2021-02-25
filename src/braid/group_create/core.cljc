@@ -3,6 +3,7 @@
    [clojure.string :as string]
    [braid.base.api :as base]
    [braid.core.common.util :refer [slugify]]
+   [braid.group-explore.api :as group-explore.api]
    #?@(:clj
        [[braid.chat.db.group :as group]
         [braid.core.server.routes.helpers :refer [edn-response]]]
@@ -105,4 +106,8 @@
        (base/register-system-page!
         {:key :create-group
          :view views/create-group-page-view
-         :styles styles/>create-group-styles}))))
+         :styles styles/>create-group-styles})
+
+       (group-explore.api/register-link!
+        {:title "Create Group"
+         :url (routes/system-page-path {:page-id "create-group"})}))))
