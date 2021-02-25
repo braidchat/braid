@@ -97,9 +97,6 @@
           (edn-response {:ok true}))
       (error-response 400 :no-such-email)))
 
-  (GET "/registration/check-slug-unique" req
-    (edn-response (not (group/group-with-slug-exists? (get-in req [:params :slug])))))
-
   ; accept an email invite to join a group
   (POST "/register" [token invite_id email now hmac :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
