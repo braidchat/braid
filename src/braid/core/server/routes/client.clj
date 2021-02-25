@@ -65,9 +65,6 @@
   (GET "/gateway/join-group/:group-id" [group-id]
     (spa/get-html "gateway" {:gateway_action "join-group"}))
 
-  (GET "/gateway/create-group" []
-    (spa/get-html "gateway" {:gateway_action "create-group"}))
-
   (GET "/gateway/request-password-reset" _
     (spa/get-html "gateway" {:gateway_action "request-password-reset"}))
 

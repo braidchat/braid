@@ -16,6 +16,7 @@
     [braid.emoji-big.core]
     [braid.emoji-custom.core]
     [braid.emoji-emojione.core]
+    [braid.group-create.core]
     [braid.group-explore.core]
     [braid.notices.core]
     [braid.page-inbox.core]
@@ -56,6 +57,7 @@
    braid.emoji-big.core/init!
    braid.emoji-custom.core/init!
    braid.emoji-emojione.core/init!
+   braid.group-create.core/init!
    braid.group-explore.core/init!
    braid.notices.core/init!
    braid.sidebar.core/init!
