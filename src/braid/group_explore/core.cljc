@@ -10,7 +10,8 @@
          [[re-frame.core :refer [dispatch]]
           [braid.group-explore.views :as views]
           [braid.group-explore.styles :as styles]
-          [braid.core.common.schema :as schema ]])))
+          [braid.core.common.schema :as schema ]
+          [braid.sidebar.api :as sidebar.api]])))
 
 #?(:clj
    (defn- get-public-groups
@@ -93,4 +94,7 @@
           :on-load (fn [_]
                      (dispatch [::load-public-groups]))
           :view views/group-explore-page-view
-          :styles styles/>group-explore-page}))))
+          :styles styles/>group-explore-page})
+
+       (sidebar.api/register-button!
+        views/group-explore-button-view))))
