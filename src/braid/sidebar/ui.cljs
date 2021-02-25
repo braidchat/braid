@@ -7,10 +7,14 @@
     [braid.core.client.helpers :refer [location element-offset get-style]]
     [braid.core.client.routes :as routes]
     [braid.core.client.ui.styles.vars :as style-vars]
+    [braid.core.hooks :as hooks]
     [braid.lib.color :as color]
     [braid.lib.upload :as upload])
   (:import
     (goog.events EventType)))
+
+(defonce sidebar-extra-views
+  (hooks/register! (atom []) [fn?]))
 
 (def v- (partial mapv -))
 
@@ -161,15 +165,6 @@
           (when-not (drag-grp :avatar)
             (string/join "" (take 2 (drag-grp :name))))])])))
 
-(defn group-explore-button-view []
-  (let [page (subscribe [:page])
-        invitations (subscribe [:invitations])]
-    [:a.plus
-     {:class (when (#{:group-explore :create-group} (@page :type)) "active")
-      :href (routes/system-page-path {:page-id "group-explore"})}
-     (when (< 0 (count @invitations))
-       [:div.badge (count @invitations)])]))
-
 (defn global-settings-button-view []
   (let [page (subscribe [:page])]
     [:a.global-settings
@@ -182,7 +177,7 @@
 (defn sidebar-view []
   [:div.sidebar
    [groups-view]
-   [group-explore-button-view]
+   (into [:<>] (map vector) @sidebar-extra-views)
    [:div.spacer]
    (if @(subscribe [:user-id])
      [global-settings-button-view]

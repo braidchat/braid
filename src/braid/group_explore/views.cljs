@@ -83,6 +83,17 @@
                 ^{:key (:id group)}
                 [public-group-view group]))])]))))
 
+(defn group-explore-button-view
+  "Goes in the sidebar"
+  []
+  (let [page (subscribe [:page])
+        invitations (subscribe [:invitations])]
+    [:a.plus
+     {:class (when (#{:group-explore :create-group} (@page :type)) "active")
+      :href (routes/system-page-path {:page-id "group-explore"})}
+     (when (< 0 (count @invitations))
+       [:div.badge (count @invitations)])]))
+
 (defn group-explore-page-view
   []
   [:div.page.group-explore
