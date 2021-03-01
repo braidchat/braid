@@ -9,6 +9,8 @@
   :clean-targets ^{:protect false}
   ["resources/public/js"]
 
+  :auto-clean false
+
   :middleware [lein-tools-deps.plugin/resolve-dependencies-with-deps-edn]
 
   :lein-tools-deps/config {:config-files [:install :user :project]}
