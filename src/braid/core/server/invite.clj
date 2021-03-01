@@ -3,6 +3,7 @@
    [braid.base.server.cache :refer [cache-set! cache-get cache-del!]]
    [braid.base.conf :refer [config]]
    [braid.chat.db.group :as group]
+   [braid.core.server.mail :as mail]
    [braid.lib.crypto :refer [hmac constant-comp random-nonce]]
    [clj-time.coerce :as c]
    [clj-time.core :as t]
@@ -54,12 +55,10 @@
 
 (defn send-invite
   [invite]
-  @(http/post (str "https://api.mailgun.net/v3/" (config :mailgun-domain) "/messages")
-             {:basic-auth ["api" (config :mailgun-password)]
-              :form-params (merge {:to (invite :invitee-email)
-                                   :from (str "noreply@" (config :mailgun-domain))
-                                   :subject "Join the conversation"}
-                                  (invite-message invite))}))
+  (mail/send!
+    {:to (invite :invitee-email)
+     :subject "Join the conversation"
+     :body (invite-message invite)}))
 
 (defn register-page
   [invite token]
@@ -116,31 +115,29 @@
   [user]
   (let [secret (random-nonce 20)]
     (cache-set! (str (user :id)) secret)
-    @(http/post (str "https://api.mailgun.net/v3/" (config :mailgun-domain) "/messages")
-                {:basic-auth ["api" (config :mailgun-password)]
-                 :form-params {:to (user :email)
-                               :from (str "noreply@" (config :mailgun-domain))
-                               :subject "Password reset requested"
-                               :text (str "A password reset was requested on "
-                                          (config :site-url) " for " (user :email) "\n\n"
-                                          "If this was you, follow this link to reset your password "
-                                          (config :site-url) "/reset?user=" (user :id) "&token=" secret
-                                          "\n\n"
-                                          "If this wasn't you, just ignore this email")
-                               :html (str "<html><body>"
-                                          "<p>"
-                                          "A password reset was requested on "
-                                          (config :site-url) " for " (user :email)
-                                          "</p>"
-                                          "<p>"
-                                          "If this was you, <a href=\""
-                                          (config :site-url) "/reset?user=" (user :id) "&token=" secret
-                                          "\"> click here</a> to reset your password "
-                                          "</p>"
-                                          "<p>"
-                                          "If this wasn't you, just ignore this email"
-                                          "</p>"
-                                          "</body></html>")}})))
+    (mail/send!
+      {:to (user :email)
+       :subject "Password reset requested"
+       :body {:text (str "A password reset was requested on "
+                         (config :site-url) " for " (user :email) "\n\n"
+                         "If this was you, follow this link to reset your password "
+                         (config :site-url) "/reset?user=" (user :id) "&token=" secret
+                         "\n\n"
+                         "If this wasn't you, just ignore this email")
+              :html (str "<html><body>"
+                         "<p>"
+                         "A password reset was requested on "
+                         (config :site-url) " for " (user :email)
+                         "</p>"
+                         "<p>"
+                         "If this was you, <a href=\""
+                         (config :site-url) "/reset?user=" (user :id) "&token=" secret
+                         "\"> click here</a> to reset your password "
+                         "</p>"
+                         "<p>"
+                         "If this wasn't you, just ignore this email"
+                         "</p>"
+                         "</body></html>")}})))
 
 (defn verify-reset-nonce
   "Verify that the given nonce is valid for the reset request"

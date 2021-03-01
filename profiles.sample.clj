@@ -4,8 +4,12 @@
 {:braid
  {:env
   {;; for invite emails:
-   :mailgun-domain "braid.mysite.com"
-   :mailgun-password "my_mailgun_key"
+   :email-host "smtp.mailgun.org"
+   :email-user "myuser@site.com"
+   :email-password "my_email_password"
+   :email-port 587
+   :email-secure "tls"
+   :email-from "noreply@braid.chat"
    :site-url "http://localhost:5555"
    :hmac-secret "foobar"
    ;; for avatar and file uploads

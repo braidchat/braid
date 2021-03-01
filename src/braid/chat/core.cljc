@@ -41,8 +41,8 @@
                   :github-client-secret
                   :hmac-secret
                   :http-only
-                  :mailgun-domain
-                  :mailgun-password
+                  :email-host :email-user :email-password :email-port
+                  :email-secure :email-from
                   :site-url]]
          (base/register-config-var! k))
 

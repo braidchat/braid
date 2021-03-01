@@ -4,6 +4,7 @@
    [braid.chat.db.thread :as thread]
    [braid.chat.db.user :as user]
    [braid.core.server.message-format :as message-format]
+   [braid.core.server.mail :as mail]
    [braid.base.server.scheduler :refer [scheduler]]
    [clj-time.coerce :refer [to-date-time]]
    [clj-time.core :as time]
@@ -95,13 +96,10 @@
 (defn send-message
   [to {:keys [text html subject]
        :or {subject "While you were away"}}]
-  @(http/post (str "https://api.mailgun.net/v3/" (config :mailgun-domain) "/messages")
-              {:basic-auth ["api" (config :mailgun-password)]
-               :form-params {:to to
-                             :from (str "noreply@" (config :mailgun-domain))
-                             :subject subject
-                             :text text
-                             :html html}}))
+  (mail/send!
+    {:subject subject
+     :body {:text text :html html}
+     :to to}))
 
 ;; Scheduling
 
