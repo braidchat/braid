@@ -1,4 +1,5 @@
 /resources/public/js/
+/cljs-test-runner-out
 /target
 .lein-env
 .lein-repl-history
@@ -14,5 +15,7 @@ figwheel_server.log
 *.iml
 .cljs_rhino_repl/
 /notes/
-datomic-pro-0.9.5201
+/datomic-pro-0.9.5201
+/datomic-pro-0.9.5697
+/lucene
 .cpcache
