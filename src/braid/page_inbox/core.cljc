@@ -39,8 +39,7 @@
           ;; TODO could be made more efficient by depending on other subs
           ;; or using reg-sub-raw and reactions
           (fn [state [_ group-id]]
-            (let [user-id (get-in state [:session :user-id])
-                  open-thread-ids (get-in state [:user :open-thread-ids])
+            (let [open-thread-ids (get-in state [:user :open-thread-ids])
                   threads (state :threads)
                   open-threads (vals (select-keys threads open-thread-ids))]
               (->> open-threads
@@ -50,7 +49,6 @@
                    (sort-by
                      (fn [thread]
                        (->> (thread :messages)
-                            (filter (fn [m] (= (m :user-id) user-id)))
                             (map :created-at)
                             (apply max))))
                    reverse)))})
