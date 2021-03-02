@@ -57,4 +57,4 @@
                :dependencies [[com.bhauman/figwheel-main "0.2.12"
                                :exclusions [org.clojure/clojurescript]]]
                :prep-tasks ["compile"
-                            ["trampoline" "run" "-m" "figwheel.main" "-bo" "prod"]]}]})
+                            ["run" "-m" "figwheel.main" "-bo" "prod"]]}]})
