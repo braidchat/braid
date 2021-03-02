@@ -13,7 +13,6 @@
     :right 0
     :bottom 0
     :left 0
-    :padding-left vars/pad
     :align-items "flex-end"
     :overflow-x "auto" }
 

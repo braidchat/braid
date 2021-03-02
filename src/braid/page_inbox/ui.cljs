@@ -5,13 +5,12 @@
     [braid.core.client.ui.views.threads :refer [threads-view]]
     [braid.lib.color :as color]))
 
-(defn new-thread-view [{:keys [group-id] :as  thread-opts}]
+(defn new-thread-view
+  [{:keys [on-click group-id]}]
   [:button.new-thread
    {:title "Start New Thread"
     :style {:background-color (color/->color group-id)}
-    :on-click
-    (fn []
-      (dispatch [:create-thread! thread-opts]))}
+    :on-click on-click}
    "+"])
 
 (defn clear-inbox-button-view []
@@ -24,25 +23,36 @@
                       (dispatch [:clear-inbox!]))}
          "Clear Inbox"]))))
 
+(defn inbox-view
+  [{:keys [inbox-id open-threads new-thread-on-click group-id]}]
+  (r/with-let [resort-nonce (r/atom 0)
+               thread-order-dirty? (r/atom false)]
+    [:div.inbox
+     ;; necessary to prevent component-reuse when switching groups
+     ^{:key [inbox-id @resort-nonce]}
+     [threads-view {:new-thread-view [:div.sidebar
+                                      (when @thread-order-dirty?
+                                        [:button.resort-inbox
+                                         {:on-click (fn [_]
+                                                      (swap! resort-nonce inc))}
+                                         "Resort Inbox"])
+                                      [new-thread-view {:on-click new-thread-on-click
+                                                        :group-id group-id}]]
+                    :threads open-threads
+                    :thread-order-dirty? thread-order-dirty?}]]))
 
 (defn inbox-page-view
   []
-  (r/with-let [resort-nonce (r/atom 0)
-               thread-order-dirty? (r/atom false)]
-    (let [group-id @(subscribe [:open-group-id])
-          group @(subscribe [:active-group])
-          open-threads @(subscribe [:open-threads group-id])]
-      [:div.page.inbox
-       [:div.intro
-        (:intro group)
-        [clear-inbox-button-view]
-        (when @thread-order-dirty?
-          [:button.resort-inbox
-           {:on-click (fn [_]
-                        (swap! resort-nonce inc))}
-           "Resort Inbox"])]
-       ;; necessary to prevent component-reuse when switching groups
-       ^{:key [group-id @resort-nonce]}
-       [threads-view {:new-thread-view [new-thread-view {:group-id group-id}]
-                      :threads open-threads
-                      :thread-order-dirty? thread-order-dirty?}]])))
+  (let [group-id @(subscribe [:open-group-id])
+        group @(subscribe [:active-group])
+        open-threads @(subscribe [:open-threads group-id])
+        new-thread-on-click (fn []
+                              (dispatch [:create-thread! {:group-id group-id}]))]
+    [:div.page.inbox
+     [:div.intro
+      (:intro group)
+      [clear-inbox-button-view]]
+     [inbox-view {:inbox-id group-id
+                  :open-threads open-threads
+                  :new-thread-on-click new-thread-on-click
+                  :group-id group-id}]]))
