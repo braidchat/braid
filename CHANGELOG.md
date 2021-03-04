@@ -1,3 +1,15 @@
+## 1 March 2021
+
+Now uses SMTP to send emails instead of Mailgun's HTTP API.
+To this end, now uses the following config variables instead of `:mailgun-domain` and `:mailgun-password`:
+
+ - `:email-host`
+ - `:email-user`
+ - `:email-password`
+ - `:email-port`
+ - `:email-from`
+ - `:email-secure` (which will can be omitted, `"ssl"` or `"tls"`)
+
 ## 27 January 2021
 
   - Recent large architectural changes:
