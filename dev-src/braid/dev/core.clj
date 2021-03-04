@@ -52,3 +52,8 @@
   "Helper function for stopping all Braid components."
   []
   (mount/stop))
+
+(defn disable-request-logging!
+  []
+  (taoensso.timbre/merge-config!
+    {:ns-filter {:allow #{"*"} :deny #{"braid.core.server.middleware"}}}))
