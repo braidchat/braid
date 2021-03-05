@@ -6,6 +6,7 @@
    [reagent.dom :as r-dom]))
 
 (defn threads-view
+  "new-thread-view, thread-order-dirty? are optional"
   [{:keys [new-thread-view threads thread-order-dirty?] :as props}]
   ;; to avoid accidental re-use when switching groups, key this component with the group-id
 
@@ -68,8 +69,10 @@
            (when (not= (set (map :id target-threads))
                        (set (map :id (prev-props :threads))))
              (update-threads! target-threads))
-           (reset! thread-order-dirty? (not= (map :id @threads)
-                                             (map :id target-threads)))))
+           ;; thread-order-dirty is optional
+           (when thread-order-dirty?
+             (reset! thread-order-dirty? (not= (map :id @threads)
+                                               (map :id target-threads))))))
 
        :reagent-render
        (fn [{:keys [new-thread-view]}]
