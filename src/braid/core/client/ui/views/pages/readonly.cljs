@@ -14,5 +14,5 @@
     [:div.page.readonly-inbox
      [:div.intro
       (:intro group)]
-     ^{:key group-id}
-     [threads-view {:threads (map #(assoc % :readonly true) open-threads)}]]))
+     [threads-view {:threads (map #(assoc % :readonly true) open-threads)
+                    :resort-nonce group-id}]]))

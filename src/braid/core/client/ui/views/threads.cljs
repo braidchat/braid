@@ -6,8 +6,25 @@
    [reagent.dom :as r-dom]))
 
 (defn threads-view
-  "new-thread-view, thread-order-dirty? are optional"
-  [{:keys [new-thread-view threads thread-order-dirty?] :as props}]
+  "
+  threads
+     threads to display;
+     component will 'cache' order of threads if new threads come in,
+     to prevent threads from 'jumping around'
+
+  resort-nonce (optional, but recommended)
+    value of any type, if it changes, will 'force' re-render threads
+    in the order as passed in (ie. without caching)
+
+  new-thread-view (optional)
+    hiccup to include before threads
+
+  thread-order-dirty? (optional)
+    atom, will be reset! to true when displayed thread order does not match passed-in order"
+  [{:keys [threads
+           new-thread-view
+           resort-nonce
+           thread-order-dirty?] :as props}]
   ;; to avoid accidental re-use when switching groups, key this component with the group-id
 
   ;; for a better user experience, this component maintains order of threads
@@ -15,6 +32,9 @@
   ;; (except blank new threads, which are put at the front)
   (let [threads (r/atom [])
         this-elt (atom nil)
+        reset-threads!
+        (fn [target-threads]
+          (reset! threads target-threads))
         update-threads!
         (fn [target-threads]
           (swap! threads
@@ -66,8 +86,13 @@
        :component-did-update
        (fn [this [_ prev-props]]
          (let [target-threads ((r/props this) :threads)]
-           (when (not= (set (map :id target-threads))
-                       (set (map :id (prev-props :threads))))
+           (cond
+             (not= ((r/props this) :resort-nonce)
+                   (prev-props :resort-nonce))
+             (reset-threads! target-threads)
+
+             (not= (set (map :id target-threads))
+                   (set (map :id (prev-props :threads))))
              (update-threads! target-threads))
            ;; thread-order-dirty is optional
            (when thread-order-dirty?

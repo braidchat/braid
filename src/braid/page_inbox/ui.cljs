@@ -28,8 +28,6 @@
   (r/with-let [resort-nonce (r/atom 0)
                thread-order-dirty? (r/atom false)]
     [:div.inbox
-     ;; necessary to prevent component-reuse when switching groups
-     ^{:key [inbox-id @resort-nonce]}
      [threads-view {:new-thread-view [:div.sidebar
                                       (when @thread-order-dirty?
                                         [:button.resort-inbox
@@ -39,6 +37,7 @@
                                       [new-thread-view {:on-click new-thread-on-click
                                                         :group-id group-id}]]
                     :threads open-threads
+                    :resort-nonce [inbox-id @resort-nonce]
                     :thread-order-dirty? thread-order-dirty?}]]))
 
 (defn inbox-page-view
