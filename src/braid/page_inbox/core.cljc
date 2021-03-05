@@ -41,16 +41,18 @@
           (fn [state [_ group-id]]
             (let [open-thread-ids (get-in state [:user :open-thread-ids])
                   threads (state :threads)
-                  open-threads (vals (select-keys threads open-thread-ids))]
+                  open-threads (vals (select-keys threads open-thread-ids))
+                  now (js/Date.)]
               (->> open-threads
                    (filter (fn [thread]
                              (= (thread :group-id) group-id)))
-                   ;; sort by last message sent by logged-in user, most recent first
                    (sort-by
                      (fn [thread]
-                       (->> (thread :messages)
-                            (map :created-at)
-                            (apply max))))
+                       (or (->> (thread :messages)
+                                (map :created-at)
+                                (apply max))
+                           ;; treat threads with no messages as being just created
+                           now)))
                    reverse)))})
 
        (base/register-events!
