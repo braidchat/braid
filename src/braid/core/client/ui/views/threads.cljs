@@ -80,7 +80,7 @@
 
        :component-did-mount
        (fn [this]
-         (update-threads! (props :threads))
+         (reset-threads! (props :threads))
          (reset! this-elt (r-dom/dom-node this)))
 
        :component-did-update
