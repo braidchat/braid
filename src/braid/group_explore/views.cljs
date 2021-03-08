@@ -3,11 +3,16 @@
    [braid.lib.color :as color]
    [braid.lib.date :as date]
    [braid.core.client.routes :as routes]
+   [braid.core.hooks :as hooks]
    [cljs-time.core :as t]
    [re-frame.core :refer [dispatch subscribe]]
    [reagent.core :as r])
   (:import
    (goog.events KeyCodes)))
+
+(defonce group-explore-links
+  (hooks/register! (atom []) [{:title string?
+                               :url string?}]))
 
 (defn- invitations-view
   []
@@ -78,12 +83,25 @@
                 ^{:key (:id group)}
                 [public-group-view group]))])]))))
 
+(defn group-explore-button-view
+  "Goes in the sidebar"
+  []
+  (let [page (subscribe [:page])
+        invitations (subscribe [:invitations])]
+    [:a.plus
+     {:class (when (#{:group-explore :create-group} (@page :type)) "active")
+      :href (routes/system-page-path {:page-id "group-explore"})}
+     (when (< 0 (count @invitations))
+       [:div.badge (count @invitations)])]))
+
 (defn group-explore-page-view
   []
   [:div.page.group-explore
    [:div.title "Group Explore"]
    [:div.content
-    [:a {:href (routes/system-page-path {:page-id "create-group"})}
-     "Create Group"]
+    (doall
+     (for [{:keys [title url]} @group-explore-links]
+       ^{:key url}
+       [:a {:href url} title]))
     [invitations-view]
     [public-groups-view]]])

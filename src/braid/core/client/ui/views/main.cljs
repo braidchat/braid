@@ -6,7 +6,6 @@
    [braid.base.client.root-view :as root-view]
    [braid.core.client.routes :as routes]
    [braid.core.client.ui.views.header :refer [header-view readonly-header-view]]
-   [braid.core.client.ui.views.pages.create-group :refer [create-group-page-view]]
    [braid.core.client.ui.views.pages.readonly :refer [readonly-inbox-page-view]]
    [re-frame.core :refer [dispatch subscribe]]))
 
@@ -16,7 +15,6 @@
     (case id
       :readonly [readonly-inbox-page-view]
       :login [gateway-view]
-      :create-group [create-group-page-view]
       (when-let [view (pages/get-view id)]
         [view page]))))
 
@@ -27,7 +25,6 @@
     (case id
       (:inbox :readonly) [readonly-inbox-page-view]
       :login [gateway-view]
-      :create-group [create-group-page-view]
       (when-let [view (pages/get-view id)]
         [view page]))))
 
@@ -41,12 +38,8 @@
   (case @(subscribe [:login-state])
     :gateway
     [:div.main
-     (case @(subscribe [:page-path])
-       "/pages/create-group"
-       [create-group-page-view]
-
-       [:div.gateway
-        [user-auth-view]])]
+     [:div.gateway
+      [user-auth-view]]]
 
     :anon-connected
     [:div.main

@@ -1,4 +1,4 @@
-(ns braid.core.client.gateway.forms.create-group.validations
+(ns braid.group-create.validations
   (:require
    [clojure.string :as string]
    [braid.lib.xhr :as xhr]))
@@ -29,15 +29,15 @@
         (cb nil)))
     (fn [url cb]
       (xhr/edn-xhr
-        {:uri "/registration/check-slug-unique"
-         :method :get
-         :params {:slug url}
-         :on-complete (fn [valid?]
-                        (if valid?
-                          (cb nil)
-                          (cb "Your group URL is already taken; try another.")))
-         :on-error (fn [_]
-                     (cb "There was an error checking your URL."))}))]
+       {:uri "/registration/check-slug-unique"
+        :method :get
+        :params {:slug url}
+        :on-complete (fn [valid?]
+                       (if valid?
+                         (cb nil)
+                         (cb "Your group URL is already taken; try another.")))
+        :on-error (fn [_]
+                    (cb "There was an error checking your URL."))}))]
 
    :group-type
    [(fn [type cb]

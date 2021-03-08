@@ -1,6 +1,5 @@
 (ns braid.core.client.gateway.events
   (:require
-   [braid.core.client.gateway.forms.create-group.events :as create-group]
    [braid.core.client.gateway.forms.join-group.events :as join-group]
    [braid.core.client.gateway.forms.user-auth.events :as user-auth]
    [braid.core.client.gateway.fx]
@@ -20,7 +19,7 @@
   (fn [{state :db} _]
     (case (state :action)
       :create-group
-      {:dispatch [::create-group/initialize!]}
+      {:dispatch [:braid.group-create.core/initialize!]}
 
       :log-in
       {:dispatch [::user-auth/initialize! :log-in]}
