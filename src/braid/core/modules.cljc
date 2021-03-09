@@ -31,7 +31,8 @@
     [braid.sidebar.core]
     [braid.stars.core]
     [braid.uploads.core]
-    [braid.users.core]))
+    [braid.users.core]
+    [braid.version.core]))
 
 (defn init! [module-fns]
   (hooks/reset-all!)
@@ -71,7 +72,8 @@
    braid.stars.core/init!
    braid.search.core/init!
    braid.uploads.core/init!
-   braid.users.core/init!])
+   braid.users.core/init!
+   braid.version.core/init!])
 
 (defn plus [base to-add]
   (distinct (concat base to-add)))
