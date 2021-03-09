@@ -11,14 +11,7 @@
   [group-name]
   (some? (d/pull (db/db) '[:group/id] [:group/name group-name])))
 
-(defn group-with-slug-exists?
-  [slug]
-  (boolean (first (d/q '[:find [?g]
-                         :in $ ?slug
-                         :where
-                         [?g :group/slug ?slug]]
-                       (db/db)
-                       slug))))
+
 
 (defn group-by-id
   [group-id]

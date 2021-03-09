@@ -51,6 +51,16 @@
             tag-name)
        boolean))
 
+(defn group-with-slug-exists?
+  [db slug]
+  (->> (d/q '[:find ?group .
+              :in $ ?slug
+              :where
+              [?group :group/slug ?slug]]
+            db
+            slug)
+       boolean))
+
 (defn user-in-group?
   [db user-id group-id]
   (->> (d/q '[:find ?user .

@@ -6,6 +6,8 @@
    [braid.group-explore.api :as group-explore.api]
    #?@(:clj
        [[braid.chat.db.group :as group]
+        [braid.chat.predicates :as p]
+        [braid.core.server.db :as db]
         [braid.core.server.routes.helpers :refer [edn-response]]]
        :cljs
        [[re-frame.core :refer [dispatch]]
@@ -21,7 +23,7 @@
        (base/register-public-http-route!
         [:get "/registration/check-slug-unique"
          (fn [req]
-           (edn-response (not (group/group-with-slug-exists? (get-in req [:params :slug])))))]))
+           (edn-response (not (p/group-with-slug-exists? (db/db) (get-in req [:params :slug])))))]))
      :cljs
      (do
        (base/register-events!

@@ -39,21 +39,6 @@
                                                        :name "Dupe"
                                                        :slug (data :slug)})))))))
 
-(deftest group-with-slug-exists?
-  (db/run-txns!
-   (group/create-group-txn {:id (db/uuid)
-                            :slug "existing-group"
-                            :name "Existing Group"}))
-
-  (testing "returns true when a matching group exists"
-    (is (= (group/group-with-slug-exists? "existing-group") true)))
-
-  (testing "returns false when a matching group does not exist"
-    (is (= (group/group-with-slug-exists? "not-existing-group") false))))
-
-
-                                        ; BDD Tests
-
 (deftest set-group-intro
   (testing "can set an existing group's intro"
     (let [[group] (db/run-txns! (group/create-group-txn {:id (db/uuid) :slug "a" :name "a"}))

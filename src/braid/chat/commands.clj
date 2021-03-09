@@ -1,5 +1,6 @@
 (ns braid.chat.commands
   (:require
+    [braid.core.common.schema :as schema]
     [braid.core.server.db :as db]
     [braid.chat.predicates :as p]
     [braid.chat.db.tag :as db.tag]
@@ -12,7 +13,31 @@
     [braid.chat.socket-message-handlers :refer [new-message-callbacks]]))
 
 (def commands
-  [{:id :braid.chat/create-thread!
+  [{:id :braid.chat/create-group!
+    :params {:user-id uuid?
+             :group-id uuid?
+             :name schema/GroupName
+             :slug schema/GroupSlug
+             :public? boolean?}
+    :conditions
+    (fn [{:keys [user-id group-id name slug public?]}]
+      [[#(p/user-exists? (db/db) user-id)
+        :forbidden "User does not exist"]
+       [#(not (p/group-exists? (db/db) group-id))
+        :forbidden "Group already exists"]
+       [#(not (p/group-with-slug-exists? (db/db) slug))
+        :forbidden "Group with this URL already exists"]])
+    :effect
+    (fn [{:keys [user-id group-id name slug public?]}]
+      (fx/run-txns! (db.group/create-group-txn {:id group-id
+                                                :slug slug
+                                                :name name}))
+      (fx/run-txns! (db.group/group-set-txn group-id :public? public?))
+      (fx/run-txns! (db.group/user-add-to-group-txn user-id group-id))
+      (fx/run-txns! (db.group/user-subscribe-to-group-tags-txn user-id group-id))
+      (fx/run-txns! (db.group/user-make-group-admin-txn user-id group-id)))}
+
+   {:id :braid.chat/create-thread!
     :params {:thread-id uuid?
              :group-id uuid?
              :user-id uuid?}

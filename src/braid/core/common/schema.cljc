@@ -1,7 +1,13 @@
 (ns braid.core.common.schema
   (:require
+    [clojure.string :as string]
     [clojure.spec.alpha :as s]
     [spec-tools.data-spec :as ds]))
+
+(def NonBlankString
+  (s/and
+    string?
+    (complement string/blank?)))
 
 (def NewMessage
   "A new message, before saved into thread - what the client sends"
@@ -54,6 +60,15 @@
 (def UserId
   uuid?)
 
+(def GroupName
+  NonBlankString)
+
+(def GroupSlug
+  (s/and NonBlankString
+    #(re-matches #"[a-z0-9-]+" %)
+    #((complement string/starts-with?) "-" %)
+    #((complement string/ends-with?) "-" %)))
+
 (def User
   {:id UserId
    :nickname string?
@@ -63,11 +78,11 @@
 
 (def Group
   {:id uuid?
-   :name string?
-   :slug string?
+   :name GroupName
+   :slug GroupSlug
    :admins #{uuid?}
-   :intro (ds/maybe string?)
-   :avatar (ds/maybe string?)
+   :intro (ds/maybe NonBlankString)
+   :avatar (ds/maybe NonBlankString)
    :public? boolean?
    :users-count integer?
    :users {UserId User}})
