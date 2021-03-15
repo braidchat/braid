@@ -64,6 +64,26 @@
       [:&.settings::after
        (mixins/fontawesome \uf013)]]]])
 
+(defn header-button [size]
+  [:&
+   {:color "white"
+    :height size
+    :line-height size
+    :width size
+    :-webkit-font-smoothing "antialiased"
+    :text-align "center"
+    :text-decoration "none"}
+
+   [:>.icon
+    {:font-family "fontawesome"}]
+
+   [:&:hover
+    :&.active
+    {:background "rgba(0,0,0,0.25)"}]
+
+   [:&.open-sidebar::after
+    (mixins/fontawesome \uf0e8)]])
+
 (defn group-header [size]
   [:>.group-header
 
@@ -90,19 +110,7 @@
       :vertical-align "top"}
 
      [:>a
-      {:width size
-       :text-align "center"
-       :text-decoration "none"}
-
-      [:>.icon
-       {:font-family "fontawesome"}]
-
-      [:&:hover
-       :&.active
-       {:background "rgba(0,0,0,0.25)"}]
-
-      [:&.open-sidebar::after
-       (mixins/fontawesome \uf0e8)]]]
+      (header-button size)]]
 
     [:>.search-bar
      {:display "inline-block"
