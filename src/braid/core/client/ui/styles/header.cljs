@@ -178,7 +178,7 @@
     ".options:hover"
     {:display "inline-block"}]])
 
-(defn header-button [size]
+(defn header-text-button [size]
   [:&
    (header-text size)
    mixins/standard-font
@@ -203,7 +203,7 @@
     {:margin-left vars/pad}
 
     [:button.join
-     (header-button size)]
+     (header-text-button size)]
 
     [:>.user-info
      {:display "inline-block"
