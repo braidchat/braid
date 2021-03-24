@@ -405,6 +405,7 @@
                :headers {"x-csrf-token" (:csrf-token @socket/chsk-state)}
                :on-complete (fn [data]
                               (socket/disconnect!)
+                              (swap! socket/chsk-state assoc :csrf-token nil)
                               (dispatch [:initialize-db!])
                               (dispatch [:set-login-state! :gateway])
                               (dispatch [:go-to! "/"]))}}))
