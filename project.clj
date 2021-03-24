@@ -52,7 +52,7 @@
              [:dev
               ;; etaoin requires: sudo apt-get install chromium-chromedriver
               ;; on mac: brew cask install chromedriver OR brew install --cask chromedriver
-              {:dependencies [[etaoin "0.3.6"]]}]
+              {:dependencies [[etaoin "0.4.0"]]}]
 
              :uberjar
              [:prod
