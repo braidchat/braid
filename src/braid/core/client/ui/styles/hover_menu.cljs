@@ -75,8 +75,8 @@
       {:color "#666"}]
 
      [:>.icon
-      {:font-family "fontawesome"
-       :display "inline-block"
+      {:display "inline-block"
        :margin-left "0.5em"
-       :width "1.5em"}]]]])
+       :width "1.5em"}
+      (mixins/fontawesome nil)]]]])
 

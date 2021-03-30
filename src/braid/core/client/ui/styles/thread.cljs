@@ -53,7 +53,6 @@
     [:>.main>.control
      :>.extras>.control
      {:cursor "pointer"
-      :font-family "fontawesome"
       :text-align "center"
       :display "block"
       :text-decoration "none"
@@ -62,6 +61,7 @@
       ; needs to accomodate widest icon
       ; otherwise, x button moves
       :width "1.1em"}
+     (mixins/fontawesome nil)
 
      [:&:hover
       {:color "#333"}]]]])

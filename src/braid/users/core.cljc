@@ -17,5 +17,6 @@
         {:class "users"
          :route-fn routes/group-page-path
          :route-args {:page-id "users"}
+         :icon \uf0c0
          :body "Users"})
        (base/register-styles! styles/users-page))))

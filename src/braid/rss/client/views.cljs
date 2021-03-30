@@ -96,7 +96,7 @@
                       {:on-click (fn [_] (dispatch [:rss/force-feed-run (feed :id)]))}
                       "Check Now"]]
                 [:td [:button
-                      {:style {:font-family "fontawesome"
+                      {:style {:font-family "\"Font Awesome 5 Free\""
                                :size "smaller"
                                :color "red"
                                :cursor "pointer"}

@@ -59,6 +59,7 @@
       [{:class "settings"
         :route-fn routes/group-page-path
         :route-args {:page-id "settings"}
+        :icon \uf013
         :body "Group Settings"}])
     [map?]))
 

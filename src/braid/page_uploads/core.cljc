@@ -24,7 +24,7 @@
        (chat/register-group-header-button!
          {:title "Uploads"
           :class "uploads"
-          :icon \uf0ee
+          :icon \uf093
           :priority 0
           :route-fn routes/group-page-path
           :route-args {:page-id "uploads"}})

@@ -5,6 +5,7 @@
     [braid.chat.api :as chat]
     #?@(:cljs
          [[re-frame.core :refer [subscribe dispatch]]
+          [braid.core.client.ui.styles.mixins :as mixins]
           [braid.core.client.routes :as routes]
           [braid.core.client.ui.views.threads :refer [threads-view]]]
          :clj
@@ -61,8 +62,8 @@
             :font-size "1.25em"
             :margin-right "0.25rem"
             :cursor "pointer"
-            :transform "rotate(-90deg)"
-            :font-family "fontawesome"}
+            :transform "rotate(-90deg)"}
+           (mixins/fontawesome nil)
 
            [:&.starred
             {:color "#f3c657"

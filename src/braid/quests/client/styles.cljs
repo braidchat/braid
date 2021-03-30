@@ -64,12 +64,12 @@
 
         [:&::before
          {:content "attr(data-icon)"
-          :font-family "FontAwesome"
           :display "block"
           :font-size quest-icon-size
           :color "#666"
           :margin [[0 vars/pad 0 (m// vars/pad 2)]]
-          :align-self "center"}]
+          :align-self "center"}
+         (mixins/fontawesome nil)]
 
         [:.info
          {:margin-right (em 1)}

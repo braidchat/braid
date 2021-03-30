@@ -35,8 +35,8 @@
        [:button
         {:margin-right (rem 0.5)}
         [:&.delete
-         {:color "red"
-          :font-family "fontawesome"}]]
+         {:color "red"}
+         (mixins/fontawesome nil)]]
 
        [:>.count
         {:margin-right (em 0.5)}

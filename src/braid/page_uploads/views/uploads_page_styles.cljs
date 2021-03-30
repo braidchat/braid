@@ -32,8 +32,8 @@
        [:>td.delete
 
         [:>button
-         {:font-family "fontawesome"
-          :color "red"}]]
+         {:color "red"}
+         (mixins/fontawesome nil)]]
 
        [:>td.uploaded-file
 

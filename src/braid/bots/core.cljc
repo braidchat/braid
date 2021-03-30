@@ -33,6 +33,7 @@
          {:class "group-bots"
           :route-fn routes/group-page-path
           :route-args {:page-id "bots"}
+          :icon \uf544
           :body "Bots"})
        (chat/register-group-page!
          {:key :bots

@@ -38,7 +38,7 @@
                                 :hover-text-color "lightgray"})
         [:&.dangerous {:color "red"}]
         [:&.delete
-         {:font-family "fontawesome"}]]
+         (mixins/fontawesome nil)]]
 
        [:>.avatar
         {:width (rem 4)

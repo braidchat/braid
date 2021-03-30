@@ -52,9 +52,9 @@
        {:margin-left "0.5em"}]
 
       [:>.icon
-       {:font-family "fontawesome"
-        :display "inline-block"
-        :width "1.5em"}]
+       {:display "inline-block"
+        :width "1.5em"}
+       (mixins/fontawesome nil)]
 
       ; ADMIN
 
@@ -75,7 +75,7 @@
     :text-decoration "none"}
 
    [:>.icon
-    {:font-family "fontawesome"}]
+    (mixins/fontawesome nil)]
 
    [:&:hover
     :&.active

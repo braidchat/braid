@@ -45,7 +45,7 @@
                                    {:group-id (@group :id)
                                     :user-id @user-id}]))))
         :priority 7
-        :icon \uf08b}
+        :icon  \uf2f5}
        {:body "Log Out"
         :on-click (fn [_]
                     (dispatch [:logout! nil]))

@@ -64,9 +64,12 @@
      :border-color "#666"
      :cursor "pointer"}]])
 
-(defn fontawesome [unicode]
-  {:font-family "fontawesome"
-   :content (str "\"" unicode "\"")})
+(defn fontawesome
+  [unicode]
+  (merge {:font-family "\"Font Awesome 5 Free\""
+          :font-weight 900}
+         (when unicode
+           {:content (str "\"" unicode "\"")})))
 
 (defn outline-button
   [{:keys [text-color border-color

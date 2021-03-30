@@ -1,4 +1,6 @@
-(ns braid.core.client.ui.styles.fontawesome)
+(ns braid.core.client.ui.styles.fontawesome
+  (:require
+    [braid.core.client.ui.styles.mixins :as mixins]))
 
 (def icons
  {:github \uf09b
@@ -14,5 +16,4 @@
   :users \uf0c0})
 
 (defn mixin [code]
-  {:font-family "fontawesome"
-   :content  (str "\"" (or (icons code) code) "\"")})
+  (mixins/fontawesome (or (icons code) code)))

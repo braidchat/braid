@@ -32,7 +32,6 @@
      :position "absolute"
      :right pad
      :line-height "1.25em"
-     :font-family "fontawesome"
      :color "#ccc"
      :background "#fff"
      :width "1.25em"
@@ -42,6 +41,7 @@
      :padding 0
      :cursor "pointer"
      :margin-left "0.25rem"}
+    (mixins/fontawesome nil)
 
     [:&:hover
      {:color "red"}]]

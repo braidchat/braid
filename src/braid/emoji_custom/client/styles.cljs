@@ -1,8 +1,10 @@
-(ns braid.emoji-custom.client.styles)
+(ns braid.emoji-custom.client.styles
+  (:require
+    [braid.core.client.ui.styles.mixins :as mixins]))
 
 (def settings-page
   [:.app>.main>.page.group-settings>.content
    [:.settings.custom-emoji
     [:button.delete
-     {:font-family "fontawesome"
-      :color "red"}]]])
+     {:color "red"}
+     (mixins/fontawesome nil)]]])
