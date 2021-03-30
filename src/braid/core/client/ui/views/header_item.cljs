@@ -25,6 +25,6 @@
                          (on-click context)
                          on-click)
              :title title}
-         body
+         [:span body]
          (when icon
            [:div.icon icon])]))))
