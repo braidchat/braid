@@ -1,7 +1,8 @@
 (ns braid.base.server.scheduler
   (:require
    [clojurewerkz.quartzite.scheduler :as qs]
-   [mount.core :as mount :refer [defstate]]))
+   [mount.core :as mount :refer [defstate]]
+   [taoensso.timbre :as timbre]))
 
 (defn stop-scheduler!
   [s]
@@ -9,7 +10,7 @@
 
 (defn start-scheduler!
   []
-  (println "starting quartz scheduler")
+  (timbre/infof "starting quartz scheduler")
   (doto (qs/initialize)
     (qs/start)))
 
