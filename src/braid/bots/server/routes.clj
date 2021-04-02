@@ -167,8 +167,7 @@
 
 (defn bad-transit-resp-fn
   [ex req handler]
-  (println "transit error: " ex)
-  (println "req" req)
+  (timbre/warnf "transit error: %s\nrequest: %s" ex req)
   {:status 400
    :headers {"Content-Type" "text/plain"}
    :body "Malformed transit body"})
