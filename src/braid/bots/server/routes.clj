@@ -11,7 +11,6 @@
     [braid.core.server.sync-helpers :as sync-helpers]
     [braid.core.common.util :as util]
     [clojure.string :as string]
-    [compojure.core :refer [GET POST PUT defroutes context]]
     [ring.middleware.transit :as transit]
     [taoensso.timbre :as timbre])
   (:import
