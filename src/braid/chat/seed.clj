@@ -5,7 +5,8 @@
     [braid.chat.db.tag :as tag]
     [braid.chat.db.user :as user]
     [braid.base.server.cqrs :as cqrs]
-    [braid.core.server.db :as db]))
+    [braid.core.server.db :as db]
+    [taoensso.timbre :as timbre]))
 
 (def groups
   [{:group/id (uuid/squuid)
@@ -96,36 +97,33 @@
     :mentioned-tag-ids []}])
 
 (defn seed! []
-  (println "Create Groups")
+  (timbre/infof "Create Groups")
   (doseq [group groups]
     (db/run-txns! (group/create-group-txn
                     {:id (:group/id group)
                      :slug (:group/slug group)
                      :name (:group/name group)})))
 
-  (println "Create Users")
+  (timbre/infof "Create Users")
   (doseq [user users]
-    (println ".")
     (db/run-txns! (user/create-user-txn
                     {:id (:user/id user)
                      :email (:user/email user)})))
 
-  (println "Set user passwords")
+  (timbre/infof "Set user passwords")
   (doseq [user users]
-    (println ".")
     (db/run-txns! (user/set-user-password-txn
                     (:user/id user)
                     (:user/password user))))
 
-  (println "Add Users to Groups")
+  (timbre/infof "Add Users to Groups")
   (doseq [user users
           group groups]
-    (println ".")
     (db/run-txns!
       (group/user-add-to-group-txn (user :user/id)
                                    (group :group/id))))
 
-  (println "Make Users Admins")
+  (timbre/infof "Make Users Admins")
   (db/run-txns! (group/user-make-group-admin-txn
                   (get-in users [0 :user/id])
                   (get-in groups [0 :group/id])))
@@ -133,35 +131,29 @@
                   (get-in users [1 :user/id])
                   (get-in groups [1 :group/id])))
 
-  (println "Create Tags")
+  (timbre/infof "Create Tags")
   (doseq [tag tags]
-    (println ".")
     (db/run-txns! (tag/create-tag-txn
                     {:id (:tag/id tag)
                      :name (:tag/name tag)
                      :group-id (:tag/group-id tag)})))
 
-  (println "Subscribe Users to Tags")
+  (timbre/infof "Subscribe Users to Tags")
   (doseq [user users
           tag tags]
-    (println ".")
     (db/run-txns!
       (tag/user-subscribe-to-tag-txn (:user/id user) (:tag/id tag))))
 
-  (println "Create Threads")
+  (timbre/infof "Create Threads")
   (doseq [thread threads]
-    (println ".")
     (cqrs/dispatch :braid.chat/create-thread!
                    {:thread-id (:thread/id thread)
                     :user-id (:thread/user-id thread)
                     :group-id (:thread/group-id thread)}))
 
-  (println "Create Messages")
+  (timbre/infof "Create Messages")
   (doseq [message messages]
-    (println ".")
     (cqrs/dispatch :braid.chat/create-message!
                    (-> message
                        (assoc :message-id (:id message))
                        (dissoc :id)))))
-
-
