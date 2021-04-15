@@ -4,11 +4,13 @@
     [braid.chat.api :as chat]
     [braid.search.api :as search-api]
     #?@(:clj
-         [[braid.chat.db.tag :as tag]
+         [[braid.chat.db.group :as group]
+          [braid.chat.db.tag :as tag]
           [braid.chat.db.thread :as thread]
           [braid.search.lucene :as lucene]
           [braid.search.server :as search]
-          [braid.search.threads :as threads-search]]
+          [braid.search.threads :as threads-search]
+          [braid.search.users :as users-search]]
          :cljs
          [[clojure.string :as string]
           [re-frame.core :refer [dispatch]]
@@ -50,9 +52,8 @@
             {:db (assoc-in db [::state :query] query)})
 
           ::set-results!
-          (fn [{db :db} [_ query {:keys [threads thread-ids]}]]
+          (fn [{db :db} [_ query {:keys [thread-ids]}]]
             {:db (-> db
-                     (update-in [:threads] #(merge-with merge % (key-by-id threads)))
                      (assoc-in [::state :loading?] false)
                      (update-in [::state] (fn [s]
                                             (if (= (s :query) query)
@@ -120,6 +121,7 @@
            (filter (fn [{:keys [thread-id]}]
                      (thread/user-can-see-thread? user-id thread-id))
                    search-results)))
+       (search-api/register-search-function! users-search/search-users-by-name)
 
        ;; [TODO] also register for when a message is deleted to remove
        ;; text from index?
@@ -127,15 +129,13 @@
 
        (base/register-server-message-handlers!
          {::search-ws
-          (fn [{:keys [?data ?reply-fn user-id]}]
+          (fn [{:keys [?reply-fn user-id] [query group-id] :?data}]
             ;; this can take a while, so move it to a future
-            (let [user-tags (tag/tag-ids-for-user user-id)
-                  filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
-                  ;; [TODO] pagination
-                  search-results (search/search-as user-id ?data)
-                  ;; [TODO] send other search types too
-                  thread-ids (map :thread-id (:thread search-results))
-                  threads (map (comp filter-tags thread/thread-by-id)
-                               (take 25 thread-ids))]
-              (when ?reply-fn
-                (?reply-fn {:threads threads :thread-ids thread-ids}))))}))))
+            (when (and group-id (group/user-in-group? user-id group-id))
+              (let [search-results (search/search-as {:user-id user-id
+                                                      :group-id group-id
+                                                      :query query})
+                    ;; [TODO] send other search types too
+                    thread-ids (map :thread-id (:thread search-results))]
+                (when ?reply-fn
+                  (?reply-fn {:thread-ids thread-ids})))))}))))

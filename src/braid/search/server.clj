@@ -21,7 +21,7 @@
   The query can specify tags by prefixing them with an octothorpe; for example,
   the query 'foo #bar' will find any threads tagged with 'bar' containing the
   text 'foo'"
-  [user-id [query group-id]]
+  [{:keys [user-id query group-id]}]
   ; TODO: pagination?
   (let [results (pmap (fn [search-fn]
                         (search-fn {:user-id user-id

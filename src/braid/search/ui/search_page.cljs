@@ -1,5 +1,6 @@
 (ns braid.search.ui.search-page
   (:require
+   [clojure.set :as set]
    [re-frame.core :refer [dispatch subscribe]]
    [braid.core.client.ui.views.thread :refer [thread-view]]))
 
@@ -41,7 +42,25 @@
                                   (comp (partial apply max)
                                         (partial map :created-at)
                                         :messages)
-                                  #(compare %2 %1)))]
+                                  #(compare %2 %1)))
+            maybe-load-more (fn []
+                              (when (and (= status :done-results)
+                                         (< (count loaded-threads) (count thread-ids)))
+                                (dispatch [:set-page-loading! true])
+                                (let [already-have (set (map :id loaded-threads))
+                                      to-load (->> thread-ids
+                                                   (remove already-have)
+                                                   (take 25))]
+                                  (dispatch [:load-threads!
+                                             {:thread-ids to-load
+                                              :on-complete
+                                              (fn []
+                                                (dispatch [:set-page-loading! false]))}]))))]
+        (when (< (count (set/intersection (into #{} (map :id)
+                                                loaded-threads)
+                                          (set thread-ids)))
+                 (min 25 (count thread-ids)))
+          (maybe-load-more))
         [:div.page.search
          [:div.title (str "Search for \"" query "\"")]
          [:div.content
@@ -55,21 +74,10 @@
            (fn [e]
              (let [div (.. e -target)]
                (when (and (= (.-className div) "threads")
-                          (= status :done-results)
-                          (< (count loaded-threads) (count thread-ids))
                           (> 100 (- (.-scrollWidth div)
                                     (+ (.-scrollLeft div) (.-offsetWidth div)))
                              0))
-                 (dispatch [:set-page-loading! true])
-                 (let [already-have (set (map :id loaded-threads))
-                       to-load (->> thread-ids
-                                    (remove already-have)
-                                    (take 25))]
-                   (dispatch [:load-threads!
-                              {:thread-ids to-load
-                               :on-complete
-                               (fn []
-                                 (dispatch [:set-page-loading! false]))}])))))
+                 (maybe-load-more))))
            :on-wheel ; make the mouse wheel scroll horizontally
            (fn [e]
              (let [target-classes (.. e -target -classList)
