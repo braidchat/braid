@@ -107,7 +107,7 @@
 
      :clj
      (do
-       (base/register-config-var! :lucene-store-location)
+       (base/register-config-var! :lucene-store-location :optional [:string])
 
        ;; [TODO] also register for when a message is deleted to remove
        ;; text from index?

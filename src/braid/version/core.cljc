@@ -8,7 +8,7 @@
 
   #?(:clj
      (do
-       (base/register-config-var! :version)
+       (base/register-config-var! :version :optional [:string])
 
        (base/register-additional-script!
          {:body

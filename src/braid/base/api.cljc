@@ -145,12 +145,20 @@
        [f]
        {:pre [(fn? f)]}
        (swap! braid.base.server.seed/seed-fns conj f))
-
+     
      (defn register-config-var!
        "Add a keyword to be read from `env` and added to the `config` state"
-       [k]
-       {:pre [(keyword? k)]}
-       (swap! braid.base.conf/config-vars conj k))
+         [k required-or-optional schema]
+       {:pre [(keyword? k)
+              (#{:required :optional} required-or-optional)
+              ;; TODO use malli internals to check schema
+              ]}
+       (swap! braid.base.conf/config-vars conj
+              {:key k
+               :required? (case required-or-optional
+                            :required true
+                            :optional false)
+               :schema schema}))
 
      (defn register-server-message-handlers!
        "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"
