@@ -141,6 +141,5 @@
                   (let [search-results (search/search-as {:user-id user-id
                                                           :group-id group-id
                                                           :query query})]
-                    (prn "SEARCH RESULTS " search-results)
                     (when ?reply-fn
                       (?reply-fn search-results))))))}))))
