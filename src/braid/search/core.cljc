@@ -2,11 +2,13 @@
   (:require
     [braid.base.api :as base]
     [braid.chat.api :as chat]
+    [braid.search.api :as search-api]
     #?@(:clj
          [[braid.chat.db.tag :as tag]
           [braid.chat.db.thread :as thread]
           [braid.search.lucene :as lucene]
-          [braid.search.server :as search]]
+          [braid.search.server :as search]
+          [braid.search.threads :as threads-search]]
          :cljs
          [[clojure.string :as string]
           [re-frame.core :refer [dispatch]]
@@ -109,19 +111,31 @@
      (do
        (base/register-config-var! :lucene-store-location)
 
+       (search-api/register-search-function! threads-search/search-threads-by-tag)
+       (search-api/register-search-function! threads-search/search-threads-by-user)
+       (search-api/register-search-function! threads-search/search-threads-by-full-text)
+       (search-api/register-search-auth-check!
+         :thread
+         (fn [user-id search-results]
+           (filter (fn [{:keys [thread-id]}]
+                     (thread/user-can-see-thread? user-id thread-id))
+                   search-results)))
+
        ;; [TODO] also register for when a message is deleted to remove
        ;; text from index?
        (chat/register-new-message-callback! lucene/index-message!)
 
        (base/register-server-message-handlers!
          {::search-ws
-          (fn [{:as ev-msg :keys [?data ?reply-fn user-id]}]
+          (fn [{:keys [?data ?reply-fn user-id]}]
             ;; this can take a while, so move it to a future
-            (future
-              (let [user-tags (tag/tag-ids-for-user user-id)
-                    filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
-                    thread-ids (search/search-threads-as user-id ?data)
-                    threads (map (comp filter-tags thread/thread-by-id)
-                                 (take 25 thread-ids))]
-                (when ?reply-fn
-                  (?reply-fn {:threads threads :thread-ids thread-ids})))))}))))
+            (let [user-tags (tag/tag-ids-for-user user-id)
+                  filter-tags (fn [t] (update-in t [:tag-ids] (partial into #{} (filter user-tags))))
+                  ;; [TODO] pagination
+                  search-results (search/search-as user-id ?data)
+                  ;; [TODO] send other search types too
+                  thread-ids (map :thread-id (:thread search-results))
+                  threads (map (comp filter-tags thread/thread-by-id)
+                               (take 25 thread-ids))]
+              (when ?reply-fn
+                (?reply-fn {:threads threads :thread-ids thread-ids}))))}))))

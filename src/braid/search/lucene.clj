@@ -62,15 +62,13 @@
                              nil))]
        (clucie/update!
          writer
-         (-> existing
-             (update :content str "\n" (:content message))
-             (update :created-at #(max (:created-at message) (Long. %))))
+         (update existing :content str "\n" (:content message))
          [:group-id :thread-id :content]
          :thread-id (:thread-id message))
        (clucie/add!
          writer
          [message]
-         [:group-id :thread-id :content #_:mentioned-tag-ids #_:mentioned-user-ids])))))
+         [:group-id :thread-id :content])))))
 
 (defn search
   ([group-id text] (search (store) group-id text))
