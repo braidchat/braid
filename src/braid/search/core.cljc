@@ -19,6 +19,7 @@
           [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
           [braid.search.ui.search-page :refer [search-page-view]]
           [braid.search.ui.thread-results :as thread-results]
+          [braid.search.ui.user-results :as user-results]
           [braid.search.ui.search-page-styles :refer [>search-page]]])))
 
 (defn init! []
@@ -99,6 +100,9 @@
           (fn [state _]
             (state ::state))})
 
+       (search-api/register-search-results-view! :thread thread-results/search-threads-view)
+       (search-api/register-search-results-view! :user user-results/search-users-view)
+
        (chat/register-group-page!
          {:key :search
           :view search-page-view
@@ -137,5 +141,6 @@
                   (let [search-results (search/search-as {:user-id user-id
                                                           :group-id group-id
                                                           :query query})]
+                    (prn "SEARCH RESULTS " search-results)
                     (when ?reply-fn
                       (?reply-fn search-results))))))}))))

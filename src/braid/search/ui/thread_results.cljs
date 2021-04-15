@@ -39,26 +39,27 @@
       [:div.description
        (str "Displaying " (count loaded-threads) "/"
             (count thread-ids))]]
-     [:div.threads
-      {:on-scroll ; page in more results as the user scrolls
-       (fn [e]
-         (let [div (.. e -target)]
-           (when (and (= (.-className div) "threads")
-                      (> 100 (- (.-scrollWidth div)
-                                (+ (.-scrollLeft div) (.-offsetWidth div)))
-                         0))
-             (maybe-load-more))))
-       :on-wheel ; make the mouse wheel scroll horizontally
-       (fn [e]
-         (let [target-classes (.. e -target -classList)
-               this-elt (.. e -target)]
-           ;; TODO: check if threads-div needs to scroll?
-           (when (and (or (.contains target-classes "thread")
-                          (.contains target-classes "threads"))
-                      (= 0 (.-deltaX e) (.-deltaZ e)))
-             (set! (.-scrollLeft this-elt)
-                   (- (.-scrollLeft this-elt) (.-deltaY e))))))}
-      (doall
-        (for [thread sorted-threads]
-          ^{:key (:id thread)}
-          [thread-view (:id thread)]))]]))
+     [:div.results
+      [:div.threads
+       {:on-scroll ; page in more results as the user scrolls
+        (fn [e]
+          (let [div (.. e -target)]
+            (when (and (= (.-className div) "threads")
+                       (> 100 (- (.-scrollWidth div)
+                                 (+ (.-scrollLeft div) (.-offsetWidth div)))
+                          0))
+              (maybe-load-more))))
+        :on-wheel ; make the mouse wheel scroll horizontally
+        (fn [e]
+          (let [target-classes (.. e -target -classList)
+                this-elt (.. e -target)]
+            ;; TODO: check if threads-div needs to scroll?
+            (when (and (or (.contains target-classes "thread")
+                           (.contains target-classes "threads"))
+                       (= 0 (.-deltaX e) (.-deltaZ e)))
+              (set! (.-scrollLeft this-elt)
+                    (- (.-scrollLeft this-elt) (.-deltaY e))))))}
+       (doall
+         (for [thread sorted-threads]
+           ^{:key (:id thread)}
+           [thread-view (:id thread)]))]]]))
