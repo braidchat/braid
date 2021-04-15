@@ -9,6 +9,7 @@
    [datomic.api :as d]
    [mount.core :as mount]
    [environ.core :refer [env]]
+   [taoensso.timbre :as timbre]
    ;; the following namespaces are required for their mount components:
    [braid.core]
    [braid.dev.figwheel]))
@@ -53,7 +54,32 @@
   []
   (mount/stop))
 
+(defn- disable-ns-logging!
+  [ns-name]
+  (taoensso.timbre/swap-config!
+    (fn [c]
+      (if (map? (:ns-filter c))
+        (update-in c [:ns-filter :deny]
+                   (fnil conj #{})
+                   ns-name)
+        (update c :ns-filter
+                (fn [f] {:allow f :deny #{ns-name}}))))))
+
 (defn disable-request-logging!
   []
-  (taoensso.timbre/merge-config!
-    {:ns-filter {:allow #{"*"} :deny #{"braid.core.server.middleware"}}}))
+  (doseq [ns ["braid.core.server.middleware"
+              "braid.base.server.ws-handler"
+              "braid.base.server.cqrs"]]
+    (disable-ns-logging! ns)))
+
+(defn disable-startup-logging!
+  []
+  (doseq [ns ["braid.core.server.email-digest"
+              "braid.base.server.scheduler"
+              "braid.core.server.core"]]
+    (disable-ns-logging! ns)))
+
+(defn disable-seed-logging!
+  []
+  (doseq [seed-ns ["braid.chat.seed"]]
+    (disable-ns-logging! seed-ns)))
