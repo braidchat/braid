@@ -67,21 +67,21 @@
   [feed item]
   (let [thread-id (java.util.UUID/randomUUID)]
     (cqrs/dispatch
-      [:braid.chat/create-thread!
-       {:user-id (feed :user-id)
-        :thread-id thread-id
-        :group-id (feed :group-id)}])
+      :braid.chat/create-thread!
+      {:user-id (feed :user-id)
+       :thread-id thread-id
+       :group-id (feed :group-id)})
     (cqrs/dispatch
-      [:braid.chat/create-message!
-       {:message-id (java.util.UUID/randomUUID)
-        ;; TODO: maybe also include description of item?
-        ;; it probably is html though, which may be something not
-        ;; worth the hassle
-        :content (string/join "\n" [(item :title) (item :link)])
-        :thread-id thread-id
-        :user-id (feed :user-id)
-        :mentioned-user-ids []
-        :mentioned-tag-ids (feed :tag-ids)}])))
+      :braid.chat/create-message!
+      {:message-id (java.util.UUID/randomUUID)
+       ;; TODO: maybe also include description of item?
+       ;; it probably is html though, which may be something not
+       ;; worth the hassle
+       :content (string/join "\n" [(item :title) (item :link)])
+       :thread-id thread-id
+       :user-id (feed :user-id)
+       :mentioned-user-ids []
+       :mentioned-tag-ids (feed :tag-ids)})))
 
 (defn update-feed!
   [feed]
