@@ -18,6 +18,7 @@
           [braid.core.client.routes :as routes]
           [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
           [braid.search.ui.search-page :refer [search-page-view]]
+          [braid.search.ui.thread-results :as thread-results]
           [braid.search.ui.search-page-styles :refer [>search-page]]])))
 
 (defn init! []
@@ -25,11 +26,11 @@
      (do
        (base/register-state!
          {::state {:query nil
-                   :thread-ids nil
+                   :results nil
                    :loading? false
                    :error? false}}
          {::state {:query (ds/maybe string?)
-                   :thread-ids (ds/maybe [any?])
+                   :results (ds/maybe {keyword? any?})
                    :error? boolean?
                    :loading? boolean?}})
 
@@ -52,12 +53,12 @@
             {:db (assoc-in db [::state :query] query)})
 
           ::set-results!
-          (fn [{db :db} [_ query {:keys [thread-ids]}]]
+          (fn [{db :db} [_ query results]]
             {:db (-> db
                      (assoc-in [::state :loading?] false)
                      (update-in [::state] (fn [s]
                                             (if (= (s :query) query)
-                                              (assoc s :thread-ids (vec thread-ids))
+                                              (assoc s :results results)
                                               s))))})
 
           ::set-error!!
@@ -70,7 +71,7 @@
           (fn [{db :db} [_ query group-id]]
             (when-not (string/blank? query)
               {:db (-> db
-                       (assoc-in [::state :thread-ids] nil)
+                       (assoc-in [::state :results] nil)
                        (assoc-in [::state :error?] false)
                        (assoc-in [::state :loading?] true))
                :websocket-send
@@ -78,14 +79,14 @@
                  [::search-ws [query group-id]]
                  15000
                  (fn [reply]
-                   (if (:thread-ids reply)
+                   (if (seq reply)
                      (dispatch [::set-results! query reply])
                      (dispatch [::set-error!!]))))}))
 
           ::clear-search!
           (fn [{db :db} _]
             {:db (assoc db ::state {:query nil
-                                    :thread-ids nil
+                                    :results nil
                                     :error? false
                                     :loading? false})})})
 
@@ -131,11 +132,10 @@
          {::search-ws
           (fn [{:keys [?reply-fn user-id] [query group-id] :?data}]
             ;; this can take a while, so move it to a future
-            (when (and group-id (group/user-in-group? user-id group-id))
-              (let [search-results (search/search-as {:user-id user-id
-                                                      :group-id group-id
-                                                      :query query})
-                    ;; [TODO] send other search types too
-                    thread-ids (map :thread-id (:thread search-results))]
-                (when ?reply-fn
-                  (?reply-fn {:thread-ids thread-ids})))))}))))
+            (do #_future
+                (when (and group-id (group/user-in-group? user-id group-id))
+                  (let [search-results (search/search-as {:user-id user-id
+                                                          :group-id group-id
+                                                          :query query})]
+                    (when ?reply-fn
+                      (?reply-fn search-results))))))}))))

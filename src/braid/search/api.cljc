@@ -1,8 +1,9 @@
 (ns braid.search.api
   (:require
-   [braid.base.api :as base]
    #?@(:clj
-       [[braid.search.server :as search]])))
+       [[braid.search.server :as search]]
+       :cljs
+       [[braid.search.client :as search]])))
 
 #?(:clj
    (do
@@ -29,5 +30,17 @@
      type `entity-type` (see `register-search-function!`)"
        [entity-type auth-fn]
        (swap! search/search-type-auth-check assoc entity-type auth-fn)))
+
+   :cljs
+   (do
+     (defn register-search-results-view!
+       "Register a view to display the search results for a search type.
+
+        The view function will recieve two arguments, the `status` of
+        the view page (which can be `:error`, `:loading`,
+        `:searching`, `:done-results`, or `:done-empty`) and the
+        results for the registered type."
+       [entity-type view-fn]
+       (swap! search/search-results-views assoc entity-type view-fn)))
 
    )
