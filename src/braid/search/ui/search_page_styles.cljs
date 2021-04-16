@@ -17,7 +17,7 @@
       :min-width "min-content"
       :display "flex"
       :align-items "flex-end"
-      :height "80%"}
+      :height "90%"}
      [:>.description
       {:position "absolute"
        :top "1rem"

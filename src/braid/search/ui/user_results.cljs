@@ -17,8 +17,20 @@
 (def styles
   [:>.result.user
    [:>.users.content
+    ;; would like to just do "flex-wrap: wrap" but apparently a
+    ;; flex-direction: column + flex-wrap: wrap doesn't grow the width
+    ;; of the parent when it wraps, so then this ends up overlapping
+    ;; with the search results next to it
     {:display "flex"
-     :flex-direction "row"
+     :flex-direction "column"
      :align-items "flex-end"
-     :gap "0.5rem"}
-    card-styles/>user-card]])
+     :max-height "90%"
+     :gap "0.5rem"
+     :margin-left "0.5rem"
+     :overflow-y "auto"
+     :padding "0.25rem"}
+    card-styles/>user-card
+    [:>.card.user
+     {:min-height "5rem"
+      :margin-top 0
+      :margin-left "0.5rem"}]]])
