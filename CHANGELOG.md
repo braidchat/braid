@@ -1,3 +1,16 @@
+## 16 April 2021
+
+Search system is now extensible via the following hooks:
+
+Clojure-side:
+ - `braid.search.api/register-search-function!`
+ - `braid.search.api/register-search-auth-check!`
+
+Clojurescript-side:
+ - `braid.search.api/register-search-results-view!`
+
+See the function docstrings for more details
+
 ## 1 March 2021
 
 Now uses SMTP to send emails instead of Mailgun's HTTP API.
