@@ -81,7 +81,7 @@
        :thread-id thread-id
        :user-id (feed :user-id)
        :mentioned-user-ids []
-       :mentioned-tag-ids (feed :tag-ids)})))
+       :mentioned-tag-ids (vec (feed :tag-ids))})))
 
 (defn update-feed!
   [feed]
