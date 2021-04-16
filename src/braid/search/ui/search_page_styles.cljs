@@ -1,14 +1,24 @@
-(ns braid.search.ui.search-page-styles
-  (:require
-   [braid.core.client.ui.styles.threads :as threads-style]))
+(ns braid.search.ui.search-page-styles)
 
 (def >search-page
   [:>.page.search
-   #_{:display "flex"
-    :flex-direction "row"}
-   [:>.results
-    {:display "flex"
+   [:>.title
+    {:position "absolute"
+     :top "0"}]
+   [:>.search-results
+    {:position "absolute"
+     :bottom 0
+     :display "flex"
      :height "100%"
      :flex-direction "row"
-     :position "relative"}
-    (threads-style/>threads)]])
+     :align-items "flex-end"}
+    [:>.result
+     {:position "relative"
+      :min-width "min-content"
+      :display "flex"
+      :align-items "flex-end"
+      :height "80%"}
+     [:>.description
+      {:position "absolute"
+       :top "1rem"
+       :left "1rem"}]]]])

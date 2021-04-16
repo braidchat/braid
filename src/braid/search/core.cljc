@@ -100,8 +100,14 @@
           (fn [state _]
             (state ::state))})
 
-       (search-api/register-search-results-view! :thread thread-results/search-threads-view)
-       (search-api/register-search-results-view! :user user-results/search-users-view)
+       (search-api/register-search-results-view!
+         :user
+         {:view user-results/search-users-view
+          :styles user-results/styles})
+       (search-api/register-search-results-view!
+         :thread
+         {:view thread-results/search-threads-view
+          :styles thread-results/styles})
 
        (chat/register-group-page!
          {:key :search

@@ -1,7 +1,26 @@
 (ns braid.search.ui.search-page
   (:require
    [re-frame.core :refer [dispatch subscribe]]
+   [garden.core :as garden]
    [braid.search.client :refer [search-results-views]]))
+
+(defn search-results-styles-view
+  []
+  [:style
+   {:type "text/css"
+    :dangerouslySetInnerHTML
+    {:__html
+     (garden/css
+       {:auto-prefix #{:transition
+                       :flex-direction
+                       :flex-shrink
+                       :align-items
+                       :animation
+                       :flex-grow}
+        :vendors ["webkit"]}
+       (into [:.page.search>.search-results]
+             (map :styles)
+             (vals @search-results-views)))}}])
 
 (defn search-page-view
   []
@@ -34,14 +53,15 @@
 
       (:done-results :loading)
       [:div.page.search
-       [:div.title (str "Search for \"" query "\"")]
-       [:div.content
-        [:div.description
-         (when (= status :loading)
-           "Loading more results...")]]
-       (doall (for [[type view] @search-results-views]
-                ^{:key type}
-                [view status (get results type)]))]
+       [search-results-styles-view]
+       [:div.title
+        (when (= status :loading)
+          "Loading more results...\n")
+        (str "Search for \"" query "\"")]
+       [:div.search-results
+        (doall (for [[type {:keys [view]}] @search-results-views]
+                 ^{:key type}
+                 [view status (get results type)]))]]
 
       :done-empty
       [:div.page.search

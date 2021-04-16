@@ -2,7 +2,8 @@
   (:require
    [clojure.set :as set]
    [re-frame.core :refer [dispatch subscribe]]
-   [braid.core.client.ui.views.thread :refer [thread-view]]))
+   [braid.core.client.ui.views.thread :refer [thread-view]]
+   [braid.core.client.ui.styles.threads :as threads-style]))
 
 (defn search-threads-view
   [status threads]
@@ -34,32 +35,39 @@
                                       (set thread-ids)))
              (min 25 (count thread-ids)))
       (maybe-load-more))
-    [:<>
-     [:div.content
-      [:div.description
-       (str "Displaying " (count loaded-threads) "/"
-            (count thread-ids))]]
-     [:div.results
-      [:div.threads
-       {:on-scroll ; page in more results as the user scrolls
-        (fn [e]
-          (let [div (.. e -target)]
-            (when (and (= (.-className div) "threads")
-                       (> 100 (- (.-scrollWidth div)
-                                 (+ (.-scrollLeft div) (.-offsetWidth div)))
-                          0))
-              (maybe-load-more))))
-        :on-wheel ; make the mouse wheel scroll horizontally
-        (fn [e]
-          (let [target-classes (.. e -target -classList)
-                this-elt (.. e -target)]
-            ;; TODO: check if threads-div needs to scroll?
-            (when (and (or (.contains target-classes "thread")
-                           (.contains target-classes "threads"))
-                       (= 0 (.-deltaX e) (.-deltaZ e)))
-              (set! (.-scrollLeft this-elt)
-                    (- (.-scrollLeft this-elt) (.-deltaY e))))))}
-       (doall
-         (for [thread sorted-threads]
-           ^{:key (:id thread)}
-           [thread-view (:id thread)]))]]]))
+    [:div.result.thread
+     [:div.description
+      (str "Displaying " (count loaded-threads) "/"
+           (count thread-ids))]
+     [:div.threads.content
+      {:on-scroll ; page in more results as the user scrolls
+       (fn [e]
+         (let [div (.. e -target)]
+           (when (and (= (.-className div) "threads")
+                      (> 100 (- (.-scrollWidth div)
+                                (+ (.-scrollLeft div) (.-offsetWidth div)))
+                         0))
+             (maybe-load-more))))
+       :on-wheel ; make the mouse wheel scroll horizontally
+       (fn [e]
+         (let [target-classes (.. e -target -classList)
+               this-elt (.. e -target)]
+           ;; TODO: check if threads-div needs to scroll?
+           (when (and (or (.contains target-classes "thread")
+                          (.contains target-classes "threads"))
+                      (= 0 (.-deltaX e) (.-deltaZ e)))
+             (set! (.-scrollLeft this-elt)
+                   (- (.-scrollLeft this-elt) (.-deltaY e))))))}
+      (doall
+        (for [thread sorted-threads]
+          ^{:key (:id thread)}
+          [thread-view (:id thread)]))]]))
+
+(def styles
+  [:>.result.thread
+   {:position "relative"
+    :height "100%"}
+   (threads-style/>threads)
+   [:>.threads
+    {:position "relative"
+     :top "unset"}]])
