@@ -5,21 +5,21 @@
     [braid.search.api :as search-api]
     #?@(:clj
          [[braid.chat.db.group :as group]
-          [braid.chat.db.tag :as tag]
           [braid.chat.db.thread :as thread]
           [braid.search.lucene :as lucene]
           [braid.search.server :as search]
           [braid.search.threads :as threads-search]
+          [braid.search.tags :as tags-search]
           [braid.search.users :as users-search]]
          :cljs
          [[clojure.string :as string]
           [re-frame.core :refer [dispatch]]
           [spec-tools.data-spec :as ds]
           [braid.core.client.routes :as routes]
-          [braid.core.client.state.helpers :as helpers :refer [key-by-id]]
           [braid.search.ui.search-page :refer [search-page-view]]
           [braid.search.ui.thread-results :as thread-results]
           [braid.search.ui.user-results :as user-results]
+          [braid.search.ui.tag-results :as tag-results]
           [braid.search.ui.search-page-styles :refer [>search-page]]])))
 
 (defn init! []
@@ -105,6 +105,10 @@
          {:view user-results/search-users-view
           :styles user-results/styles})
        (search-api/register-search-results-view!
+         :tag
+         {:view tag-results/search-tags-view
+          :styles tag-results/styles})
+       (search-api/register-search-results-view!
          :thread
          {:view thread-results/search-threads-view
           :styles thread-results/styles})
@@ -133,6 +137,7 @@
                      (thread/user-can-see-thread? user-id thread-id))
                    search-results)))
        (search-api/register-search-function! users-search/search-users-by-name)
+       (search-api/register-search-function! tags-search/search-tags-by-name)
 
        ;; [TODO] also register for when a message is deleted to remove
        ;; text from index?
