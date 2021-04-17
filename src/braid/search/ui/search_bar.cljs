@@ -1,18 +1,20 @@
 (ns braid.search.ui.search-bar
   (:require
-    [re-frame.core :refer [subscribe dispatch]]
-    [braid.core.client.routes :as routes]
-    [braid.lib.color :as color]))
+   [reagent.core :as r]
+   [re-frame.core :refer [subscribe dispatch]]
+   [braid.core.client.routes :as routes]
+   [braid.lib.color :as color]))
 
 (defn search-bar-view
   []
-  (let [search-query @(subscribe [:braid.search/query])]
+  (r/with-let [search-query (r/atom @(subscribe [:braid.search/query]))]
     [:div.search-bar
      [:input {:type "text"
               :placeholder "Search..."
-              :value search-query
+              :value @search-query
               :on-change
               (fn [e]
+                (reset! search-query (.. e -target -value))
                 (dispatch [:braid.search/update-query! (.. e -target -value)]))}]
      (if search-query
        [:a.action.clear
