@@ -79,9 +79,9 @@
                (list
                  [::search-ws [query group-id]]
                  15000
-                 (fn [reply]
-                   (if (seq reply)
-                     (dispatch [::set-results! query reply])
+                 (fn [{:keys [results]}]
+                   (if results
+                     (dispatch [::set-results! query results])
                      (dispatch [::set-error!!]))))}))
 
           ::clear-search!
@@ -156,4 +156,4 @@
                                                           :group-id group-id
                                                           :query query})]
                     (when ?reply-fn
-                      (?reply-fn search-results))))))}))))
+                      (?reply-fn {:results search-results}))))))}))))
