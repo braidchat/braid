@@ -7,7 +7,7 @@
   [_ users]
   [:div.result.user
    [:div.description
-    (str (count users) " users")]
+    (str (count users) " user" (when (not= (count users) 1) "s"))]
    [:div.users.content
     (doall
       (for [{:keys [user-id]} users]
