@@ -1,4 +1,6 @@
-(ns braid.search.ui.search-page-styles)
+(ns braid.search.ui.search-page-styles
+  (:require
+   [braid.core.client.ui.styles.vars :as vars]))
 
 (def >search-page
   [:>.page.search
@@ -20,5 +22,6 @@
       :height "90%"}
      [:>.description
       {:position "absolute"
+       :color vars/grey-text
        :top "1rem"
        :left "1rem"}]]]])

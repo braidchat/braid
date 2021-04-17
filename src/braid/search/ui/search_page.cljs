@@ -36,9 +36,8 @@
       :searching
       [:div.page.search
        [:div.title (str "Search for \"" query "\"")]
-       [:div.content
-        [:div.description
-         "Searching..."]]]
+       [:div.description
+        "Searching..."]]
 
       :error
       [:div.page.search
@@ -55,16 +54,16 @@
       [:div.page.search
        [search-results-styles-view]
        [:div.title
-        (when (= status :loading)
-          "Loading more results...\n")
-        (str "Search for \"" query "\"")]
+        (str "Search for \"" query "\"")
+        (when (= status :loading) "  Loading...") ]
        [:div.search-results
-        (doall (for [[type {:keys [view]}] @search-results-views]
-                 ^{:key type}
-                 [view status (get results type)]))]]
+        (doall
+          (for [[type {:keys [view]}] @search-results-views
+                :when (seq (get results type))]
+            ^{:key type}
+            [view status (get results type)]))]]
 
       :done-empty
       [:div.page.search
        [:div.title (str "Search for \"" query "\"")]
-       [:div.content
-        [:div.description "No results."]]])))
+       [:div.description "No results."]])))
