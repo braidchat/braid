@@ -66,7 +66,7 @@
 
 (defn fontawesome
   [unicode]
-  (merge {:font-family "\"Font Awesome 5 Free\""
+  (merge {:font-family "\"Font Awesome 5 Free\", \"Font Awesome 5 Brands\""
           :font-weight 900}
          (when unicode
            {:content (str "\"" unicode "\"")})))
