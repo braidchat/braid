@@ -1,5 +1,6 @@
 (ns braid.search.tags
   (:require
+   [clojure.string :as string]
    [datomic.api :as d]
    [braid.core.server.db :as db]))
 
@@ -10,11 +11,12 @@
                 :in $ [?tag-name ...] ?g-id
                 :where
                 [?g :group/id ?g-id]
-                [?t :tag/name ?tag-name]
+                [?t :tag/name ?tag-name-case]
+                [(clojure.string/lower-case ?tag-name-case) ?tag-name]
                 [?t :tag/group ?g]
                 [?t :tag/id ?t-id]]
               (db/db)
-              tags
+              (map string/lower-case tags)
               group-id)
          (into #{}
                (map (fn [[tag-id tag-name]]
