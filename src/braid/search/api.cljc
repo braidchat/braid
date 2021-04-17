@@ -36,11 +36,25 @@
      (defn register-search-results-view!
        "Register a view and styles to display the search results for a search type.
 
+        This function takes the following arguments:
+        - `entity-type`: a keyword indicating the type of entity this
+          view will display (see
+          `braid.search.api/register-search-function!`)
+        - a map with the following keys:
+          - `:view`: The view function (see below)
+          - `:styles` a vector of styles in \"garden\" format
+          - `:priority` a number indicating the order these results
+            should be shown on the search page (lower is further to
+            the left)
+
         The view function will recieve two arguments, the `status` of
         the view page (which can be `:error`, `:loading`,
         `:searching`, `:done-results`, or `:done-empty`) and the
         results for the registered type."
-       [entity-type {:keys [view styles]}]
-       (swap! search/search-results-views assoc entity-type {:view view :styles styles})))
+       [entity-type {:keys [view styles priority]}]
+       (swap! search/search-results-views assoc entity-type
+              {:view view
+               :styles styles
+               :priority priority})))
 
    )

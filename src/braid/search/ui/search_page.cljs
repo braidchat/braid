@@ -58,7 +58,8 @@
         (when (= status :loading) "  Loading...") ]
        [:div.search-results
         (doall
-          (for [[type {:keys [view]}] @search-results-views
+          (for [[type {:keys [view]}] (->> @search-results-views
+                                           (sort-by (comp :priority second)))
                 :when (seq (get results type))]
             ^{:key type}
             [view status (get results type)]))]]

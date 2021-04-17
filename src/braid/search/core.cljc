@@ -103,15 +103,18 @@
        (search-api/register-search-results-view!
          :user
          {:view user-results/search-users-view
-          :styles user-results/styles})
+          :styles user-results/styles
+          :priority 1})
        (search-api/register-search-results-view!
          :tag
          {:view tag-results/search-tags-view
-          :styles tag-results/styles})
+          :styles tag-results/styles
+          :priority 10})
        (search-api/register-search-results-view!
          :thread
          {:view thread-results/search-threads-view
-          :styles thread-results/styles})
+          :styles thread-results/styles
+          :priority 100})
 
        (chat/register-group-page!
          {:key :search
