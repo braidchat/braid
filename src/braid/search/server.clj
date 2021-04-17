@@ -13,8 +13,6 @@
   [_ results]
   results)
 
-(defn tee [x] (prn x) x)
-
 (defn search-as
   "Return the ids of all threads, visible to the user, in the given group,
   matching the provided query.
