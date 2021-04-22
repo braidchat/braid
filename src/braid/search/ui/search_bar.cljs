@@ -16,7 +16,7 @@
               (fn [e]
                 (reset! search-query (.. e -target -value))
                 (dispatch [:braid.search/update-query! (.. e -target -value)]))}]
-     (if search-query
+     (if (and @search-query (not= "" @search-query))
        [:a.action.clear
         {:on-click (fn [] (reset! search-query ""))
          :href (routes/group-page-path {:group-id @(subscribe [:open-group-id])
