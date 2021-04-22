@@ -18,7 +18,8 @@
                 (dispatch [:braid.search/update-query! (.. e -target -value)]))}]
      (if search-query
        [:a.action.clear
-        {:href (routes/group-page-path {:group-id @(subscribe [:open-group-id])
+        {:on-click (fn [] (reset! search-query ""))
+         :href (routes/group-page-path {:group-id @(subscribe [:open-group-id])
                                         :page-id "inbox"})
          :style {:color (color/->color @(subscribe [:open-group-id]))}}]
        [:div.action.search])]))
