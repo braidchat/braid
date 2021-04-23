@@ -47,7 +47,7 @@
 
           :braid.uploads-page/get-group-uploads!
           (fn [{state :db} _]
-            (let [group-id (state :open-group-id)]
+            (when-let [group-id (state :open-group-id)]
               {:websocket-send
                (list
                  [:braid.server/uploads-in-group group-id]
