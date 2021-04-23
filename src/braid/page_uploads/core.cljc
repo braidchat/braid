@@ -43,7 +43,7 @@
        (base/register-events!
          {::store-group-uploads!
           (fn [{db :db} [_ group-id uploads]]
-            {:db (assoc-in db [::uploads group-id] uploads)})
+            {:db (assoc-in db [::uploads group-id] (vec uploads))})
 
           :braid.uploads-page/get-group-uploads!
           (fn [{state :db} _]
