@@ -12,6 +12,7 @@
                                   {:user-id-fn
                                    (fn [ob] (or (get-in ob [:session :user-id])
                                                (get-in ob [:session :fake-id])))
+                                   :simple-auto-threading? true
                                    :csrf-token-fn nil
                                    :ws-kalive-ms 30000
                                    :packer packer})]
