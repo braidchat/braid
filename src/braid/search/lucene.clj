@@ -75,7 +75,8 @@
        (clucie/add!
          wrtr
          [message]
-         [:group-id :thread-id :content])))))
+         [:group-id :thread-id :content]))
+     (.commit wrtr))))
 
 (defn search
   ([group-id text] (search (store) group-id text))
