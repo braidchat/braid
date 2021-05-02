@@ -47,6 +47,7 @@
 (defonce writers-cache (agent {}))
 (defn writer
   [store]
+  ;; [TODO] use a promise instead of awaiting?
   (send writers-cache update store
         (fn [writer]
           (or writer (store/store-writer store analyzer))))
