@@ -56,14 +56,14 @@
 
 (defn index-message!
   ([message] (index-message! (store) message))
-  ([store message]
+  ([reader message]
    (let [message (-> message
                      (update :created-at (memfn getTime))
                      (assoc :group-id (db.thread/thread-group-id (:thread-id message))))
-         wrtr (writer store)]
+         wrtr (writer (store))]
      (if-let [existing (try
                          (first
-                           (clucie/search store {:group-id (:group-id message)
+                           (clucie/search reader {:group-id (:group-id message)
                                                  :thread-id (:thread-id message)}
                                           1))
                          (catch IndexNotFoundException _
