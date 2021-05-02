@@ -37,36 +37,43 @@
 (defonce -store (atom nil))
 (defn store
   []
-  (if-let [s @-store]
-    s
-    (let [s (if-let [store-path (config :lucene-store-location)]
-              (store/disk-store store-path)
-              (store/memory-store))]
-      (reset! -store s)
-      s)))
+  (swap! -store
+         (fn [s]
+           (or s
+               (if-let [store-path (config :lucene-store-location)]
+                 (store/disk-store store-path)
+                 (store/memory-store))))))
+
+(defonce writers-cache (agent {}))
+(defn writer
+  [store]
+  (send writers-cache update store
+        (fn [writer]
+          (or writer (store/store-writer store analyzer))))
+  (await-for 1000 writers-cache)
+  (get @writers-cache store))
 
 (defn index-message!
-  ([message]
-   (with-open [writer (store/store-writer (store) analyzer)]
-     (index-message! writer (store) message)))
-  ([writer reader message]
+  ([message] (index-message! (store) message))
+  ([store message]
    (let [message (-> message
                      (update :created-at (memfn getTime))
-                     (assoc :group-id (db.thread/thread-group-id (:thread-id message))))]
+                     (assoc :group-id (db.thread/thread-group-id (:thread-id message))))
+         wrtr (writer store)]
      (if-let [existing (try
                          (first
-                           (clucie/search reader {:group-id (:group-id message)
-                                                  :thread-id (:thread-id message)}
+                           (clucie/search store {:group-id (:group-id message)
+                                                 :thread-id (:thread-id message)}
                                           1))
-                           (catch IndexNotFoundException _
-                             nil))]
+                         (catch IndexNotFoundException _
+                           nil))]
        (clucie/update!
-         writer
+         wrtr
          (update existing :content str "\n" (:content message))
          [:group-id :thread-id :content]
          :thread-id (:thread-id message))
        (clucie/add!
-         writer
+         wrtr
          [message]
          [:group-id :thread-id :content])))))
 
@@ -93,10 +100,11 @@
   "Import all existing messages into Lucene"
   []
   ;; Need to have an index created to make a reader, so just insert a dummy record
-  (index-message! {:content "hello" :group-id (java.util.UUID/randomUUID)
-                   :thread-id (java.util.UUID/randomUUID) :created-at (java.util.Date.)})
-  (with-open [reader (store/store-reader (store))
-              writer (store/store-writer (store) analyzer)]
+  (index-message!
+    (store)
+    {:content "hello" :group-id (java.util.UUID/randomUUID)
+     :thread-id (java.util.UUID/randomUUID) :created-at (java.util.Date.)})
+  (with-open [reader (store/store-reader (store))]
     (doseq [msg (->> (d/q '[:find [(pull ?m pull-pattern) ...]
                            :in $ pull-pattern
                            :where [?m :message/id _]]
@@ -105,4 +113,4 @@
                     (map common/db->message))]
       (when (and (:group-id msg) (:thread-id msg) (:content msg)
                  (:created-at msg))
-        (index-message! writer reader msg)))))
+        (index-message! reader msg)))))
