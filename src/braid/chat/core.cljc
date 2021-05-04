@@ -31,20 +31,23 @@
      (do
        (base/register-db-schema! schema/schema)
        (base/register-db-seed-fn! seed/seed!)
+
        ;; TODO some of these might better belong elsewhere
-       (doseq [k [:aws-bucket
-                  :aws-region
-                  :aws/credentials-provider
-                  :cookie-secure
-                  :db-url
-                  :github-client-id
-                  :github-client-secret
-                  :hmac-secret
-                  :http-only
-                  :email-host :email-user :email-password :email-port
-                  :email-secure :email-from
-                  :site-url]]
-         (base/register-config-var! k))
+       (base/register-config-var! :aws-bucket :optional [:string])
+       (base/register-config-var! :aws-region :optional [:string])
+       (base/register-config-var! :aws/credentials-provider :optional [:string])
+       (base/register-config-var! :cookie-secure :optional [:boolean])
+       (base/register-config-var! :db-url :optional [:re #"^datomic:.*$"])
+       (base/register-config-var! :github-client-id :optional [:re #"^[a-f0-9]{20}$"])
+       (base/register-config-var! :github-client-secret :optional [:re #"^[a-f0-9]{40}$"])
+       (base/register-config-var! :hmac-secret :optional [:string])
+       (base/register-config-var! :email-host :optional [:string])
+       (base/register-config-var! :email-user :optional [:string])
+       (base/register-config-var! :email-password :optional [:string])
+       (base/register-config-var! :email-port :optional [:int])
+       (base/register-config-var! :email-secure :optional [:enum "ssl" "tls"])
+       (base/register-config-var! :email-from :optional [:string])
+       (base/register-config-var! :site-url :optional [:re #"^https?://.*$"])
 
        (base/register-initial-user-data! initial-data/initial-data-for-user)
 

@@ -26,7 +26,7 @@
 (defn init! []
   #?(:clj
      (do
-       (base/register-config-var! :google-maps-api-key)
+       (base/register-config-var! :google-maps-api-key :optional [:string])
 
        (base/register-private-http-route!
         [:get "/maps-embeds/static-map"
@@ -42,7 +42,7 @@
                   :body (:body resp)})
                {:status 500
                 :body nil})))]))
-
+     
      :cljs
      (do
        (embeds/register-embed!

@@ -128,7 +128,7 @@
 
      :clj
      (do
-       (base/register-config-var! :lucene-store-location)
+       (base/register-config-var! :lucene-store-location :optional [:string])
 
        (search-api/register-search-function! threads-search/search-threads-by-tag)
        (search-api/register-search-function! threads-search/search-threads-by-user)

@@ -19,3 +19,4 @@ figwheel_server.log
 /datomic-pro-0.9.5697
 /lucene
 .cpcache
+/.calva

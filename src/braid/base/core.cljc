@@ -37,10 +37,10 @@
      :clj
      (do
        ;; TODO transfer appropriate vars from braid.chat.core
-       (doseq [k [:app-title
-                  :prod-js
-                  :redis-uri]]
-         (base/register-config-var! k))
+       (base/register-config-var! :app-title :optional [:string])
+       (base/register-config-var! :prod-js :optional [:boolean])
+       (base/register-config-var! :redis-uri :optional [:re #"^redis://.*$"])
+
 
        (base/register-server-message-handlers!
          {::server-start
