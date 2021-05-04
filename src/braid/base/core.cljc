@@ -38,9 +38,9 @@
      (do
        ;; TODO transfer appropriate vars from braid.chat.core
        (base/register-config-var! :app-title :optional [:string])
-       (base/register-config-var! :prod-js :optional [:string])
-       (base/register-config-var! :redis-uri :optional [:string])
-       
+       (base/register-config-var! :prod-js :optional [:boolean])
+       (base/register-config-var! :redis-uri :optional [:re #"^redis://.*$"])
+
 
        (base/register-server-message-handlers!
          {::server-start

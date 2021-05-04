@@ -23,22 +23,25 @@
      Removes keys that aren't defined in schema.
      Throws an error when missing keys or values are invalid."
   [env config-vars]
-  (let [schema (->malli-schema config-vars)]
+  (let [schema (->malli-schema config-vars)
+        env (malli/decode schema env (malli.transform/transformer
+                                       malli.transform/strip-extra-keys-transformer
+                                       malli.transform/string-transformer))]
     (if (malli/validate schema env)
-      (malli/decode schema env malli.transform/strip-extra-keys-transformer)
+      env
       (let [cause (malli/explain schema env)]
         (throw
-         (ex-info (str "Config invalid\n"
-                       (with-out-str
-                         (pprint/pprint (malli.error/humanize cause)))) cause))))))
+          (ex-info (str "Config invalid\n"
+                        (with-out-str
+                          (pprint/pprint (malli.error/humanize cause)))) cause))))))
 
 #_(select-and-validate
    {:foo "123"
     :bar 2}
    [{:key :foo
      :required? false
-     :schema [:string]}])
-                     
+     :schema [:int]}])
+
 
 (defstate config
   :start
