@@ -7,7 +7,13 @@
 
 (defn search-bar-view
   []
-  (r/with-let [search-query (r/atom @(subscribe [:braid.search/query]))]
+  (r/with-let [search-query (r/atom @(subscribe [:braid.search/query]))
+               prev-page (r/atom (:type @(subscribe [:page])))]
+    (let [current-page (:type @(subscribe [:page]))]
+      (when (not= @prev-page current-page)
+        (when (= @prev-page :search)
+          (reset! search-query ""))
+        (reset! prev-page current-page)))
     [:div.search-bar
      [:input {:type "text"
               :placeholder "Search..."
