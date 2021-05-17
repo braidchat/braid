@@ -21,6 +21,11 @@
     (dispatch [:set-group-and-page! [(uuid group-id) page]])
     (pages/on-load! (keyword page-id) page)))
 
+;; invites end up here
+(defroute group-path "/groups/:group-id" [group-id]
+  (router/go-to (group-page-path {:group-id group-id
+                                  :page-id "inbox"})))
+
 (defroute system-page-path "/pages/:page-id" [page-id query-params]
   (let [page (merge {:type (keyword page-id)
                      :page-id (keyword page-id)}
