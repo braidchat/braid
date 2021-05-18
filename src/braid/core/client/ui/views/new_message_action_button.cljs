@@ -9,12 +9,12 @@
   (hooks/register! (atom []) [HeaderItem]))
 
 (defn new-message-action-button-view
-  [{:keys [thread-id group-id] :as config}]
+  [{:keys [thread-id group-id]}]
   [:div.plus
    (let [popup-view (fn [] [hover-menu-view
-                           {:thread-id thread-id
-                            :group-id group-id}
-                           @menu-items :top])]
+                            {:thread-id thread-id
+                             :group-id group-id}
+                            @menu-items :top])]
      {:on-mouse-enter
       (popovers/on-mouse-enter popup-view)
       :on-touch-start
