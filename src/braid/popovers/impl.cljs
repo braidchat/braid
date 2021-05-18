@@ -17,11 +17,9 @@
                           (when-not modal?
                             (reset! popover nil)))
         :on-click (fn [e]
-                    (.stopPropagation e)
                     (when (= (.-target e) (.-currentTarget e))
                       (reset! popover nil)))
         :on-touch-start (fn [e]
-                          (.stopPropagation e)
                           (when (= (.-target e) (.-currentTarget e))
                             (reset! popover nil)))
         :style
