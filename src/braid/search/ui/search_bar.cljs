@@ -11,8 +11,9 @@
                prev-page (r/atom (:type @(subscribe [:page])))]
     (let [current-page (:type @(subscribe [:page]))]
       (when (not= @prev-page current-page)
-        (when (= @prev-page :search)
-          (reset! search-query ""))
+        (if (= @prev-page :search)
+          (reset! search-query "")
+          (reset! search-query @(subscribe [:braid.search/query])))
         (reset! prev-page current-page)))
     [:div.search-bar
      [:input {:type "text"
