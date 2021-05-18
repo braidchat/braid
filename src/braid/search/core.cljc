@@ -122,7 +122,7 @@
           :on-load (fn [page]
                      (dispatch [::set-query! (page :query)])
                      (dispatch [:braid.search/search-history! (page :query) (page :group-id)]))
-          :on-exit (fn [page]
+          :on-exit (fn [_]
                      (dispatch [::clear-search!]))
           :styles >search-page}))
 
