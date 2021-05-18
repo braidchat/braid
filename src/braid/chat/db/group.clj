@@ -11,8 +11,6 @@
   [group-name]
   (some? (d/pull (db/db) '[:group/id] [:group/name group-name])))
 
-
-
 (defn group-by-id
   [group-id]
   (some-> (d/pull (db/db) group-pull-pattern [:group/id group-id])
