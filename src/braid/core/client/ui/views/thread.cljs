@@ -19,8 +19,8 @@
 (def max-file-size (* 10 1024 1024))
 
 (defn messages-view [thread-id]
-  ; Closing over thread-id, but the only time a thread's id changes is the new
-  ; thread box, which doesn't have messages anyway
+  ;; Closing over thread-id, but the only time a thread's id changes is the new
+  ;; thread box, which doesn't have messages anyway
   (let [messages (subscribe [:messages-for-thread thread-id])
 
         last-open-at (subscribe [:thread-last-open-at thread-id])
