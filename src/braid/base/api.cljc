@@ -159,7 +159,7 @@
                             :required true
                             :optional false)
                :schema (if (= :optional required-or-optional)
-                         [:or schema nil?]
+                         [:maybe schema]
                          schema)}))
 
      (defn register-server-message-handlers!
