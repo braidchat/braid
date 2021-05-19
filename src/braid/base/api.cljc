@@ -158,7 +158,9 @@
                :required? (case required-or-optional
                             :required true
                             :optional false)
-               :schema schema}))
+               :schema (if (= :optional required-or-optional)
+                         [:or schema nil?]
+                         schema)}))
 
      (defn register-server-message-handlers!
        "Add a map of websocket-event-name -> event-handler-fn to handle events from the client"
