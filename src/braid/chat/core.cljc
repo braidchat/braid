@@ -35,7 +35,7 @@
        ;; TODO some of these might better belong elsewhere
        (base/register-config-var! :aws-bucket :optional [:string])
        (base/register-config-var! :aws-region :optional [:string])
-       (base/register-config-var! :aws/credentials-provider :optional [:string])
+       (base/register-config-var! :aws/credentials-provider :optional [:fn fn?])
        (base/register-config-var! :cookie-secure :optional [:boolean])
        (base/register-config-var! :db-url :optional [:re #"^datomic:.*$"])
        (base/register-config-var! :github-client-id :optional [:re #"^[a-f0-9]{20}$"])
