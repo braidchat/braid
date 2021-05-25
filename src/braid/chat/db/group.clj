@@ -176,13 +176,30 @@
          (db/db) group-id)
     (map (fn [[tag]] [:db/add [:user/id user-id] :user/subscribed-tag tag]))))
 
+(defn user-subscribe-to-all-tagged-threads
+  "Subscribe the user to all tagged conversation threads (ie. public).
+   Without this, threads that were started *before* a new user registered
+   would not show up for that user even if new messages were posted on those threads."
+  [user-id group-id]
+  (->> (d/q '[:find [?thread ...]
+              :in $ ?group-id
+              :where
+              [?group :group/id ?group-id]
+              [?tag :tag/group ?group]
+              [?thread :thread/tag ?tag]
+              [?thread :thread/group ?group]]
+            (db/db) group-id)
+       (map (fn [thread]
+              [:db/add [:user/id user-id] :user/subscribed-thread thread]))))
+
 (defn user-join-group-txn
   "Add a user to the given group, subscribe them to the group tags,
   and subscribe them to the five most recent threads in the group."
   [user-id group-id]
   (concat
     (user-add-to-group-txn user-id group-id)
-    (user-subscribe-to-group-tags-txn user-id group-id)))
+    (user-subscribe-to-group-tags-txn user-id group-id)
+    (user-subscribe-to-all-tagged-threads user-id group-id)))
 
 (defn user-open-recent-threads
   "Opens last 10 visible threads for new user.
