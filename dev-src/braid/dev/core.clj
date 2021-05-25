@@ -14,6 +14,36 @@
    [braid.core]
    [braid.dev.figwheel]))
 
+(defn- disable-ns-logging!
+  [ns-name]
+  (taoensso.timbre/swap-config!
+    (fn [c]
+      (if (map? (:ns-filter c))
+        (update-in c [:ns-filter :deny]
+                   (fnil conj #{})
+                   ns-name)
+        (update c :ns-filter
+                (fn [f] {:allow f :deny #{ns-name}}))))))
+
+(defn disable-request-logging!
+  []
+  (doseq [ns ["braid.core.server.middleware"
+              "braid.base.server.ws-handler"
+              "braid.base.server.cqrs"]]
+    (disable-ns-logging! ns)))
+
+(defn disable-startup-logging!
+  []
+  (doseq [ns ["braid.core.server.email-digest"
+              "braid.base.server.scheduler"
+              "braid.core.server.core"]]
+    (disable-ns-logging! ns)))
+
+(defn disable-seed-logging!
+  []
+  (doseq [seed-ns ["braid.chat.seed"]]
+    (disable-ns-logging! seed-ns)))
+
 (defn drop-db!
   "Drops the database (and also the database connection).
   To re-seed, you'll need to make a new connection, usually by the (start!) function in dev.core"
@@ -45,6 +75,7 @@
                          (assoc :aws/credentials-provider
                                 (constantly ((juxt :aws-access-key :aws-secret-key) env)))))
       (mount/start))
+  (disable-ns-logging! "braid.core.server.middleware")
   (when (zero? port)
     (mount/stop #'braid.base.conf/config)
     (mount/start #'braid.base.conf/config)))
@@ -53,33 +84,3 @@
   "Helper function for stopping all Braid components."
   []
   (mount/stop))
-
-(defn- disable-ns-logging!
-  [ns-name]
-  (taoensso.timbre/swap-config!
-    (fn [c]
-      (if (map? (:ns-filter c))
-        (update-in c [:ns-filter :deny]
-                   (fnil conj #{})
-                   ns-name)
-        (update c :ns-filter
-                (fn [f] {:allow f :deny #{ns-name}}))))))
-
-(defn disable-request-logging!
-  []
-  (doseq [ns ["braid.core.server.middleware"
-              "braid.base.server.ws-handler"
-              "braid.base.server.cqrs"]]
-    (disable-ns-logging! ns)))
-
-(defn disable-startup-logging!
-  []
-  (doseq [ns ["braid.core.server.email-digest"
-              "braid.base.server.scheduler"
-              "braid.core.server.core"]]
-    (disable-ns-logging! ns)))
-
-(defn disable-seed-logging!
-  []
-  (doseq [seed-ns ["braid.chat.seed"]]
-    (disable-ns-logging! seed-ns)))
