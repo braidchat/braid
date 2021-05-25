@@ -346,8 +346,7 @@
 (reg-event-fx
   :remove-from-group!
   (fn [_ [ _ {:keys [group-id user-id] :as args}]]
-    {:websocket-send (list [:braid.server/remove-from-group args])
-     :dispatch [:redirect-from-root!]}))
+    {:websocket-send (list [:braid.server/remove-from-group args])}))
 
 (reg-event-fx
   :set-login-state!
