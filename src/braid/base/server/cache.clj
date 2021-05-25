@@ -15,7 +15,7 @@
   (atom {}))
 
 (defn cache-set! [k v]
-  (if redis?
+  (if @redis?
     (car/wcar @redis-conn (car/set k v))
     (swap! dev-cache assoc k v)))
 
