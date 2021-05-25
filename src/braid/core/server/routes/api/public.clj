@@ -38,7 +38,7 @@
         (error-response 401 "Group is private"))
       (error-response 404 "No group with that id found")))
 
-  ; log in
+  ;; log in
   (PUT "/session" [email password :as req]
     (if-let [user-id (when (and email password)
                        (user/authenticate-user email password))]
@@ -65,7 +65,7 @@
              :session (assoc (req :session) :user-id (user :id))})))
       (error-response 500 "Couldn't exchange token with github")))
 
-  ; register a user
+  ;; register a user
   (PUT "/users" [email password :as req]
     (cond
       (string/blank? email)
@@ -97,7 +97,7 @@
           (edn-response {:ok true}))
       (error-response 400 :no-such-email)))
 
-  ; accept an email invite to join a group
+  ;; accept an email invite to join a group
   (POST "/register" [token invite_id email now hmac :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
@@ -125,7 +125,7 @@
                :session (assoc (req :session) :user-id user-id)
                :body ""}))))))
 
-  ; join by invite link
+  ;; join by invite link
   (POST "/link-register" [group-id email password now form-hmac :as req]
     (let [bad-resp {:status 400 :headers {"Content-Type" "text/plain"}}]
       (if-not group-id
@@ -175,7 +175,7 @@
                    :body ""}))
               (assoc bad-resp :body "Not logged in")))))))
 
-  ; reset password
+  ;; reset password
   (POST "/reset" [new-password token user-id :<< as-uuid now hmac :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
