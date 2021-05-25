@@ -275,14 +275,12 @@
        (when (and group-id to-remove-id
                (or (= to-remove-id user-id)
                    (group/user-is-group-admin? user-id group-id)))
-         (db/run-txns! (group/user-leave-group-txn to-remove-id group-id))
-         (broadcast-group-change group-id [:braid.client/user-left
-                                           [group-id to-remove-id]])
-         (chsk-send!
-           to-remove-id
-           [:braid.client/left-group [group-id (:name (group/group-by-id group-id))]])))
-     ;; TODO rewrite to use cofx
-     {})
+         {:db-run-txns! (group/user-leave-group-txn to-remove-id group-id)
+          :group-broadcast! [group-id [:braid.client/user-left
+                                       [group-id to-remove-id]]]
+          :chsk-send! [to-remove-id
+                       [:braid.client/left-group
+                        [group-id (:name (group/group-by-id group-id))]]]})))
 
    :braid.server/set-group-intro
    (fn [{:keys [?data user-id]}]
