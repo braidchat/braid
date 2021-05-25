@@ -182,10 +182,14 @@
   [user-id group-id]
   (concat
     (user-add-to-group-txn user-id group-id)
-    (user-subscribe-to-group-tags-txn user-id group-id)
-    ; add user to recent threads in group
-    (mapcat
-      (fn [t] (thread/user-show-thread-txn user-id (t :id)))
-      (thread/recent-threads {:user-id user-id
-                              :group-id group-id
-                              :num-threads 5}))))
+    (user-subscribe-to-group-tags-txn user-id group-id)))
+
+(defn user-open-recent-threads
+  "Opens last 10 visible threads for new user.
+  This can't be done in same tx as 'user-join-group' b/c that txn is the one that makes threads available for the user."
+  [user-id group-id]
+  (mapcat
+    (fn [t] (thread/user-show-thread-txn user-id (t :id)))
+    (thread/recent-threads {:user-id user-id
+                            :group-id group-id
+                            :num-threads 10})))

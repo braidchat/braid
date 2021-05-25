@@ -9,6 +9,7 @@
 (defn user-join-group!
   [user-id group-id]
   (db/run-txns! (group/user-join-group-txn user-id group-id))
+  (db/run-txns! (group/user-open-recent-threads user-id group-id))
   (sync-helpers/broadcast-group-change
     group-id
     [:braid.client/new-user [(-> (user/user-by-id user-id)
