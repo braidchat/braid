@@ -155,10 +155,10 @@
   (reg-sub
     (with-ns ns :fields-valid?)
     (fn [state [_ fields]]
-      (->> fields
-           (map (fn [field]
-                  (and
-                    (empty? (get-in state [k :fields field :errors]))
-                    (= 0 (get-in state [k :fields field :validations-left]))
-                    (not (get-in state [k :fields field :typing?])))))
-           (every? true?)))))
+      (every?
+        (fn [field]
+          (and
+            (empty? (get-in state [k :fields field :errors]))
+            (= 0 (get-in state [k :fields field :validations-left]))
+            (not (get-in state [k :fields field :typing?]))))
+        fields))))
