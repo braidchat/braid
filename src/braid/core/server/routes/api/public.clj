@@ -126,26 +126,36 @@
                :body ""}))))))
 
   ; join by invite link
-  (POST "/link-register" [group-id email now form-hmac :as req]
+  (POST "/link-register" [group-id email password now form-hmac :as req]
     (let [bad-resp {:status 400 :headers {"Content-Type" "text/plain"}}]
       (if-not group-id
         (assoc bad-resp :body "Missing group id")
         (let [group-id (java.util.UUID/fromString group-id)
               group-settings (group/group-settings group-id)]
-          (if-not (invites/verify-hmac form-hmac (str now group-id))
+          (cond
+            (not (invites/verify-hmac form-hmac (str now group-id)))
             (assoc bad-resp :body "No such group or the request has been tampered with")
-            (if (string/blank? email)
-              (assoc bad-resp :body "Invalid email")
-              (if (user/user-with-email email)
-                (assoc bad-resp
-                       :body (str "A user is already registered with that email.\n"
-                                  "Log in and try joining"))
-                (let [id (events/register-user! email group-id)
-                      referer (get-in req [:headers "referer"] (config :site-url))
-                      [proto _ referrer-domain] (string/split referer #"/")]
-                  {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
-                   :session (assoc (req :session) :user-id id)
-                   :body ""}))))))))
+
+            (string/blank? email)
+            (assoc bad-resp :body "Invalid email")
+
+            (string/blank? password)
+            (assoc bad-resp :body "Empty password")
+
+            (user/user-with-email email)
+            (assoc bad-resp
+                   :body (str "A user is already registered with that email.\n"
+                              "Log in and try joining"))
+
+            :else
+            (let [id (events/register-user! {:email email
+                                             :password password
+                                             :group-id group-id})
+                  referer (get-in req [:headers "referer"] (config :site-url))
+                  [proto _ referrer-domain] (string/split referer #"/")]
+              {:status 302 :headers {"Location" (str proto "//" referrer-domain)}
+               :session (assoc (req :session) :user-id id)
+               :body ""}))))))
 
   (POST "/link-join" [group-id now form-hmac :as req]
     (let [bad-resp {:status 400 :headers {"Content-Type" "text/plain"}}]

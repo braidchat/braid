@@ -17,8 +17,9 @@
                              group-id]]))
 
 (defn register-user!
-  [email group-id]
+  [{:keys [email password group-id]}]
   (let [[user] (db/run-txns! (user/create-user-txn {:id (db/uuid)
                                                     :email email}))]
+    (db/run-txns! (user/set-user-password-txn (:id user) password))
     (user-join-group! (user :id) group-id)
     (user :id)))

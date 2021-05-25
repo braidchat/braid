@@ -147,6 +147,42 @@ body textarea, body input {
   color: #444444;
   margin: 0 0 0.5rem 0;
 }
+.app > .main .gateway >.section-wrapper >.section >form >fieldset > label {
+  display: block;
+  margin-bottom: 2em;
+}
+
+.app > .main .gateway >.section-wrapper >.section >form >fieldset > label > input[type=text],
+.app > .main .gateway >.section-wrapper >.section >form >fieldset > label > input[type=email],
+.app > .main .gateway >.section-wrapper >.section >form >fieldset > label > input[type=password] {
+  font-size: 1.25rem;
+  font-family: Open Sans;
+  padding: 0 0.4em;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e0e0e0;
+  line-height: 2em;
+  height: 2em;
+  border-radius: 3px;
+}
+
+.app > .main .gateway >.section-wrapper >.section >form >fieldset >label >input:focus {
+   border-color: #2bb8ba;
+   outline: none;
+}
+
+.app > .main .gateway >.section-wrapper >.section >form >fieldset >label >input::-webkit-input-placeholder,
+.app > .main .gateway >.section-wrapper >.section >form >fieldset >label >input::-moz-placeholder {
+   color: #444444;
+}
+
+.app > .main .gateway >.section-wrapper > .section > form > fieldset > label > h2 {
+  font-size: 1em;
+  color: #444444;
+  margin: 0 0 0.5rem 0;
+  text-align: left;
+  margin-bottom: 0;
+}
 
 .app >.main .gateway button.submit {
   width: 100%;
@@ -223,7 +259,14 @@ body textarea, body input {
                   <input type="hidden" name="now" value="{{now}}">
                   <input type="hidden" name="form-hmac" value="{{form-hmac}}">
                   <fieldset>
-                    <input type="email" name="email" placeholder="email address">
+                    <label>
+                      <h2 class="field">Email</h2>
+                      <input type="email" name="email" placeholder="email address">
+                    </label>
+                    <label>
+                      <h2 class="field">Password</h2>
+                      <input type="password" name="password" placeholder="•••••••••••">
+                    </label>
                     <button class="submit" type="submit">Register</button>
                   </fieldset>
                 </form>
