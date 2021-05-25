@@ -38,7 +38,7 @@
      :braid.client/left-group
      (fn [_ [group-id group-name]]
        (dispatch [:leave-group! {:group-id group-id
-                                :group-name group-name}]))
+                                 :group-name group-name}]))
 
      :braid.client/user-connected
      (fn [_ [group-id user-id]]
