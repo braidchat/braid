@@ -54,7 +54,8 @@
 
      :braid.client/user-left
      (fn [_ [group-id user-id]]
-       (dispatch [:remove-user-from-group! [user-id group-id]]))
+       (dispatch [:remove-user-from-group! {:user-id user-id
+                                            :group-id group-id}]))
 
      :braid.client/new-admin
      (fn [_ [group-id new-admin-id]]

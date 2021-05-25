@@ -538,7 +538,7 @@
 
 (reg-event-fx
   :remove-user-from-group!
-  (fn [{db :db} [_ [group-id user-id]]]
+  (fn [{db :db} [_ {:keys [group-id user-id]}]]
     ;; TODO: remove mentions of that user from the group?
     {:db (if (get-in db [:groups group-id :users])
            (update-in db [:groups group-id :users] dissoc user-id)
