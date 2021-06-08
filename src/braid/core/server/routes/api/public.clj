@@ -98,7 +98,7 @@
       (error-response 400 :no-such-email)))
 
   ;; accept an email invite to join a group
-  (POST "/register" [token invite_id email now hmac :as req]
+  (POST "/register" [token invite_id email now hmac password :as req]
     (let [fail {:status 400 :headers {"Content-Type" "text/plain"}}]
       (cond
         (not (invites/verify-hmac hmac (str now token invite_id email)))
@@ -107,19 +107,19 @@
         (string/blank? invite_id)
         (assoc fail :body "Invalid invitation ID")
 
+        (string/blank? password)
+        (assoc fail :body "Empty password")
+
         :else
         (let [invite (invitation/invite-by-id (java.util.UUID/fromString invite_id))]
           (if-let [err (:error (invites/verify-invite-nonce invite token))]
             (assoc fail :body "Invalid invite token")
-            (let [user-id (db/uuid)]
-              (do
-                (db/run-txns!
-                  (user/create-user-txn {:id user-id
-                                         :email email}))
-                (events/user-join-group! user-id (invite :group-id))
-                (db/run-txns!
-                  (concat
-                    (invitation/retract-invitation-txn (invite :id)))))
+            (let [user-id (events/register-user!
+                            {:email email
+                             :password password
+                             :group-id (invite :group-id)})]
+              (db/run-txns!
+                (invitation/retract-invitation-txn (invite :id)))
               {:status 302
                :headers {"Location" (config :site-url)}
                :session (assoc (req :session) :user-id user-id)

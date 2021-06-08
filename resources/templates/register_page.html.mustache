@@ -188,6 +188,27 @@ body textarea, body input {
   cursor: not-allowed;
 }
 
+.app > .main .gateway >.section >form >fieldset > label > input[type=password] {
+  font-size: 1.25rem;
+  font-family: Open Sans;
+  padding: 0 0.4em;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e0e0e0;
+  line-height: 2em;
+  height: 2em;
+  border-radius: 3px;
+}
+
+.app > .main .gateway >.section >form >fieldset >label >input:focus {
+   border-color: #2bb8ba;
+   outline: none;
+}
+
+.app > .main .gateway >.section >form >fieldset >label >input::-webkit-input-placeholder,
+.app > .main .gateway >.section >form >fieldset >label >input::-moz-placeholder {
+   color: #444444;
+}
     </style>
 </head>
 <body>
@@ -209,6 +230,12 @@ body textarea, body input {
             <input type="hidden" name="email" value="{{invitee_email}}">
             <input type="hidden" name="now" value="{{now}}">
             <input type="hidden" name="hmac" value="{{form_hmac}}">
+            <fieldset>
+              <label>
+                <h2 class="field">Password</h2>
+                <input type="password" name="password" placeholder="•••••••••••">
+              </label>
+            </fieldset>
             <fieldset>
               <span class="option"><h2>Accept your invite from {{inviter}}</h2></span>
               <button class="submit" type="submit">Join the {{group}} group</button>
