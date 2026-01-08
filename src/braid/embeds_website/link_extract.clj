@@ -102,7 +102,8 @@
                         (or host)
                         string/capitalize)
      :images (cond
-               (re-matches #"(www\.)?youtube.com" host)
+               (and (re-matches #"(www\.)?youtube.com" host)
+                    (not (string/blank? (.getQuery u))))
                (let [qs (into {}
                               (map #(vec (string/split % #"=" 2)))
                               (-> (.getQuery u)
