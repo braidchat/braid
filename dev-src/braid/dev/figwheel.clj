@@ -7,7 +7,6 @@
   :start (repl-api/start
            {:mode :serve
             :open-url false
-            :ring-server-options {:port 3559}
             :connect-url "ws://[[client-hostname]]:[[server-port]]/figwheel-connect"
             :watch-dirs ["src"]}
            "dev")

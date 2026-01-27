@@ -108,12 +108,18 @@
   (sente/chsk-reconnect! chsk))
 
 (defn connect! []
-  (if-not chsk
+  (if (or (not chsk)
+          (not (:csrf-token @chsk-state)))
     (xhr/edn-xhr
       {:uri "/csrf"
        :method :get
        :on-complete (fn [resp]
-                      (make-socket! (:token resp))
-                      (start-router!)
-                      (start-ping-loop))})
+                      (if chsk
+                        (do
+                          (swap! chsk-state assoc :csrf-token (resp :token))
+                          (reconnect!))
+                        (do
+                          (make-socket! (:token resp))
+                          (start-router!)
+                          (start-ping-loop))))})
     (reconnect!)))
